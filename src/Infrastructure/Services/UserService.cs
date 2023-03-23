@@ -187,11 +187,11 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<Response<object>> ConfirmSignUpAsync(string code, string email)
+        public async Task<Response<object>> ConfirmSignUpAsync(string code, string userId)
         {
             try
             {
-                var getUserResponse = await AdminGetUserAsync(email);
+                var getUserResponse = await AdminGetUserAsync(userId);
 
                 if (getUserResponse == null)
                 {
@@ -207,7 +207,7 @@ namespace Infrastructure.Services
                 {
                     ClientId = _awsSettings.CognitoAppClientIds[0],
                     ConfirmationCode = code,
-                    Username = email
+                    Username = userId
                 });
 
                 return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
@@ -221,7 +221,7 @@ namespace Infrastructure.Services
             catch (Exception ex)
             {
                 var exceptionResponse = Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex, _headerService.GetConversationId());
-                _logger.LogError(ex, $"Unknown error confirming user signup with email {email}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                _logger.LogError(ex, $"Unknown error confirming user signup with id {userId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
                 return exceptionResponse;
             }
         }
@@ -389,18 +389,18 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<Response<ResendConfirmationCodeResponse>> ResendVerificationEmailAsync(string email)
+        public async Task<Response<ResendConfirmationCodeResponse>> ResendVerificationEmailAsync(string userId)
         {
             try
             {
-                var getUserResponse = await AdminGetUserAsync(email);
-
+                var getUserResponse = await AdminGetUserAsync(userId);
+                
                 if (getUserResponse.Status == UserStatusType.CONFIRMED)
                 {
-                    return Response<ResendConfirmationCodeResponse>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.ResendVerificationEmailErrorUserAlreadyConfirmed, $"User {email} is already confirmed", _headerService.GetConversationId());
+                    return Response<ResendConfirmationCodeResponse>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.ResendVerificationEmailErrorUserAlreadyConfirmed, $"User with {getUserResponse.Email} is already confirmed", _headerService.GetConversationId());
                 }
 
-                var response = await _provider.ResendConfirmationCodeAsync(new ResendConfirmationCodeRequest { Username = email, ClientId = _awsSettings.CognitoAppClientIds[0] });
+                var response = await _provider.ResendConfirmationCodeAsync(new ResendConfirmationCodeRequest { Username = userId, ClientId = _awsSettings.CognitoAppClientIds[0] });
 
                 return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
                     ? Response<ResendConfirmationCodeResponse>.CreateSuccessfulResponse(_headerService.GetConversationId())
@@ -409,7 +409,7 @@ namespace Infrastructure.Services
             catch (Exception ex)
             {
                 var exceptionResponse = Response<ResendConfirmationCodeResponse>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex, _headerService.GetConversationId());
-                _logger.LogError(ex, $"Unknown error resending verification email for email {email}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                _logger.LogError(ex, $"Unknown error resending verification email for id {userId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
                 return exceptionResponse;
             }
         }
@@ -443,7 +443,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code, string email, string password)
+        public async Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code, string userId, string password)
         {
             try
             {
@@ -458,7 +458,7 @@ namespace Infrastructure.Services
                 {
                     ClientId = _awsSettings.CognitoAppClientIds[0],
                     ConfirmationCode = code,
-                    Username = email,
+                    Username = userId,
                     Password = password
                 });
 
@@ -469,7 +469,7 @@ namespace Infrastructure.Services
             catch (Exception ex)
             {
                 var exceptionResponse = Response<ConfirmForgotPasswordResponse>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex, _headerService.GetConversationId());
-                _logger.LogError(ex, $"Unknown error confirming forgot password with email {email}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                _logger.LogError(ex, $"Unknown error confirming forgot password with id {userId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
                 return exceptionResponse;
             }
         }

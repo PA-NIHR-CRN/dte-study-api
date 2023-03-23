@@ -85,7 +85,7 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("resendverificationemail")]
         public async Task<IActionResult> ResendVerificationEmailAsync([FromBody] ResendVerificationEmailRequest request)
         {
-            var response = await _mediator.Send(new ResendVerificationEmailCommand(request.Email));
+            var response = await _mediator.Send(new ResendVerificationEmailCommand(request.UserId));
 
             return Ok(response);
         }
@@ -101,7 +101,7 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("confirmsignup")]
         public async Task<IActionResult> ConfirmSignUpAsync([FromBody] ConfirmSignUpRequest request)
         {
-            var response = await _mediator.Send(new ConfirmSignUpCommand(request.Code, request.Email));
+            var response = await _mediator.Send(new ConfirmSignUpCommand(request.Code, request.UserId));
 
             return Ok(response);
         }
@@ -133,7 +133,7 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("confirmforgotpassword")]
         public async Task<IActionResult> ConfirmForgotPasswordAsync([FromBody] ConfirmForgotPasswordRequest request)
         {
-            var response = await _mediator.Send(new ConfirmForgotPasswordCommand(request.Code, request.Email, request.Password));
+            var response = await _mediator.Send(new ConfirmForgotPasswordCommand(request.Code, request.UserId, request.Password));
 
             return Ok(response);
         }
@@ -149,7 +149,7 @@ namespace StudyApi.Controllers.V1.Users
         {
             return Ok(await _mediator.Send(new GetPasswordPolicyQuery()));
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] Change user password
         /// </summary>

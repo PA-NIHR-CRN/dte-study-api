@@ -7,7 +7,7 @@ namespace StudyApi.Validation.Users
     {
         public ResendVerificationEmailRequestValidator()
         {
-            RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("Email is required");
+            RuleFor(x => x.UserId).NotEmpty().EmailAddress().WithMessage("User Id is required");
         }
     }
 }
