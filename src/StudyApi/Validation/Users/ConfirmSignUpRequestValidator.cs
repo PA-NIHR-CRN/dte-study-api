@@ -8,7 +8,7 @@ namespace StudyApi.Validation.Users
         public ConfirmSignUpRequestValidator()
         {
             RuleFor(x => x.Code).NotEmpty();
-            RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("Email is required");
+            RuleFor(x => x.UserId).NotEmpty().WithMessage("UserId is required");
         }
     }
 }

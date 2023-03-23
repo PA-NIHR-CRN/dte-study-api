@@ -10,13 +10,13 @@ namespace Application.Users.V1.Commands
     public class ConfirmForgotPasswordCommand : IRequest<Response<ConfirmForgotPasswordResponse>>
     {
         public string Code { get; }
-        public string Email { get; }
+        public string UserId { get; }
         public string Password { get; }
 
-        public ConfirmForgotPasswordCommand(string code, string email, string password)
+        public ConfirmForgotPasswordCommand(string code, string userId, string password)
         {
             Code = code;
-            Email = email;
+            UserId = userId;
             Password = password;
         }
 
@@ -31,7 +31,7 @@ namespace Application.Users.V1.Commands
 
             public async Task<Response<ConfirmForgotPasswordResponse>> Handle(ConfirmForgotPasswordCommand request, CancellationToken cancellationToken)
             {
-                return await _userService.ConfirmForgotPasswordAsync(request.Code, request.Email, request.Password);
+                return await _userService.ConfirmForgotPasswordAsync(request.Code, request.UserId, request.Password);
             }
         }
     }

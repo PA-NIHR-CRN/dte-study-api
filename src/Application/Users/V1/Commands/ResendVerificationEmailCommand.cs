@@ -9,11 +9,11 @@ namespace Application.Users.V1.Commands
 {
     public class ResendVerificationEmailCommand : IRequest<Response<ResendConfirmationCodeResponse>>
     {
-        public string Email { get; }
+        private string UserId { get; }
 
-        public ResendVerificationEmailCommand(string email)
+        public ResendVerificationEmailCommand(string userId)
         {
-            Email = email;
+            UserId = userId;
         }
 
         public class ResendVerificationEmailHandler : IRequestHandler<ResendVerificationEmailCommand, Response<ResendConfirmationCodeResponse>>
@@ -27,7 +27,7 @@ namespace Application.Users.V1.Commands
 
             public async Task<Response<ResendConfirmationCodeResponse>> Handle(ResendVerificationEmailCommand request, CancellationToken cancellationToken)
             {
-                return await _userService.ResendVerificationEmailAsync(request.Email);
+                return await _userService.ResendVerificationEmailAsync(request.UserId);
             }
         }
     }
