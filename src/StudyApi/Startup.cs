@@ -1,15 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
+using System.Threading.Tasks;
 using Application.Settings;
 using Dte.Common.Authentication;
 using FluentValidation.AspNetCore;
+using Infrastructure.Clients;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +24,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using StudyApi.Behaviours;
@@ -41,7 +47,7 @@ namespace StudyApi
             Configuration = configuration;
             Environment = environment;
         }
-
+        
         public void ConfigureServices(IServiceCollection services)
         {
             // Configuration
@@ -55,7 +61,7 @@ namespace StudyApi
             if (clientsSettings == null) throw new Exception("Could not bind the Clients Settings, please check configuration");
             var emailSettings = Configuration.GetSection(EmailSettings.SectionName).Get<EmailSettings>();
             if (emailSettings == null) throw new Exception("Could not bind the email settings, please check configuration");
-
+            
             services.AddSingleton(awsSettings);
             services.AddSingleton(cpmsSettings);
             services.AddSingleton(identitySettings);
@@ -69,6 +75,26 @@ namespace StudyApi
                     options.AddPolicy(name: "AllowLocal", policy =>
                     {
                         policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
+                    });
+                });
+            }
+
+            services.Configure<NhsLoginSettings>(Configuration.GetSection("NhsLogin"));
+
+            services.AddHttpClient<NhsLoginHttpClient>((serviceProvider, httpClient) =>
+            {
+                var settings = serviceProvider.GetService<IOptions<NhsLoginSettings>>()?.Value;
+
+                httpClient.BaseAddress = new Uri(settings.BaseUrl);
+            });
+
+            if (Environment.IsDevelopment())
+            {
+                services.AddCors(options =>
+                {
+                    options.AddPolicy(name: "AllowLocal", policy =>
+                    {
+                        policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
                     });
                 });
             }
@@ -94,26 +120,6 @@ namespace StudyApi
 
             services.AddSwaggerGen(c =>
             {
-                // Include 'SecurityScheme' to use JWT Authentication
-                var jwtSecurityScheme = new OpenApiSecurityScheme
-                {
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    Name = "JWT Authentication",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
-
-                    Reference = new OpenApiReference
-                    {
-                        Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme
-                    }
-                };
-
-                c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement { { jwtSecurityScheme, Array.Empty<string>() } });
-
                 var versionProvider = services.BuildServiceProvider().GetService<IApiVersionDescriptionProvider>();
                 foreach (var description in versionProvider.ApiVersionDescriptions)
                 {
@@ -124,48 +130,26 @@ namespace StudyApi
                 c.IncludeXmlComments(filePath);
             });
 
-            services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer("AnyAuthenticatedUser", options =>
-                {
-                    var issuerAuthority = $"https://cognito-idp.{awsSettings.CognitoRegion}.amazonaws.com/{awsSettings.CognitoPoolId}";
+            var dataprotection = services.AddDataProtection();
+            if (!Environment.IsDevelopment())
+            {
+                dataprotection.PersistKeysToAWSSystemsManager("/BPOR/DataProtection");
+            }
 
-                    options.Authority = issuerAuthority;
-                    options.RequireHttpsMetadata = true;
-                    options.IncludeErrorDetails = true;
+            services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options => {
+                    options.Cookie.Name = ".BPOR.Session";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.IsEssential = true;
+                    options.SlidingExpiration = true;
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                    options.Cookie.SameSite = Environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict;
 
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    options.Events.OnRedirectToLogin = (context) =>
                     {
-                        RoleClaimType = "cognito:groups",
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero,
-                        ValidIssuer = issuerAuthority,
-                        ValidAudiences = awsSettings.CognitoAppClientIds,
-                        IssuerValidator = (issuer, token, parameters) =>
-                        {
-                            if (string.IsNullOrWhiteSpace(token.Issuer)) throw new SecurityTokenInvalidIssuerException("The token issuer is empty or null");
-                            var validIssuers = new[] { parameters.ValidIssuer };
-                            if (validIssuers.Contains(issuer)) return issuer;
-                            throw new SecurityTokenInvalidIssuerException("The sign-in user's account does not belong to the issuer");
-                        },
-                        AudienceValidator = (audiences, token, parameters) =>
-                        {
-                            if (token is JwtSecurityToken jwt)
-                            {
-                                var tokenUse = jwt.Claims.FirstOrDefault(x => x.Type == "token_use");
-                                if (string.IsNullOrWhiteSpace(tokenUse?.Value) || !string.Equals(tokenUse.Value, "id", StringComparison.CurrentCultureIgnoreCase))
-                                {
-                                    return true;
-                                }
-                            }
-
-                            var audienceList = parameters.ValidAudiences.Any() ? parameters.ValidAudiences : awsSettings.CognitoAppClientIds;
-
-                            return audienceList.Any(audiences.Contains);
-                        }
+                        context.Response.StatusCode = 401;
+                        return Task.CompletedTask;
                     };
 
                     options.Validate();
@@ -179,28 +163,24 @@ namespace StudyApi
                 // No roles
                 options.AddPolicy("AnyAuthenticatedUser", builder => builder
                     .RequireAuthenticatedUser()
-                    .AddAuthenticationSchemes("AnyAuthenticatedUser")
                 );
-
+                
                 // For specified roles
                 options.AddPolicy("Admin", builder => builder
                     .RequireAuthenticatedUser()
                     .RequireRole(AppRoles.Admin)
-                    .AddAuthenticationSchemes("AnyAuthenticatedUser")
                 );
-
+                
                 options.AddPolicy("Lead", builder => builder
                     .RequireAuthenticatedUser()
                     .RequireRole(AppRoles.Admin, AppRoles.Lead) // TODO - Admin might not have access to lead
-                    .AddAuthenticationSchemes("AnyAuthenticatedUser")
                 );
-
+                
                 //Scopes
                 options.AddPolicy("TokenReadWrite", builder => builder
                     .RequireScopes(scopes)
                     .RequireAuthenticatedUser()
                     .RequireRole(AppRoles.Lead)
-                    .AddAuthenticationSchemes("AnyAuthenticatedUser")
                 );
             });
 
@@ -232,6 +212,35 @@ namespace StudyApi
                 .AddCheck<ReferenceDataServiceHealthCheck>("ReferenceDataService", timeout: clientsSettings.ReferenceDataService.DefaultTimeout, tags: new List<string> { "services" });
         }
 
+        private static void SetSessionExpiryCookie(AppendCookieContext context)
+        {
+            var issuedAt = DateTimeOffset.UtcNow;
+            var expiresAt = issuedAt.Add(TimeSpan.FromMinutes(10));
+
+            var content = JsonConvert.SerializeObject(
+                new { issuedAt, expiresAt },
+                new JsonSerializerSettings { DateFormatHandling = DateFormatHandling.IsoDateFormat }
+                );
+
+            if (string.IsNullOrWhiteSpace(context.CookieValue))
+            {
+                context.Context.Response.Cookies.Delete(context.CookieName + ".Expiry");
+            }
+            else
+            {
+                context.Context.Response.Cookies.Append(
+                    context.CookieName + ".Expiry",
+                    content,
+                    new CookieOptions
+                    {
+                        HttpOnly = false, // Cookie must be accessible from the client to allow session expiry notification
+                        Secure = context.CookieOptions.Secure,
+                        SameSite = context.CookieOptions.SameSite,
+                        IsEssential = true
+                    });
+            }
+        }
+
         public void Configure(IApplicationBuilder app, IApiVersionDescriptionProvider provider)
         {
             app.UseCustomExceptionHandler();
@@ -253,6 +262,24 @@ namespace StudyApi
                 app.UseCors("AllowLocal");
             }
 
+
+            if (Environment.IsDevelopment())
+            {
+                app.UseCors("AllowLocal");
+            }
+
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                MinimumSameSitePolicy = Environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict,
+                Secure = Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always,
+                OnAppendCookie = context =>
+                {
+                    if(context.CookieName == ".BPOR.Session")
+                    {
+                        SetSessionExpiryCookie(context);
+                    }
+                }
+            });
 
             app.UseAuthentication();
             app.UseAuthorization();

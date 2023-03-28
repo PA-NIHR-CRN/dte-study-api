@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Participants.V1.Commands.Participants;
@@ -17,6 +18,16 @@ using ConfirmForgotPasswordRequest = StudyApi.Requests.Users.ConfirmForgotPasswo
 using ConfirmSignUpRequest = StudyApi.Requests.Users.ConfirmSignUpRequest;
 using ForgotPasswordRequest = StudyApi.Requests.Users.ForgotPasswordRequest;
 using SignUpRequest = StudyApi.Requests.Users.SignUpRequest;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Identity.Web;
+using Newtonsoft.Json.Linq;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Net;
+using Dte.Common.Exceptions.Common;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace StudyApi.Controllers.V1.Users
 {
@@ -25,13 +36,16 @@ namespace StudyApi.Controllers.V1.Users
     [Route("api/users")]
     public class UsersController : Controller
     {
+        private const string NhsAccessTokenCookieName = ".BPOR.NHS.Access";
         private readonly IMediator _mediator;
         private readonly ILogger<UsersController> _logger;
+        private readonly IDataProtector _dataProtector;
 
-        public UsersController(IMediator mediator, ILogger<UsersController> logger)
+        public UsersController(IMediator mediator, ILogger<UsersController> logger, IDataProtectionProvider dataProtector)
         {
             _mediator = mediator;
             _logger = logger;
+            _dataProtector = dataProtector.CreateProtector("nhs.login.cookies");
         }
 
         /// <summary>
@@ -45,8 +59,74 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request)
         {
-            return Ok(await _mediator.Send(new UserLoginCommand(request.Email, request.Password)));
+            var response = await _mediator.Send(new UserLoginCommand(request.Email, request.Password));
+            if (response.IsSuccess)
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwtSecurityToken = handler.ReadJwtToken(response.Content);
+
+                var claimsIdentity = new ClaimsIdentity(jwtSecurityToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                var authProperties = new AuthenticationProperties
+                {
+                    AllowRefresh = true,
+                };
+
+                await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+                return Ok(response);
+            }
+            else
+            {
+                return Ok(response);
+            }
+
         }
+
+
+        /// <summary>
+        /// [AllowAnonymous] NhsLogin
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<string>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("nhslogin")]
+        public async Task<IActionResult> NhsLogin([FromBody] NhsLoginRequest request)
+        {
+            var response = await _mediator.Send(new NhsLoginCommand(request.Code, request.RedirectUrl));
+
+            if (response.IsSuccess)
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var idToken = handler.ReadJwtToken(response.Content.IdToken);
+
+                var claimsIdentity = new ClaimsIdentity(idToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                var authProperties = new AuthenticationProperties
+                {
+                    AllowRefresh = true,
+                };
+
+                await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+
+                var cookieValue = _dataProtector.Protect(response.Content.AccessToken);
+
+                HttpContext.Response.Cookies.Append(NhsAccessTokenCookieName, cookieValue, new CookieOptions { HttpOnly = true, IsEssential = true, Secure = true });
+            return Ok(Response<string>.CreateSuccessfulContentResponse(response.Content.IdToken));
+            }
+            else
+            {
+                return Ok(Response<string>.CreateErrorMessageResponse(response.Errors));
+            }
+        }
+
 
         /// <summary>
         /// [AllowAnonymous] SignUp user
@@ -60,18 +140,57 @@ namespace StudyApi.Controllers.V1.Users
         public async Task<IActionResult> SignUpUserAsync([FromBody] SignUpRequest request)
         {
             var response = await _mediator.Send(new SignUpCommand(request.Email, request.Password));
-            
-            if(response.Content.UserExists)
-                return Ok(response);
 
             if (!response.IsSuccess)
             {
                 return Ok(response);
             }
 
-            var createDetailsResponse = await _mediator.Send(new CreateParticipantDetailsCommand(response.Content.UserId, request.Email, request.Firstname, request.Lastname, request.ConsentRegistration));
+            if (response.Content.UserExists)
+                return Ok(response);
+
+            var createDetailsResponse = await _mediator.Send(new CreateParticipantDetailsCommand(
+                response.Content.UserId, request.Email, request.Firstname, request.Lastname,
+                request.ConsentRegistration, null, request.DateOfBirth, ""));
 
             return Ok(new { IsSuccess = response.IsSuccess && createDetailsResponse.IsSuccess });
+        }
+
+        public class NhsSignUpRequestLocal
+        {
+            public bool ConsentRegistration { get; set; }
+        }
+        /// <summary>
+        /// [AllowAnonymous] SignUp NHS user
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<SignUpResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("nhssignup")]
+        public async Task<IActionResult> NhsSignUpUserAsync([FromBody] NhsSignUpRequestLocal request)
+        {
+            if (HttpContext.Request.Cookies.TryGetValue(NhsAccessTokenCookieName, out var cookieValue))
+            {
+                var accessToken = _dataProtector.Unprotect(cookieValue);
+                var response = await _mediator.Send(new NhsSignUpCommand(request.ConsentRegistration, accessToken));
+
+                if (response.IsSuccess)
+                {
+                    HttpContext.Response.Cookies.Delete(NhsAccessTokenCookieName);
+                }
+
+                return Ok(response);
+            }
+            else
+            {
+                var errors = new List<Error>
+                {
+                    new Error { Detail = "Access Token not found" }
+                };
+                return BadRequest(Response<SignUpResponse>.CreateErrorMessageResponse(errors));
+            }
         }
 
         /// <summary>
@@ -105,7 +224,7 @@ namespace StudyApi.Controllers.V1.Users
 
             return Ok(response);
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] Forgot Password Email
         /// </summary>
@@ -121,7 +240,7 @@ namespace StudyApi.Controllers.V1.Users
 
             return Ok(response);
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] Confirm Forgot Password endpoint
         /// </summary>
@@ -151,6 +270,28 @@ namespace StudyApi.Controllers.V1.Users
         }
 
         /// <summary>
+        /// Dummy endpoint to refresh session cookie
+        /// </summary>
+        /// <response code="204">When IsSuccess true</response>
+        [HttpGet("refreshsession")]
+        public async Task<IActionResult> RefreshSession()
+        {
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Logout
+        /// </summary>
+        /// <response code="204">When IsSuccess true</response>
+        [HttpPost("logout")]
+        public async Task<IActionResult> LogOut()
+        {
+            HttpContext.Response.Cookies.Delete(NhsAccessTokenCookieName);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return NoContent();
+        }
+
+        /// <summary>
         /// [AllowAnonymous] Change user password
         /// </summary>
         /// <response code="200">When IsSuccess true</response>
@@ -161,7 +302,9 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("changepassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            return Ok(await _mediator.Send(new ChangePasswordCommand(request.AccessToken, request.OldPassword, request.NewPassword)));
+            var email = User.GetUserEmail();
+            return Ok(await _mediator.Send(new ChangePasswordCommand(email, request.OldPassword,
+                request.NewPassword)));
         }
 
         /// <summary>
@@ -173,9 +316,10 @@ namespace StudyApi.Controllers.V1.Users
         [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<object>))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
         [HttpDelete("deleteparticipantaccount")]
-        public async Task<IActionResult> DeleteParticipantAccount([FromBody] DeleteParticipantAccountRequest request)
+        public async Task<IActionResult> DeleteParticipantAccount()
         {
-            return Ok(await _mediator.Send(new DeleteParticipantAccountCommand(request.AccessToken, User.GetUserIdCognito())));
+            return Ok(await _mediator.Send(
+                new DeleteParticipantAccountCommand(User.GetUserEmail(), User.GetParticipantId())));
         }
 
         /// <summary>
@@ -189,9 +333,11 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("changeemail")]
         public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequest request)
         {
-            return Ok(await _mediator.Send(new ChangeEmailCommand(User.GetUserIdCognito(), request.AccessToken, request.NewEmail)));
+            var currentEmail = User.GetUserEmail();
+            return Ok(await _mediator.Send(new ChangeEmailCommand(User.GetParticipantId(), currentEmail,
+                request.NewEmail)));
         }
-        
+
         /// <summary>
         /// [Admin] Get users who are in the whitelist
         /// </summary>
@@ -205,7 +351,7 @@ namespace StudyApi.Controllers.V1.Users
         {
             return Ok(await _mediator.Send(new GetAccessWhiteListQuery()));
         }
-        
+
         /// <summary>
         /// [Admin] Add users to the white list
         /// </summary>

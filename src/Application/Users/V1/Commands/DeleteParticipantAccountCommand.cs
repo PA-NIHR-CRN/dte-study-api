@@ -12,14 +12,12 @@ namespace Application.Users.V1.Commands
 {
     public class DeleteParticipantAccountCommand : IRequest<Response<object>>
     {
-        public string AccessToken { get; set; }
-        public string ParticipantId { get; set; }
-        public string OldPassword { get; set; }
-        public string NewPassword { get; set; }
+        private string UserName { get; }
+        private string ParticipantId { get; }
 
-        public DeleteParticipantAccountCommand(string accessToken, string participantId)
+        public DeleteParticipantAccountCommand(string userName, string participantId)
         {
-            AccessToken = accessToken;
+            UserName = userName;
             ParticipantId = participantId;
         }
 
@@ -49,7 +47,7 @@ namespace Application.Users.V1.Commands
                     ParticipantId = request.ParticipantId
                 });
 
-                return await _userService.DeleteUserAsync(request.AccessToken);
+                return await _userService.DeleteUserAsync(request.ParticipantId);
             }
         }
     }

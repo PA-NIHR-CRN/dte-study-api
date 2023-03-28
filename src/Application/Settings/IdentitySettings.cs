@@ -4,5 +4,6 @@ namespace Application.Settings
     {
         public static string SectionName => "IdentitySettings";
         public string IdgExternalProviderName { get; set; }
+        public string NhsLoginAuthority { get; set; }
     }
 }
