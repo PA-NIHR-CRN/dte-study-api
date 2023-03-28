@@ -101,7 +101,6 @@ namespace Application.Mappings.Participants
                 MobileNumber = source.MobileNumber,
                 LandlineNumber = source.LandlineNumber,
                 Address = MapTo(source.Address),
-                DateOfBirth = source.DateOfBirth,
                 SexRegisteredAtBirth = source.SexRegisteredAtBirth,
                 GenderIsSameAsSexRegisteredAtBirth = source.GenderIsSameAsSexRegisteredAtBirth,
                 EthnicGroup = source.EthnicGroup,
