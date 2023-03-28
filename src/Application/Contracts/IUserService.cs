@@ -6,7 +6,9 @@ namespace Application.Contracts
 {
     public interface IUserService
     {
-        Task<Response<UserLoginResponse>> LoginAsync(string email, string password);
+        Task<Response<string>> LoginAsync(string email, string password);
+        Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl);
+        Task<Response<SignUpResponse>> NhsSignUpAsync(bool consent, string token);
         Task<Response<SignUpResponse>> SignUpAsync(string email, string password);
         Task<Response<object>> ConfirmSignUpAsync(string code, string userId);
         Task<Response<SignUpResponse>> AdminCreateUserSetPasswordAsync(string email, string password);
@@ -16,8 +18,11 @@ namespace Application.Contracts
         Task<PasswordPolicyTypeResponse> GetPasswordPolicyTypeAsync();
         Task<Response<ResendConfirmationCodeResponse>> ResendVerificationEmailAsync(string userId);
         Task<Response<ForgotPasswordResponse>> ForgotPasswordAsync(string email);
-        Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code, string email, string password);
-        Task<Response<object>> ChangePasswordAsync(string accessToken, string oldPassword, string newPassword);
-        Task<Response<object>> ChangeEmailAsync(string accessToken, string newEmail);
+
+        Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code, string userId,
+            string password);
+
+        Task<Response<object>> ChangePasswordAsync(string participantId, string oldPassword, string newPassword);
+        Task<Response<object>> ChangeEmailAsync(string currentEmail, string newEmail);
     }
 }

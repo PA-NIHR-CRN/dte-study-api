@@ -1,7 +1,3 @@
-using System.Threading.Tasks;
-using Application.Participants.V1.Commands.ParticipantRegistrations;
-using Application.Participants.V1.Queries.ParticipantRegistrations;
-using Domain.Entities.ParticipantRegistrations;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using StudyApi.Attributes;

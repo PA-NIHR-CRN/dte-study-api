@@ -7,7 +7,6 @@ namespace StudyApi.Validation.Users
     {
         public ChangeEmailRequestValidator()
         {
-            RuleFor(x => x.AccessToken).NotEmpty();
             RuleFor(x => x.NewEmail).NotEmpty().EmailAddress();
         }
     }

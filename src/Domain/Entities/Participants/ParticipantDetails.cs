@@ -13,6 +13,7 @@ namespace Domain.Entities.Participants
         [DynamoDBProperty] public string Email { get; set; }
         [DynamoDBProperty] public string Firstname { get; set; }
         [DynamoDBProperty] public string Lastname { get; set; }
+        [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? DateOfBirth { get; set; }
         [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? UpdatedAtUtc { get; set; }
         [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime CreatedAtUtc { get; set; }
     }
