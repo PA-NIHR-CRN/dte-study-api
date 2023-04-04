@@ -7,7 +7,6 @@ namespace StudyApi.Validation.Users
     {
         public ChangePasswordRequestValidator()
         {
-            RuleFor(x => x.AccessToken).NotEmpty();
             RuleFor(x => x.OldPassword).NotEmpty();
             RuleFor(x => x.NewPassword).NotEmpty();
         }

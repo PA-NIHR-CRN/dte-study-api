@@ -8,7 +8,7 @@ namespace StudyApi.Validation.Users
         public ConfirmForgotPasswordRequestValidator()
         {
             RuleFor(x => x.Code).NotEmpty();
-            RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("Email is required");
+            RuleFor(x => x.UserId).NotEmpty().WithMessage("User Id is required");
             RuleFor(x => x.Password).NotEmpty();
         }
     }

@@ -39,7 +39,6 @@ namespace StudyApi.Common
         private Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
             var code = HttpStatusCode.InternalServerError;
-
             var result = string.Empty;
 
             switch (ex)
@@ -47,10 +46,12 @@ namespace StudyApi.Common
                 case ValidationException validationException:
                     code = HttpStatusCode.BadRequest;
                     result = JsonConvert.SerializeObject(validationException.Failures);
+                    _logger.LogWarning(result);
                     break;
                 case BadRequestException badRequestException:
                     code = HttpStatusCode.BadRequest;
                     result = JsonConvert.SerializeObject(new { badRequestException.Message});
+                    _logger.LogWarning(result);
                     break;
                 case NotFoundException _:
                     code = HttpStatusCode.NotFound;
@@ -58,29 +59,16 @@ namespace StudyApi.Common
                 case UnauthorizedException _:
                     code = HttpStatusCode.Unauthorized;
                     break;
-                case InternalServerErrorException internalServerErrorException:
-                    code = HttpStatusCode.InternalServerError;
-                    result = JsonConvert.SerializeObject(new { internalServerErrorException.Message});
+                default:
+                    result = JsonConvert.SerializeObject(new { error = code, conversationId = _headerService.GetConversationId() });
+                    _logger.LogError(ex, result);
+                    _logger.LogError(ex.StackTrace);
                     break;
             }
 
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;
-
-            if (result == string.Empty)
-            {
-                result = JsonConvert.SerializeObject(new { error = ex.Message, innerException = ex.InnerException?.Message, conversationId = _headerService.GetConversationId() });
-            }
-
-            if (code == HttpStatusCode.BadRequest || code == HttpStatusCode.NotFound || code == HttpStatusCode.Unauthorized)
-            {
-                _logger.LogWarning(result);
-            }
-            else
-            {
-                _logger.LogError(ex, result);
-            }
-            
+           
             return context.Response.WriteAsync(result);
         }
     }

@@ -7,7 +7,6 @@ namespace StudyApi.Validation.Users
     {
         public DeleteParticipantAccountRequestValidator()
         {
-            RuleFor(x => x.AccessToken).NotEmpty();
         }
     }
 }

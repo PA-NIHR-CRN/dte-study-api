@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Users.V1.Commands
 {
-    public class UserLoginCommand : IRequest<Response<UserLoginResponse>>
+    public class UserLoginCommand : IRequest<Response<string>>
     {
         public string Email { get; }
         public string Password { get; }
@@ -22,7 +22,7 @@ namespace Application.Users.V1.Commands
             Password = password;
         }
 
-        public class UserLoginCommandHandler : IRequestHandler<UserLoginCommand, Response<UserLoginResponse>>
+        public class UserLoginCommandHandler : IRequestHandler<UserLoginCommand, Response<string>>
         {
             private readonly IFeatureFlagService _featureFlagService;
             private readonly IUserService _userService;
@@ -43,7 +43,7 @@ namespace Application.Users.V1.Commands
                 _logger = logger;
             }
 
-            public async Task<Response<UserLoginResponse>> Handle(UserLoginCommand request, CancellationToken cancellationToken)
+            public async Task<Response<string>> Handle(UserLoginCommand request, CancellationToken cancellationToken)
             {
                 var privateBetaEmailWhitelistFeatureFlag = await _featureFlagService.GetPrivateBetaEmailWhitelistFeatureFlag();
 
@@ -54,7 +54,7 @@ namespace Application.Users.V1.Commands
                     if (whitelist == null)
                     {
                         _logger.LogWarning("Attempted to login user but they are not whitelisted");
-                        return Response<UserLoginResponse>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UserLoginCommandHandler), "User_Not_In_Allow_List_Error", "User is not in the allow list", _headerService.GetConversationId());
+                        return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UserLoginCommandHandler), "User_Not_In_Allow_List_Error", "User is not in the allow list", _headerService.GetConversationId());
                     }
                 }
                 

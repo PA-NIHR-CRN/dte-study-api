@@ -12,13 +12,13 @@ namespace Application.Users.V1.Commands
     public class ChangeEmailCommand : IRequest<Response<object>>
     {
         public string ParticipantId { get; }
-        public string AccessToken { get; set; }
+        public string CurrentEmail { get; set; }
         public string NewEmail { get; set; }
 
-        public ChangeEmailCommand(string participantId, string accessToken, string newEmail)
+        public ChangeEmailCommand(string participantId, string currentEmail, string newEmail)
         {
             ParticipantId = participantId;
-            AccessToken = accessToken;
+            CurrentEmail = currentEmail;
             NewEmail = newEmail;
         }
 
@@ -37,7 +37,7 @@ namespace Application.Users.V1.Commands
 
             public async Task<Response<object>> Handle(ChangeEmailCommand request, CancellationToken cancellationToken)
             {
-                var clientResponse =  await _userService.ChangeEmailAsync(request.AccessToken, request.NewEmail);
+                var clientResponse =  await _userService.ChangeEmailAsync(request.CurrentEmail, request.NewEmail);
 
                 if (clientResponse != null && clientResponse.IsSuccess)
                 {

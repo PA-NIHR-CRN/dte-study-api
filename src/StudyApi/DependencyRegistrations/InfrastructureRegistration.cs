@@ -43,6 +43,9 @@ namespace StudyApi.DependencyRegistrations
             services.AddSingleton<IHeaderService, HeaderService>();
             services.AddScoped<IFeatureFlagService, FeatureFlagService>();
 
+            services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
+            services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();
+
             // AWS
             var awsSettings = configuration.GetSection(AwsSettings.SectionName).Get<AwsSettings>();
             var amazonDynamoDbConfig = new AmazonDynamoDBConfig();

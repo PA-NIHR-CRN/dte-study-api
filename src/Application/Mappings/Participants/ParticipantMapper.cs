@@ -1,3 +1,4 @@
+using System;
 using Application.Models.Participants;
 using Application.Participants.V1.Commands.ParticipantRegistrations;
 using Application.Participants.V1.Commands.Participants;
@@ -47,7 +48,11 @@ namespace Application.Mappings.Participants
                 Email = source.Email,
                 Firstname = source.Firstname,
                 Lastname = source.Lastname,
-                ConsentRegistration = source.ConsentRegistration
+                ConsentRegistration = source.ConsentRegistration,
+                NhsId = source.NhsId,
+                DateOfBirth = source.DateOfBirth,
+                NhsNumber = source.NhsNumber
+                
             };
         }
         
@@ -101,7 +106,6 @@ namespace Application.Mappings.Participants
                 MobileNumber = source.MobileNumber,
                 LandlineNumber = source.LandlineNumber,
                 Address = MapTo(source.Address),
-                DateOfBirth = source.DateOfBirth,
                 SexRegisteredAtBirth = source.SexRegisteredAtBirth,
                 GenderIsSameAsSexRegisteredAtBirth = source.GenderIsSameAsSexRegisteredAtBirth,
                 EthnicGroup = source.EthnicGroup,

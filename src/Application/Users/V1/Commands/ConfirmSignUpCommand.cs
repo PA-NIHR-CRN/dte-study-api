@@ -8,13 +8,13 @@ namespace Application.Users.V1.Commands
 {
     public class ConfirmSignUpCommand : IRequest<Response<object>>
     {
-        public string Code { get; }
-        public string Email { get; }
+        private string Code { get; }
+        private string UserId { get; }
 
-        public ConfirmSignUpCommand(string code, string email)
+        public ConfirmSignUpCommand(string code, string userId)
         {
             Code = code;
-            Email = email;
+            UserId = userId;
         }
 
         public class ConfirmSignUpCommandHandler : IRequestHandler<ConfirmSignUpCommand, Response<object>>
@@ -28,7 +28,7 @@ namespace Application.Users.V1.Commands
 
             public async Task<Response<object>> Handle(ConfirmSignUpCommand request, CancellationToken cancellationToken)
             {
-                return await _userService.ConfirmSignUpAsync(request.Code, request.Email);
+                return await _userService.ConfirmSignUpAsync(request.Code, request.UserId);
             }
         }
     }
