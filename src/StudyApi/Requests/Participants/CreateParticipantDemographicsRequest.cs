@@ -8,7 +8,6 @@ namespace StudyApi.Requests.Participants
         public string MobileNumber { get; set; }
         public string LandlineNumber { get; set; }
         public CreateParticipantAddressRequest Address { get; set; }
-        public DateTime DateOfBirth { get; set; }
         public string SexRegisteredAtBirth { get; set; }
         public bool? GenderIsSameAsSexRegisteredAtBirth { get; set; }
         public string EthnicGroup { get; set; }

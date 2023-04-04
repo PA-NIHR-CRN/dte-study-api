@@ -1,8 +1,8 @@
 namespace StudyApi.Requests.Users
 {
-    public class ConfirmSignUpRequest
+    public class NhsLoginRequest
     {
         public string Code { get; set; }
-        public string UserId { get; set; }
+        public string RedirectUrl { get; set; }
     }
 }

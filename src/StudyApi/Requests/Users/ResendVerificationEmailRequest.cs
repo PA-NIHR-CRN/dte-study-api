@@ -2,6 +2,6 @@ namespace StudyApi.Requests.Users
 {
     public class ResendVerificationEmailRequest
     {
-        public string Email { get; set; }
+        public string UserId { get; set; }
     }
 }

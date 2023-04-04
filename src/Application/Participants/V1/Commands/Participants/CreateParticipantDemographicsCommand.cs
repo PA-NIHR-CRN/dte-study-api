@@ -22,7 +22,6 @@ namespace Application.Participants.V1.Commands.Participants
         public string MobileNumber { get; }
         public string LandlineNumber { get; }
         public ParticipantAddressModel Address { get; }
-        public DateTime DateOfBirth { get; }
         public string SexRegisteredAtBirth { get; }
         public bool? GenderIsSameAsSexRegisteredAtBirth { get; }
         public string EthnicGroup { get; }
@@ -35,7 +34,6 @@ namespace Application.Participants.V1.Commands.Participants
             string mobileNumber,
             string landlineNumber,
             ParticipantAddressModel address,
-            DateTime dateOfBirth,
             string sexRegisteredAtBirth,
             bool? genderIsSameAsSexRegisteredAtBirth,
             string ethnicGroup,
@@ -48,7 +46,6 @@ namespace Application.Participants.V1.Commands.Participants
             MobileNumber = mobileNumber;
             LandlineNumber = landlineNumber;
             Address = address;
-            DateOfBirth = dateOfBirth;
             SexRegisteredAtBirth = sexRegisteredAtBirth;
             GenderIsSameAsSexRegisteredAtBirth = genderIsSameAsSexRegisteredAtBirth;
             EthnicGroup = ethnicGroup;

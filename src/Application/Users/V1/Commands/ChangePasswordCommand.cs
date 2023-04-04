@@ -10,13 +10,13 @@ namespace Application.Users.V1.Commands
 {
     public class ChangePasswordCommand : IRequest<Response<object>>
     {
-        public string AccessToken { get; set; }
+        public string Email { get; set; }
         public string OldPassword { get; set; }
         public string NewPassword { get; set; }
 
-        public ChangePasswordCommand(string accessToken, string oldPassword, string newPassword)
+        public ChangePasswordCommand(string email, string oldPassword, string newPassword)
         {
-            AccessToken = accessToken;
+            Email = email;
             OldPassword = oldPassword;
             NewPassword = newPassword;
         }
@@ -38,7 +38,7 @@ namespace Application.Users.V1.Commands
 
             public async Task<Response<object>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
             {
-                return await  _userService.ChangePasswordAsync(request.AccessToken, request.OldPassword, request.NewPassword);
+                return await  _userService.ChangePasswordAsync(request.Email, request.OldPassword, request.NewPassword);
             }
         }
     }
