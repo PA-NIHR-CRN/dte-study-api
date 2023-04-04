@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <UserSecretsId>a8675377-93f4-41ef-abda-eae1f5acfa89</UserSecretsId>
     </PropertyGroup>
 
@@ -11,13 +11,14 @@
 
     <ItemGroup>
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
-        <PackageReference Include="Dte.Common" Version="1.4.0" />
-        <PackageReference Include="Dte.Location.Api.Client" Version="1.0.2" />
-        <PackageReference Include="Dte.Participant.Api.Client" Version="1.2.6"/>
-        <PackageReference Include="Dte.Reference.Data.Api.Client" Version="1.0.4" />
-        <PackageReference Include="Dte.Study.Management.Api.Client" Version="1.0.2" />
+        <PackageReference Include="Dte.Common" Version="1.6.0" />
+        <PackageReference Include="Dte.Location.Api.Client" Version="1.0.0" />
+        <PackageReference Include="Dte.Participant.Api.Client" Version="20230302.115713.0-preview" />
+        <PackageReference Include="Dte.Reference.Data.Api.Client" Version="1.0.0" />
+        <PackageReference Include="Dte.Study.Management.Api.Client" Version="1.0.0" />
         <PackageReference Include="MediatR" Version="10.0.1" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.13" />
         <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.14" />
         <PackageReference Include="System.Text.Json" Version="6.0.1" />
     </ItemGroup>

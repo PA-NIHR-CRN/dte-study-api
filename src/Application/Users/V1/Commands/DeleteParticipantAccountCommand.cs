@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Contracts;
 using Dte.Common.Http;
 using Dte.Common.Responses;
 using Dte.Participant.Api.Client;
@@ -23,17 +22,15 @@ namespace Application.Users.V1.Commands
 
         public class DeleteParticipantAccountCommandHandler : IRequestHandler<DeleteParticipantAccountCommand, Response<object>>
         {
-            private readonly IUserService _userService;
             private readonly IParticipantApiClient _participantApiClient;
             private readonly IHeaderService _headerService;
             private readonly ILogger<DeleteParticipantAccountCommandHandler> _logger;
 
-            public DeleteParticipantAccountCommandHandler(IUserService userService,
+            public DeleteParticipantAccountCommandHandler(
                 IHeaderService headerService,
                 IParticipantApiClient participantApiClient,
                 ILogger<DeleteParticipantAccountCommandHandler> logger)
             {
-                _userService = userService;
                 _headerService = headerService;
                 _participantApiClient = participantApiClient;
                 _logger = logger;
@@ -46,8 +43,8 @@ namespace Application.Users.V1.Commands
                 {
                     ParticipantId = request.ParticipantId
                 });
-
-                return await _userService.DeleteUserAsync(request.ParticipantId);
+                
+                return Response<object>.CreateSuccessfulResponse();
             }
         }
     }
