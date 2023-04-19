@@ -102,6 +102,11 @@ namespace Infrastructure.Services
                 return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                     nameof(UserService), ErrorCode.AuthenticationNotAuthorized, "", _headerService.GetConversationId());
             }
+            catch (LimitExceededException)
+            {
+                return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                    nameof(UserService), ErrorCode.AuthenticationNotAuthorized, "", _headerService.GetConversationId());
+            }
             catch (Exception ex)
             {
                 var exceptionResponse = Response<string>.CreateExceptionResponse(
