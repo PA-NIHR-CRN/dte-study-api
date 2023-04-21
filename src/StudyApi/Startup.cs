@@ -47,37 +47,30 @@ namespace StudyApi
             Configuration = configuration;
             Environment = environment;
         }
-        
+
         public void ConfigureServices(IServiceCollection services)
         {
             // Configuration
             var awsSettings = Configuration.GetSection(AwsSettings.SectionName).Get<AwsSettings>();
             if (awsSettings == null) throw new Exception("Could not bind the aws settings, please check configuration");
             var cpmsSettings = Configuration.GetSection(CpmsSettings.SectionName).Get<CpmsSettings>();
-            if (cpmsSettings == null) throw new Exception("Could not bind the cpms settings, please check configuration");
+            if (cpmsSettings == null)
+                throw new Exception("Could not bind the cpms settings, please check configuration");
             var identitySettings = Configuration.GetSection(IdentitySettings.SectionName).Get<IdentitySettings>();
-            if (identitySettings == null) throw new Exception("Could not bind the identity settings, please check configuration");
+            if (identitySettings == null)
+                throw new Exception("Could not bind the identity settings, please check configuration");
             var clientsSettings = Configuration.GetSection(ClientsSettings.SectionName).Get<ClientsSettings>();
-            if (clientsSettings == null) throw new Exception("Could not bind the Clients Settings, please check configuration");
+            if (clientsSettings == null)
+                throw new Exception("Could not bind the Clients Settings, please check configuration");
             var emailSettings = Configuration.GetSection(EmailSettings.SectionName).Get<EmailSettings>();
-            if (emailSettings == null) throw new Exception("Could not bind the email settings, please check configuration");
-            
+            if (emailSettings == null)
+                throw new Exception("Could not bind the email settings, please check configuration");
+
             services.AddSingleton(awsSettings);
             services.AddSingleton(cpmsSettings);
             services.AddSingleton(identitySettings);
             services.AddSingleton(clientsSettings);
             services.AddSingleton(emailSettings);
-            
-            if (Environment.IsDevelopment())
-            {
-                services.AddCors(options =>
-                {
-                    options.AddPolicy(name: "AllowLocal", policy =>
-                    {
-                        policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
-                    });
-                });
-            }
 
             services.Configure<NhsLoginSettings>(Configuration.GetSection("NhsLogin"));
 
@@ -92,10 +85,12 @@ namespace StudyApi
             {
                 services.AddCors(options =>
                 {
-                    options.AddPolicy(name: "AllowLocal", policy =>
-                    {
-                        policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
-                    });
+                    options.AddPolicy(name: "AllowLocal",
+                        policy =>
+                        {
+                            policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod()
+                                .AllowCredentials();
+                        });
                 });
             }
 
@@ -123,9 +118,10 @@ namespace StudyApi
                 var versionProvider = services.BuildServiceProvider().GetService<IApiVersionDescriptionProvider>();
                 foreach (var description in versionProvider.ApiVersionDescriptions)
                 {
-                    c.SwaggerDoc(description.GroupName, new OpenApiInfo { Title = "Dte.Study.Api", Version = description.GroupName });
+                    c.SwaggerDoc(description.GroupName,
+                        new OpenApiInfo { Title = "Dte.Study.Api", Version = description.GroupName });
                 }
-                
+
                 var filePath = Path.Combine(AppContext.BaseDirectory, "StudyApi.xml");
                 c.IncludeXmlComments(filePath);
             });
@@ -138,7 +134,8 @@ namespace StudyApi
 
             services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options => {
+                .AddCookie(options =>
+                {
                     options.Cookie.Name = ".BPOR.Session";
                     options.Cookie.HttpOnly = true;
                     options.Cookie.IsEssential = true;
@@ -164,18 +161,18 @@ namespace StudyApi
                 options.AddPolicy("AnyAuthenticatedUser", builder => builder
                     .RequireAuthenticatedUser()
                 );
-                
+
                 // For specified roles
                 options.AddPolicy("Admin", builder => builder
                     .RequireAuthenticatedUser()
                     .RequireRole(AppRoles.Admin)
                 );
-                
+
                 options.AddPolicy("Lead", builder => builder
-                    .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Admin, AppRoles.Lead) // TODO - Admin might not have access to lead
+                        .RequireAuthenticatedUser()
+                        .RequireRole(AppRoles.Admin, AppRoles.Lead) // TODO - Admin might not have access to lead
                 );
-                
+
                 //Scopes
                 options.AddPolicy("TokenReadWrite", builder => builder
                     .RequireScopes(scopes)
@@ -198,18 +195,26 @@ namespace StudyApi
                     x.Filters.Add(typeof(RequestModelValidatorFilter));
                     x.Filters.Add(new AuthorizeFilter("AnyAuthenticatedUser"));
                 })
-                .AddFluentValidation(x => x.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Transient))
-                .AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.Load("Application"), lifetime: ServiceLifetime.Transient))
+                .AddFluentValidation(x =>
+                    x.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Transient))
+                .AddFluentValidation(x =>
+                    x.RegisterValidatorsFromAssembly(Assembly.Load("Application"), lifetime: ServiceLifetime.Transient))
                 .AddNewtonsoftJson(x => { x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore; })
                 .AddNewtonsoftJson();
-            
+
             var build = System.Environment.GetEnvironmentVariable("DTE_BUILD_STRING") ?? "Unknown";
             services.AddHealthChecks()
                 .AddCheck("StudyApi", () => HealthCheckResult.Healthy($"Build: {build}"))
-                .AddCheck<StudyManagementServiceHealthCheck>("StudyManagementService", timeout: clientsSettings.StudyManagementService.DefaultTimeout, tags: new List<string> { "services" })
-                .AddCheck<ParticipantServiceHealthCheck>("ParticipantService", timeout: clientsSettings.ParticipantService.DefaultTimeout, tags: new List<string> { "services" })
-                .AddCheck<LocationServiceHealthCheck>("LocationService", timeout: clientsSettings.LocationService.DefaultTimeout, tags: new List<string> { "services" })
-                .AddCheck<ReferenceDataServiceHealthCheck>("ReferenceDataService", timeout: clientsSettings.ReferenceDataService.DefaultTimeout, tags: new List<string> { "services" });
+                .AddCheck<StudyManagementServiceHealthCheck>("StudyManagementService",
+                    timeout: clientsSettings.StudyManagementService.DefaultTimeout,
+                    tags: new List<string> { "services" })
+                .AddCheck<ParticipantServiceHealthCheck>("ParticipantService",
+                    timeout: clientsSettings.ParticipantService.DefaultTimeout, tags: new List<string> { "services" })
+                .AddCheck<LocationServiceHealthCheck>("LocationService",
+                    timeout: clientsSettings.LocationService.DefaultTimeout, tags: new List<string> { "services" })
+                .AddCheck<ReferenceDataServiceHealthCheck>("ReferenceDataService",
+                    timeout: clientsSettings.ReferenceDataService.DefaultTimeout,
+                    tags: new List<string> { "services" });
         }
 
         private static void SetSessionExpiryCookie(AppendCookieContext context)
@@ -220,7 +225,7 @@ namespace StudyApi
             var content = JsonConvert.SerializeObject(
                 new { issuedAt, expiresAt },
                 new JsonSerializerSettings { DateFormatHandling = DateFormatHandling.IsoDateFormat }
-                );
+            );
 
             if (string.IsNullOrWhiteSpace(context.CookieValue))
             {
@@ -233,7 +238,8 @@ namespace StudyApi
                     content,
                     new CookieOptions
                     {
-                        HttpOnly = false, // Cookie must be accessible from the client to allow session expiry notification
+                        HttpOnly =
+                            false, // Cookie must be accessible from the client to allow session expiry notification
                         Secure = context.CookieOptions.Secure,
                         SameSite = context.CookieOptions.SameSite,
                         IsEssential = true
@@ -251,19 +257,15 @@ namespace StudyApi
             {
                 foreach (var description in provider.ApiVersionDescriptions)
                 {
-                    c.SwaggerEndpoint($"./{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+                    c.SwaggerEndpoint($"./{description.GroupName}/swagger.json",
+                        description.GroupName.ToUpperInvariant());
                 }
             });
 
             app.UseRouting();
-            
-            if (Environment.IsDevelopment())
-            {
-                app.UseCors("AllowLocal");
-            }
 
-
-            if (Environment.IsDevelopment())
+            if (Environment.IsDevelopment() || string.Equals(Environment.EnvironmentName, "sandbox",
+                    StringComparison.InvariantCultureIgnoreCase))
             {
                 app.UseCors("AllowLocal");
             }
@@ -274,7 +276,7 @@ namespace StudyApi
                 Secure = Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always,
                 OnAppendCookie = context =>
                 {
-                    if(context.CookieName == ".BPOR.Session")
+                    if (context.CookieName == ".BPOR.Session")
                     {
                         SetSessionExpiryCookie(context);
                     }
