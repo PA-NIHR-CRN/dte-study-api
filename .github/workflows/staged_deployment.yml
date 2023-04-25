@@ -125,8 +125,8 @@ jobs:
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_VS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_VS_ACCESS_KEY_SECRET }}
+          aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Add Nuget Source
@@ -155,8 +155,8 @@ jobs:
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_VS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_VS_ACCESS_KEY_SECRET }}
+          aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ secrets.AWS_REGION }}
           
       - name: Add Nuget Source
