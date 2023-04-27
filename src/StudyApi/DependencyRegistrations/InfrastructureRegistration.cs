@@ -37,6 +37,8 @@ namespace StudyApi.DependencyRegistrations
             services.AddScoped<IAccessWhitelistRepository, AccessWhitelistRepository>();
             services.AddSingleton<IClock, Clock>();
             services.AddScoped<IUserService, UserService>();
+
+            
             services.AddScoped<IEmailService, EmailService>();
             services.AddTransient<CpmsHttpMessageHandler>();
             services.AddScoped<IMessageSenderFactory, MessageSenderFactory>();
@@ -85,6 +87,7 @@ namespace StudyApi.DependencyRegistrations
             if (!ProdEnvironmentNames.Any(x => string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
             {
                 // Enable local stubs
+                services.AddScoped<IEmailService, MockEmailService>();
             }
 
             return services;
