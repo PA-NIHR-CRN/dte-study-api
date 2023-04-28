@@ -330,6 +330,16 @@ namespace Infrastructure.Services
                     Username = email,
                     Password = password,
                 });
+                
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    // admin confirm user if in dev environment
+                    await _provider.AdminConfirmSignUpAsync(new AdminConfirmSignUpRequest
+                    {
+                        Username = email,
+                        UserPoolId = _awsSettings.CognitoPoolId,
+                    });
+                }
 
                 return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
                     ? Response<SignUpResponse>.CreateSuccessfulContentResponse(
