@@ -88,6 +88,11 @@ namespace StudyApi.DependencyRegistrations
             {
                 // Enable local stubs
                 services.AddScoped<IEmailService, MockEmailService>();
+                var mockAmazonCognitoConfig = new AmazonCognitoIdentityProviderConfig
+                {
+                    ServiceURL = "http://localhost:9229/",
+                };
+                services.AddScoped<IAmazonCognitoIdentityProvider>(_ => new AmazonCognitoIdentityProviderClient(mockAmazonCognitoConfig));
             }
 
             return services;
