@@ -22,6 +22,7 @@ using Infrastructure.Content;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using AdminGetUserResponse = Application.Responses.V1.Users.AdminGetUserResponse;
 using ConfirmForgotPasswordResponse = Application.Responses.V1.Users.ConfirmForgotPasswordResponse;
@@ -42,11 +43,12 @@ namespace Infrastructure.Services
         private readonly IParticipantApiClient _participantApiClient;
         private readonly NhsLoginHttpClient _nhsLoginHttpClient;
         private readonly IMediator _mediator;
+        private readonly DevSwitches _devSwitches;
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
             AwsSettings awsSettings, ILogger<UserService> logger, EmailSettings emailSettings,
             IEmailService emailService, IParticipantApiClient participantApiClient,
-            NhsLoginHttpClient nhsLoginHttpClient)
+            NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSwitches> devSwitches)
         {
             _provider = provider;
             _headerService = headerService;
@@ -57,6 +59,7 @@ namespace Infrastructure.Services
             _participantApiClient = participantApiClient;
             _nhsLoginHttpClient = nhsLoginHttpClient;
             _mediator = mediator;
+            _devSwitches = devSwitches.Value;
         }
 
         public async Task<Response<string>> LoginAsync(string email, string password)
@@ -331,9 +334,8 @@ namespace Infrastructure.Services
                     Password = password,
                 });
                 
-                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                if (_devSwitches.AutoConfirmNewCognitoSignup)
                 {
-                    // admin confirm user if in dev environment
                     await _provider.AdminConfirmSignUpAsync(new AdminConfirmSignUpRequest
                     {
                         Username = email,

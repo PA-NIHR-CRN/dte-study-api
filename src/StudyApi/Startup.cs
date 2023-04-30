@@ -51,6 +51,7 @@ namespace StudyApi
         public void ConfigureServices(IServiceCollection services)
         {
             // Configuration
+            services.AddOptions<DevSwitches>().Bind(Configuration.GetSection(DevSwitches.SectionName));
             var awsSettings = Configuration.GetSection(AwsSettings.SectionName).Get<AwsSettings>();
             if (awsSettings == null) throw new Exception("Could not bind the aws settings, please check configuration");
             var cpmsSettings = Configuration.GetSection(CpmsSettings.SectionName).Get<CpmsSettings>();
