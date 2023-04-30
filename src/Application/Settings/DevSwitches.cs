@@ -4,5 +4,6 @@ namespace Application.Settings
     {
         public static string SectionName => "DevSwitches";
         public bool AutoConfirmNewCognitoSignup { get; set; }
+        public bool EnableStubs { get; set; }
     }
 }

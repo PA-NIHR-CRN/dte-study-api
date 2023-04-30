@@ -83,16 +83,14 @@ namespace StudyApi.DependencyRegistrations
             services.AddHttpClientWithRetry<IReferenceDataApiClient, ReferenceDataApiClient>(clientsSettings.ReferenceDataService, 2, logger);
             services.AddHttpClientWithRetry<IParticipantApiClient, ParticipantApiClient>(clientsSettings.ParticipantService, 2, logger);
 
+            // get DevSwitches from appsettings.json
+            var devSwitches = configuration.GetSection(DevSwitches.SectionName).Get<DevSwitches>();
+
             // If not Prod, then enable stubs
-            if (!ProdEnvironmentNames.Any(x => string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
+            if (devSwitches.EnableStubs)
             {
                 // Enable local stubs
                 services.AddScoped<IEmailService, MockEmailService>();
-                var mockAmazonCognitoConfig = new AmazonCognitoIdentityProviderConfig
-                {
-                    ServiceURL = "http://localhost:9229/",
-                };
-                services.AddScoped<IAmazonCognitoIdentityProvider>(_ => new AmazonCognitoIdentityProviderClient(mockAmazonCognitoConfig));
             }
 
             return services;
