@@ -22,6 +22,7 @@ using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using StudyApi.Mocks;
 
 namespace StudyApi.DependencyRegistrations
 {
@@ -91,6 +92,7 @@ namespace StudyApi.DependencyRegistrations
             {
                 // Enable local stubs
                 services.AddScoped<IEmailService, MockEmailService>();
+                services.AddSingleton<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
             }
 
             return services;
