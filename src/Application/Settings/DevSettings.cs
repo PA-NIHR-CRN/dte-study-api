@@ -1,8 +1,8 @@
 namespace Application.Settings
 {
-    public class DevSwitches
+    public class DevSettings
     {
-        public static string SectionName => "DevSwitches";
+        public static string SectionName => "DevSettings";
         public bool AutoConfirmNewCognitoSignup { get; set; }
         public bool EnableStubs { get; set; }
     }

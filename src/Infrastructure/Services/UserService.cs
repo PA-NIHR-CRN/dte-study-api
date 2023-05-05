@@ -43,12 +43,12 @@ namespace Infrastructure.Services
         private readonly IParticipantApiClient _participantApiClient;
         private readonly NhsLoginHttpClient _nhsLoginHttpClient;
         private readonly IMediator _mediator;
-        private readonly DevSwitches _devSwitches;
+        private readonly DevSettings _devSettings;
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
             AwsSettings awsSettings, ILogger<UserService> logger, EmailSettings emailSettings,
             IEmailService emailService, IParticipantApiClient participantApiClient,
-            NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSwitches> devSwitches)
+            NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings)
         {
             _provider = provider;
             _headerService = headerService;
@@ -59,7 +59,7 @@ namespace Infrastructure.Services
             _participantApiClient = participantApiClient;
             _nhsLoginHttpClient = nhsLoginHttpClient;
             _mediator = mediator;
-            _devSwitches = devSwitches.Value;
+            _devSettings = devSettings.Value;
         }
 
         public async Task<Response<string>> LoginAsync(string email, string password)
@@ -334,7 +334,7 @@ namespace Infrastructure.Services
                     Password = password,
                 });
                 
-                if (_devSwitches.AutoConfirmNewCognitoSignup)
+                if (_devSettings.AutoConfirmNewCognitoSignup)
                 {
                     await _provider.AdminConfirmSignUpAsync(new AdminConfirmSignUpRequest
                     {

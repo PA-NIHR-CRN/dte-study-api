@@ -83,12 +83,11 @@ namespace StudyApi.DependencyRegistrations
             services.AddHttpClientWithRetry<ILocationApiClient, LocationApiClient>(clientsSettings.LocationService, 2, logger);
             services.AddHttpClientWithRetry<IReferenceDataApiClient, ReferenceDataApiClient>(clientsSettings.ReferenceDataService, 2, logger);
             services.AddHttpClientWithRetry<IParticipantApiClient, ParticipantApiClient>(clientsSettings.ParticipantService, 2, logger);
-
-            // get DevSwitches from appsettings.json
-            var devSwitches = configuration.GetSection(DevSwitches.SectionName).Get<DevSwitches>();
+            
+            var devSettings = configuration.GetSection(DevSettings.SectionName).Get<DevSettings>();
 
             // If not Prod, then enable stubs
-            if (devSwitches.EnableStubs)
+            if (devSettings.EnableStubs && !ProdEnvironmentNames.Any(x => string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
             {
                 // Enable local stubs
                 services.AddScoped<IEmailService, MockEmailService>();
