@@ -22,6 +22,7 @@ using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using StudyApi.Mocks;
 
 namespace StudyApi.DependencyRegistrations
 {
@@ -37,6 +38,8 @@ namespace StudyApi.DependencyRegistrations
             services.AddScoped<IAccessWhitelistRepository, AccessWhitelistRepository>();
             services.AddSingleton<IClock, Clock>();
             services.AddScoped<IUserService, UserService>();
+
+            
             services.AddScoped<IEmailService, EmailService>();
             services.AddTransient<CpmsHttpMessageHandler>();
             services.AddScoped<IMessageSenderFactory, MessageSenderFactory>();
@@ -80,11 +83,15 @@ namespace StudyApi.DependencyRegistrations
             services.AddHttpClientWithRetry<ILocationApiClient, LocationApiClient>(clientsSettings.LocationService, 2, logger);
             services.AddHttpClientWithRetry<IReferenceDataApiClient, ReferenceDataApiClient>(clientsSettings.ReferenceDataService, 2, logger);
             services.AddHttpClientWithRetry<IParticipantApiClient, ParticipantApiClient>(clientsSettings.ParticipantService, 2, logger);
+            
+            var devSettings = configuration.GetSection(DevSettings.SectionName).Get<DevSettings>();
 
             // If not Prod, then enable stubs
-            if (!ProdEnvironmentNames.Any(x => string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
+            if (devSettings.EnableStubs && !ProdEnvironmentNames.Any(x => string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
             {
                 // Enable local stubs
+                services.AddScoped<IEmailService, MockEmailService>();
+                services.AddSingleton<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
             }
 
             return services;
