@@ -16,7 +16,6 @@
         <PackageReference Include="AWSSDK.SQS" Version="3.7.2.18" />
         <PackageReference Include="Dte.Common" Version="1.6.0" />
         <PackageReference Include="Dte.Location.Api.Client" Version="1.0.2" />
-        <PackageReference Include="Dte.Participant.Api.Client" Version="1.2.7" />
         <PackageReference Include="Dte.Reference.Data.Api.Client" Version="1.0.4" />
         <PackageReference Include="Dte.Study.Management.Api.Client" Version="1.0.2" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.13" />
