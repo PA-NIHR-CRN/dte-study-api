@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Participants.V1.Commands.Participants;
@@ -21,11 +20,7 @@ using SignUpRequest = StudyApi.Requests.Users.SignUpRequest;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.Identity.Web;
-using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net;
 using Dte.Common.Exceptions.Common;
 using Microsoft.AspNetCore.DataProtection;
 
@@ -336,34 +331,6 @@ namespace StudyApi.Controllers.V1.Users
             var currentEmail = User.GetUserEmail();
             return Ok(await _mediator.Send(new ChangeEmailCommand(User.GetParticipantId(), currentEmail,
                 request.NewEmail)));
-        }
-
-        /// <summary>
-        /// [Admin] Get users who are in the whitelist
-        /// </summary>
-        /// <response code="200">When IsSuccess true</response>
-        /// <response code="500">Server side error</response>
-        [Authorize("Admin")]
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<IEnumerable<AccessWhiteListResponse>>))]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
-        [HttpGet("accesswhitelist")]
-        public async Task<IActionResult> GetAccessWhiteList()
-        {
-            return Ok(await _mediator.Send(new GetAccessWhiteListQuery()));
-        }
-
-        /// <summary>
-        /// [Admin] Add users to the white list
-        /// </summary>
-        /// <response code="200">When IsSuccess true</response>
-        /// <response code="500">Server side error</response>
-        [Authorize("Admin")]
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<object>))]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
-        [HttpPost("accesswhitelist")]
-        public async Task<IActionResult> SaveAccessWhiteList([FromBody] SaveAccessWhiteListRequest request)
-        {
-            return Ok(await _mediator.Send(new SaveAccessWhiteListCommand(request.Emails)));
         }
     }
 }

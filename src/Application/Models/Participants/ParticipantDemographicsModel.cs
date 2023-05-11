@@ -22,7 +22,6 @@ namespace Application.Models.Participants
         
         public void Mapping(Profile profile)
         {
-            profile.CreateMap<ParticipantAddress, ParticipantAddressModel>();
             profile.CreateMap<ParticipantDemographics, ParticipantDemographicsModel>();
         }
     }

@@ -2,12 +2,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Constants;
+using Application.Contracts;
 using Application.Mappings.Participants;
 using Dte.Common.Exceptions;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Common.Responses;
-using Dte.Participant.Api.Client;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -31,13 +31,13 @@ namespace Application.Participants.V1.Commands.Participants
         
         public class UpdateParticipantDetailsCommandHandler : IRequestHandler<UpdateParticipantDetailsCommand, Response<object>>
         {
-            private readonly IParticipantApiClient _client;
+            private readonly IParticipantService _participantService;
             private readonly IHeaderService _headerService;
             private readonly ILogger<UpdateParticipantDetailsCommandHandler> _logger;
 
-            public UpdateParticipantDetailsCommandHandler(IParticipantApiClient client, IHeaderService headerService, ILogger<UpdateParticipantDetailsCommandHandler> logger)
+            public UpdateParticipantDetailsCommandHandler(IParticipantService participantService, IHeaderService headerService, ILogger<UpdateParticipantDetailsCommandHandler> logger)
             {
-                _client = client;
+                _participantService = participantService;
                 _headerService = headerService;
                 _logger = logger;
             }
@@ -46,7 +46,7 @@ namespace Application.Participants.V1.Commands.Participants
             {
                 try
                 {
-                    await _client.UpdateParticipantDetailsAsync(request.ParticipantId, ParticipantMapper.MapTo(request));
+                    await _participantService.UpdateParticipantDetails(request.ParticipantId, ParticipantMapper.MapTo(request));
 
                     return Response<object>.CreateSuccessfulResponse(_headerService.GetConversationId());
                 }
