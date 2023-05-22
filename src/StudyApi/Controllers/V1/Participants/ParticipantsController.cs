@@ -62,8 +62,7 @@ namespace StudyApi.Controllers.V1.Participants
             (
                 User.GetParticipantId(),
                 request.Firstname,
-                request.Lastname,
-                request.ConsentRegistration
+                request.Lastname
             );
 
             return Ok(await _mediator.Send(command));

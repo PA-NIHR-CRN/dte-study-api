@@ -15,8 +15,6 @@ namespace Application.Contracts
         Task UpdateParticipantDemographicsAsync(ParticipantDemographics entity);
         Task DeleteParticipantDetailsAsync(ParticipantDetails entity);
         Task CreateAnonymisedDemographicParticipantDataAsync(ParticipantDetails entity);
-
-        Task<ParticipantDetails> ScanForParticipantDetailsWithFilterAsync(string dbCol,
-            AttributeValue filterValue);
+        Task<ParticipantDetails> QueryIndexForParticipantDetailsAsync(string query, string colName);
     }
 }

@@ -6,8 +6,8 @@ namespace Application.Contracts;
 
 public interface IParticipantService
 {
-    Task<ParticipantDetailsResponse> GetParticipantDetails(string participantId);
-    Task<ParticipantDetailsResponse> GetParticipantDetailsByEmail(string email);
+    Task<ParticipantDetails> GetParticipantDetails(string participantId);
+    Task<ParticipantDetails> GetParticipantDetailsByEmail(string email);
     Task<ParticipantDetails> GetParticipantDetailsByNhsNumber(string nhsNumber);
     Task<ParticipantDemographicsResponse> GetParticipantDemographics(string participantId);
     Task CreateParticipantDetails(ParticipantDetails entity);
