@@ -158,9 +158,15 @@ public class ParticipantService : IParticipantService
         }
     }
 
-    public Task UpdateParticipantEmail(string requestParticipantId, string requestNewEmail)
+    public async Task UpdateParticipantEmail(string participantId, string newEmail)
     {
-        throw new NotImplementedException();
+        var participant = await _participantRepository.GetParticipantDetailsAsync(participantId);
+        if (participant == null)
+            throw new NotFoundException($"No participant found for participantId: {participantId}");
+
+        participant.Email = newEmail.ToLower();
+        participant.UpdatedAtUtc = _clock.Now();
+        await _participantRepository.UpdateParticipantDetailsAsync(participant);
     }
 
     public async Task DeleteUserAsync(string participantId)
@@ -235,7 +241,7 @@ public class ParticipantService : IParticipantService
         await _participantRepository.UpdateParticipantDemographicsAsync(demographics);
     }
 
-    public async Task<ParticipantDetailsResponse> GetParticipantDetails(string participantId)
+    public async Task<ParticipantDetails> GetParticipantDetails(string participantId)
     {
         var participantDetails = await _participantRepository.GetParticipantDetailsAsync(participantId);
 
@@ -244,40 +250,32 @@ public class ParticipantService : IParticipantService
             throw new NotFoundException($"No participant details found for participantId: {participantId}");
         }
 
-        return ParticipantMapper.MapTo(participantDetails);
+        return participantDetails;
     }
 
-    public async Task<ParticipantDetailsResponse> GetParticipantDetailsByEmail(string email)
+    public async Task<ParticipantDetails> GetParticipantDetailsByEmail(string email)
     {
-        if (string.IsNullOrEmpty(email))
-        {
-            return null;
-        }
+        if (string.IsNullOrEmpty(email)) return null;
 
         email = email.ToLowerInvariant();
 
         var participantDetails =
-            await _participantRepository.ScanForParticipantDetailsWithFilterAsync("Email",
-                new AttributeValue { S = email });
+            await _participantRepository.QueryIndexForParticipantDetailsAsync(email, "Email");
 
-        _logger.LogInformation("participantDetails: {participantDetails}",
+        _logger.LogInformation("participantDetails: {ParticipantDetails}",
             JsonConvert.SerializeObject(participantDetails));
 
-        return participantDetails == null ? null : ParticipantMapper.MapTo(participantDetails);
+        return participantDetails;
     }
 
     public async Task<ParticipantDetails> GetParticipantDetailsByNhsNumber(string nhsNumber)
     {
-        if (string.IsNullOrEmpty(nhsNumber))
-        {
-            return null;
-        }
+        if (string.IsNullOrEmpty(nhsNumber)) return null;
 
         var participantDetails =
-            await _participantRepository.ScanForParticipantDetailsWithFilterAsync("NhsNumber",
-                new AttributeValue { S = nhsNumber });
+            await _participantRepository.QueryIndexForParticipantDetailsAsync(nhsNumber, "NhsNumber");
 
-        _logger.LogInformation("participantDetails: {participantDetails}",
+        _logger.LogInformation("participantDetails: {ParticipantDetails}",
             JsonConvert.SerializeObject(participantDetails));
 
         return participantDetails;
@@ -326,8 +324,6 @@ public class ParticipantService : IParticipantService
 
         entity.Firstname = request.Firstname;
         entity.Lastname = request.Lastname;
-        entity.ConsentRegistration = request.ConsentRegistration;
-        entity.ConsentRegistrationAtUtc = request.ConsentRegistration ? _clock.Now() : (DateTime?)null;
         entity.UpdatedAtUtc = _clock.Now();
 
         await _participantRepository.UpdateParticipantDetailsAsync(entity);

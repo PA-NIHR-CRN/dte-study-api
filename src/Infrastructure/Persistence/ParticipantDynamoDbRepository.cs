@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Application.Contracts;
 using Application.Settings;
@@ -39,90 +40,41 @@ namespace Infrastructure.Persistence
                 _config);
         }
 
-        public async Task<ParticipantDetails> ScanForParticipantDetailsWithFilterAsync(
-            string dbCol,
-            AttributeValue filterValue)
+        public async Task<ParticipantDetails> QueryIndexForParticipantDetailsAsync(string query, string colName)
         {
-            var items = new List<Dictionary<string, AttributeValue>>();
-
-            var scanRequestCount = 1;
-            Dictionary<string, AttributeValue> lastKeyEvaluated = null;
-            do
+            var request = new QueryRequest
             {
-                var request = new ScanRequest
+                TableName = _config.OverrideTableName,
+                KeyConditionExpression = $"{colName} = :value",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    TableName = _config.OverrideTableName,
-                    FilterExpression = $"#{dbCol} = :{dbCol}",
-                    ExpressionAttributeNames = new Dictionary<string, string>
-                    {
-                        {
-                            $"#{dbCol}", dbCol
-                        }
-                    },
-                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                    {
-                        { $":{dbCol}", filterValue }
-                    },
-                    ConsistentRead = true,
-                    ExclusiveStartKey = lastKeyEvaluated,
-                };
-
-                _logger.LogInformation("request {scanRequestCount}: {request}", scanRequestCount,
-                    JsonConvert.SerializeObject(request, Formatting.Indented));
-
-                var response = await _client.ScanAsync(request);
-
-                _logger.LogInformation("response {scanRequestCount}: {response}", scanRequestCount,
-                    JsonConvert.SerializeObject(response, Formatting.Indented));
-
-                lastKeyEvaluated = response.LastEvaluatedKey;
-
-                items.AddRange(response.Items);
-
-                scanRequestCount++;
-            } while (lastKeyEvaluated != null && lastKeyEvaluated.Count != 0);
-
-            _logger.LogInformation("items: {items}", JsonConvert.SerializeObject(items, Formatting.Indented));
-
-            if (items.Count == 0)
-            {
-                return null;
-            }
-
-            var item = items.OrderByDescending(x => DateTime.Parse(x["CreatedAtUtc"].S)).First();
-
-            // make item dictionary to an object
-            var participantDetails = new ParticipantDetails
-            {
-                Pk = item["PK"].S,
-                Sk = item["SK"].S,
-                Email = item["Email"].S,
-                Firstname = item["Firstname"].S,
-                Lastname = item["Lastname"].S,
-                ConsentRegistration = Convert.ToBoolean(Convert.ToInt16(item["ConsentRegistration"].N)),
-                DateOfBirth = DateTime.Parse(item["DateOfBirth"].S),
+                    { ":value", new AttributeValue { S = query } }
+                },
+                IndexName = $"{colName}Index",
             };
 
-            if (item.TryGetValue("NhsId", out var nhsId))
+            _logger.LogInformation("request: {Request}", JsonConvert.SerializeObject(request, Formatting.Indented));
+
+            try
             {
-                participantDetails.NhsId = nhsId.S;
-            }
+                var response = await _client.QueryAsync(request);
 
-            if (item.TryGetValue("NhsNumber", out var nhsNumber))
+                _logger.LogInformation("response: {Response}", JsonConvert.SerializeObject(response, Formatting.Indented));
+
+                var items = response.Items;
+                if (items.Count == 0) return null;
+                var item = items.OrderByDescending(x => DateTime.Parse(x["CreatedAtUtc"].S)).First();
+
+                _logger.LogInformation("item: {Item}", JsonConvert.SerializeObject(item, Formatting.Indented));
+
+                var participant = _context.FromDocument<ParticipantDetails>(Document.FromAttributeMap(item));
+                return await GetParticipantDetailsAsync(participant.Pk.Replace("PARTICIPANT#", ""));
+            }
+            catch (Exception e)
             {
-                participantDetails.NhsNumber = nhsNumber.S;
+                Console.WriteLine(e);
+                throw;
             }
-
-            if (item.TryGetValue("ParticipantId", out var participantId))
-            {
-                participantDetails.ParticipantId = participantId.S;
-            }
-
-
-            _logger.LogInformation("participantDetails: {participantDetails}",
-                JsonConvert.SerializeObject(participantDetails));
-
-            return participantDetails;
         }
 
         public async Task<ParticipantDemographics> GetParticipantDemographicsAsync(string participantId)
