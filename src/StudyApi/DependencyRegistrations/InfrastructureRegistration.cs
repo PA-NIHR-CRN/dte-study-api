@@ -32,6 +32,7 @@ namespace StudyApi.DependencyRegistrations
         {
             // Infrastructure dependencies
             services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
+            services.AddScoped<IParticipantService, ParticipantService>();
             services.AddSingleton<IClock, Clock>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
