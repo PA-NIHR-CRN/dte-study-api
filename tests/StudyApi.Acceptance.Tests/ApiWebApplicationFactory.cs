@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using Application.Contracts;
 using Application.Settings;
@@ -10,8 +9,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StudyApi.Acceptance.Tests.Stubs;
-using StudyApi.Common;
+using ParticipantApi.Acceptance.Tests.Stubs;
 
 namespace StudyApi.Acceptance.Tests
 {
@@ -75,8 +73,7 @@ namespace StudyApi.Acceptance.Tests
                 
                 services.AddScoped(_ => new MockAuthUser(_claims));
                 
-                services.AddSingleton<IParticipantRegistrationRepository, ParticipantRegistrationRepositoryStub>();
-                services.AddSingleton<IStudyRegistrationRepository, StudyRegistrationRepositoryStub>();
+                services.AddSingleton<IParticipantRepository, ParticipantRepositoryStub>();
             });
         }
 
@@ -102,4 +99,5 @@ namespace StudyApi.Acceptance.Tests
             }
         }
     }
+
 }

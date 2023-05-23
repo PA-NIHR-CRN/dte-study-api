@@ -12,16 +12,15 @@ using Dte.Common.Contracts;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Location.Api.Client;
-using Dte.Participant.Api.Client;
 using Dte.Reference.Data.Api.Client;
 using Dte.Study.Management.Api.Client;
-using Infrastructure.Clients;
 using Infrastructure.Factories;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using StudyApi.Mocks;
 
 namespace StudyApi.DependencyRegistrations
 {
@@ -32,13 +31,11 @@ namespace StudyApi.DependencyRegistrations
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, string environmentName)
         {
             // Infrastructure dependencies
-            services.AddScoped<IStudyRegistrationRepository, StudyRegistrationDynamoDbRepository>();
-            services.AddScoped<IParticipantRegistrationRepository, ParticipantRegistrationDynamoDbRepository>();
-            services.AddScoped<IAccessWhitelistRepository, AccessWhitelistRepository>();
+            services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
+            services.AddScoped<IParticipantService, ParticipantService>();
             services.AddSingleton<IClock, Clock>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
-            services.AddTransient<CpmsHttpMessageHandler>();
             services.AddScoped<IMessageSenderFactory, MessageSenderFactory>();
             services.AddSingleton<IHeaderService, HeaderService>();
             services.AddScoped<IFeatureFlagService, FeatureFlagService>();
@@ -63,15 +60,6 @@ namespace StudyApi.DependencyRegistrations
             services.AddDefaultAWSOptions(configuration.GetAWSOptions());
 
             // Clients
-            // CPMS
-
-            var cpmsSettings = configuration.GetSection(CpmsSettings.SectionName).Get<CpmsSettings>();
-            services.AddHttpClient<ICpmsHttpClient, CpmsHttpClient>(client =>
-                {
-                    var clientBaseAddress = new Uri(cpmsSettings.CpmsApiBaseUrl);
-                    client.BaseAddress = clientBaseAddress;
-                })
-                .AddHttpMessageHandler<CpmsHttpMessageHandler>();
 
             var clientsSettings = configuration.GetSection(ClientsSettings.SectionName).Get<ClientsSettings>();
             var logger = services.BuildServiceProvider().GetService<ILoggerFactory>().CreateLogger("StudyApi.DependencyRegistrations.InfrastructureRegistration");
@@ -79,12 +67,15 @@ namespace StudyApi.DependencyRegistrations
             services.AddHttpClientWithRetry<IStudyManagementApiClient, StudyManagementApiClient>(clientsSettings.StudyManagementService, 2, logger);
             services.AddHttpClientWithRetry<ILocationApiClient, LocationApiClient>(clientsSettings.LocationService, 2, logger);
             services.AddHttpClientWithRetry<IReferenceDataApiClient, ReferenceDataApiClient>(clientsSettings.ReferenceDataService, 2, logger);
-            services.AddHttpClientWithRetry<IParticipantApiClient, ParticipantApiClient>(clientsSettings.ParticipantService, 2, logger);
+
+            var devSettings = configuration.GetSection(DevSettings.SectionName).Get<DevSettings>();
 
             // If not Prod, then enable stubs
-            if (!ProdEnvironmentNames.Any(x => string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
+            if (devSettings.EnableStubs && !ProdEnvironmentNames.Any(x => string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
             {
                 // Enable local stubs
+                services.AddScoped<IEmailService, MockEmailService>();
+                services.AddSingleton<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
             }
 
             return services;
