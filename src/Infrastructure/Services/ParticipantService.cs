@@ -65,10 +65,6 @@ public class ParticipantService : IParticipantService
         {
             return null;
         }
-        catch (Exception ex)
-        {
-            return null;
-        }
     }
 
     private async Task CreateUserAndDeactivateOldUserAsync(ParticipantDetails request,
@@ -132,7 +128,7 @@ public class ParticipantService : IParticipantService
             return;
         }
 
-        participant = await GetParticipantDetailsByNhsNumber(request.NhsNumber);
+        participant = await GetParticipantDetailsByNhsNumberAsync(request.NhsNumber);
         // If participant is found, create new user and deactivate old user
         if (participant != null)
         {
@@ -158,7 +154,7 @@ public class ParticipantService : IParticipantService
         }
     }
 
-    public async Task UpdateParticipantEmail(string participantId, string newEmail)
+    public async Task UpdateParticipantEmailAsync(string participantId, string newEmail)
     {
         var participant = await _participantRepository.GetParticipantDetailsAsync(participantId);
         if (participant == null)
@@ -177,32 +173,32 @@ public class ParticipantService : IParticipantService
             if (entity == null) return;
 
             var linkedEmail = entity.Email;
-            await SaveAnonymisedDemographicParticipantData(entity);
-            await RemoveParticipantData(entity);
+            await SaveAnonymisedDemographicParticipantDataAsync(entity);
+            await RemoveParticipantDataAsync(entity);
                     
 
-            var linkedEntity = await GetParticipantDetailsByEmail(linkedEmail);
+            var linkedEntity = await GetParticipantDetailsByEmailAsync(linkedEmail);
             if (linkedEntity == null) return;
-            await RemoveParticipantData(linkedEntity);
+            await RemoveParticipantDataAsync(linkedEntity);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError("Delete-error = {EMessage}", e.Message);
+            _logger.LogError(ex, "Delete-error = {EMessage}", ex.Message);
         }
     }
 
-    private async Task RemoveParticipantData(ParticipantDetails entity)
+    private async Task RemoveParticipantDataAsync(ParticipantDetails entity)
     {
         var participantId = StripPrimaryKey(entity.Pk);
         if (entity.NhsId == null)
         {
-            await RemoveCognitoUser(participantId);
+            await RemoveCognitoUserAsync(participantId);
         }
 
         await _participantRepository.DeleteParticipantDetailsAsync(entity);
     }
 
-    private async Task RemoveCognitoUser(string username)
+    private async Task RemoveCognitoUserAsync(string username)
     {
         await _provider.AdminDeleteUserAsync(new AdminDeleteUserRequest
         {
@@ -211,7 +207,7 @@ public class ParticipantService : IParticipantService
         });
     }
 
-    private async Task SaveAnonymisedDemographicParticipantData(ParticipantDetails entity)
+    private async Task SaveAnonymisedDemographicParticipantDataAsync(ParticipantDetails entity)
     {
         var primaryKey = DeletedKey(Guid.NewGuid());
         var anonEntity = new ParticipantDetails
@@ -241,7 +237,7 @@ public class ParticipantService : IParticipantService
         await _participantRepository.UpdateParticipantDemographicsAsync(demographics);
     }
 
-    public async Task<ParticipantDetails> GetParticipantDetails(string participantId)
+    public async Task<ParticipantDetails> GetParticipantDetailsAsync(string participantId)
     {
         var participantDetails = await _participantRepository.GetParticipantDetailsAsync(participantId);
 
@@ -253,7 +249,7 @@ public class ParticipantService : IParticipantService
         return participantDetails;
     }
 
-    public async Task<ParticipantDetails> GetParticipantDetailsByEmail(string email)
+    public async Task<ParticipantDetails> GetParticipantDetailsByEmailAsync(string email)
     {
         if (string.IsNullOrEmpty(email)) return null;
 
@@ -268,7 +264,7 @@ public class ParticipantService : IParticipantService
         return participantDetails;
     }
 
-    public async Task<ParticipantDetails> GetParticipantDetailsByNhsNumber(string nhsNumber)
+    public async Task<ParticipantDetails> GetParticipantDetailsByNhsNumberAsync(string nhsNumber)
     {
         if (string.IsNullOrEmpty(nhsNumber)) return null;
 
@@ -281,7 +277,7 @@ public class ParticipantService : IParticipantService
         return participantDetails;
     }
 
-    public async Task<ParticipantDemographicsResponse> GetParticipantDemographics(string participantId)
+    public async Task<ParticipantDemographicsResponse> GetParticipantDemographicsAsync(string participantId)
     {
         var participantDemographics = await _participantRepository.GetParticipantDemographicsAsync(participantId);
 
@@ -293,7 +289,7 @@ public class ParticipantService : IParticipantService
         return ParticipantMapper.MapTo(participantDemographics);
     }
 
-    public async Task CreateParticipantDetails(ParticipantDetails request)
+    public async Task CreateParticipantDetailsAsync(ParticipantDetails request)
     {
         var entity = new ParticipantDetails
         {
@@ -313,7 +309,7 @@ public class ParticipantService : IParticipantService
         await _participantRepository.CreateParticipantDetailsAsync(entity);
     }
 
-    public async Task UpdateParticipantDetails(ParticipantDetails request)
+    public async Task UpdateParticipantDetailsAsync(ParticipantDetails request)
     {
         var entity = await _participantRepository.GetParticipantDetailsAsync(request.ParticipantId);
 
@@ -329,7 +325,7 @@ public class ParticipantService : IParticipantService
         await _participantRepository.UpdateParticipantDetailsAsync(entity);
     }
 
-    public async Task CreateParticipantDemographics(ParticipantDemographics request)
+    public async Task CreateParticipantDemographicsAsync(ParticipantDemographics request)
     {
         var updateExisting = false;
 
@@ -373,7 +369,7 @@ public class ParticipantService : IParticipantService
         }
     }
 
-    public async Task UpdateParticipantDemographics(ParticipantDemographics request)
+    public async Task UpdateParticipantDemographicsAsync(ParticipantDemographics request)
     {
         var entity = await _participantRepository.GetParticipantDemographicsAsync(request.ParticipantId);
 

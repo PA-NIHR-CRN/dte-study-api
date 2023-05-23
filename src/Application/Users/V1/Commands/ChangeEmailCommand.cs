@@ -39,7 +39,7 @@ namespace Application.Users.V1.Commands
 
                 if (clientResponse != null && clientResponse.IsSuccess)
                 {
-                    await _participantService.UpdateParticipantEmail(request.ParticipantId,
+                    await _participantService.UpdateParticipantEmailAsync(request.ParticipantId,
                     
                         request.NewEmail);
                 }
