@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Constants;
+using Application.Contracts;
 using Application.Mappings.Participants;
 using Application.Models.Participants;
-using Dte.Common.Exceptions;
+using Domain.Entities.Participants;
+using Dte.Common.Contracts;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Common.Responses;
-using Dte.Participant.Api.Client;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -28,7 +30,7 @@ namespace Application.Participants.V1.Commands.Participants
         public string EthnicBackground { get; }
         public bool? Disability { get; }
         public string DisabilityDescription { get; }
-        public IEnumerable<string> HealthConditionInterests { get; set; }
+        public IEnumerable<string> HealthConditionInterests { get; }
 
         public CreateParticipantDemographicsCommand(string participantId,
             string mobileNumber,
@@ -55,37 +57,80 @@ namespace Application.Participants.V1.Commands.Participants
             HealthConditionInterests = healthConditionInterests;
         }
 
-        public class CreateParticipantDemographicsCommandHandler : IRequestHandler<CreateParticipantDemographicsCommand, Response<object>>
+        public class
+            CreateParticipantDemographicsCommandHandler : IRequestHandler<CreateParticipantDemographicsCommand,
+                Response<object>>
         {
-            private readonly IParticipantApiClient _client;
+            private readonly IParticipantRepository _participantRepository;
+            private readonly IClock _clock;
             private readonly IHeaderService _headerService;
             private readonly ILogger<CreateParticipantDemographicsCommandHandler> _logger;
 
-            public CreateParticipantDemographicsCommandHandler(IParticipantApiClient client, IHeaderService headerService, ILogger<CreateParticipantDemographicsCommandHandler> logger)
+            public CreateParticipantDemographicsCommandHandler(IParticipantRepository participantRepository,
+                IClock clock, IHeaderService headerService, ILogger<CreateParticipantDemographicsCommandHandler> logger)
             {
-                _client = client;
+                _participantRepository = participantRepository;
+                _clock = clock;
                 _headerService = headerService;
                 _logger = logger;
             }
-            
-            public async Task<Response<object>> Handle(CreateParticipantDemographicsCommand request, CancellationToken cancellationToken)
+
+            public async Task<Response<object>> Handle(CreateParticipantDemographicsCommand request,
+                CancellationToken cancellationToken)
             {
                 try
                 {
-                    await _client.CreateParticipantDemographicsAsync(ParticipantMapper.MapTo(request));
+                    var updateExisting = false;
+
+                    var entity = await _participantRepository.GetParticipantDemographicsAsync(request.ParticipantId);
+
+                    if (entity == null)
+                    {
+                        entity = new ParticipantDemographics
+                        {
+                            ParticipantId = request.ParticipantId,
+                        };
+                        updateExisting = false;
+                    }
+                    else
+                    {
+                        updateExisting = true;
+                    }
+
+                    entity.MobileNumber = request.MobileNumber;
+                    entity.LandlineNumber = request.LandlineNumber;
+                    entity.SexRegisteredAtBirth = request.SexRegisteredAtBirth;
+                    entity.GenderIsSameAsSexRegisteredAtBirth = request.GenderIsSameAsSexRegisteredAtBirth;
+                    entity.EthnicGroup = request.EthnicGroup;
+                    entity.EthnicBackground = request.EthnicBackground;
+                    entity.Disability = request.Disability;
+                    entity.DisabilityDescription = request.DisabilityDescription;
+                    entity.HealthConditionInterests = request.HealthConditionInterests?.ToList();
+
+                    if (request.Address != null)
+                    {
+                        entity.Address = ParticipantAddressMapper.MapTo(request.Address);
+                    }
+
+                    if (updateExisting)
+                    {
+                        await _participantRepository.UpdateParticipantDemographicsAsync(entity);
+                    }
+                    else
+                    {
+                        await _participantRepository.CreateParticipantDemographicsAsync(entity);
+                    }
 
                     return Response<object>.CreateSuccessfulResponse(_headerService.GetConversationId());
                 }
-                catch (HttpServiceException ex)
-                {
-                    var exceptionResponse = Response<object>.CreateHttpExceptionResponse(nameof(UpdateParticipantDetailsCommand.UpdateParticipantDetailsCommandHandler), ex, "err", _headerService.GetConversationId());
-                    _logger.LogError(ex, $"Error creating participant demographics for {request.ParticipantId} - StatusCode: {ex.HttpStatusCode}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
-                    return exceptionResponse;
-                }
                 catch (Exception ex)
                 {
-                    var exceptionResponse = Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UpdateParticipantDetailsCommand.UpdateParticipantDetailsCommandHandler), "err", ex, _headerService.GetConversationId());
-                    _logger.LogError(ex, $"Unknown error creating participant demographics for {request.ParticipantId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    var exceptionResponse = Response<object>.CreateExceptionResponse(
+                        ProjectAssemblyNames.ApiAssemblyName,
+                        nameof(UpdateParticipantDetailsCommand.UpdateParticipantDetailsCommandHandler), "err", ex,
+                        _headerService.GetConversationId());
+                    _logger.LogError(ex,
+                        $"Unknown error creating participant demographics for {request.ParticipantId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
                     return exceptionResponse;
                 }
             }

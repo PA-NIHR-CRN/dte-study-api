@@ -1,9 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Contracts;
 using Dte.Common.Http;
 using Dte.Common.Responses;
-using Dte.Participant.Api.Client;
-using Dte.Participant.Api.Client.Requests.Participants;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -22,27 +21,24 @@ namespace Application.Users.V1.Commands
 
         public class DeleteParticipantAccountCommandHandler : IRequestHandler<DeleteParticipantAccountCommand, Response<object>>
         {
-            private readonly IParticipantApiClient _participantApiClient;
+            private readonly IParticipantService _participantService;
             private readonly IHeaderService _headerService;
             private readonly ILogger<DeleteParticipantAccountCommandHandler> _logger;
 
             public DeleteParticipantAccountCommandHandler(
                 IHeaderService headerService,
-                IParticipantApiClient participantApiClient,
+                IParticipantService participantService,
                 ILogger<DeleteParticipantAccountCommandHandler> logger)
             {
                 _headerService = headerService;
-                _participantApiClient = participantApiClient;
+                _participantService = participantService;
                 _logger = logger;
             }
 
             public async Task<Response<object>> Handle(DeleteParticipantAccountCommand request, CancellationToken cancellationToken)
             {                
                 // clear out personal details
-                await _participantApiClient.DeleteParticipantAccountAsync(new DeleteParticipantAccountRequest
-                {
-                    ParticipantId = request.ParticipantId
-                });
+                await _participantService.DeleteUserAsync(request.ParticipantId);
                 
                 return Response<object>.CreateSuccessfulResponse();
             }

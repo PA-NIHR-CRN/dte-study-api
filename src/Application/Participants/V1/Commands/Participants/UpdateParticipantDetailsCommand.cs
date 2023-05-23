@@ -2,66 +2,84 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Constants;
-using Application.Mappings.Participants;
+using Application.Contracts;
+using Dte.Common.Contracts;
 using Dte.Common.Exceptions;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Common.Responses;
-using Dte.Participant.Api.Client;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace Application.Participants.V1.Commands.Participants
+namespace Application.Participants.V1.Commands.Participants;
+
+public class UpdateParticipantDetailsCommand : IRequest<Response<object>>
 {
-    public class UpdateParticipantDetailsCommand : IRequest<Response<object>>
+    public UpdateParticipantDetailsCommand(string participantId, string firstname, string lastname)
     {
-        public string ParticipantId { get; set; }
-        public string Firstname { get; set; }
-        public string Lastname { get; set; }
-        public bool ConsentRegistration { get; set; }
+        ParticipantId = participantId;
+        Firstname = firstname;
+        Lastname = lastname;
+    }
 
-        public UpdateParticipantDetailsCommand(string participantId, string firstname, string lastname, bool consentRegistration)
+    private string ParticipantId { get; }
+    private string Firstname { get; set; }
+    private string Lastname { get; set; }
+
+    public class
+        UpdateParticipantDetailsCommandHandler : IRequestHandler<UpdateParticipantDetailsCommand, Response<object>>
+    {
+        private readonly IHeaderService _headerService;
+        private readonly ILogger<UpdateParticipantDetailsCommandHandler> _logger;
+        private readonly IParticipantRepository _participantRepository;
+        private readonly IClock _clock;
+
+        public UpdateParticipantDetailsCommandHandler(IParticipantRepository participantRepository,
+            IHeaderService headerService, ILogger<UpdateParticipantDetailsCommandHandler> logger, IClock clock)
         {
-            ParticipantId = participantId;
-            Firstname = firstname;
-            Lastname = lastname;
-            ConsentRegistration = consentRegistration;
+            _participantRepository = participantRepository;
+            _headerService = headerService;
+            _logger = logger;
+            _clock = clock;
         }
-        
-        public class UpdateParticipantDetailsCommandHandler : IRequestHandler<UpdateParticipantDetailsCommand, Response<object>>
+
+        public async Task<Response<object>> Handle(UpdateParticipantDetailsCommand request,
+            CancellationToken cancellationToken)
         {
-            private readonly IParticipantApiClient _client;
-            private readonly IHeaderService _headerService;
-            private readonly ILogger<UpdateParticipantDetailsCommandHandler> _logger;
-
-            public UpdateParticipantDetailsCommandHandler(IParticipantApiClient client, IHeaderService headerService, ILogger<UpdateParticipantDetailsCommandHandler> logger)
+            try
             {
-                _client = client;
-                _headerService = headerService;
-                _logger = logger;
+                var entity = await _participantRepository.GetParticipantDetailsAsync(request.ParticipantId);
+
+                if (entity == null) throw new NotFoundException($"Participant not found, Id: {request.ParticipantId}");
+
+                entity.Firstname = request.Firstname;
+                entity.Lastname = request.Lastname;
+                entity.UpdatedAtUtc = _clock.Now();
+
+                await _participantRepository.UpdateParticipantDetailsAsync(entity);
+
+                return Response<object>.CreateSuccessfulResponse(_headerService.GetConversationId());
             }
-            
-            public async Task<Response<object>> Handle(UpdateParticipantDetailsCommand request, CancellationToken cancellationToken)
+            catch (HttpServiceException ex)
             {
-                try
-                {
-                    await _client.UpdateParticipantDetailsAsync(request.ParticipantId, ParticipantMapper.MapTo(request));
-
-                    return Response<object>.CreateSuccessfulResponse(_headerService.GetConversationId());
-                }
-                catch (HttpServiceException ex)
-                {
-                    var exceptionResponse = Response<object>.CreateHttpExceptionResponse(nameof(UpdateParticipantDetailsCommandHandler), ex, "err", _headerService.GetConversationId());
-                    _logger.LogError(ex, $"Error updating participant details for {request.ParticipantId} - StatusCode: {ex.HttpStatusCode}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
-                    return exceptionResponse;
-                }
-                catch (Exception ex)
-                {
-                    var exceptionResponse = Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UpdateParticipantDetailsCommandHandler), "err", ex, _headerService.GetConversationId());
-                    _logger.LogError(ex, $"Unknown error updating participant details for {request.ParticipantId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
-                    return exceptionResponse;
-                }
+                var exceptionResponse = Response<object>.CreateHttpExceptionResponse(
+                    nameof(UpdateParticipantDetailsCommandHandler), ex, "err", _headerService.GetConversationId());
+                _logger.LogError(ex,
+                    "Error updating participant details for {RequestParticipantId} - StatusCode: {ExHttpStatusCode}\\r\\n{SerializeObject}",
+                    request.ParticipantId, ex.HttpStatusCode,
+                    JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
+                return exceptionResponse;
+            }
+            catch (Exception ex)
+            {
+                var exceptionResponse = Response<object>.CreateExceptionResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UpdateParticipantDetailsCommandHandler), "err", ex,
+                    _headerService.GetConversationId());
+                _logger.LogError(ex,
+                    "Unknown error updating participant details for {RequestParticipantId}\\r\\n{SerializeObject}",
+                    request.ParticipantId, JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
+                return exceptionResponse;
             }
         }
     }
