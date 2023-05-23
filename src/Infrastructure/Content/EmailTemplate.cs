@@ -164,7 +164,7 @@ namespace Infrastructure.Content
                                 >
                                   <img
                                     alt=""Be Part of Research Logo""
-                                    src=""https://bepartofresearch.nihr.ac.uk/dA/67fb23bffd/BPoR%20colour%20RGB.jpg""
+                                    src=""https://bepartofresearch.nihr.ac.uk/dA/a85d705dda/BPoR_NIHR_colour-RGB.svg""
                                     style=""
                                       width: 150px;
                                       height: auto;
@@ -436,6 +436,11 @@ namespace Infrastructure.Content
                             <p style=""display: block; margin: 13px 0"">
                               <span style=""font-size: 16px""
                                 >###TEXT_REPLACE5###
+                              </span>
+                            </p>
+                            <p style=""display: block; margin: 13px 0"">
+                              <span style=""font-size: 16px""
+                                >###TEXT_REPLACE6###
                               </span>
                             </p>
                             <p style=""display: block; margin: 13px 0"">
