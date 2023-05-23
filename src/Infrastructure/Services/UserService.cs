@@ -10,13 +10,13 @@ using Application.Contracts;
 using Application.Participants.V1.Commands.Participants;
 using Application.Responses.V1.Users;
 using Application.Settings;
+using Domain.Entities.Participants;
 using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
 using Dte.Common.Extensions;
 using Dte.Common.Helpers;
 using Dte.Common.Http;
 using Dte.Common.Responses;
-using Dte.Participant.Api.Client;
 using Infrastructure.Clients;
 using Infrastructure.Content;
 using MediatR;
@@ -40,15 +40,16 @@ namespace Infrastructure.Services
         private readonly ILogger<UserService> _logger;
         private readonly IEmailService _emailService;
         private readonly EmailSettings _emailSettings;
-        private readonly IParticipantApiClient _participantApiClient;
         private readonly NhsLoginHttpClient _nhsLoginHttpClient;
         private readonly IMediator _mediator;
         private readonly DevSettings _devSettings;
+        private readonly IParticipantService _participantService;
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
             AwsSettings awsSettings, ILogger<UserService> logger, EmailSettings emailSettings,
-            IEmailService emailService, IParticipantApiClient participantApiClient,
+            IEmailService emailService, IParticipantService participantService,
             NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings)
+
         {
             _provider = provider;
             _headerService = headerService;
@@ -56,10 +57,10 @@ namespace Infrastructure.Services
             _logger = logger;
             _emailService = emailService;
             _emailSettings = emailSettings;
-            _participantApiClient = participantApiClient;
             _nhsLoginHttpClient = nhsLoginHttpClient;
             _mediator = mediator;
             _devSettings = devSettings.Value;
+            _participantService = participantService;
         }
 
         public async Task<Response<string>> LoginAsync(string email, string password)
@@ -147,13 +148,13 @@ namespace Infrastructure.Services
                     );
                 }
 
-                await _participantApiClient.NhsLoginAsync(new Dte.Participant.Api.Client.Requests.NhsLogin.NhsLoginRequest
+                await _participantService.NhsLoginAsync(new ParticipantDetails
                 {
                     ConsentRegistration = false,
                     DateOfBirth = nhsUserInfo.DateOfBirth,
                     Email = nhsUserInfo.Email,
-                    FirstName = nhsUserInfo.FirstName,
-                    LastName = nhsUserInfo.LastName,
+                    Firstname = nhsUserInfo.FirstName,
+                    Lastname = nhsUserInfo.LastName,
                     NhsId = nhsUserInfo.NhsId,
                     NhsNumber = nhsUserInfo.NhsNumber,
                 });
@@ -163,13 +164,15 @@ namespace Infrastructure.Services
             }
             catch (HttpServiceException ex)
             {
-                if (ex.ResponseContent != JsonConvert.SerializeObject(new { Message = ErrorCode.UnableToMatchAccounts }))
+                if (ex.ResponseContent !=
+                    JsonConvert.SerializeObject(new { Message = ErrorCode.UnableToMatchAccounts }))
                 {
                     return HandleNhsLoginException(ex);
                 }
 
                 var errorResponse = Response<NhsLoginResponse>.CreateErrorMessageResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.UnableToMatchAccounts, "Unable to match account details",
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.UnableToMatchAccounts,
+                    "Unable to match account details",
                     _headerService.GetConversationId());
 
                 return errorResponse;
@@ -183,8 +186,8 @@ namespace Infrastructure.Services
         private Response<NhsLoginResponse> HandleNhsLoginException(Exception ex)
         {
             var exceptionResponse = Response<NhsLoginResponse>.CreateExceptionResponse(
-    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
-    _headerService.GetConversationId());
+                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
+                _headerService.GetConversationId());
             _logger.LogError(ex,
                 $"Unknown error logging in with NHS login\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
             return exceptionResponse;
@@ -199,7 +202,7 @@ namespace Infrastructure.Services
                 await _mediator.Send(new CreateParticipantDetailsCommand("", nhsUserInfo.Email,
                     nhsUserInfo.FirstName, nhsUserInfo.LastName,
                     consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber));
-                
+
                 var baseUrl = _emailSettings.WebAppBaseUrl;
                 var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
                         "New Be Part of Research Account")
@@ -253,8 +256,7 @@ namespace Infrastructure.Services
                         email);
                     var cognitoUser = await _provider.AdminGetUserAsync(new AdminGetUserRequest
                         { UserPoolId = _awsSettings.CognitoPoolId, Username = email });
-                    
-                    
+
 
                     // if user is not verified, resend confirmation code
                     if (cognitoUser.UserStatus == UserStatusType.UNCONFIRMED)
@@ -272,7 +274,7 @@ namespace Infrastructure.Services
                     else
                     {
                         // get participant details using id
-                        var participant = await _participantApiClient.GetParticipantDetailsAsync(cognitoUser.Username);
+                        var participant = await _participantService.GetParticipantDetailsAsync(cognitoUser.Username);
                         if (participant == null)
                         {
                             return Response<SignUpResponse>.CreateErrorMessageResponse(
@@ -303,7 +305,7 @@ namespace Infrastructure.Services
                 }
 
                 // check if user exists in participant details table and send email
-                var participantDetails = await _participantApiClient.GetParticipantDetailsByEmailAsync(email);
+                var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
                 if (participantDetails != null)
                 {
                     var baseUrl = _emailSettings.WebAppBaseUrl;
@@ -315,7 +317,8 @@ namespace Infrastructure.Services
                             "An attempt to log into your Be Part of Research account using this email address has been made. As you created your account using your NHS login information, you need to use that option to login to your Be Part of Research account. ")
                         .Replace("###TEXT_REPLACE3###",
                             "Please use the link below and select the NHS login button to continue.")
-                        .Replace("###LINK_REPLACE###", $"<a href=\"{baseUrl}participants/options\">{baseUrl}participants/options</a>")
+                        .Replace("###LINK_REPLACE###",
+                            $"<a href=\"{baseUrl}participants/options\">{baseUrl}participants/options</a>")
                         .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
                         .Replace("###TEXT_REPLACE4###",
                             "If you did not attempt to re-register please ignore this email.")
@@ -333,7 +336,7 @@ namespace Infrastructure.Services
                     Username = email,
                     Password = password,
                 });
-                
+
                 if (_devSettings.AutoConfirmNewCognitoSignup)
                 {
                     await _provider.AdminConfirmSignUpAsync(new AdminConfirmSignUpRequest
@@ -623,7 +626,7 @@ namespace Infrastructure.Services
             try
             {
                 var getUserResponse = await AdminGetUserAsync(userId);
-                
+
                 if (getUserResponse.Status == UserStatusType.CONFIRMED)
                 {
                     return Response<ResendConfirmationCodeResponse>.CreateErrorMessageResponse(
@@ -666,26 +669,27 @@ namespace Infrastructure.Services
 
             if (user == null || !user.Enabled)
             {
-                var participantDetails = await _participantApiClient.GetParticipantDetailsByEmailAsync(email);
-                if (!string.IsNullOrWhiteSpace(participantDetails?.NhsId))
-                {
-                    var baseUrl = _emailSettings.WebAppBaseUrl;
-                    var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                            "Password Reset Attempt")
-                        .Replace("###TEXT_REPLACE1###",
-                            "A request has been received to change the password for your Be Part of Research account. We were unable to complete this request because your account was created with your NHS login information. You will need to use this option on each occasion to access your account and update your details.")
-                        .Replace("###TEXT_REPLACE2###",
-                            "Please use the link below and select the NHS login button to continue.")
-                        .Replace("###TEXT_REPLACE3###",
-                            "")
-                        .Replace("###LINK_REPLACE###", $"<a href=\"{baseUrl}participants/options\">{baseUrl}participants/options</a>")
-                        .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                        .Replace("###TEXT_REPLACE4###",
-                            "If you have not attempted to reset your password, please contact us by email at <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>")
-                        .Replace("###TEXT_REPLACE5###", "");
+                var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
+                if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
+                    return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
+                        _headerService.GetConversationId());
+                var baseUrl = _emailSettings.WebAppBaseUrl;
+                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
+                        "Password Reset Attempt")
+                    .Replace("###TEXT_REPLACE1###",
+                        "A request has been received to change the password for your Be Part of Research account. We were unable to complete this request because your account was created with your NHS login information. You will need to use this option on each occasion to access your account and update your details.")
+                    .Replace("###TEXT_REPLACE2###",
+                        "Please use the link below and select the NHS login button to continue.")
+                    .Replace("###TEXT_REPLACE3###",
+                        "")
+                    .Replace("###LINK_REPLACE###",
+                        $"<a href=\"{baseUrl}participants/options\">{baseUrl}participants/options</a>")
+                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
+                    .Replace("###TEXT_REPLACE4###",
+                        "If you have not attempted to reset your password, please contact us by email at <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>")
+                    .Replace("###TEXT_REPLACE5###", "");
 
-                    await _emailService.SendEmailAsync(email, "Be Part of Research password reset", htmlBody);
-                }
+                await _emailService.SendEmailAsync(email, "Be Part of Research password reset", htmlBody);
 
                 return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                     _headerService.GetConversationId());
@@ -701,7 +705,8 @@ namespace Infrastructure.Services
 
                 if (!IsSuccessHttpStatusCode((int)response.HttpStatusCode))
                 {
-                    _logger.LogWarning("ForgotPasswordAsync returned: {response}", JsonConvert.SerializeObject(response));
+                    _logger.LogWarning("ForgotPasswordAsync returned: {response}",
+                        JsonConvert.SerializeObject(response));
                 }
             }
 
@@ -709,7 +714,8 @@ namespace Infrastructure.Services
         }
 
 
-        public async Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code, string userId, string password)
+        public async Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code,
+            string userId, string password)
         {
             try
             {
