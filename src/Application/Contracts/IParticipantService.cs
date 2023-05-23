@@ -6,15 +6,15 @@ namespace Application.Contracts;
 
 public interface IParticipantService
 {
-    Task<ParticipantDetails> GetParticipantDetails(string participantId);
-    Task<ParticipantDetails> GetParticipantDetailsByEmail(string email);
-    Task<ParticipantDetails> GetParticipantDetailsByNhsNumber(string nhsNumber);
-    Task<ParticipantDemographicsResponse> GetParticipantDemographics(string participantId);
-    Task CreateParticipantDetails(ParticipantDetails entity);
-    Task UpdateParticipantDetails(ParticipantDetails entity);
-    Task CreateParticipantDemographics(ParticipantDemographics entity);
-    Task UpdateParticipantDemographics(ParticipantDemographics entity);
+    Task<ParticipantDetails> GetParticipantDetailsAsync(string participantId);
+    Task<ParticipantDetails> GetParticipantDetailsByEmailAsync(string email);
+    Task<ParticipantDetails> GetParticipantDetailsByNhsNumberAsync(string nhsNumber);
+    Task<ParticipantDemographicsResponse> GetParticipantDemographicsAsync(string participantId);
+    Task CreateParticipantDetailsAsync(ParticipantDetails entity);
+    Task UpdateParticipantDetailsAsync(ParticipantDetails entity);
+    Task CreateParticipantDemographicsAsync(ParticipantDemographics entity);
+    Task UpdateParticipantDemographicsAsync(ParticipantDemographics entity);
     Task NhsLoginAsync(ParticipantDetails entity);
-    Task UpdateParticipantEmail(string requestParticipantId, string requestNewEmail);
+    Task UpdateParticipantEmailAsync(string requestParticipantId, string requestNewEmail);
     Task DeleteUserAsync(string requestParticipantId);
 }

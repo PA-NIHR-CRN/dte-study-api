@@ -274,7 +274,7 @@ namespace Infrastructure.Services
                     else
                     {
                         // get participant details using id
-                        var participant = await _participantService.GetParticipantDetails(cognitoUser.Username);
+                        var participant = await _participantService.GetParticipantDetailsAsync(cognitoUser.Username);
                         if (participant == null)
                         {
                             return Response<SignUpResponse>.CreateErrorMessageResponse(
@@ -305,7 +305,7 @@ namespace Infrastructure.Services
                 }
 
                 // check if user exists in participant details table and send email
-                var participantDetails = await _participantService.GetParticipantDetailsByEmail(email);
+                var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
                 if (participantDetails != null)
                 {
                     var baseUrl = _emailSettings.WebAppBaseUrl;
@@ -669,7 +669,7 @@ namespace Infrastructure.Services
 
             if (user == null || !user.Enabled)
             {
-                var participantDetails = await _participantService.GetParticipantDetailsByEmail(email);
+                var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
                 if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
                     return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                         _headerService.GetConversationId());
