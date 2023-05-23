@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Domain.Entities.ParticipantRegistrations;
 using Dte.Api.Acceptance.Test.Helpers.Clients;
 using Dte.Common.Extensions;
 using Dte.Common.Helpers;
@@ -41,11 +40,6 @@ namespace StudyApi.Acceptance.Tests.Clients
             _apiClient.SetBearerAuthorisationHeader(token);
         }
 
-        public async Task<IApiResponse<IEnumerable<ParticipantRegistration>>> GetParticipantRegistrationsAsync(string uri, ContentNegotiation contentNegotiation = null)
-        {
-            return await _apiClient.GetAsync<IEnumerable<ParticipantRegistration>>(uri);
-        }
-        
         public async Task<IApiResponse<TResponse>> SendAsync<TRequest, TResponse>(TRequest request, string uri, HttpMethod method, RequestOptions options, string contentType = "application/json", string accept = "application/json") where TResponse : ResponseBase
         {
             if (request != null)

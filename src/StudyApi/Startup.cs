@@ -51,6 +51,7 @@ namespace StudyApi
         public void ConfigureServices(IServiceCollection services)
         {
             // Configuration
+            services.AddOptions<DevSettings>().Bind(Configuration.GetSection(DevSettings.SectionName));
             var awsSettings = Configuration.GetSection(AwsSettings.SectionName).Get<AwsSettings>();
             if (awsSettings == null) throw new Exception("Could not bind the aws settings, please check configuration");
             var cpmsSettings = Configuration.GetSection(CpmsSettings.SectionName).Get<CpmsSettings>();
@@ -205,16 +206,9 @@ namespace StudyApi
             var build = System.Environment.GetEnvironmentVariable("DTE_BUILD_STRING") ?? "Unknown";
             services.AddHealthChecks()
                 .AddCheck("StudyApi", () => HealthCheckResult.Healthy($"Build: {build}"))
-                .AddCheck<StudyManagementServiceHealthCheck>("StudyManagementService",
-                    timeout: clientsSettings.StudyManagementService.DefaultTimeout,
-                    tags: new List<string> { "services" })
-                .AddCheck<ParticipantServiceHealthCheck>("ParticipantService",
-                    timeout: clientsSettings.ParticipantService.DefaultTimeout, tags: new List<string> { "services" })
-                .AddCheck<LocationServiceHealthCheck>("LocationService",
-                    timeout: clientsSettings.LocationService.DefaultTimeout, tags: new List<string> { "services" })
-                .AddCheck<ReferenceDataServiceHealthCheck>("ReferenceDataService",
-                    timeout: clientsSettings.ReferenceDataService.DefaultTimeout,
-                    tags: new List<string> { "services" });
+                .AddCheck<StudyManagementServiceHealthCheck>("StudyManagementService", timeout: clientsSettings.StudyManagementService.DefaultTimeout, tags: new List<string> { "services" })
+                .AddCheck<LocationServiceHealthCheck>("LocationService", timeout: clientsSettings.LocationService.DefaultTimeout, tags: new List<string> { "services" })
+                .AddCheck<ReferenceDataServiceHealthCheck>("ReferenceDataService", timeout: clientsSettings.ReferenceDataService.DefaultTimeout, tags: new List<string> { "services" });
         }
 
         private static void SetSessionExpiryCookie(AppendCookieContext context)

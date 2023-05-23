@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using Application.Extensions;
-using Application.Participants.V1.Commands.ParticipantRegistrations;
+using Application.Mappings.Participants;
 using Application.Participants.V1.Commands.Participants;
 using Application.Participants.V1.Queries.Participants;
 using Application.Responses.V1.Participants;
@@ -39,15 +39,15 @@ namespace StudyApi.Controllers.V1.Participants
         public async Task<IActionResult> GetParticipantDetails()
         {
             var participantId = User.GetParticipantId();
-            if(string.IsNullOrWhiteSpace(participantId))
+            if (string.IsNullOrWhiteSpace(participantId))
             {
                 return Unauthorized();
             }
 
             return Ok(await _mediator.Send(new GetParticipantDetailsQuery(participantId)));
         }
-        
-  
+
+
         /// <summary>
         /// [Authorize("AnyAuthenticatedUser")] Update participant details for the logged in participant
         /// </summary>
@@ -62,10 +62,9 @@ namespace StudyApi.Controllers.V1.Participants
             (
                 User.GetParticipantId(),
                 request.Firstname,
-                request.Lastname,
-                request.ConsentRegistration
+                request.Lastname
             );
-            
+
             return Ok(await _mediator.Send(command));
         }
 
@@ -80,8 +79,8 @@ namespace StudyApi.Controllers.V1.Participants
         public async Task<IActionResult> GetParticipantDemographics()
         {
             var participantId = User.GetParticipantId();
-            
-            if(string.IsNullOrWhiteSpace(participantId))
+
+            if (string.IsNullOrWhiteSpace(participantId))
             {
                 return Unauthorized();
             }
@@ -97,7 +96,8 @@ namespace StudyApi.Controllers.V1.Participants
         [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<object>))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
         [HttpPost("demographics")]
-        public async Task<IActionResult> CreateParticipantDemographics([FromBody] CreateParticipantDemographicsRequest request)
+        public async Task<IActionResult> CreateParticipantDemographics(
+            [FromBody] CreateParticipantDemographicsRequest request)
         {
             var command = new CreateParticipantDemographicsCommand
             (
@@ -113,10 +113,10 @@ namespace StudyApi.Controllers.V1.Participants
                 request.DisabilityDescription,
                 request.HealthConditionInterests
             );
-            
+
             return Ok(await _mediator.Send(command));
         }
-        
+
         /// <summary>
         /// [Authorize("AnyAuthenticatedUser")] Update participant demographics
         /// </summary>
@@ -125,7 +125,8 @@ namespace StudyApi.Controllers.V1.Participants
         [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<object>))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
         [HttpPut("demographics")]
-        public async Task<IActionResult> UpdateParticipantDemographics([FromBody] UpdateParticipantDemographicsRequest request)
+        public async Task<IActionResult> UpdateParticipantDemographics(
+            [FromBody] UpdateParticipantDemographicsRequest request)
         {
             var command = new UpdateParticipantDemographicsCommand
             (
@@ -133,74 +134,17 @@ namespace StudyApi.Controllers.V1.Participants
                 request.MobileNumber,
                 request.LandlineNumber,
                 ParticipantRequestMapper.MapTo(request.Address),
-                request.DateOfBirth,
                 request.SexRegisteredAtBirth,
                 request.GenderIsSameAsSexRegisteredAtBirth,
                 request.EthnicGroup,
                 request.EthnicBackground,
                 request.Disability,
                 request.DisabilityDescription,
-                request.HealthConditionInterests
+                request.HealthConditionInterests,
+                request.DateOfBirth
             );
-            
+
             return Ok(await _mediator.Send(command));
-        }
-        
-        /// <summary>
-        /// Check if the logged in participant is suitable for this study
-        /// </summary>
-        /// <response code="200">Study information retrieved</response>
-        /// <response code="500">Server side error</response>
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<ParticipantSuitabilityResponse>))]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
-        [HttpGet("suitability/{studyId:long}")]
-        public async Task<IActionResult> GetParticipantSuitability(long studyId)
-        {
-            return Ok(await _mediator.Send(new GetParticipantSuitabilityQuery(User.GetParticipantId(), studyId)));
-        }
-        
-        /// <summary>
-        /// Create a participant registration for a Study Site
-        /// </summary>
-        /// <response code="200">Participant registration created</response>
-        /// <response code="500">Server side error</response>
-        /// <remarks>This endpoint will return Success if created else will return a list of errors if the participants has already applied for a study site</remarks>
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<object>))]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
-        [HttpPost("ParticipantRegistrations")]
-        public async Task<IActionResult> CreateParticipantRegistration([FromBody]CreateParticipantRegistrationRequest request)
-        {
-            var command = new CreateParticipantRegistrationCommand
-            (
-                request.StudyId, 
-                request.SiteId, 
-                request.ParticipantId
-            );
-            
-            return Ok(await _mediator.Send(command));
-        }
-        
-        /// <summary>
-        /// [Authorize("AnyAuthenticatedUser")] Get own participant consent only
-        /// </summary>
-        /// <response code="200">Participant consent retrieved</response>
-        /// <response code="500">Server side error</response>
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<ParticipantDetailsResponse>))]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
-        [HttpGet("consent")]
-        public async Task<IActionResult> GetParticipantConsent()
-        {
-            var participantId = User.GetParticipantId();
-            if(string.IsNullOrWhiteSpace(participantId))
-            {
-                return Unauthorized();
-            }
-            var participantDetails = await _mediator.Send(new GetParticipantDetailsQuery(participantId));
-            if(participantDetails.Content == null)
-            {
-                return NotFound(false);
-            }               
-            return Ok(participantDetails.Content.ConsentRegistration);
         }
     }
 }

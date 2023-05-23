@@ -2,8 +2,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Application.Contracts;
 using Dte.Common.Responses;
-using Dte.Participant.Api.Client;
-using Dte.Participant.Api.Client.Requests.Participants;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -25,13 +23,13 @@ namespace Application.Users.V1.Commands
         public class ChangeEmailCommandHandler : IRequestHandler<ChangeEmailCommand, Response<object>>
         {
             private readonly IUserService _userService;
-            private readonly IParticipantApiClient _participantApiClient;
+            private readonly IParticipantService _participantService;
             private readonly ILogger<ChangeEmailCommandHandler> _logger;
 
-            public ChangeEmailCommandHandler(IUserService userService, IParticipantApiClient participantApiClient, ILogger<ChangeEmailCommandHandler> logger)
+            public ChangeEmailCommandHandler(IUserService userService, IParticipantService participantService, ILogger<ChangeEmailCommandHandler> logger)
             {
                 _userService = userService;
-                _participantApiClient = participantApiClient;
+                _participantService = participantService;
                 _logger = logger;
             }
 
@@ -41,10 +39,9 @@ namespace Application.Users.V1.Commands
 
                 if (clientResponse != null && clientResponse.IsSuccess)
                 {
-                    await _participantApiClient.UpdateParticipantEmailAsync(request.ParticipantId, new UpdateParticipantEmailRequest
-                    {
-                        Email = request.NewEmail
-                    });
+                    await _participantService.UpdateParticipantEmailAsync(request.ParticipantId,
+                    
+                        request.NewEmail);
                 }
 
                 return clientResponse;

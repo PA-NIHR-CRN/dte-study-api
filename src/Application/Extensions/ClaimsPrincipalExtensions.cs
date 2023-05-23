@@ -12,11 +12,6 @@ namespace Application.Extensions
             return principal.Claims.FirstOrDefault(x => x.Type == "email")?.Value;
         }
 
-        public static string GetUserId(this ClaimsPrincipal principal)
-        {
-            return principal.FindFirstValue(ClaimTypes.NameIdentifier);
-        }
-        
         public static bool IsExternalProviderUser(this ClaimsPrincipal principal, string externalProviderName = null)
         {
             var id = principal.FindFirstValue("cognito:username");
@@ -53,24 +48,7 @@ namespace Application.Extensions
             return split.LastOrDefault();
         }
 
-        public static string GetUserFirstname(this ClaimsPrincipal principal)
-        {
-            return principal.FindFirstValue(ClaimTypes.GivenName);
-        }
-        
-        public static string GetUserLastname(this ClaimsPrincipal principal)
-        {
-            return principal.FindFirstValue(ClaimTypes.Surname);
-        }
-
-        public static bool IsCurrentUser(this ClaimsPrincipal principal, string id)
-        {
-            var currentUserId = GetParticipantId(principal);
-
-            return string.Equals(currentUserId, id, StringComparison.OrdinalIgnoreCase);
-        }
-        
-        public static string FindFirstValue(this ClaimsPrincipal principal, string claimType)
+        private static string FindFirstValue(this ClaimsPrincipal principal, string claimType)
         {
             if (principal == null)
             {
