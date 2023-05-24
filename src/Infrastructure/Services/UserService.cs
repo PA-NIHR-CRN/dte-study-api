@@ -210,13 +210,15 @@ namespace Infrastructure.Services
                         $"Thank you for registering for Be Part of Research using your NHS login or through the NHS App. You will need to use the NHS login option on the <a href=\"{baseUrl}Participants/Options\">Be Part of Research</a> website each time you access your account.")
                     .Replace("###TEXT_REPLACE2###",
                         "By signing up, you are joining our community of amazing volunteers who are helping researchers to understand more about health and care conditions. Please visit the <a href=\"https://bepartofresearch.nihr.ac.uk/taking-part/how-to-take-part\">How to take part</a> section of the website to find out about other ways to take part in health and care research.")
-                    .Replace("###TEXT_REPLACE3###",
+                     .Replace("###TEXT_REPLACE3###",
+                        "Sign up to our <a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\">newsletter</a> to receive all our research news, studies you can take part in and other opportunities helping to shape health and care research from across the UK.")
+                    .Replace("###TEXT_REPLACE4###",
                         "If you close your NHS login account, your Be Part of Research account will remain open and if you would also like to close your Be Part of Research account you will need to email <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>.")
                     .Replace("###LINK_REPLACE###", "")
                     .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                    .Replace("###TEXT_REPLACE4###",
+                    .Replace("###TEXT_REPLACE5###",
                         "Thank you for your ongoing commitment and support.")
-                    .Replace("###TEXT_REPLACE5###", "");
+                    .Replace("###TEXT_REPLACE6###", "");
 
                 await _emailService.SendEmailAsync(nhsUserInfo.Email, "Be Part of Research", htmlBody);
 
@@ -295,7 +297,8 @@ namespace Infrastructure.Services
                             .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
                             .Replace("###TEXT_REPLACE4###",
                                 "If you did not attempt to re-register please ignore this email.")
-                            .Replace("###TEXT_REPLACE5###", "Thank you for your ongoing commitment and support.");
+                            .Replace("###TEXT_REPLACE5###", "Thank you for your ongoing commitment and support.")
+                            .Replace("###TEXT_REPLACE6###", "");
 
                         await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
                     }
@@ -322,7 +325,8 @@ namespace Infrastructure.Services
                         .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
                         .Replace("###TEXT_REPLACE4###",
                             "If you did not attempt to re-register please ignore this email.")
-                        .Replace("###TEXT_REPLACE5###", "Thank you for your ongoing commitment and support.");
+                        .Replace("###TEXT_REPLACE5###", "Thank you for your ongoing commitment and support.")
+                        .Replace("###TEXT_REPLACE6###", "");
 
                     await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
 
@@ -669,6 +673,7 @@ namespace Infrastructure.Services
 
             if (user == null || !user.Enabled)
             {
+
                 var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
                 if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
                     return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
@@ -687,7 +692,8 @@ namespace Infrastructure.Services
                     .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
                     .Replace("###TEXT_REPLACE4###",
                         "If you have not attempted to reset your password, please contact us by email at <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>")
-                    .Replace("###TEXT_REPLACE5###", "");
+                    .Replace("###TEXT_REPLACE5###", "")
+                    .Replace("###TEXT_REPLACE6###", "");
 
                 await _emailService.SendEmailAsync(email, "Be Part of Research password reset", htmlBody);
 
