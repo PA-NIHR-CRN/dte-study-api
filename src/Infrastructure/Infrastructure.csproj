@@ -27,11 +27,7 @@
     
     <ItemGroup>
         <Folder Include="HttpMessageHandlers" />
-        <Folder Include="Content\" />
         <Folder Include="Utils\" />
     </ItemGroup>
 
-    <ItemGroup>
-        <None Remove="Content\" />
-    </ItemGroup>
 </Project>
