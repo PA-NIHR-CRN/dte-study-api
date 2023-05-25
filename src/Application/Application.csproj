@@ -3,17 +3,19 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <UserSecretsId>a8675377-93f4-41ef-abda-eae1f5acfa89</UserSecretsId>
+        <Configurations>Release;Debug</Configurations>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
     <ItemGroup>
         <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
-        <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.93" />
         <PackageReference Include="Dte.Common" Version="1.6.0" />
         <PackageReference Include="Dte.Location.Api.Client" Version="1.0.2" />
+        <PackageReference Include="Dte.Participant.Api.Client" Version="1.2.7" />
         <PackageReference Include="Dte.Reference.Data.Api.Client" Version="1.0.0" />
         <PackageReference Include="Dte.Study.Management.Api.Client" Version="1.0.2" />
         <PackageReference Include="MediatR" Version="10.0.1" />
