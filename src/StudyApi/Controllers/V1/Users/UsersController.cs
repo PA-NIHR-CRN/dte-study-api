@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Participants.V1.Commands.Participants;
@@ -21,6 +22,8 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using Application.Contracts;
 using Dte.Common.Exceptions.Common;
 using Microsoft.AspNetCore.DataProtection;
 
@@ -35,13 +38,45 @@ namespace StudyApi.Controllers.V1.Users
         private readonly IMediator _mediator;
         private readonly ILogger<UsersController> _logger;
         private readonly IDataProtector _dataProtector;
+        private readonly ISessionService _sessionService;
 
-        public UsersController(IMediator mediator, ILogger<UsersController> logger, IDataProtectionProvider dataProtector)
+        public UsersController(IMediator mediator, ILogger<UsersController> logger,
+            IDataProtectionProvider dataProtector, ISessionService sessionService)
         {
             _mediator = mediator;
             _logger = logger;
             _dataProtector = dataProtector.CreateProtector("nhs.login.cookies");
+            _sessionService = sessionService;
         }
+        
+        private async Task CreateSessionAndLogin(string jwtToken, string sessionId)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwtToken);
+    
+            var claims = new List<Claim>
+            {
+                new Claim("sessionId", sessionId)
+            };
+            claims.AddRange(token.Claims);
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var authProperties = new AuthenticationProperties
+            {
+                AllowRefresh = true,
+            };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+            
+            var participantId = token.Claims.FirstOrDefault(x => x.Type == "sub")?.Value;
+    
+            await _sessionService.SetSessionAsync(participantId, sessionId);
+        }
+
 
         /// <summary>
         /// [AllowAnonymous] Login
@@ -55,29 +90,15 @@ namespace StudyApi.Controllers.V1.Users
         public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request)
         {
             var response = await _mediator.Send(new UserLoginCommand(request.Email, request.Password));
-            if (response.IsSuccess)
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var jwtSecurityToken = handler.ReadJwtToken(response.Content);
 
-                var claimsIdentity = new ClaimsIdentity(jwtSecurityToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                var authProperties = new AuthenticationProperties
-                {
-                    AllowRefresh = true,
-                };
-
-                await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                authProperties);
-                return Ok(response);
-            }
-            else
+            if (!response.IsSuccess)
             {
                 return Ok(response);
             }
 
+            var sessionId = Guid.NewGuid().ToString();
+            await CreateSessionAndLogin(response.Content, sessionId);
+            return Ok(response);
         }
 
 
@@ -94,32 +115,18 @@ namespace StudyApi.Controllers.V1.Users
         {
             var response = await _mediator.Send(new NhsLoginCommand(request.Code, request.RedirectUrl));
 
-            if (response.IsSuccess)
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var idToken = handler.ReadJwtToken(response.Content.IdToken);
-
-                var claimsIdentity = new ClaimsIdentity(idToken.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                var authProperties = new AuthenticationProperties
-                {
-                    AllowRefresh = true,
-                };
-
-                await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                authProperties);
-
-                var cookieValue = _dataProtector.Protect(response.Content.AccessToken);
-
-                HttpContext.Response.Cookies.Append(NhsAccessTokenCookieName, cookieValue, new CookieOptions { HttpOnly = true, IsEssential = true, Secure = true });
-            return Ok(Response<string>.CreateSuccessfulContentResponse(response.Content.IdToken));
-            }
-            else
+            if (!response.IsSuccess)
             {
                 return Ok(Response<string>.CreateErrorMessageResponse(response.Errors));
             }
+
+            var sessionId = Guid.NewGuid().ToString();
+            await CreateSessionAndLogin(response.Content.IdToken, sessionId);
+            var cookieValue = _dataProtector.Protect(response.Content.AccessToken);
+            HttpContext.Response.Cookies.Append(NhsAccessTokenCookieName, cookieValue,
+                new CookieOptions { HttpOnly = true, IsEssential = true, Secure = true });
+            return Ok(Response<string>.CreateSuccessfulContentResponse(response.Content.IdToken));
+
         }
 
 
@@ -155,6 +162,7 @@ namespace StudyApi.Controllers.V1.Users
         {
             public bool ConsentRegistration { get; set; }
         }
+
         /// <summary>
         /// [AllowAnonymous] SignUp NHS user
         /// </summary>
@@ -247,7 +255,8 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("confirmforgotpassword")]
         public async Task<IActionResult> ConfirmForgotPasswordAsync([FromBody] ConfirmForgotPasswordRequest request)
         {
-            var response = await _mediator.Send(new ConfirmForgotPasswordCommand(request.Code, request.UserId, request.Password));
+            var response =
+                await _mediator.Send(new ConfirmForgotPasswordCommand(request.Code, request.UserId, request.Password));
 
             return Ok(response);
         }
@@ -281,6 +290,7 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("logout")]
         public async Task<IActionResult> LogOut()
         {
+            await _sessionService.DeleteSessionAsync(User.GetParticipantId());
             HttpContext.Response.Cookies.Delete(NhsAccessTokenCookieName);
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return NoContent();

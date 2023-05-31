@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using Application.Settings;
@@ -13,7 +12,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.CookiePolicy;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,8 +23,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using StudyApi.Behaviours;
@@ -40,7 +36,7 @@ namespace StudyApi
     public class Startup
     {
         private IConfiguration Configuration { get; }
-        public IWebHostEnvironment Environment { get; }
+        private IWebHostEnvironment Environment { get; }
 
         public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
@@ -206,9 +202,14 @@ namespace StudyApi
             var build = System.Environment.GetEnvironmentVariable("DTE_BUILD_STRING") ?? "Unknown";
             services.AddHealthChecks()
                 .AddCheck("StudyApi", () => HealthCheckResult.Healthy($"Build: {build}"))
-                .AddCheck<StudyManagementServiceHealthCheck>("StudyManagementService", timeout: clientsSettings.StudyManagementService.DefaultTimeout, tags: new List<string> { "services" })
-                .AddCheck<LocationServiceHealthCheck>("LocationService", timeout: clientsSettings.LocationService.DefaultTimeout, tags: new List<string> { "services" })
-                .AddCheck<ReferenceDataServiceHealthCheck>("ReferenceDataService", timeout: clientsSettings.ReferenceDataService.DefaultTimeout, tags: new List<string> { "services" });
+                .AddCheck<StudyManagementServiceHealthCheck>("StudyManagementService",
+                    timeout: clientsSettings.StudyManagementService.DefaultTimeout,
+                    tags: new List<string> { "services" })
+                .AddCheck<LocationServiceHealthCheck>("LocationService",
+                    timeout: clientsSettings.LocationService.DefaultTimeout, tags: new List<string> { "services" })
+                .AddCheck<ReferenceDataServiceHealthCheck>("ReferenceDataService",
+                    timeout: clientsSettings.ReferenceDataService.DefaultTimeout,
+                    tags: new List<string> { "services" });
         }
 
         private static void SetSessionExpiryCookie(AppendCookieContext context)
@@ -279,6 +280,8 @@ namespace StudyApi
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<SessionExpiryMiddleware>();
 
             app
                 .UseHsts()
