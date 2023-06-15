@@ -7,6 +7,7 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Application.Constants;
 using Application.Contracts;
+using Application.Models.MFA;
 using Application.Participants.V1.Commands.Participants;
 using Application.Responses.V1.Users;
 using Application.Settings;
@@ -20,6 +21,7 @@ using Dte.Common.Responses;
 using Infrastructure.Clients;
 using Infrastructure.Content;
 using MediatR;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -27,6 +29,7 @@ using Newtonsoft.Json;
 using AdminGetUserResponse = Application.Responses.V1.Users.AdminGetUserResponse;
 using ConfirmForgotPasswordResponse = Application.Responses.V1.Users.ConfirmForgotPasswordResponse;
 using ForgotPasswordResponse = Application.Responses.V1.Users.ForgotPasswordResponse;
+using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 using ResendConfirmationCodeResponse = Application.Responses.V1.Users.ResendConfirmationCodeResponse;
 using SignUpResponse = Application.Responses.V1.Users.SignUpResponse;
 
@@ -44,11 +47,13 @@ namespace Infrastructure.Services
         private readonly IMediator _mediator;
         private readonly DevSettings _devSettings;
         private readonly IParticipantService _participantService;
+        private readonly IDataProtector _dataProtector;
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
             AwsSettings awsSettings, ILogger<UserService> logger, EmailSettings emailSettings,
             IEmailService emailService, IParticipantService participantService,
-            NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings)
+            NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings,
+            IDataProtectionProvider dataProtector)
 
         {
             _provider = provider;
@@ -61,7 +66,21 @@ namespace Infrastructure.Services
             _mediator = mediator;
             _devSettings = devSettings.Value;
             _participantService = participantService;
+            _dataProtector = dataProtector.CreateProtector("mfa.login.details");
         }
+
+        private string GenerateMfaDetails(AdminInitiateAuthResponse response)
+        {
+            var sessionId = response.Session;
+            var username = response.ChallengeParameters["USER_ID_FOR_SRP"];
+
+            return _dataProtector.Protect(JsonConvert.SerializeObject(new MfaLoginDetails
+            {
+                SessionId = sessionId,
+                Username = username
+            }));
+        }
+
 
         public async Task<Response<string>> LoginAsync(string email, string password)
         {
@@ -79,17 +98,37 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminInitiateAuthAsync(request);
+                var mfaDetails = GenerateMfaDetails(response);
 
-                if (response?.AuthenticationResult == null)
+                if (response.ChallengeName == ChallengeNameType.MFA_SETUP)
                 {
-                    _logger.LogError("AWS Cognito returned as response without an AuthenticationResult");
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.AuthenticationError,
-                        "Authentication Result from the service provider was null", _headerService.GetConversationId());
+                        nameof(UserService), "Mfa_Setup_Challenge",
+                        mfaDetails, _headerService.GetConversationId());
                 }
 
-                return Response<string>.CreateSuccessfulContentResponse(response.AuthenticationResult.IdToken,
-                    _headerService.GetConversationId());
+                if (response.ChallengeName == ChallengeNameType.SMS_MFA)
+                {
+                    return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                        nameof(UserService), "Sms_Mfa_Challenge",
+                        mfaDetails, _headerService.GetConversationId());
+                }
+
+                if (response.ChallengeName == ChallengeNameType.SOFTWARE_TOKEN_MFA)
+                {
+                    return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                        nameof(UserService), "Software_Token_Mfa_Challenge",
+                        mfaDetails, _headerService.GetConversationId());
+                }
+
+                if (response?.AuthenticationResult != null)
+                    return Response<string>.CreateSuccessfulContentResponse(response.AuthenticationResult.IdToken,
+                        _headerService.GetConversationId());
+
+                _logger.LogError("AWS Cognito returned as response without an AuthenticationResult");
+                return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                    nameof(UserService), ErrorCode.AuthenticationError,
+                    "Authentication Result from the service provider was null", _headerService.GetConversationId());
             }
             catch (UserNotFoundException)
             {
@@ -121,6 +160,299 @@ namespace Infrastructure.Services
                 return exceptionResponse;
             }
         }
+
+        private MfaLoginDetails DeserializeMfaLoginDetails(string mfaDetails) =>
+            JsonConvert.DeserializeObject<MfaLoginDetails>(_dataProtector.Unprotect(mfaDetails));
+
+        private AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
+            string username, string code, string codeKey)
+        {
+            return new AdminRespondToAuthChallengeRequest
+            {
+                ClientId = _awsSettings.CognitoAppClientIds[0],
+                ChallengeName = ChallengeNameType.FindValue(challengeName),
+                Session = sessionId,
+                UserPoolId = _awsSettings.CognitoPoolId,
+                ChallengeResponses = new Dictionary<string, string>
+                {
+                    { "USERNAME", username },
+                    { codeKey, code }
+                }
+            };
+        }
+
+        private Response<string> HandleMfaException(Exception ex, string errorType)
+        {
+            var exceptionResponse = Response<string>.CreateErrorMessageResponse(
+                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), errorType,
+                ex.Message, _headerService.GetConversationId());
+
+            _logger.LogError(ex, $"{errorType} occurred\\r\\n{{SerializeObject}}",
+                JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
+
+            return exceptionResponse;
+        }
+
+
+        public async Task<Response<string>> RespondToTotpMfaChallengeAsync(string code, string mfaDetails)
+        {
+            var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+            var authChallengeRequest = CreateAuthChallengeRequest("SOFTWARE_TOKEN_MFA", mfaLoginDetails.SessionId,
+                mfaLoginDetails.Username, code, "SOFTWARE_TOKEN_MFA_CODE");
+
+            try
+            {
+                var authChallengeResponse = await _provider.AdminRespondToAuthChallengeAsync(authChallengeRequest);
+                var idToken = authChallengeResponse.AuthenticationResult.IdToken;
+
+                return Response<string>.CreateSuccessfulContentResponse(idToken, _headerService.GetConversationId());
+            }
+            catch (CodeMismatchException ex)
+            {
+                return HandleMfaException(ex, "MFA_Code_Mismatch");
+            }
+            catch (NotAuthorizedException ex)
+            {
+                if (ex.Message == "Invalid session for the user, session is expired.")
+                {
+                    return HandleMfaException(ex, "MFA_Session_Expired");
+                }
+                else
+                {
+                    return HandleMfaException(ex, "Not_Authorized");
+                }
+            }
+            catch (Exception ex)
+            {
+                return HandleMfaException(ex, "Unknown error responding to mfa challenge");
+            }
+        }
+
+        public async Task<Response<string>> ResendMfaChallenge(string mfaRequestDetails)
+        {
+            // resend mfa challenge
+            var mfaLoginDetails = DeserializeMfaLoginDetails(mfaRequestDetails);
+
+            var request = new AdminInitiateAuthRequest
+            {
+                ClientId = _awsSettings.CognitoAppClientIds[0],
+                UserPoolId = _awsSettings.CognitoPoolId,
+                AuthFlow = AuthFlowType.ADMIN_NO_SRP_AUTH,
+                AuthParameters = new Dictionary<string, string>
+                {
+                    { "USERNAME", mfaLoginDetails.Username },
+                    { "PASSWORD", mfaLoginDetails.Password }
+                }
+            };
+
+            try
+            {
+                var response = await _provider.AdminInitiateAuthAsync(request);
+                var mfaDetails = GenerateMfaDetails(response);
+
+                if (response.ChallengeName == ChallengeNameType.SMS_MFA)
+                {
+                    return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                        nameof(UserService), "Sms_Mfa_Challenge",
+                        mfaDetails, _headerService.GetConversationId());
+                }
+
+                return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                    nameof(UserService), "No_Mfa_Challenge",
+                    mfaDetails, _headerService.GetConversationId());
+            }
+            catch (Exception ex)
+            {
+                var exceptionResponse = Response<string>.CreateExceptionResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
+                    _headerService.GetConversationId());
+
+                _logger.LogError(ex,
+                    $"Unknown error resending mfa challenge for user with username {mfaLoginDetails.Username}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+
+                return exceptionResponse;
+            }
+        }
+
+        public async Task<Response<string>> RespondToMfaChallengeAsync(string mfaCode, string mfaDetails)
+        {
+            var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+            var request = CreateAuthChallengeRequest("SMS_MFA", mfaLoginDetails.SessionId, mfaLoginDetails.Username,
+                mfaCode, "SMS_MFA_CODE");
+
+            try
+            {
+                var response = await _provider.AdminRespondToAuthChallengeAsync(request);
+
+                if (response?.AuthenticationResult == null)
+                {
+                    _logger.LogError("AWS Cognito returned as response without an AuthenticationResult");
+                    return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                        nameof(UserService), ErrorCode.AuthenticationError,
+                        "Authentication Result from the service provider was null", _headerService.GetConversationId());
+                }
+
+                return Response<string>.CreateSuccessfulContentResponse(response.AuthenticationResult.IdToken,
+                    _headerService.GetConversationId());
+            }
+            catch (CodeMismatchException ex)
+            {
+                return HandleMfaException(ex, "MFA_Code_Mismatch");
+            }
+            catch (NotAuthorizedException ex)
+            {
+                if (ex.Message == "Invalid session for the user, session is expired.")
+                {
+                    return HandleMfaException(ex, "MFA_Session_Expired");
+                }
+                else
+                {
+                    return HandleMfaException(ex, "Not_Authorized");
+                }
+            }
+            catch (Exception ex)
+            {
+                return HandleMfaException(ex, "Unknown error responding to mfa challenge");
+            }
+        }
+
+
+        private string CleanPhoneNumber(string phoneNumber)
+        {
+            // ensure the phone number is in the correct format for cognito ie +441234567890
+            phoneNumber = phoneNumber.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "");
+            if (!phoneNumber.StartsWith("+"))
+            {
+                phoneNumber = $"+44{phoneNumber.TrimStart('0')}";
+            }
+
+            return phoneNumber;
+        }
+
+        public async Task UpdateCognitoPhoneNumberAsync(string mfaDetails, string phoneNumber)
+        {
+            // get the username from the mfa details
+            var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+            var username = mfaLoginDetails.Username;
+
+            // ensure the phone number is in the correct format for cognito ie +441234567890
+            phoneNumber = CleanPhoneNumber(phoneNumber);
+
+            var request = new AdminUpdateUserAttributesRequest
+            {
+                UserPoolId = _awsSettings.CognitoPoolId,
+                Username = username,
+                UserAttributes = new List<AttributeType>
+                {
+                    new AttributeType
+                    {
+                        Name = "phone_number",
+                        Value = phoneNumber
+                    }
+                }
+            };
+
+            await _provider.AdminUpdateUserAttributesAsync(request);
+        }
+
+
+        public async Task<TotpTokenResult> GenerateTotpToken(string mfaDetails)
+        {
+            var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+            var username = mfaLoginDetails.Username;
+            var sessionId = mfaLoginDetails.SessionId;
+
+            var associateRequest = new AssociateSoftwareTokenRequest
+            {
+                Session = sessionId
+            };
+
+            var associateResponse = await _provider.AssociateSoftwareTokenAsync(associateRequest);
+            var secretCode = associateResponse.SecretCode;
+
+            return new TotpTokenResult
+            {
+                SecretCode = secretCode,
+                SessionId = associateResponse.Session,
+                Username = username
+            };
+        }
+
+
+        public async Task<Response<string>> SetUpMfaAsync(string mfaDetails, bool isToken)
+        {
+            try
+            {
+                // set up mfa device on cognito.  This may be a phone or a software token
+                var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+                var username = mfaLoginDetails.Username;
+                var password = mfaLoginDetails.Password;
+                AdminSetUserMFAPreferenceRequest request;
+
+                if (isToken)
+                {
+                    // Software Token set up request
+                    request = new AdminSetUserMFAPreferenceRequest
+                    {
+                        UserPoolId = _awsSettings.CognitoPoolId,
+                        Username = username,
+                        SoftwareTokenMfaSettings = new SoftwareTokenMfaSettingsType
+                        {
+                            Enabled = true,
+                            PreferredMfa = true,
+                        },
+                    };
+                }
+                else
+                {
+                    // SMS set up request
+                    request = new AdminSetUserMFAPreferenceRequest
+                    {
+                        UserPoolId = _awsSettings.CognitoPoolId,
+                        Username = username,
+                        SMSMfaSettings = new SMSMfaSettingsType
+                        {
+                            Enabled = true,
+                            PreferredMfa = true,
+                        },
+                    };
+                }
+
+                var response = await _provider.AdminSetUserMFAPreferenceAsync(request);
+
+                if (response.HttpStatusCode != HttpStatusCode.OK)
+                {
+                    _logger.LogError("AWS Cognito returned a response without an AuthenticationResult");
+                    return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                        nameof(UserService), ErrorCode.AuthenticationError,
+                        "Authentication Result from the service provider was null", _headerService.GetConversationId());
+                }
+
+                // log the user in again to get the new tokens with mfa enabled
+                var loginResponse = await LoginAsync(username, password);
+
+                if (!loginResponse.IsSuccess)
+                {
+                    var newMfaDetails = loginResponse.Errors.First().Detail;
+                    return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                        nameof(UserService), isToken ? "Software_Token_Mfa_Challenge" : "SMS_MFA_Challenge",
+                        newMfaDetails, _headerService.GetConversationId());
+                }
+
+                return Response<string>.CreateSuccessfulContentResponse(response.HttpStatusCode.ToString(),
+                    _headerService.GetConversationId());
+            }
+            catch (Exception ex)
+            {
+                var exceptionResponse = Response<string>.CreateExceptionResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
+                    _headerService.GetConversationId());
+                _logger.LogError(ex, "Unknown error setting up mfa\\r\\n{SerializeObject}",
+                    JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
+                return exceptionResponse;
+            }
+        }
+
 
         private static bool IsUnder18(DateTime dateOfBirth) => DateTime.Now.AddYears(-18).Date < dateOfBirth.Date;
 
@@ -210,7 +542,7 @@ namespace Infrastructure.Services
                         $"Thank you for registering for Be Part of Research using your NHS login or through the NHS App. You will need to use the NHS login option on the <a href=\"{baseUrl}Participants/Options\">Be Part of Research</a> website each time you access your account.")
                     .Replace("###TEXT_REPLACE2###",
                         "By signing up, you are joining our community of amazing volunteers who are helping researchers to understand more about health and care conditions. Please visit the <a href=\"https://bepartofresearch.nihr.ac.uk/taking-part/how-to-take-part\">How to take part</a> section of the website to find out about other ways to take part in health and care research.")
-                     .Replace("###TEXT_REPLACE3###",
+                    .Replace("###TEXT_REPLACE3###",
                         "Sign up to our <a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\">newsletter</a> to receive all our research news, studies you can take part in and other opportunities helping to shape health and care research from across the UK.")
                     .Replace("###TEXT_REPLACE4###",
                         "If you close your NHS login account, your Be Part of Research account will remain open and if you would also like to close your Be Part of Research account you will need to email <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>.")
@@ -673,7 +1005,6 @@ namespace Infrastructure.Services
 
             if (user == null || !user.Enabled)
             {
-
                 var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
                 if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
                     return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
@@ -911,5 +1242,12 @@ namespace Infrastructure.Services
         private static bool IsSuccessHttpStatusCode(int httpStatusCode) => httpStatusCode >= StatusCodes.Status200OK &&
                                                                            httpStatusCode <
                                                                            StatusCodes.Status300MultipleChoices;
+    }
+
+    public class MfaLoginDetails
+    {
+        public string Username { get; set; }
+        public string SessionId { get; set; }
+        public string Password { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Application.Models.MFA;
 using Application.Responses.V1.Users;
 using Dte.Common.Responses;
 
@@ -24,5 +25,11 @@ namespace Application.Contracts
 
         Task<Response<object>> ChangePasswordAsync(string participantId, string oldPassword, string newPassword);
         Task<Response<object>> ChangeEmailAsync(string currentEmail, string newEmail);
+        Task<Response<string>> RespondToMfaChallengeAsync(string code, string mfaDetails);
+        Task<Response<string>> SetUpMfaAsync(string mfaDetails, bool isToken = false);
+        Task UpdateCognitoPhoneNumberAsync(string mfaDetails, string phoneNumber);
+        Task<TotpTokenResult> GenerateTotpToken(string mfaDetails);
+        Task<Response<string>> RespondToTotpMfaChallengeAsync(string code, string mfaDetails);
+        Task<Response<string>> ResendMfaChallenge(string requestMfaDetails);
     }
 }
