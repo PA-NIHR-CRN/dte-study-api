@@ -69,7 +69,7 @@ namespace Infrastructure.Services
             _dataProtector = dataProtector.CreateProtector("mfa.login.details");
         }
 
-        private string GenerateMfaDetails(AdminInitiateAuthResponse response)
+        private string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null)
         {
             var sessionId = response.Session;
             var username = response.ChallengeParameters["USER_ID_FOR_SRP"];
@@ -77,7 +77,8 @@ namespace Infrastructure.Services
             return _dataProtector.Protect(JsonConvert.SerializeObject(new MfaLoginDetails
             {
                 SessionId = sessionId,
-                Username = username
+                Username = username,
+                Password = password
             }));
         }
 
@@ -98,7 +99,7 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminInitiateAuthAsync(request);
-                var mfaDetails = GenerateMfaDetails(response);
+                var mfaDetails = GenerateMfaDetails(response, password);
 
                 if (response.ChallengeName == ChallengeNameType.MFA_SETUP)
                 {
@@ -248,7 +249,7 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminInitiateAuthAsync(request);
-                var mfaDetails = GenerateMfaDetails(response);
+                var mfaDetails = GenerateMfaDetails(response, mfaLoginDetails.Password);
 
                 if (response.ChallengeName == ChallengeNameType.SMS_MFA)
                 {
@@ -435,7 +436,7 @@ namespace Infrastructure.Services
                 {
                     var newMfaDetails = loginResponse.Errors.First().Detail;
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), isToken ? "Software_Token_Mfa_Challenge" : "SMS_MFA_Challenge",
+                        nameof(UserService), isToken ? "Software_Token_Mfa_Challenge" : "Sms_Mfa_Challenge",
                         newMfaDetails, _headerService.GetConversationId());
                 }
 
