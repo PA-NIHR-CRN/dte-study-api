@@ -9,10 +9,12 @@ using Application.Mappings.Participants;
 using Application.Models.Participants;
 using Application.Responses.V1.Participants;
 using Application.Settings;
+using Application.Content;
 using Domain.Entities.Participants;
 using Dte.Common.Contracts;
 using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
+using Infrastructure.Clients;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -26,16 +28,21 @@ public class ParticipantService : IParticipantService
     private readonly IParticipantRepository _participantRepository;
     private readonly IClock _clock;
     private readonly ILogger<UserService> _logger;
+    private readonly IEmailService _emailService;
+    private readonly EmailSettings _emailSettings;
 
     public ParticipantService(IParticipantRepository participantRepository, IClock clock,
         IAmazonCognitoIdentityProvider provider, AwsSettings awsSettings,
-        ILogger<UserService> logger)
+        ILogger<UserService> logger, EmailSettings emailSettings,
+        IEmailService emailService)
     {
         _participantRepository = participantRepository;
         _clock = clock;
         _provider = provider;
         _awsSettings = awsSettings;
         _logger = logger;
+        _emailService = emailService;
+        _emailSettings = emailSettings;
     }
     
     private static string DeletedKey(Guid primaryKey) => $"DELETED#{primaryKey}";
@@ -171,6 +178,26 @@ public class ParticipantService : IParticipantService
         {
             var entity = await _participantRepository.GetParticipantDetailsAsync(participantId);
             if (entity == null) return;
+
+            var baseUrl = _emailSettings.WebAppBaseUrl;
+            var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
+                    "Closure of Be Part of Research Account")
+                .Replace("###TEXT_REPLACE1###",
+                    "This email is to confirm the closure of your Be Part of Research account. If you would still like to hear from us, you can sign up to our <a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\">newsletter</a> to receive all our research news, and hear about studies and other opportunities to help shape health and care research from across the UK.")
+                .Replace("###TEXT_REPLACE2###",
+                    "If you would like to register again in future, please visit the <a href=\"https://volunteer.bepartofresearch.nihr.ac.uk/Participants/introduction\">registration page</a>.")
+                 .Replace("###TEXT_REPLACE3###",
+                    "Thank you for your support.")
+                .Replace("###TEXT_REPLACE4###",
+                    "")
+                .Replace("###LINK_REPLACE###", "")
+                .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
+                .Replace("###TEXT_REPLACE5###",
+                    "")
+                .Replace("###TEXT_REPLACE6###",
+                    "");
+
+            await _emailService.SendEmailAsync(entity.Email, "Be Part of Research", htmlBody);
 
             var linkedEmail = entity.Email;
             await SaveAnonymisedDemographicParticipantDataAsync(entity);
