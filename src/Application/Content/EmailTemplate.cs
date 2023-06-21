@@ -1,4 +1,4 @@
-namespace Infrastructure.Content
+namespace Application.Content
 {
     public static class EmailTemplate
     {
