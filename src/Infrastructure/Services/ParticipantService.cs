@@ -183,7 +183,7 @@ public class ParticipantService : IParticipantService
             var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
                     "Closure of Be Part of Research Account")
                 .Replace("###TEXT_REPLACE1###",
-                    "This email is to confirm the closure of your Be Part of Research account. If you would still like to hear from us, you can sign up to our <a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\">newsletter</a> to receive all our research news, and hear about studies and other opportunities to help shape health and care research from across the UK.")
+                    "This email is to confirm the closure of your Be Part of Research account. If you would still like to hear from us, you can<a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\"> sign up to our newsletter</a> to receive all our research news, and hear about studies and other opportunities to help shape health and care research from across the UK.")
                 .Replace("###TEXT_REPLACE2###",
                     "If you would like to register again in future, please visit the <a href=\"https://volunteer.bepartofresearch.nihr.ac.uk/Participants/introduction\">registration page</a>.")
                  .Replace("###TEXT_REPLACE3###",
