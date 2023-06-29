@@ -135,10 +135,10 @@ namespace StudyApi.Controllers.V1.Users
         [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
         [HttpPost("respondtototpmfachallenge")]
-        public async Task<IActionResult> RespondToTotpMfaChallengeAsync([FromBody] RespondToMfaRequest request)
+        public async Task<IActionResult> RespondToTotpMfaChallengeAsync([FromBody] RespondToTotpMfaRequest request)
         {
             var response =
-                await _userService.RespondToTotpMfaChallengeAsync(request.MfaCode, request.MfaDetails);
+                await _userService.RespondToTotpMfaChallengeAsync(request.AuthenticatorAppCode, request.MfaDetails);
 
             if (!response.IsSuccess)
             {
