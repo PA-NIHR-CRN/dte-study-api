@@ -164,11 +164,11 @@ namespace StudyApi.Controllers.V1.Users
             await _userService.UpdateCognitoPhoneNumberAsync(request.MfaDetails, request.PhoneNumber);
             var response = await _userService.SetUpMfaAsync(request.MfaDetails);
 
-            return !response.IsSuccess
+             return !response.IsSuccess
                 ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
                 : Ok(response);
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] ResendMfaChallenge
         /// </summary>
@@ -201,6 +201,22 @@ namespace StudyApi.Controllers.V1.Users
             var response = await _userService.GenerateTotpToken(request.MfaDetails);
 
             return Ok(Response<TotpTokenResult>.CreateSuccessfulContentResponse(response));
+        }
+
+        /// <summary>
+        /// [AllowAnonymous] VerifySoftwareTokenAsync
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("verifytokenmfa")]
+        public async Task<IActionResult> VerifySoftwareTokenAsync([FromBody] VerifyMfaRequest request)
+        {
+            var response = await _userService.VerifySoftwareTokenAsync(request.AuthenticatorAppCode, request.MfaDetails);
+
+            return Ok(response);
         }
 
 
