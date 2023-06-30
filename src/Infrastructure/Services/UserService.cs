@@ -375,7 +375,7 @@ namespace Infrastructure.Services
             {
                 SecretCode = secretCode,
                 SessionId = associateResponse.Session,
-                Username = username
+                Username = username,
             };
         }
 
@@ -454,6 +454,34 @@ namespace Infrastructure.Services
             }
         }
 
+        /// <summary>
+        /// Verify the TOTP and register for MFA.
+        /// </summary>
+        /// <param name="session">The name of the session.</param>
+        /// <param name="code">The MFA code.</param>
+        /// <returns>The status of the software token.</returns>
+        public async Task<Response<string>> VerifySoftwareTokenAsync(string code, string mfaDetails)
+        {
+            var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+            var sessionId = mfaLoginDetails.SessionId;
+
+            var tokenRequest = new VerifySoftwareTokenRequest
+            {
+                Session = sessionId,
+                UserCode = code,
+            };
+
+            try
+            {
+                var response = await _provider.VerifySoftwareTokenAsync(tokenRequest);
+                return Response<string>.CreateSuccessfulContentResponse(response.Status,
+                    _headerService.GetConversationId());
+            }
+            catch (Exception ex)
+            {
+                return HandleMfaException(ex, "Error");
+            }
+        }
 
         private static bool IsUnder18(DateTime dateOfBirth) => DateTime.Now.AddYears(-18).Date < dateOfBirth.Date;
 
@@ -1214,7 +1242,7 @@ namespace Infrastructure.Services
             }
         }
 
-        private async Task<List<string>> ValidatePassword(string password)
+           private async Task<List<string>> ValidatePassword(string password)
         {
             var passwordPolicyTypeResponse = await GetPasswordPolicyTypeAsync();
 
