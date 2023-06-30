@@ -69,7 +69,7 @@ namespace Infrastructure.Services
             _dataProtector = dataProtector.CreateProtector("mfa.login.details");
         }
 
-        private string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null)
+        private string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null, bool authenticatedMobileVerified = false)
         {
             var sessionId = response.Session;
             var username = response.ChallengeParameters["USER_ID_FOR_SRP"];
@@ -78,10 +78,10 @@ namespace Infrastructure.Services
             {
                 SessionId = sessionId,
                 Username = username,
-                Password = password
+                Password = password,
+                AuthenticatedMobileVerified = authenticatedMobileVerified.ToString()
             }));
         }
-
 
         public async Task<Response<string>> LoginAsync(string email, string password)
         {
@@ -99,7 +99,9 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminInitiateAuthAsync(request);
-                var mfaDetails = GenerateMfaDetails(response, password);
+                var getUserResponse = await AdminGetUserAsync(email);
+                var authenticatedMobileVerified = getUserResponse.AuthenticatedMobileVerified;
+                var mfaDetails = GenerateMfaDetails(response, password, authenticatedMobileVerified);
 
                 if (response.ChallengeName == ChallengeNameType.MFA_SETUP)
                 {
@@ -872,12 +874,21 @@ namespace Infrastructure.Services
                     Username = email
                 });
 
-                return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
+                Boolean authenticatedMobileVerified = false;
+
+                foreach (var attribute in response.UserAttributes)
+                {
+                    if (attribute.Name.Equals("phone_number_verified") && attribute.Value.Equals("true")) {
+                        authenticatedMobileVerified = true;
+                    }
+                }
+
+                    return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
                     ? new AdminGetUserResponse
                     {
                         Email = email, Id = response.Username, Status = response.UserStatus?.ToString(),
                         CreatedDate = response.UserCreateDate, LastModifiedDate = response.UserLastModifiedDate,
-                        Enabled = response.Enabled
+                        Enabled = response.Enabled, AuthenticatedMobileVerified = authenticatedMobileVerified
                     }
                     : null;
             }
@@ -1278,5 +1289,6 @@ namespace Infrastructure.Services
         public string Username { get; set; }
         public string SessionId { get; set; }
         public string Password { get; set; }
+        public string AuthenticatedMobileVerified { get; set; }
     }
 }
