@@ -37,7 +37,7 @@ public class ParticipantService : IParticipantService
         _awsSettings = awsSettings;
         _logger = logger;
     }
-    
+
     private static string DeletedKey(Guid primaryKey) => $"DELETED#{primaryKey}";
     private static string DeletedKey() => "DELETED#";
     private static string StripPrimaryKey(string pk) => pk.Replace("PARTICIPANT#", "");
@@ -175,7 +175,7 @@ public class ParticipantService : IParticipantService
             var linkedEmail = entity.Email;
             await SaveAnonymisedDemographicParticipantDataAsync(entity);
             await RemoveParticipantDataAsync(entity);
-                    
+
 
             var linkedEntity = await GetParticipantDetailsByEmailAsync(linkedEmail);
             if (linkedEntity == null) return;
@@ -185,6 +185,17 @@ public class ParticipantService : IParticipantService
         {
             _logger.LogError(ex, "Delete-error = {EMessage}", ex.Message);
         }
+    }
+
+    public async Task StoreMfaCodeAsync(string username, string code)
+    {
+        var particpiant = await _participantRepository.GetParticipantDetailsAsync(username);
+        if (particpiant == null)
+            throw new NotFoundException($"No participant found for username: {username}");
+
+        particpiant.MfaChangePhoneCode = code;
+        particpiant.MfaChangePhoneCodeExpiry = DateTime.UtcNow.AddMinutes(5);;
+        await _participantRepository.UpdateParticipantDetailsAsync(particpiant);
     }
 
     private async Task RemoveParticipantDataAsync(ParticipantDetails entity)
@@ -224,7 +235,7 @@ public class ParticipantService : IParticipantService
         };
 
         await _participantRepository.CreateAnonymisedDemographicParticipantDataAsync(anonEntity);
-                
+
         var demographics = await _participantRepository.GetParticipantDemographicsAsync(StripPrimaryKey(entity.Pk));
         if (demographics == null) return;
         demographics.Pk = primaryKey;

@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Application.Responses.V1.Participants;
 using Domain.Entities.Participants;
@@ -17,4 +18,5 @@ public interface IParticipantService
     Task NhsLoginAsync(ParticipantDetails entity);
     Task UpdateParticipantEmailAsync(string requestParticipantId, string requestNewEmail);
     Task DeleteUserAsync(string requestParticipantId);
+    Task StoreMfaCodeAsync(string username, string code);
 }

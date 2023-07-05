@@ -6,5 +6,6 @@ namespace StudyApi.Requests.Users
     {
         public string AuthenticatorAppCode { get; set; }
         public string MfaDetails { get; set; }
+        public string SessionId { get; set; }
     }
 }
