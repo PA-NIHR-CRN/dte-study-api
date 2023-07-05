@@ -135,10 +135,10 @@ namespace StudyApi.Controllers.V1.Users
         [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
         [HttpPost("respondtototpmfachallenge")]
-        public async Task<IActionResult> RespondToTotpMfaChallengeAsync([FromBody] RespondToTotpMfaRequest request)
+        public async Task<IActionResult> RespondToTotpMfaChallengeAsync([FromBody] RespondToMfaRequest request)
         {
             var response =
-                await _userService.RespondToTotpMfaChallengeAsync(request.AuthenticatorAppCode, request.MfaDetails);
+                await _userService.RespondToTotpMfaChallengeAsync(request.MfaCode, request.MfaDetails);
 
             if (!response.IsSuccess)
             {
@@ -162,6 +162,25 @@ namespace StudyApi.Controllers.V1.Users
         public async Task<IActionResult> SetUpMfaAsync([FromBody] SetUpMfaRequest request)
         {
             await _userService.UpdateCognitoPhoneNumberAsync(request.MfaDetails, request.PhoneNumber);
+            var response = await _userService.SetUpMfaAsync(request.MfaDetails);
+
+             return !response.IsSuccess
+                ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
+                : Ok(response);
+        }
+        
+        /// <summary>
+        /// [AllowAnonymous] Login
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("sendmfaotpemail")]
+        public async Task<IActionResult> SendMfaOtpEmail([FromBody] SetUpMfaRequest request)
+        {
+            await _userService.SendEmailOtpAsync(request.MfaDetails);
             var response = await _userService.SetUpMfaAsync(request.MfaDetails);
 
              return !response.IsSuccess
@@ -214,7 +233,7 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("verifytokenmfa")]
         public async Task<IActionResult> VerifySoftwareTokenAsync([FromBody] VerifyMfaRequest request)
         {
-            var response = await _userService.VerifySoftwareTokenAsync(request.AuthenticatorAppCode, request.MfaDetails);
+            var response = await _userService.VerifySoftwareTokenAsync(request.AuthenticatorAppCode, request.SessionId, request.MfaDetails);
 
             return Ok(response);
         }
