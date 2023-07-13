@@ -181,7 +181,21 @@ namespace StudyApi.Controllers.V1.Users
         public async Task<IActionResult> SendMfaOtpEmail([FromBody] SetUpMfaRequest request)
         {
             await _userService.SendEmailOtpAsync(request.MfaDetails);
-            var response = await _userService.SetUpMfaAsync(request.MfaDetails);
+            return Ok();
+        }
+        
+        /// <summary>
+        /// [AllowAnonymous] ValidateEmailOtp
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("validatemfaotpemail")]
+        public async Task<IActionResult> ValidateEmailOtp([FromBody] RespondToMfaRequest request)
+        {
+            var response = await _userService.ValidateEmailOtpAsync(request.MfaDetails, request.MfaCode);
 
              return !response.IsSuccess
                 ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
