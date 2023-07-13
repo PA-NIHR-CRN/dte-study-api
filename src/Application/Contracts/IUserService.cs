@@ -34,5 +34,6 @@ namespace Application.Contracts
         Task<Response<string>> RespondToTotpMfaChallengeAsync(string code, string mfaDetails);
         Task<Response<string>> ResendMfaChallenge(string requestMfaDetails);
         Task<Response<string>> SendEmailOtpAsync(string requestMfaDetails);
+        Task<Response<string>> ValidateEmailOtpAsync(string requestMfaDetails, string code);
     }
 }

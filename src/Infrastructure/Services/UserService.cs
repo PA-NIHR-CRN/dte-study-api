@@ -29,7 +29,6 @@ using Newtonsoft.Json;
 using AdminGetUserResponse = Application.Responses.V1.Users.AdminGetUserResponse;
 using ConfirmForgotPasswordResponse = Application.Responses.V1.Users.ConfirmForgotPasswordResponse;
 using ForgotPasswordResponse = Application.Responses.V1.Users.ForgotPasswordResponse;
-using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 using ResendConfirmationCodeResponse = Application.Responses.V1.Users.ResendConfirmationCodeResponse;
 using SignUpResponse = Application.Responses.V1.Users.SignUpResponse;
 
@@ -69,8 +68,7 @@ namespace Infrastructure.Services
             _dataProtector = dataProtector.CreateProtector("mfa.login.details");
         }
 
-        private string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null,
-            bool authenticatedMobileVerified = false)
+        private string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null)
         {
             var sessionId = response.Session;
             var username = response.ChallengeParameters["USER_ID_FOR_SRP"];
@@ -80,7 +78,6 @@ namespace Infrastructure.Services
                 SessionId = sessionId,
                 Username = username,
                 Password = password,
-                AuthenticatedMobileVerified = authenticatedMobileVerified.ToString()
             }));
         }
 
@@ -100,9 +97,7 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminInitiateAuthAsync(request);
-                var getUserResponse = await AdminGetUserAsync(email);
-                var authenticatedMobileVerified = getUserResponse.AuthenticatedMobileVerified;
-                var mfaDetails = GenerateMfaDetails(response, password, authenticatedMobileVerified);
+                var mfaDetails = GenerateMfaDetails(response, password);
 
                 if (response.ChallengeName == ChallengeNameType.MFA_SETUP)
                 {
@@ -115,12 +110,10 @@ namespace Infrastructure.Services
                 {
                     // get the phone number from the user and pass it back in the response
                     var phoneNumber = response.ChallengeParameters["CODE_DELIVERY_DESTINATION"];
-                    var returnData = new { MfaDetails = mfaDetails, PhoneNumber = phoneNumber };
 
-                    
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), "Sms_Mfa_Challenge",
-                        JsonConvert.SerializeObject(returnData), _headerService.GetConversationId());
+                        mfaDetails, _headerService.GetConversationId());
                 }
 
                 if (response.ChallengeName == ChallengeNameType.SOFTWARE_TOKEN_MFA)
@@ -172,6 +165,7 @@ namespace Infrastructure.Services
 
         private MfaLoginDetails DeserializeMfaLoginDetails(string mfaDetails) =>
             JsonConvert.DeserializeObject<MfaLoginDetails>(_dataProtector.Unprotect(mfaDetails));
+
 
         private AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
             string username, string code, string codeKey)
@@ -317,8 +311,8 @@ namespace Infrastructure.Services
                 await _emailService.SendEmailAsync(mfaLoginDetails.Username, "Be Part of Research", htmlBody);
 
                 await _participantService.StoreMfaCodeAsync(mfaLoginDetails.Username, code);
-                
-                return Response<string>.CreateSuccessfulContentResponse(mfaLoginDetails.Username, _headerService.GetConversationId());
+
+                return Response<string>.CreateSuccessfulResponse(_headerService.GetConversationId());
             }
             catch (Exception ex)
             {
@@ -332,14 +326,63 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<Response<string>> RespondToMfaChallengeAsync(string mfaCode, string mfaDetails)
+        public async Task<Response<string>> ValidateEmailOtpAsync(string requestMfaDetails, string code)
         {
-            var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-            var request = CreateAuthChallengeRequest("SMS_MFA", mfaLoginDetails.SessionId, mfaLoginDetails.Username,
-                mfaCode, "SMS_MFA_CODE");
-
             try
             {
+                var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
+                var isValid = await _participantService.ValidateMfaCodeAsync(mfaLoginDetails.Username, code);
+
+                if (!isValid)
+                {
+                    return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                        nameof(UserService), "Invalid_Otp_Code",
+                        "The otp code provided was invalid", _headerService.GetConversationId());
+                }
+
+                return Response<string>.CreateSuccessfulResponse(_headerService.GetConversationId());
+            }
+            catch (NotFoundException ex)
+            {
+                var exceptionResponse = Response<string>.CreateExceptionResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
+                    ErrorCode.DemographicsNotFoundForParticipantError, ex,
+                    _headerService.GetConversationId());
+
+                _logger.LogError(ex, "Error validating email otp code");
+
+                return exceptionResponse;
+            }
+            catch (BadRequestException ex)
+            {
+                var exceptionResponse = Response<string>.CreateExceptionResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
+                    ErrorCode.DemographicsNotFoundForParticipantError, ex,
+                    _headerService.GetConversationId());
+
+                _logger.LogError(ex, "Error validating email otp code");
+
+                return exceptionResponse;
+            }
+            catch (Exception ex)
+            {
+                var exceptionResponse = Response<string>.CreateExceptionResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
+                    _headerService.GetConversationId());
+
+                _logger.LogError(ex, "Error validating email otp code");
+
+                return exceptionResponse;
+            }
+        }
+
+        public async Task<Response<string>> RespondToMfaChallengeAsync(string mfaCode, string mfaDetails)
+        {
+            try
+            {
+                var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+                var request = CreateAuthChallengeRequest("SMS_MFA", mfaLoginDetails.SessionId, mfaLoginDetails.Username,
+                    mfaCode, "SMS_MFA_CODE");
                 var response = await _provider.AdminRespondToAuthChallengeAsync(request);
 
                 if (response?.AuthenticationResult == null)
@@ -370,7 +413,8 @@ namespace Infrastructure.Services
             }
             catch (Exception ex)
             {
-                return HandleMfaException(ex, "Unknown error responding to mfa challenge");
+                var response = HandleMfaException(ex, "Unknown error responding to mfa challenge");
+                return response;
             }
         }
 
@@ -535,7 +579,7 @@ namespace Infrastructure.Services
                         nameof(UserService), ErrorCode.AuthenticationError, "Invalid MFA code",
                         _headerService.GetConversationId());
                 }
-                
+
                 // log the user in again to get the new tokens with mfa enabled
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
                 var username = mfaLoginDetails.Username;
@@ -545,12 +589,11 @@ namespace Infrastructure.Services
                 if (loginResponse.IsSuccess)
                     return Response<string>.CreateSuccessfulContentResponse(response.Status.ToString(),
                         _headerService.GetConversationId());
-                
+
                 var newMfaDetails = loginResponse.Errors.First().Detail;
                 return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                     nameof(UserService), "Software_Token_Mfa_Challenge", newMfaDetails,
                     _headerService.GetConversationId());
-
             }
             catch (Exception ex)
             {
@@ -1363,6 +1406,5 @@ namespace Infrastructure.Services
         public string Username { get; set; }
         public string SessionId { get; set; }
         public string Password { get; set; }
-        public string AuthenticatedMobileVerified { get; set; }
     }
 }

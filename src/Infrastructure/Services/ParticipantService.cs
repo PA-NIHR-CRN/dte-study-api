@@ -13,6 +13,7 @@ using Domain.Entities.Participants;
 using Dte.Common.Contracts;
 using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
+using Dte.Common.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -196,6 +197,25 @@ public class ParticipantService : IParticipantService
         particpiant.MfaChangePhoneCode = code;
         particpiant.MfaChangePhoneCodeExpiry = DateTime.UtcNow.AddMinutes(5);;
         await _participantRepository.UpdateParticipantDetailsAsync(particpiant);
+    }
+
+    public Task<bool> ValidateMfaCodeAsync(string username, string code)
+    {
+        return _participantRepository.GetParticipantDetailsAsync(username)
+            .ContinueWith(task =>
+            {
+                var participant = task.Result;
+                if (participant == null)
+                    throw new NotFoundException($"No participant found for username: {username}");
+
+                if (participant.MfaChangePhoneCodeExpiry < DateTime.UtcNow)
+                    throw new BadRequestException("Code has expired");
+
+                if (participant.MfaChangePhoneCode != code)
+                    throw new BadRequestException("Code is invalid");
+
+                return true;
+            });
     }
 
     private async Task RemoveParticipantDataAsync(ParticipantDetails entity)
