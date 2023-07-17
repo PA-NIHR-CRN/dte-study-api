@@ -185,6 +185,23 @@ namespace StudyApi.Controllers.V1.Users
         }
         
         /// <summary>
+        /// [AllowAnonymous] Login
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("getmaskedmobile")]
+        public async Task<IActionResult> GetMaskedMobile([FromBody] SetUpMfaRequest request)
+        {
+            var maskedMobile = await _userService.GetMaskedMobile(request.MfaDetails);
+            
+            return Ok(maskedMobile);
+            
+        }
+        
+        /// <summary>
         /// [AllowAnonymous] ValidateEmailOtp
         /// </summary>
         /// <response code="200">When IsSuccess true</response>
@@ -492,9 +509,5 @@ namespace StudyApi.Controllers.V1.Users
             return Ok(await _mediator.Send(new ChangeEmailCommand(User.GetParticipantId(), currentEmail,
                 request.NewEmail)));
         }
-    }
-
-    public class SetUpTokenMfaRequest
-    {
     }
 }

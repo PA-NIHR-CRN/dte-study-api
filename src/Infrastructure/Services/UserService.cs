@@ -72,12 +72,14 @@ namespace Infrastructure.Services
         {
             var sessionId = response.Session;
             var username = response.ChallengeParameters["USER_ID_FOR_SRP"];
+            var phoneNumber = response.ChallengeParameters["CODE_DELIVERY_DESTINATION"];
 
             return _dataProtector.Protect(JsonConvert.SerializeObject(new MfaLoginDetails
             {
                 SessionId = sessionId,
                 Username = username,
                 Password = password,
+                PhoneNumber = phoneNumber
             }));
         }
 
@@ -108,9 +110,6 @@ namespace Infrastructure.Services
 
                 if (response.ChallengeName == ChallengeNameType.SMS_MFA)
                 {
-                    // get the phone number from the user and pass it back in the response
-                    var phoneNumber = response.ChallengeParameters["CODE_DELIVERY_DESTINATION"];
-
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), "Sms_Mfa_Challenge",
                         mfaDetails, _headerService.GetConversationId());
@@ -374,6 +373,15 @@ namespace Infrastructure.Services
 
                 return exceptionResponse;
             }
+        }
+
+        public Task<string> GetMaskedMobile(string requestMfaDetails)
+        {
+            var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
+
+            var phoneNumber = mfaLoginDetails.PhoneNumber;
+
+            return Task.FromResult(string.IsNullOrEmpty(phoneNumber) ? string.Empty : phoneNumber);
         }
 
         public async Task<Response<string>> RespondToMfaChallengeAsync(string mfaCode, string mfaDetails)
@@ -1406,5 +1414,6 @@ namespace Infrastructure.Services
         public string Username { get; set; }
         public string SessionId { get; set; }
         public string Password { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }
