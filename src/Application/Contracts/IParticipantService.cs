@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Application.Models.MFA;
 using Application.Responses.V1.Participants;
 using Domain.Entities.Participants;
 using Dte.Common.Responses;
@@ -20,5 +21,5 @@ public interface IParticipantService
     Task UpdateParticipantEmailAsync(string requestParticipantId, string requestNewEmail);
     Task DeleteUserAsync(string requestParticipantId);
     Task StoreMfaCodeAsync(string username, string code);
-    Task<bool> ValidateMfaCodeAsync(string username, string code);
+    Task<MfaValidationResult> ValidateMfaCodeAsync(string username, string code);
 }

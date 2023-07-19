@@ -177,11 +177,29 @@ namespace StudyApi.Controllers.V1.Users
         [AllowAnonymous]
         [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("reissuesession")]
+        public async Task<IActionResult> ReissueMfaSession([FromBody] SetUpMfaRequest request)
+        {
+            var response = await _userService.ReissueMfaSessionAsync(request.MfaDetails);
+            
+            return !response.IsSuccess
+                ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
+                : Ok(response);
+        }
+        
+        /// <summary>
+        /// [AllowAnonymous] Login
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
         [HttpPost("sendmfaotpemail")]
         public async Task<IActionResult> SendMfaOtpEmail([FromBody] SetUpMfaRequest request)
         {
-            await _userService.SendEmailOtpAsync(request.MfaDetails);
-            return Ok();
+            var email = await _userService.SendEmailOtpAsync(request.MfaDetails);
+            return Ok(email);
         }
         
         /// <summary>

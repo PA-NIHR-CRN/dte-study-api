@@ -72,7 +72,11 @@ namespace Infrastructure.Services
         {
             var sessionId = response.Session;
             var username = response.ChallengeParameters["USER_ID_FOR_SRP"];
-            var phoneNumber = response.ChallengeParameters["CODE_DELIVERY_DESTINATION"];
+            // conditionally add phone number if it exists
+            var phoneNumber = response.ChallengeParameters.ContainsKey("CODE_DELIVERY_DESTINATION")
+                ? response.ChallengeParameters["CODE_DELIVERY_DESTINATION"]
+                : null;
+
 
             return _dataProtector.Protect(JsonConvert.SerializeObject(new MfaLoginDetails
             {
@@ -290,28 +294,30 @@ namespace Infrastructure.Services
                 var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
                 var code = GenerateOtpCode();
 
-                var baseUrl = _emailSettings.WebAppBaseUrl;
                 var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
                         "Confirm your email address")
                     .Replace("###TEXT_REPLACE1###",
-                        $"{code}is your Be Part of Research security code.")
+                        $"{code} is your Be Part of Research security code.")
                     .Replace("###TEXT_REPLACE2###",
                         "This code will expire after 5 minutes.")
                     .Replace("###TEXT_REPLACE3###",
-                        "Sign up to our <a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\">newsletter</a> to receive all our research news, studies you can take part in and other opportunities helping to shape health and care research from across the UK.")
+                        "")
                     .Replace("###TEXT_REPLACE4###",
-                        "If you close your NHS login account, your Be Part of Research account will remain open and if you would also like to close your Be Part of Research account you will need to email <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>.")
+                        "")
                     .Replace("###LINK_REPLACE###", "")
                     .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
                     .Replace("###TEXT_REPLACE5###",
-                        "Thank you for your ongoing commitment and support.")
+                        "")
                     .Replace("###TEXT_REPLACE6###", "");
 
-                await _emailService.SendEmailAsync(mfaLoginDetails.Username, "Be Part of Research", htmlBody);
+                var participant = await _participantService.GetParticipantDetailsAsync(mfaLoginDetails.Username);
+
+                await _emailService.SendEmailAsync(participant.Email, "Be Part of Research", htmlBody);
 
                 await _participantService.StoreMfaCodeAsync(mfaLoginDetails.Username, code);
 
-                return Response<string>.CreateSuccessfulResponse(_headerService.GetConversationId());
+                return Response<string>.CreateSuccessfulContentResponse(mfaLoginDetails.Username,
+                    _headerService.GetConversationId());
             }
             catch (Exception ex)
             {
@@ -325,43 +331,33 @@ namespace Infrastructure.Services
             }
         }
 
+        private Response<string> CreateErrorResponse(string errorCode, string errorMessage)
+        {
+            var errorResponse = Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                nameof(UserService), errorCode, errorMessage, _headerService.GetConversationId());
+
+            _logger.LogError(errorMessage);
+
+            return errorResponse;
+        }
+
         public async Task<Response<string>> ValidateEmailOtpAsync(string requestMfaDetails, string code)
         {
             try
             {
                 var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
-                var isValid = await _participantService.ValidateMfaCodeAsync(mfaLoginDetails.Username, code);
+                var mfaValidationResult =
+                    await _participantService.ValidateMfaCodeAsync(mfaLoginDetails.Username, code);
 
-                if (!isValid)
+                return mfaValidationResult switch
                 {
-                    return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Invalid_Otp_Code",
-                        "The otp code provided was invalid", _headerService.GetConversationId());
-                }
-
-                return Response<string>.CreateSuccessfulResponse(_headerService.GetConversationId());
-            }
-            catch (NotFoundException ex)
-            {
-                var exceptionResponse = Response<string>.CreateExceptionResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
-                    ErrorCode.DemographicsNotFoundForParticipantError, ex,
-                    _headerService.GetConversationId());
-
-                _logger.LogError(ex, "Error validating email otp code");
-
-                return exceptionResponse;
-            }
-            catch (BadRequestException ex)
-            {
-                var exceptionResponse = Response<string>.CreateExceptionResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
-                    ErrorCode.DemographicsNotFoundForParticipantError, ex,
-                    _headerService.GetConversationId());
-
-                _logger.LogError(ex, "Error validating email otp code");
-
-                return exceptionResponse;
+                    MfaValidationResult.UserNotFound => CreateErrorResponse("MFA_User_Not_Found", "User not found"),
+                    MfaValidationResult.CodeExpired => CreateErrorResponse("MFA_Code_Expired", "Code has expired"),
+                    MfaValidationResult.CodeInvalid => CreateErrorResponse("MFA_Code_Mismatch", "Code is invalid"),
+                    MfaValidationResult.Success => Response<string>.CreateSuccessfulResponse(
+                        _headerService.GetConversationId()),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
             }
             catch (Exception ex)
             {
@@ -410,14 +406,10 @@ namespace Infrastructure.Services
             }
             catch (NotAuthorizedException ex)
             {
-                if (ex.Message == "Invalid session for the user, session is expired.")
-                {
-                    return HandleMfaException(ex, "MFA_Session_Expired");
-                }
-                else
-                {
-                    return HandleMfaException(ex, "Not_Authorized");
-                }
+                return HandleMfaException(ex,
+                    ex.Message == "Invalid session for the user, session is expired."
+                        ? "MFA_Session_Expired"
+                        : "Not_Authorized");
             }
             catch (Exception ex)
             {
@@ -468,28 +460,41 @@ namespace Infrastructure.Services
 
         public async Task<TotpTokenResult> GenerateTotpToken(string mfaDetails)
         {
-            var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-            var username = mfaLoginDetails.Username;
-            var sessionId = mfaLoginDetails.SessionId;
-
-            var associateRequest = new AssociateSoftwareTokenRequest
+            try
             {
-                Session = sessionId
-            };
+                var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+                var username = mfaLoginDetails.Username;
+                var sessionId = mfaLoginDetails.SessionId;
 
-            var associateResponse = await _provider.AssociateSoftwareTokenAsync(associateRequest);
-            var secretCode = associateResponse.SecretCode;
+                var associateRequest = new AssociateSoftwareTokenRequest
+                {
+                    Session = sessionId,
+                };
 
-            return new TotpTokenResult
+                var associateResponse = await _provider.AssociateSoftwareTokenAsync(associateRequest);
+                var secretCode = associateResponse.SecretCode;
+
+                return new TotpTokenResult
+                {
+                    SecretCode = secretCode,
+                    SessionId = associateResponse.Session,
+                    Username = username,
+                };
+            }
+            catch (Exception e)
             {
-                SecretCode = secretCode,
-                SessionId = associateResponse.Session,
-                Username = username,
-            };
+                var exceptionResponse = Response<string>.CreateExceptionResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, e,
+                    _headerService.GetConversationId());
+
+                _logger.LogError(e, "Error generating totp token");
+
+                throw new Exception(exceptionResponse.ToString());
+            }
         }
 
 
-        public async Task<Response<string>> SetUpMfaAsync(string mfaDetails, bool isToken)
+        public async Task<Response<string>> SetUpMfaAsync(string mfaDetails)
         {
             try
             {
@@ -497,36 +502,18 @@ namespace Infrastructure.Services
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
                 var username = mfaLoginDetails.Username;
                 var password = mfaLoginDetails.Password;
-                AdminSetUserMFAPreferenceRequest request;
 
-                if (isToken)
+                // set up the mfa device on cognito with sms
+                var request = new AdminSetUserMFAPreferenceRequest
                 {
-                    // Software Token set up request
-                    request = new AdminSetUserMFAPreferenceRequest
+                    UserPoolId = _awsSettings.CognitoPoolId,
+                    Username = username,
+                    SMSMfaSettings = new SMSMfaSettingsType
                     {
-                        UserPoolId = _awsSettings.CognitoPoolId,
-                        Username = username,
-                        SoftwareTokenMfaSettings = new SoftwareTokenMfaSettingsType
-                        {
-                            Enabled = true,
-                            PreferredMfa = true,
-                        },
-                    };
-                }
-                else
-                {
-                    // SMS set up request
-                    request = new AdminSetUserMFAPreferenceRequest
-                    {
-                        UserPoolId = _awsSettings.CognitoPoolId,
-                        Username = username,
-                        SMSMfaSettings = new SMSMfaSettingsType
-                        {
-                            Enabled = true,
-                            PreferredMfa = true,
-                        },
-                    };
-                }
+                        Enabled = true,
+                        PreferredMfa = true,
+                    },
+                };
 
                 var response = await _provider.AdminSetUserMFAPreferenceAsync(request);
 
@@ -545,7 +532,7 @@ namespace Infrastructure.Services
                 {
                     var newMfaDetails = loginResponse.Errors.First().Detail;
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), isToken ? "Software_Token_Mfa_Challenge" : "Sms_Mfa_Challenge",
+                        nameof(UserService), "Sms_Mfa_Challenge",
                         newMfaDetails, _headerService.GetConversationId());
                 }
 
@@ -562,13 +549,27 @@ namespace Infrastructure.Services
                 return exceptionResponse;
             }
         }
+        
+        private async Task<Response<string>> LoginAndHandleResponse(string username, string password, string errorDetail)
+        {
+            var loginResponse = await LoginAsync(username, password);
 
-        /// <summary>
-        /// Verify the TOTP and register for MFA.
-        /// </summary>
-        /// <param name="session">The name of the session.</param>
-        /// <param name="code">The MFA code.</param>
-        /// <returns>The status of the software token.</returns>
+            if (loginResponse.IsSuccess)
+                return Response<string>.CreateSuccessfulContentResponse(loginResponse.Content,
+                    _headerService.GetConversationId());
+
+            var newMfaDetails = loginResponse.Errors.First().Detail;
+            return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                nameof(UserService), errorDetail, newMfaDetails,
+                _headerService.GetConversationId());
+        }
+        
+        public async Task<Response<string>> ReissueMfaSessionAsync(string requestMfaDetails)
+        {
+            var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
+            return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password, "Mfa_Reissue_Session");
+        }
+
         public async Task<Response<string>> VerifySoftwareTokenAsync(string code, string sessionId, string mfaDetails)
         {
             var tokenRequest = new VerifySoftwareTokenRequest
@@ -588,20 +589,8 @@ namespace Infrastructure.Services
                         _headerService.GetConversationId());
                 }
 
-                // log the user in again to get the new tokens with mfa enabled
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-                var username = mfaLoginDetails.Username;
-                var password = mfaLoginDetails.Password;
-                var loginResponse = await LoginAsync(username, password);
-
-                if (loginResponse.IsSuccess)
-                    return Response<string>.CreateSuccessfulContentResponse(response.Status.ToString(),
-                        _headerService.GetConversationId());
-
-                var newMfaDetails = loginResponse.Errors.First().Detail;
-                return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), "Software_Token_Mfa_Challenge", newMfaDetails,
-                    _headerService.GetConversationId());
+                return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password, "Software_Token_Mfa_Challenge");
             }
             catch (Exception ex)
             {

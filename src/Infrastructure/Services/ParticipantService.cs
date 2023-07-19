@@ -6,6 +6,7 @@ using Amazon.CognitoIdentityProvider.Model;
 using Amazon.DynamoDBv2.Model;
 using Application.Contracts;
 using Application.Mappings.Participants;
+using Application.Models.MFA;
 using Application.Models.Participants;
 using Application.Responses.V1.Participants;
 using Application.Settings;
@@ -199,24 +200,22 @@ public class ParticipantService : IParticipantService
         await _participantRepository.UpdateParticipantDetailsAsync(particpiant);
     }
 
-    public Task<bool> ValidateMfaCodeAsync(string username, string code)
+    public async Task<MfaValidationResult> ValidateMfaCodeAsync(string username, string code)
     {
-        return _participantRepository.GetParticipantDetailsAsync(username)
-            .ContinueWith(task =>
-            {
-                var participant = task.Result;
-                if (participant == null)
-                    throw new NotFoundException($"No participant found for username: {username}");
+        var participant = await _participantRepository.GetParticipantDetailsAsync(username);
 
-                if (participant.MfaChangePhoneCodeExpiry < DateTime.UtcNow)
-                    throw new BadRequestException("Code has expired");
+        if (participant == null)
+            return MfaValidationResult.UserNotFound;
 
-                if (participant.MfaChangePhoneCode != code)
-                    throw new BadRequestException("Code is invalid");
+        if (participant.MfaChangePhoneCodeExpiry < DateTime.UtcNow)
+            return MfaValidationResult.CodeExpired;
 
-                return true;
-            });
+        if (participant.MfaChangePhoneCode != code)
+            return MfaValidationResult.CodeInvalid;
+
+        return MfaValidationResult.Success;
     }
+
 
     private async Task RemoveParticipantDataAsync(ParticipantDetails entity)
     {
