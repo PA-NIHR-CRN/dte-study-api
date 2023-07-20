@@ -464,11 +464,36 @@ namespace Infrastructure.Services
             {
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
                 var username = mfaLoginDetails.Username;
-                var sessionId = mfaLoginDetails.SessionId;
+                
+                // get user and delete phone number
+                var user = await _provider.AdminGetUserAsync(new AdminGetUserRequest
+                {
+                    Username = username,
+                    UserPoolId = _awsSettings.CognitoPoolId
+                });
+                
+                var phoneNumber = user.UserAttributes.FirstOrDefault(x => x.Name == "phone_number")?.Value;
+                
+                if (!string.IsNullOrEmpty(phoneNumber))
+                {
+                    // delete the phone number
+                    await _provider.AdminDeleteUserAttributesAsync(new AdminDeleteUserAttributesRequest
+                    {
+                        Username = username,
+                        UserPoolId = _awsSettings.CognitoPoolId,
+                        UserAttributeNames = new List<string> {"phone_number"}
+                    });
+
+                    // get a new session id
+                    var loginResponse = await LoginAsync(username, mfaLoginDetails.Password);
+                    
+                    var newMfaDetails = loginResponse.Errors.First().Detail;
+                    mfaLoginDetails = DeserializeMfaLoginDetails(newMfaDetails);
+                }
 
                 var associateRequest = new AssociateSoftwareTokenRequest
                 {
-                    Session = sessionId,
+                    Session = mfaLoginDetails.SessionId,
                 };
 
                 var associateResponse = await _provider.AssociateSoftwareTokenAsync(associateRequest);
