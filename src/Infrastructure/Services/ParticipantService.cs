@@ -196,7 +196,7 @@ public class ParticipantService : IParticipantService
             throw new NotFoundException($"No participant found for username: {username}");
 
         particpiant.MfaChangePhoneCode = code;
-        particpiant.MfaChangePhoneCodeExpiry = DateTime.UtcNow.AddMinutes(5);;
+        particpiant.MfaChangePhoneCodeExpiry = _clock.Now().AddMinutes(5);
         await _participantRepository.UpdateParticipantDetailsAsync(particpiant);
     }
 
@@ -207,7 +207,7 @@ public class ParticipantService : IParticipantService
         if (participant == null)
             return MfaValidationResult.UserNotFound;
 
-        if (participant.MfaChangePhoneCodeExpiry < DateTime.UtcNow)
+        if (participant.MfaChangePhoneCodeExpiry < _clock.Now())
             return MfaValidationResult.CodeExpired;
 
         if (participant.MfaChangePhoneCode != code)

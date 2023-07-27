@@ -316,7 +316,7 @@ namespace Infrastructure.Services
 
                 await _participantService.StoreMfaCodeAsync(mfaLoginDetails.Username, code);
 
-                return Response<string>.CreateSuccessfulContentResponse(mfaLoginDetails.Username,
+                return Response<string>.CreateSuccessfulContentResponse(participant.Email,
                     _headerService.GetConversationId());
             }
             catch (Exception ex)
