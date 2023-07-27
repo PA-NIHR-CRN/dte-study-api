@@ -312,7 +312,7 @@ namespace Infrastructure.Services
 
                 var participant = await _participantService.GetParticipantDetailsAsync(mfaLoginDetails.Username);
 
-                await _emailService.SendEmailAsync(participant.Email, "Be Part of Research", htmlBody);
+                await _emailService.SendEmailAsync(participant.Email, "Be Part of Research security code", htmlBody);
 
                 await _participantService.StoreMfaCodeAsync(mfaLoginDetails.Username, code);
 
@@ -615,7 +615,34 @@ namespace Infrastructure.Services
                 }
 
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-                return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password, "Software_Token_Mfa_Challenge");
+                return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password,
+                    "Software_Token_Mfa_Challenge");
+            }
+            catch (CodeMismatchException ex)
+            {
+                return HandleMfaException(ex, "MFA_Code_Mismatch");
+            }
+            catch (NotAuthorizedException ex)
+            {
+                if (ex.Message == "Invalid session for the user, session is expired.")
+                {
+                    return HandleMfaException(ex, "MFA_Session_Expired");
+                }
+                else
+                {
+                    return HandleMfaException(ex, "Not_Authorized");
+                }
+            }
+            catch (EnableSoftwareTokenMFAException ex)
+            {
+                if(ex.Message == "Code mismatch")
+                {
+                    return HandleMfaException(ex, "MFA_Code_Mismatch");
+                }
+                else
+                {
+                    return HandleMfaException(ex, "Error");
+                }
             }
             catch (Exception ex)
             {
