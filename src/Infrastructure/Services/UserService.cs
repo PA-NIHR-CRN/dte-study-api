@@ -439,6 +439,15 @@ namespace Infrastructure.Services
 
             // ensure the phone number is in the correct format for cognito ie +441234567890
             phoneNumber = CleanPhoneNumber(phoneNumber);
+            
+            // check and see if the user already has a phone number
+            var user = await _provider.AdminGetUserAsync(new AdminGetUserRequest
+            {
+                Username = username,
+                UserPoolId = _awsSettings.CognitoPoolId
+            });
+            
+            var existingPhoneNumber = user.UserAttributes.FirstOrDefault(x => x.Name == "phone_number")?.Value;
 
             var request = new AdminUpdateUserAttributesRequest
             {
@@ -453,6 +462,30 @@ namespace Infrastructure.Services
                     }
                 }
             };
+            
+            // if user has a phone number send an email to confirm the change
+            if (!string.IsNullOrEmpty(existingPhoneNumber))
+            {
+                // get user email
+                var email = user.UserAttributes.FirstOrDefault(x => x.Name == "email")?.Value;
+                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
+                        "Be Part of Research mobile phone number verified")
+                    .Replace("###TEXT_REPLACE1###",
+                        $"The new mobile phone number provided to secure your account has been verified. We will send a security code to this number each time you sign in.")
+                    .Replace("###TEXT_REPLACE2###",
+                        "This will not change any telephone numbers stored in the personal details section of your account. Please sign in to your account if you need to change these.")
+                    .Replace("###TEXT_REPLACE3###",
+                        "")
+                    .Replace("###TEXT_REPLACE4###",
+                        "")
+                    .Replace("###LINK_REPLACE###", "")
+                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
+                    .Replace("###TEXT_REPLACE5###",
+                        "")
+                    .Replace("###TEXT_REPLACE6###", "");
+
+                await _emailService.SendEmailAsync(email, "Be Part of Research mobile phone number verified", htmlBody);
+            }
 
             await _provider.AdminUpdateUserAttributesAsync(request);
         }
