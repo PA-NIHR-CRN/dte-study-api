@@ -38,7 +38,7 @@ namespace Application.Users.V1.Commands
 
             public async Task<Response<object>> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
             {
-                return await  _userService.ChangePasswordAsync(request.Email, request.OldPassword, request.NewPassword);
+                return await  _userService.ChangePasswordAsync(request.Email, request.NewPassword);
             }
         }
     }
