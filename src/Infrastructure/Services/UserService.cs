@@ -423,7 +423,8 @@ namespace Infrastructure.Services
         private string CleanPhoneNumber(string phoneNumber)
         {
             // ensure its a valid uk mobile using regex
-            var isValid = Regex.IsMatch(phoneNumber, @"^((\+44\s?|0)7([45789]\d{2}|624)\s?\d{3}\s?\d{3})$");
+            var isValid = Regex.IsMatch(phoneNumber, @"^((\+44\s?|0)7([45789]\d{2}|624)\s?\d{3}\s?\d{3})$",
+                RegexOptions.None, TimeSpan.FromMilliseconds(100));
             if (!isValid)
             {
                 throw new ValidationException();
