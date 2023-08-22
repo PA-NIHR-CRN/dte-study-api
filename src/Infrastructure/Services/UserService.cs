@@ -1332,50 +1332,28 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<Response<object>> ChangePasswordAsync(string email, string oldPassword,
-            string newPassword)
+        public async Task<Response<object>> ChangePasswordAsync(string email, string newPassword)
         {
-            var request = new AdminInitiateAuthRequest
-            {
-                UserPoolId = _awsSettings.CognitoPoolId,
-                ClientId = _awsSettings.CognitoAppClientIds[0],
-                AuthFlow = AuthFlowType.ADMIN_NO_SRP_AUTH,
-            };
-
-            request.AuthParameters.Add("USERNAME", email);
-            request.AuthParameters.Add("PASSWORD", oldPassword);
-
             try
             {
-                var tokenResponse = await _provider.AdminInitiateAuthAsync(request);
-
-                if (tokenResponse?.AuthenticationResult == null)
+                var response = await _provider.AdminSetUserPasswordAsync(new AdminSetUserPasswordRequest
                 {
-                    return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.ChangePasswordError, "Change user password error",
-                        _headerService.GetConversationId());
-                }
-
-                var response = await _provider.ChangePasswordAsync(new ChangePasswordRequest
-                {
-                    AccessToken = tokenResponse.AuthenticationResult.AccessToken,
-                    PreviousPassword = oldPassword,
-                    ProposedPassword = newPassword
+                    UserPoolId = _awsSettings.CognitoPoolId,
+                    Username = email,
+                    Password = newPassword,
+                    Permanent = true
                 });
 
-                if (response == null)
+                if (response.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 {
                     return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.ChangePasswordError, "Change user password error",
-                        _headerService.GetConversationId());
-                }
-
-                return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
-                    ? Response<object>.CreateSuccessfulResponse()
-                    : Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.ChangePasswordError,
                         $"Change user password returned response code: {response.HttpStatusCode}",
                         _headerService.GetConversationId());
+                }
+
+                return Response<object>.CreateSuccessfulResponse();
+
             }
             catch (LimitExceededException ex)
             {
@@ -1398,7 +1376,7 @@ namespace Infrastructure.Services
                 return exceptionResponse;
             }
         }
-
+        
         public async Task<Response<object>> ChangeEmailAsync(string currentEmail, string newEmail)
         {
             try
