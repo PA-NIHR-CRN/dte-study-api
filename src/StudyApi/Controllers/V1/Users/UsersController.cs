@@ -328,19 +328,11 @@ namespace StudyApi.Controllers.V1.Users
         {
             var response = await _mediator.Send(new SignUpCommand(request.Email, request.Password));
 
-            if (!response.IsSuccess)
-            {
-                return Ok(response);
-            }
-
-            if (response.Content.UserExists)
-                return Ok(response);
-
-            var createDetailsResponse = await _mediator.Send(new CreateParticipantDetailsCommand(
+            await _mediator.Send(new CreateParticipantDetailsCommand(
                 response.Content.UserId, request.Email, request.Firstname, request.Lastname,
                 request.ConsentRegistration, null, request.DateOfBirth, ""));
 
-            return Ok(new { IsSuccess = response.IsSuccess && createDetailsResponse.IsSuccess });
+            return Ok(new { IsSuccess = response.IsSuccess });
         }
 
         public class NhsSignUpRequestLocal
@@ -410,7 +402,7 @@ namespace StudyApi.Controllers.V1.Users
         {
             var response = await _mediator.Send(new ConfirmSignUpCommand(request.Code, request.UserId));
 
-            return Ok(response);
+            return Ok(new { IsSuccess = response.IsSuccess });
         }
 
         /// <summary>
