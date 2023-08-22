@@ -22,7 +22,15 @@ namespace StudyApi.Common
                 var errors = context.ModelState.Values.SelectMany(v => v.Errors.Select(b => b.ErrorMessage)).ToList();
                 var errorsString = string.Join("; ", errors);
                 _logger.LogWarning("Request Validation Failed: {Errors}", errorsString);
-                context.Result = new BadRequestObjectResult(context.ModelState);
+
+                // Set a generic error message
+                var genericErrorResponse = new
+                {
+                    status = 400,
+                    message = "Your request contains invalid parameters. Please check and try again."
+                };
+
+                context.Result = new BadRequestObjectResult(genericErrorResponse);
             }
             else
             {
