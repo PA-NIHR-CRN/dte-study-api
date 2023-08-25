@@ -1,11 +1,13 @@
 using System;
 using System.Linq;
+using System.Net.Http;
 using Amazon;
 using Amazon.CognitoIdentityProvider;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Application.Contracts;
 using Application.Settings;
+using Contentful.Core;
 using Dte.Common;
 using Dte.Common.Authentication;
 using Dte.Common.Contracts;
@@ -28,7 +30,8 @@ namespace StudyApi.DependencyRegistrations
     {
         private static readonly string[] ProdEnvironmentNames = { "production", "prod", "live" };
 
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, string environmentName)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services,
+            IConfiguration configuration, string environmentName)
         {
             // Infrastructure dependencies
             services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
@@ -40,9 +43,18 @@ namespace StudyApi.DependencyRegistrations
             services.AddSingleton<IHeaderService, HeaderService>();
             services.AddScoped<IFeatureFlagService, FeatureFlagService>();
             services.AddScoped<ISessionService, SessionService>();
-            
+            services.AddScoped<IContentfulService, ContentfulService>();
+
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
             services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();
+
+
+            // Contentful set up
+            var contentfulSettings = configuration.GetSection(ContentfulSettings.SectionName).Get<ContentfulSettings>();
+            services.AddSingleton<IContentfulClient>(sp => new ContentfulClient(new HttpClient(),
+                contentfulSettings.DeliveryApiKey, contentfulSettings.PreviewApiKey, contentfulSettings.SpaceId,
+                contentfulSettings.UsePreviewApi));
+
 
             // AWS
             var awsSettings = configuration.GetSection(AwsSettings.SectionName).Get<AwsSettings>();
@@ -55,24 +67,31 @@ namespace StudyApi.DependencyRegistrations
             }
 
             services.AddScoped<IAmazonDynamoDB>(_ => new AmazonDynamoDBClient(amazonDynamoDbConfig));
-            services.AddScoped<IDynamoDBContext>(_ => new DynamoDBContext(new AmazonDynamoDBClient(amazonDynamoDbConfig)));
+            services.AddScoped<IDynamoDBContext>(_ =>
+                new DynamoDBContext(new AmazonDynamoDBClient(amazonDynamoDbConfig)));
             amazonCognitoConfig.RegionEndpoint = RegionEndpoint.GetBySystemName(awsSettings.CognitoRegion);
-            services.AddScoped<IAmazonCognitoIdentityProvider>(_ => new AmazonCognitoIdentityProviderClient(amazonCognitoConfig));
+            services.AddScoped<IAmazonCognitoIdentityProvider>(_ =>
+                new AmazonCognitoIdentityProviderClient(amazonCognitoConfig));
             services.AddDefaultAWSOptions(configuration.GetAWSOptions());
 
             // Clients
 
             var clientsSettings = configuration.GetSection(ClientsSettings.SectionName).Get<ClientsSettings>();
-            var logger = services.BuildServiceProvider().GetService<ILoggerFactory>().CreateLogger("StudyApi.DependencyRegistrations.InfrastructureRegistration");
+            var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
+                .CreateLogger("StudyApi.DependencyRegistrations.InfrastructureRegistration");
 
-            services.AddHttpClientWithRetry<IStudyManagementApiClient, StudyManagementApiClient>(clientsSettings.StudyManagementService, 2, logger);
-            services.AddHttpClientWithRetry<ILocationApiClient, LocationApiClient>(clientsSettings.LocationService, 2, logger);
-            services.AddHttpClientWithRetry<IReferenceDataApiClient, ReferenceDataApiClient>(clientsSettings.ReferenceDataService, 2, logger);
+            services.AddHttpClientWithRetry<IStudyManagementApiClient, StudyManagementApiClient>(
+                clientsSettings.StudyManagementService, 2, logger);
+            services.AddHttpClientWithRetry<ILocationApiClient, LocationApiClient>(clientsSettings.LocationService, 2,
+                logger);
+            services.AddHttpClientWithRetry<IReferenceDataApiClient, ReferenceDataApiClient>(
+                clientsSettings.ReferenceDataService, 2, logger);
 
             var devSettings = configuration.GetSection(DevSettings.SectionName).Get<DevSettings>();
 
             // If not Prod, then enable stubs
-            if (devSettings.EnableStubs && !ProdEnvironmentNames.Any(x => string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
+            if (devSettings.EnableStubs && !ProdEnvironmentNames.Any(x =>
+                    string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
             {
                 // Enable local stubs
                 services.AddScoped<IEmailService, MockEmailService>();

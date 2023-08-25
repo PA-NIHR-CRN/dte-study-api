@@ -44,11 +44,13 @@ namespace Infrastructure.Services
         private readonly IMediator _mediator;
         private readonly DevSettings _devSettings;
         private readonly IParticipantService _participantService;
+        private readonly IContentfulService _contentfulService;
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
             AwsSettings awsSettings, ILogger<UserService> logger, EmailSettings emailSettings,
             IEmailService emailService, IParticipantService participantService,
-            NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings)
+            NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings,
+            IContentfulService contentfulService)
 
         {
             _provider = provider;
@@ -61,6 +63,7 @@ namespace Infrastructure.Services
             _mediator = mediator;
             _devSettings = devSettings.Value;
             _participantService = participantService;
+            _contentfulService = contentfulService;
         }
 
         public async Task<Response<string>> LoginAsync(string email, string password)
@@ -210,7 +213,7 @@ namespace Infrastructure.Services
                         $"Thank you for registering for Be Part of Research using your NHS login or through the NHS App. You will need to use the NHS login option on the <a href=\"{baseUrl}Participants/Options\">Be Part of Research</a> website each time you access your account.")
                     .Replace("###TEXT_REPLACE2###",
                         "By signing up, you are joining our community of amazing volunteers who are helping researchers to understand more about health and care conditions. Please visit the <a href=\"https://bepartofresearch.nihr.ac.uk/taking-part/how-to-take-part\">How to take part</a> section of the website to find out about other ways to take part in health and care research.")
-                     .Replace("###TEXT_REPLACE3###",
+                    .Replace("###TEXT_REPLACE3###",
                         "<a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\">Sign up to our newsletter</a> to receive all our research news, studies you can take part in and other opportunities helping to shape health and care research from across the UK.")
                     .Replace("###TEXT_REPLACE4###",
                         "If you close your NHS login account, your Be Part of Research account will remain open and if you would also like to close your Be Part of Research account you will need to email <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>.")
@@ -673,7 +676,6 @@ namespace Infrastructure.Services
 
             if (user == null || !user.Enabled)
             {
-
                 var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
                 if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
                     return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
