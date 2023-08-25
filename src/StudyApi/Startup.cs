@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Application.Settings;
+using Contentful.Core;
 using Dte.Common.Authentication;
 using FluentValidation.AspNetCore;
 using Infrastructure.Clients;
@@ -74,6 +75,13 @@ namespace StudyApi
             services.AddHttpClient<NhsLoginHttpClient>((serviceProvider, httpClient) =>
             {
                 var settings = serviceProvider.GetService<IOptions<NhsLoginSettings>>()?.Value;
+
+                httpClient.BaseAddress = new Uri(settings.BaseUrl);
+            });
+            
+            services.AddHttpClient<IContentfulClient>((serviceProvider, httpClient) =>
+            {
+                var settings = serviceProvider.GetService<IOptions<ContentfulSettings>>()?.Value;
 
                 httpClient.BaseAddress = new Uri(settings.BaseUrl);
             });
