@@ -6,6 +6,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Application.Contracts;
 using Application.Settings;
+using AspNetCoreRateLimit;
 using Dte.Common;
 using Dte.Common.Authentication;
 using Dte.Common.Contracts;
@@ -30,6 +31,13 @@ namespace StudyApi.DependencyRegistrations
 
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, string environmentName)
         {
+            // Rate limiting
+            services.AddMemoryCache();
+            services.AddMemoryCache();
+            services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
+            services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRateLimitPolicies"));
+            services.AddInMemoryRateLimiting();
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
             // Infrastructure dependencies
             services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
             services.AddScoped<IParticipantService, ParticipantService>();
