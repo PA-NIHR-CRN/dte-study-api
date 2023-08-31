@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
@@ -19,14 +18,17 @@ using Dte.Common.Extensions;
 using Dte.Common.Helpers;
 using Dte.Common.Http;
 using Dte.Common.Responses;
+using FluentValidation.Results;
 using Infrastructure.Clients;
 using Infrastructure.Content;
+using Infrastructure.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using PhoneNumbers;
 using AdminGetUserResponse = Application.Responses.V1.Users.AdminGetUserResponse;
 using ConfirmForgotPasswordResponse = Application.Responses.V1.Users.ConfirmForgotPasswordResponse;
 using ForgotPasswordResponse = Application.Responses.V1.Users.ForgotPasswordResponse;
@@ -422,20 +424,29 @@ namespace Infrastructure.Services
 
         private string CleanPhoneNumber(string phoneNumber)
         {
-            // ensure its a valid uk mobile using regex
-            var isValid = Regex.IsMatch(phoneNumber, @"^((\+44\s?|0)7([45789]\d{2}|624)\s?\d{3}\s?\d{3})$",
-                RegexOptions.None, TimeSpan.FromMilliseconds(100));
-            if (!isValid)
+            PhoneNumberUtil phoneUtil = PhoneNumberUtil.GetInstance();
+
+            // Ensure it's a valid UK number using libphonenumber
+            var number = phoneUtil.Parse(phoneNumber, "GB");
+            if (!phoneUtil.IsValidNumber(number))
             {
-                throw new ValidationException();
+                throw new ValidationException(new List<ValidationFailure>
+                {
+                    new ValidationFailure("PhoneNumber", $"{number} is not a valid UK number")
+                }, "PhoneNumber");
             }
 
-            // ensure the phone number is in the correct format for cognito ie +441234567890
-            phoneNumber = phoneNumber.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "");
-            if (!phoneNumber.StartsWith("+"))
+            // Check if the number is specifically a mobile number
+            if (phoneUtil.GetNumberType(number) != PhoneNumberType.MOBILE)
             {
-                phoneNumber = $"+44{phoneNumber.TrimStart('0')}";
+                throw new ValidationException(new List<ValidationFailure>
+                {
+                    new ValidationFailure("PhoneNumber", $"{number} is not a valid UK mobile number")
+                }, "PhoneNumber");
             }
+
+            // Ensure the phone number is in the correct format for cognito i.e., +441234567890 E164
+            phoneNumber = phoneUtil.Format(number, PhoneNumberFormat.E164);
 
             return phoneNumber;
         }
@@ -445,8 +456,8 @@ namespace Infrastructure.Services
             try
             {
                 // get the username from the mfa details
-                var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-                var username = mfaLoginDetails.Username;
+                // var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+                var username = "mfaLoginDetails.Username";
 
                 // ensure the phone number is in the correct format for cognito ie +441234567890
                 phoneNumber = CleanPhoneNumber(phoneNumber);
@@ -501,15 +512,26 @@ namespace Infrastructure.Services
 
                 await _provider.AdminUpdateUserAttributesAsync(request);
             }
-            catch (Exception e)
+            catch (ValidationException e)
             {
-                var exceptionResponse = Response<string>.CreateExceptionResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, e,
+                var exceptionResponse = Response<string>.CreateErrorMessageResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, e.Message,
                     _headerService.GetConversationId());
 
                 _logger.LogError(e, "Error updating cognito phone number");
 
-                throw new Exception(exceptionResponse.ToString());
+                throw new CognitoPhoneNumberUpdateException(exceptionResponse.ToString());
+            }
+            catch (Exception e)
+            {
+                var exceptionResponse = Response<string>.CreateExceptionResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), "Cognito_Phone_Number_Update_Exception",
+                    e,
+                    _headerService.GetConversationId());
+
+                _logger.LogError(e, "Error updating cognito phone number");
+
+                throw new CognitoPhoneNumberUpdateException(exceptionResponse.ToString());
             }
         }
 
