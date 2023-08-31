@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Application.Settings;
+using AspNetCoreRateLimit;
 using Dte.Common.Authentication;
 using FluentValidation.AspNetCore;
 using Infrastructure.Clients;
@@ -239,6 +240,8 @@ namespace StudyApi
 
         public void Configure(IApplicationBuilder app, IApiVersionDescriptionProvider provider)
         {
+            app.UseIpRateLimiting();
+
             app.UseCustomExceptionHandler();
             app.UseCustomHeaderForwarderHandler();
 
