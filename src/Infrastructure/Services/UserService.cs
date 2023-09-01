@@ -1182,7 +1182,8 @@ namespace Infrastructure.Services
                     RequireNumbers = passwordPolicy.RequireNumbers,
                     RequireSymbols = passwordPolicy.RequireSymbols,
                     RequireUppercase = passwordPolicy.RequireUppercase,
-                    AllowedPasswordSymbols = string.Join(" ", PasswordHelper.SymbolList)
+                    AllowedPasswordSymbols = string.Join(" ", PasswordHelper.SymbolList),
+                    WeakPasswords = PasswordHelper.WeakPasswords
                 };
             }
             catch (Exception ex)
