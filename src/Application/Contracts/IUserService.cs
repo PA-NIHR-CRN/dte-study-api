@@ -24,7 +24,7 @@ namespace Application.Contracts
         Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code, string userId,
             string password);
 
-        Task<Response<object>> ChangePasswordAsync(string participantId, string oldPassword, string newPassword);
+        Task<Response<object>> ChangePasswordAsync(string participantId, string newPassword);
         Task<Response<object>> ChangeEmailAsync(string currentEmail, string newEmail);
         Task<Response<string>> RespondToMfaChallengeAsync(string code, string mfaDetails);
         Task<Response<string>> SetUpMfaAsync(string mfaDetails);

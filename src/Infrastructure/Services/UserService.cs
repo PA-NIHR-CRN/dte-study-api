@@ -111,21 +111,21 @@ namespace Infrastructure.Services
                 if (response.ChallengeName == ChallengeNameType.MFA_SETUP)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Mfa_Setup_Challenge",
+                        nameof(UserService), ErrorCode.MfaSetupChallenge,
                         mfaDetails, _headerService.GetConversationId());
                 }
 
                 if (response.ChallengeName == ChallengeNameType.SMS_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Sms_Mfa_Challenge",
+                        nameof(UserService), ErrorCode.MfaSmsChallenge,
                         mfaDetails, _headerService.GetConversationId());
                 }
 
                 if (response.ChallengeName == ChallengeNameType.SOFTWARE_TOKEN_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Software_Token_Mfa_Challenge",
+                        nameof(UserService), ErrorCode.MfaSoftwareTokenChallenge,
                         mfaDetails, _headerService.GetConversationId());
                 }
 
@@ -231,6 +231,10 @@ namespace Infrastructure.Services
                     return HandleMfaException(ex, "Not_Authorized");
                 }
             }
+            catch (ExpiredCodeException ex)
+            {
+                return HandleMfaException(ex, ex.Message == "Your software token has already been used once." ? "Mfa_Used_Token" : ErrorCode.MfaCodeExpired);
+            }
             catch (Exception ex)
             {
                 return HandleMfaException(ex, "Unknown error responding to mfa challenge");
@@ -262,7 +266,7 @@ namespace Infrastructure.Services
                 if (response.ChallengeName == ChallengeNameType.SMS_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Sms_Mfa_Challenge",
+                        nameof(UserService), ErrorCode.MfaSmsChallenge,
                         mfaDetails, _headerService.GetConversationId());
                 }
 
@@ -354,9 +358,9 @@ namespace Infrastructure.Services
 
                 return mfaValidationResult switch
                 {
-                    MfaValidationResult.UserNotFound => CreateErrorResponse("MFA_User_Not_Found", "User not found"),
-                    MfaValidationResult.CodeExpired => CreateErrorResponse("MFA_Code_Expired", "Code has expired"),
-                    MfaValidationResult.CodeInvalid => CreateErrorResponse("MFA_Code_Mismatch", "Code is invalid"),
+                    MfaValidationResult.UserNotFound => CreateErrorResponse(ErrorCode.MfaUserNotFound, "User not found"),
+                    MfaValidationResult.CodeExpired => CreateErrorResponse(ErrorCode.MfaCodeExpired, "Code has expired"),
+                    MfaValidationResult.CodeInvalid => CreateErrorResponse(ErrorCode.MfaCodeMismatch, "Code is invalid"),
                     MfaValidationResult.Success => Response<string>.CreateSuccessfulResponse(
                         _headerService.GetConversationId()),
                     _ => throw new ArgumentOutOfRangeException()
@@ -635,7 +639,7 @@ namespace Infrastructure.Services
                 {
                     var newMfaDetails = loginResponse.Errors.First().Detail;
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Sms_Mfa_Challenge",
+                        nameof(UserService), ErrorCode.MfaSmsChallenge,
                         newMfaDetails, _headerService.GetConversationId());
                 }
 
@@ -672,7 +676,7 @@ namespace Infrastructure.Services
         {
             var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
             return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password,
-                "Mfa_Reissue_Session");
+                ErrorCode.MfaReissueSession);
         }
 
         public async Task<Response<string>> VerifySoftwareTokenAsync(string code, string sessionId, string mfaDetails)
@@ -696,7 +700,7 @@ namespace Infrastructure.Services
 
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
                 return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password,
-                    "Software_Token_Mfa_Challenge");
+                    ErrorCode.MfaSoftwareTokenChallenge);
             }
             catch (CodeMismatchException ex)
             {
@@ -912,7 +916,7 @@ namespace Infrastructure.Services
                     }
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { UserExists = true, }, _headerService.GetConversationId());
+                        new SignUpResponse { IsSuccess = true, }, _headerService.GetConversationId());
                 }
 
                 // check if user exists in participant details table and send email
@@ -939,7 +943,7 @@ namespace Infrastructure.Services
                     await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { UserExists = true, }, _headerService.GetConversationId());
+                        new SignUpResponse { IsSuccess = true, }, _headerService.GetConversationId());
                 }
 
                 var response = await _provider.SignUpAsync(new SignUpRequest
@@ -958,34 +962,34 @@ namespace Infrastructure.Services
                     });
                 }
 
-                return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
-                    ? Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { UserId = response.UserSub, }, _headerService.GetConversationId())
-                    : Response<SignUpResponse>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.SignUpError, "Signup error", _headerService.GetConversationId());
+                return Response<SignUpResponse>.CreateSuccessfulContentResponse(
+                    new SignUpResponse { IsSuccess = true, UserId = response.UserSub}, _headerService.GetConversationId());
             }
             catch (UsernameExistsException ex)
             {
-                var exceptionResponse = Response<SignUpResponse>.CreateExceptionResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.SignUpErrorUsernameExists, ex,
-                    _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    $"Error signing up user {email}, username already exists\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
-                return exceptionResponse;
+                    $"Error signing up user {email}, username already exists");
+                // Return a generic success response, to appear as though registration was successful
+                return Response<SignUpResponse>.CreateSuccessfulContentResponse(
+                    new SignUpResponse { IsSuccess = true }, _headerService.GetConversationId());
             }
             catch (InvalidParameterException ex)
             {
-                return Response<SignUpResponse>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), ErrorCode.SignUpErrorInvalidParameter, ex, _headerService.GetConversationId());
+                _logger.LogError(ex,
+                    $"Invalid parameters provided for user signup {email}");
+                return Response<SignUpResponse>.CreateErrorMessageResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
+                    ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.",
+                    _headerService.GetConversationId());
             }
             catch (Exception ex)
             {
-                var exceptionResponse = Response<SignUpResponse>.CreateExceptionResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
-                    _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    $"Unknown error signing up user with email {email}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
-                return exceptionResponse;
+                    $"Unknown error signing up user with email {email}");
+                return Response<SignUpResponse>.CreateErrorMessageResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
+                    ErrorCode.InternalServerError, "An error occurred during sign up. Please try again later.",
+                    _headerService.GetConversationId());
             }
         }
 
@@ -995,18 +999,11 @@ namespace Infrastructure.Services
             {
                 var getUserResponse = await AdminGetUserAsync(userId);
 
-                if (getUserResponse == null)
+                if (getUserResponse == null || getUserResponse.Status == UserStatusType.CONFIRMED)
                 {
-                    return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.ConfirmSignUpErrorUserNotFound, "User not found",
-                        _headerService.GetConversationId());
-                }
-
-                if (getUserResponse.Status == UserStatusType.CONFIRMED)
-                {
-                    return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.ConfirmSignUpErrorUserAlreadyConfirmed,
-                        "User email is already confirmed", _headerService.GetConversationId());
+                    _logger.LogInformation($"User {userId} not found or already confirmed");
+                    // Return a generic success message.
+                    return Response<object>.CreateSuccessfulResponse();
                 }
 
                 var response = await _provider.ConfirmSignUpAsync(new ConfirmSignUpRequest
@@ -1016,28 +1013,30 @@ namespace Infrastructure.Services
                     Username = userId
                 });
 
-                return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
-                    ? Response<object>.CreateSuccessfulResponse()
-                    : Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.ConfirmSignUpError,
-                        $"Confirm SignUp user returned response code: {response.HttpStatusCode}",
-                        _headerService.GetConversationId());
+                if (!IsSuccessHttpStatusCode((int)response.HttpStatusCode))
+                {
+                    _logger.LogError($"Confirm SignUp user returned response code: {response.HttpStatusCode}");
+                }
+
+                // Return a generic success message regardless of the outcome.
+                return Response<object>.CreateSuccessfulResponse();
             }
             catch (ExpiredCodeException ex)
             {
-                return Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), ErrorCode.ConfirmSignUpErrorExpiredCode, ex,
-                    _headerService.GetConversationId());
+                _logger.LogError(ex, $"Expired code error during confirmation for user {userId}");
+                return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                    nameof(UserService), ErrorCode.InternalServerError,
+                    "An error occurred during confirmation. Please try again.", _headerService.GetConversationId());
             }
             catch (Exception ex)
             {
-                var exceptionResponse = Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), ErrorCode.InternalServerError, ex, _headerService.GetConversationId());
-                _logger.LogError(ex,
-                    $"Unknown error confirming user signup with userId {userId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
-                return exceptionResponse;
+                _logger.LogError(ex, $"Unknown error confirming user signup with userId {userId}");
+                return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                    nameof(UserService), ErrorCode.InternalServerError,
+                    "An error occurred during confirmation. Please try again.", _headerService.GetConversationId());
             }
         }
+
 
         public async Task<Response<SignUpResponse>> AdminCreateUserSetPasswordAsync(string email, string password)
         {
@@ -1249,37 +1248,37 @@ namespace Infrastructure.Services
             {
                 var getUserResponse = await AdminGetUserAsync(userId);
 
-                if (getUserResponse.Status == UserStatusType.CONFIRMED)
+                if (getUserResponse.Status != UserStatusType.CONFIRMED)
                 {
-                    return Response<ResendConfirmationCodeResponse>.CreateErrorMessageResponse(
-                        ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
-                        ErrorCode.ResendVerificationEmailErrorUserAlreadyConfirmed,
-                        $"User {userId} is already confirmed", _headerService.GetConversationId());
+                    var response = await _provider.ResendConfirmationCodeAsync(new ResendConfirmationCodeRequest
+                    {
+                        Username = userId,
+                        ClientId = _awsSettings.CognitoAppClientIds[0]
+                    });
+
+                    // Log the response for internal tracking but do not return specifics to the client
+                    if (!IsSuccessHttpStatusCode((int)response.HttpStatusCode))
+                    {
+                        _logger.LogError(
+                            $"Resend verification email response returned code: {response.HttpStatusCode} for userId {userId}");
+                    }
                 }
 
-                var response = await _provider.ResendConfirmationCodeAsync(new ResendConfirmationCodeRequest
-                    { Username = userId, ClientId = _awsSettings.CognitoAppClientIds[0] });
-
-                return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
-                    ? Response<ResendConfirmationCodeResponse>.CreateSuccessfulResponse(
-                        _headerService.GetConversationId())
-                    : Response<ResendConfirmationCodeResponse>.CreateErrorMessageResponse(
-                        ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
-                        ErrorCode.ResendVerificationEmailError,
-                        $"Resend verification email response returned code: {response.HttpStatusCode}",
-                        _headerService.GetConversationId());
+                // Always return the same generic response regardless of user state or other conditions
+                return Response<ResendConfirmationCodeResponse>.CreateSuccessfulResponse(
+                    _headerService.GetConversationId());
             }
             catch (Exception ex)
             {
-                var exceptionResponse = Response<ResendConfirmationCodeResponse>.CreateExceptionResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
-                    _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    $"Unknown error resending verification email for userId {userId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    $"Unknown error resending verification email for userId {userId}");
 
-                return exceptionResponse;
+                // In case of an exception also return the generic message
+                return Response<ResendConfirmationCodeResponse>.CreateSuccessfulResponse(
+                    _headerService.GetConversationId());
             }
         }
+
 
         public async Task<Response<ForgotPasswordResponse>> ForgotPasswordAsync(string email)
         {
@@ -1379,50 +1378,28 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<Response<object>> ChangePasswordAsync(string email, string oldPassword,
-            string newPassword)
+        public async Task<Response<object>> ChangePasswordAsync(string email, string newPassword)
         {
-            var request = new AdminInitiateAuthRequest
-            {
-                UserPoolId = _awsSettings.CognitoPoolId,
-                ClientId = _awsSettings.CognitoAppClientIds[0],
-                AuthFlow = AuthFlowType.ADMIN_NO_SRP_AUTH,
-            };
-
-            request.AuthParameters.Add("USERNAME", email);
-            request.AuthParameters.Add("PASSWORD", oldPassword);
-
             try
             {
-                var tokenResponse = await _provider.AdminInitiateAuthAsync(request);
-
-                if (tokenResponse?.AuthenticationResult == null)
+                var response = await _provider.AdminSetUserPasswordAsync(new AdminSetUserPasswordRequest
                 {
-                    return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.ChangePasswordError, "Change user password error",
-                        _headerService.GetConversationId());
-                }
-
-                var response = await _provider.ChangePasswordAsync(new ChangePasswordRequest
-                {
-                    AccessToken = tokenResponse.AuthenticationResult.AccessToken,
-                    PreviousPassword = oldPassword,
-                    ProposedPassword = newPassword
+                    UserPoolId = _awsSettings.CognitoPoolId,
+                    Username = email,
+                    Password = newPassword,
+                    Permanent = true
                 });
 
-                if (response == null)
+                if (response.HttpStatusCode != System.Net.HttpStatusCode.OK)
                 {
                     return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.ChangePasswordError, "Change user password error",
-                        _headerService.GetConversationId());
-                }
-
-                return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
-                    ? Response<object>.CreateSuccessfulResponse()
-                    : Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.ChangePasswordError,
                         $"Change user password returned response code: {response.HttpStatusCode}",
                         _headerService.GetConversationId());
+                }
+
+                return Response<object>.CreateSuccessfulResponse();
+
             }
             catch (LimitExceededException ex)
             {
@@ -1445,7 +1422,7 @@ namespace Infrastructure.Services
                 return exceptionResponse;
             }
         }
-
+        
         public async Task<Response<object>> ChangeEmailAsync(string currentEmail, string newEmail)
         {
             try
