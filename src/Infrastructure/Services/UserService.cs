@@ -108,21 +108,21 @@ namespace Infrastructure.Services
                 if (response.ChallengeName == ChallengeNameType.MFA_SETUP)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Mfa_Setup_Challenge",
+                        nameof(UserService), ErrorCode.MfaSetupChallenge,
                         mfaDetails, _headerService.GetConversationId());
                 }
 
                 if (response.ChallengeName == ChallengeNameType.SMS_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Sms_Mfa_Challenge",
+                        nameof(UserService), ErrorCode.MfaSmsChallenge,
                         mfaDetails, _headerService.GetConversationId());
                 }
 
                 if (response.ChallengeName == ChallengeNameType.SOFTWARE_TOKEN_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Software_Token_Mfa_Challenge",
+                        nameof(UserService), ErrorCode.MfaSoftwareTokenChallenge,
                         mfaDetails, _headerService.GetConversationId());
                 }
 
@@ -228,6 +228,10 @@ namespace Infrastructure.Services
                     return HandleMfaException(ex, "Not_Authorized");
                 }
             }
+            catch (ExpiredCodeException ex)
+            {
+                return HandleMfaException(ex, ex.Message == "Your software token has already been used once." ? "Mfa_Used_Token" : ErrorCode.MfaCodeExpired);
+            }
             catch (Exception ex)
             {
                 return HandleMfaException(ex, "Unknown error responding to mfa challenge");
@@ -259,7 +263,7 @@ namespace Infrastructure.Services
                 if (response.ChallengeName == ChallengeNameType.SMS_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Sms_Mfa_Challenge",
+                        nameof(UserService), ErrorCode.MfaSmsChallenge,
                         mfaDetails, _headerService.GetConversationId());
                 }
 
@@ -351,9 +355,9 @@ namespace Infrastructure.Services
 
                 return mfaValidationResult switch
                 {
-                    MfaValidationResult.UserNotFound => CreateErrorResponse("MFA_User_Not_Found", "User not found"),
-                    MfaValidationResult.CodeExpired => CreateErrorResponse("MFA_Code_Expired", "Code has expired"),
-                    MfaValidationResult.CodeInvalid => CreateErrorResponse("MFA_Code_Mismatch", "Code is invalid"),
+                    MfaValidationResult.UserNotFound => CreateErrorResponse(ErrorCode.MfaUserNotFound, "User not found"),
+                    MfaValidationResult.CodeExpired => CreateErrorResponse(ErrorCode.MfaCodeExpired, "Code has expired"),
+                    MfaValidationResult.CodeInvalid => CreateErrorResponse(ErrorCode.MfaCodeMismatch, "Code is invalid"),
                     MfaValidationResult.Success => Response<string>.CreateSuccessfulResponse(
                         _headerService.GetConversationId()),
                     _ => throw new ArgumentOutOfRangeException()
@@ -590,7 +594,7 @@ namespace Infrastructure.Services
                 {
                     var newMfaDetails = loginResponse.Errors.First().Detail;
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), "Sms_Mfa_Challenge",
+                        nameof(UserService), ErrorCode.MfaSmsChallenge,
                         newMfaDetails, _headerService.GetConversationId());
                 }
 
@@ -627,7 +631,7 @@ namespace Infrastructure.Services
         {
             var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
             return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password,
-                "Mfa_Reissue_Session");
+                ErrorCode.MfaReissueSession);
         }
 
         public async Task<Response<string>> VerifySoftwareTokenAsync(string code, string sessionId, string mfaDetails)
@@ -651,7 +655,7 @@ namespace Infrastructure.Services
 
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
                 return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password,
-                    "Software_Token_Mfa_Challenge");
+                    ErrorCode.MfaSoftwareTokenChallenge);
             }
             catch (CodeMismatchException ex)
             {
@@ -914,7 +918,7 @@ namespace Infrastructure.Services
                 }
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                    new SignUpResponse { IsSuccess = true }, _headerService.GetConversationId());
+                    new SignUpResponse { IsSuccess = true, UserId = response.UserSub}, _headerService.GetConversationId());
             }
             catch (UsernameExistsException ex)
             {
