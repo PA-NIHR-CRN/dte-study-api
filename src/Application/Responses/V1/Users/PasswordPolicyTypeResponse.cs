@@ -8,5 +8,6 @@ namespace Application.Responses.V1.Users
         public bool RequireSymbols { get; set; }
         public bool RequireUppercase { get; set; }
         public string AllowedPasswordSymbols { get; set; }
+        public string[] WeakPasswords { get; set; }
     }
 }
