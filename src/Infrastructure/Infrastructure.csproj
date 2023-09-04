@@ -19,6 +19,7 @@
         <PackageReference Include="Dte.Location.Api.Client" Version="1.0.2" />
         <PackageReference Include="Dte.Reference.Data.Api.Client" Version="1.0.4" />
         <PackageReference Include="Dte.Study.Management.Api.Client" Version="1.0.2" />
+        <PackageReference Include="libphonenumber-csharp" Version="8.13.19" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.13" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
