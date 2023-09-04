@@ -5,6 +5,7 @@ using Amazon.DynamoDBv2.Model;
 using Dte.Common.Exceptions;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
+using Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -58,6 +59,9 @@ namespace StudyApi.Common
                     break;
                 case UnauthorizedException _:
                     code = HttpStatusCode.Unauthorized;
+                    break;
+                case CognitoPhoneNumberUpdateException:
+                    code = HttpStatusCode.BadRequest;
                     break;
                 default:
                     result = JsonConvert.SerializeObject(new { error = code, conversationId = _headerService.GetConversationId() });

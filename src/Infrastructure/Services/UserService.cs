@@ -18,14 +18,17 @@ using Dte.Common.Extensions;
 using Dte.Common.Helpers;
 using Dte.Common.Http;
 using Dte.Common.Responses;
+using FluentValidation.Results;
 using Infrastructure.Clients;
 using Infrastructure.Content;
+using Infrastructure.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using PhoneNumbers;
 using AdminGetUserResponse = Application.Responses.V1.Users.AdminGetUserResponse;
 using ConfirmForgotPasswordResponse = Application.Responses.V1.Users.ConfirmForgotPasswordResponse;
 using ForgotPasswordResponse = Application.Responses.V1.Users.ForgotPasswordResponse;
@@ -425,73 +428,115 @@ namespace Infrastructure.Services
 
         private string CleanPhoneNumber(string phoneNumber)
         {
-            // ensure the phone number is in the correct format for cognito ie +441234567890
-            phoneNumber = phoneNumber.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "");
-            if (!phoneNumber.StartsWith("+"))
+            PhoneNumberUtil phoneUtil = PhoneNumberUtil.GetInstance();
+
+            // Ensure it's a valid UK number using libphonenumber
+            var number = phoneUtil.Parse(phoneNumber, "GB");
+            if (!phoneUtil.IsValidNumber(number))
             {
-                phoneNumber = $"+44{phoneNumber.TrimStart('0')}";
+                throw new ValidationException(new List<ValidationFailure>
+                {
+                    new ValidationFailure("PhoneNumber", $"{number} is not a valid UK number")
+                }, "PhoneNumber");
             }
+
+            // Check if the number is specifically a mobile number
+            if (phoneUtil.GetNumberType(number) != PhoneNumberType.MOBILE)
+            {
+                throw new ValidationException(new List<ValidationFailure>
+                {
+                    new ValidationFailure("PhoneNumber", $"{number} is not a valid UK mobile number")
+                }, "PhoneNumber");
+            }
+
+            // Ensure the phone number is in the correct format for cognito i.e., +441234567890 E164
+            phoneNumber = phoneUtil.Format(number, PhoneNumberFormat.E164);
 
             return phoneNumber;
         }
 
         public async Task UpdateCognitoPhoneNumberAsync(string mfaDetails, string phoneNumber)
         {
-            // get the username from the mfa details
-            var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-            var username = mfaLoginDetails.Username;
-
-            // ensure the phone number is in the correct format for cognito ie +441234567890
-            phoneNumber = CleanPhoneNumber(phoneNumber);
-            
-            // check and see if the user already has a phone number
-            var user = await _provider.AdminGetUserAsync(new AdminGetUserRequest
+            try
             {
-                Username = username,
-                UserPoolId = _awsSettings.CognitoPoolId
-            });
-            
-            var existingPhoneNumber = user.UserAttributes.FirstOrDefault(x => x.Name == "phone_number")?.Value;
+                // get the username from the mfa details
+                var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+                var username = mfaLoginDetails.Username;
 
-            var request = new AdminUpdateUserAttributesRequest
-            {
-                UserPoolId = _awsSettings.CognitoPoolId,
-                Username = username,
-                UserAttributes = new List<AttributeType>
+                // ensure the phone number is in the correct format for cognito ie +441234567890
+                phoneNumber = CleanPhoneNumber(phoneNumber);
+
+                // check and see if the user already has a phone number
+                var user = await _provider.AdminGetUserAsync(new AdminGetUserRequest
                 {
-                    new AttributeType
+                    Username = username,
+                    UserPoolId = _awsSettings.CognitoPoolId
+                });
+
+                var existingPhoneNumber = user.UserAttributes.FirstOrDefault(x => x.Name == "phone_number")?.Value;
+
+                var request = new AdminUpdateUserAttributesRequest
+                {
+                    UserPoolId = _awsSettings.CognitoPoolId,
+                    Username = username,
+                    UserAttributes = new List<AttributeType>
                     {
-                        Name = "phone_number",
-                        Value = phoneNumber
+                        new AttributeType
+                        {
+                            Name = "phone_number",
+                            Value = phoneNumber
+                        }
                     }
+                };
+
+                // if user has a phone number send an email to confirm the change
+                if (!string.IsNullOrEmpty(existingPhoneNumber))
+                {
+                    // get user email
+                    var email = user.UserAttributes.FirstOrDefault(x => x.Name == "email")?.Value;
+                    var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
+                            "Be Part of Research mobile phone number verified")
+                        .Replace("###TEXT_REPLACE1###",
+                            $"The new mobile phone number provided to secure your account has been verified. We will send a security code to this number each time you sign in.")
+                        .Replace("###TEXT_REPLACE2###",
+                            "This will not change any telephone numbers stored in the personal details section of your account. Please sign in to your account if you need to change these.")
+                        .Replace("###TEXT_REPLACE3###",
+                            "")
+                        .Replace("###TEXT_REPLACE4###",
+                            "")
+                        .Replace("###LINK_REPLACE###", "")
+                        .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
+                        .Replace("###TEXT_REPLACE5###",
+                            "")
+                        .Replace("###TEXT_REPLACE6###", "");
+
+                    await _emailService.SendEmailAsync(email, "Be Part of Research mobile phone number verified",
+                        htmlBody);
                 }
-            };
-            
-            // if user has a phone number send an email to confirm the change
-            if (!string.IsNullOrEmpty(existingPhoneNumber))
-            {
-                // get user email
-                var email = user.UserAttributes.FirstOrDefault(x => x.Name == "email")?.Value;
-                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                        "Be Part of Research mobile phone number verified")
-                    .Replace("###TEXT_REPLACE1###",
-                        $"The new mobile phone number provided to secure your account has been verified. We will send a security code to this number each time you sign in.")
-                    .Replace("###TEXT_REPLACE2###",
-                        "This will not change any telephone numbers stored in the personal details section of your account. Please sign in to your account if you need to change these.")
-                    .Replace("###TEXT_REPLACE3###",
-                        "")
-                    .Replace("###TEXT_REPLACE4###",
-                        "")
-                    .Replace("###LINK_REPLACE###", "")
-                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                    .Replace("###TEXT_REPLACE5###",
-                        "")
-                    .Replace("###TEXT_REPLACE6###", "");
 
-                await _emailService.SendEmailAsync(email, "Be Part of Research mobile phone number verified", htmlBody);
+                await _provider.AdminUpdateUserAttributesAsync(request);
             }
+            catch (ValidationException e)
+            {
+                var exceptionResponse = Response<string>.CreateErrorMessageResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, e.Message,
+                    _headerService.GetConversationId());
 
-            await _provider.AdminUpdateUserAttributesAsync(request);
+                _logger.LogError(e, "Error updating cognito phone number");
+
+                throw new CognitoPhoneNumberUpdateException(exceptionResponse.ToString());
+            }
+            catch (Exception e)
+            {
+                var exceptionResponse = Response<string>.CreateExceptionResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), "Cognito_Phone_Number_Update_Exception",
+                    e,
+                    _headerService.GetConversationId());
+
+                _logger.LogError(e, "Error updating cognito phone number");
+
+                throw new CognitoPhoneNumberUpdateException(exceptionResponse.ToString());
+            }
         }
 
 
@@ -501,16 +546,16 @@ namespace Infrastructure.Services
             {
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
                 var username = mfaLoginDetails.Username;
-                
+
                 // get user and delete phone number
                 var user = await _provider.AdminGetUserAsync(new AdminGetUserRequest
                 {
                     Username = username,
                     UserPoolId = _awsSettings.CognitoPoolId
                 });
-                
+
                 var phoneNumber = user.UserAttributes.FirstOrDefault(x => x.Name == "phone_number")?.Value;
-                
+
                 if (!string.IsNullOrEmpty(phoneNumber))
                 {
                     // delete the phone number
@@ -523,7 +568,7 @@ namespace Infrastructure.Services
 
                     // get a new session id
                     var loginResponse = await LoginAsync(username, mfaLoginDetails.Password);
-                    
+
                     var newMfaDetails = loginResponse.Errors.First().Detail;
                     mfaLoginDetails = DeserializeMfaLoginDetails(newMfaDetails);
                 }
@@ -611,7 +656,7 @@ namespace Infrastructure.Services
                 return exceptionResponse;
             }
         }
-        
+
         private async Task<Response<string>> LoginAndHandleResponse(string username, string password,
             string errorDetail)
         {
@@ -626,7 +671,7 @@ namespace Infrastructure.Services
                 nameof(UserService), errorDetail, newMfaDetails,
                 _headerService.GetConversationId());
         }
-        
+
         public async Task<Response<string>> ReissueMfaSessionAsync(string requestMfaDetails)
         {
             var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
