@@ -33,7 +33,6 @@ namespace StudyApi.DependencyRegistrations
         {
             // Rate limiting
             services.AddMemoryCache();
-            services.AddMemoryCache();
             services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
             services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRateLimitPolicies"));
             services.AddInMemoryRateLimiting();
