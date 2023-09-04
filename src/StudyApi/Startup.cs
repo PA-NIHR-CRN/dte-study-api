@@ -198,7 +198,10 @@ namespace StudyApi
                 .AddFluentValidation(x =>
                     x.RegisterValidatorsFromAssembly(Assembly.Load("Application"), lifetime: ServiceLifetime.Transient))
                 .AddNewtonsoftJson(x => { x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore; })
-                .AddNewtonsoftJson();
+                .AddNewtonsoftJson().ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressModelStateInvalidFilter = true;
+                });
 
             var build = System.Environment.GetEnvironmentVariable("DTE_BUILD_STRING") ?? "Unknown";
             services.AddHealthChecks()
