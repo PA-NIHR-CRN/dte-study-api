@@ -460,8 +460,8 @@ namespace Infrastructure.Services
             try
             {
                 // get the username from the mfa details
-                // var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-                var username = "mfaLoginDetails.Username";
+                var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+                var username = mfaLoginDetails.Username;
 
                 // ensure the phone number is in the correct format for cognito ie +441234567890
                 phoneNumber = CleanPhoneNumber(phoneNumber);
