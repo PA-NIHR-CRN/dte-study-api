@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Threading.Tasks;
 using Application.Responses.V1.Users;
 using Dte.Common.Responses;
@@ -8,7 +9,7 @@ namespace Application.Contracts
     {
         Task<Response<string>> LoginAsync(string email, string password);
         Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl);
-        Task<Response<SignUpResponse>> NhsSignUpAsync(bool consent, string selectedLanguage, string token);
+        Task<Response<SignUpResponse>> NhsSignUpAsync(bool consent, CultureInfo selectedLocale, string token);
         Task<Response<SignUpResponse>> SignUpAsync(string email, string password);
         Task<Response<object>> ConfirmSignUpAsync(string code, string userId);
         Task<Response<SignUpResponse>> AdminCreateUserSetPasswordAsync(string email, string password);

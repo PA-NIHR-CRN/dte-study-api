@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Threading.Tasks;
 using Application.Contracts;
 using Application.Responses.V1;
@@ -15,9 +16,10 @@ namespace Infrastructure.Services
             _client = client;
         }
 
-        public async Task<ContentfulEmail> GetContentfulEmailAsync(string entryId, string locale = "en-GB")
+        public async Task<ContentfulEmail> GetContentfulEmailAsync(string entryId, CultureInfo locale)
         {
-            var entry = await _client.GetEntry(entryId, new QueryBuilder<ContentfulEmail>().LocaleIs(locale));
+            if (locale==null) { locale = new CultureInfo("en-GB"); }
+            var entry = await _client.GetEntry(entryId, new QueryBuilder<ContentfulEmail>().LocaleIs(locale.ToString()));
             return entry;
         }
     }
