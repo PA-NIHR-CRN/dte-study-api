@@ -53,6 +53,7 @@ namespace StudyApi.DependencyRegistrations
 
             // Contentful set up
             var contentfulSettings = configuration.GetSection(ContentfulSettings.SectionName).Get<ContentfulSettings>();
+            services.AddSingleton(contentfulSettings);
             services.AddSingleton<IContentfulClient>(sp => new ContentfulClient(new HttpClient(),
                 contentfulSettings.DeliveryApiKey, contentfulSettings.PreviewApiKey, contentfulSettings.SpaceId,
                 contentfulSettings.UsePreviewApi));

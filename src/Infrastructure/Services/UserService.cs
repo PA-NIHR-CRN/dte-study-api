@@ -47,12 +47,14 @@ namespace Infrastructure.Services
         private readonly IParticipantService _participantService;
         private readonly IContentfulService _contentfulService;
         private readonly IRichTextToHtmlConverter _richTextToHtmlConverter;
+        private readonly ContentfulSettings _contentfulSettings;
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
             AwsSettings awsSettings, ILogger<UserService> logger,
             IEmailService emailService, IParticipantService participantService,
             NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings,
-            IContentfulService contentfulService, IRichTextToHtmlConverter richTextToHtmlConverter)
+            IContentfulService contentfulService, IRichTextToHtmlConverter richTextToHtmlConverter,
+            ContentfulSettings contentfulSettings)
 
         {
             _provider = provider;
@@ -66,6 +68,7 @@ namespace Infrastructure.Services
             _participantService = participantService;
             _contentfulService = contentfulService;
             _richTextToHtmlConverter = richTextToHtmlConverter;
+            _contentfulSettings = contentfulSettings;
         }
 
         public async Task<Response<string>> LoginAsync(string email, string password)
@@ -191,6 +194,7 @@ namespace Infrastructure.Services
         private async Task SendContentfulEmailAsync(string emailName, string emailRecipient, CultureInfo selectedLocale,
             string firstName = null)
         {
+            if (selectedLocale == null) selectedLocale = new CultureInfo("en-GB");
             var contentfulEmail = await _contentfulService.GetContentfulEmailAsync(emailName, selectedLocale);
             string htmlContent = _richTextToHtmlConverter.Convert(contentfulEmail.EmailBody);
 
@@ -231,7 +235,8 @@ namespace Infrastructure.Services
                     nhsUserInfo.FirstName, nhsUserInfo.LastName,
                     consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber));
 
-                await SendContentfulEmailAsync(ContentfulEmailNames.NhsSignUp, nhsUserInfo.Email, selectedLocale);
+                await SendContentfulEmailAsync(_contentfulSettings.EmailTemplates.NhsSignUp, nhsUserInfo.Email,
+                    selectedLocale);
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
                     new SignUpResponse { UserConsents = true, }, _headerService.GetConversationId());
@@ -295,7 +300,7 @@ namespace Infrastructure.Services
                                 $"User with email {email} not found", _headerService.GetConversationId());
                         }
 
-                        await SendContentfulEmailAsync(ContentfulEmailNames.EmailAccountExists, email,
+                        await SendContentfulEmailAsync(_contentfulSettings.EmailTemplates.EmailAccountExists, email,
                             participant.SelectedLocale, participant.Firstname);
                     }
 
@@ -307,7 +312,7 @@ namespace Infrastructure.Services
                 var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
                 if (participantDetails != null)
                 {
-                    await SendContentfulEmailAsync(ContentfulEmailNames.NhsAccountExists, email,
+                    await SendContentfulEmailAsync(_contentfulSettings.EmailTemplates.NhsAccountExists, email,
                         participantDetails.SelectedLocale, participantDetails.Firstname);
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
@@ -658,7 +663,8 @@ namespace Infrastructure.Services
                     return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                         _headerService.GetConversationId());
 
-                await SendContentfulEmailAsync(ContentfulEmailNames.NhsPasswordReset, email, participantDetails.SelectedLocale);
+                await SendContentfulEmailAsync(_contentfulSettings.EmailTemplates.NhsPasswordReset, email,
+                    participantDetails.SelectedLocale);
 
                 return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                     _headerService.GetConversationId());
