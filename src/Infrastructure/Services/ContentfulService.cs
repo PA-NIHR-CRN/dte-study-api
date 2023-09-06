@@ -1,22 +1,24 @@
 using System.Threading.Tasks;
 using Application.Contracts;
+using Application.Responses.V1;
 using Contentful.Core;
+using Contentful.Core.Search;
 
-namespace Infrastructure.Services;
-
-public class ContentfulService: IContentfulService
+namespace Infrastructure.Services
 {
-    private readonly IContentfulClient _client;
-    
-    public ContentfulService(IContentfulClient client)
+    public class ContentfulService: IContentfulService
     {
-        _client = client;
+        private readonly IContentfulClient _client;
+
+        public ContentfulService(IContentfulClient client)
+        {
+            _client = client;
+        }
+
+        public async Task<ContentfulEmail> GetContentfulEmailAsync(string entryId, string locale = "en-GB")
+        {
+            var entry = await _client.GetEntry(entryId, new QueryBuilder<ContentfulEmail>().LocaleIs(locale));
+            return entry;
+        }
     }
-    
-    public async Task<string> GetContentfulEntry(string entryId)
-    {
-        var entry = await _client.GetEntry<dynamic>(entryId);
-        return entry.ToString();
-    }
-    
 }

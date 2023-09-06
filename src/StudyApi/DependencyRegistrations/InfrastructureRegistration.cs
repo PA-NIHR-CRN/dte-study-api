@@ -19,6 +19,7 @@ using Dte.Study.Management.Api.Client;
 using Infrastructure.Factories;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
+using Infrastructure.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -44,6 +45,7 @@ namespace StudyApi.DependencyRegistrations
             services.AddScoped<IFeatureFlagService, FeatureFlagService>();
             services.AddScoped<ISessionService, SessionService>();
             services.AddScoped<IContentfulService, ContentfulService>();
+            services.AddScoped<IRichTextToHtmlConverter, RichTextToHtmlConverter>();
 
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
             services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();

@@ -158,6 +158,7 @@ namespace StudyApi.Controllers.V1.Users
         public class NhsSignUpRequestLocal
         {
             public bool ConsentRegistration { get; set; }
+            public string SelectedLanguage { get; set; }
         }
         /// <summary>
         /// [AllowAnonymous] SignUp NHS user
@@ -173,7 +174,7 @@ namespace StudyApi.Controllers.V1.Users
             if (HttpContext.Request.Cookies.TryGetValue(NhsAccessTokenCookieName, out var cookieValue))
             {
                 var accessToken = _dataProtector.Unprotect(cookieValue);
-                var response = await _mediator.Send(new NhsSignUpCommand(request.ConsentRegistration, accessToken));
+                var response = await _mediator.Send(new NhsSignUpCommand(request.ConsentRegistration, request.SelectedLanguage, accessToken));
 
                 if (response.IsSuccess)
                 {

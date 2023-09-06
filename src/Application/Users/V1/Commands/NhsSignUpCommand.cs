@@ -10,11 +10,13 @@ namespace Application.Users.V1.Commands
     public class NhsSignUpCommand : IRequest<Response<SignUpResponse>>
     {
         private bool ConsentRegistration { get; }
+        private string SelectedLanguage { get; }
         private string Token { get; }
 
-        public NhsSignUpCommand(bool consentRegistration, string token)
+        public NhsSignUpCommand(bool consentRegistration, string selectedLanguage, string token)
         {
             ConsentRegistration = consentRegistration;
+            SelectedLanguage = selectedLanguage;
             Token = token;
         }
 
@@ -31,7 +33,7 @@ namespace Application.Users.V1.Commands
             public async Task<Response<SignUpResponse>> Handle(NhsSignUpCommand request,
                 CancellationToken cancellationToken)
             {
-                return await _userService.NhsSignUpAsync(request.ConsentRegistration, request.Token);
+                return await _userService.NhsSignUpAsync(request.ConsentRegistration, request.SelectedLanguage, request.Token);
             }
         }
     }
