@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -187,10 +188,10 @@ namespace Infrastructure.Services
             }
         }
 
-        private async Task SendContentfulEmailAsync(string emailName, string emailRecipient, string selectedLanguage,
+        private async Task SendContentfulEmailAsync(string emailName, string emailRecipient, CultureInfo selectedLocale,
             string firstName = null)
         {
-            var contentfulEmail = await _contentfulService.GetContentfulEmailAsync(emailName, selectedLanguage);
+            var contentfulEmail = await _contentfulService.GetContentfulEmailAsync(emailName, selectedLocale);
             string htmlContent = _richTextToHtmlConverter.Convert(contentfulEmail.EmailBody);
 
             if (!string.IsNullOrEmpty(firstName))
@@ -199,7 +200,7 @@ namespace Infrastructure.Services
                 var data = new
                 {
                     firstName =
-                        System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(firstName.ToLower()),
+                        selectedLocale.TextInfo.ToTitleCase(firstName.ToLower()),
                 };
                 htmlContent = template(data);
             }
@@ -219,7 +220,7 @@ namespace Infrastructure.Services
             return exceptionResponse;
         }
 
-        public async Task<Response<SignUpResponse>> NhsSignUpAsync(bool consentRegistration, string selectedLanguage,
+        public async Task<Response<SignUpResponse>> NhsSignUpAsync(bool consentRegistration, CultureInfo selectedLocale,
             string token)
         {
             try
@@ -230,7 +231,7 @@ namespace Infrastructure.Services
                     nhsUserInfo.FirstName, nhsUserInfo.LastName,
                     consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber));
 
-                await SendContentfulEmailAsync(ContentfulEmailNames.NhsSignUp, nhsUserInfo.Email, selectedLanguage);
+                await SendContentfulEmailAsync(ContentfulEmailNames.NhsSignUp, nhsUserInfo.Email, selectedLocale);
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
                     new SignUpResponse { UserConsents = true, }, _headerService.GetConversationId());
@@ -295,7 +296,7 @@ namespace Infrastructure.Services
                         }
 
                         await SendContentfulEmailAsync(ContentfulEmailNames.EmailAccountExists, email,
-                            participant.SelectedLanuguage, participant.Firstname);
+                            participant.SelectedLocale, participant.Firstname);
                     }
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
@@ -307,7 +308,7 @@ namespace Infrastructure.Services
                 if (participantDetails != null)
                 {
                     await SendContentfulEmailAsync(ContentfulEmailNames.NhsAccountExists, email,
-                        participantDetails.SelectedLanuguage, participantDetails.Firstname);
+                        participantDetails.SelectedLocale, participantDetails.Firstname);
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
                         new SignUpResponse { UserExists = true, }, _headerService.GetConversationId());
@@ -657,7 +658,7 @@ namespace Infrastructure.Services
                     return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                         _headerService.GetConversationId());
 
-                await SendContentfulEmailAsync(ContentfulEmailNames.NhsPasswordReset, email, participantDetails.SelectedLanuguage);
+                await SendContentfulEmailAsync(ContentfulEmailNames.NhsPasswordReset, email, participantDetails.SelectedLocale);
 
                 return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                     _headerService.GetConversationId());
