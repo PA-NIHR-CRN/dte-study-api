@@ -18,6 +18,7 @@ using Dte.Common.Extensions;
 using Dte.Common.Helpers;
 using Dte.Common.Http;
 using Dte.Common.Responses;
+using HandlebarsDotNet;
 using Infrastructure.Clients;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -39,18 +40,18 @@ namespace Infrastructure.Services
         private readonly AwsSettings _awsSettings;
         private readonly ILogger<UserService> _logger;
         private readonly IEmailService _emailService;
-        private readonly EmailSettings _emailSettings;
         private readonly NhsLoginHttpClient _nhsLoginHttpClient;
         private readonly IMediator _mediator;
         private readonly DevSettings _devSettings;
         private readonly IParticipantService _participantService;
         private readonly IContentfulService _contentfulService;
+        private readonly IRichTextToHtmlConverter _richTextToHtmlConverter;
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
-            AwsSettings awsSettings, ILogger<UserService> logger, EmailSettings emailSettings,
+            AwsSettings awsSettings, ILogger<UserService> logger,
             IEmailService emailService, IParticipantService participantService,
             NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings,
-            IContentfulService contentfulService)
+            IContentfulService contentfulService, IRichTextToHtmlConverter richTextToHtmlConverter)
 
         {
             _provider = provider;
@@ -58,12 +59,12 @@ namespace Infrastructure.Services
             _awsSettings = awsSettings;
             _logger = logger;
             _emailService = emailService;
-            _emailSettings = emailSettings;
             _nhsLoginHttpClient = nhsLoginHttpClient;
             _mediator = mediator;
             _devSettings = devSettings.Value;
             _participantService = participantService;
             _contentfulService = contentfulService;
+            _richTextToHtmlConverter = richTextToHtmlConverter;
         }
 
         public async Task<Response<string>> LoginAsync(string email, string password)
@@ -186,6 +187,28 @@ namespace Infrastructure.Services
             }
         }
 
+        private async Task SendContentfulEmailAsync(string emailName, string emailRecipient, string selectedLanguage,
+            string firstName = null)
+        {
+            var contentfulEmail = await _contentfulService.GetContentfulEmailAsync(emailName, selectedLanguage);
+            string htmlContent = _richTextToHtmlConverter.Convert(contentfulEmail.EmailBody);
+
+            if (!string.IsNullOrEmpty(firstName))
+            {
+                var template = Handlebars.Compile(htmlContent);
+                var data = new
+                {
+                    firstName =
+                        System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(firstName.ToLower()),
+                };
+                htmlContent = template(data);
+            }
+
+            var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###BODY_REPLACE###", htmlContent);
+
+            await _emailService.SendEmailAsync(emailRecipient, contentfulEmail.EmailSubject, htmlBody);
+        }
+
         private Response<NhsLoginResponse> HandleNhsLoginException(Exception ex)
         {
             var exceptionResponse = Response<NhsLoginResponse>.CreateExceptionResponse(
@@ -196,7 +219,8 @@ namespace Infrastructure.Services
             return exceptionResponse;
         }
 
-        public async Task<Response<SignUpResponse>> NhsSignUpAsync(bool consentRegistration, string token)
+        public async Task<Response<SignUpResponse>> NhsSignUpAsync(bool consentRegistration, string selectedLanguage,
+            string token)
         {
             try
             {
@@ -206,24 +230,7 @@ namespace Infrastructure.Services
                     nhsUserInfo.FirstName, nhsUserInfo.LastName,
                     consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber));
 
-                var baseUrl = _emailSettings.WebAppBaseUrl;
-                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                        "New Be Part of Research Account")
-                    .Replace("###TEXT_REPLACE1###",
-                        $"Thank you for registering for Be Part of Research using your NHS login or through the NHS App. You will need to use the NHS login option on the <a href=\"{baseUrl}Participants/Options\">Be Part of Research</a> website each time you access your account.")
-                    .Replace("###TEXT_REPLACE2###",
-                        "By signing up, you are joining our community of amazing volunteers who are helping researchers to understand more about health and care conditions. Please visit the <a href=\"https://bepartofresearch.nihr.ac.uk/taking-part/how-to-take-part\">How to take part</a> section of the website to find out about other ways to take part in health and care research.")
-                    .Replace("###TEXT_REPLACE3###",
-                        "<a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\">Sign up to our newsletter</a> to receive all our research news, studies you can take part in and other opportunities helping to shape health and care research from across the UK.")
-                    .Replace("###TEXT_REPLACE4###",
-                        "If you close your NHS login account, your Be Part of Research account will remain open and if you would also like to close your Be Part of Research account you will need to email <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>.")
-                    .Replace("###LINK_REPLACE###", "")
-                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                    .Replace("###TEXT_REPLACE5###",
-                        "Thank you for your ongoing commitment and support.")
-                    .Replace("###TEXT_REPLACE6###", "");
-
-                await _emailService.SendEmailAsync(nhsUserInfo.Email, "Be Part of Research", htmlBody);
+                await SendContentfulEmailAsync(ContentfulEmailNames.NhsSignUp, nhsUserInfo.Email, selectedLanguage);
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
                     new SignUpResponse { UserConsents = true, }, _headerService.GetConversationId());
@@ -287,23 +294,8 @@ namespace Infrastructure.Services
                                 $"User with email {email} not found", _headerService.GetConversationId());
                         }
 
-                        var baseUrl = _emailSettings.WebAppBaseUrl;
-                        var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                                "Be Part of Research registration attempt")
-                            .Replace("###TEXT_REPLACE1###",
-                                $"Hi {System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(participant.Firstname.ToLower())},")
-                            .Replace("###TEXT_REPLACE2###",
-                                "An attempt has been made to register again for Be Part of Research using your email address. As you already have an account with us, there is no need to re-register.")
-                            .Replace("###TEXT_REPLACE3###",
-                                "If you need to access your account please sign in using the link below. If you cannot remember your password, you can choose to reset it from the sign-in page.")
-                            .Replace("###LINK_REPLACE###", $"{baseUrl}UserLogin")
-                            .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                            .Replace("###TEXT_REPLACE4###",
-                                "If you did not attempt to re-register please ignore this email.")
-                            .Replace("###TEXT_REPLACE5###", "Thank you for your ongoing commitment and support.")
-                            .Replace("###TEXT_REPLACE6###", "");
-
-                        await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
+                        await SendContentfulEmailAsync(ContentfulEmailNames.EmailAccountExists, email,
+                            participant.SelectedLanuguage, participant.Firstname);
                     }
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
@@ -314,24 +306,8 @@ namespace Infrastructure.Services
                 var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
                 if (participantDetails != null)
                 {
-                    var baseUrl = _emailSettings.WebAppBaseUrl;
-                    var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                            "Be Part of Research registration attempt")
-                        .Replace("###TEXT_REPLACE1###",
-                            $"Hi {System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(participantDetails.Firstname.ToLower())},")
-                        .Replace("###TEXT_REPLACE2###",
-                            "An attempt to log into your Be Part of Research account using this email address has been made. As you created your account using your NHS login information, you need to use that option to login to your Be Part of Research account. ")
-                        .Replace("###TEXT_REPLACE3###",
-                            "Please use the link below and select the NHS login button to continue.")
-                        .Replace("###LINK_REPLACE###",
-                            $"<a href=\"{baseUrl}participants/options\">{baseUrl}participants/options</a>")
-                        .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                        .Replace("###TEXT_REPLACE4###",
-                            "If you did not attempt to re-register please ignore this email.")
-                        .Replace("###TEXT_REPLACE5###", "Thank you for your ongoing commitment and support.")
-                        .Replace("###TEXT_REPLACE6###", "");
-
-                    await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
+                    await SendContentfulEmailAsync(ContentfulEmailNames.NhsAccountExists, email,
+                        participantDetails.SelectedLanuguage, participantDetails.Firstname);
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
                         new SignUpResponse { UserExists = true, }, _headerService.GetConversationId());
@@ -680,24 +656,8 @@ namespace Infrastructure.Services
                 if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
                     return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                         _headerService.GetConversationId());
-                var baseUrl = _emailSettings.WebAppBaseUrl;
-                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                        "Password Reset Attempt")
-                    .Replace("###TEXT_REPLACE1###",
-                        "A request has been received to change the password for your Be Part of Research account. We were unable to complete this request because your account was created with your NHS login information. You will need to use this option on each occasion to access your account and update your details.")
-                    .Replace("###TEXT_REPLACE2###",
-                        "Please use the link below and select the NHS login button to continue.")
-                    .Replace("###TEXT_REPLACE3###",
-                        "")
-                    .Replace("###LINK_REPLACE###",
-                        $"<a href=\"{baseUrl}participants/options\">{baseUrl}participants/options</a>")
-                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                    .Replace("###TEXT_REPLACE4###",
-                        "If you have not attempted to reset your password, please contact us by email at <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>")
-                    .Replace("###TEXT_REPLACE5###", "")
-                    .Replace("###TEXT_REPLACE6###", "");
 
-                await _emailService.SendEmailAsync(email, "Be Part of Research password reset", htmlBody);
+                await SendContentfulEmailAsync(ContentfulEmailNames.NhsPasswordReset, email, participantDetails.SelectedLanuguage);
 
                 return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                     _headerService.GetConversationId());
@@ -720,7 +680,6 @@ namespace Infrastructure.Services
 
             return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(_headerService.GetConversationId());
         }
-
 
         public async Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code,
             string userId, string password)

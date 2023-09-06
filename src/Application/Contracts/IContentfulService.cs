@@ -1,9 +1,10 @@
 using System.Threading.Tasks;
+using Application.Responses.V1;
 
 namespace Application.Contracts
 {
     public interface IContentfulService
     {
-        Task<string> GetContentfulEntry(string entryId);
+        Task<ContentfulEmail> GetContentfulEmailAsync(string entryId, string locale);
     }
 }
