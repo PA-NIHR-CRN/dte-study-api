@@ -18,7 +18,6 @@ namespace Infrastructure.Services
 
         public async Task<ContentfulEmail> GetContentfulEmailAsync(string entryId, CultureInfo locale)
         {
-            if (locale==null) { locale = new CultureInfo("en-GB"); }
             var entry = await _client.GetEntry(entryId, new QueryBuilder<ContentfulEmail>().LocaleIs(locale.ToString()));
             return entry;
         }

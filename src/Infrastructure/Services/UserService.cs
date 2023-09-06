@@ -194,7 +194,7 @@ namespace Infrastructure.Services
         private async Task SendContentfulEmailAsync(string emailName, string emailRecipient, CultureInfo selectedLocale,
             string firstName = null)
         {
-            if (selectedLocale == null) selectedLocale = new CultureInfo("en-GB");
+            selectedLocale ??= new CultureInfo("en-GB");
             var contentfulEmail = await _contentfulService.GetContentfulEmailAsync(emailName, selectedLocale);
             string htmlContent = _richTextToHtmlConverter.Convert(contentfulEmail.EmailBody);
 
@@ -204,7 +204,7 @@ namespace Infrastructure.Services
                 var data = new
                 {
                     firstName =
-                        selectedLocale.TextInfo.ToTitleCase(firstName.ToLower()),
+                        selectedLocale.TextInfo.ToTitleCase(firstName.ToLower(selectedLocale))
                 };
                 htmlContent = template(data);
             }
