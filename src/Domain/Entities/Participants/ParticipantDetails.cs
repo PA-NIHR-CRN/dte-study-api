@@ -20,6 +20,8 @@ namespace Domain.Entities.Participants
         [DynamoDBProperty] public CultureInfo SelectedLocale { get; set; }
         [DynamoDBProperty] public bool ConsentRegistration { get; set; }
         [DynamoDBProperty] public DateTime? DateOfBirth { get; set; }
+        [DynamoDBProperty] public string MfaChangePhoneCode { get; set; }
+        [DynamoDBProperty] public DateTime? MfaChangePhoneCodeExpiry { get; set; }
         [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? ConsentRegistrationAtUtc { get; set; }
         [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? RemovalOfConsentRegistrationAtUtc { get; set; }
         [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? UpdatedAtUtc { get; set; }

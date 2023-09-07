@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Application.Settings;
+using AspNetCoreRateLimit;
 using Contentful.Core;
 using Dte.Common.Authentication;
 using FluentValidation.AspNetCore;
@@ -205,7 +206,10 @@ namespace StudyApi
                 .AddFluentValidation(x =>
                     x.RegisterValidatorsFromAssembly(Assembly.Load("Application"), lifetime: ServiceLifetime.Transient))
                 .AddNewtonsoftJson(x => { x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore; })
-                .AddNewtonsoftJson();
+                .AddNewtonsoftJson().ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressModelStateInvalidFilter = true;
+                });
 
             var build = System.Environment.GetEnvironmentVariable("DTE_BUILD_STRING") ?? "Unknown";
             services.AddHealthChecks()
@@ -247,6 +251,8 @@ namespace StudyApi
 
         public void Configure(IApplicationBuilder app, IApiVersionDescriptionProvider provider)
         {
+            app.UseIpRateLimiting();
+
             app.UseCustomExceptionHandler();
             app.UseCustomHeaderForwarderHandler();
 
