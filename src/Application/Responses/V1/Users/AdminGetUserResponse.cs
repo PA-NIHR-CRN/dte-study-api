@@ -9,7 +9,8 @@ namespace Application.Responses.V1.Users
         public string Status { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime LastModifiedDate { get; set; }
-
         public bool Enabled { get; set; }
+        public bool AuthenticatedMobileVerified { get; set; }
+
     }
 }
