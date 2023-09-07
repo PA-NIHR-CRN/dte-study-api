@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using Application.Participants.V1.Commands.Participants;
 using Application.Responses.V1.Users;
@@ -338,6 +339,7 @@ namespace StudyApi.Controllers.V1.Users
         public class NhsSignUpRequestLocal
         {
             public bool ConsentRegistration { get; set; }
+            public CultureInfo SelectedLocale { get; set; }
         }
 
         /// <summary>
@@ -354,7 +356,7 @@ namespace StudyApi.Controllers.V1.Users
             if (HttpContext.Request.Cookies.TryGetValue(NhsAccessTokenCookieName, out var cookieValue))
             {
                 var accessToken = _dataProtector.Unprotect(cookieValue);
-                var response = await _mediator.Send(new NhsSignUpCommand(request.ConsentRegistration, accessToken));
+                var response = await _mediator.Send(new NhsSignUpCommand(request.ConsentRegistration, request.SelectedLocale, accessToken));
 
                 if (response.IsSuccess)
                 {
