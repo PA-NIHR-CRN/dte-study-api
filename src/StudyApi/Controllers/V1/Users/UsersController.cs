@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using Application.Contracts;
+using Application.Models.MFA;
 using Dte.Common.Exceptions.Common;
 using Microsoft.AspNetCore.DataProtection;
 
@@ -39,16 +40,18 @@ namespace StudyApi.Controllers.V1.Users
         private readonly ILogger<UsersController> _logger;
         private readonly IDataProtector _dataProtector;
         private readonly ISessionService _sessionService;
-        
+        private readonly IUserService _userService;
+
         public UsersController(IMediator mediator, ILogger<UsersController> logger,
-            IDataProtectionProvider dataProtector, ISessionService sessionService)
+            IDataProtectionProvider dataProtector, ISessionService sessionService, IUserService userService)
         {
             _mediator = mediator;
             _logger = logger;
             _dataProtector = dataProtector.CreateProtector("nhs.login.cookies");
             _sessionService = sessionService;
+            _userService = userService;
         }
-        
+
         private async Task CreateSessionAndLogin(string jwtToken, string sessionId)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -99,6 +102,191 @@ namespace StudyApi.Controllers.V1.Users
             return Ok(response);
         }
 
+        /// <summary>
+        /// [AllowAnonymous] RespondToMfaChallenge
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("respondtomfachallenge")]
+        public async Task<IActionResult> RespondToMfaChallengeAsync([FromBody] RespondToMfaRequest request)
+        {
+            var response =
+                await _userService.RespondToMfaChallengeAsync(request.MfaCode, request.MfaDetails);
+
+            if (!response.IsSuccess)
+            {
+                return Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors));
+            }
+
+            var sessionId = Guid.NewGuid().ToString();
+            await CreateSessionAndLogin(response.Content, sessionId);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// [AllowAnonymous] RespondToMfaChallenge
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("respondtototpmfachallenge")]
+        public async Task<IActionResult> RespondToTotpMfaChallengeAsync([FromBody] RespondToMfaRequest request)
+        {
+            var response =
+                await _userService.RespondToTotpMfaChallengeAsync(request.MfaCode, request.MfaDetails);
+
+            if (!response.IsSuccess)
+            {
+                return Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors));
+            }
+
+            var sessionId = Guid.NewGuid().ToString();
+            await CreateSessionAndLogin(response.Content, sessionId);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// [AllowAnonymous] Login
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("setupsmsmfa")]
+        public async Task<IActionResult> SetUpMfaAsync([FromBody] SetUpMfaRequest request)
+        {
+            await _userService.UpdateCognitoPhoneNumberAsync(request.MfaDetails, request.PhoneNumber);
+            var response = await _userService.SetUpMfaAsync(request.MfaDetails);
+
+             return !response.IsSuccess
+                ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
+                : Ok(response);
+        }
+        
+        /// <summary>
+        /// [AllowAnonymous] Login
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("reissuesession")]
+        public async Task<IActionResult> ReissueMfaSession([FromBody] SetUpMfaRequest request)
+        {
+            var response = await _userService.ReissueMfaSessionAsync(request.MfaDetails);
+            
+            return !response.IsSuccess
+                ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
+                : Ok(response);
+        }
+        
+        /// <summary>
+        /// [AllowAnonymous] Login
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("sendmfaotpemail")]
+        public async Task<IActionResult> SendMfaOtpEmail([FromBody] SetUpMfaRequest request)
+        {
+            var email = await _userService.SendEmailOtpAsync(request.MfaDetails);
+            return Ok(email);
+        }
+        
+        /// <summary>
+        /// [AllowAnonymous] Login
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("getmaskedmobile")]
+        public async Task<IActionResult> GetMaskedMobile([FromBody] SetUpMfaRequest request)
+        {
+            var maskedMobile = await _userService.GetMaskedMobile(request.MfaDetails);
+            
+            return Ok(maskedMobile);
+            
+        }
+        
+        /// <summary>
+        /// [AllowAnonymous] ValidateEmailOtp
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("validatemfaotpemail")]
+        public async Task<IActionResult> ValidateEmailOtp([FromBody] RespondToMfaRequest request)
+        {
+            var response = await _userService.ValidateEmailOtpAsync(request.MfaDetails, request.MfaCode);
+
+             return !response.IsSuccess
+                ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
+                : Ok(response);
+        }
+
+        /// <summary>
+        /// [AllowAnonymous] ResendMfaChallenge
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("resendmfachallenge")]
+        public async Task<IActionResult> ResendMfaChallenge([FromBody] SetUpMfaRequest request)
+        {
+            var response = await _userService.ResendMfaChallenge(request.MfaDetails);
+
+            return !response.IsSuccess
+                ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
+                : Ok(response);
+        }
+
+        /// <summary>
+        /// [AllowAnonymous] SetUpTokenMfaAsync
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("setuptokenmfa")]
+        public async Task<IActionResult> SetUpTokenMfaAsync([FromBody] SetUpMfaRequest request)
+        {
+            var response = await _userService.GenerateTotpToken(request.MfaDetails);
+
+            return Ok(Response<TotpTokenResult>.CreateSuccessfulContentResponse(response));
+        }
+
+        /// <summary>
+        /// [AllowAnonymous] VerifySoftwareTokenAsync
+        /// </summary>
+        /// <response code="200">When IsSuccess true</response>
+        /// <response code="500">Server side error</response>
+        [AllowAnonymous]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPost("verifytokenmfa")]
+        public async Task<IActionResult> VerifySoftwareTokenAsync([FromBody] VerifyMfaRequest request)
+        {
+            var response = await _userService.VerifySoftwareTokenAsync(request.AuthenticatorAppCode, request.SessionId, request.MfaDetails);
+
+            return Ok(response);
+        }
+
 
         /// <summary>
         /// [AllowAnonymous] NhsLogin
@@ -140,25 +328,18 @@ namespace StudyApi.Controllers.V1.Users
         {
             var response = await _mediator.Send(new SignUpCommand(request.Email, request.Password));
 
-            if (!response.IsSuccess)
-            {
-                return Ok(response);
-            }
-
-            if (response.Content.UserExists)
-                return Ok(response);
-
-            var createDetailsResponse = await _mediator.Send(new CreateParticipantDetailsCommand(
+            await _mediator.Send(new CreateParticipantDetailsCommand(
                 response.Content.UserId, request.Email, request.Firstname, request.Lastname,
                 request.ConsentRegistration, null, request.DateOfBirth, ""));
 
-            return Ok(new { IsSuccess = response.IsSuccess && createDetailsResponse.IsSuccess });
+            return Ok(new { IsSuccess = response.IsSuccess });
         }
 
         public class NhsSignUpRequestLocal
         {
             public bool ConsentRegistration { get; set; }
         }
+
         /// <summary>
         /// [AllowAnonymous] SignUp NHS user
         /// </summary>
@@ -221,7 +402,7 @@ namespace StudyApi.Controllers.V1.Users
         {
             var response = await _mediator.Send(new ConfirmSignUpCommand(request.Code, request.UserId));
 
-            return Ok(response);
+            return Ok(new { IsSuccess = response.IsSuccess });
         }
 
         /// <summary>
@@ -251,7 +432,8 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("confirmforgotpassword")]
         public async Task<IActionResult> ConfirmForgotPasswordAsync([FromBody] ConfirmForgotPasswordRequest request)
         {
-            var response = await _mediator.Send(new ConfirmForgotPasswordCommand(request.Code, request.UserId, request.Password));
+            var response =
+                await _mediator.Send(new ConfirmForgotPasswordCommand(request.Code, request.UserId, request.Password));
 
             return Ok(response);
         }
