@@ -23,7 +23,6 @@ using Dte.Common.Responses;
 using FluentValidation.Results;
 using HandlebarsDotNet;
 using Infrastructure.Clients;
-using Infrastructure.Content;
 using Infrastructure.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection;
@@ -60,7 +59,7 @@ namespace Infrastructure.Services
             AwsSettings awsSettings, ILogger<UserService> logger,
             IEmailService emailService, IParticipantService participantService,
             NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings,
-            IDataProtectionProvider dataProtector)
+            IDataProtectionProvider dataProtector,
             IContentfulService contentfulService, IRichTextToHtmlConverter richTextToHtmlConverter,
             ContentfulSettings contentfulSettings)
 
