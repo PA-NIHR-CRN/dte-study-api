@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Application.Settings;
 using AspNetCoreRateLimit;
-using Contentful.Core;
+using Dte.Common;
 using Dte.Common.Authentication;
 using FluentValidation.AspNetCore;
 using Infrastructure.Clients;
@@ -49,7 +49,8 @@ namespace StudyApi
         public void ConfigureServices(IServiceCollection services)
         {
             // Configuration
-            services.AddOptions<DevSettings>().Bind(Configuration.GetSection(DevSettings.SectionName));
+            var contentfulSettings = Configuration.GetSection(ContentfulSettings.SectionName).Get<ContentfulSettings>();
+            var appSettings = Configuration.GetSection(AppSettings.SectionName).Get<AppSettings>();
             var awsSettings = Configuration.GetSection(AwsSettings.SectionName).Get<AwsSettings>();
             if (awsSettings == null) throw new Exception("Could not bind the aws settings, please check configuration");
             var cpmsSettings = Configuration.GetSection(CpmsSettings.SectionName).Get<CpmsSettings>();
@@ -70,19 +71,14 @@ namespace StudyApi
             services.AddSingleton(identitySettings);
             services.AddSingleton(clientsSettings);
             services.AddSingleton(emailSettings);
+            services.AddSingleton(appSettings);
+            services.AddSingleton(contentfulSettings);              
 
             services.Configure<NhsLoginSettings>(Configuration.GetSection("NhsLogin"));
 
             services.AddHttpClient<NhsLoginHttpClient>((serviceProvider, httpClient) =>
             {
                 var settings = serviceProvider.GetService<IOptions<NhsLoginSettings>>()?.Value;
-
-                httpClient.BaseAddress = new Uri(settings.BaseUrl);
-            });
-            
-            services.AddHttpClient<IContentfulClient>((serviceProvider, httpClient) =>
-            {
-                var settings = serviceProvider.GetService<IOptions<ContentfulSettings>>()?.Value;
 
                 httpClient.BaseAddress = new Uri(settings.BaseUrl);
             });
