@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Net.Http;
 using Amazon;
 using Amazon.CognitoIdentityProvider;
 using Amazon.DynamoDBv2;
@@ -8,19 +7,18 @@ using Amazon.DynamoDBv2.DataModel;
 using Application.Contracts;
 using Application.Settings;
 using AspNetCoreRateLimit;
-using Contentful.Core;
 using Dte.Common;
 using Dte.Common.Authentication;
 using Dte.Common.Contracts;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
+using Dte.Common.Services;
 using Dte.Location.Api.Client;
 using Dte.Reference.Data.Api.Client;
 using Dte.Study.Management.Api.Client;
 using Infrastructure.Factories;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
-using Infrastructure.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -51,19 +49,14 @@ namespace StudyApi.DependencyRegistrations
             services.AddSingleton<IHeaderService, HeaderService>();
             services.AddScoped<IFeatureFlagService, FeatureFlagService>();
             services.AddScoped<ISessionService, SessionService>();
+            services.AddTransient<IRichTextToHtmlService, RichTextToHtmlService>();
             services.AddScoped<IContentfulService, ContentfulService>();
-            services.AddScoped<IRichTextToHtmlConverter, RichTextToHtmlConverter>();
-
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
             services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();
 
 
             // Contentful set up
-            var contentfulSettings = configuration.GetSection(ContentfulSettings.SectionName).Get<ContentfulSettings>();
-            services.AddSingleton(contentfulSettings);
-            services.AddSingleton<IContentfulClient>(sp => new ContentfulClient(new HttpClient(),
-                contentfulSettings.DeliveryApiKey, contentfulSettings.PreviewApiKey, contentfulSettings.SpaceId,
-                contentfulSettings.UsePreviewApi));
+            services.AddContentfulServices(configuration);
 
 
             // AWS

@@ -12,18 +12,18 @@ using Application.Models.MFA;
 using Application.Participants.V1.Commands.Participants;
 using Application.Responses.V1.Users;
 using Application.Settings;
-using Application.Content;
 using Domain.Entities.Participants;
+using Dte.Common;
+using Dte.Common.Contracts;
 using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
 using Dte.Common.Extensions;
 using Dte.Common.Helpers;
 using Dte.Common.Http;
+using Dte.Common.Models;
 using Dte.Common.Responses;
 using FluentValidation.Results;
-using HandlebarsDotNet;
 using Infrastructure.Clients;
-using Infrastructure.Content;
 using Infrastructure.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection;
@@ -53,16 +53,13 @@ namespace Infrastructure.Services
         private readonly IParticipantService _participantService;
         private readonly IDataProtector _dataProtector;
         private readonly IContentfulService _contentfulService;
-        private readonly IRichTextToHtmlConverter _richTextToHtmlConverter;
         private readonly ContentfulSettings _contentfulSettings;
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
             AwsSettings awsSettings, ILogger<UserService> logger,
             IEmailService emailService, IParticipantService participantService,
             NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings,
-            IDataProtectionProvider dataProtector)
-            IContentfulService contentfulService, IRichTextToHtmlConverter richTextToHtmlConverter,
-            ContentfulSettings contentfulSettings)
+            IDataProtectionProvider dataProtector, IContentfulService contentfulService, ContentfulSettings contentfulSettings)
 
         {
             _provider = provider;
@@ -76,7 +73,6 @@ namespace Infrastructure.Services
             _participantService = participantService;
             _dataProtector = dataProtector.CreateProtector("mfa.login.details");
             _contentfulService = contentfulService;
-            _richTextToHtmlConverter = richTextToHtmlConverter;
             _contentfulSettings = contentfulSettings;
         }
 
@@ -310,26 +306,20 @@ namespace Infrastructure.Services
             {
                 var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
                 var code = GenerateOtpCode();
-
-                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                        "Confirm your email address")
-                    .Replace("###TEXT_REPLACE1###",
-                        $"{code} is your Be Part of Research security code.")
-                    .Replace("###TEXT_REPLACE2###",
-                        "This code will expire after 5 minutes.")
-                    .Replace("###TEXT_REPLACE3###",
-                        "")
-                    .Replace("###TEXT_REPLACE4###",
-                        "")
-                    .Replace("###LINK_REPLACE###", "")
-                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                    .Replace("###TEXT_REPLACE5###",
-                        "")
-                    .Replace("###TEXT_REPLACE6###", "");
-
+                
                 var participant = await _participantService.GetParticipantDetailsAsync(mfaLoginDetails.Username);
-
-                await _emailService.SendEmailAsync(participant.Email, "Be Part of Research security code", htmlBody);
+                
+                var contentfulEmailRequest = new EmailContentRequest
+                {
+                    EmailName = _contentfulSettings.EmailTemplates.MfaEmailConfirmation,
+                    FirstName = participant.Firstname,
+                    Code = code,
+                    SelectedLocale = participant.SelectedLocale
+                };
+                
+                var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
+                
+                await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
 
                 await _participantService.StoreMfaCodeAsync(mfaLoginDetails.Username, code);
 
@@ -503,25 +493,17 @@ namespace Infrastructure.Services
                 if (!string.IsNullOrEmpty(existingPhoneNumber))
                 {
                     // get user email
-                    var email = user.UserAttributes.FirstOrDefault(x => x.Name == "email")?.Value;
-                    var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                            "Be Part of Research mobile phone number verified")
-                        .Replace("###TEXT_REPLACE1###",
-                            $"The new mobile phone number provided to secure your account has been verified. We will send a security code to this number each time you sign in.")
-                        .Replace("###TEXT_REPLACE2###",
-                            "This will not change any telephone numbers stored in the personal details section of your account. Please sign in to your account if you need to change these.")
-                        .Replace("###TEXT_REPLACE3###",
-                            "")
-                        .Replace("###TEXT_REPLACE4###",
-                            "")
-                        .Replace("###LINK_REPLACE###", "")
-                        .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                        .Replace("###TEXT_REPLACE5###",
-                            "")
-                        .Replace("###TEXT_REPLACE6###", "");
-
-                    await _emailService.SendEmailAsync(email, "Be Part of Research mobile phone number verified",
-                        htmlBody);
+                    var participant = await _participantService.GetParticipantDetailsAsync(username);
+                    
+                    var contentfulEmailRequest = new EmailContentRequest
+                    {
+                        EmailName = _contentfulSettings.EmailTemplates.MfaMobileNumberVerification,
+                        FirstName = participant.Firstname,
+                        SelectedLocale = participant.SelectedLocale
+                    };
+                    
+                    var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
+                    await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
                 }
 
                 await _provider.AdminUpdateUserAttributesAsync(request);
@@ -805,29 +787,6 @@ namespace Infrastructure.Services
             }
         }
 
-        private async Task SendContentfulEmailAsync(string emailName, string emailRecipient, CultureInfo selectedLocale,
-            string firstName = null)
-        {
-            selectedLocale ??= new CultureInfo("en-GB");
-            var contentfulEmail = await _contentfulService.GetContentfulEmailAsync(emailName, selectedLocale);
-            string htmlContent = _richTextToHtmlConverter.Convert(contentfulEmail.EmailBody);
-
-            if (!string.IsNullOrEmpty(firstName))
-            {
-                var template = Handlebars.Compile(htmlContent);
-                var data = new
-                {
-                    firstName =
-                        selectedLocale.TextInfo.ToTitleCase(firstName.ToLower(selectedLocale))
-                };
-                htmlContent = template(data);
-            }
-
-            var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###BODY_REPLACE###", htmlContent);
-
-            await _emailService.SendEmailAsync(emailRecipient, contentfulEmail.EmailSubject, htmlBody);
-        }
-
         private Response<NhsLoginResponse> HandleNhsLoginException(Exception ex)
         {
             var exceptionResponse = Response<NhsLoginResponse>.CreateExceptionResponse(
@@ -848,10 +807,16 @@ namespace Infrastructure.Services
                 await _mediator.Send(new CreateParticipantDetailsCommand("", nhsUserInfo.Email,
                     nhsUserInfo.FirstName, nhsUserInfo.LastName,
                     consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber));
-
-
-                await SendContentfulEmailAsync(_contentfulSettings.EmailTemplates.NhsSignUp, nhsUserInfo.Email,
-                    selectedLocale);
+                
+                var request = new EmailContentRequest
+                {
+                    EmailName = _contentfulSettings.EmailTemplates.NhsSignUp,
+                    FirstName = nhsUserInfo.FirstName,
+                    SelectedLocale = selectedLocale
+                };
+                
+                var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
+                await _emailService.SendEmailAsync(nhsUserInfo.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
                     new SignUpResponse { UserConsents = true, }, _headerService.GetConversationId());
@@ -915,8 +880,16 @@ namespace Infrastructure.Services
                                 $"User with email {email} not found", _headerService.GetConversationId());
                         }
 
-                        await SendContentfulEmailAsync(_contentfulSettings.EmailTemplates.EmailAccountExists, email,
-                            participant.SelectedLocale, participant.Firstname);
+                        var request = new EmailContentRequest
+                        {
+                            EmailName = _contentfulSettings.EmailTemplates.EmailAccountExists,
+                            SelectedLocale = participant.SelectedLocale,
+                            FirstName = participant.Firstname,
+                        };
+
+                        var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
+                        
+                        await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
                     }
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
@@ -927,8 +900,16 @@ namespace Infrastructure.Services
                 var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
                 if (participantDetails != null)
                 {
-                    await SendContentfulEmailAsync(_contentfulSettings.EmailTemplates.NhsAccountExists, email,
-                        participantDetails.SelectedLocale, participantDetails.Firstname);
+                    var request = new EmailContentRequest
+                    {
+                        EmailName = _contentfulSettings.EmailTemplates.NhsAccountExists,
+                        SelectedLocale = participantDetails.SelectedLocale,
+                        FirstName = participantDetails.Firstname,
+                    };
+                    
+                    var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
+                    
+                    await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
                         new SignUpResponse { IsSuccess = true, }, _headerService.GetConversationId());
@@ -1283,9 +1264,17 @@ namespace Infrastructure.Services
                 if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
                     return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                         _headerService.GetConversationId());
+                
+                var request = new EmailContentRequest
+                {
+                    EmailName = _contentfulSettings.EmailTemplates.NhsPasswordReset,
+                    SelectedLocale = participantDetails.SelectedLocale,
+                    FirstName = participantDetails.Firstname,
+                };
 
-                await SendContentfulEmailAsync(_contentfulSettings.EmailTemplates.NhsPasswordReset, email,
-                    participantDetails.SelectedLocale);
+                var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
+                
+                await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
 
                 return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                     _headerService.GetConversationId());
