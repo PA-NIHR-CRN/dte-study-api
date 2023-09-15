@@ -202,9 +202,8 @@ namespace StudyApi
             var build = System.Environment.GetEnvironmentVariable("DTE_BUILD_STRING") ?? "Unknown";
             services.AddHealthChecks()
                 .AddCheck("StudyApi", () => HealthCheckResult.Healthy($"Build: {build}"))
-                .AddCheck<StudyManagementServiceHealthCheck>("StudyManagementService", timeout: clientsSettings.StudyManagementService.DefaultTimeout, tags: new List<string> { "services" })
-                .AddCheck<LocationServiceHealthCheck>("LocationService", timeout: clientsSettings.LocationService.DefaultTimeout, tags: new List<string> { "services" })
-                .AddCheck<ReferenceDataServiceHealthCheck>("ReferenceDataService", timeout: clientsSettings.ReferenceDataService.DefaultTimeout, tags: new List<string> { "services" });
+                .AddCheck<LocationServiceHealthCheck>("LocationService",
+                    timeout: clientsSettings.LocationService.DefaultTimeout, tags: new List<string> { "services" });
         }
 
         private static void SetSessionExpiryCookie(AppendCookieContext context)
