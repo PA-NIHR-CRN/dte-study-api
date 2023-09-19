@@ -67,6 +67,25 @@ namespace StudyApi.Controllers.V1.Participants
 
             return Ok(await _mediator.Send(command));
         }
+        
+        /// <summary>
+        /// [Authorize("AnyAuthenticatedUser")] Update participant selected locale for the logged in participant
+        /// </summary>
+        /// <response code="200">Participant details updated</response>
+        /// <response code="500">Server side error</response>
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<object>))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+        [HttpPut("selectedlocale")]
+        public async Task<IActionResult> UpdateParticipantSelectedLocale([FromBody] UpdateParticipantSelectedLocaleRequest request)
+        {
+            var command = new UpdateParticipantSelectedLocaleCommand
+            (
+                User.GetParticipantId(),
+                request.SelectedLocale
+            );
+
+            return Ok(await _mediator.Send(command));
+        }
 
         /// <summary>
         /// [Authorize("AnyAuthenticatedUser")] Get own participant demographics only

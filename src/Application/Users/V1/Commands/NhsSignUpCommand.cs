@@ -11,10 +11,10 @@ namespace Application.Users.V1.Commands
     public class NhsSignUpCommand : IRequest<Response<SignUpResponse>>
     {
         private bool ConsentRegistration { get; }
-        private CultureInfo SelectedLocale { get; }
+        private string SelectedLocale { get; }
         private string Token { get; }
 
-        public NhsSignUpCommand(bool consentRegistration, CultureInfo selectedLocale, string token)
+        public NhsSignUpCommand(bool consentRegistration, string selectedLocale, string token)
         {
             ConsentRegistration = consentRegistration;
             SelectedLocale = selectedLocale;

@@ -7,6 +7,7 @@ namespace Application.Responses.V1.Participants
         public string Firstname { get; set; }
         public string Lastname { get; set; }
         public string Email { get; set; }
+        public string SelectedLocale { get; set; }
         public bool ConsentRegistration { get; set; }
         public string NhsNumber { get; set; }
         public string NhsId { get; set; }

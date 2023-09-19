@@ -165,11 +165,11 @@ namespace StudyApi.Controllers.V1.Users
             await _userService.UpdateCognitoPhoneNumberAsync(request.MfaDetails, request.PhoneNumber);
             var response = await _userService.SetUpMfaAsync(request.MfaDetails);
 
-             return !response.IsSuccess
+            return !response.IsSuccess
                 ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
                 : Ok(response);
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] Login
         /// </summary>
@@ -182,12 +182,12 @@ namespace StudyApi.Controllers.V1.Users
         public async Task<IActionResult> ReissueMfaSession([FromBody] SetUpMfaRequest request)
         {
             var response = await _userService.ReissueMfaSessionAsync(request.MfaDetails);
-            
+
             return !response.IsSuccess
                 ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
                 : Ok(response);
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] Login
         /// </summary>
@@ -202,7 +202,7 @@ namespace StudyApi.Controllers.V1.Users
             var email = await _userService.SendEmailOtpAsync(request.MfaDetails);
             return Ok(email);
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] Login
         /// </summary>
@@ -215,11 +215,10 @@ namespace StudyApi.Controllers.V1.Users
         public async Task<IActionResult> GetMaskedMobile([FromBody] SetUpMfaRequest request)
         {
             var maskedMobile = await _userService.GetMaskedMobile(request.MfaDetails);
-            
+
             return Ok(maskedMobile);
-            
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] ValidateEmailOtp
         /// </summary>
@@ -233,7 +232,7 @@ namespace StudyApi.Controllers.V1.Users
         {
             var response = await _userService.ValidateEmailOtpAsync(request.MfaDetails, request.MfaCode);
 
-             return !response.IsSuccess
+            return !response.IsSuccess
                 ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
                 : Ok(response);
         }
@@ -283,7 +282,8 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("verifytokenmfa")]
         public async Task<IActionResult> VerifySoftwareTokenAsync([FromBody] VerifyMfaRequest request)
         {
-            var response = await _userService.VerifySoftwareTokenAsync(request.AuthenticatorAppCode, request.SessionId, request.MfaDetails);
+            var response = await _userService.VerifySoftwareTokenAsync(request.AuthenticatorAppCode, request.SessionId,
+                request.MfaDetails);
 
             return Ok(response);
         }
@@ -331,15 +331,15 @@ namespace StudyApi.Controllers.V1.Users
 
             await _mediator.Send(new CreateParticipantDetailsCommand(
                 response.Content.UserId, request.Email, request.Firstname, request.Lastname,
-                request.ConsentRegistration, null, request.DateOfBirth, ""));
+                request.ConsentRegistration, null, request.DateOfBirth, "", request.SelectedLocale));
 
             return Ok(new { IsSuccess = response.IsSuccess });
         }
-
+        
         public class NhsSignUpRequestLocal
         {
             public bool ConsentRegistration { get; set; }
-            public CultureInfo SelectedLocale { get; set; }
+            public string SelectedLocale { get; set; }
         }
 
         /// <summary>
@@ -356,7 +356,8 @@ namespace StudyApi.Controllers.V1.Users
             if (HttpContext.Request.Cookies.TryGetValue(NhsAccessTokenCookieName, out var cookieValue))
             {
                 var accessToken = _dataProtector.Unprotect(cookieValue);
-                var response = await _mediator.Send(new NhsSignUpCommand(request.ConsentRegistration, request.SelectedLocale, accessToken));
+                var response = await _mediator.Send(new NhsSignUpCommand(request.ConsentRegistration,
+                    request.SelectedLocale, accessToken));
 
                 if (response.IsSuccess)
                 {

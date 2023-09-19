@@ -24,9 +24,10 @@ namespace Application.Participants.V1.Commands.Participants
         public string NhsId { get; }
         public string NhsNumber { get; }
         public DateTime? DateOfBirth { get; set; }
+        public string SelectedLocale { get; set; }
 
         public CreateParticipantDetailsCommand(string participantId, string email, string firstname, string lastname,
-            bool consentRegistration, string nhsId, DateTime? dateOfBirth, string nhsNumber)
+            bool consentRegistration, string nhsId, DateTime? dateOfBirth, string nhsNumber, string selectedLocale)
         {
             ParticipantId = participantId;
             Email = email;
@@ -36,6 +37,7 @@ namespace Application.Participants.V1.Commands.Participants
             NhsId = nhsId;
             NhsNumber = nhsNumber;
             DateOfBirth = dateOfBirth;
+            SelectedLocale = selectedLocale;
         }
 
         public class CreateParticipantDetailsCommandHandler : IRequestHandler<CreateParticipantDetailsCommand, Response<object>>
@@ -72,6 +74,7 @@ namespace Application.Participants.V1.Commands.Participants
                         ConsentRegistrationAtUtc = request.ConsentRegistration ? _clock.Now() : (DateTime?)null,
                         RemovalOfConsentRegistrationAtUtc = (DateTime?)null,
                         CreatedAtUtc = _clock.Now(),
+                        SelectedLocale = request.SelectedLocale
                     };
 
                     await _participantRepository.CreateParticipantDetailsAsync(entity);
