@@ -17,7 +17,7 @@ namespace Domain.Entities.Participants
         [DynamoDBProperty] public string NhsId { get; set; }
         [DynamoDBProperty] public string SessionId { get; set; }
         [DynamoDBProperty] public string NhsNumber { get; set; }
-        [DynamoDBProperty] public CultureInfo SelectedLocale { get; set; }
+        [DynamoDBProperty] public string SelectedLocale { get; set; }
         [DynamoDBProperty] public bool ConsentRegistration { get; set; }
         [DynamoDBProperty] public DateTime? DateOfBirth { get; set; }
         [DynamoDBProperty] public string MfaChangePhoneCode { get; set; }

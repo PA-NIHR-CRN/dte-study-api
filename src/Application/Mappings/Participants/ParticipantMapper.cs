@@ -32,6 +32,7 @@ namespace Application.Mappings.Participants
                 ConsentRegistration = source.ConsentRegistration,
                 ConsentRegistrationAtUtc = source.ConsentRegistrationAtUtc,
                 RemovalOfConsentRegistrationAtUtc = source.RemovalOfConsentRegistrationAtUtc,
+                SelectedLocale = source.SelectedLocale,
             };
         }
 

@@ -314,7 +314,7 @@ namespace Infrastructure.Services
                     EmailName = _contentfulSettings.EmailTemplates.MfaEmailConfirmation,
                     FirstName = participant.Firstname,
                     Code = code,
-                    SelectedLocale = participant.SelectedLocale
+                    SelectedLocale = new CultureInfo(participant.SelectedLocale)
                 };
                 
                 var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
@@ -499,7 +499,7 @@ namespace Infrastructure.Services
                     {
                         EmailName = _contentfulSettings.EmailTemplates.MfaMobileNumberVerification,
                         FirstName = participant.Firstname,
-                        SelectedLocale = participant.SelectedLocale
+                        SelectedLocale = new CultureInfo(participant.SelectedLocale)
                     };
                     
                     var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
@@ -797,7 +797,7 @@ namespace Infrastructure.Services
             return exceptionResponse;
         }
 
-        public async Task<Response<SignUpResponse>> NhsSignUpAsync(bool consentRegistration, CultureInfo selectedLocale,
+        public async Task<Response<SignUpResponse>> NhsSignUpAsync(bool consentRegistration, string selectedLocale,
             string token)
         {
             try
@@ -806,13 +806,13 @@ namespace Infrastructure.Services
 
                 await _mediator.Send(new CreateParticipantDetailsCommand("", nhsUserInfo.Email,
                     nhsUserInfo.FirstName, nhsUserInfo.LastName,
-                    consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber));
+                    consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber, selectedLocale));
                 
                 var request = new EmailContentRequest
                 {
                     EmailName = _contentfulSettings.EmailTemplates.NhsSignUp,
                     FirstName = nhsUserInfo.FirstName,
-                    SelectedLocale = selectedLocale
+                    SelectedLocale = new CultureInfo(selectedLocale)
                 };
                 
                 var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
@@ -883,7 +883,7 @@ namespace Infrastructure.Services
                         var request = new EmailContentRequest
                         {
                             EmailName = _contentfulSettings.EmailTemplates.EmailAccountExists,
-                            SelectedLocale = participant.SelectedLocale,
+                            SelectedLocale = new CultureInfo(participant.SelectedLocale),
                             FirstName = participant.Firstname,
                         };
 
@@ -903,7 +903,7 @@ namespace Infrastructure.Services
                     var request = new EmailContentRequest
                     {
                         EmailName = _contentfulSettings.EmailTemplates.NhsAccountExists,
-                        SelectedLocale = participantDetails.SelectedLocale,
+                        SelectedLocale = new CultureInfo(participantDetails.SelectedLocale),
                         FirstName = participantDetails.Firstname,
                     };
                     
@@ -1268,7 +1268,7 @@ namespace Infrastructure.Services
                 var request = new EmailContentRequest
                 {
                     EmailName = _contentfulSettings.EmailTemplates.NhsPasswordReset,
-                    SelectedLocale = participantDetails.SelectedLocale,
+                    SelectedLocale = new CultureInfo(participantDetails.SelectedLocale),
                     FirstName = participantDetails.Firstname,
                 };
 
