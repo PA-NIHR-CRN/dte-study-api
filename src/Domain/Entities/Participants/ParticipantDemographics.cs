@@ -21,6 +21,7 @@ namespace Domain.Entities.Participants
         [DynamoDBProperty] public bool? Disability { get; set; }
         [DynamoDBProperty] public bool? ConsentContact { get; set; }
         [DynamoDBProperty] public string DisabilityDescription { get; set; }
+        [DynamoDBProperty] public string SelectedLocale { get; set; }
         [DynamoDBProperty] public List<string> HealthConditionInterests { get; set; }
         [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? UpdatedAtUtc { get; set; }
         [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? DateOfBirth { get; set; }
