@@ -21,7 +21,6 @@ using Dte.Common.Http;
 using Dte.Common.Responses;
 using FluentValidation.Results;
 using Infrastructure.Clients;
-using Infrastructure.Content;
 using Infrastructure.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection;
