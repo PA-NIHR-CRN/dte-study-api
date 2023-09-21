@@ -6,6 +6,7 @@ using Amazon.CognitoIdentityProvider.Model;
 using Amazon.DynamoDBv2.Model;
 using Application.Contracts;
 using Application.Mappings.Participants;
+using Application.Models.MFA;
 using Application.Models.Participants;
 using Application.Responses.V1.Participants;
 using Application.Settings;
@@ -14,6 +15,7 @@ using Domain.Entities.Participants;
 using Dte.Common.Contracts;
 using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
+using Dte.Common.Responses;
 using Infrastructure.Clients;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -44,7 +46,7 @@ public class ParticipantService : IParticipantService
         _emailService = emailService;
         _emailSettings = emailSettings;
     }
-    
+
     private static string DeletedKey(Guid primaryKey) => $"DELETED#{primaryKey}";
     private static string DeletedKey() => "DELETED#";
     private static string StripPrimaryKey(string pk) => pk.Replace("PARTICIPANT#", "");
@@ -202,7 +204,7 @@ public class ParticipantService : IParticipantService
             var linkedEmail = entity.Email;
             await SaveAnonymisedDemographicParticipantDataAsync(entity);
             await RemoveParticipantDataAsync(entity);
-                    
+
 
             var linkedEntity = await GetParticipantDetailsByEmailAsync(linkedEmail);
             if (linkedEntity == null) return;
@@ -213,6 +215,34 @@ public class ParticipantService : IParticipantService
             _logger.LogError(ex, "Delete-error = {EMessage}", ex.Message);
         }
     }
+
+    public async Task StoreMfaCodeAsync(string username, string code)
+    {
+        var particpiant = await _participantRepository.GetParticipantDetailsAsync(username);
+        if (particpiant == null)
+            throw new NotFoundException($"No participant found for username: {username}");
+
+        particpiant.MfaChangePhoneCode = code;
+        particpiant.MfaChangePhoneCodeExpiry = _clock.Now().AddMinutes(5);
+        await _participantRepository.UpdateParticipantDetailsAsync(particpiant);
+    }
+
+    public async Task<MfaValidationResult> ValidateMfaCodeAsync(string username, string code)
+    {
+        var participant = await _participantRepository.GetParticipantDetailsAsync(username);
+
+        if (participant == null)
+            return MfaValidationResult.UserNotFound;
+
+        if (participant.MfaChangePhoneCodeExpiry < _clock.Now())
+            return MfaValidationResult.CodeExpired;
+
+        if (participant.MfaChangePhoneCode != code)
+            return MfaValidationResult.CodeInvalid;
+
+        return MfaValidationResult.Success;
+    }
+
 
     private async Task RemoveParticipantDataAsync(ParticipantDetails entity)
     {
@@ -251,7 +281,7 @@ public class ParticipantService : IParticipantService
         };
 
         await _participantRepository.CreateAnonymisedDemographicParticipantDataAsync(anonEntity);
-                
+
         var demographics = await _participantRepository.GetParticipantDemographicsAsync(StripPrimaryKey(entity.Pk));
         if (demographics == null) return;
         demographics.Pk = primaryKey;
