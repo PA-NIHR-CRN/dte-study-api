@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
@@ -1077,7 +1078,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<AdminGetUserResponse> AdminGetUserAsync(string email)
+        public async Task<AdminGetUserResponse> AdminGetUserAsync(string email, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -1085,7 +1086,7 @@ namespace Infrastructure.Services
                 {
                     UserPoolId = _awsSettings.CognitoPoolId,
                     Username = email
-                });
+                }, cancellationToken);
 
                 Boolean authenticatedMobileVerified = false;
 

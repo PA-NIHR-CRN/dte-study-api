@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Application.Models.MFA;
 using Application.Responses.V1.Participants;
@@ -19,7 +20,7 @@ public interface IParticipantService
     Task UpdateParticipantDemographicsAsync(ParticipantDemographics entity);
     Task NhsLoginAsync(ParticipantDetails entity);
     Task UpdateParticipantEmailAsync(string requestParticipantId, string requestNewEmail);
-    Task DeleteUserAsync(string requestParticipantId);
+    Task DeleteUserAsync(string requestParticipantId, CancellationToken cancellationToken = default);
     Task StoreMfaCodeAsync(string username, string code);
     Task<MfaValidationResult> ValidateMfaCodeAsync(string username, string code);
 }

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Application.Models.MFA;
@@ -15,7 +16,7 @@ namespace Application.Contracts
         Task<Response<SignUpResponse>> SignUpAsync(string email, string password);
         Task<Response<object>> ConfirmSignUpAsync(string code, string userId);
         Task<Response<SignUpResponse>> AdminCreateUserSetPasswordAsync(string email, string password);
-        Task<AdminGetUserResponse> AdminGetUserAsync(string email);
+        Task<AdminGetUserResponse> AdminGetUserAsync(string email, CancellationToken cancellationToken = default);
         Task<Response<object>> DeleteUserAsync(string accessToken);
         Task<bool> UserExistsAsync(string email);
         Task<PasswordPolicyTypeResponse> GetPasswordPolicyTypeAsync();

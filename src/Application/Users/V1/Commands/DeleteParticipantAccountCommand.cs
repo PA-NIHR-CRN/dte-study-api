@@ -38,7 +38,7 @@ namespace Application.Users.V1.Commands
             public async Task<Response<object>> Handle(DeleteParticipantAccountCommand request, CancellationToken cancellationToken)
             {                
                 // clear out personal details
-                await _participantService.DeleteUserAsync(request.ParticipantId);
+                await _participantService.DeleteUserAsync(request.ParticipantId, cancellationToken);
                 
                 return Response<object>.CreateSuccessfulResponse();
             }

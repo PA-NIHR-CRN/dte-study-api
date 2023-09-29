@@ -36,13 +36,15 @@ namespace Infrastructure.Persistence
                 { OverrideTableName = awsSettings.ParticipantRegistrationDynamoDbTableName };
         }
 
-        public async Task<ParticipantDetails> GetParticipantDetailsAsync(string participantId)
+        public async Task<ParticipantDetails> GetParticipantDetailsAsync(string participantId,
+            CancellationToken cancellationToken = default)
         {
             return await _context.LoadAsync<ParticipantDetails>(ParticipantKey(participantId), ParticipantKey(),
-                _config);
+                _config, cancellationToken);
         }
 
-        public async Task<ParticipantDetails> QueryIndexForParticipantDetailsAsync(string query, string colName)
+        public async Task<ParticipantDetails> QueryIndexForParticipantDetailsAsync(string query, string colName,
+            CancellationToken cancellationToken = default)
         {
             var request = new QueryRequest
             {
@@ -59,9 +61,10 @@ namespace Infrastructure.Persistence
 
             try
             {
-                var response = await _client.QueryAsync(request);
+                var response = await _client.QueryAsync(request, cancellationToken);
 
-                _logger.LogInformation("response: {Response}", JsonConvert.SerializeObject(response, Formatting.Indented));
+                _logger.LogInformation("response: {Response}",
+                    JsonConvert.SerializeObject(response, Formatting.Indented));
 
                 var items = response.Items;
                 if (items.Count == 0) return null;
@@ -70,7 +73,7 @@ namespace Infrastructure.Persistence
                 _logger.LogInformation("item: {Item}", JsonConvert.SerializeObject(item, Formatting.Indented));
 
                 var participant = _context.FromDocument<ParticipantDetails>(Document.FromAttributeMap(item));
-                return await GetParticipantDetailsAsync(participant.Pk.Replace("PARTICIPANT#", ""));
+                return await GetParticipantDetailsAsync(participant.Pk.Replace("PARTICIPANT#", ""), cancellationToken);
             }
             catch (Exception e)
             {
@@ -78,14 +81,16 @@ namespace Infrastructure.Persistence
                 throw;
             }
         }
-        
-        public async Task<ParticipantDemographics> GetParticipantDemographicsAsync(string participantId)
+
+        public async Task<ParticipantDemographics> GetParticipantDemographicsAsync(string participantId,
+            CancellationToken cancellationToken = default)
         {
             return await _context.LoadAsync<ParticipantDemographics>(ParticipantKey(participantId), ParticipantKey(),
-                _config);
+                _config, cancellationToken);
         }
 
-        public async Task CreateParticipantDetailsAsync(ParticipantDetails entity)
+        public async Task CreateParticipantDetailsAsync(ParticipantDetails entity,
+            CancellationToken cancellationToken = default)
         {
             // TODO pull out this logic into a mapper
             entity.Pk = ParticipantKey(string.IsNullOrEmpty(entity.ParticipantId)
@@ -93,45 +98,51 @@ namespace Infrastructure.Persistence
                 : entity.ParticipantId);
             entity.Sk = ParticipantKey();
 
-            await _context.SaveAsync(entity, _config);
+            await _context.SaveAsync(entity, _config, cancellationToken);
         }
 
-        public async Task UpdateParticipantDetailsAsync(ParticipantDetails entity)
+        public async Task UpdateParticipantDetailsAsync(ParticipantDetails entity,
+            CancellationToken cancellationToken = default)
         {
-            await _context.SaveAsync(entity, _config);
+            await _context.SaveAsync(entity, _config, cancellationToken);
         }
 
-        public async Task CreateParticipantDemographicsAsync(ParticipantDemographics entity)
+        public async Task CreateParticipantDemographicsAsync(ParticipantDemographics entity,
+            CancellationToken cancellationToken = default)
         {
             entity.Pk = ParticipantKey(entity.ParticipantId);
             entity.Sk = ParticipantKey();
 
-            await _context.SaveAsync(entity, _config);
+            await _context.SaveAsync(entity, _config, cancellationToken);
         }
 
-        public async Task AddDemographicsToNhsUserAsync(ParticipantDemographics entity, string nhsId)
+        public async Task AddDemographicsToNhsUserAsync(ParticipantDemographics entity, string nhsId,
+            CancellationToken cancellationToken = default)
         {
             entity.Pk = ParticipantKey(nhsId);
             entity.Sk = ParticipantKey();
 
-            await _context.SaveAsync(entity, _config);
+            await _context.SaveAsync(entity, _config, cancellationToken);
         }
 
-        public async Task UpdateParticipantDemographicsAsync(ParticipantDemographics entity)
+        public async Task UpdateParticipantDemographicsAsync(ParticipantDemographics entity,
+            CancellationToken cancellationToken = default)
         {
-            await _context.SaveAsync(entity, _config);
+            await _context.SaveAsync(entity, _config, cancellationToken);
         }
 
-        public async Task DeleteParticipantDetailsAsync(ParticipantDetails entity)
+        public async Task DeleteParticipantDetailsAsync(ParticipantDetails entity,
+            CancellationToken cancellationToken = default)
         {
-            await _context.DeleteAsync(entity, _config);
+            await _context.DeleteAsync(entity, _config, cancellationToken);
         }
 
-        public async Task CreateAnonymisedDemographicParticipantDataAsync(ParticipantDetails entity)
+        public async Task CreateAnonymisedDemographicParticipantDataAsync(ParticipantDetails entity,
+            CancellationToken cancellationToken = default)
         {
-            await _context.SaveAsync(entity, _config);
+            await _context.SaveAsync(entity, _config, cancellationToken);
         }
-        
+
         public async IAsyncEnumerable<Participant> GetAllAsync(
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
@@ -148,19 +159,28 @@ namespace Infrastructure.Persistence
             }
         }
 
-        public async Task<Participant> GetParticipantAsync(string pk)
+        public async Task<Participant> GetParticipantAsync(string pk, CancellationToken cancellationToken = default)
         {
             return await _context.LoadAsync<Participant>(pk, ParticipantKey(),
-                _config);
+                _config, cancellationToken);
         }
 
-        public async Task DeleteParticipantAsync(Participant entity)
+        public async Task DeleteParticipantAsync(Participant entity, CancellationToken cancellationToken = default)
         {
-            await _context.DeleteAsync(entity, _config);
+            await _context.DeleteAsync(entity, _config, cancellationToken);
         }
-        public async Task CreateParticipantAsync(Participant entity)
+
+        public async Task CreateParticipantAsync(Participant entity, CancellationToken cancellationToken = default)
         {
-            await _context.SaveAsync(entity, _config);
+            await _context.SaveAsync(entity, _config, cancellationToken);
+        }
+
+        public async IAsyncEnumerator<Participant> GetAsyncEnumerator(CancellationToken cancellationToken = default)
+        {
+            await foreach (var participant in GetAllAsync(cancellationToken))
+            {
+                yield return participant;
+            }
         }
     }
 }
