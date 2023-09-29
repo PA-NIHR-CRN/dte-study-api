@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
@@ -58,28 +57,19 @@ namespace Infrastructure.Persistence
             };
 
             _logger.LogInformation("request: {Request}", JsonConvert.SerializeObject(request, Formatting.Indented));
+            var response = await _client.QueryAsync(request, cancellationToken);
 
-            try
-            {
-                var response = await _client.QueryAsync(request, cancellationToken);
+            _logger.LogInformation("response: {Response}",
+                JsonConvert.SerializeObject(response, Formatting.Indented));
 
-                _logger.LogInformation("response: {Response}",
-                    JsonConvert.SerializeObject(response, Formatting.Indented));
+            var items = response.Items;
+            if (items.Count == 0) return null;
+            var item = items.OrderByDescending(x => DateTime.Parse(x["CreatedAtUtc"].S)).First();
 
-                var items = response.Items;
-                if (items.Count == 0) return null;
-                var item = items.OrderByDescending(x => DateTime.Parse(x["CreatedAtUtc"].S)).First();
+            _logger.LogInformation("item: {Item}", JsonConvert.SerializeObject(item, Formatting.Indented));
 
-                _logger.LogInformation("item: {Item}", JsonConvert.SerializeObject(item, Formatting.Indented));
-
-                var participant = _context.FromDocument<ParticipantDetails>(Document.FromAttributeMap(item));
-                return await GetParticipantDetailsAsync(participant.Pk.Replace("PARTICIPANT#", ""), cancellationToken);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            var participant = _context.FromDocument<ParticipantDetails>(Document.FromAttributeMap(item));
+            return await GetParticipantDetailsAsync(participant.Pk.Replace("PARTICIPANT#", ""), cancellationToken);
         }
 
         public async Task<ParticipantDemographics> GetParticipantDemographicsAsync(string participantId,
@@ -143,22 +133,6 @@ namespace Infrastructure.Persistence
             await _context.SaveAsync(entity, _config, cancellationToken);
         }
 
-        public async IAsyncEnumerable<Participant> GetAllAsync(
-            [EnumeratorCancellation] CancellationToken cancellationToken = default)
-        {
-            var search = _context.ScanAsync<Participant>(null, _config);
-
-            while (!search.IsDone)
-            {
-                var page = await search.GetNextSetAsync(cancellationToken);
-                foreach (var item in page)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    yield return item;
-                }
-            }
-        }
-
         public async Task<Participant> GetParticipantAsync(string pk, CancellationToken cancellationToken = default)
         {
             return await _context.LoadAsync<Participant>(pk, ParticipantKey(),
@@ -177,9 +151,16 @@ namespace Infrastructure.Persistence
 
         public async IAsyncEnumerator<Participant> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
-            await foreach (var participant in GetAllAsync(cancellationToken))
+            var search = _context.ScanAsync<Participant>(null, _config);
+
+            while (!search.IsDone)
             {
-                yield return participant;
+                var page = await search.GetNextSetAsync(cancellationToken);
+                foreach (var item in page)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    yield return item;
+                }
             }
         }
     }
