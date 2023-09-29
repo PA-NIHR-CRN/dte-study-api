@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
@@ -76,7 +78,7 @@ namespace Infrastructure.Persistence
                 throw;
             }
         }
-
+        
         public async Task<ParticipantDemographics> GetParticipantDemographicsAsync(string participantId)
         {
             return await _context.LoadAsync<ParticipantDemographics>(ParticipantKey(participantId), ParticipantKey(),
@@ -126,6 +128,37 @@ namespace Infrastructure.Persistence
         }
 
         public async Task CreateAnonymisedDemographicParticipantDataAsync(ParticipantDetails entity)
+        {
+            await _context.SaveAsync(entity, _config);
+        }
+        
+        public async IAsyncEnumerable<Participant> GetAllAsync(
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            var search = _context.ScanAsync<Participant>(null, _config);
+
+            while (!search.IsDone)
+            {
+                var page = await search.GetNextSetAsync(cancellationToken);
+                foreach (var item in page)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    yield return item;
+                }
+            }
+        }
+
+        public async Task<Participant> GetParticipantAsync(string pk)
+        {
+            return await _context.LoadAsync<Participant>(pk, ParticipantKey(),
+                _config);
+        }
+
+        public async Task DeleteParticipantAsync(Participant entity)
+        {
+            await _context.DeleteAsync(entity, _config);
+        }
+        public async Task CreateParticipantAsync(Participant entity)
         {
             await _context.SaveAsync(entity, _config);
         }

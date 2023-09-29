@@ -94,18 +94,31 @@ public class ParticipantService : IParticipantService
             CreatedAtUtc = _clock.Now(),
         };
         // check if demographic data is complete
-        var demographics = await _participantRepository
+        var oldUser = await _participantRepository
             .GetParticipantDemographicsAsync(participant.Pk.Replace("PARTICIPANT#", ""));
-        if (demographics.HasDemographics)
+        if (oldUser.HasDemographics)
         {
             await _participantRepository.CreateParticipantDetailsAsync(entity);
-            await _participantRepository.AddDemographicsToNhsUserAsync(demographics, entity.NhsId);
+            await _participantRepository.AddDemographicsToNhsUserAsync(oldUser, entity.NhsId);
         }
         else if (participant.ConsentRegistration)
         {
             // create new user with consent and deactivate the old user
             await _participantRepository.CreateParticipantDetailsAsync(entity);
         }
+
+        // get the linked account row by passing the ParticipantId into the pk as the new row saves the PK as ParticipantId to link 
+        var linkedRecord =
+            await _participantRepository.GetParticipantAsync(
+                $"PARTICIPANT#{oldUser.ParticipantId}");
+
+        // delete the linked row
+        await _participantRepository.DeleteParticipantAsync(linkedRecord);
+
+        // create a new row with all the same info with LINKED# replacing PARTICIPANT#
+        linkedRecord.Pk = $"LINKED#{linkedRecord.ParticipantId}";
+        linkedRecord.Sk = "LINKED#";
+        await _participantRepository.CreateParticipantAsync(linkedRecord);
 
         var response = await _provider.AdminDisableUserAsync(new AdminDisableUserRequest
             {
@@ -181,25 +194,25 @@ public class ParticipantService : IParticipantService
             var entity = await _participantRepository.GetParticipantDetailsAsync(participantId);
             if (entity == null) return;
 
-            var baseUrl = _emailSettings.WebAppBaseUrl;
-            var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                    "Closure of Be Part of Research Account")
-                .Replace("###TEXT_REPLACE1###",
-                    "This email is to confirm the closure of your Be Part of Research account. If you would still like to hear from us, you can<a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\"> sign up to our newsletter</a> to receive all our research news, and hear about studies and other opportunities to help shape health and care research from across the UK.")
-                .Replace("###TEXT_REPLACE2###",
-                    "If you would like to register again in future, please visit the <a href=\"https://volunteer.bepartofresearch.nihr.ac.uk/Participants/introduction\">registration page</a>.")
-                 .Replace("###TEXT_REPLACE3###",
-                    "Thank you for your support.")
-                .Replace("###TEXT_REPLACE4###",
-                    "")
-                .Replace("###LINK_REPLACE###", "")
-                .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                .Replace("###TEXT_REPLACE5###",
-                    "")
-                .Replace("###TEXT_REPLACE6###",
-                    "");
-
-            await _emailService.SendEmailAsync(entity.Email, "Be Part of Research", htmlBody);
+            // var baseUrl = _emailSettings.WebAppBaseUrl;
+            // var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
+            //         "Closure of Be Part of Research Account")
+            //     .Replace("###TEXT_REPLACE1###",
+            //         "This email is to confirm the closure of your Be Part of Research account. If you would still like to hear from us, you can<a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\"> sign up to our newsletter</a> to receive all our research news, and hear about studies and other opportunities to help shape health and care research from across the UK.")
+            //     .Replace("###TEXT_REPLACE2###",
+            //         "If you would like to register again in future, please visit the <a href=\"https://volunteer.bepartofresearch.nihr.ac.uk/Participants/introduction\">registration page</a>.")
+            //      .Replace("###TEXT_REPLACE3###",
+            //         "Thank you for your support.")
+            //     .Replace("###TEXT_REPLACE4###",
+            //         "")
+            //     .Replace("###LINK_REPLACE###", "")
+            //     .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
+            //     .Replace("###TEXT_REPLACE5###",
+            //         "")
+            //     .Replace("###TEXT_REPLACE6###",
+            //         "");
+            //
+            // await _emailService.SendEmailAsync(entity.Email, "Be Part of Research", htmlBody);
 
             var linkedEmail = entity.Email;
             await SaveAnonymisedDemographicParticipantDataAsync(entity);
