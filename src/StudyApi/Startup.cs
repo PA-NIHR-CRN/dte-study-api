@@ -251,8 +251,7 @@ namespace StudyApi
 
             app.UseRouting();
 
-            if (Environment.IsDevelopment() || string.Equals(Environment.EnvironmentName, "sandbox",
-                    StringComparison.InvariantCultureIgnoreCase))
+            if (Environment.IsDevelopment())
             {
                 app.UseCors("AllowLocal");
             }
