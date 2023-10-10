@@ -52,22 +52,6 @@ namespace StudyApi.Acceptance.Tests
             TestApi.AddClaims(new Claim("cognito:groups", AppRoles.Admin));
         }
         
-        protected void LoginAsResearcher(bool isAdmin = false)
-        {
-            if (isAdmin)
-            {
-                TestApi.AddClaims
-                (
-                    new Claim("cognito:username", $"{IdentitySettings.IdgExternalProviderName}_{Guid.NewGuid().ToString()}"),
-                    new Claim("cognito:groups", AppRoles.Admin)
-                );
-            }
-            else
-            {
-                TestApi.AddClaims(new Claim("cognito:username", $"{IdentitySettings.IdgExternalProviderName}_{Guid.NewGuid().ToString()}"));
-            }
-        }
-        
         protected void LoginAsParticipant()
         {
             TestApi.AddClaims(new Claim("cognito:username", $"{Guid.NewGuid().ToString()}"));
