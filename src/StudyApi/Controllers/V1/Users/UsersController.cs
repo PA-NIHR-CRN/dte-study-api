@@ -300,7 +300,7 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("nhslogin")]
         public async Task<IActionResult> NhsLogin([FromBody] NhsLoginRequest request)
         {
-            var response = await _mediator.Send(new NhsLoginCommand(request.Code, request.RedirectUrl));
+            var response = await _mediator.Send(new NhsLoginCommand(request.Code, request.RedirectUrl, request.SelectedLocale));
 
             if (!response.IsSuccess)
             {
@@ -327,7 +327,7 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("signup")]
         public async Task<IActionResult> SignUpUserAsync([FromBody] SignUpRequest request)
         {
-            var response = await _mediator.Send(new SignUpCommand(request.Email, request.Password));
+            var response = await _mediator.Send(new SignUpCommand(request.Email, request.Password, request.SelectedLocale));
 
             await _mediator.Send(new CreateParticipantDetailsCommand(
                 response.Content.UserId, request.Email, request.Firstname, request.Lastname,

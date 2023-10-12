@@ -728,7 +728,7 @@ namespace Infrastructure.Services
 
         private static bool IsUnder18(DateTime dateOfBirth) => DateTime.Now.AddYears(-18).Date < dateOfBirth.Date;
 
-        public async Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl)
+        public async Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl, string selectedLocale)
         {
             try
             {
@@ -761,6 +761,7 @@ namespace Infrastructure.Services
                     Lastname = nhsUserInfo.LastName,
                     NhsId = nhsUserInfo.NhsId,
                     NhsNumber = nhsUserInfo.NhsNumber,
+                    SelectedLocale = selectedLocale
                 });
 
                 return Response<NhsLoginResponse>.CreateSuccessfulContentResponse(response,
@@ -832,7 +833,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password)
+        public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password, string selectedLocale)
         {
             try
             {
@@ -920,6 +921,10 @@ namespace Infrastructure.Services
                     ClientId = _awsSettings.CognitoAppClientIds[0],
                     Username = email,
                     Password = password,
+                    ClientMetadata = new Dictionary<string, string>
+                    {
+                        { "selectedLocale", selectedLocale }
+                    }
                 });
 
                 if (_devSettings.AutoConfirmNewCognitoSignup)
