@@ -16,7 +16,7 @@ namespace Infrastructure.Services
         public EmailService(EmailSettings emailSettings)
         {
             _emailSettings = emailSettings;
-            _client = new AmazonSimpleEmailServiceClient(RegionEndpoint.EUWest1);
+            _client = new AmazonSimpleEmailServiceClient(RegionEndpoint.EUWest2);
         }
 
         public async Task SendEmailAsync(string to, string subject, string body)

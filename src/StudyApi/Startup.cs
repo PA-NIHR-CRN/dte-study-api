@@ -51,12 +51,6 @@ namespace StudyApi
             services.AddOptions<DevSettings>().Bind(Configuration.GetSection(DevSettings.SectionName));
             var awsSettings = Configuration.GetSection(AwsSettings.SectionName).Get<AwsSettings>();
             if (awsSettings == null) throw new Exception("Could not bind the aws settings, please check configuration");
-            var cpmsSettings = Configuration.GetSection(CpmsSettings.SectionName).Get<CpmsSettings>();
-            if (cpmsSettings == null)
-                throw new Exception("Could not bind the cpms settings, please check configuration");
-            var identitySettings = Configuration.GetSection(IdentitySettings.SectionName).Get<IdentitySettings>();
-            if (identitySettings == null)
-                throw new Exception("Could not bind the identity settings, please check configuration");
             var clientsSettings = Configuration.GetSection(ClientsSettings.SectionName).Get<ClientsSettings>();
             if (clientsSettings == null)
                 throw new Exception("Could not bind the Clients Settings, please check configuration");
@@ -65,8 +59,6 @@ namespace StudyApi
                 throw new Exception("Could not bind the email settings, please check configuration");
 
             services.AddSingleton(awsSettings);
-            services.AddSingleton(cpmsSettings);
-            services.AddSingleton(identitySettings);
             services.AddSingleton(clientsSettings);
             services.AddSingleton(emailSettings);
 
@@ -259,11 +251,11 @@ namespace StudyApi
 
             app.UseRouting();
 
-            if (Environment.IsDevelopment() || string.Equals(Environment.EnvironmentName, "sandbox",
-                    StringComparison.InvariantCultureIgnoreCase))
+            if (Environment.IsDevelopment())
             {
                 app.UseCors("AllowLocal");
             }
+            
 
             app.UseCookiePolicy(new CookiePolicyOptions
             {
