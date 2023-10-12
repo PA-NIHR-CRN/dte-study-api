@@ -43,16 +43,10 @@ namespace StudyApi.Acceptance.Tests
                 // Configuration
                 var awsSettings = Configuration.GetSection(AwsSettings.SectionName).Get<AwsSettings>();
                 if (awsSettings == null) throw new Exception("Could not bind the aws settings, please check configuration");
-                var cpmsSettings = Configuration.GetSection(CpmsSettings.SectionName).Get<CpmsSettings>();
-                if (cpmsSettings == null) throw new Exception("Could not bind the cpms settings, please check configuration");
-                var identitySettings = Configuration.GetSection(IdentitySettings.SectionName).Get<IdentitySettings>();
-                if (identitySettings == null) throw new Exception("Could not bind the identity settings, please check configuration");
                 var emailSettings = Configuration.GetSection(EmailSettings.SectionName).Get<EmailSettings>();
                 if (emailSettings == null) throw new Exception("Could not bind the email settings, please check configuration");
 
                 services.AddSingleton(awsSettings);
-                services.AddSingleton(cpmsSettings);
-                services.AddSingleton(identitySettings);
                 services.AddSingleton(emailSettings);
                 
                 services.AddAuthentication("Test").AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", options => { });

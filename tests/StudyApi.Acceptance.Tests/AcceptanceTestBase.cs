@@ -29,7 +29,6 @@ namespace StudyApi.Acceptance.Tests
             CreateApiWebApplicationFactory();
             Scope = TestApi.Services.CreateScope();
 
-            IdentitySettings = Scope.ServiceProvider.GetService<IdentitySettings>();
             ClientsSettings = Scope.ServiceProvider.GetService<ClientsSettings>();
             
             var httpClient = TestApi.CreateClient();
@@ -43,29 +42,12 @@ namespace StudyApi.Acceptance.Tests
         protected IServiceScope Scope { get; private set; }
         protected Uri BaseAddress { get; private set; }
         protected StudyApiClient StudyApiClient { get; private set; }
-        protected IdentitySettings IdentitySettings { get; private set; }
         protected ClientsSettings ClientsSettings { get; private set; }
 
         protected void LoginAsAdmin()
         {
             TestApi.AddClaims(new Claim("cognito:username", $"{Guid.NewGuid().ToString()}"));
             TestApi.AddClaims(new Claim("cognito:groups", AppRoles.Admin));
-        }
-        
-        protected void LoginAsResearcher(bool isAdmin = false)
-        {
-            if (isAdmin)
-            {
-                TestApi.AddClaims
-                (
-                    new Claim("cognito:username", $"{IdentitySettings.IdgExternalProviderName}_{Guid.NewGuid().ToString()}"),
-                    new Claim("cognito:groups", AppRoles.Admin)
-                );
-            }
-            else
-            {
-                TestApi.AddClaims(new Claim("cognito:username", $"{IdentitySettings.IdgExternalProviderName}_{Guid.NewGuid().ToString()}"));
-            }
         }
         
         protected void LoginAsParticipant()
