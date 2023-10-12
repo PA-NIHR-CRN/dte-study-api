@@ -83,20 +83,6 @@ namespace StudyApi
                         });
                 });
             }
-            else
-            {
-                services.AddCors(options =>
-                {
-                    options.AddPolicy(name: "AllowProd",
-                        policy =>
-                        {
-                            policy.WithOrigins("https://dev.volunteer.bepartofresearch.nihr.ac.uk")
-                                .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                .AllowCredentials();
-                        });
-                });
-            }
 
             services.AddApiVersioning(opts =>
             {
@@ -268,10 +254,6 @@ namespace StudyApi
             if (Environment.IsDevelopment())
             {
                 app.UseCors("AllowLocal");
-            }
-            else
-            {
-                app.UseCors("AllowProd");
             }
             
 
