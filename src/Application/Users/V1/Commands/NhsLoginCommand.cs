@@ -11,11 +11,13 @@ namespace Application.Users.V1.Commands
     {
         private string Code { get; }
         private string RedirectUrl { get; }
+        private string SelectedLocale { get; }
 
-        public NhsLoginCommand(string code, string redirectUrl)
+        public NhsLoginCommand(string code, string redirectUrl, string selectedLocale)
         {
             Code = code;
             RedirectUrl = redirectUrl;
+            SelectedLocale = selectedLocale;
         }
 
         public class NhsLoginCommandHandler : IRequestHandler<NhsLoginCommand, Response<NhsLoginResponse>>
@@ -31,7 +33,7 @@ namespace Application.Users.V1.Commands
             public async Task<Response<NhsLoginResponse>> Handle(NhsLoginCommand request,
                 CancellationToken cancellationToken)
             {
-                return await _userService.NhsLoginAsync(request.Code, request.RedirectUrl);
+                return await _userService.NhsLoginAsync(request.Code, request.RedirectUrl, request.SelectedLocale);
             }
         }
     }
