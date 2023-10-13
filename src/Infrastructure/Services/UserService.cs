@@ -224,13 +224,13 @@ namespace Infrastructure.Services
             }
             catch (CodeMismatchException ex)
             {
-                return HandleMfaException(ex, "MFA_Code_Mismatch");
+                return HandleMfaException(ex, ErrorCode.MfaCodeMismatch);
             }
             catch (NotAuthorizedException ex)
             {
                 if (ex.Message == "Invalid session for the user, session is expired.")
                 {
-                    return HandleMfaException(ex, "MFA_Session_Expired");
+                    return HandleMfaException(ex, ErrorCode.MfaSessionExpired);
                 }
                 else
                 {
@@ -277,7 +277,7 @@ namespace Infrastructure.Services
                 }
 
                 return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), "No_Mfa_Challenge",
+                    nameof(UserService), ErrorCode.MfaNoChallenge,
                     mfaDetails, _headerService.GetConversationId());
             }
             catch (Exception ex)
@@ -409,13 +409,13 @@ namespace Infrastructure.Services
             }
             catch (CodeMismatchException ex)
             {
-                return HandleMfaException(ex, "MFA_Code_Mismatch");
+                return HandleMfaException(ex, ErrorCode.MfaCodeMismatch);
             }
             catch (NotAuthorizedException ex)
             {
                 return HandleMfaException(ex,
                     ex.Message == "Invalid session for the user, session is expired."
-                        ? "MFA_Session_Expired"
+                        ? ErrorCode.MfaSessionExpired
                         : "Not_Authorized");
             }
             catch (Exception ex)
@@ -696,13 +696,13 @@ namespace Infrastructure.Services
             }
             catch (CodeMismatchException ex)
             {
-                return HandleMfaException(ex, "MFA_Code_Mismatch");
+                return HandleMfaException(ex, ErrorCode.MfaCodeMismatch);
             }
             catch (NotAuthorizedException ex)
             {
                 if (ex.Message == "Invalid session for the user, session is expired.")
                 {
-                    return HandleMfaException(ex, "MFA_Session_Expired");
+                    return HandleMfaException(ex, ErrorCode.MfaSessionExpired);
                 }
                 else
                 {
@@ -713,7 +713,7 @@ namespace Infrastructure.Services
             {
                 if (ex.Message == "Code mismatch")
                 {
-                    return HandleMfaException(ex, "MFA_Code_Mismatch");
+                    return HandleMfaException(ex, ErrorCode.MfaCodeMismatch);
                 }
                 else
                 {
