@@ -923,7 +923,7 @@ namespace Infrastructure.Services
                     Password = password,
                     ClientMetadata = new Dictionary<string, string>
                     {
-                        { "selectedLocale", selectedLocale }
+                        { "selectedLocale", selectedLocale ?? "en-GB" }
                     }
                 });
 
