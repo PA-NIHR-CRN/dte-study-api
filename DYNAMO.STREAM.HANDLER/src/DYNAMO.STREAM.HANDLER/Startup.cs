@@ -2,6 +2,8 @@ using Amazon.Lambda.Annotations;
 using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DYNAMO.STREAM.HANDLER.Handlers;
+using DYNAMO.STREAM.HANDLER.Ingestors;
+using DYNAMO.STREAM.HANDLER.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +25,12 @@ public class Startup
         services.AddDbContext<ParticipantDbContext>(options =>
             options.UseMySql(configuration.GetConnectionString("ParticipantDb"), ServerVersion.Parse("8.0.21")));
         services.AddTransient<IStreamHandler, StreamHandler>();
+        services.AddTransient<IDataIngestor, CsvIngestor>();
+        services.AddTransient<ICsvService, CsvService>();
         services.AddSingleton<IAsyncPolicy>(x =>
             Policy.Handle<Exception>().WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+        
+        
+        
     }
 }
