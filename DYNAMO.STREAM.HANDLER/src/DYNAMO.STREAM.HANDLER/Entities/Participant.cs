@@ -4,6 +4,7 @@ namespace DYNAMO.STREAM.HANDLER.Entities;
 
 public class Participant
 {
+    // TODO: does this need to be a constructor?
     public Participant()
     {
         DailyLifeImpact = null!;
