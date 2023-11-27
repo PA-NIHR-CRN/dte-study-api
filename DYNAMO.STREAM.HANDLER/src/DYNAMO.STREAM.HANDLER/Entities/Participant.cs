@@ -8,14 +8,14 @@ public class Participant
     [Key]
     public int Id { get; set; }
     public string ParticipantIdentifier { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     
     public bool RegistrationConsent { get; set; }
     public DateTime? RegistrationConsentAtUtc { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    public string Email { get; set; }
+    public string? Email { get; set; }
     public string EthnicBackground { get; set; }
     public string EthnicGroup { get; set; }
     
@@ -24,8 +24,8 @@ public class Participant
     public bool? HasLongTermCondition { get; set; }
     
     public bool? GenderIsSameAsSexRegisteredAtBirth { get; set; }
-    public string MobileNumber { get; set; }
-    public string LandlineNumber { get; set; }
+    public string? MobileNumber { get; set; }
+    public string? LandlineNumber { get; set; }
     public string NHSNumber { get; set; }
     
     public bool IsDeleted { get; set; }
