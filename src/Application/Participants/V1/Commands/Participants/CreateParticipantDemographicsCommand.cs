@@ -89,23 +89,30 @@ namespace Application.Participants.V1.Commands.Participants
                 try
                 {
                     var updateExisting = false;
-                   
+
                     var entity = await _participantRepository.GetParticipantDemographicsAsync(request.ParticipantId);
 
-                    if(!entity.HasDemographics)
+                    _logger.LogInformation("Participant: {SerializeObject}", JsonConvert.SerializeObject(entity));
+
+                    if (!entity.HasDemographics)
                     {
                         var user = await _participantRepository.GetParticipantDetailsAsync(request.ParticipantId);
                         if (user.NhsId is null)
                         {
+                            _logger.LogInformation(
+                                "Sending email with name {EmailTemplatesNewAccount} to {UserEmail} for participant {UserParticipantId}",
+                                _contentfulSettings.EmailTemplates.NewAccount, user.Email, user.ParticipantId);
+
                             var contentfulEmailRequest = new EmailContentRequest
                             {
                                 EmailName = _contentfulSettings.EmailTemplates.NewAccount,
                                 SelectedLocale = new CultureInfo(user.SelectedLocale)
                             };
-                
+
                             var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
-                            
-                            await _emailService.SendEmailAsync(user.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
+
+                            await _emailService.SendEmailAsync(user.Email, contentfulEmail.EmailSubject,
+                                contentfulEmail.EmailBody);
                         }
                     }
 
@@ -152,7 +159,7 @@ namespace Application.Participants.V1.Commands.Participants
                 {
                     var exceptionResponse = Response<object>.CreateExceptionResponse(
                         ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UpdateParticipantDetailsCommand.UpdateParticipantDetailsCommandHandler), "err", ex,
+                        nameof(CreateParticipantDemographicsCommandHandler), "err", ex,
                         _headerService.GetConversationId());
                     _logger.LogError(ex,
                         $"Unknown error creating participant demographics for {request.ParticipantId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
