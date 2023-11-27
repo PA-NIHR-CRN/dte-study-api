@@ -4,6 +4,7 @@ using Dte.Common.Contracts;
 using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DYNAMO.STREAM.HANDLER.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Polly;
 
@@ -115,20 +116,23 @@ public class StreamHandler : IStreamHandler
     private Task ProcessRemove(DynamoDBEvent.DynamodbStreamRecord record)
     {
         var pk = record.Dynamodb.OldImage.PK();
-        var participant = _dbContext.Participants.FirstOrDefault(x => x.ParticipantIdentifier == pk);
+        var participant = _dbContext.Participants.Include(participant => participant.Address).FirstOrDefault(x => x.ParticipantIdentifier == pk);
 
-        participant.IsDeleted = true;
-        participant.Email = null;
-        participant.FirstName = null;
-        participant.LastName = null;
-        participant.MobileNumber = null;
-        participant.LandlineNumber = null;
-        participant.RegistrationConsent = false;
-        participant.RemovalOfConsentRegistrationAtUtc = _clock.Now();
-        participant.UpdatedAt = _clock.Now();
-        participant.Disability = false;
-        participant.Address.Clear();
-        participant.HealthConditions.Clear();
+        if (participant != null)
+        {
+            participant.IsDeleted = true;
+            participant.Email = null;
+            participant.FirstName = null;
+            participant.LastName = null;
+            participant.MobileNumber = null;
+            participant.LandlineNumber = null;
+            participant.RegistrationConsent = false;
+            participant.RemovalOfConsentRegistrationAtUtc = _clock.Now();
+            participant.UpdatedAt = _clock.Now();
+            participant.Disability = null;
+            participant.Address.Clear();
+            participant.HealthConditions.Clear();
+        }
 
         return Task.CompletedTask;
     }
