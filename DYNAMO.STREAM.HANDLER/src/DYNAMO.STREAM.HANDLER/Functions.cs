@@ -1,6 +1,7 @@
 using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
 using DYNAMO.STREAM.HANDLER.Contracts;
+using Microsoft.Extensions.Logging;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -10,29 +11,35 @@ public class Functions
 {
     private readonly IStreamHandler _streamHandler;
     private readonly IDataIngestor _dataIngestor;
+    private readonly ILogger<Functions> _logger;
 
-    public Functions(IStreamHandler streamHandler, IDataIngestor dataIngestor)
+    public Functions(IStreamHandler streamHandler, IDataIngestor dataIngestor, ILogger<Functions> logger)
     {
         _streamHandler = streamHandler;
         _dataIngestor = dataIngestor;
+        _logger = logger;
     }
 
     [LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
-    public async Task ProcessStream(DynamoDBEvent dynamoDbEvent, ILambdaContext context)
+    public async Task ProcessStream(DynamoDBEvent dynamoDbEvent, CancellationToken cancellationToken)
     {
-        // TODO: use our an injected ILogger here.
-        // Add a log scope with any useful information from the context / event.
-        context.Logger.LogInformation($"Beginning to process {dynamoDbEvent.Records.Count} records...");
-        await _streamHandler.ProcessStream(dynamoDbEvent);
-        context.Logger.LogInformation("Stream processing complete.");
+        // TODO: should this pattern be followed throughout the application?
+        using (_logger.BeginScope(nameof(ProcessStream)))
+        {
+            _logger.LogInformation("Beginning to process {RecordsCount} records...", dynamoDbEvent.Records.Count);
+            await _streamHandler.ProcessStreamAsync(dynamoDbEvent, cancellationToken);
+            _logger.LogInformation("Stream processing complete");
+        }
     }
-    
+
     [LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
-    public async Task IngestData(ILambdaContext context)
+    public async Task IngestData(CancellationToken cancellationToken)
     {
-        // TODO: logging as above
-        context.Logger.LogInformation("Beginning to ingest data...");
-        await _dataIngestor.IngestDataAsync();
-        context.Logger.LogInformation("Data ingestion complete.");
+        using (_logger.BeginScope(nameof(ProcessStream)))
+        {
+            _logger.LogInformation("Beginning to ingest data...");
+            await _dataIngestor.IngestDataAsync(cancellationToken);
+            _logger.LogInformation("Data ingestion complete.");
+        }
     }
 }

@@ -1,5 +1,6 @@
 using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace DYNAMO.STREAM.HANDLER.Services;
@@ -7,32 +8,32 @@ namespace DYNAMO.STREAM.HANDLER.Services;
 public class RefDataService : IRefDataService
 {
     private readonly ILogger<RefDataService> _logger;
-    private readonly List<Gender> _genderRefData;
-    private readonly List<HealthCondition> _healthConditionRefData;
-    private readonly List<IdentifierType> _identifierTypeRefData;
-    private readonly List<CommunicationLanguage> _communicationLanguageRefData;
-    private readonly List<DailyLifeImpact> _dailyLifeImpactRefData;
+    private readonly Lazy<List<Gender>> _genderRefData;
+    private readonly Lazy<List<HealthCondition>> _healthConditionRefData;
+    private readonly Lazy<List<IdentifierType>> _identifierTypeRefData;
+    private readonly Lazy<List<CommunicationLanguage>> _communicationLanguageRefData;
+    private readonly Lazy<List<DailyLifeImpact>> _dailyLifeImpactRefData;
 
     public RefDataService(ParticipantDbContext dbContext, ILogger<RefDataService> logger)
     {
         _logger = logger;
+        // Probably should lock the lazy loader so this shared resource is thread-safe. 
 
-        // TODO: make these lazy. Not all execution paths will need all the reference data
-        // load them only when needed and then keep them around.
-        // Probably should lock the lazy loader so this shared resource is thread-safe.
+        // Lazy loader is thread safe by default
+        _genderRefData = new Lazy<List<Gender>>(() => dbContext.Genders.AsNoTracking().ToList());
+        _healthConditionRefData = new Lazy<List<HealthCondition>>(() => dbContext.HealthConditions.AsNoTracking().ToList());
+        _identifierTypeRefData = new Lazy<List<IdentifierType>>(() => dbContext.IdentifierTypes.AsNoTracking().ToList());
+        _communicationLanguageRefData = new Lazy<List<CommunicationLanguage>>(() => dbContext.CommunicationLanguages.AsNoTracking().ToList());
+        _dailyLifeImpactRefData = new Lazy<List<DailyLifeImpact>>(() => dbContext.DailyLifeImpacts.AsNoTracking().ToList());
 
-        // Load these as no-tracking. We won't be updating them.
-        _genderRefData = dbContext.Genders.ToList();
-        _healthConditionRefData = dbContext.HealthConditions.ToList();
-        _identifierTypeRefData = dbContext.IdentifierTypes.ToList();
-        _communicationLanguageRefData = dbContext.CommunicationLanguages.ToList();
-        _dailyLifeImpactRefData = dbContext.DailyLifeImpacts.ToList();
     }
 
-    private int GetIdFromReferenceData<T>(List<T> refData, string code) where T : IReferenceData
+    private int GetIdFromReferenceData<T>(Lazy<List<T>> refDataLazy, string code) where T : IReferenceData
     {
-        // TODO: Any trimming of code required here?
+        code = code.Trim();
         // Ensure the database is case insensitive (is case-sensitivity required?)
+
+        var refData = refDataLazy.Value;
 
         var matches = refData.Where(item => item.Code == code)
                             .OrderBy(x => x.IsDeleted ? 1 : 0) // Use active matches (0) first

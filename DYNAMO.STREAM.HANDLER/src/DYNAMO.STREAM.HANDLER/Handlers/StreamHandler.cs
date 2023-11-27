@@ -4,7 +4,6 @@ using Dte.Common.Contracts;
 using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DYNAMO.STREAM.HANDLER.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Polly;
 
@@ -16,19 +15,21 @@ public class StreamHandler : IStreamHandler
     private readonly ILogger<StreamHandler> _logger;
     private readonly IParticipantMapper _participantMapper;
     private readonly IClock _clock;
+    private readonly IAuroraRepository _auroraRepository;
     private readonly IAsyncPolicy _retryPolicy;
 
     public StreamHandler(ParticipantDbContext dbContext, IAsyncPolicy retryPolicy, ILogger<StreamHandler> logger,
-        IParticipantMapper participantMapper, IClock clock)
+        IParticipantMapper participantMapper, IClock clock, IAuroraRepository auroraRepository)
     {
         _dbContext = dbContext;
         _retryPolicy = retryPolicy;
         _logger = logger;
         _participantMapper = participantMapper;
         _clock = clock;
+        _auroraRepository = auroraRepository;
     }
 
-    public async Task ProcessStream(DynamoDBEvent dynamoDbEvent)
+    public async Task ProcessStreamAsync(DynamoDBEvent dynamoDbEvent, CancellationToken cancellationToken)
     {
         foreach (var record in dynamoDbEvent.Records)
         {
@@ -37,8 +38,9 @@ public class StreamHandler : IStreamHandler
 
             try
             {
-                await _retryPolicy.ExecuteAsync(async () => await ProcessRecord(record));
-                await _dbContext.SaveChangesAsync();
+                await _retryPolicy.ExecuteAsync(async () => await ProcessRecordAsync(record, cancellationToken));
+                // TODO: should this be moved to the _auroraRepository to encapsulate the logic?  Doing so would mean that the _dbContext could be removed from the constructor.
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (Exception e)
             {
@@ -49,96 +51,92 @@ public class StreamHandler : IStreamHandler
         }
     }
 
-    private Task ProcessRecord(DynamoDBEvent.DynamodbStreamRecord record)
+    private Task ProcessRecordAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
         if (record.EventName == OperationType.INSERT)
         {
-            return ProcessInsert(record);
+            return ProcessInsertAsync(record, cancellationToken);
         }
         else if (record.EventName == OperationType.MODIFY)
         {
-            return ProcessModify(record);
+            return ProcessModifyAsync(record, cancellationToken);
         }
         else if (record.EventName == OperationType.REMOVE)
         {
-            return ProcessRemove(record);
+            return ProcessRemoveAsync(record, cancellationToken);
         }
         else
         {
-            //TODO: Never throw a base Exception. Always throw something specific.
-            throw new NotImplementedException($"Unknown Event Name {record.EventName}");
+            throw new NotSupportedException($"Unknown Event Name {record.EventName}");
         }
     }
-
-    private Task ProcessInsert(DynamoDBEvent.DynamodbStreamRecord record)
+    
+    private async Task ProcessInsertAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
-        // check if the record sk is DELETED# and return as this is a newly created DELETE record should this be done before mapping to save on processing?
         var pk = record.Dynamodb.NewImage.PK();
         if (pk.StartsWith("DELETED#"))
         {
-            return Task.CompletedTask;
+            return;
         }
 
         var participant = new Participant();
-
         _participantMapper.Map(record.Dynamodb.NewImage, participant);
-
-        // if patrticipant has both identifiers then this is a linked record
-        // TODO: Add an IsLinkedAccount() method
-        // to do more rigourous checks on the linked status.
-        if (participant.ParticipantIdentifiers.Count == 2)
+    
+        var isLinkedAccount = await _auroraRepository.IsLinkedAccountAsync(participant, cancellationToken);
+        if (isLinkedAccount)
         {
-            // check if the record is already in the database
-            var existingParticipant = _dbContext
-                .ParticipantIdentifiers
-                .Where(x => participant.ParticipantIdentifiers.Select(y => y.Value).Contains(x.Value))
-                .Select(x => x.Participant)
-                .SingleOrDefault();
-
+            var existingParticipant = await _auroraRepository.GetParticipantAsync(participant, cancellationToken);
             if (existingParticipant != null)
             {
-                // if the record is already in the database then update the record
                 _participantMapper.Map(record.Dynamodb.NewImage, existingParticipant);
-                return Task.CompletedTask;
             }
         }
-
-        _dbContext.Participants.Add(participant);
-        // TODO: returning Task.CompletedTask means this code is no doing anything asynchronously.
-        // Ensure all db access is async, pass cancellation token down from the highest level.
-        return Task.CompletedTask;
+        else
+        {
+            // TODO: should this be added to _auroraRepository as it's more of a context thing?
+            await _dbContext.Participants.AddAsync(participant, cancellationToken);
+        }
     }
 
-    private Task ProcessModify(DynamoDBEvent.DynamodbStreamRecord record)
+    private async Task ProcessModifyAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
         var pk = record.Dynamodb.NewImage.PK();
-        var participant = _dbContext.Participants.Single(x => x.ParticipantIdentifiers.Any(y => y.Value == pk));
+        var participant = await _auroraRepository.GetParticipantByIdAsync(pk, cancellationToken);
 
-        _participantMapper.Map(record.Dynamodb.NewImage, participant);
-
-        return Task.CompletedTask;
+        if (participant != null)
+        {
+            _participantMapper.Map(record.Dynamodb.NewImage, participant );
+        }
+        else
+        {
+            _logger.LogWarning("Participant with PK {PK} not found for modification", pk);
+        }
     }
 
-    private Task ProcessRemove(DynamoDBEvent.DynamodbStreamRecord record)
+    private async Task ProcessRemoveAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
         var pk = record.Dynamodb.OldImage.PK();
-        var participant = _dbContext.Participants.Single(x => x.ParticipantIdentifiers.Any(y => y.Value == pk));
+        var participant = await _auroraRepository.GetParticipantByIdAsync(pk, cancellationToken);
 
-        // TODO: handle soft-delete transparently
-        participant.IsDeleted = true;
-        participant.Email = null;
-        participant.FirstName = null;
-        participant.LastName = null;
-        participant.MobileNumber = null;
-        participant.LandlineNumber = null;
-        participant.RegistrationConsent = false;
-        participant.RemovalOfConsentRegistrationAtUtc = _clock.Now();
-        participant.UpdatedAt = _clock.Now();
+        if (participant != null)
+        {
+            // TODO: handle soft-delete transparently
+            participant.IsDeleted = true;
+            participant.Email = null;
+            participant.FirstName = null;
+            participant.LastName = null;
+            participant.MobileNumber = null;
+            participant.LandlineNumber = null;
+            participant.RegistrationConsent = false;
+            participant.RemovalOfConsentRegistrationAtUtc = _clock.Now();
+            participant.UpdatedAt = _clock.Now();
             participant.Disability = null;
-        participant.Address.Clear();
-        participant.HealthConditions.Clear();
+            participant.Address.Clear();
+            participant.HealthConditions.Clear();
         }
-
-        return Task.CompletedTask;
+        else
+        {
+            _logger.LogWarning("Participant with PK {PK} not found for deletion.", pk);
+        }
     }
 }
