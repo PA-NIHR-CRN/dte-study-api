@@ -1,7 +1,5 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace DYNAMO.STREAM.HANDLER.Entities;
 
-public abstract class Gender : RefData
+public class Gender : RefData
 {
 }
