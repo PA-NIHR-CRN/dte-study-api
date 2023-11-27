@@ -14,4 +14,21 @@ public class ParticipantAddress
     public string Postcode { get; set; }
     public int ParticipantId { get; set; }
     public Participant Participant { get; set; }
+    
+    private static string GetOutcodeFromPostcode(string postcode)
+    {
+        if (string.IsNullOrWhiteSpace(postcode)) return null;
+        var postcodeWithoutSpace = postcode.Replace(" ", "");
+        return postcodeWithoutSpace[..^3];
+    }
+
+    public void Clear()
+    {
+        AddressLine1 = null;
+        AddressLine2 = null;
+        AddressLine3 = null;
+        AddressLine4 = null;
+        Town = null;
+        Postcode = GetOutcodeFromPostcode(Postcode);
+    }
 }
