@@ -4,6 +4,7 @@ using Dte.Common.Contracts;
 using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DYNAMO.STREAM.HANDLER.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Polly;
 
@@ -133,9 +134,10 @@ public class StreamHandler : IStreamHandler
         participant.RegistrationConsent = false;
         participant.RemovalOfConsentRegistrationAtUtc = _clock.Now();
         participant.UpdatedAt = _clock.Now();
-        participant.Disability = false;
+            participant.Disability = null;
         participant.Address.Clear();
         participant.HealthConditions.Clear();
+        }
 
         return Task.CompletedTask;
     }
