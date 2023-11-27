@@ -1,7 +1,6 @@
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
-using Dte.Common.Contracts;
 using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DynamoParticipant = Domain.Entities.Participants.Participant;
@@ -12,108 +11,96 @@ public class ParticipantMapper : IParticipantMapper
 {
     private readonly IDynamoDBContext _context;
     private readonly IRefDataService _refDataService;
-    private readonly IClock _clock;
 
-    public ParticipantMapper(IDynamoDBContext context, IRefDataService refDataService, IClock clock)
+    public ParticipantMapper(IDynamoDBContext context, IRefDataService refDataService)
     {
         _context = context;
         _refDataService = refDataService;
-        _clock = clock;
     }
 
     private void MapIdentifiers(DynamoParticipant source, Participant participant)
     {
         // Iterate over possible identifiers (ParticipantId, NhsId, etc.)
-        var identifiers = new List<(string type, string value)>
+        var identifiers = new List<(int type, string value)>
         {
-            ("ParticipantId", source.ParticipantId),
-            ("NhsId", source.NhsId)
+            (_refDataService.GetIdentifierTypeId("ParticipantId"), source.ParticipantId),
+            (_refDataService.GetIdentifierTypeId("NhsId"), source.NhsId)
         };
 
         foreach (var (type, value) in identifiers)
         {
-            if (!string.IsNullOrEmpty(value))
+            if (!participant.ParticipantIdentifiers.Any(pi => pi.Value == value && pi.IdentifierTypeId == type))
             {
-                var identifierTypeId = _refDataService.GetIdentifierTypeId(type);
-                if (identifierTypeId != null)
+                var newIdentifier = new ParticipantIdentifier
                 {
-                    if (!participant.ParticipantIdentifiers.Any(pi =>
-                            pi.Value == value && pi.IdentifierTypeId == identifierTypeId))
-                    {
-                        var newIdentifier = new ParticipantIdentifier
-                        {
-                            ParticipantId = participant.Id,
-                            Value = value,
-                            IdentifierTypeId = identifierTypeId,
-                            IsDeleted = false
-                        };
+                    Value = value,
+                    IdentifierTypeId = type,
+                };
 
-                        participant.ParticipantIdentifiers.Add(newIdentifier);
-                    }
-                }
+                participant.ParticipantIdentifiers.Add(newIdentifier);
             }
         }
     }
 
-    private void MapHealthConditions(DynamoParticipant source, Participant participant,
-        Participant? existingParticipant = null)
+    private void MapHealthConditions(DynamoParticipant source, Participant participant)
     {
-        var healthConditions = source.HealthConditionInterests?.Select(code => new ParticipantHealthCondition
+        var sourceHealthConditions = source.HealthConditionInterests
+            .Select(code => new ParticipantHealthCondition
         {
             HealthConditionId = _refDataService.GetHealthConditionId(code),
-            ParticipantId = participant.Id,
-            CreatedAt = existingParticipant == null
-                ? _clock.Now()
-                : participant.HealthConditions
-                    .First(x => x.HealthConditionId == _refDataService.GetHealthConditionId(code)).CreatedAt,
-            UpdatedAt = _clock.Now(),
-            IsDeleted = false
+            ParticipantId = participant.Id
         }).ToList();
 
-        if (healthConditions != null)
+        // TODO: Requirements clarification. If a health condition is added, removed and then added again,
+        // should a new row be added to participant.HealthConditions or should the old soft deleted row be reactivated?
+
+        // Add new health conditions
+        foreach (var sourceHealthCondition in sourceHealthConditions)
         {
-            foreach (var healthCondition in healthConditions.Where(healthCondition =>
-                         participant.HealthConditions.All(hc =>
-                             hc.HealthConditionId != healthCondition.HealthConditionId)))
+            if (!participant.HealthConditions.Any(hc => hc.Id != sourceHealthCondition.Id))
             {
-                participant.HealthConditions.Add(healthCondition);
+                participant.HealthConditions.Add(sourceHealthCondition);
+            }
+        }
+
+        // Remove health conditions
+        foreach (var destinationHealthCondition in participant.HealthConditions)
+        {
+            if (!sourceHealthConditions.Exists(hc => hc.Id != destinationHealthCondition.Id))
+            {
+                // TODO: Handle soft delete transparently
+                participant.HealthConditions.Remove(destinationHealthCondition);
             }
         }
     }
 
 
-    public Participant Map(Dictionary<string, AttributeValue> record, Participant? existingParticipant = null)
+    public void Map(Dictionary<string, AttributeValue> record, Participant destination)
     {
         var doc = Document.FromAttributeMap(record);
 
         var source = _context.FromDocument<DynamoParticipant>(doc);
 
-        var participant = existingParticipant ?? new Participant();
+        destination.Email = source.Email;
+        destination.FirstName = source.Firstname;
+        destination.LastName = source.Lastname;
+        destination.RegistrationConsent = source.ConsentRegistration;
+        destination.RegistrationConsentAtUtc = source.ConsentRegistrationAtUtc;
+        destination.MobileNumber = source.MobileNumber;
+        destination.LandlineNumber = source.LandlineNumber;
+        destination.DateOfBirth = source.DateOfBirth;
+        destination.EthnicGroup = source.EthnicGroup;
+        destination.EthnicBackground = source.EthnicBackground;
+        destination.GenderIsSameAsSexRegisteredAtBirth = source.GenderIsSameAsSexRegisteredAtBirth;
+        destination.NHSNumber = source.NhsNumber;
+        destination.RemovalOfConsentRegistrationAtUtc = source.RemovalOfConsentRegistrationAtUtc;
+        destination.HasLongTermCondition = source.Disability;
+        destination.GenderId = _refDataService.GetGenderId(source.SexRegisteredAtBirth);
+        destination.CommunicationLanguageId = _refDataService.GetCommunicationLanguageId(source.SelectedLocale);
+        destination.DailyLifeImpactId = _refDataService.GetDailyLifeImpactId(source.DisabilityDescription);
+        destination.Address = ParticipantAddressMapper.Map(source.Address, destination.Id);
 
-        participant.Email = source.Email;
-        participant.FirstName = source.Firstname;
-        participant.LastName = source.Lastname;
-        participant.RegistrationConsent = source.ConsentRegistration;
-        participant.RegistrationConsentAtUtc = source.ConsentRegistrationAtUtc;
-        participant.MobileNumber = source.MobileNumber;
-        participant.LandlineNumber = source.LandlineNumber;
-        participant.DateOfBirth = source.DateOfBirth;
-        participant.EthnicGroup = source.EthnicGroup;
-        participant.EthnicBackground = source.EthnicBackground;
-        participant.CreatedAt = source.CreatedAtUtc;
-        participant.UpdatedAt = source.UpdatedAtUtc;
-        participant.GenderIsSameAsSexRegisteredAtBirth = source.GenderIsSameAsSexRegisteredAtBirth;
-        participant.NHSNumber = source.NhsNumber;
-        participant.RemovalOfConsentRegistrationAtUtc = source.RemovalOfConsentRegistrationAtUtc;
-        participant.HasLongTermCondition = source.Disability;
-        participant.GenderId = _refDataService.GetGenderId(source.SexRegisteredAtBirth);
-        participant.CommunicationLanguageId = _refDataService.GetCommunicationLanguageId(source.SelectedLocale);
-        participant.DailyLifeImpactId = _refDataService.GetDailyLifeImpactId(source.DisabilityDescription);
-        participant.Address = ParticipantAddressMapper.Map(source.Address, participant.Id);
-        
-        MapHealthConditions(source, participant, existingParticipant);
-        MapIdentifiers(source, participant);
-
-        return participant;
+        MapHealthConditions(source, destination);
+        MapIdentifiers(source, destination);
     }
 }

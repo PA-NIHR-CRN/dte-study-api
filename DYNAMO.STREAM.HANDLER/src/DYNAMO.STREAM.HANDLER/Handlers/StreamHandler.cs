@@ -64,7 +64,8 @@ public class StreamHandler : IStreamHandler
         }
         else
         {
-            throw new Exception($"Unknown Event Name {record.EventName}");
+            //TODO: Never throw a base Exception. Always throw something specific.
+            throw new NotImplementedException($"Unknown Event Name {record.EventName}");
         }
     }
 
@@ -77,19 +78,21 @@ public class StreamHandler : IStreamHandler
             return Task.CompletedTask;
         }
 
-        var participant = _participantMapper.Map(record.Dynamodb.NewImage);
+        var participant = new Participant();
+
+        _participantMapper.Map(record.Dynamodb.NewImage, participant);
 
         // if patrticipant has both identifiers then this is a linked record
+        // TODO: Add an IsLinkedAccount() method
+        // to do more rigourous checks on the linked status.
         if (participant.ParticipantIdentifiers.Count == 2)
         {
             // check if the record is already in the database
-            var existingParticipant = _dbContext.Participants.FirstOrDefault(x =>
-                x.ParticipantIdentifiers.Any(pi =>
-                    pi.Value == participant.ParticipantIdentifiers.First().Value &&
-                    pi.IdentifierTypeId == participant.ParticipantIdentifiers.First().IdentifierTypeId) ||
-                x.ParticipantIdentifiers.Any(pi =>
-                    pi.Value == participant.ParticipantIdentifiers.Last().Value &&
-                    pi.IdentifierTypeId == participant.ParticipantIdentifiers.Last().IdentifierTypeId));
+            var existingParticipant = _dbContext
+                .ParticipantIdentifiers
+                .Where(x => participant.ParticipantIdentifiers.Select(y => y.Value).Contains(x.Value))
+                .Select(x => x.Participant)
+                .SingleOrDefault();
 
             if (existingParticipant != null)
             {
@@ -100,13 +103,16 @@ public class StreamHandler : IStreamHandler
         }
 
         _dbContext.Participants.Add(participant);
+        // TODO: returning Task.CompletedTask means this code is no doing anything asynchronously.
+        // Ensure all db access is async, pass cancellation token down from the highest level.
         return Task.CompletedTask;
     }
 
     private Task ProcessModify(DynamoDBEvent.DynamodbStreamRecord record)
     {
         var pk = record.Dynamodb.NewImage.PK();
-        var participant = _dbContext.Participants.FirstOrDefault(x => x.ParticipantIdentifier == pk);
+        var participant = _dbContext.Participants.Single(x => x.ParticipantIdentifiers.Any(y => y.Value == pk));
+
         _participantMapper.Map(record.Dynamodb.NewImage, participant);
 
         return Task.CompletedTask;
@@ -115,8 +121,9 @@ public class StreamHandler : IStreamHandler
     private Task ProcessRemove(DynamoDBEvent.DynamodbStreamRecord record)
     {
         var pk = record.Dynamodb.OldImage.PK();
-        var participant = _dbContext.Participants.FirstOrDefault(x => x.ParticipantIdentifier == pk);
+        var participant = _dbContext.Participants.Single(x => x.ParticipantIdentifiers.Any(y => y.Value == pk));
 
+        // TODO: handle soft-delete transparently
         participant.IsDeleted = true;
         participant.Email = null;
         participant.FirstName = null;
