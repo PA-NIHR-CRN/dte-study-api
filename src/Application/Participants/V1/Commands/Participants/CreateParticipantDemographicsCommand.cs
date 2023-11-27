@@ -152,6 +152,8 @@ namespace Application.Participants.V1.Commands.Participants
 
                     if (updateExisting)
                     {
+                        _logger.LogInformation("Updating participant demographics for {ParticipantId}",
+                            request.ParticipantId);
                         await _participantRepository.UpdateParticipantDemographicsAsync(entity);
                     }
                     else
