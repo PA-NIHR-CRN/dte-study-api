@@ -108,8 +108,14 @@ namespace Application.Participants.V1.Commands.Participants
                                 EmailName = _contentfulSettings.EmailTemplates.NewAccount,
                                 SelectedLocale = new CultureInfo(user.SelectedLocale)
                             };
+                            
+                            _logger.LogInformation("ContentfulEmailRequest: {SerializeObject}",
+                                JsonConvert.SerializeObject(contentfulEmailRequest));
 
                             var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
+                            
+                            _logger.LogInformation("ContentfulEmail: {SerializeObject}",
+                                JsonConvert.SerializeObject(contentfulEmail));
 
                             await _emailService.SendEmailAsync(user.Email, contentfulEmail.EmailSubject,
                                 contentfulEmail.EmailBody);
