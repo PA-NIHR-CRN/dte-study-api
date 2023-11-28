@@ -2,5 +2,5 @@ namespace DYNAMO.STREAM.HANDLER.Contracts;
 
 public interface IDataIngestor
 {
-    Task IngestDataAsync();
+    Task IngestDataAsync(CancellationToken cancellationToken);
 }
