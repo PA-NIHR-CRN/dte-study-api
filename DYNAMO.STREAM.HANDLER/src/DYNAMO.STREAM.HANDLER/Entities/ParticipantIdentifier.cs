@@ -1,8 +1,9 @@
+using DYNAMO.STREAM.HANDLER.Entities.RefData;
 using System.ComponentModel.DataAnnotations;
 
 namespace DYNAMO.STREAM.HANDLER.Entities;
 
-public class ParticipantIdentifier
+public class ParticipantIdentifier : ISoftDelete
 {
     public ParticipantIdentifier()
     {

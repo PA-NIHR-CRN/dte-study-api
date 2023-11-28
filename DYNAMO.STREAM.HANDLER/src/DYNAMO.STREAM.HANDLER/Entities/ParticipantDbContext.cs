@@ -1,4 +1,6 @@
 using DYNAMO.STREAM.HANDLER.Contracts;
+using DYNAMO.STREAM.HANDLER.Entities.Interceptors;
+using DYNAMO.STREAM.HANDLER.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 
 namespace DYNAMO.STREAM.HANDLER.Entities;
@@ -23,7 +25,14 @@ public class ParticipantDbContext: DbContext
     public DbSet<Gender> Genders { get; set; }
     public DbSet<HealthCondition> HealthConditions { get; set; }
     public DbSet<IdentifierType> IdentifierTypes { get; set; }
-    
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+
+        optionsBuilder.AddInterceptors(new SoftDeleteInterceptor(),
+                                       new AuditedInterceptor());
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

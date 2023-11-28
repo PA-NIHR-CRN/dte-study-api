@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using DYNAMO.STREAM.HANDLER.Contracts;
 
-namespace DYNAMO.STREAM.HANDLER.Entities;
+namespace DYNAMO.STREAM.HANDLER.Entities.RefData;
 
-public abstract class RefData : IReferenceData
+public abstract class RefData : IReferenceData, ISoftDelete
 {
     protected RefData()
     {

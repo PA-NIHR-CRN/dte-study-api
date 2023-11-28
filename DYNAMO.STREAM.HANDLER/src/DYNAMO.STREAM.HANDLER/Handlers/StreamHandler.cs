@@ -14,18 +14,16 @@ public class StreamHandler : IStreamHandler
     private readonly ParticipantDbContext _dbContext;
     private readonly ILogger<StreamHandler> _logger;
     private readonly IParticipantMapper _participantMapper;
-    private readonly IClock _clock;
     private readonly IAuroraRepository _auroraRepository;
     private readonly IAsyncPolicy _retryPolicy;
 
     public StreamHandler(ParticipantDbContext dbContext, IAsyncPolicy retryPolicy, ILogger<StreamHandler> logger,
-        IParticipantMapper participantMapper, IClock clock, IAuroraRepository auroraRepository)
+        IParticipantMapper participantMapper, IAuroraRepository auroraRepository)
     {
         _dbContext = dbContext;
         _retryPolicy = retryPolicy;
         _logger = logger;
         _participantMapper = participantMapper;
-        _clock = clock;
         _auroraRepository = auroraRepository;
     }
 
@@ -82,7 +80,7 @@ public class StreamHandler : IStreamHandler
         var participant = new Participant();
         _participantMapper.Map(record.Dynamodb.NewImage, participant);
     
-        var isLinkedAccount = await _auroraRepository.IsLinkedAccountAsync(participant, cancellationToken);
+        var isLinkedAccount = _auroraRepository.IsLinkedAccount(participant);
         if (isLinkedAccount)
         {
             var existingParticipant = await _auroraRepository.GetParticipantAsync(participant, cancellationToken);
@@ -101,7 +99,7 @@ public class StreamHandler : IStreamHandler
     private async Task ProcessModifyAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
         var pk = record.Dynamodb.NewImage.PK();
-        var participant = await _auroraRepository.GetParticipantByIdAsync(pk, cancellationToken);
+        var participant = await _auroraRepository.GetParticipantByPkAsync(pk, cancellationToken);
 
         if (participant != null)
         {
@@ -116,23 +114,11 @@ public class StreamHandler : IStreamHandler
     private async Task ProcessRemoveAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
         var pk = record.Dynamodb.OldImage.PK();
-        var participant = await _auroraRepository.GetParticipantByIdAsync(pk, cancellationToken);
+        var participant = await _auroraRepository.GetParticipantByPkAsync(pk, cancellationToken);
 
         if (participant != null)
         {
-            // TODO: handle soft-delete transparently
-            participant.IsDeleted = true;
-            participant.Email = null;
-            participant.FirstName = null;
-            participant.LastName = null;
-            participant.MobileNumber = null;
-            participant.LandlineNumber = null;
-            participant.RegistrationConsent = false;
-            participant.RemovalOfConsentRegistrationAtUtc = _clock.Now();
-            participant.UpdatedAt = _clock.Now();
-            participant.Disability = null;
-            participant.Address.Clear();
-            participant.HealthConditions.Clear();
+            _dbContext.Participants.Remove(participant);
         }
         else
         {

@@ -1,5 +1,6 @@
 using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities;
+using DYNAMO.STREAM.HANDLER.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -13,27 +14,58 @@ public class RefDataService : IRefDataService
     private readonly Lazy<List<IdentifierType>> _identifierTypeRefData;
     private readonly Lazy<List<CommunicationLanguage>> _communicationLanguageRefData;
     private readonly Lazy<List<DailyLifeImpact>> _dailyLifeImpactRefData;
+    private readonly object _lockObject = new object();
 
     public RefDataService(ParticipantDbContext dbContext, ILogger<RefDataService> logger)
     {
         _logger = logger;
-        // Probably should lock the lazy loader so this shared resource is thread-safe. 
 
-        // Lazy loader is thread safe by default
-        _genderRefData = new Lazy<List<Gender>>(() => dbContext.Genders.AsNoTracking().ToList());
-        _healthConditionRefData = new Lazy<List<HealthCondition>>(() => dbContext.HealthConditions.AsNoTracking().ToList());
-        _identifierTypeRefData = new Lazy<List<IdentifierType>>(() => dbContext.IdentifierTypes.AsNoTracking().ToList());
-        _communicationLanguageRefData = new Lazy<List<CommunicationLanguage>>(() => dbContext.CommunicationLanguages.AsNoTracking().ToList());
-        _dailyLifeImpactRefData = new Lazy<List<DailyLifeImpact>>(() => dbContext.DailyLifeImpacts.AsNoTracking().ToList());
+        _genderRefData = new Lazy<List<Gender>>(() =>
+        {
+            lock (_lockObject)
+            {
+                return dbContext.Genders.AsNoTracking().ToList();
+            }
+        });
+
+        _healthConditionRefData = new Lazy<List<HealthCondition>>(() =>
+        {
+            lock (_lockObject)
+            {
+                return dbContext.HealthConditions.AsNoTracking().ToList();
+            }
+        });
+
+        _identifierTypeRefData = new Lazy<List<IdentifierType>>(() =>
+        {
+            lock (_lockObject)
+            {
+                return dbContext.IdentifierTypes.AsNoTracking().ToList();
+            }
+        });
+
+        _communicationLanguageRefData = new Lazy<List<CommunicationLanguage>>(() =>
+        {
+            lock (_lockObject)
+            {
+                return dbContext.CommunicationLanguages.AsNoTracking().ToList();
+            }
+        });
+
+        _dailyLifeImpactRefData = new Lazy<List<DailyLifeImpact>>(() =>
+        {
+            lock (_lockObject)
+            {
+                return dbContext.DailyLifeImpacts.AsNoTracking().ToList();
+            }
+        });
 
     }
 
-    private int GetIdFromReferenceData<T>(Lazy<List<T>> refDataLazy, string code) where T : IReferenceData
+    private int GetIdFromReferenceData<T>(IEnumerable<T> refData, string code) where T : IReferenceData
     {
         code = code.Trim();
         // Ensure the database is case insensitive (is case-sensitivity required?)
-
-        var refData = refDataLazy.Value;
 
         var matches = refData.Where(item => item.Code == code)
                             .OrderBy(x => x.IsDeleted ? 1 : 0) // Use active matches (0) first
@@ -74,7 +106,7 @@ public class RefDataService : IRefDataService
                 return null;
             }
 
-            return GetIdFromReferenceData(_genderRefData, gender);
+            return GetIdFromReferenceData(_genderRefData.Value, gender);
         }
     }
 
@@ -86,7 +118,7 @@ public class RefDataService : IRefDataService
             {
                 return null;
             }
-            return GetIdFromReferenceData(_dailyLifeImpactRefData, impact);
+            return GetIdFromReferenceData(_dailyLifeImpactRefData.Value, impact);
         }
     }
 
@@ -94,7 +126,7 @@ public class RefDataService : IRefDataService
     {
         using (_logger.BeginScope(nameof(GetHealthConditionId)))
         {
-            return GetIdFromReferenceData(_healthConditionRefData, healthCondition);
+            return GetIdFromReferenceData(_healthConditionRefData.Value, healthCondition);
         }
     }
 
@@ -102,7 +134,7 @@ public class RefDataService : IRefDataService
     {
         using (_logger.BeginScope(nameof(GetIdentifierTypeId)))
         {
-            return GetIdFromReferenceData(_identifierTypeRefData, identifierType);
+            return GetIdFromReferenceData(_identifierTypeRefData.Value, identifierType);
         }
     }
 
@@ -115,7 +147,7 @@ public class RefDataService : IRefDataService
                 return null;
             }
 
-            return GetIdFromReferenceData(_communicationLanguageRefData, language);
+            return GetIdFromReferenceData(_communicationLanguageRefData.Value, language);
         }
     }
 }

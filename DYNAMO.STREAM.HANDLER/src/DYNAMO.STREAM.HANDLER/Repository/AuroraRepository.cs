@@ -7,10 +7,12 @@ namespace DYNAMO.STREAM.HANDLER.Repository;
 public class AuroraRepository : IAuroraRepository
 {
     private readonly ParticipantDbContext _dbContext;
+    private readonly IRefDataService _refDataService;
 
-    public AuroraRepository(ParticipantDbContext dbContext)
+    public AuroraRepository(ParticipantDbContext dbContext, IRefDataService refDataService)
     {
         _dbContext = dbContext;
+        _refDataService = refDataService;
     }
 
     public async Task<Participant?> GetParticipantAsync(Participant participant, CancellationToken cancellationToken)
@@ -24,21 +26,21 @@ public class AuroraRepository : IAuroraRepository
             .SingleOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<Participant?> GetParticipantByIdAsync(string pk, CancellationToken cancellationToken)
+    public async Task<Participant?> GetParticipantByPkAsync(string pk, CancellationToken cancellationToken)
     {
         return await _dbContext.Participants
             .Where(x => x.ParticipantIdentifiers.Any(y => y.Value == pk))
             .SingleOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<bool> IsLinkedAccountAsync(Participant participant, CancellationToken cancellationToken)
+    public bool IsLinkedAccount(Participant participant)
     {
-        if (participant.ParticipantIdentifiers.Count == 2)
+        var linkedIdentifierTypes = new[]
         {
-            var participantFromDb = await GetParticipantAsync(participant, cancellationToken);
-            return participantFromDb != null;
-        }
+            _refDataService.GetIdentifierTypeId("ParticipantId"),
+            _refDataService.GetIdentifierTypeId("NhsId")
+        };
 
-        return false;
+        return Array.TrueForAll(linkedIdentifierTypes, x => participant.ParticipantIdentifiers.Any(y => y.Id == x));
     }
 }
