@@ -28,7 +28,6 @@ public class Startup
         // ref data service singleton
         services.AddSingleton<IRefDataService, RefDataService>();
         services.AddSingleton<IConfiguration>(configuration);
-        services.AddSingleton<IClock, Clock>();
         services.AddDbContext<ParticipantDbContext>(options =>
             options.UseMySql(configuration.GetConnectionString("ParticipantDb"), ServerVersion.Parse("8.0.21")));
         services.AddTransient<IStreamHandler, StreamHandler>();

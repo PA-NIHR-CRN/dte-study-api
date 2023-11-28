@@ -35,7 +35,7 @@ public class Functions
     [LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
     public async Task IngestData(CancellationToken cancellationToken)
     {
-        using (_logger.BeginScope(nameof(ProcessStream)))
+        using (_logger.BeginScope(nameof(IngestData)))
         {
             _logger.LogInformation("Beginning to ingest data...");
             await _dataIngestor.IngestDataAsync(cancellationToken);

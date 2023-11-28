@@ -1,6 +1,8 @@
+using DYNAMO.STREAM.HANDLER.Entities.RefData;
+
 namespace DYNAMO.STREAM.HANDLER.Entities;
 
-public class ParticipantHealthCondition
+public class ParticipantHealthCondition : ISoftDelete, IAudited
 {
     public ParticipantHealthCondition()
     {
