@@ -23,6 +23,7 @@ namespace Application.Participants.V1.Commands.Participants
 {
     public class CreateParticipantDemographicsCommand : IRequest<Response<object>>
     {
+        private const string DefaultLocale = "en-GB";
         public string ParticipantId { get; }
         public string MobileNumber { get; }
         public string LandlineNumber { get; }
@@ -106,7 +107,7 @@ namespace Application.Participants.V1.Commands.Participants
                             var contentfulEmailRequest = new EmailContentRequest
                             {
                                 EmailName = _contentfulSettings.EmailTemplates.NewAccount,
-                                SelectedLocale = new CultureInfo(user.SelectedLocale)
+                                SelectedLocale = new CultureInfo(user.SelectedLocale ?? SelectedLocale.Default),
                             };
                             
                             _logger.LogInformation("ContentfulEmailRequest: {SerializeObject}",

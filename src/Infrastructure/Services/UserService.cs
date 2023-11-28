@@ -314,7 +314,7 @@ namespace Infrastructure.Services
                     EmailName = _contentfulSettings.EmailTemplates.MfaEmailConfirmation,
                     FirstName = participant.Firstname,
                     Code = code,
-                    SelectedLocale = new CultureInfo(participant.SelectedLocale)
+                    SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
                 };
                 
                 var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
@@ -499,7 +499,7 @@ namespace Infrastructure.Services
                     {
                         EmailName = _contentfulSettings.EmailTemplates.MfaMobileNumberVerification,
                         FirstName = participant.Firstname,
-                        SelectedLocale = new CultureInfo(participant.SelectedLocale)
+                        SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
                     };
                     
                     var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
@@ -813,7 +813,7 @@ namespace Infrastructure.Services
                 {
                     EmailName = _contentfulSettings.EmailTemplates.NhsSignUp,
                     FirstName = nhsUserInfo.FirstName,
-                    SelectedLocale = new CultureInfo(selectedLocale)
+                    SelectedLocale = new CultureInfo(selectedLocale ?? SelectedLocale.Default),
                 };
                 
                 var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
@@ -884,7 +884,7 @@ namespace Infrastructure.Services
                         var request = new EmailContentRequest
                         {
                             EmailName = _contentfulSettings.EmailTemplates.EmailAccountExists,
-                            SelectedLocale = new CultureInfo(participant.SelectedLocale),
+                            SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
                             FirstName = participant.Firstname,
                         };
 
@@ -904,7 +904,7 @@ namespace Infrastructure.Services
                     var request = new EmailContentRequest
                     {
                         EmailName = _contentfulSettings.EmailTemplates.NhsAccountExists,
-                        SelectedLocale = new CultureInfo(participantDetails.SelectedLocale),
+                        SelectedLocale = new CultureInfo(participantDetails.SelectedLocale ?? SelectedLocale.Default),
                         FirstName = participantDetails.Firstname,
                     };
                     
@@ -1273,7 +1273,7 @@ namespace Infrastructure.Services
                 var request = new EmailContentRequest
                 {
                     EmailName = _contentfulSettings.EmailTemplates.NhsPasswordReset,
-                    SelectedLocale = new CultureInfo(participantDetails.SelectedLocale),
+                    SelectedLocale = new CultureInfo(participantDetails.SelectedLocale ?? SelectedLocale.Default),
                     FirstName = participantDetails.Firstname,
                 };
 

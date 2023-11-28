@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
+using Application.Constants;
 using Application.Contracts;
 using Application.Mappings.Participants;
 using Application.Models.MFA;
@@ -188,7 +189,7 @@ public class ParticipantService : IParticipantService
             var contentfulEmailRequest = new EmailContentRequest
             {
                 EmailName = _contentfulSettings.EmailTemplates.DeleteAccount,
-                SelectedLocale = new CultureInfo(entity.SelectedLocale)
+                SelectedLocale = new CultureInfo(entity.SelectedLocale ?? SelectedLocale.Default)
             };
                 
             var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
