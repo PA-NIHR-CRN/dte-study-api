@@ -5,5 +5,5 @@ namespace DYNAMO.STREAM.HANDLER.Contracts;
 
 public interface IParticipantMapper
 {
-    Participant Map (Dictionary<string,AttributeValue> record, Participant? existingParticipant = null);
+    void Map (Dictionary<string,AttributeValue> record, Participant destination);
 }

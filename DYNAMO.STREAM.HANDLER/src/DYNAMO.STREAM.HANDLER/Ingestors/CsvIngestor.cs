@@ -16,14 +16,14 @@ public class CsvIngestor : IDataIngestor
         _streamHandler = streamHandler;
     }
 
-    public async Task IngestDataAsync()
+    public async Task IngestDataAsync(CancellationToken cancellationToken)
     {
         var dynamoDbEvent = new DynamoDBEvent
         {
             Records = new List<DynamoDBEvent.DynamodbStreamRecord>()
         };
 
-        await foreach (var record in _csvService.ReadCsvAsync())
+        await foreach (var record in _csvService.ReadCsvAsync(cancellationToken))
         {
             dynamoDbEvent.Records.Add(new DynamoDBEvent.DynamodbStreamRecord
             {
@@ -48,6 +48,6 @@ public class CsvIngestor : IDataIngestor
         }
 
         // Process the stream records after the loop
-        await _streamHandler.ProcessStream(dynamoDbEvent);
+        await _streamHandler.ProcessStreamAsync(dynamoDbEvent, cancellationToken);
     }
 }
