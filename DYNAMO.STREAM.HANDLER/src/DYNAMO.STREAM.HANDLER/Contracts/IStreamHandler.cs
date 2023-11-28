@@ -4,5 +4,5 @@ namespace DYNAMO.STREAM.HANDLER.Contracts;
 
 public interface IStreamHandler
 {
-    Task ProcessStream(DynamoDBEvent dynamoDbEvent);
+    Task ProcessStreamAsync(DynamoDBEvent dynamoDbEvent, CancellationToken cancellationToken);
 }

@@ -4,7 +4,7 @@ namespace DYNAMO.STREAM.HANDLER.Ingestors;
 
 public class DynamoDbIngestor : IDataIngestor
 {
-    public Task IngestDataAsync()
+    public Task IngestDataAsync(CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

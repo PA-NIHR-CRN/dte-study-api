@@ -4,5 +4,5 @@ namespace DYNAMO.STREAM.HANDLER.Contracts;
 
 public interface ICsvService
 {
-     IAsyncEnumerable<Participant>ReadCsvAsync();
+     IAsyncEnumerable<Participant>ReadCsvAsync(CancellationToken cancellationToken);
 }

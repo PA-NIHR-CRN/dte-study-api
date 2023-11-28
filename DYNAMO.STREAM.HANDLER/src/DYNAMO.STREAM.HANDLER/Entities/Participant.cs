@@ -1,9 +1,11 @@
+using DYNAMO.STREAM.HANDLER.Entities.RefData;
 using System.ComponentModel.DataAnnotations;
 
 namespace DYNAMO.STREAM.HANDLER.Entities;
 
-public class Participant
+public class Participant : ISoftDelete, IAudited
 {
+    // TODO: does this need to be a constructor?
     public Participant()
     {
         DailyLifeImpact = null!;
@@ -21,7 +23,7 @@ public class Participant
     public bool RegistrationConsent { get; set; }
     public DateTime? RegistrationConsentAtUtc { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
     public string? Email { get; set; }
     public string? EthnicBackground { get; set; }
     public string? EthnicGroup { get; set; }
