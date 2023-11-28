@@ -24,11 +24,6 @@ namespace DYNAMO.STREAM.HANDLER.Entities.Interceptors
 
             foreach (var entry in eventData.Context.ChangeTracker.Entries())
             {
-                if (entry is not { State: EntityState.Deleted, Entity: ISoftDelete delete })
-                {
-                    continue;
-                }
-
                 if (entry is { State: EntityState.Deleted, Entity: Participant participant })
                 {
                     participant.Email = null;
@@ -43,8 +38,11 @@ namespace DYNAMO.STREAM.HANDLER.Entities.Interceptors
                     participant.HealthConditions.Clear();
                 }
 
-                entry.State = EntityState.Modified;
-                delete.IsDeleted = true;
+                if (entry is { State: EntityState.Deleted, Entity: ISoftDelete delete })
+                {
+                    entry.State = EntityState.Modified;
+                    delete.IsDeleted = true;
+                }
             }
             return result;
         }
