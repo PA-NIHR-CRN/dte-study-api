@@ -1,11 +1,11 @@
+using Domain.Entities.Participants;
 using DYNAMO.STREAM.HANDLER.Entities.RefData;
 using System.ComponentModel.DataAnnotations;
 
 namespace DYNAMO.STREAM.HANDLER.Entities;
 
-public class Participant : ISoftDelete, IAudited
+public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
 {
-    // TODO: does this need to be a constructor?
     public Participant()
     {
         DailyLifeImpact = null!;
@@ -14,7 +14,6 @@ public class Participant : ISoftDelete, IAudited
         Address = null!;
     }
 
-    // schema for aurora db
     [Key]
     public int Id { get; set; }
     public string? FirstName { get; set; }
@@ -51,6 +50,18 @@ public class Participant : ISoftDelete, IAudited
     public ICollection<ParticipantIdentifier> ParticipantIdentifiers { get; set; } =
         new List<ParticipantIdentifier>();
     public ParticipantAddress Address { get; set; }
-    
 
+    public void Anonymise()
+    {
+        Email = null;
+        FirstName = null;
+        LastName = null;
+        MobileNumber = null;
+        LandlineNumber = null;
+        RegistrationConsent = false;
+        RemovalOfConsentRegistrationAtUtc = DateTime.UtcNow;
+        Disability = null;
+        Address.Anonymise();
+        HealthConditions.Clear();
+    }
 }

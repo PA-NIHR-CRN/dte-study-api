@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 
 namespace DYNAMO.STREAM.HANDLER.Entities.Interceptors
 {
-    internal class AuditedInterceptor : SaveChangesInterceptor
+    internal class TimestampInterceptor : SaveChangesInterceptor
     {
         public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
         {
-            return ValueTask.FromResult(HandleAuditing(eventData, result));
+            return ValueTask.FromResult(HandleTimestamps(eventData, result));
         }
 
         public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
         {
-            return HandleAuditing(eventData, result);
+            return HandleTimestamps(eventData, result);
         }
 
-        protected static InterceptionResult<int> HandleAuditing(DbContextEventData eventData, InterceptionResult<int> result)
+        protected static InterceptionResult<int> HandleTimestamps(DbContextEventData eventData, InterceptionResult<int> result)
         {
             if (eventData.Context is null)
             {
@@ -29,17 +29,17 @@ namespace DYNAMO.STREAM.HANDLER.Entities.Interceptors
 
             foreach (var entry in eventData.Context.ChangeTracker.Entries())
             {
-                if (entry is { State: EntityState.Added, Entity: IAudited inserted })
+                if (entry is { State: EntityState.Added, Entity: ITimestamped inserted })
                 {
                     inserted.CreatedAt = inserted.UpdatedAt = DateTime.UtcNow;
                 }
 
-                if (entry is { State: EntityState.Modified, Entity: IAudited updated })
+                if (entry is { State: EntityState.Modified, Entity: ITimestamped updated })
                 {
                     updated.UpdatedAt = DateTime.UtcNow;
                 }
 
-                if (entry is { State: EntityState.Deleted, Entity: IAudited deleted })
+                if (entry is { State: EntityState.Deleted, Entity: ITimestamped deleted })
                 {
                     deleted.UpdatedAt = DateTime.UtcNow;
                 }

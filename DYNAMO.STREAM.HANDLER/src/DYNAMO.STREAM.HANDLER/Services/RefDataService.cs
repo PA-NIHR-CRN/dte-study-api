@@ -1,4 +1,3 @@
-using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DYNAMO.STREAM.HANDLER.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
@@ -73,6 +72,8 @@ public class RefDataService : IRefDataService
 
         if (!matches.Any())
         {
+            // TODO: We discussed adding missing reference data that was received as we should accurately
+            // reflect what the application saves to DynamoDB.
             throw new KeyNotFoundException($"Reference data '{code}' not found.");
         }
 
