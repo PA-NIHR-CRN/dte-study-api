@@ -1,4 +1,3 @@
-using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities.Interceptors;
 using DYNAMO.STREAM.HANDLER.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +30,7 @@ public class ParticipantDbContext: DbContext
         base.OnConfiguring(optionsBuilder);
 
         optionsBuilder.AddInterceptors(new SoftDeleteInterceptor(),
-                                       new AuditedInterceptor());
+                                       new TimestampInterceptor());
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -43,5 +42,20 @@ public class ParticipantDbContext: DbContext
         {
             modelBuilder.Entity(type).ToTable("SysRef" + type.Name);
         }
+    }
+
+    public async Task<Participant?> GetParticipantByLinkedIdentifiersAsync(IList<(int type, string value)> identifiers, CancellationToken cancellationToken)
+    {
+        return await ParticipantIdentifiers
+            .Where(x => identifiers.Any(y => y.type == x.IdentifierTypeId && y.value == x.Value))
+            .Select(x => x.Participant)
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<Participant?> GetParticipantByPkAsync(string pk, CancellationToken cancellationToken)
+    {
+        return await Participants
+            .Where(x => x.ParticipantIdentifiers.Any(y => y.Value == pk))
+            .SingleOrDefaultAsync(cancellationToken);
     }
 }

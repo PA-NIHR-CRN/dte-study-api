@@ -1,6 +1,6 @@
 using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
-using DYNAMO.STREAM.HANDLER.Contracts;
+using DYNAMO.STREAM.HANDLER.Handlers;
 using Microsoft.Extensions.Logging;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -10,36 +10,29 @@ namespace DYNAMO.STREAM.HANDLER;
 public class Functions
 {
     private readonly IStreamHandler _streamHandler;
-    private readonly IDataIngestor _dataIngestor;
     private readonly ILogger<Functions> _logger;
 
-    public Functions(IStreamHandler streamHandler, IDataIngestor dataIngestor, ILogger<Functions> logger)
+    public Functions(IStreamHandler streamHandler, ILogger<Functions> logger)
     {
         _streamHandler = streamHandler;
-        _dataIngestor = dataIngestor;
         _logger = logger;
     }
 
     [LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
-    public async Task ProcessStream(DynamoDBEvent dynamoDbEvent, CancellationToken cancellationToken)
+    public StreamsEventResponse ProcessStream(DynamoDBEvent dynamoDbEvent)
     {
-        // TODO: should this pattern be followed throughout the application?
-        using (_logger.BeginScope(nameof(ProcessStream)))
+        using (_logger.BeginScope("{FunctionName}", nameof(ProcessStream)))
         {
-            _logger.LogInformation("Beginning to process {RecordsCount} records...", dynamoDbEvent.Records.Count);
-            await _streamHandler.ProcessStreamAsync(dynamoDbEvent, cancellationToken);
-            _logger.LogInformation("Stream processing complete");
-        }
-    }
+            _logger.LogInformation("Number of records: {RecordsCount}", dynamoDbEvent.Records.Count);
 
-    [LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
-    public async Task IngestData(CancellationToken cancellationToken)
-    {
-        using (_logger.BeginScope(nameof(IngestData)))
-        {
-            _logger.LogInformation("Beginning to ingest data...");
-            await _dataIngestor.IngestDataAsync(cancellationToken);
-            _logger.LogInformation("Data ingestion complete.");
+            // AWS DynamoDb Stream handler is currently synchronous, but we want the library code
+            // to remain async.
+            var cts = new CancellationTokenSource();
+            var failures = _streamHandler.ProcessStreamAsync(dynamoDbEvent, cts.Token).Result;
+
+            _logger.LogInformation("DynamoDBEvent processing complete");
+
+            return new StreamsEventResponse { BatchItemFailures = failures.ToList() };
         }
     }
 }

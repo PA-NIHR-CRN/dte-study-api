@@ -1,11 +1,10 @@
 using Amazon.DynamoDBv2;
 using Amazon.Lambda.DynamoDBEvents;
-using Dte.Common.Contracts;
-using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DYNAMO.STREAM.HANDLER.Extensions;
+using DYNAMO.STREAM.HANDLER.Mappers;
 using Microsoft.Extensions.Logging;
-using Polly;
+using static Amazon.Lambda.DynamoDBEvents.StreamsEventResponse;
 
 namespace DYNAMO.STREAM.HANDLER.Handlers;
 
@@ -14,115 +13,130 @@ public class StreamHandler : IStreamHandler
     private readonly ParticipantDbContext _dbContext;
     private readonly ILogger<StreamHandler> _logger;
     private readonly IParticipantMapper _participantMapper;
-    private readonly IAuroraRepository _auroraRepository;
-    private readonly IAsyncPolicy _retryPolicy;
 
-    public StreamHandler(ParticipantDbContext dbContext, IAsyncPolicy retryPolicy, ILogger<StreamHandler> logger,
-        IParticipantMapper participantMapper, IAuroraRepository auroraRepository)
+    public StreamHandler(ParticipantDbContext dbContext, ILogger<StreamHandler> logger,
+        IParticipantMapper participantMapper)
     {
         _dbContext = dbContext;
-        _retryPolicy = retryPolicy;
         _logger = logger;
         _participantMapper = participantMapper;
-        _auroraRepository = auroraRepository;
     }
 
-    public async Task ProcessStreamAsync(DynamoDBEvent dynamoDbEvent, CancellationToken cancellationToken)
+    public async Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(DynamoDBEvent dynamoDbEvent, CancellationToken cancellationToken)
     {
+        var failures = new List<BatchItemFailure>();
+        string currentRecordSequenceNumber;
+
         foreach (var record in dynamoDbEvent.Records)
         {
-            _logger.LogInformation("**** Processing {EventType} Event ID: {RecordEventId}", record.EventName,
-                record.EventID);
+            currentRecordSequenceNumber = record.Dynamodb.SequenceNumber;
 
-            try
+            using (_logger.BeginScope("{EventId}, {SequenceNumber}", record.EventID, currentRecordSequenceNumber))
             {
-                await _retryPolicy.ExecuteAsync(async () => await ProcessRecordAsync(record, cancellationToken));
-                // TODO: should this be moved to the _auroraRepository to encapsulate the logic?  Doing so would mean that the _dbContext could be removed from the constructor.
-                await _dbContext.SaveChangesAsync(cancellationToken);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "**** Error processing Event ID: {RecordEventId}", record.EventID);
-            }
+                try
+                {
+                    _logger.LogInformation("Processing record {SequenceNumber}, ApproximateCreationDateTime: {ApproximateCreationDateTime}", currentRecordSequenceNumber, record.Dynamodb.ApproximateCreationDateTime);
 
-            _logger.LogInformation("****  Finished processing Event ID: {RecordEventId}", record.EventID);
+                    _logger.LogDebug("AwsRegion: {AwsRegion}, EventID: {EventID}, EventName: {EventName}, EventSource: {EventSource}, EventSourceArn: {EventSourceArn}, EventVersion: {EventVersion}, UserIdentity: {@UserIdentity}, SizeBytes: {SizeBytes}, StreamViewType: {StreamViewType}",
+                                           record.AwsRegion,
+                                           record.EventID,
+                                           record.EventName,
+                                           record.EventSource,
+                                           record.EventSourceArn,
+                                           record.EventVersion,
+                                           record.UserIdentity,
+                                           record.Dynamodb.SizeBytes,
+                                           record.Dynamodb.StreamViewType
+                                           );
+
+                    _logger.LogTrace("{@record}", record);
+
+                    await ProcessRecordAsync(record, cancellationToken);
+
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+
+                    _logger.LogInformation("Record processing complete");
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, e.Message);
+                    failures.Add(new BatchItemFailure { ItemIdentifier = currentRecordSequenceNumber });
+
+                    // If there is one failure the whole batch is retried, exit early here.
+                    return failures;
+                }
+            }
         }
+
+        return failures;
     }
 
-    private Task ProcessRecordAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
+    private async Task ProcessRecordAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
         if (record.EventName == OperationType.INSERT)
         {
-            return ProcessInsertAsync(record, cancellationToken);
+            await ProcessInsertAsync(record, cancellationToken);
         }
         else if (record.EventName == OperationType.MODIFY)
         {
-            return ProcessModifyAsync(record, cancellationToken);
+            await ProcessModifyAsync(record, cancellationToken);
         }
         else if (record.EventName == OperationType.REMOVE)
         {
-            return ProcessRemoveAsync(record, cancellationToken);
+            await ProcessRemoveAsync(record, cancellationToken);
         }
         else
         {
             throw new NotSupportedException($"Unknown Event Name {record.EventName}");
         }
     }
-    
+
     private async Task ProcessInsertAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
         var pk = record.Dynamodb.NewImage.PK();
-        if (pk.StartsWith("DELETED#"))
+
+        if (pk.StartsWith("DELETED#", StringComparison.InvariantCultureIgnoreCase))
         {
             return;
         }
 
-        var participant = new Participant();
-        _participantMapper.Map(record.Dynamodb.NewImage, participant);
-    
-        var isLinkedAccount = _auroraRepository.IsLinkedAccount(participant);
-        if (isLinkedAccount)
+        var identifiers = _participantMapper.ExtractIdentifiers(record.Dynamodb.NewImage);
+
+        var targetParticipant = await _dbContext.GetParticipantByLinkedIdentifiersAsync(identifiers, cancellationToken);
+
+        if (targetParticipant == null)
         {
-            var existingParticipant = await _auroraRepository.GetParticipantAsync(participant, cancellationToken);
-            if (existingParticipant != null)
-            {
-                _participantMapper.Map(record.Dynamodb.NewImage, existingParticipant);
-            }
+            // No linked participant exists, create a new one.
+            targetParticipant = new Participant();
+            await _dbContext.Participants.AddAsync(targetParticipant, cancellationToken);
         }
-        else
-        {
-            // TODO: should this be added to _auroraRepository as it's more of a context thing?
-            await _dbContext.Participants.AddAsync(participant, cancellationToken);
-        }
+
+        _participantMapper.Map(record.Dynamodb.NewImage, targetParticipant);
     }
 
     private async Task ProcessModifyAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
         var pk = record.Dynamodb.NewImage.PK();
-        var participant = await _auroraRepository.GetParticipantByPkAsync(pk, cancellationToken);
+        var participant = await _dbContext.GetParticipantByPkAsync(pk, cancellationToken);
 
-        if (participant != null)
+        if (participant == null)
         {
-            _participantMapper.Map(record.Dynamodb.NewImage, participant );
+            throw new KeyNotFoundException($"Participant with PK '{pk}' not found.");
         }
-        else
-        {
-            _logger.LogWarning("Participant with PK {PK} not found for modification", pk);
-        }
+
+        _participantMapper.Map(record.Dynamodb.NewImage, participant);
     }
 
     private async Task ProcessRemoveAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
         var pk = record.Dynamodb.OldImage.PK();
-        var participant = await _auroraRepository.GetParticipantByPkAsync(pk, cancellationToken);
+        var participant = await _dbContext.GetParticipantByPkAsync(pk, cancellationToken);
 
-        if (participant != null)
+        if (participant == null)
         {
-            _dbContext.Participants.Remove(participant);
+            throw new KeyNotFoundException($"Participant with PK '{pk}' not found.");
         }
-        else
-        {
-            _logger.LogWarning("Participant with PK {PK} not found for deletion.", pk);
-        }
+
+        _dbContext.Participants.Remove(participant);
     }
 }

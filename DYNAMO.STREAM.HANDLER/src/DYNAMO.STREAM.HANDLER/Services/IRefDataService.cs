@@ -1,4 +1,4 @@
-namespace DYNAMO.STREAM.HANDLER.Contracts;
+namespace DYNAMO.STREAM.HANDLER.Services;
 
 public interface IRefDataService
 {

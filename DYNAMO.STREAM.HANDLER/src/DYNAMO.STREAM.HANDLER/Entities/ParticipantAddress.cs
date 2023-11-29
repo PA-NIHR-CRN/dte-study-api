@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DYNAMO.STREAM.HANDLER.Entities;
 
-public class ParticipantAddress
+public class ParticipantAddress : IPersonalInformation
 {
     public ParticipantAddress()
     {
@@ -33,7 +33,7 @@ public class ParticipantAddress
         return postcodeWithoutSpace[..^3];
     }
 
-    public void Clear()
+    public void Anonymise()
     {
         AddressLine1 = null;
         AddressLine2 = null;

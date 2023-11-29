@@ -1,5 +1,5 @@
 namespace DYNAMO.STREAM.HANDLER.Entities.RefData;
 
-public class HealthCondition : RefData
+public class HealthCondition : ReferenceData
 {
 }

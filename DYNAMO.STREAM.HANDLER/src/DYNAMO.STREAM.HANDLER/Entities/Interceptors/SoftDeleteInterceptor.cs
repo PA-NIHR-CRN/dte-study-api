@@ -24,22 +24,13 @@ namespace DYNAMO.STREAM.HANDLER.Entities.Interceptors
 
             foreach (var entry in eventData.Context.ChangeTracker.Entries())
             {
-                if (entry is { State: EntityState.Deleted, Entity: Participant participant })
-                {
-                    participant.Email = null;
-                    participant.FirstName = null;
-                    participant.LastName = null;
-                    participant.MobileNumber = null;
-                    participant.LandlineNumber = null;
-                    participant.RegistrationConsent = false;
-                    participant.RemovalOfConsentRegistrationAtUtc = DateTime.UtcNow;
-                    participant.Disability = null;
-                    participant.Address.Clear();
-                    participant.HealthConditions.Clear();
-                }
-
                 if (entry is { State: EntityState.Deleted, Entity: ISoftDelete delete })
                 {
+                    if (entry is { Entity: IPersonalInformation pii })
+                    {
+                        pii.Anonymise();
+                    }
+
                     entry.State = EntityState.Modified;
                     delete.IsDeleted = true;
                 }

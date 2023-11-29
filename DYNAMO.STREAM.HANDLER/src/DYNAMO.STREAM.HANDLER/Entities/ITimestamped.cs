@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DYNAMO.STREAM.HANDLER.Entities
 {
-    public interface IAudited
+    public interface ITimestamped
     {
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

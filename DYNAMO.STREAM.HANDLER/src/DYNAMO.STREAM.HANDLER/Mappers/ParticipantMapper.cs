@@ -1,8 +1,8 @@
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
-using DYNAMO.STREAM.HANDLER.Contracts;
 using DYNAMO.STREAM.HANDLER.Entities;
+using DYNAMO.STREAM.HANDLER.Services;
 using DynamoParticipant = Domain.Entities.Participants.Participant;
 
 namespace DYNAMO.STREAM.HANDLER.Mappers;
@@ -20,7 +20,6 @@ public class ParticipantMapper : IParticipantMapper
 
     private void MapIdentifiers(DynamoParticipant source, Participant participant)
     {
-        // Iterate over possible identifiers (ParticipantId, NhsId, etc.)
         var identifiers = new List<(int type, string value)>
         {
             (_refDataService.GetIdentifierTypeId("ParticipantId"), source.ParticipantId),
@@ -40,6 +39,8 @@ public class ParticipantMapper : IParticipantMapper
                 participant.ParticipantIdentifiers.Add(newIdentifier);
             }
         }
+
+        // TODO: remove (soft delete) identifiers that exist in participant but not in source?
     }
 
     private void MapHealthConditions(DynamoParticipant source, Participant participant)
@@ -63,19 +64,18 @@ public class ParticipantMapper : IParticipantMapper
             }
         }
 
-        // Remove health conditions
+        // Remove 'expired' health conditions
         foreach (var destinationHealthCondition in participant.HealthConditions)
         {
             if (!sourceHealthConditions.Exists(hc => hc.Id != destinationHealthCondition.Id))
             {
-                // TODO: Handle soft delete transparently
                 participant.HealthConditions.Remove(destinationHealthCondition);
             }
         }
     }
 
 
-    public void Map(Dictionary<string, AttributeValue> record, Participant destination)
+    public Participant Map(Dictionary<string, AttributeValue> record, Participant destination)
     {
         var doc = Document.FromAttributeMap(record);
 
@@ -102,5 +102,16 @@ public class ParticipantMapper : IParticipantMapper
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);
+
+        return destination;
+    }
+
+    public IList<(int type, string value)> ExtractIdentifiers(Dictionary<string, AttributeValue> newImage)
+    {
+        return new List<(int type, string value)>
+        {
+            (_refDataService.GetIdentifierTypeId("ParticipantId"), newImage[nameof(DynamoParticipant.ParticipantId)].S),
+            (_refDataService.GetIdentifierTypeId("NhsId"), newImage[nameof(DynamoParticipant.NhsId)].S)
+        };
     }
 }

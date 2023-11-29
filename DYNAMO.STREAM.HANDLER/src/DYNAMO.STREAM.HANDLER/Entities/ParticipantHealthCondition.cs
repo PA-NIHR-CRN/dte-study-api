@@ -2,7 +2,7 @@ using DYNAMO.STREAM.HANDLER.Entities.RefData;
 
 namespace DYNAMO.STREAM.HANDLER.Entities;
 
-public class ParticipantHealthCondition : ISoftDelete, IAudited
+public class ParticipantHealthCondition : ISoftDelete, ITimestamped
 {
     public ParticipantHealthCondition()
     {
