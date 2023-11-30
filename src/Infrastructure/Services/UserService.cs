@@ -894,7 +894,7 @@ namespace Infrastructure.Services
                     }
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { IsSuccess = true, }, _headerService.GetConversationId());
+                        new SignUpResponse { IsSuccess = false, }, _headerService.GetConversationId());
                 }
 
                 // check if user exists in participant details table and send email
@@ -913,7 +913,7 @@ namespace Infrastructure.Services
                     await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
 
                     return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { IsSuccess = true, }, _headerService.GetConversationId());
+                        new SignUpResponse { IsSuccess = false, }, _headerService.GetConversationId());
                 }
 
                 var response = await _provider.SignUpAsync(new SignUpRequest
