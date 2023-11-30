@@ -59,7 +59,8 @@ namespace Infrastructure.Services
             AwsSettings awsSettings, ILogger<UserService> logger,
             IEmailService emailService, IParticipantService participantService,
             NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings,
-            IDataProtectionProvider dataProtector, IContentfulService contentfulService, ContentfulSettings contentfulSettings)
+            IDataProtectionProvider dataProtector, IContentfulService contentfulService,
+            ContentfulSettings contentfulSettings)
 
         {
             _provider = provider;
@@ -93,7 +94,6 @@ namespace Infrastructure.Services
                 Password = password,
                 PhoneNumber = phoneNumber
             }));
-   
         }
 
         public async Task<Response<string>> LoginAsync(string email, string password)
@@ -239,7 +239,10 @@ namespace Infrastructure.Services
             }
             catch (ExpiredCodeException ex)
             {
-                return HandleMfaException(ex, ex.Message == "Your software token has already been used once." ? "Mfa_Used_Token" : ErrorCode.MfaCodeExpired);
+                return HandleMfaException(ex,
+                    ex.Message == "Your software token has already been used once."
+                        ? "Mfa_Used_Token"
+                        : ErrorCode.MfaCodeExpired);
             }
             catch (Exception ex)
             {
@@ -306,9 +309,9 @@ namespace Infrastructure.Services
             {
                 var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
                 var code = GenerateOtpCode();
-                
+
                 var participant = await _participantService.GetParticipantDetailsAsync(mfaLoginDetails.Username);
-                
+
                 var contentfulEmailRequest = new EmailContentRequest
                 {
                     EmailName = _contentfulSettings.EmailTemplates.MfaEmailConfirmation,
@@ -316,10 +319,11 @@ namespace Infrastructure.Services
                     Code = code,
                     SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
                 };
-                
+
                 var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
-                
-                await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
+
+                await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
+                    contentfulEmail.EmailBody);
 
                 await _participantService.StoreMfaCodeAsync(mfaLoginDetails.Username, code);
 
@@ -358,9 +362,12 @@ namespace Infrastructure.Services
 
                 return mfaValidationResult switch
                 {
-                    MfaValidationResult.UserNotFound => CreateErrorResponse(ErrorCode.MfaUserNotFound, "User not found"),
-                    MfaValidationResult.CodeExpired => CreateErrorResponse(ErrorCode.MfaCodeExpired, "Code has expired"),
-                    MfaValidationResult.CodeInvalid => CreateErrorResponse(ErrorCode.MfaCodeMismatch, "Code is invalid"),
+                    MfaValidationResult.UserNotFound =>
+                        CreateErrorResponse(ErrorCode.MfaUserNotFound, "User not found"),
+                    MfaValidationResult.CodeExpired =>
+                        CreateErrorResponse(ErrorCode.MfaCodeExpired, "Code has expired"),
+                    MfaValidationResult.CodeInvalid =>
+                        CreateErrorResponse(ErrorCode.MfaCodeMismatch, "Code is invalid"),
                     MfaValidationResult.Success => Response<string>.CreateSuccessfulResponse(
                         _headerService.GetConversationId()),
                     _ => throw new ArgumentOutOfRangeException()
@@ -494,16 +501,17 @@ namespace Infrastructure.Services
                 {
                     // get user email
                     var participant = await _participantService.GetParticipantDetailsAsync(username);
-                    
+
                     var contentfulEmailRequest = new EmailContentRequest
                     {
                         EmailName = _contentfulSettings.EmailTemplates.MfaMobileNumberVerification,
                         FirstName = participant.Firstname,
                         SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
                     };
-                    
+
                     var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
-                    await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
+                    await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
+                        contentfulEmail.EmailBody);
                 }
 
                 await _provider.AdminUpdateUserAttributesAsync(request);
@@ -728,7 +736,8 @@ namespace Infrastructure.Services
 
         private static bool IsUnder18(DateTime dateOfBirth) => DateTime.Now.AddYears(-18).Date < dateOfBirth.Date;
 
-        public async Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl, string selectedLocale)
+        public async Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl,
+            string selectedLocale)
         {
             try
             {
@@ -807,17 +816,19 @@ namespace Infrastructure.Services
 
                 await _mediator.Send(new CreateParticipantDetailsCommand("", nhsUserInfo.Email,
                     nhsUserInfo.FirstName, nhsUserInfo.LastName,
-                    consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber, selectedLocale));
-                
+                    consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber,
+                    selectedLocale));
+
                 var request = new EmailContentRequest
                 {
                     EmailName = _contentfulSettings.EmailTemplates.NhsSignUp,
                     FirstName = nhsUserInfo.FirstName,
                     SelectedLocale = new CultureInfo(selectedLocale ?? SelectedLocale.Default),
                 };
-                
+
                 var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
-                await _emailService.SendEmailAsync(nhsUserInfo.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
+                await _emailService.SendEmailAsync(nhsUserInfo.Email, contentfulEmail.EmailSubject,
+                    contentfulEmail.EmailBody);
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
                     new SignUpResponse { UserConsents = true, }, _headerService.GetConversationId());
@@ -889,13 +900,16 @@ namespace Infrastructure.Services
                         };
 
                         var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
-                        
-                        await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
+
+                        await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
+                            contentfulEmail.EmailBody);
                     }
 
-                    return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { IsSuccess = false, }, _headerService.GetConversationId());
+                    return Response<SignUpResponse>.CreateErrorMessageResponse(
+                        ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.SignUpError,
+                        "", _headerService.GetConversationId());
                 }
+
 
                 // check if user exists in participant details table and send email
                 var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
@@ -907,13 +921,13 @@ namespace Infrastructure.Services
                         SelectedLocale = new CultureInfo(participantDetails.SelectedLocale ?? SelectedLocale.Default),
                         FirstName = participantDetails.Firstname,
                     };
-                    
-                    var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
-                    
-                    await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
 
-                    return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { IsSuccess = false, }, _headerService.GetConversationId());
+                    var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
+
+                    await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject,
+                        contentfulEmail.EmailBody);
+
+                    throw new UsernameExistsException("Username already exists");
                 }
 
                 var response = await _provider.SignUpAsync(new SignUpRequest
@@ -937,16 +951,20 @@ namespace Infrastructure.Services
                 }
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                    new SignUpResponse { IsSuccess = true, UserId = response.UserSub}, _headerService.GetConversationId());
+                    new SignUpResponse { IsSuccess = true, UserId = response.UserSub },
+                    _headerService.GetConversationId());
             }
             catch (UsernameExistsException ex)
             {
                 _logger.LogError(ex,
                     $"Error signing up user {email}, username already exists");
                 // Return a generic success response, to appear as though registration was successful
-                return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                    new SignUpResponse { IsSuccess = true }, _headerService.GetConversationId());
+                return Response<SignUpResponse>.CreateErrorMessageResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
+                    ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.",
+                    _headerService.GetConversationId());
             }
+
             catch (InvalidParameterException ex)
             {
                 _logger.LogError(ex,
@@ -956,6 +974,7 @@ namespace Infrastructure.Services
                     ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.",
                     _headerService.GetConversationId());
             }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex,
@@ -1269,7 +1288,7 @@ namespace Infrastructure.Services
                 if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
                     return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                         _headerService.GetConversationId());
-                
+
                 var request = new EmailContentRequest
                 {
                     EmailName = _contentfulSettings.EmailTemplates.NhsPasswordReset,
@@ -1278,8 +1297,9 @@ namespace Infrastructure.Services
                 };
 
                 var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
-                
-                await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
+
+                await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject,
+                    contentfulEmail.EmailBody);
 
                 return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                     _headerService.GetConversationId());
@@ -1366,7 +1386,6 @@ namespace Infrastructure.Services
                 }
 
                 return Response<object>.CreateSuccessfulResponse();
-
             }
             catch (LimitExceededException ex)
             {
@@ -1389,7 +1408,7 @@ namespace Infrastructure.Services
                 return exceptionResponse;
             }
         }
-        
+
         public async Task<Response<object>> ChangeEmailAsync(string currentEmail, string newEmail)
         {
             try
