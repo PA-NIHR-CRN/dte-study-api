@@ -8,6 +8,7 @@ using DYNAMO.STREAM.HANDLER.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DYNAMO.STREAM.HANDLER;
 
@@ -26,5 +27,12 @@ public class Startup
         services.AddScoped<IDynamoDBContext>(x => new DynamoDBContext(new AmazonDynamoDBClient()));
         services.AddTransient<IStreamHandler, StreamHandler>();
         services.AddTransient<IParticipantMapper, ParticipantMapper>();
+        
+        services.AddLogging(loggingBuilder =>
+        {
+            loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
+            loggingBuilder.AddConsole();
+            loggingBuilder.AddDebug();
+        });
     }
 }
