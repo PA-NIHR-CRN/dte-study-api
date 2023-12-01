@@ -1,10 +1,11 @@
+using DYNAMO.STREAM.HANDLER.Entities.Configuration;
 using DYNAMO.STREAM.HANDLER.Entities.Interceptors;
 using DYNAMO.STREAM.HANDLER.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 
 namespace DYNAMO.STREAM.HANDLER.Entities;
 
-public class ParticipantDbContext: DbContext
+public class ParticipantDbContext : DbContext
 {
     public ParticipantDbContext(DbContextOptions<ParticipantDbContext> options) : base(options)
     {
@@ -30,27 +31,27 @@ public class ParticipantDbContext: DbContext
         base.OnConfiguring(optionsBuilder);
 
         optionsBuilder.AddInterceptors(new SoftDeleteInterceptor(),
-                                       new TimestampInterceptor());
+            new TimestampInterceptor());
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var refDataTypes = typeof(IReferenceData).Assembly.GetTypes()
-            .Where(t => typeof(IReferenceData).IsAssignableFrom(t) && !t.IsInterface);
-        
+            .Where(t => t != typeof(ReferenceData) && typeof(IReferenceData).IsAssignableFrom(t) && !t.IsInterface);
+
         foreach (var type in refDataTypes)
         {
-            // do not map the base class
-            if (type == typeof(ReferenceData))
-            {
-                continue;
-            }
-            
             modelBuilder.Entity(type).ToTable("SysRef" + type.Name);
         }
+        modelBuilder.ApplyConfiguration(new CommunicationLanguageConfiguration());
+        modelBuilder.ApplyConfiguration(new DailyLifeImpactConfiguration());
+        modelBuilder.ApplyConfiguration(new GenderConfiguration());
+        modelBuilder.ApplyConfiguration(new HealthConditionConfiguration());
+        modelBuilder.ApplyConfiguration(new IdentifierTypeConfiguration());
     }
 
-    public async Task<Participant?> GetParticipantByLinkedIdentifiersAsync(IList<(int type, string value)> identifiers, CancellationToken cancellationToken)
+    public async Task<Participant?> GetParticipantByLinkedIdentifiersAsync(IList<(int type, string value)> identifiers,
+        CancellationToken cancellationToken)
     {
         return await ParticipantIdentifiers
             .Where(x => identifiers.Any(y => y.type == x.IdentifierTypeId && y.value == x.Value))
