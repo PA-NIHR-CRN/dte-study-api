@@ -1,4 +1,3 @@
-using Domain.Entities.Participants;
 using DYNAMO.STREAM.HANDLER.Entities.RefData;
 using System.ComponentModel.DataAnnotations;
 

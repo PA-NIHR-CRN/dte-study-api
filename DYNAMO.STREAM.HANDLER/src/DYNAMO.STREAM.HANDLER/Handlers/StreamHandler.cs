@@ -25,6 +25,7 @@ public class StreamHandler : IStreamHandler
     public async Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(DynamoDBEvent dynamoDbEvent, CancellationToken cancellationToken)
     {
         var failures = new List<BatchItemFailure>();
+        // TODO: how do we handle out of order events if they are indeed out of order?
         string currentRecordSequenceNumber;
 
         foreach (var record in dynamoDbEvent.Records)

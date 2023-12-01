@@ -5,10 +5,9 @@
     "dotnet lambda help",
     "All the command line options for the Lambda command can be specified in this file."
   ],
-  "profile": "",
-  "region": "",
+  "profile": "localstack",
+  "region": "us-west-2",
   "configuration": "Release",
-  "s3-prefix": "DYNAMO.STREAM.HANDLER/",
-  "template": "serverless.template",
-  "template-parameters": ""
+  "framework": "net6.0",
+  "template": "serverless.template"
 }

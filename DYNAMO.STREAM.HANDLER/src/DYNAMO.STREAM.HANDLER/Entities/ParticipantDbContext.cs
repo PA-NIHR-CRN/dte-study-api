@@ -36,10 +36,16 @@ public class ParticipantDbContext: DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var refDataTypes = typeof(IReferenceData).Assembly.GetTypes()
-            .Where(t => t.IsAssignableFrom(typeof(IReferenceData)));
+            .Where(t => typeof(IReferenceData).IsAssignableFrom(t) && !t.IsInterface);
         
         foreach (var type in refDataTypes)
         {
+            // do not map the base class
+            if (type == typeof(ReferenceData))
+            {
+                continue;
+            }
+            
             modelBuilder.Entity(type).ToTable("SysRef" + type.Name);
         }
     }

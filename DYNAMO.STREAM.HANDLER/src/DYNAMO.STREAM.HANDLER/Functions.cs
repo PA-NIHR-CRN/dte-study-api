@@ -1,3 +1,4 @@
+using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
 using DYNAMO.STREAM.HANDLER.Handlers;
@@ -18,7 +19,7 @@ public class Functions
         _logger = logger;
     }
 
-    [LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
+    [LambdaFunction()]
     public StreamsEventResponse ProcessStream(DynamoDBEvent dynamoDbEvent)
     {
         using (_logger.BeginScope("{FunctionName}", nameof(ProcessStream)))

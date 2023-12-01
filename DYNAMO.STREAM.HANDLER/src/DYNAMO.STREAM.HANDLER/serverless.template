@@ -3,19 +3,12 @@
   "Transform": "AWS::Serverless-2016-10-31",
   "Description": "An AWS Serverless Application. This template is partially managed by Amazon.Lambda.Annotations (v1.0.0.0).",
   "Resources": {
-    "DYNAMO.STREAM.HANDLERFunctionsGetGenerated": {
+    "DYNAMOSTREAMHANDLERFunctionsProcessStreamGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
-        "Tool": "Amazon.Lambda.Annotations",
-        "SyncedEvents": [
-          "RootGet"
-        ]
+        "Tool": "Amazon.Lambda.Annotations"
       },
       "Properties": {
-        "Architectures": [
-          "x86_64"
-        ],
-        "Handler": "DYNAMO.STREAM.HANDLER::DYNAMO.STREAM.HANDLER.Functions::Get",
         "Runtime": "dotnet6",
         "CodeUri": ".",
         "MemorySize": 256,
@@ -24,15 +17,7 @@
           "AWSLambdaBasicExecutionRole"
         ],
         "PackageType": "Zip",
-        "Events": {
-          "RootGet": {
-            "Type": "Api",
-            "Properties": {
-              "Path": "/",
-              "Method": "GET"
-            }
-          }
-        }
+        "Handler": "DYNAMO.STREAM.HANDLER::DYNAMO.STREAM.HANDLER.Functions_ProcessStream_Generated::ProcessStream"
       }
     }
   },
