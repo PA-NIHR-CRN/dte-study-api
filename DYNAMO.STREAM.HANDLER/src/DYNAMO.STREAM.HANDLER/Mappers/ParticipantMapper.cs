@@ -20,60 +20,60 @@ public class ParticipantMapper : IParticipantMapper
 
     private void MapIdentifiers(DynamoParticipant source, Participant participant)
     {
-        var identifiers = new List<(int type, string value)>
+        // Get dictionary of identifiers from source
+        var identifiers = ExtractIdentifiers(new Dictionary<string, AttributeValue>
         {
-            (_refDataService.GetIdentifierTypeId("ParticipantId"), source.ParticipantId),
-            (_refDataService.GetIdentifierTypeId("NhsId"), source.NhsId)
-        };
+            { "ParticipantId", new AttributeValue { S = source.ParticipantId } },
+            { "NhsId", new AttributeValue { S = source.NhsNumber } }
+        });
 
-        foreach (var (type, value) in identifiers)
+        foreach (var identifier in identifiers)
         {
-            if (!participant.ParticipantIdentifiers.Any(pi => pi.Value == value && pi.IdentifierTypeId == type))
+            if (string.IsNullOrWhiteSpace(identifier.Value)) continue;
+
+            if (!participant.ParticipantIdentifiers.Any(pi => pi.Value == identifier.Value && pi.IdentifierTypeId == identifier.Type))
             {
                 var newIdentifier = new ParticipantIdentifier
                 {
-                    Value = value,
-                    IdentifierTypeId = type,
+                    Value = identifier.Value,
+                    IdentifierTypeId = identifier.Type,
                 };
 
                 participant.ParticipantIdentifiers.Add(newIdentifier);
             }
         }
-
-        // TODO: remove (soft delete) identifiers that exist in participant but not in source?
     }
 
     private void MapHealthConditions(DynamoParticipant source, Participant participant)
     {
         var sourceHealthConditions = source.HealthConditionInterests
             .Select(code => new ParticipantHealthCondition
-        {
-            HealthConditionId = _refDataService.GetHealthConditionId(code),
-            ParticipantId = participant.Id
-        }).ToList();
-
-        // TODO: Requirements clarification. If a health condition is added, removed and then added again,
-        // should a new row be added to participant.HealthConditions or should the old soft deleted row be reactivated?
+            {
+                HealthConditionId = _refDataService.GetHealthConditionId(code),
+                ParticipantId = participant.Id
+            }).ToList();
 
         // Add new health conditions
-        foreach (var sourceHealthCondition in sourceHealthConditions)
+        foreach (var sourceHealthCondition in sourceHealthConditions.Where(sourceHealthCondition =>
+                     participant.HealthConditions.All(hc =>
+                         hc.HealthConditionId != sourceHealthCondition.HealthConditionId)))
         {
-            if (!participant.HealthConditions.Any(hc => hc.Id != sourceHealthCondition.Id))
-            {
-                participant.HealthConditions.Add(sourceHealthCondition);
-            }
+            participant.HealthConditions.Add(sourceHealthCondition);
         }
+        
+        // Identify health conditions to be removed
+        var healthConditionsToRemove = participant.HealthConditions
+            .Where(destinationHealthCondition =>
+                !sourceHealthConditions.Exists(hc =>
+                    hc.HealthConditionId == destinationHealthCondition.HealthConditionId))
+            .ToList();
 
-        // Remove 'expired' health conditions
-        foreach (var destinationHealthCondition in participant.HealthConditions)
+        // Remove identified health conditions
+        foreach (var healthCondition in healthConditionsToRemove)
         {
-            if (!sourceHealthConditions.Exists(hc => hc.Id != destinationHealthCondition.Id))
-            {
-                participant.HealthConditions.Remove(destinationHealthCondition);
-            }
+            participant.HealthConditions.Remove(healthCondition);
         }
     }
-
 
     public Participant Map(Dictionary<string, AttributeValue> record, Participant destination)
     {
@@ -106,12 +106,21 @@ public class ParticipantMapper : IParticipantMapper
         return destination;
     }
 
-    public IList<(int type, string value)> ExtractIdentifiers(Dictionary<string, AttributeValue> newImage)
+    public List<Identifier> ExtractIdentifiers(Dictionary<string, AttributeValue> newImage)
     {
-        return new List<(int type, string value)>
+        var keyNames = new[] { "ParticipantId", "NhsId" };
+        var identifiers = new List<Identifier>();
+
+        foreach (var keyName in keyNames)
         {
-            (_refDataService.GetIdentifierTypeId("ParticipantId"), newImage[nameof(DynamoParticipant.ParticipantId)].S),
-            (_refDataService.GetIdentifierTypeId("NhsId"), newImage[nameof(DynamoParticipant.NhsId)].S)
-        };
+            if (newImage.TryGetValue(keyName, out var attrValue) && !string.IsNullOrWhiteSpace(attrValue.S))
+            {
+                int typeId = _refDataService.GetIdentifierTypeId(keyName);
+                identifiers.Add(new Identifier(typeId, attrValue.S));
+            }
+        }
+
+        return identifiers;
     }
+
 }

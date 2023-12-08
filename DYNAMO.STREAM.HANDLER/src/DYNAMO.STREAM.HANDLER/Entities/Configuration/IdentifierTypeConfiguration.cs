@@ -13,14 +13,14 @@ public class IdentifierTypeConfiguration : IEntityTypeConfiguration<IdentifierTy
             new IdentifierType
             {
                 Id = 1,
-                Code = "1",
+                Code = "ParticipantId",
                 Description = "ParticipantId",
                 IsDeleted = false
             },
             new IdentifierType
             {
                 Id = 2,
-                Code = "2",
+                Code = "NhsId",
                 Description = "NhsId",
                 IsDeleted = false
             }
