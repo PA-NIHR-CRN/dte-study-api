@@ -1,8 +1,10 @@
-name: Stream Handler Manual Deploy
+name: Stream Handler Manual Deploy Dev
 
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   build_test_deploy:
@@ -15,7 +17,7 @@ jobs:
           aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
           aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
+
       - name: Build Run Number and Build Id
         run: echo ${{ github.run_number }}-${{ github.run_id }}
 
@@ -23,7 +25,7 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '6.0.x'
-          
+
       - name: Add Nuget Source
         run: dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
@@ -32,10 +34,10 @@ jobs:
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
-
-#      - name: Test
-#        run: dotnet test --no-restore --verbosity normal
         
+        #      - name: Test
+        #        run: dotnet test --no-restore --verbosity normal
+
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
