@@ -13,7 +13,7 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
     {
         var healthConditions = LoadHealthConditionArrayFromResource();
         builder.HasData(healthConditions.Select((hc, i) => new HealthCondition
-            { Id = i + 1, Code = (i + 1).ToString(), Description = hc, IsDeleted = false }));
+            { Id = i + 1, Code = hc, Description = hc, IsDeleted = false }));
     }
 
     private static string[] LoadHealthConditionArrayFromResource()

@@ -14,21 +14,21 @@ public class GenderConfiguration : IEntityTypeConfiguration<Gender>
             new Gender
             {
                 Id = 1,
-                Code = "1",
+                Code = "Male",
                 Description = "Male",
                 IsDeleted = false
             },
             new Gender
             {
                 Id = 2,
-                Code = "2",
+                Code = "Female",
                 Description = "Female",
                 IsDeleted = false
             },
             new Gender
             {
                 Id = 3,
-                Code = "3",
+                Code = "Prefer Not to Say",
                 Description = "Prefer Not to Say",
                 IsDeleted = false
             }

@@ -13,15 +13,15 @@ public class CommunicationLanguageConfiguration: IEntityTypeConfiguration<Commun
             new CommunicationLanguage
             {
                 Id = 1,
-                Code = "1",
-                Description = "en-GB",
+                Code = "en-GB",
+                Description = "English",
                 IsDeleted = false
             },
             new CommunicationLanguage
             {
                 Id = 2,
-                Code = "2",
-                Description = "cy-GB",
+                Code = "cy-GB",
+                Description = "Welsh",
                 IsDeleted = false
             }
         );

@@ -13,28 +13,28 @@ public class DailyLifeImpactConfiguration : IEntityTypeConfiguration<DailyLifeIm
             new DailyLifeImpact
             {
                 Id = 1,
-                Code = "1",
+                Code = "Yes, a lot",
                 Description = "Yes, a lot",
                 IsDeleted = false
             },
             new DailyLifeImpact
             {
                 Id = 2,
-                Code = "2",
+                Code = "Yes, a little",
                 Description = "Yes, a little",
                 IsDeleted = false
             },
             new DailyLifeImpact
             {
                 Id = 3,
-                Code = "3",
+                Code = "Not at all",
                 Description = "Not at all",
                 IsDeleted = false
             },
             new DailyLifeImpact
             {
                 Id = 4,
-                Code = "4",
+                Code = "Prefer not to say",
                 Description = "Prefer not to say",
                 IsDeleted = false
             }
