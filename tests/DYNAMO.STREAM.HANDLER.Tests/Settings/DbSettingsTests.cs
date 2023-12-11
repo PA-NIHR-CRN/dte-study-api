@@ -17,14 +17,14 @@ public class DbSettingsTests
         var result = dbSettings.BuildConnectionString();
 
         Assert.Equal(
-            "Server=TestHost;Port=3306;User ID=TestUser;Password=TestPassword;Database=TestDbClusterIdentifier",
+            "Server=TestHost;Port=3306;User ID=TestUser;Password=TestPassword;Database=TestDatabase",
             result);
     }
 
     [Theory]
     [InlineData("Username", "User ID=")]
     [InlineData("Password", "Password=")]
-    [InlineData("DbClusterIdentifier", "Database=")]
+    [InlineData("Database", "Database=")]
     public void BuildConnectionString_ReturnsConnectionStringWithoutProperty_WhenPropertyIsNull(string propertyName,
         string expectedMissingPart)
     {
