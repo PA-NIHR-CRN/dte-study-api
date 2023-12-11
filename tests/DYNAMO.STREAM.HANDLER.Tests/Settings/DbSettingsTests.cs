@@ -10,7 +10,6 @@ public class DbSettingsTests
             Username = "TestUser",
             Password = "TestPassword",
             Host = "TestHost",
-            Engine = "TestEngine",
             Port = 3306,
             DbClusterIdentifier = "TestDbClusterIdentifier"
         };
@@ -34,7 +33,6 @@ public class DbSettingsTests
             Username = "TestUser",
             Password = "TestPassword",
             Host = "TestHost",
-            Engine = "TestEngine",
             Port = 3306,
             DbClusterIdentifier = "TestDbClusterIdentifier"
         };
