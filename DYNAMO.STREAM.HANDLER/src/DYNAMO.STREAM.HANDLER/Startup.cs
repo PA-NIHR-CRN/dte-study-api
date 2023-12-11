@@ -1,6 +1,5 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
-using Amazon.Lambda.Annotations;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DYNAMO.STREAM.HANDLER.Extensions;
 using DYNAMO.STREAM.HANDLER.Handlers;
@@ -10,10 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace DYNAMO.STREAM.HANDLER;
 
-[LambdaStartup]
+
 public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
@@ -51,11 +51,28 @@ public class Startup
 
     private static void ConfigureLogging(IServiceCollection services, IConfiguration configuration)
     {
+        var loggerOptions = new LambdaLoggerOptions
+        {
+            IncludeCategory = true,
+            IncludeLogLevel = true,
+            IncludeNewline = true,
+            IncludeEventId = true,
+            IncludeException = true,
+            IncludeScopes = true,
+        };
+
         services.AddLogging(loggingBuilder =>
         {
-            loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
-            loggingBuilder.AddConsole();
-            loggingBuilder.AddDebug();
+            loggingBuilder
+            .AddConfiguration(configuration.GetSection("Logging"))
+            .AddLambdaLogger(loggerOptions);
+
+            if (Debugger.IsAttached || Environment.UserInteractive)
+            {
+                loggingBuilder
+                    .AddConsole()
+                    .AddDebug();
+            }
         });
     }
 }

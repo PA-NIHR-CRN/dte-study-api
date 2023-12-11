@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31702.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudyApi", "src\StudyApi\StudyApi.csproj", "{95F39AE4-DC6B-4619-A395-B95D37BF6FF5}"
 EndProject
@@ -10,10 +10,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D8D5725-D28E-4BF5-96A6-6E0D36EF7464}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		docker-compose.yml = docker-compose.yml
+		global.json = global.json
 		README.md = README.md
 		template.yaml = template.yaml
-		global.json = global.json
-		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "src\Domain\Domain.csproj", "{AA853DAE-9874-45A8-B3C2-27794BE906D3}"
@@ -30,13 +30,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "src\Infra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "src\Application\Application.csproj", "{FA43F7D5-E0AA-4192-BA27-58450FA8B8C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudyApi.Acceptance.Tests", "tests\StudyApi.Acceptance.Tests\StudyApi.Acceptance.Tests.csproj", "{1EE7ECD6-0C65-4F42-AC34-C822BC3AD1B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudyApi.Acceptance.Tests", "tests\StudyApi.Acceptance.Tests\StudyApi.Acceptance.Tests.csproj", "{1EE7ECD6-0C65-4F42-AC34-C822BC3AD1B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.Tests", "tests\Application.Tests\Application.Tests.csproj", "{5B0B13E2-CD2E-46AD-AD07-53D090FDB0A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.Tests", "tests\Application.Tests\Application.Tests.csproj", "{5B0B13E2-CD2E-46AD-AD07-53D090FDB0A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DYNAMO.STREAM.HANDLER", "DYNAMO.STREAM.HANDLER\src\DYNAMO.STREAM.HANDLER\DYNAMO.STREAM.HANDLER.csproj", "{2BC45B3E-6B16-4102-8DDD-95F2D2D9A5FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DYNAMO.STREAM.HANDLER", "DYNAMO.STREAM.HANDLER\src\DYNAMO.STREAM.HANDLER\DYNAMO.STREAM.HANDLER.csproj", "{2BC45B3E-6B16-4102-8DDD-95F2D2D9A5FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DYNAMO.STREAM.HANDLER.Tests", "tests\DYNAMO.STREAM.HANDLER.Tests\DYNAMO.STREAM.HANDLER.Tests.csproj", "{B5447623-44A4-452D-8839-C46700803DEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DYNAMO.STREAM.HANDLER.Tests", "tests\DYNAMO.STREAM.HANDLER.Tests\DYNAMO.STREAM.HANDLER.Tests.csproj", "{B5447623-44A4-452D-8839-C46700803DEE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
