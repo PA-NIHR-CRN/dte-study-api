@@ -10,7 +10,6 @@
   "configuration": "Release",
   "framework": "net6.0",
   "function-runtime":"dotnet6",
-  "template": "serverless.template",
   "function-handler" : "DYNAMO.STREAM.HANDLER::DYNAMO.STREAM.HANDLER.Functions::ProcessStream",
   "function-memory-size" : 256,
   "function-timeout" : 30
