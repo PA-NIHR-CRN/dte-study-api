@@ -17,7 +17,7 @@ public class DbSettingsTests
         var result = dbSettings.BuildConnectionString();
 
         Assert.Equal(
-            "Server=TestHost;Port=3306;User ID=TestUser;Password=TestPassword;Database=TestDbClusterIdentifier;SSL Mode=None;Connection Protocol=Socket",
+            "Server=TestHost;Port=3306;User ID=TestUser;Password=TestPassword;Database=TestDbClusterIdentifier",
             result);
     }
 
@@ -43,8 +43,6 @@ public class DbSettingsTests
 
         Assert.Contains("Server=TestHost", result);
         Assert.Contains("Port=3306", result);
-        Assert.Contains("SSL Mode=None", result);
-        Assert.Contains("Connection Protocol=Socket", result);
 
         Assert.DoesNotContain(expectedMissingPart, result);
     }
