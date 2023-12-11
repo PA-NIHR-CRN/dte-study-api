@@ -2,7 +2,7 @@ using MySqlConnector;
 
 namespace DYNAMO.STREAM.HANDLER;
 
-public class DbSettings : IDbSettings
+public class DbSettings
 {
     public static string SectionName => "DbSettings";
     public string Username { get; set; }

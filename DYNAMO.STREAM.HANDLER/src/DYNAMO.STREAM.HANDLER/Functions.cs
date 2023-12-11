@@ -10,28 +10,20 @@ namespace DYNAMO.STREAM.HANDLER;
 
 public class Functions
 {
-    private readonly IStreamHandler _streamHandler;
-    private readonly ILogger<Functions> _logger;
-
-    public Functions(IStreamHandler streamHandler, ILogger<Functions> logger)
+    [LambdaFunction]
+    public StreamsEventResponse ProcessStream([FromServices] IStreamHandler streamHandler,
+        [FromServices] ILogger<Functions> logger, DynamoDBEvent dynamoDbEvent)
     {
-        _streamHandler = streamHandler;
-        _logger = logger;
-    }
-
-    [LambdaFunction()]
-    public StreamsEventResponse ProcessStream(DynamoDBEvent dynamoDbEvent)
-    {
-        using (_logger.BeginScope("{FunctionName}", nameof(ProcessStream)))
+        using (logger.BeginScope("{FunctionName}", nameof(ProcessStream)))
         {
-            _logger.LogInformation("Number of records: {RecordsCount}", dynamoDbEvent.Records.Count);
+            logger.LogInformation("Number of records: {RecordsCount}", dynamoDbEvent.Records.Count);
 
             // AWS DynamoDb Stream handler is currently synchronous, but we want the library code
             // to remain async.
             var cts = new CancellationTokenSource();
-            var failures = _streamHandler.ProcessStreamAsync(dynamoDbEvent, cts.Token).Result;
+            var failures = streamHandler.ProcessStreamAsync(dynamoDbEvent, cts.Token).Result;
 
-            _logger.LogInformation("DynamoDBEvent processing complete");
+            logger.LogInformation("DynamoDBEvent processing complete");
 
             return new StreamsEventResponse { BatchItemFailures = failures.ToList() };
         }
