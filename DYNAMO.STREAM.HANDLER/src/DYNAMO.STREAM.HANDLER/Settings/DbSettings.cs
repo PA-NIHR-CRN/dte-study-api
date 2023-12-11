@@ -8,7 +8,6 @@ public class DbSettings
     public string Username { get; set; }
     public string Password { get; set; }
     public string Host { get; set; }
-    public string Engine { get; set; }
     public int Port { get; set; }
     public string DbClusterIdentifier { get; set; }
     
@@ -21,8 +20,6 @@ public class DbSettings
             UserID = Username,
             Password = Password,
             Database = DbClusterIdentifier,
-            SslMode = MySqlSslMode.None,
-            ConnectionProtocol = MySqlConnectionProtocol.Tcp
         };
         return connectionStringBuilder.ConnectionString;
     }
