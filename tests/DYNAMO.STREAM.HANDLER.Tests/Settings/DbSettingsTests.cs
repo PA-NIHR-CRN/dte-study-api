@@ -11,7 +11,7 @@ public class DbSettingsTests
             Password = "TestPassword",
             Host = "TestHost",
             Port = 3306,
-            DbClusterIdentifier = "TestDbClusterIdentifier"
+            Database = "TestDatabase"
         };
 
         var result = dbSettings.BuildConnectionString();
@@ -34,7 +34,7 @@ public class DbSettingsTests
             Password = "TestPassword",
             Host = "TestHost",
             Port = 3306,
-            DbClusterIdentifier = "TestDbClusterIdentifier"
+            Database = "TestDatabase"
         };
 
         typeof(DbSettings).GetProperty(propertyName)?.SetValue(dbSettings, null);

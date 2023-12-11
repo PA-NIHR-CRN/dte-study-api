@@ -9,7 +9,7 @@ public class DbSettings
     public string Password { get; set; }
     public string Host { get; set; }
     public int Port { get; set; }
-    public string DbClusterIdentifier { get; set; }
+    public string Database { get; set; }
     
     public string BuildConnectionString()
     {
@@ -19,7 +19,7 @@ public class DbSettings
             Port = (uint)Port,
             UserID = Username,
             Password = Password,
-            Database = DbClusterIdentifier,
+            Database = Database,
         };
         return connectionStringBuilder.ConnectionString;
     }
