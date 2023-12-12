@@ -46,16 +46,22 @@ public class Functions
             {
                 try
                 {
-                    var dynamoDbEvent = JsonSerializer.Serialize(_dynamoDbEventService.CreateParticipantInsertEvent(participant));
-
                     // send event to target lambda function
                     var invokeRequest = new InvokeRequest
                     {
                         FunctionName =
                             "arn:aws:lambda:eu-west-2:841171564302:function:crnccd-lambda-dev-dte-participant-stream",
                         InvocationType = InvocationType.Event,
-                        Payload = dynamoDbEvent
+                        PayloadStream = new MemoryStream()
                     };
+
+                    var serializer = new Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer();
+
+                    serializer.Serialize(_dynamoDbEventService.CreateParticipantInsertEvent(participant), invokeRequest.PayloadStream);
+
+                    invokeRequest.PayloadStream.Flush();
+                    invokeRequest.PayloadStream.Seek(0, SeekOrigin.Begin);
+
                     await _lambdaClient.InvokeAsync(invokeRequest, cts.Token);
 
                     _logger.LogInformation("Sent participant {ParticipantParticipantId} to target lambda function",

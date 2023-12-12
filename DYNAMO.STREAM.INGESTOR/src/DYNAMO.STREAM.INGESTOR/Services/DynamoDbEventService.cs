@@ -15,7 +15,7 @@ public class DynamoDbEventService : IDynamoDbEventService
                 new ()
                 {
                     EventID = Guid.NewGuid().ToString(),
-                    EventName = "INSERT",
+                    EventName = OperationType.INSERT,
                     Dynamodb = new StreamRecord
                     {
                         ApproximateCreationDateTime = DateTime.UtcNow,
@@ -27,6 +27,7 @@ public class DynamoDbEventService : IDynamoDbEventService
                         NewImage = participant,
                         SequenceNumber = Guid.NewGuid().ToString(),
                         SizeBytes = 0,
+                        StreamViewType = StreamViewType.NEW_AND_OLD_IMAGES,
                     },
                     EventSource = "aws:dynamodb",
                     EventVersion = "1.1",

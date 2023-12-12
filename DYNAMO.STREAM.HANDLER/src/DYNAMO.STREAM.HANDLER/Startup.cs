@@ -13,7 +13,6 @@ using System.Diagnostics;
 
 namespace DYNAMO.STREAM.HANDLER;
 
-
 public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
@@ -26,7 +25,12 @@ public class Startup
         services.AddOptions<DbSettings>().Bind(configuration.GetSection(DbSettings.SectionName));
         var connectionString = GetConnectionString(configuration);
         services.AddDbContext<ParticipantDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+            {
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+                    builder => { builder.EnableRetryOnFailure(3, TimeSpan.FromSeconds(10), null); });
+            }
+        );
+
         services.AddScoped<IDynamoDBContext>(x => new DynamoDBContext(new AmazonDynamoDBClient()));
 
         // add application services
@@ -64,8 +68,8 @@ public class Startup
         services.AddLogging(loggingBuilder =>
         {
             loggingBuilder
-            .AddConfiguration(configuration.GetSection("Logging"))
-            .AddLambdaLogger(loggerOptions);
+                .AddConfiguration(configuration.GetSection("Logging"))
+                .AddLambdaLogger(loggerOptions);
 
             if (Debugger.IsAttached || Environment.UserInteractive)
             {
