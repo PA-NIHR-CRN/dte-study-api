@@ -35,7 +35,7 @@ public class Startup
 
         // add application services
         services.AddSingleton<IRefDataService, RefDataService>();
-        services.AddTransient<IStreamHandler, StreamHandler>();
+        services.AddScoped<IStreamHandler, StreamHandler>();
         services.AddTransient<IParticipantMapper, ParticipantMapper>();
 
         ConfigureLogging(services, configuration);
