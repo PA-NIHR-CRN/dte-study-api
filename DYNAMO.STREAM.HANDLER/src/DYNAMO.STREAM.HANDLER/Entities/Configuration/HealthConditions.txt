@@ -709,7 +709,6 @@ Erectile dysfunction (impotence)
 Impotence
 Excessive sweating (hyperhidrosis)
 Hyperhidrosis
-Sweating (excessive)
 Fabricated or induced illness
 Fainting
 Falls
@@ -1124,7 +1123,6 @@ Low white blood cell count
 White blood cell count (low)
 Bunions
 Lost or changed sense of smell
-Anosmia
 Sense of smell (lost/changed)
 Soiling (child pooing their pants)
 Oral thrush (mouth thrush)
