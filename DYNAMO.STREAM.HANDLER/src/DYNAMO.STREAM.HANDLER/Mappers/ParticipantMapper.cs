@@ -46,34 +46,48 @@ public class ParticipantMapper : IParticipantMapper
 
     private void MapHealthConditions(DynamoParticipant source, Participant participant)
     {
-        var sourceHealthConditions = source.HealthConditionInterests
-            .Select(code => new ParticipantHealthCondition
-            {
-                HealthConditionId = _refDataService.GetHealthConditionId(code),
-                ParticipantId = participant.Id
-            }).ToList();
-
-        // Add new health conditions
-        foreach (var sourceHealthCondition in sourceHealthConditions.Where(sourceHealthCondition =>
-                     participant.HealthConditions.All(hc =>
-                         hc.HealthConditionId != sourceHealthCondition.HealthConditionId)))
+        //  Stage one registration does not have health conditions
+        if (source.HealthConditionInterests == null && !participant.HealthConditions.Any())
         {
-            participant.HealthConditions.Add(sourceHealthCondition);
+            return;
         }
-        
-        // Identify health conditions to be removed
-        var healthConditionsToRemove = participant.HealthConditions
-            .Where(destinationHealthCondition =>
-                !sourceHealthConditions.Exists(hc =>
-                    hc.HealthConditionId == destinationHealthCondition.HealthConditionId))
+
+        // Clear existing conditions if source is empty or null
+        if (source.HealthConditionInterests == null || !source.HealthConditionInterests.Any())
+        {
+            participant.HealthConditions.Clear();
+            return;
+        }
+
+        var sourceHealthConditionIds = source.HealthConditionInterests
+            .Select(code => _refDataService.GetHealthConditionId(code))
             .ToList();
 
-        // Remove identified health conditions
+        // Add new health conditions not in participant.HealthConditions
+        foreach (var healthConditionId in sourceHealthConditionIds)
+        {
+            if (!participant.HealthConditions.Any(hc => hc.HealthConditionId == healthConditionId))
+            {
+                participant.HealthConditions.Add(new ParticipantHealthCondition
+                {
+                    HealthConditionId = healthConditionId,
+                    ParticipantId = participant.Id
+                });
+            }
+        }
+
+        // Create a list of health conditions to be removed
+        var healthConditionsToRemove = participant.HealthConditions
+            .Where(hc => !sourceHealthConditionIds.Contains(hc.HealthConditionId))
+            .ToList();
+
+        // Remove the identified health conditions
         foreach (var healthCondition in healthConditionsToRemove)
         {
             participant.HealthConditions.Remove(healthCondition);
         }
     }
+
 
     public Participant Map(Dictionary<string, AttributeValue> record, Participant destination)
     {
