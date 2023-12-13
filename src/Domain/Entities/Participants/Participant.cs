@@ -33,7 +33,6 @@ public class Participant
     [DynamoDBProperty] public string EthnicGroup { get; set; }
     [DynamoDBProperty] public string EthnicBackground { get; set; }
     [DynamoDBProperty] public bool? Disability { get; set; }
-    [DynamoDBProperty] public bool? ConsentContact { get; set; }
     [DynamoDBProperty] public string DisabilityDescription { get; set; }
     [DynamoDBProperty] public string SelectedLocale { get; set; }
     [DynamoDBProperty] public List<string> HealthConditionInterests { get; set; }

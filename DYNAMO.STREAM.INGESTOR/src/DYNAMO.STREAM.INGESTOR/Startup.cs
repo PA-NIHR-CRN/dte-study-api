@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Amazon.Lambda;
+using Amazon.Lambda.Core;
 using DYNAMO.STREAM.HANDLER;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DYNAMO.STREAM.HANDLER.Extensions;
@@ -23,6 +24,7 @@ public class Startup
         // add aws services
         services.AddSingleton<IAmazonDynamoDB, AmazonDynamoDBClient>();
         services.AddSingleton<IAmazonLambda, AmazonLambdaClient>();
+        services.AddScoped<ILambdaSerializer, Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer>();
 
         // add application services
         services.AddTransient<IDynamoParticipantRepository, DynamoParticipantRepository>();
