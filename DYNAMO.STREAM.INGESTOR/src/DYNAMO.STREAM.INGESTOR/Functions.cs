@@ -1,6 +1,6 @@
-using System.Text.Json;
 using Amazon.Lambda;
 using Amazon.Lambda.Core;
+using Amazon.Lambda.DynamoDBEvents;
 using Amazon.Lambda.Model;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DYNAMO.STREAM.INGESTOR.Repository;
@@ -20,6 +20,7 @@ public class Functions
     private readonly ILogger<Functions> _logger;
     private readonly IAmazonLambda _lambdaClient;
     private readonly IDynamoDbEventService _dynamoDbEventService;
+    private readonly ILambdaSerializer _serializer;
 
     public Functions()
     {
@@ -33,6 +34,7 @@ public class Functions
         _repository = provider.GetRequiredService<IDynamoParticipantRepository>();
         _lambdaClient = provider.GetRequiredService<IAmazonLambda>();
         _dynamoDbEventService = provider.GetRequiredService<IDynamoDbEventService>();
+        _serializer = provider.GetRequiredService<ILambdaSerializer>();
         provider.GetRequiredService<ParticipantDbContext>().Database.Migrate();
     }
     
@@ -51,21 +53,32 @@ public class Functions
                     {
                         FunctionName =
                             "arn:aws:lambda:eu-west-2:841171564302:function:crnccd-lambda-dev-dte-participant-stream",
-                        InvocationType = InvocationType.Event,
+                        InvocationType = InvocationType.RequestResponse,
                         PayloadStream = new MemoryStream()
                     };
 
-                    var serializer = new Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer();
-
-                    serializer.Serialize(_dynamoDbEventService.CreateParticipantInsertEvent(participant), invokeRequest.PayloadStream);
+                    _serializer.Serialize(_dynamoDbEventService.CreateParticipantInsertEvent(participant), invokeRequest.PayloadStream);
 
                     invokeRequest.PayloadStream.Flush();
                     invokeRequest.PayloadStream.Seek(0, SeekOrigin.Begin);
 
-                    await _lambdaClient.InvokeAsync(invokeRequest, cts.Token);
+                    // Deserialize the awaited response into StreamsEventResponse and check for any failures. 
+                    var response = await _lambdaClient.InvokeAsync(invokeRequest, cts.Token);
+                    var streamsResponse = _serializer.Deserialize<StreamsEventResponse>(response.Payload);
+                    
+                    if (streamsResponse.BatchItemFailures.Any())
+                    {
+                        _logger.LogError("Failed to send participant {ParticipantParticipantId} to target lambda function",
+                            participant["PK"].S);
+                        throw new AmazonLambdaException("Failed to send participant to target lambda function");
+                    }
 
                     _logger.LogInformation("Sent participant {ParticipantParticipantId} to target lambda function",
                         participant["PK"].S);
+                }
+                catch (AmazonLambdaException)
+                {
+                    throw;
                 }
                 catch (Exception e)
                 {

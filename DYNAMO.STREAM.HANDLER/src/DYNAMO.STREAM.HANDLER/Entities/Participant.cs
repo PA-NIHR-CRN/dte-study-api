@@ -48,7 +48,7 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
         new List<ParticipantHealthCondition>();
     public ICollection<ParticipantIdentifier> ParticipantIdentifiers { get; set; } =
         new List<ParticipantIdentifier>();
-    public ParticipantAddress Address { get; set; }
+    public ParticipantAddress? Address { get; set; }
 
     public void Anonymise()
     {
@@ -60,7 +60,7 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
         RegistrationConsent = false;
         RemovalOfConsentRegistrationAtUtc = DateTime.UtcNow;
         Disability = null;
-        Address.Anonymise();
+        Address?.Anonymise();
         HealthConditions.Clear();
     }
 }
