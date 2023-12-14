@@ -1,6 +1,7 @@
 using Amazon.DynamoDBv2;
 using Amazon.Lambda;
 using Amazon.Lambda.Core;
+using Amazon.Lambda.DynamoDBEvents;
 using Dynamo.Stream.Handler.Entities;
 using Dynamo.Stream.Handler.Handlers;
 using Dynamo.Stream.Ingestor.Repository;
@@ -8,6 +9,7 @@ using Dynamo.Stream.Ingestor.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Dynamo.Stream.Handler.Extensions;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -43,7 +45,19 @@ public class Functions
             var participants = await _repository.GetAllParticipantsAsAttributeMapsAsync(cts.Token);
             foreach (var participant in participants)
             {
-                var streamEvent = _dynamoDbEventService.CreateEvent(OperationType.INSERT, participant);
+                DynamoDBEvent streamEvent;
+
+                var pk = participant.PK();
+
+                if (pk.StartsWith("DELETED#"))
+                {
+                    streamEvent = _dynamoDbEventService.CreateEvent(OperationType.REMOVE, oldImage: participant);
+                }
+                else
+                {
+                    streamEvent = _dynamoDbEventService.CreateEvent(OperationType.INSERT, newImage: participant);
+                }
+
                 var errors = await _streamHandler.ProcessStreamAsync(streamEvent, cts.Token);
 
                 if (errors.Any())
