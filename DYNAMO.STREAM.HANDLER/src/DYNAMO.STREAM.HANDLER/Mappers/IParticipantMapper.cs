@@ -1,7 +1,7 @@
 using Amazon.DynamoDBv2.Model;
-using DYNAMO.STREAM.HANDLER.Entities;
+using Dynamo.Stream.Handler.Entities;
 
-namespace DYNAMO.STREAM.HANDLER.Mappers;
+namespace Dynamo.Stream.Handler.Mappers;
 
 public interface IParticipantMapper
 {

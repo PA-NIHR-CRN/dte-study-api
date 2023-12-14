@@ -1,9 +1,9 @@
 using System.Reflection;
-using DYNAMO.STREAM.HANDLER.Entities.RefData;
+using Dynamo.Stream.Handler.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DYNAMO.STREAM.HANDLER.Entities.Configuration;
+namespace Dynamo.Stream.Handler.Entities.Configuration;
 
 public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondition>
 {
@@ -13,7 +13,7 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
     {
         var healthConditions = LoadHealthConditionArrayFromResource();
         builder.HasData(healthConditions.Select((hc, i) => new HealthCondition
-            { Id = i + 1, Code = hc, Description = hc, IsDeleted = false }));
+        { Id = i + 1, Code = hc, Description = hc, IsDeleted = false }));
     }
 
     private static string[] LoadHealthConditionArrayFromResource()

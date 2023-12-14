@@ -2,7 +2,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.DynamoDBEvents;
 
-namespace DYNAMO.STREAM.INGESTOR.Services;
+namespace Dynamo.Stream.Ingestor.Services;
 
 public interface IDynamoDbEventService
 {

@@ -1,11 +1,11 @@
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
-using DYNAMO.STREAM.HANDLER.Entities;
-using DYNAMO.STREAM.HANDLER.Services;
+using Dynamo.Stream.Handler.Entities;
+using Dynamo.Stream.Handler.Services;
 using DynamoParticipant = Domain.Entities.Participants.Participant;
 
-namespace DYNAMO.STREAM.HANDLER.Mappers;
+namespace Dynamo.Stream.Handler.Mappers;
 
 public class ParticipantMapper : IParticipantMapper
 {

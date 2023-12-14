@@ -2,7 +2,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Configuration;
 
-namespace DYNAMO.STREAM.INGESTOR.Repository
+namespace Dynamo.Stream.Ingestor.Repository
 {
     public class DynamoParticipantRepository : IDynamoParticipantRepository
     {

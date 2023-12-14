@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Dynamo.Stream.Handler.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace DYNAMO.STREAM.HANDLER.Entities.Interceptors
+namespace Dynamo.Stream.Handler.Entities.Interceptors
 {
     internal class TimestampInterceptor : SaveChangesInterceptor
     {

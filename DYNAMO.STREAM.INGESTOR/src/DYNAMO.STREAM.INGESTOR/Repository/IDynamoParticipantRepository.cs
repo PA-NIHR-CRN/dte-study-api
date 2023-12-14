@@ -1,6 +1,6 @@
 using Amazon.DynamoDBv2.Model;
 
-namespace DYNAMO.STREAM.INGESTOR.Repository;
+namespace Dynamo.Stream.Ingestor.Repository;
 
 public interface IDynamoParticipantRepository
 {

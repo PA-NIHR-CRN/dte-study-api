@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace DYNAMO.STREAM.HANDLER.Entities;
+namespace Dynamo.Stream.Handler.Entities;
 
 public class ParticipantAddress : IPersonalInformation
 {
@@ -9,7 +9,7 @@ public class ParticipantAddress : IPersonalInformation
         Participant = null!;
     }
 
-    [Key] 
+    [Key]
     public int Id { get; set; }
     public string? AddressLine1 { get; set; }
     public string? AddressLine2 { get; set; }
@@ -21,7 +21,7 @@ public class ParticipantAddress : IPersonalInformation
 
     [Required]
     public Participant Participant { get; set; }
-    
+
     private static string? GetOutcodeFromPostcode(string? postcode)
     {
         if (string.IsNullOrWhiteSpace(postcode))

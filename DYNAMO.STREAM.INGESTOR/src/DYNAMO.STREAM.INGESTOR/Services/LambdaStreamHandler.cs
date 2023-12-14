@@ -2,7 +2,7 @@
 using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
 using Amazon.Lambda.Model;
-using DYNAMO.STREAM.HANDLER.Handlers;
+using Dynamo.Stream.Handler.Handlers;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;

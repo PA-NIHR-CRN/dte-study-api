@@ -1,10 +1,10 @@
 using Amazon.DynamoDBv2;
 using Amazon.Lambda;
 using Amazon.Lambda.Core;
-using DYNAMO.STREAM.HANDLER.Entities;
-using DYNAMO.STREAM.HANDLER.Handlers;
-using DYNAMO.STREAM.INGESTOR.Repository;
-using DYNAMO.STREAM.INGESTOR.Services;
+using Dynamo.Stream.Handler.Entities;
+using Dynamo.Stream.Handler.Handlers;
+using Dynamo.Stream.Ingestor.Repository;
+using Dynamo.Stream.Ingestor.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
-namespace DYNAMO.STREAM.INGESTOR;
+namespace Dynamo.Stream.Ingestor;
 
 public class Functions
 {
@@ -25,8 +25,7 @@ public class Functions
     {
         var services = new ServiceCollection();
         // Configure your services here
-        var startup = new Startup();
-        startup.ConfigureServices(services);
+        Startup.ConfigureServices(services);
         var provider = services.BuildServiceProvider();
 
         _logger = provider.GetRequiredService<ILogger<Functions>>();

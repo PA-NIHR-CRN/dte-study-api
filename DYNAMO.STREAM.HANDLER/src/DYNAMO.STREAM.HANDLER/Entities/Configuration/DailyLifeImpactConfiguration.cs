@@ -1,8 +1,8 @@
-using DYNAMO.STREAM.HANDLER.Entities.RefData;
+using Dynamo.Stream.Handler.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DYNAMO.STREAM.HANDLER.Entities.Configuration;
+namespace Dynamo.Stream.Handler.Entities.Configuration;
 
 public class DailyLifeImpactConfiguration : IEntityTypeConfiguration<DailyLifeImpact>
 {

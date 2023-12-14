@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
-namespace DYNAMO.STREAM.HANDLER.Entities;
+namespace Dynamo.Stream.Handler.Entities;
 
 public class ParticipantDbContextFactory : IDesignTimeDbContextFactory<ParticipantDbContext>
 {
