@@ -4,6 +4,6 @@ namespace Dynamo.Stream.Ingestor.Repository;
 
 public interface IDynamoParticipantRepository
 {
-    public Task<IEnumerable<Dictionary<string, AttributeValue>>> GetAllParticipantsAsAttributeMapsAsync(
+    public IAsyncEnumerable<Dictionary<string, AttributeValue>> GetAllParticipantsAsAttributeMapsAsync(
         CancellationToken cancellationToken = default);
 }

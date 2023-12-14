@@ -1,7 +1,7 @@
+using System.Runtime.CompilerServices;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Dynamo.Stream.Ingestor.Settings;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Dynamo.Stream.Ingestor.Repository
@@ -12,22 +12,31 @@ namespace Dynamo.Stream.Ingestor.Repository
         private readonly DynamoDbSettings _dynamoDbSettings;
 
 
-        public DynamoParticipantRepository(IAmazonDynamoDB dynamoDbClient, IConfiguration configuration, IOptions<DynamoDbSettings > dynamoDbSettings)
+        public DynamoParticipantRepository(IAmazonDynamoDB dynamoDbClient, IOptions<DynamoDbSettings> dynamoDbSettings)
         {
             _dynamoDbClient = dynamoDbClient;
             _dynamoDbSettings = dynamoDbSettings.Value;
         }
 
-        public async Task<IEnumerable<Dictionary<string, AttributeValue>>> GetAllParticipantsAsAttributeMapsAsync(
-            CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<Dictionary<string, AttributeValue>> GetAllParticipantsAsAttributeMapsAsync(
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var request = new ScanRequest
             {
                 TableName = _dynamoDbSettings.TableName,
             };
+            
+            ScanResponse response;
 
-            var response = await _dynamoDbClient.ScanAsync(request, cancellationToken);
-            return response.Items;
+            do
+            {
+                response = await _dynamoDbClient.ScanAsync(request, cancellationToken);
+                foreach (var item in response.Items)
+                {
+                    yield return item;
+                }
+                request.ExclusiveStartKey = response.LastEvaluatedKey;
+            } while (response.LastEvaluatedKey?.Count > 0);
         }
     }
 }
