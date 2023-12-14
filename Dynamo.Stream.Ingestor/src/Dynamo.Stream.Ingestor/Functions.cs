@@ -43,8 +43,8 @@ public class Functions
         var cts = new CancellationTokenSource();
         using (_logger.BeginScope("{FunctionName}", nameof(IngestParticipants)))
         {
-            var participants = await _repository.GetAllParticipantsAsAttributeMapsAsync(cts.Token);
-            foreach (var participant in participants)
+            var participants = _repository.GetAllParticipantsAsAttributeMapsAsync(cts.Token);
+            await foreach (var participant in participants)
             {
                 DynamoDBEvent streamEvent;
 
@@ -58,12 +58,13 @@ public class Functions
                 {
                     streamEvent = _dynamoDbEventService.CreateEvent(OperationType.INSERT, newImage: participant);
                 }
-                
+
                 var errors = await _streamHandler.ProcessStreamAsync(streamEvent, cts.Token);
                 if (errors.Any())
                 {
                     _logger.LogError("{@errors}", errors);
-                    throw new AmazonLambdaException($"Event(s) {string.Join(", ", errors.Select(x => x.ItemIdentifier))} failed to process.");
+                    throw new AmazonLambdaException(
+                        $"Event(s) {string.Join(", ", errors.Select(x => x.ItemIdentifier))} failed to process.");
                 }
 
                 _logger.LogInformation("Sent participant {ParticipantParticipantId} to target lambda function",
