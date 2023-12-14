@@ -47,38 +47,28 @@ public class Functions
             foreach (var participant in participants)
             {
                 DynamoDBEvent streamEvent;
-                
+
                 var pk = participant.PK();
+
                 if (pk.StartsWith("DELETED#"))
                 {
-                    // change to PARTICIPANT#
-                    participant.UpdatePrimaryKey();
-                    streamEvent = _dynamoDbEventService.CreateEvent(OperationType.INSERT, participant);
-                    ProcessEvent(streamEvent, cts.Token);
-                    
-                    // delete the participant
-                    streamEvent = _dynamoDbEventService.CreateEvent(OperationType.REMOVE, new Dictionary<string, AttributeValue>(), participant);
-                    ProcessEvent(streamEvent, cts.Token);
+                    streamEvent = _dynamoDbEventService.CreateEvent(OperationType.REMOVE, oldImage: participant);
                 }
                 else
                 {
-                    streamEvent = _dynamoDbEventService.CreateEvent(OperationType.INSERT, participant);
-                    ProcessEvent(streamEvent, cts.Token);
+                    streamEvent = _dynamoDbEventService.CreateEvent(OperationType.INSERT, newImage: participant);
+                }
+                
+                var errors = await _streamHandler.ProcessStreamAsync(streamEvent, cts.Token);
+                if (errors.Any())
+                {
+                    _logger.LogError("{@errors}", errors);
+                    throw new AmazonLambdaException($"Event(s) {string.Join(", ", errors.Select(x => x.ItemIdentifier))} failed to process.");
                 }
 
                 _logger.LogInformation("Sent participant {ParticipantParticipantId} to target lambda function",
                     participant["PK"].S);
             }
-        }
-    }
-    
-    private async void ProcessEvent(DynamoDBEvent streamEvent, CancellationToken token)
-    {
-        var errors = await _streamHandler.ProcessStreamAsync(streamEvent, token);
-        if (errors.Any())
-        {
-            _logger.LogError("{@errors}", errors);
-            throw new AmazonLambdaException($"Event(s) {string.Join(", ", errors.Select(x => x.ItemIdentifier))} failed to process.");
         }
     }
 }
