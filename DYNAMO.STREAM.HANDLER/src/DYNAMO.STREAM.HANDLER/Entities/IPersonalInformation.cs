@@ -1,4 +1,4 @@
-﻿namespace DYNAMO.STREAM.HANDLER.Entities
+﻿namespace Dynamo.Stream.Handler.Entities
 {
     public interface IPersonalInformation
     {

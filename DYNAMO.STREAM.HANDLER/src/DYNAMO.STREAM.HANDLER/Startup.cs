@@ -1,22 +1,23 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
-using DYNAMO.STREAM.HANDLER.Entities;
-using DYNAMO.STREAM.HANDLER.Extensions;
-using DYNAMO.STREAM.HANDLER.Handlers;
-using DYNAMO.STREAM.HANDLER.Mappers;
-using DYNAMO.STREAM.HANDLER.Services;
+using Dynamo.Stream.Handler.Entities;
+using Dynamo.Stream.Handler.Extensions;
+using Dynamo.Stream.Handler.Handlers;
+using Dynamo.Stream.Handler.Mappers;
+using Dynamo.Stream.Handler.Services;
+using Dynamo.Stream.Handler.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
-namespace DYNAMO.STREAM.HANDLER;
+namespace Dynamo.Stream.Handler;
 
 
-public class Startup
+public static class Startup
 {
-    public void ConfigureServices(IServiceCollection services)
+    public static void ConfigureServices(IServiceCollection services)
     {
         // configuration
         var configuration = BuildConfiguration();
@@ -37,19 +38,22 @@ public class Startup
         ConfigureLogging(services, configuration);
     }
 
-    private static IConfiguration BuildConfiguration()
+    public static IConfiguration BuildConfiguration()
     {
         return new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", true).AddEnvironmentVariables().AddAwsSecrets().Build();
+            .AddJsonFile("appsettings.json", true)
+            .AddEnvironmentVariables()
+            .AddAwsSecrets()
+            .Build();
     }
 
-    private static string GetConnectionString(IConfiguration configuration)
+    public static string GetConnectionString(IConfiguration configuration)
     {
         var dbSettings = configuration.GetSection(DbSettings.SectionName).Get<DbSettings>();
         return dbSettings.BuildConnectionString();
     }
 
-    private static void ConfigureLogging(IServiceCollection services, IConfiguration configuration)
+    public static void ConfigureLogging(IServiceCollection services, IConfiguration configuration)
     {
         var loggerOptions = new LambdaLoggerOptions
         {

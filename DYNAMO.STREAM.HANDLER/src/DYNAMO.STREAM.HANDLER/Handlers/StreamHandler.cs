@@ -1,12 +1,12 @@
 using Amazon.DynamoDBv2;
 using Amazon.Lambda.DynamoDBEvents;
-using DYNAMO.STREAM.HANDLER.Entities;
-using DYNAMO.STREAM.HANDLER.Extensions;
-using DYNAMO.STREAM.HANDLER.Mappers;
+using Dynamo.Stream.Handler.Entities;
+using Dynamo.Stream.Handler.Extensions;
+using Dynamo.Stream.Handler.Mappers;
 using Microsoft.Extensions.Logging;
 using static Amazon.Lambda.DynamoDBEvents.StreamsEventResponse;
 
-namespace DYNAMO.STREAM.HANDLER.Handlers;
+namespace Dynamo.Stream.Handler.Handlers;
 
 public class StreamHandler : IStreamHandler
 {

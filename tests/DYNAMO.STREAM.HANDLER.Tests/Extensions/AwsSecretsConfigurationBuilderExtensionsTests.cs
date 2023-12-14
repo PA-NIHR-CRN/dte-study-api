@@ -1,5 +1,5 @@
 using Dte.Common.Lambda.SecretsManagement.AwsSecretsManager;
-using DYNAMO.STREAM.HANDLER.Extensions;
+using Dynamo.Stream.Handler.Extensions;
 using Microsoft.Extensions.Configuration;
 
 namespace DYNAMO.STREAM.HANDLER.Tests.Extensions;

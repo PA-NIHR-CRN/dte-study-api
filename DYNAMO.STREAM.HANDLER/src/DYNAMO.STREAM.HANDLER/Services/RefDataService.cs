@@ -1,9 +1,9 @@
-using DYNAMO.STREAM.HANDLER.Entities;
-using DYNAMO.STREAM.HANDLER.Entities.RefData;
+using Dynamo.Stream.Handler.Entities;
+using Dynamo.Stream.Handler.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace DYNAMO.STREAM.HANDLER.Services;
+namespace Dynamo.Stream.Handler.Services;
 
 public class RefDataService : IRefDataService
 {

@@ -1,5 +1,5 @@
 using Amazon.DynamoDBv2.Model;
-using DYNAMO.STREAM.HANDLER.Extensions;
+using Dynamo.Stream.Handler.Extensions;
 
 namespace DYNAMO.STREAM.HANDLER.Tests.Extensions;
 

@@ -1,9 +1,9 @@
 using Amazon.SecretsManager.Model;
 using Dte.Common.Lambda.Extensions;
-using DYNAMO.STREAM.HANDLER.Helpers;
+using Dynamo.Stream.Handler.Helpers;
 using Microsoft.Extensions.Configuration;
 
-namespace DYNAMO.STREAM.HANDLER.Extensions;
+namespace Dynamo.Stream.Handler.Extensions;
 
 public static class AwsSecretsConfigurationBuilderExtensions
 {

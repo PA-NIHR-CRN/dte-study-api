@@ -1,6 +1,6 @@
 using MySqlConnector;
 
-namespace DYNAMO.STREAM.HANDLER;
+namespace Dynamo.Stream.Handler.Settings;
 
 public class DbSettings
 {
@@ -10,7 +10,7 @@ public class DbSettings
     public string Host { get; set; }
     public int Port { get; set; }
     public string Database { get; set; }
-    
+
     public string BuildConnectionString()
     {
         var connectionStringBuilder = new MySqlConnectionStringBuilder
@@ -23,5 +23,5 @@ public class DbSettings
         };
         return connectionStringBuilder.ConnectionString;
     }
-    
+
 }

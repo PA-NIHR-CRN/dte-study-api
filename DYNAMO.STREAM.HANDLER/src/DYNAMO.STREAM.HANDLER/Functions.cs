@@ -1,12 +1,12 @@
 using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
-using DYNAMO.STREAM.HANDLER.Handlers;
+using Dynamo.Stream.Handler.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
-namespace DYNAMO.STREAM.HANDLER;
+namespace Dynamo.Stream.Handler;
 
 public class Functions
 {
@@ -17,8 +17,7 @@ public class Functions
     {
         var services = new ServiceCollection();
         // Configure your services here
-        var startup = new Startup();
-        startup.ConfigureServices(services);
+        Startup.ConfigureServices(services);
         var provider = services.BuildServiceProvider();
 
         _logger = provider.GetRequiredService<ILogger<Functions>>();

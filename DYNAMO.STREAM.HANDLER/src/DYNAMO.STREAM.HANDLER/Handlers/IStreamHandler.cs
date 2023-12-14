@@ -1,7 +1,7 @@
 using Amazon.Lambda.DynamoDBEvents;
 using static Amazon.Lambda.DynamoDBEvents.StreamsEventResponse;
 
-namespace DYNAMO.STREAM.HANDLER.Handlers;
+namespace Dynamo.Stream.Handler.Handlers;
 
 public interface IStreamHandler
 {

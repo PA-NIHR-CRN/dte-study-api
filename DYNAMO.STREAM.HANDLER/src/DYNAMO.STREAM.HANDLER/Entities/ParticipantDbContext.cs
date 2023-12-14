@@ -1,9 +1,9 @@
-using DYNAMO.STREAM.HANDLER.Entities.Configuration;
-using DYNAMO.STREAM.HANDLER.Entities.Interceptors;
-using DYNAMO.STREAM.HANDLER.Entities.RefData;
+using Dynamo.Stream.Handler.Entities.Configuration;
+using Dynamo.Stream.Handler.Entities.Interceptors;
+using Dynamo.Stream.Handler.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 
-namespace DYNAMO.STREAM.HANDLER.Entities;
+namespace Dynamo.Stream.Handler.Entities;
 
 public class ParticipantDbContext : DbContext
 {

@@ -1,6 +1,7 @@
+using Dynamo.Stream.Handler.Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace DYNAMO.STREAM.HANDLER.Entities.RefData;
+namespace Dynamo.Stream.Handler.Entities.RefData;
 
 public abstract class ReferenceData : IReferenceData, ISoftDelete
 {
