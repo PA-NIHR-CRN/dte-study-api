@@ -1,6 +1,6 @@
 using Dynamo.Stream.Handler.Settings;
 
-namespace DYNAMO.STREAM.HANDLER.Tests.Settings;
+namespace Dynamo.Stream.Handler.Tests.Settings;
 
 public class DbSettingsTests
 {

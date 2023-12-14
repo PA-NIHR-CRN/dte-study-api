@@ -32,13 +32,13 @@ If already installed check if new version is available.
 
 Execute unit tests
 ```
-    cd "DYNAMO.STREAM.INGESTOR/test/DYNAMO.STREAM.INGESTOR.Tests"
+    cd "Dynamo.Stream.Ingestor/test/Dynamo.Stream.Ingestor.Tests"
     dotnet test
 ```
 
 Deploy application
 ```
-    cd "DYNAMO.STREAM.INGESTOR/src/DYNAMO.STREAM.INGESTOR"
+    cd "Dynamo.Stream.Ingestor/src/Dynamo.Stream.Ingestor"
     dotnet lambda deploy-serverless
 ```
 ## Arm64
