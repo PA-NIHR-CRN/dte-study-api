@@ -4,11 +4,6 @@ using Amazon.Lambda.DynamoDBEvents;
 using Amazon.Lambda.Model;
 using Dynamo.Stream.Handler.Handlers;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dynamo.Stream.Ingestor.Services
 {

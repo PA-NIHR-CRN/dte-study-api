@@ -1,7 +1,10 @@
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda;
 using Amazon.Lambda.Core;
+using Amazon.Lambda.DynamoDBEvents;
 using Dynamo.Stream.Handler.Entities;
+using Dynamo.Stream.Handler.Extensions;
 using Dynamo.Stream.Handler.Handlers;
 using Dynamo.Stream.Ingestor.Repository;
 using Dynamo.Stream.Ingestor.Services;
@@ -43,18 +46,39 @@ public class Functions
             var participants = await _repository.GetAllParticipantsAsAttributeMapsAsync(cts.Token);
             foreach (var participant in participants)
             {
-                var streamEvent = _dynamoDbEventService.CreateEvent(OperationType.INSERT, participant);
-                var errors = await _streamHandler.ProcessStreamAsync(streamEvent, cts.Token);
-
-                if (errors.Any())
+                DynamoDBEvent streamEvent;
+                
+                var pk = participant.PK();
+                if (pk.StartsWith("DELETED#"))
                 {
-                    _logger.LogError("{@errors}", errors);
-                    throw new AmazonLambdaException($"Event(s) {string.Join(", ", errors.Select(x => x.ItemIdentifier))} failed to process.");
+                    // change to PARTICIPANT#
+                    participant.UpdatePrimaryKey();
+                    streamEvent = _dynamoDbEventService.CreateEvent(OperationType.INSERT, participant);
+                    ProcessEvent(streamEvent, cts.Token);
+                    
+                    // delete the participant
+                    streamEvent = _dynamoDbEventService.CreateEvent(OperationType.REMOVE, new Dictionary<string, AttributeValue>(), participant);
+                    ProcessEvent(streamEvent, cts.Token);
+                }
+                else
+                {
+                    streamEvent = _dynamoDbEventService.CreateEvent(OperationType.INSERT, participant);
+                    ProcessEvent(streamEvent, cts.Token);
                 }
 
                 _logger.LogInformation("Sent participant {ParticipantParticipantId} to target lambda function",
                     participant["PK"].S);
             }
+        }
+    }
+    
+    private async void ProcessEvent(DynamoDBEvent streamEvent, CancellationToken token)
+    {
+        var errors = await _streamHandler.ProcessStreamAsync(streamEvent, token);
+        if (errors.Any())
+        {
+            _logger.LogError("{@errors}", errors);
+            throw new AmazonLambdaException($"Event(s) {string.Join(", ", errors.Select(x => x.ItemIdentifier))} failed to process.");
         }
     }
 }
