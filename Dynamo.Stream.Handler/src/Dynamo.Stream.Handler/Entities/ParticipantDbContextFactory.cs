@@ -8,12 +8,9 @@ public class ParticipantDbContextFactory : IDesignTimeDbContextFactory<Participa
 {
     public ParticipantDbContext CreateDbContext(string[] args)
     {
-        IConfigurationRoot configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .Build();
+        var configuration = Startup.BuildConfiguration();
 
-        var connectionString = configuration.GetConnectionString("ParticipantDb");
+        var connectionString = Startup.GetConnectionString(configuration);
 
         var options = new DbContextOptionsBuilder<ParticipantDbContext>()
             .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))

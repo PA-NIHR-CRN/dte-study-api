@@ -22,7 +22,7 @@ public static class AwsSecretsConfigurationBuilderExtensions
 
         if (string.IsNullOrWhiteSpace(awsSecretsName))
         {
-            throw new ConfigurationException($"The {AwsSecretManagerSecretName} environment variable has not been set");
+            return configurationBuilder;
         }
 
         var allowedSecretNames = new[] { awsSecretsName };

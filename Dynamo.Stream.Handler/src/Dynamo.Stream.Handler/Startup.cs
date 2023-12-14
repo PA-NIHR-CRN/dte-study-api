@@ -42,6 +42,7 @@ public static class Startup
     {
         return new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true)
+            .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true)
             .AddEnvironmentVariables()
             .AddAwsSecrets()
             .Build();

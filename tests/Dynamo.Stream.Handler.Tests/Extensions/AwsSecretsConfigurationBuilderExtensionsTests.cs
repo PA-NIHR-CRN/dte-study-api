@@ -19,16 +19,6 @@ public class AwsSecretsConfigurationBuilderExtensionsTests
         Assert.Same(_configurationBuilder, result);
     }
 
-
-    [Fact]
-    public void AddAwsSecrets_ThrowsException_WhenAwsSecretsNameIsNotSet()
-    {
-        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Production");
-        Environment.SetEnvironmentVariable("AWS_SECRET_MANAGER_SECRET_NAME", null);
-
-        Assert.Throws<ConfigurationException>(() => _configurationBuilder.AddAwsSecrets());
-    }
-
     [Fact]
     public void AddAwsSecrets_AddsSecretsManager_WhenAwsSecretsNameIsSet()
     {

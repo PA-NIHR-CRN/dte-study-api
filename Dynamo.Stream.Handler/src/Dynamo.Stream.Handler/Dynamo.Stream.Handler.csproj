@@ -38,4 +38,9 @@
       <None Remove="Entities\Configuration\HealthConditions.txt" />
       <EmbeddedResource Include="Entities\Configuration\HealthConditions.txt" />
     </ItemGroup>
+    <ItemGroup>
+      <None Update="appsettings.user.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>
