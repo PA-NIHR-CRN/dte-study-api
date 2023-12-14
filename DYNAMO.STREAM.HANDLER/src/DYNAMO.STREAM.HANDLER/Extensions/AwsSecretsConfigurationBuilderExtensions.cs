@@ -1,3 +1,4 @@
+using Amazon.Extensions.NETCore.Setup;
 using Amazon.SecretsManager.Model;
 using Dte.Common.Lambda.Extensions;
 using Dynamo.Stream.Handler.Helpers;
@@ -21,7 +22,7 @@ public static class AwsSecretsConfigurationBuilderExtensions
 
         if (string.IsNullOrWhiteSpace(awsSecretsName))
         {
-            throw new Exception($"The {AwsSecretManagerSecretName} environment variable has not been set");
+            throw new ConfigurationException($"The {AwsSecretManagerSecretName} environment variable has not been set");
         }
 
         var allowedSecretNames = new[] { awsSecretsName };
