@@ -9,6 +9,7 @@ using Dynamo.Stream.Handler.Settings;
 using Dynamo.Stream.Handler.Handlers;
 using Dynamo.Stream.Handler.Entities;
 using Dynamo.Stream.Ingestor.Repository;
+using Dynamo.Stream.Ingestor.Settings;
 
 namespace Dynamo.Stream.Ingestor;
 
@@ -37,6 +38,7 @@ public static class Startup
         var connectionString = Handler.Startup.GetConnectionString(configuration);
         services.AddDbContext<ParticipantDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+        services.AddOptions<DynamoDbSettings>().BindConfiguration("DynamoDbSettings");
 
 
         Handler.Startup.ConfigureLogging(services, configuration);
