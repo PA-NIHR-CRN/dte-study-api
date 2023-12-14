@@ -10,8 +10,8 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0"/>
-        <PackageReference Include="xunit" Version="2.4.1"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+        <PackageReference Include="xunit" Version="2.4.1" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\DYNAMO.STREAM.HANDLER\src\DYNAMO.STREAM.HANDLER\DYNAMO.STREAM.HANDLER.csproj" />
+      <ProjectReference Include="..\..\DYNAMO.STREAM.HANDLER\src\DYNAMO.STREAM.HANDLER\Dynamo.Stream.Handler.csproj" />
     </ItemGroup>
 
 </Project>

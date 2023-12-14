@@ -11,6 +11,8 @@ using DYNAMO.STREAM.HANDLER;
 using DYNAMO.STREAM.HANDLER.Entities;
 using DYNAMO.STREAM.HANDLER.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Dynamo.Stream.Ingestor.Services;
+using DYNAMO.STREAM.HANDLER.Handlers;
 
 namespace DYNAMO.STREAM.INGESTOR;
 
@@ -22,13 +24,16 @@ public class Startup
         services.AddSingleton(configuration);
 
         // add aws services
-        services.AddSingleton<IAmazonDynamoDB, AmazonDynamoDBClient>();
-        services.AddSingleton<IAmazonLambda, AmazonLambdaClient>();
+        services.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
+        services.AddScoped<IAmazonLambda, AmazonLambdaClient>();
         services.AddScoped<ILambdaSerializer, Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer>();
 
         // add application services
-        services.AddTransient<IDynamoParticipantRepository, DynamoParticipantRepository>();
+        services.AddScoped<IDynamoParticipantRepository, DynamoParticipantRepository>();
         services.AddTransient<IDynamoDbEventService, DynamoDbEventService>();
+        
+        services.AddOptions<StreamHandlerLambdaSettings>().BindConfiguration("StreamHandlerLambdaSettings");
+        services.AddTransient<IStreamHandler, LambdaStreamHandler>();
         
         // add aurora services
         // db setup
@@ -37,13 +42,17 @@ public class Startup
         services.AddDbContext<ParticipantDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+
         ConfigureLogging(services, configuration);
     }
 
     private IConfiguration BuildConfiguration()
     {
         return new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", true).AddEnvironmentVariables().AddAwsSecrets().Build();
+            .AddJsonFile("appsettings.json", true)
+            .AddEnvironmentVariables()
+            .AddAwsSecrets()
+            .Build();
     }
     
     private static string GetConnectionString(IConfiguration configuration)
