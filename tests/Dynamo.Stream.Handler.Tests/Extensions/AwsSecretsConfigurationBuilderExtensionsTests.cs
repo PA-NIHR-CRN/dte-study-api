@@ -1,3 +1,4 @@
+using Amazon.Extensions.NETCore.Setup;
 using Dte.Common.Lambda.SecretsManagement.AwsSecretsManager;
 using Dynamo.Stream.Handler.Extensions;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +26,7 @@ public class AwsSecretsConfigurationBuilderExtensionsTests
         Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Production");
         Environment.SetEnvironmentVariable("AWS_SECRET_MANAGER_SECRET_NAME", null);
 
-        Assert.Throws<Exception>(() => _configurationBuilder.AddAwsSecrets());
+        Assert.Throws<ConfigurationException>(() => _configurationBuilder.AddAwsSecrets());
     }
 
     [Fact]
