@@ -7,6 +7,7 @@ public class DbSettingsTests
     [Fact]
     public void BuildConnectionString_ReturnsCorrectValue_WhenAllPropertiesAreSet()
     {
+        // Arrange
         var dbSettings = new DbSettings
         {
             Username = "TestUser",
@@ -16,8 +17,10 @@ public class DbSettingsTests
             Database = "TestDatabase"
         };
 
+        // Act
         var result = dbSettings.BuildConnectionString();
 
+        // Assert
         Assert.Equal(
             "Server=TestHost;Port=3306;User ID=TestUser;Password=TestPassword;Database=TestDatabase",
             result);
@@ -30,6 +33,7 @@ public class DbSettingsTests
     public void BuildConnectionString_ReturnsConnectionStringWithoutProperty_WhenPropertyIsNull(string propertyName,
         string expectedMissingPart)
     {
+        // Arrange
         var dbSettings = new DbSettings
         {
             Username = "TestUser",
@@ -41,8 +45,10 @@ public class DbSettingsTests
 
         typeof(DbSettings).GetProperty(propertyName)?.SetValue(dbSettings, null);
 
+        // Act
         var result = dbSettings.BuildConnectionString();
 
+        // Assert
         Assert.Contains("Server=TestHost", result);
         Assert.Contains("Port=3306", result);
 
