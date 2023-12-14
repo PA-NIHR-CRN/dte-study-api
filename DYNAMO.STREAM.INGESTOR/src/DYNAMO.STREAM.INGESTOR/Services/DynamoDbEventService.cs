@@ -6,7 +6,7 @@ namespace DYNAMO.STREAM.INGESTOR.Services;
 
 public class DynamoDbEventService : IDynamoDbEventService
 {
-    public DynamoDBEvent CreateParticipantInsertEvent(Dictionary<string, AttributeValue> participant)
+    public DynamoDBEvent CreateEvent(OperationType eventType, Dictionary<string, AttributeValue> newImage, Dictionary<string, AttributeValue> oldImage = null!)
     {
         var dynamoDbEvent = new DynamoDBEvent
         {
@@ -15,16 +15,17 @@ public class DynamoDbEventService : IDynamoDbEventService
                 new ()
                 {
                     EventID = Guid.NewGuid().ToString(),
-                    EventName = OperationType.INSERT,
+                    EventName = eventType,
                     Dynamodb = new StreamRecord
                     {
                         ApproximateCreationDateTime = DateTime.UtcNow,
                         Keys = new Dictionary<string, AttributeValue>
                         {
-                            { "PK", participant["PK"] },
-                            { "SK", participant["SK"] }
+                            { "PK", newImage["PK"] },
+                            { "SK", newImage["SK"] }
                         },
-                        NewImage = participant,
+                        NewImage = newImage,
+                        OldImage = oldImage ?? new Dictionary<string, AttributeValue>(),
                         SequenceNumber = Guid.NewGuid().ToString(),
                         SizeBytes = 0,
                         StreamViewType = StreamViewType.NEW_AND_OLD_IMAGES,
