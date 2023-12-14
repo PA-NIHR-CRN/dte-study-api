@@ -14,6 +14,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DYNAMO.STREAM.HANDLER\DYNAMO.STREAM.HANDLER.csproj" />
+    <ProjectReference Include="..\..\src\Dynamo.Stream.Handler\Dynamo.Stream.Handler.csproj" />
   </ItemGroup>
 </Project>

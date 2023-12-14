@@ -32,13 +32,13 @@ If already installed check if new version is available.
 
 Execute unit tests
 ```
-    cd "DYNAMO.STREAM.HANDLER/test/DYNAMO.STREAM.HANDLER.Tests"
+    cd "Dynamo.Stream.Handler/test/Dynamo.Stream.Handler.Tests"
     dotnet test
 ```
 
 Deploy application
 ```
-    cd "DYNAMO.STREAM.HANDLER/src/DYNAMO.STREAM.HANDLER"
+    cd "Dynamo.Stream.Handler/src/Dynamo.Stream.Handler"
     dotnet lambda deploy-serverless
 ```
 ## Arm64

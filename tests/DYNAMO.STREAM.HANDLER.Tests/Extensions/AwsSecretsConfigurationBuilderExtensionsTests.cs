@@ -2,7 +2,7 @@ using Dte.Common.Lambda.SecretsManagement.AwsSecretsManager;
 using Dynamo.Stream.Handler.Extensions;
 using Microsoft.Extensions.Configuration;
 
-namespace DYNAMO.STREAM.HANDLER.Tests.Extensions;
+namespace Dynamo.Stream.Handler.Tests.Extensions;
 
 public class AwsSecretsConfigurationBuilderExtensionsTests
 {

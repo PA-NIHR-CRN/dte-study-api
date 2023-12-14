@@ -1,7 +1,7 @@
 using Dynamo.Stream.Handler.Helpers;
 using Microsoft.Extensions.Hosting;
 
-namespace DYNAMO.STREAM.HANDLER.Tests.Helpers;
+namespace Dynamo.Stream.Handler.Tests.Helpers;
 
 public class IsDevelopmentTests
 {

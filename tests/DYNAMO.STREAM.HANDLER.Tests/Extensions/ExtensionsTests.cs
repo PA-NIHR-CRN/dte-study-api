@@ -1,7 +1,7 @@
 using Amazon.DynamoDBv2.Model;
 using Dynamo.Stream.Handler.Extensions;
 
-namespace DYNAMO.STREAM.HANDLER.Tests.Extensions;
+namespace Dynamo.Stream.Handler.Tests.Extensions;
 
 public class ExtensionsTests
 {

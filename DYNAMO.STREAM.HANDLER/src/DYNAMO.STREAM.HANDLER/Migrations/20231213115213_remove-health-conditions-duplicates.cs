@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace DYNAMO.STREAM.HANDLER.Migrations
+namespace Dynamo.Stream.Handler.Migrations
 {
     public partial class removehealthconditionsduplicates : Migration
     {

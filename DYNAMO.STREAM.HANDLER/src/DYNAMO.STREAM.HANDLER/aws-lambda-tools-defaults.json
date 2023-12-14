@@ -10,7 +10,7 @@
   "configuration": "Release",
   "framework": "net6.0",
   "function-runtime":"dotnet6",
-  "function-handler" : "DYNAMO.STREAM.HANDLER::DYNAMO.STREAM.HANDLER.Functions::ProcessStream",
+  "function-handler" : "Dynamo.Stream.Handler::Dynamo.Stream.Handler.Functions::ProcessStream",
   "function-memory-size" : 256,
   "function-timeout" : 30
 }

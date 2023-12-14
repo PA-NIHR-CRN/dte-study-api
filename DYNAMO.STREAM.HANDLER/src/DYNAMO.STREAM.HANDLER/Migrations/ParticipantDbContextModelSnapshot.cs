@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace DYNAMO.STREAM.HANDLER.Migrations
+namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
     partial class ParticipantDbContextModelSnapshot : ModelSnapshot
@@ -19,7 +19,7 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                 .HasAnnotation("ProductVersion", "6.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.Participant", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.Participant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -99,7 +99,7 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                     b.ToTable("Participants");
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.ParticipantAddress", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.ParticipantAddress", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -134,7 +134,7 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                     b.ToTable("ParticipantAddress");
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.ParticipantHealthCondition", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.ParticipantHealthCondition", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -164,7 +164,7 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                     b.ToTable("ParticipantHealthCondition");
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.ParticipantIdentifier", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.ParticipantIdentifier", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -192,7 +192,7 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                     b.ToTable("ParticipantIdentifiers");
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.RefData.CommunicationLanguage", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.RefData.CommunicationLanguage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -229,7 +229,7 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                         });
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.RefData.DailyLifeImpact", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.RefData.DailyLifeImpact", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -280,7 +280,7 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                         });
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.RefData.Gender", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.RefData.Gender", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -324,7 +324,7 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                         });
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.RefData.HealthCondition", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.RefData.HealthCondition", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -8964,7 +8964,7 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                         });
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.RefData.IdentifierType", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.RefData.IdentifierType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -9001,17 +9001,17 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                         });
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.Participant", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.Participant", b =>
                 {
-                    b.HasOne("DYNAMO.STREAM.HANDLER.Entities.RefData.CommunicationLanguage", "CommunicationLanguage")
+                    b.HasOne("Dynamo.Stream.Handler.Entities.RefData.CommunicationLanguage", "CommunicationLanguage")
                         .WithMany()
                         .HasForeignKey("CommunicationLanguageId");
 
-                    b.HasOne("DYNAMO.STREAM.HANDLER.Entities.RefData.DailyLifeImpact", "DailyLifeImpact")
+                    b.HasOne("Dynamo.Stream.Handler.Entities.RefData.DailyLifeImpact", "DailyLifeImpact")
                         .WithMany()
                         .HasForeignKey("DailyLifeImpactId");
 
-                    b.HasOne("DYNAMO.STREAM.HANDLER.Entities.RefData.Gender", "Gender")
+                    b.HasOne("Dynamo.Stream.Handler.Entities.RefData.Gender", "Gender")
                         .WithMany()
                         .HasForeignKey("GenderId");
 
@@ -9022,26 +9022,26 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                     b.Navigation("Gender");
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.ParticipantAddress", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.ParticipantAddress", b =>
                 {
-                    b.HasOne("DYNAMO.STREAM.HANDLER.Entities.Participant", "Participant")
+                    b.HasOne("Dynamo.Stream.Handler.Entities.Participant", "Participant")
                         .WithOne("Address")
-                        .HasForeignKey("DYNAMO.STREAM.HANDLER.Entities.ParticipantAddress", "ParticipantId")
+                        .HasForeignKey("Dynamo.Stream.Handler.Entities.ParticipantAddress", "ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.ParticipantHealthCondition", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.ParticipantHealthCondition", b =>
                 {
-                    b.HasOne("DYNAMO.STREAM.HANDLER.Entities.RefData.HealthCondition", "HealthCondition")
+                    b.HasOne("Dynamo.Stream.Handler.Entities.RefData.HealthCondition", "HealthCondition")
                         .WithMany()
                         .HasForeignKey("HealthConditionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DYNAMO.STREAM.HANDLER.Entities.Participant", "Participant")
+                    b.HasOne("Dynamo.Stream.Handler.Entities.Participant", "Participant")
                         .WithMany("HealthConditions")
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -9052,15 +9052,15 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                     b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.ParticipantIdentifier", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.ParticipantIdentifier", b =>
                 {
-                    b.HasOne("DYNAMO.STREAM.HANDLER.Entities.RefData.IdentifierType", "Type")
+                    b.HasOne("Dynamo.Stream.Handler.Entities.RefData.IdentifierType", "Type")
                         .WithMany()
                         .HasForeignKey("IdentifierTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DYNAMO.STREAM.HANDLER.Entities.Participant", "Participant")
+                    b.HasOne("Dynamo.Stream.Handler.Entities.Participant", "Participant")
                         .WithMany("ParticipantIdentifiers")
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -9071,7 +9071,7 @@ namespace DYNAMO.STREAM.HANDLER.Migrations
                     b.Navigation("Type");
                 });
 
-            modelBuilder.Entity("DYNAMO.STREAM.HANDLER.Entities.Participant", b =>
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.Participant", b =>
                 {
                     b.Navigation("Address");
 

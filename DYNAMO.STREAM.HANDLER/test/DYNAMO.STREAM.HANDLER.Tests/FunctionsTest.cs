@@ -3,7 +3,7 @@ using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.TestUtilities;
 using Xunit;
 
-namespace DYNAMO.STREAM.HANDLER.Tests;
+namespace Dynamo.Stream.Handler.Tests;
 
 public class FunctionTest
 {
