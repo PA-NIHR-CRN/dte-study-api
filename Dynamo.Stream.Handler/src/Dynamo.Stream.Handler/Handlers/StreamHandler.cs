@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.DynamoDBEvents;
 using Dynamo.Stream.Handler.Entities;
 using Dynamo.Stream.Handler.Extensions;
@@ -94,25 +95,7 @@ public class StreamHandler : IStreamHandler
 
     private async Task ProcessInsertAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
-        var pk = record.Dynamodb.NewImage.PK();
-
-        if (pk.StartsWith("DELETED#", StringComparison.InvariantCultureIgnoreCase))
-        {
-            return;
-        }
-
-        var identifiers = _participantMapper.ExtractIdentifiers(record.Dynamodb.NewImage);
-
-        var targetParticipant = await _dbContext.GetParticipantByLinkedIdentifiersAsync(identifiers, cancellationToken);
-
-        if (targetParticipant == null)
-        {
-            // No linked participant exists, create a new one.
-            targetParticipant = new Participant();
-            await _dbContext.Participants.AddAsync(targetParticipant, cancellationToken);
-        }
-
-        _participantMapper.Map(record.Dynamodb.NewImage, targetParticipant);
+        await InsertAsync(record.Dynamodb.NewImage, cancellationToken);
     }
 
     private async Task ProcessModifyAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
@@ -122,7 +105,7 @@ public class StreamHandler : IStreamHandler
 
         if (participant == null)
         {
-            throw new KeyNotFoundException($"Participant with PK '{pk}' not found.");
+            participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
         }
 
         _participantMapper.Map(record.Dynamodb.NewImage, participant);
@@ -135,9 +118,20 @@ public class StreamHandler : IStreamHandler
 
         if (participant == null)
         {
-            throw new KeyNotFoundException($"Participant with PK '{pk}' not found.");
+            participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
         }
 
         _dbContext.Participants.Remove(participant);
+    }
+
+    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image, CancellationToken cancellationToken)
+    {
+        var identifiers = _participantMapper.ExtractIdentifiers(image);
+        var targetParticipant = await _dbContext.GetParticipantByLinkedIdentifiersAsync(identifiers, cancellationToken);
+        if (targetParticipant == null)
+        {
+            targetParticipant = _dbContext.Participants.Add(new Participant()).Entity;
+        }
+        return _participantMapper.Map(image, targetParticipant);
     }
 }
