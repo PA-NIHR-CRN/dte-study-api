@@ -421,7 +421,7 @@ public class MockCognitoProvider : IAmazonCognitoIdentityProvider
         // Create a mock user pool object with the password policy
         var userPool = new UserPoolType()
         {
-            Id = "mock-user-pool-id",
+            Id = "mockUserPoolId_123",
             Name = "mock-user-pool-name",
             LastModifiedDate = DateTime.UtcNow,
             CreationDate = DateTime.UtcNow,

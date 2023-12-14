@@ -30,6 +30,10 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
         }
 
         using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream == null)
+        {
+            throw new FileNotFoundException($"Email template resource '{HealthConditionResourceSuffix}' not found.");
+        }
         using var reader = new StreamReader(stream);
 
         return reader.ReadToEnd().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
