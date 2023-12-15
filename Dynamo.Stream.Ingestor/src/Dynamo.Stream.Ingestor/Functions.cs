@@ -42,8 +42,8 @@ public class Functions
         var cts = new CancellationTokenSource();
         using (_logger.BeginScope("{FunctionName}", nameof(IngestParticipants)))
         {
-            var participants = await _repository.GetAllParticipantsAsAttributeMapsAsync(cts.Token);
-            foreach (var participant in participants)
+            var participants = _repository.GetAllParticipantsAsAttributeMapsAsync(cts.Token);
+            await foreach (var participant in participants)
             {
                 DynamoDBEvent streamEvent;
 

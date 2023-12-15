@@ -1,5 +1,4 @@
 using Amazon.DynamoDBv2;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Amazon.Lambda;
 using Amazon.Lambda.Core;

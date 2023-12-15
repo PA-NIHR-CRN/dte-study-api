@@ -37,9 +37,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool?>("Disability")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("Email")
                         .HasColumnType("longtext");
 

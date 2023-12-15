@@ -152,5 +152,13 @@ public class StreamHandler : IStreamHandler
         {
             _dbContext.Participants.Remove(participant);
         }
+
+    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image, CancellationToken cancellationToken)
+    {
+        var identifiers = _participantMapper.ExtractIdentifiers(image);
+        var targetParticipant = await _dbContext.GetParticipantByLinkedIdentifiersAsync(identifiers, cancellationToken);
+        if (targetParticipant == null)
+        {
+            targetParticipant = _dbContext.Participants.Add(new Participant()).Entity;
     }
 }
