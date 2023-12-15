@@ -19,7 +19,7 @@ public class ParticipantIdentifier : ISoftDelete
 
     public int IdentifierTypeId { get; set; }
     public bool IsDeleted { get; set; }
-    public string Pk { get; set; } = null!;
+    public string Pk { get; set; }
 
     public IdentifierType Type { get; set; }
     public Participant Participant { get; set; }
