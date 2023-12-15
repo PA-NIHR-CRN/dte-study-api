@@ -1,16 +1,15 @@
 using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
 using Dynamo.Stream.Handler.Entities;
-using Dynamo.Stream.Handler.Extensions;
 using Dynamo.Stream.Handler.Handlers;
 using Dynamo.Stream.Ingestor.Repository;
 using Dynamo.Stream.Ingestor.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Dynamo.Stream.Handler.Extensions;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -60,11 +59,11 @@ public class Functions
                 }
 
                 var errors = await _streamHandler.ProcessStreamAsync(streamEvent, cts.Token);
+
                 if (errors.Any())
                 {
                     _logger.LogError("{@errors}", errors);
-                    throw new AmazonLambdaException(
-                        $"Event(s) {string.Join(", ", errors.Select(x => x.ItemIdentifier))} failed to process.");
+                    throw new AmazonLambdaException($"Event(s) {string.Join(", ", errors.Select(x => x.ItemIdentifier))} failed to process.");
                 }
 
                 _logger.LogInformation("Sent participant {ParticipantParticipantId} to target lambda function",

@@ -3,6 +3,7 @@ using System;
 using Dynamo.Stream.Handler.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    partial class ParticipantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231214133658_Convert ParticipantIdentifier.Value to Guid.")]
+    partial class ConvertParticipantIdentifierValuetoGuid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,6 +38,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<bool?>("Disability")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Email")
                         .HasColumnType("longtext");
