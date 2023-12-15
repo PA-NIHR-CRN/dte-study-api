@@ -58,7 +58,6 @@ public class RefDataService : IRefDataService
                 return dbContext.DailyLifeImpacts.AsNoTracking().ToList();
             }
         });
-
     }
 
     private int GetIdFromReferenceData<T>(IEnumerable<T> refData, string code) where T : IReferenceData
@@ -66,9 +65,9 @@ public class RefDataService : IRefDataService
         code = code.Trim();
         // Ensure the database is case insensitive (is case-sensitivity required?)
 
-        var matches = refData.Where(item => item.Code == code)
-                            .OrderBy(x => x.IsDeleted ? 1 : 0) // Use active matches (0) first
-                            .ThenBy(x => x.Id);
+        var matches = refData.Where(item => item.Code.Equals(code, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(x => x.IsDeleted ? 1 : 0) // Use active matches (0) first
+            .ThenBy(x => x.Id);
 
         if (!matches.Any())
         {
@@ -119,6 +118,7 @@ public class RefDataService : IRefDataService
             {
                 return null;
             }
+
             return GetIdFromReferenceData(_dailyLifeImpactRefData.Value, impact);
         }
     }
