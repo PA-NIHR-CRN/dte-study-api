@@ -36,7 +36,7 @@ namespace Dynamo.Stream.Ingestor.Repository
                     yield return item;
                 }
                 request.ExclusiveStartKey = response.LastEvaluatedKey;
-            } while (response.LastEvaluatedKey?.Count > 0);
+            } while (response.LastEvaluatedKey.Any());
         }
     }
 }
