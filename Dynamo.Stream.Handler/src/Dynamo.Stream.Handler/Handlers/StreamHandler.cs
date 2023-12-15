@@ -126,6 +126,7 @@ public class StreamHandler : IStreamHandler
         if (participant == null)
         {
             participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         _participantMapper.Map(record.Dynamodb.NewImage, participant);
@@ -142,6 +143,7 @@ public class StreamHandler : IStreamHandler
         if (participant == null)
         {
             participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         // TODO: are we removing the Participant here, or just the ParticipantIdentifer?

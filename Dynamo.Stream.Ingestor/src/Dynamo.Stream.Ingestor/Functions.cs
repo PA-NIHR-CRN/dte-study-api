@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Amazon.DynamoDBv2;
 using Amazon.Lambda;
 using Amazon.Lambda.Core;
@@ -39,6 +40,8 @@ public class Functions
 
     public async Task IngestParticipants()
     {
+        var sw = Stopwatch.StartNew();
+        var participantsProcessed = 0;
         var cts = new CancellationTokenSource();
         using (_logger.BeginScope("{FunctionName}", nameof(IngestParticipants)))
         {
@@ -68,7 +71,13 @@ public class Functions
 
                 _logger.LogInformation("Sent participant {ParticipantParticipantId} to target lambda function",
                     participant["PK"].S);
+                
+                participantsProcessed++;
+                
+                _logger.LogInformation("Processed {ParticipantsProcessed} participants in {ElapsedTime}", participantsProcessed, sw.Elapsed);
+                
             }
+            _logger.LogInformation("Ingested all participants in {ElapsedTime}", sw.Elapsed);
         }
     }
 }
