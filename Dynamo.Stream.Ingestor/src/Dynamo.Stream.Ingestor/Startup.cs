@@ -26,6 +26,8 @@ public static class Startup
 
         // add application services
         services.AddScoped<IDynamoParticipantRepository, DynamoParticipantRepository>();
+        //services.AddScoped<IDynamoParticipantRepository, DynamoDbBackupRepository>();
+        //services.AddOptions<DynamoDbBackupSettings>().BindConfiguration("DynamoDbBackupSettings");
         services.AddTransient<IDynamoDbEventService, DynamoDbEventService>();
 
         services.AddOptions<StreamHandlerLambdaSettings>().BindConfiguration("StreamHandlerLambdaSettings");
@@ -38,7 +40,6 @@ public static class Startup
         services.AddDbContext<ParticipantDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
         services.AddOptions<DynamoDbSettings>().BindConfiguration("DynamoDbSettings");
-
 
         Handler.Startup.ConfigureLogging(services, configuration);
     }
