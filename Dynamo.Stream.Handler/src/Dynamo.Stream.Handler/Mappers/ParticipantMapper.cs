@@ -2,7 +2,7 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Dynamo.Stream.Handler.Entities;
-using Dynamo.Stream.Handler.Enum;
+using Dynamo.Stream.Handler.Enums;
 using Dynamo.Stream.Handler.Services;
 using DynamoParticipant = Domain.Entities.Participants.Participant;
 
