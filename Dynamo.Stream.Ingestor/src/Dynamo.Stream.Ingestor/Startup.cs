@@ -35,7 +35,7 @@ public static class Startup
 
         // add aurora services
         // db setup
-        services.AddOptions<DbSettings>().Bind(configuration.GetSection(DbSettings.SectionName));
+        services.AddOptions<DbSettings>().BindConfiguration("DbSettings");
         var connectionString = Handler.Startup.GetConnectionString(configuration);
         services.AddDbContext<ParticipantDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));

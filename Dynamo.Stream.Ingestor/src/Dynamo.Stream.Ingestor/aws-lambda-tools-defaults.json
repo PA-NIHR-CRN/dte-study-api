@@ -11,6 +11,6 @@
   "framework": "net6.0",
   "function-runtime":"dotnet6",
   "function-memory-size" : 256,
-  "function-timeout" : 30,
+  "function-timeout" : 900,
   "function-handler" : "Dynamo.Stream.Ingestor::Dynamo.Stream.Ingestor.Functions::IngestParticipants"
 }
