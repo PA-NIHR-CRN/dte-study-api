@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20231215121832_alter_pk_type")]
-    partial class alter_pk_type
+    [Migration("20231215123821_ChangeIdentifiers")]
+    partial class ChangeIdentifiers
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
