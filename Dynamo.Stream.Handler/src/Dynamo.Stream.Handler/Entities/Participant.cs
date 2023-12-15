@@ -36,7 +36,6 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
     public string? NHSNumber { get; set; }
 
     public bool IsDeleted { get; set; }
-    public bool? Disability { get; set; }
     public int? DailyLifeImpactId { get; set; }
     public int? CommunicationLanguageId { get; set; }
     public int? GenderId { get; set; }
@@ -59,7 +58,7 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
         LandlineNumber = null;
         RegistrationConsent = false;
         RemovalOfConsentRegistrationAtUtc = DateTime.UtcNow;
-        Disability = null;
+        HasLongTermCondition = null; // TODO: confirm we are clearing this but not DailyLifeImpact?
         Address?.Anonymise();
         HealthConditions.Clear();
     }
