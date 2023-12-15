@@ -51,7 +51,8 @@ public static class ParticipantQueryableExtensions
 {
     public static IQueryable<Participant> ForUpdate(this IQueryable<Participant> source)
     {
-        return source.Include(x => x.Address)
+        return source
+            .Include(x => x.Address)
             .Include(x => x.HealthConditions)
             .Include(x => x.ParticipantIdentifiers);
     }
