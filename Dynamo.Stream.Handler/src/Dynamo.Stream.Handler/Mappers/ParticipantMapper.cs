@@ -25,7 +25,7 @@ public class ParticipantMapper : IParticipantMapper
         var identifiers = ExtractIdentifiers(new Dictionary<string, AttributeValue>
         {
             { "ParticipantId", new AttributeValue { S = source.ParticipantId } },
-            { "NhsId", new AttributeValue { S = source.NhsNumber } }
+            { "NhsId", new AttributeValue { S = source.NhsId } }
         });
         
         // if pk begins with deleted add identifier
