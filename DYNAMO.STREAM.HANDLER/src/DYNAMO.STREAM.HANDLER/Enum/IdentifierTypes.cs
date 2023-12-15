@@ -1,4 +1,4 @@
-namespace Dynamo.Stream.Handler.Entities.Enum;
+namespace Dynamo.Stream.Handler.Enum;
 
 public enum IdentifierTypes
 {
