@@ -1,4 +1,4 @@
-using Dynamo.Stream.Handler.Entities.Enum;
+using Dynamo.Stream.Handler.Enum;
 using Dynamo.Stream.Handler.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
