@@ -6,13 +6,20 @@ namespace Dynamo.Stream.Ingestor.Services;
 
 public class DynamoDbEventService : IDynamoDbEventService
 {
-    public DynamoDBEvent CreateEvent(OperationType eventType, Dictionary<string, AttributeValue> newImage = null!, Dictionary<string, AttributeValue> oldImage = null!)
+    public DynamoDBEvent CreateEvent(OperationType eventType, Dictionary<string, AttributeValue> newImage = null!,
+        Dictionary<string, AttributeValue> oldImage = null!)
     {
+        var image = newImage ?? oldImage;
+        if (image == null)
+        {
+            throw new ArgumentException("Either newImage or oldImage must be provided");
+        }
+
         var dynamoDbEvent = new DynamoDBEvent
         {
             Records = new List<DynamoDBEvent.DynamodbStreamRecord>
             {
-                new ()
+                new()
                 {
                     EventID = Guid.NewGuid().ToString(),
                     EventName = eventType,
@@ -21,8 +28,8 @@ public class DynamoDbEventService : IDynamoDbEventService
                         ApproximateCreationDateTime = DateTime.UtcNow,
                         Keys = new Dictionary<string, AttributeValue>
                         {
-                            { "PK", newImage["PK"] },
-                            { "SK", newImage["SK"] }
+                            { "PK", image["PK"] },
+                            { "SK", image["SK"] }
                         },
                         NewImage = newImage ?? new Dictionary<string, AttributeValue>(),
                         OldImage = oldImage ?? new Dictionary<string, AttributeValue>(),
