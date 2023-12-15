@@ -1,5 +1,4 @@
-﻿using Dynamo.Stream.Handler.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Dynamo.Stream.Handler.Entities.Interceptors

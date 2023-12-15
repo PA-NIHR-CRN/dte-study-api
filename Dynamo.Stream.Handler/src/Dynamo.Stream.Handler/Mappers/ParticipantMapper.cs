@@ -2,6 +2,8 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Dynamo.Stream.Handler.Entities;
+using Dynamo.Stream.Handler.Entities.Enum;
+using Dynamo.Stream.Handler.Extensions;
 using Dynamo.Stream.Handler.Services;
 using DynamoParticipant = Domain.Entities.Participants.Participant;
 
@@ -26,22 +28,31 @@ public class ParticipantMapper : IParticipantMapper
             { "ParticipantId", new AttributeValue { S = source.ParticipantId } },
             { "NhsId", new AttributeValue { S = source.NhsNumber } }
         });
+        
+        // if pk begins with deleted add identifier
+        if (source.Pk.StartsWith("DELETED#"))
+        {
+            identifiers.Add(new Identifier((int)IdentifierTypes.Deleted, Guid.Parse(source.Pk.Split("#")[1])));
+        }
 
         foreach (var identifier in identifiers)
         {
             if (identifier.Value == Guid.Empty) continue;
 
-            if (!participant.ParticipantIdentifiers.Any(pi => pi.Value == identifier.Value && pi.IdentifierTypeId == identifier.Type))
+            if (!participant.ParticipantIdentifiers.Any(pi =>
+                    pi.Value == identifier.Value && pi.IdentifierTypeId == identifier.Type))
             {
                 var newIdentifier = new ParticipantIdentifier
                 {
                     Value = identifier.Value,
                     IdentifierTypeId = identifier.Type,
+                    Pk = source.Pk
                 };
 
                 participant.ParticipantIdentifiers.Add(newIdentifier);
             }
         }
+        
     }
 
     private void MapHealthConditions(DynamoParticipant source, Participant participant)
@@ -136,5 +147,4 @@ public class ParticipantMapper : IParticipantMapper
 
         return identifiers;
     }
-
 }
