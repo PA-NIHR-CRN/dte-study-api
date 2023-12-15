@@ -1,13 +1,11 @@
-using Dynamo.Stream.Handler.Entities.Configuration;
 using Dynamo.Stream.Handler.Entities.Interceptors;
 using Dynamo.Stream.Handler.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 
 namespace Dynamo.Stream.Handler.Entities;
 
 public class ParticipantDbContext : DbContext
-{ 
+{
     public ParticipantDbContext(DbContextOptions<ParticipantDbContext> options) : base(options)
     {
     }
@@ -37,16 +35,15 @@ public class ParticipantDbContext : DbContext
         {
             modelBuilder.Entity(type).ToTable("SysRef" + type.Name);
         }
- 
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ParticipantDbContext).Assembly);
     }
+
     public IQueryable<Participant> GetParticipantByLinkedIdentifiers(List<Identifier> identifiers)
     {
         var values = identifiers.Select(id => id.Value).ToList();
 
-        return ParticipantIdentifiers
-            .Where(pi => values.Contains(pi.Value))
-            .Select(pi => pi.Participant);
+        return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value)));
     }
 }
 
@@ -55,7 +52,7 @@ public static class ParticipantQueryableExtensions
     public static IQueryable<Participant> ForUpdate(this IQueryable<Participant> source)
     {
         return source.Include(x => x.Address)
-                     .Include(x => x.HealthConditions)
-                     .Include(x => x.ParticipantIdentifiers);
+            .Include(x => x.HealthConditions)
+            .Include(x => x.ParticipantIdentifiers);
     }
 }

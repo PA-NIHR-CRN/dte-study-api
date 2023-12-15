@@ -106,6 +106,7 @@ public class StreamHandler : IStreamHandler
                                                 .ForUpdate()
                                                 .SingleOrDefaultAsync(cancellationToken);
 
+
         if (targetParticipant == null)
         {
             // No linked participant exists, create a new one.
@@ -130,12 +131,13 @@ public class StreamHandler : IStreamHandler
         _participantMapper.Map(record.Dynamodb.NewImage, participant);
     }
 
-    private async Task ProcessRemoveAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
+    private async Task ProcessRemoveAsync(DynamoDBEvent.DynamodbStreamRecord record,
+        CancellationToken cancellationToken)
     {
         var identifiers = _participantMapper.ExtractIdentifiers(record.Dynamodb.OldImage);
         var participant = await _dbContext.GetParticipantByLinkedIdentifiers(identifiers)
-                                          .Include(x => x.ParticipantIdentifiers)
-                                          .SingleOrDefaultAsync(cancellationToken);
+            .Include(x => x.ParticipantIdentifiers)
+            .SingleOrDefaultAsync(cancellationToken);
 
         if (participant == null)
         {
@@ -144,7 +146,8 @@ public class StreamHandler : IStreamHandler
 
         // TODO: are we removing the Participant here, or just the ParticipantIdentifer?
         // Only delete the Participant if all participant identifiers have also been deleted.
-        var idsToRemove = participant.ParticipantIdentifiers.Where(x => identifiers.Select(y => y.Value).Contains(x.Value));
+        var idsToRemove =
+            participant.ParticipantIdentifiers.Where(x => identifiers.Select(y => y.Value).Contains(x.Value));
 
         _dbContext.ParticipantIdentifiers.RemoveRange(idsToRemove);
 
@@ -152,13 +155,5 @@ public class StreamHandler : IStreamHandler
         {
             _dbContext.Participants.Remove(participant);
         }
-
-    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image, CancellationToken cancellationToken)
-    {
-        var identifiers = _participantMapper.ExtractIdentifiers(image);
-        var targetParticipant = await _dbContext.GetParticipantByLinkedIdentifiersAsync(identifiers, cancellationToken);
-        if (targetParticipant == null)
-        {
-            targetParticipant = _dbContext.Participants.Add(new Participant()).Entity;
     }
 }

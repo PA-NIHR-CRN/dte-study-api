@@ -1,3 +1,4 @@
+using Dynamo.Stream.Handler.Entities.Enum;
 using Dynamo.Stream.Handler.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,16 +13,23 @@ public class IdentifierTypeConfiguration : IEntityTypeConfiguration<IdentifierTy
         builder.HasData(
             new IdentifierType
             {
-                Id = 1,
+                Id = (int)IdentifierTypes.ParticipantId,
                 Code = "ParticipantId",
                 Description = "ParticipantId",
                 IsDeleted = false
             },
             new IdentifierType
             {
-                Id = 2,
+                Id = (int)IdentifierTypes.NhsId,
                 Code = "NhsId",
                 Description = "NhsId",
+                IsDeleted = false
+            },
+            new IdentifierType
+            {
+                Id = (int)IdentifierTypes.Deleted,
+                Code = "Deleted",
+                Description = "Deleted",
                 IsDeleted = false
             }
         );
