@@ -6,14 +6,13 @@ namespace Dynamo.Stream.Ingestor.Services;
 
 public class DynamoDbEventService : IDynamoDbEventService
 {
-    public DynamoDBEvent CreateEvent(OperationType eventType, Dictionary<string, AttributeValue> newImage = null!,
-        Dictionary<string, AttributeValue> oldImage = null!)
+    public DynamoDBEvent CreateEvent(OperationType eventType, Dictionary<string, AttributeValue> newImage = null!, Dictionary<string, AttributeValue> oldImage = null!)
     {
         var dynamoDbEvent = new DynamoDBEvent
         {
             Records = new List<DynamoDBEvent.DynamodbStreamRecord>
             {
-                new()
+                new ()
                 {
                     EventID = Guid.NewGuid().ToString(),
                     EventName = eventType,

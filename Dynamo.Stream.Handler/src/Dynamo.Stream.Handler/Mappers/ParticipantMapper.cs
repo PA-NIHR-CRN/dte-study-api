@@ -29,7 +29,7 @@ public class ParticipantMapper : IParticipantMapper
 
         foreach (var identifier in identifiers)
         {
-            if (string.IsNullOrWhiteSpace(identifier.Value)) continue;
+            if (identifier.Value == Guid.Empty) continue;
 
             if (!participant.ParticipantIdentifiers.Any(pi => pi.Value == identifier.Value && pi.IdentifierTypeId == identifier.Type))
             {
@@ -130,7 +130,7 @@ public class ParticipantMapper : IParticipantMapper
             if (newImage.TryGetValue(keyName, out var attrValue) && !string.IsNullOrWhiteSpace(attrValue.S))
             {
                 int typeId = _refDataService.GetIdentifierTypeId(keyName);
-                identifiers.Add(new Identifier(typeId, attrValue.S));
+                identifiers.Add(new Identifier(typeId, Guid.Parse(attrValue.S)));
             }
         }
 

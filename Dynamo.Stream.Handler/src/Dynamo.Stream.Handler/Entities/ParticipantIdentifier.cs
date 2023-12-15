@@ -7,7 +7,6 @@ public class ParticipantIdentifier : ISoftDelete
 {
     public ParticipantIdentifier()
     {
-        Value = null!;
         Type = null!;
         Participant = null!;
     }
@@ -16,7 +15,7 @@ public class ParticipantIdentifier : ISoftDelete
     public int ParticipantId { get; set; }
 
     [Required]
-    public string Value { get; set; }
+    public Guid Value { get; set; }
 
     public int IdentifierTypeId { get; set; }
     public bool IsDeleted { get; set; }
