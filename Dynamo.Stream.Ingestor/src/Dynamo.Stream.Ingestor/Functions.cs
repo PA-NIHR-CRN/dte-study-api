@@ -65,12 +65,11 @@ public class Functions
 
                 if (errors.Any())
                 {
-                    _logger.LogError("{@errors}", errors);
+                    _logger.LogError("Error processing participant {ParticipantId}. Errors: {@errors}", pk, errors);
                     throw new AmazonLambdaException($"Event(s) {string.Join(", ", errors.Select(x => x.ItemIdentifier))} failed to process.");
                 }
 
-                _logger.LogInformation("Sent participant {ParticipantParticipantId} to target lambda function",
-                    participant["PK"].S);
+                _logger.LogInformation("Sent participant {ParticipantParticipantId} to target lambda function", pk);
                 
                 participantsProcessed++;
                 
