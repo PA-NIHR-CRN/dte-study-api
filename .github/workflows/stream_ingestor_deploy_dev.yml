@@ -40,7 +40,7 @@ jobs:
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Ingestor/src/Dynamo.Stream.Ingestor crnccd-lambda-dev-dte-participant-ingestor --function-role crnccd-iam-dev-dte-role -ev "ASPNETCORE_ENVIRONMENT=Production;DTE_BUILD_STRING=dev-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccd-crnccd-secret-dev-dte-stream-ingestor" --function-publish true
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Ingestor/src/Dynamo.Stream.Ingestor crnccd-lambda-dev-dte-participant-ingestor --function-role crnccd-iam-dev-dte-role -ev "ASPNETCORE_ENVIRONMENT=Production;DTE_BUILD_STRING=dev-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccd-secret-dev-dte-stream-ingestor" --function-publish true
 
       - name: Update alias to point to new version
         run: |
