@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Dynamo.Stream.Handler.Entities;
 
@@ -7,7 +8,7 @@ public class ParticipantDbContextFactory : IDesignTimeDbContextFactory<Participa
 {
     public ParticipantDbContext CreateDbContext(string[] args)
     {
-        var configuration = Startup.BuildConfiguration();
+        var configuration = Startup.BuildConfiguration(new ServiceCollection().BuildServiceProvider());
 
         var connectionString = Startup.GetConnectionString(configuration);
 
