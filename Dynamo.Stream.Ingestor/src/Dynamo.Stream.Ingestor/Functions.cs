@@ -61,7 +61,7 @@ public class Functions
 
                 _logger.LogInformation("Sending batch of {BatchSize} participants to stream handler", batch.Count());
                 
-                participantsProcessed++;
+                participantsProcessed += batch.Count();
                 
                 _logger.LogInformation("Processed {ParticipantsProcessed} participants in {ElapsedTime}", participantsProcessed, sw.Elapsed);
                 
