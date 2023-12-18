@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.DynamoDBEvents;
@@ -50,10 +51,12 @@ public class DynamoDbEventService : IDynamoDbEventService
 
     public DynamoDBEvent CreateBatchEvent(IEnumerable<Dictionary<string, AttributeValue>> participants)
     {
-        var records = (from participant in participants
-            let pk = participant.PK()
-            let eventType = pk.StartsWith("DELETED#") ? OperationType.REMOVE : OperationType.INSERT
-            select new DynamoDBEvent.DynamodbStreamRecord
+        var concurrentBag = new ConcurrentBag<DynamoDBEvent.DynamodbStreamRecord>();
+        Parallel.ForEach(participants, participant =>
+        {
+            var pk = participant.PK();
+            var eventType = pk.StartsWith("DELETED#") ? OperationType.REMOVE : OperationType.INSERT;
+            var dynamoDbEvent = new DynamoDBEvent.DynamodbStreamRecord
             {
                 EventID = Guid.NewGuid().ToString(),
                 EventName = eventType,
@@ -73,8 +76,10 @@ public class DynamoDbEventService : IDynamoDbEventService
                 EventSource = "aws:dynamodb",
                 EventVersion = "1.1",
                 AwsRegion = "eu-west-2",
-            }).ToList();
+            };
+            concurrentBag.Add(dynamoDbEvent);
+        });
 
-        return new DynamoDBEvent { Records = records };
+        return new DynamoDBEvent { Records = concurrentBag.ToList() };
     }
 }
