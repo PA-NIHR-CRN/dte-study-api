@@ -83,10 +83,7 @@ public class RefDataService : IRefDataService
             _dbContext.Add(newRefData);
             _dbContext.SaveChanges();
 
-            // use type to update the cached list
-            var list = (List<T>)typeof(RefDataService).GetField($"_{typeof(T).Name}RefData",
-                BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(this)!;
-            list.Add(newRefData);
+            // use type to update the cached list?
 
             return newRefData.Id;
         }
