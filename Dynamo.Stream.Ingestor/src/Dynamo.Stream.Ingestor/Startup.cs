@@ -9,8 +9,6 @@ using Dynamo.Stream.Handler.Handlers;
 using Dynamo.Stream.Handler.Entities;
 using Dynamo.Stream.Ingestor.Repository;
 using Dynamo.Stream.Ingestor.Settings;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace Dynamo.Stream.Ingestor;
 
@@ -18,12 +16,7 @@ public static class Startup
 {
     public static void ConfigureServices(IServiceCollection services)
     {
-        var configuration = Handler.Startup.BuildConfiguration(services.BuildServiceProvider());
-        
-        var loggerFactory = new LoggerFactory();
-        loggerFactory.AddLambdaLogger(configuration.GetLambdaLoggerOptions());
-        var logger = loggerFactory.CreateLogger("IngestStartup");
-        logger.LogInformation("Starting up");
+        var configuration = Handler.Startup.BuildConfiguration();
         services.AddSingleton(configuration);
 
         // add aws services
@@ -44,13 +37,10 @@ public static class Startup
         // db setup
         services.AddOptions<DbSettings>().BindConfiguration("DbSettings");
         var connectionString = Handler.Startup.GetConnectionString(configuration);
-        logger.LogInformation("Connection string: {ConnectionString}", connectionString);
         services.AddDbContext<ParticipantDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
         services.AddOptions<DynamoDbSettings>().BindConfiguration("DynamoDbSettings");
 
         Handler.Startup.ConfigureLogging(services, configuration);
-        
-        logger.LogInformation("Finished startup");
     }
 }

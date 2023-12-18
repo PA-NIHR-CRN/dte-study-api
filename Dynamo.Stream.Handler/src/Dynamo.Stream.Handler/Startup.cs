@@ -20,10 +20,7 @@ public static class Startup
     public static void ConfigureServices(IServiceCollection services)
     {
         // configuration
-        var configuration = BuildConfiguration(services.BuildServiceProvider());
-        ConfigureLogging(services, configuration);
-        
-        
+        var configuration = BuildConfiguration();
         services.AddSingleton(configuration);
 
         // db setup
@@ -38,16 +35,16 @@ public static class Startup
         services.AddTransient<IStreamHandler, StreamHandler>();
         services.AddTransient<IParticipantMapper, ParticipantMapper>();
 
-        
+        ConfigureLogging(services, configuration);
     }
 
-    public static IConfiguration BuildConfiguration(IServiceProvider serviceProvider)
+    public static IConfiguration BuildConfiguration()
     {
         return new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true)
             .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true)
             .AddEnvironmentVariables()
-            .AddAwsSecrets(serviceProvider)
+            .AddAwsSecrets()
             .Build();
     }
 
