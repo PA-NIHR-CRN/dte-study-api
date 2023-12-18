@@ -12,5 +12,5 @@
   "function-runtime":"dotnet6",
   "function-handler" : "Dynamo.Stream.Handler::Dynamo.Stream.Handler.Functions::ProcessStream",
   "function-memory-size" : 256,
-  "function-timeout" : 30
+  "function-timeout" : 900
 }

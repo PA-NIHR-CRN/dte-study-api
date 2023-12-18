@@ -62,8 +62,32 @@ public class RefDataService : IRefDataService
             }
         });
     }
+    
+    private void UpdateCache<T>(T newRefData) where T : IReferenceData
+    {
+        switch (newRefData)
+        {
+            case Gender gender:
+                _genderRefData.Value.Add(gender);
+                break;
+            case HealthCondition healthCondition:
+                _healthConditionRefData.Value.Add(healthCondition);
+                break;
+            case IdentifierType identifierType:
+                _identifierTypeRefData.Value.Add(identifierType);
+                break;
+            case CommunicationLanguage communicationLanguage:
+                _communicationLanguageRefData.Value.Add(communicationLanguage);
+                break;
+            case DailyLifeImpact dailyLifeImpact:
+                _dailyLifeImpactRefData.Value.Add(dailyLifeImpact);
+                break;
+            default:
+                throw new NotSupportedException($"Unknown reference data type '{typeof(T).Name}'.");
+        }
+    }
 
-    private int GetIdFromReferenceData<T>(IEnumerable<T> refData, string code) where T : IReferenceData
+    private int GetIdFromReferenceData<T>(IEnumerable<T> refData, string code) where T : IReferenceData, new()
     {
         code = code.Trim();
         // Ensure the database is case insensitive (is case-sensitivity required?)
@@ -75,15 +99,17 @@ public class RefDataService : IRefDataService
         if (!matches.Any())
         {
             // Create a new instance of the reference data and add it to the database
-            var newRefData = (T)Activator.CreateInstance(typeof(T))!;
-            newRefData.Code = code;
-            newRefData.Description = code;
-            newRefData.IsDeleted = false;
+            var newRefData = new T
+            {
+                Code = code,
+                Description = code,
+                IsDeleted = false
+            };
 
             _dbContext.Add(newRefData);
             _dbContext.SaveChanges();
 
-            // use type to update the cached list?
+            UpdateCache(newRefData);
 
             return newRefData.Id;
         }
