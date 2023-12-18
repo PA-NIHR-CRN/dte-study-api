@@ -105,12 +105,11 @@ public class RefDataService : IRefDataService
                 Description = code,
                 IsDeleted = false
             };
+            UpdateCache(newRefData);
 
             _dbContext.Add(newRefData);
             _dbContext.SaveChanges();
-
-            UpdateCache(newRefData);
-
+            
             return newRefData.Id;
         }
 

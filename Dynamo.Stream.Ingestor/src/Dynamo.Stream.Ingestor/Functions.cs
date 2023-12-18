@@ -38,7 +38,7 @@ public class Functions
 
     public async Task IngestParticipants()
     {
-        const int batchSize = 1000;
+        const int batchSize = 100;
         var sw = Stopwatch.StartNew();
         var participantsProcessed = 0;
         var cts = new CancellationTokenSource();
