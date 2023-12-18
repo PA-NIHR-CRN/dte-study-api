@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Amazon.Lambda;
 using Amazon.Lambda.Core;
 using Dynamo.Stream.Handler.Entities;
-using Dynamo.Stream.Handler.Handlers;
 using Dynamo.Stream.Ingestor.Repository;
 using Dynamo.Stream.Ingestor.Services;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +19,7 @@ public class Functions
     private readonly IDynamoParticipantRepository _repository;
     private readonly ILogger<Functions> _logger;
     private readonly IDynamoDbEventService _dynamoDbEventService;
-    private readonly IStreamHandler _streamHandler;
+    private readonly ILambdaStreamHandler _streamHandler;
 
     public Functions()
     {
@@ -32,7 +31,7 @@ public class Functions
         _logger = provider.GetRequiredService<ILogger<Functions>>();
         _repository = provider.GetRequiredService<IDynamoParticipantRepository>();
         _dynamoDbEventService = provider.GetRequiredService<IDynamoDbEventService>();
-        _streamHandler = provider.GetRequiredService<IStreamHandler>();
+        _streamHandler = provider.GetRequiredService<ILambdaStreamHandler>();
         provider.GetRequiredService<ParticipantDbContext>().Database.Migrate();
     }
 

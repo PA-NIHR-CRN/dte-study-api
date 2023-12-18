@@ -5,6 +5,7 @@ using Amazon.Lambda.DynamoDBEvents;
 using Dynamo.Stream.Handler.Entities;
 using Dynamo.Stream.Handler.Mappers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using static Amazon.Lambda.DynamoDBEvents.StreamsEventResponse;
 
@@ -25,11 +26,15 @@ public class StreamHandler : IStreamHandler
     }
 
     public async Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(DynamoDBEvent dynamoDbEvent,
-        CancellationToken cancellationToken)
+        IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
         var failures = new ConcurrentBag<BatchItemFailure>();
-        var tasks = dynamoDbEvent.Records.Select(async record =>
+        var tasks = dynamoDbEvent.Records.Select(record => Task.Run(async () =>
         {
+            // Create a new scope for each task
+            using var scope = serviceProvider.CreateScope();
+            var scopedDbContext = scope.ServiceProvider.GetRequiredService<ParticipantDbContext>();
+
             try
             {
                 using (_logger.BeginScope("{EventId}, {SequenceNumber}", record.EventID,
@@ -41,7 +46,7 @@ public class StreamHandler : IStreamHandler
                     _logger.LogTrace("{@record}", record);
 
                     await ProcessRecordAsync(record, cancellationToken);
-                    await _dbContext.SaveChangesAsync(cancellationToken);
+                    await scopedDbContext.SaveChangesAsync(cancellationToken);
 
                     _logger.LogInformation("Record processing complete");
                 }
@@ -51,7 +56,7 @@ public class StreamHandler : IStreamHandler
                 _logger.LogError(e, e.Message);
                 failures.Add(new BatchItemFailure { ItemIdentifier = record.Dynamodb.SequenceNumber });
             }
-        });
+        }, cancellationToken));
 
         await Task.WhenAll(tasks);
 
