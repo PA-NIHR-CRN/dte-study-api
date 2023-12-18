@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20231213115213_remove-health-conditions-duplicates")]
-    partial class removehealthconditionsduplicates
+    [Migration("20231218144952_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -38,9 +38,6 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<bool?>("Disability")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Email")
                         .HasColumnType("longtext");
@@ -181,15 +178,20 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<int>("ParticipantId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Value")
+                    b.Property<string>("Pk")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<Guid>("Value")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("IdentifierTypeId");
 
                     b.HasIndex("ParticipantId");
+
+                    b.HasIndex("Value");
 
                     b.ToTable("ParticipantIdentifiers");
                 });
@@ -8999,6 +9001,13 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 2,
                             Code = "NhsId",
                             Description = "NhsId",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "Deleted",
+                            Description = "Deleted",
                             IsDeleted = false
                         });
                 });
