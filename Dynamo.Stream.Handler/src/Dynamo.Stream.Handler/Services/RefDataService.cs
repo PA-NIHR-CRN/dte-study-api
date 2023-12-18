@@ -1,3 +1,4 @@
+using System.Reflection;
 using Dynamo.Stream.Handler.Entities;
 using Dynamo.Stream.Handler.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +15,11 @@ public class RefDataService : IRefDataService
     private readonly Lazy<List<CommunicationLanguage>> _communicationLanguageRefData;
     private readonly Lazy<List<DailyLifeImpact>> _dailyLifeImpactRefData;
     private readonly object _lockObject = new object();
+    private readonly ParticipantDbContext _dbContext;
 
     public RefDataService(ParticipantDbContext dbContext, ILogger<RefDataService> logger)
     {
+        _dbContext = dbContext;
         _logger = logger;
 
         _genderRefData = new Lazy<List<Gender>>(() =>
@@ -71,9 +74,21 @@ public class RefDataService : IRefDataService
 
         if (!matches.Any())
         {
-            // TODO: We discussed adding missing reference data that was received as we should accurately
-            // reflect what the application saves to DynamoDB.
-            throw new KeyNotFoundException($"Reference data '{code}' not found.");
+            // Create a new instance of the reference data and add it to the database
+            var newRefData = (T)Activator.CreateInstance(typeof(T))!;
+            newRefData.Code = code;
+            newRefData.Description = code;
+            newRefData.IsDeleted = false;
+
+            _dbContext.Add(newRefData);
+            _dbContext.SaveChanges();
+
+            // use type to update the cached list
+            var list = (List<T>)typeof(RefDataService).GetField($"_{typeof(T).Name}RefData",
+                BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(this)!;
+            list.Add(newRefData);
+
+            return newRefData.Id;
         }
 
         if (matches.Count(x => !x.IsDeleted) > 1)
