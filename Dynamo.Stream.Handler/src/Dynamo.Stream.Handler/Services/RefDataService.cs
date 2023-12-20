@@ -94,7 +94,8 @@ public class RefDataService : IRefDataService
 
         var matches = refData.Where(item => item.Code.Equals(code, StringComparison.OrdinalIgnoreCase))
             .OrderBy(x => x.IsDeleted ? 1 : 0) // Use active matches (0) first
-            .ThenBy(x => x.Id);
+            .ThenBy(x => x.Id)
+            .ToList();
 
         if (!matches.Any())
         {

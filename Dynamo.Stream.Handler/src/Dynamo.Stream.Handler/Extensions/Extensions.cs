@@ -6,6 +6,6 @@ public static class Extensions
 {
     public static string PK(this Dictionary<string, AttributeValue> record)
     {
-        return record["PK"].S;
+        return record.ContainsKey("PK") ? record["PK"].S : string.Empty;
     }
 }

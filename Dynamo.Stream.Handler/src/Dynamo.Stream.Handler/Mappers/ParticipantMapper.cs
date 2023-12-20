@@ -122,7 +122,8 @@ public class ParticipantMapper : IParticipantMapper
         destination.GenderId = _refDataService.GetGenderId(source.SexRegisteredAtBirth);
         destination.CommunicationLanguageId = _refDataService.GetCommunicationLanguageId(source.SelectedLocale);
         destination.DailyLifeImpactId = _refDataService.GetDailyLifeImpactId(source.DisabilityDescription);
-        destination.Address = ParticipantAddressMapper.Map(source.Address, destination.Id);
+        
+        ParticipantAddressMapper.Map(source.Address, destination);
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);

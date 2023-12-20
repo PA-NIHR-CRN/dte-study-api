@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dynamo.Stream.Handler.Entities;
 
-public class ParticipantAddress : IPersonalInformation
+public class ParticipantAddress : IPersonalInformation, ISoftDelete
 {
     public ParticipantAddress()
     {
@@ -21,6 +21,7 @@ public class ParticipantAddress : IPersonalInformation
 
     [Required]
     public Participant Participant { get; set; }
+    public bool IsDeleted { get; set; }
 
     private static string? GetOutcodeFromPostcode(string? postcode)
     {

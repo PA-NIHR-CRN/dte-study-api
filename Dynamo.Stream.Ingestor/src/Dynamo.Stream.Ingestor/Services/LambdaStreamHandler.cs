@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Dynamo.Stream.Ingestor.Services
 {
-    public class LambdaStreamHandler : ILambdaStreamHandler
+    public class LambdaStreamHandler : IStreamHandler
     {
         private readonly ILambdaSerializer _serializer;
         private readonly IAmazonLambda _lambdaClient;

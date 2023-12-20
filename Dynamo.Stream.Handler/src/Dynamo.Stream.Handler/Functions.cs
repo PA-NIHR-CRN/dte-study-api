@@ -35,7 +35,7 @@ public class Functions
             // AWS DynamoDb Stream handler is currently synchronous, but we want the library code
             // to remain async.
             var cts = new CancellationTokenSource();
-            var failures = _streamHandler.ProcessStreamAsync(dynamoDbEvent, _serviceProvider, cts.Token).Result;
+            var failures = _streamHandler.ProcessStreamAsync(dynamoDbEvent, cts.Token).Result;
 
             _logger.LogInformation("DynamoDBEvent processing complete");
 
