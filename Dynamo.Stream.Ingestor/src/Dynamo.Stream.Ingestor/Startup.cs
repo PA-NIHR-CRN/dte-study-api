@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Dynamo.Stream.Ingestor.Services;
 using Dynamo.Stream.Handler.Settings;
 using Dynamo.Stream.Handler.Entities;
+using Dynamo.Stream.Handler.Handlers;
 using Dynamo.Stream.Ingestor.Repository;
 using Dynamo.Stream.Ingestor.Settings;
 
@@ -30,7 +31,7 @@ public static class Startup
         services.AddTransient<IDynamoDbEventService, DynamoDbEventService>();
 
         services.AddOptions<StreamHandlerLambdaSettings>().BindConfiguration("StreamHandlerLambdaSettings");
-        services.AddTransient<ILambdaStreamHandler, LambdaStreamHandler>();
+        services.AddTransient<IStreamHandler, LambdaStreamHandler>();
 
         // add aurora services
         // db setup
