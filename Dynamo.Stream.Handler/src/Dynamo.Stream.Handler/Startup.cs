@@ -27,7 +27,7 @@ public static class Startup
         services.AddOptions<DbSettings>().Bind(configuration.GetSection(DbSettings.SectionName));
         var connectionString = GetConnectionString(configuration);
         services.AddDbContext<ParticipantDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
         services.AddScoped<IDynamoDBContext>(x => new DynamoDBContext(new AmazonDynamoDBClient()));
 
         // add application services
@@ -75,8 +75,8 @@ public static class Startup
             if (Debugger.IsAttached || Environment.UserInteractive)
             {
                 loggingBuilder
-                    .AddConsole()
-                    .AddDebug();
+                    .AddConsole();
+                //.AddDebug();
             }
         });
     }

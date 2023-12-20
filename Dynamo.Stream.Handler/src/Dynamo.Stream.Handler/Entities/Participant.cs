@@ -49,6 +49,8 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
         new List<ParticipantIdentifier>();
     public ParticipantAddress? Address { get; set; }
 
+    public ICollection<SourceReference> SourceReferences { get; set; } = new List<SourceReference>();
+
     public void Anonymise()
     {
         Email = null;

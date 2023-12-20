@@ -22,7 +22,9 @@ public class ParticipantDbContext : DbContext
     {
         base.OnConfiguring(optionsBuilder);
 
-        optionsBuilder.AddInterceptors(new SoftDeleteInterceptor(),
+        optionsBuilder.AddInterceptors(
+            new DisableAutoDetectChangesInterceptor(),
+            new SoftDeleteInterceptor(),
             new TimestampInterceptor());
     }
 
