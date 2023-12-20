@@ -6,5 +6,5 @@ namespace Dynamo.Stream.Handler.Handlers;
 public interface IStreamHandler
 {
     Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(DynamoDBEvent dynamoDbEvent,
-        IServiceProvider serviceProvider, CancellationToken cancellationToken);
+        CancellationToken cancellationToken);
 }

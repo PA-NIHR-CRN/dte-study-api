@@ -12,7 +12,6 @@ public class Functions
 {
     private readonly ILogger<Functions> _logger;
     private readonly IStreamHandler _streamHandler;
-    private readonly IServiceProvider _serviceProvider;
 
     public Functions()
     {
@@ -23,7 +22,6 @@ public class Functions
 
         _logger = provider.GetRequiredService<ILogger<Functions>>();
         _streamHandler = provider.GetRequiredService<IStreamHandler>();
-        _serviceProvider = provider;
     }
 
     public StreamsEventResponse ProcessStream(DynamoDBEvent dynamoDbEvent, ILambdaContext context)
@@ -35,7 +33,7 @@ public class Functions
             // AWS DynamoDb Stream handler is currently synchronous, but we want the library code
             // to remain async.
             var cts = new CancellationTokenSource();
-            var failures = _streamHandler.ProcessStreamAsync(dynamoDbEvent, _serviceProvider, cts.Token).Result;
+            var failures = _streamHandler.ProcessStreamAsync(dynamoDbEvent, cts.Token).Result;
 
             _logger.LogInformation("DynamoDBEvent processing complete");
 
