@@ -328,11 +328,14 @@ namespace StudyApi.Controllers.V1.Users
         {
             var response = await _mediator.Send(new SignUpCommand(request.Email, request.Password));
 
-            await _mediator.Send(new CreateParticipantDetailsCommand(
-                response.Content.UserId, request.Email, request.Firstname, request.Lastname,
-                request.ConsentRegistration, null, request.DateOfBirth, ""));
+            if (response.IsSuccess)
+            {
+                await _mediator.Send(new CreateParticipantDetailsCommand(
+                    response.Content.UserId, request.Email, request.Firstname, request.Lastname,
+                    request.ConsentRegistration, null, request.DateOfBirth, ""));
+            }
 
-            return Ok(new { IsSuccess = response.IsSuccess });
+            return Ok(new { IsSuccess = true });
         }
 
         public class NhsSignUpRequestLocal

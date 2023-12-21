@@ -916,8 +916,7 @@ namespace Infrastructure.Services
                         await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
                     }
 
-                    return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { IsSuccess = true, }, _headerService.GetConversationId());
+                    throw new UsernameExistsException("User already exists");
                 }
 
                 // check if user exists in participant details table and send email
@@ -943,8 +942,7 @@ namespace Infrastructure.Services
 
                     await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
 
-                    return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { IsSuccess = true, }, _headerService.GetConversationId());
+                    throw new UsernameExistsException("Username already exists");
                 }
 
                 var response = await _provider.SignUpAsync(new SignUpRequest
@@ -971,8 +969,10 @@ namespace Infrastructure.Services
                 _logger.LogError(ex,
                     $"Error signing up user {email}, username already exists");
                 // Return a generic success response, to appear as though registration was successful
-                return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                    new SignUpResponse { IsSuccess = true }, _headerService.GetConversationId());
+                return Response<SignUpResponse>.CreateErrorMessageResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
+                    ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.",
+                    _headerService.GetConversationId());
             }
             catch (InvalidParameterException ex)
             {
