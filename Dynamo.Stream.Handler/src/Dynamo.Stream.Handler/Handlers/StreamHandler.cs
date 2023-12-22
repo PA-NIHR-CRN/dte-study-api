@@ -2,7 +2,6 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.DynamoDBEvents;
 using Dynamo.Stream.Handler.Entities;
-using Dynamo.Stream.Handler.Extensions;
 using Dynamo.Stream.Handler.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,7 +14,6 @@ public class StreamHandler : IStreamHandler
     private readonly ParticipantDbContext _dbContext;
     private readonly ILogger<StreamHandler> _logger;
     private readonly IParticipantMapper _participantMapper;
-    private Dictionary<string, int> _existingRecordsIds = new Dictionary<string, int>();
 
     public StreamHandler(ParticipantDbContext dbContext, ILogger<StreamHandler> logger,
         IParticipantMapper participantMapper)
@@ -30,16 +28,6 @@ public class StreamHandler : IStreamHandler
         var failures = new List<BatchItemFailure>();
         // TODO: how do we handle out of order events if they are indeed out of order?
         string currentRecordSequenceNumber;
-
-        var identifiers = dynamoDbEvent.Records.SelectMany(x => _participantMapper.ExtractIdentifiers(x.Dynamodb.NewImage)).Union(
-            dynamoDbEvent.Records.SelectMany(x => _participantMapper.ExtractIdentifiers(x.Dynamodb.OldImage))).Select(x => x.Value).Distinct();
-
-        _existingRecordsIds = _dbContext.ParticipantIdentifiers
-            .Where(x => identifiers.Contains(x.Value))
-            .Select(x => new { x.Pk, x.ParticipantId })
-            .ToList()
-            .DistinctBy(x => x.Pk)
-            .ToDictionary(x => x.Pk, x => x.ParticipantId);
 
         foreach (var record in dynamoDbEvent.Records)
         {
@@ -112,13 +100,12 @@ public class StreamHandler : IStreamHandler
 
     private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image, CancellationToken cancellationToken)
     {
-        Participant? targetParticipant = null;
-        if (_existingRecordsIds.ContainsKey(image.PK()))
-        {
-            targetParticipant = await _dbContext.Participants.Where(x => x.Id == _existingRecordsIds[image.PK()])
+        var identifiers = _participantMapper.ExtractIdentifiers(image);
+
+        var targetParticipant = await _dbContext.GetParticipantByLinkedIdentifiers(identifiers)
                                                 .ForUpdate()
                                                 .SingleOrDefaultAsync(cancellationToken);
-        }
+
 
         if (targetParticipant == null)
         {
@@ -131,54 +118,44 @@ public class StreamHandler : IStreamHandler
 
     private async Task ProcessModifyAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
     {
-        Participant? targetParticipant = null;
-        if (_existingRecordsIds.ContainsKey(record.Dynamodb.NewImage.PK()))
-        {
-            targetParticipant = await _dbContext.Participants.Where(x => x.Id == _existingRecordsIds[record.Dynamodb.NewImage.PK()])
+        var identifiers = _participantMapper.ExtractIdentifiers(record.Dynamodb.NewImage);
+        var participant = await _dbContext.GetParticipantByLinkedIdentifiers(identifiers)
                                                 .ForUpdate()
                                                 .SingleOrDefaultAsync(cancellationToken);
-        }
 
-        if (targetParticipant == null)
+        if (participant == null)
         {
-            targetParticipant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
+            participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        _participantMapper.Map(record.Dynamodb.NewImage, targetParticipant);
+        _participantMapper.Map(record.Dynamodb.NewImage, participant);
     }
 
     private async Task ProcessRemoveAsync(DynamoDBEvent.DynamodbStreamRecord record,
         CancellationToken cancellationToken)
     {
+        var identifiers = _participantMapper.ExtractIdentifiers(record.Dynamodb.OldImage);
+        var participant = await _dbContext.GetParticipantByLinkedIdentifiers(identifiers)
+            .Include(x => x.ParticipantIdentifiers)
+            .SingleOrDefaultAsync(cancellationToken);
 
-        Participant? targetParticipant = null;
-        if (_existingRecordsIds.ContainsKey(record.Dynamodb.OldImage.PK()))
+        if (participant == null)
         {
-            targetParticipant = await _dbContext.Participants.Where(x => x.Id == _existingRecordsIds[record.Dynamodb.OldImage.PK()])
-                                                .Include(x => x.ParticipantIdentifiers)
-                                                .SingleOrDefaultAsync(cancellationToken);
-        }
-
-        if (targetParticipant == null)
-        {
-            targetParticipant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
+            participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
-
-        var identifiers = _participantMapper.ExtractIdentifiers(record.Dynamodb.OldImage);
-
 
         // TODO: are we removing the Participant here, or just the ParticipantIdentifer?
         // Only delete the Participant if all participant identifiers have also been deleted.
         var idsToRemove =
-            targetParticipant.ParticipantIdentifiers.Where(x => identifiers.Select(y => y.Value).Contains(x.Value));
+            participant.ParticipantIdentifiers.Where(x => identifiers.Select(y => y.Value).Contains(x.Value));
 
         _dbContext.ParticipantIdentifiers.RemoveRange(idsToRemove);
 
-        if (targetParticipant.ParticipantIdentifiers.Except(idsToRemove).All(x => x.IsDeleted))
+        if (participant.ParticipantIdentifiers.Except(idsToRemove).All(x => x.IsDeleted))
         {
-            _dbContext.Participants.Remove(targetParticipant);
+            _dbContext.Participants.Remove(participant);
         }
     }
 }

@@ -27,4 +27,8 @@
       <ProjectReference Include="..\..\Dynamo.Stream.Handler\src\Dynamo.Stream.Handler\Dynamo.Stream.Handler.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Mappers\" />
+    </ItemGroup>
+
 </Project>

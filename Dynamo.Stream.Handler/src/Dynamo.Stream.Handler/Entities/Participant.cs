@@ -15,15 +15,23 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
 
     [Key]
     public int Id { get; set; }
+
+    [MaxLength(255)]
     public string? FirstName { get; set; }
+
+    [MaxLength(255)]
     public string? LastName { get; set; }
 
     public bool RegistrationConsent { get; set; }
     public DateTime? RegistrationConsentAtUtc { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    [MaxLength(255)]
     public string? Email { get; set; }
+    [MaxLength(255)]
     public string? EthnicBackground { get; set; }
+    [MaxLength(255)]
     public string? EthnicGroup { get; set; }
 
     public DateTime? DateOfBirth { get; set; }
@@ -31,8 +39,11 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
     public bool? HasLongTermCondition { get; set; }
 
     public bool? GenderIsSameAsSexRegisteredAtBirth { get; set; }
+    [MaxLength(255)]
     public string? MobileNumber { get; set; }
+    [MaxLength(255)]
     public string? LandlineNumber { get; set; }
+    [MaxLength(255)]
     public string? NHSNumber { get; set; }
 
     public bool IsDeleted { get; set; }

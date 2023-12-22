@@ -3,6 +3,7 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Dynamo.Stream.Handler.Entities;
 using Dynamo.Stream.Handler.Enums;
+using Dynamo.Stream.Handler.Extensions;
 using Dynamo.Stream.Handler.Services;
 using DynamoParticipant = Domain.Entities.Participants.Participant;
 
@@ -27,7 +28,7 @@ public class ParticipantMapper : IParticipantMapper
             { "ParticipantId", new AttributeValue { S = source.ParticipantId } },
             { "NhsId", new AttributeValue { S = source.NhsId } }
         });
-        
+
         // if pk begins with deleted add identifier
         if (source.Pk.StartsWith("DELETED#"))
         {
@@ -45,13 +46,12 @@ public class ParticipantMapper : IParticipantMapper
                 {
                     Value = identifier.Value,
                     IdentifierTypeId = identifier.Type,
-                    Pk = source.Pk
                 };
 
                 participant.ParticipantIdentifiers.Add(newIdentifier);
             }
         }
-        
+
     }
 
     private void MapHealthConditions(DynamoParticipant source, Participant participant)
@@ -122,7 +122,9 @@ public class ParticipantMapper : IParticipantMapper
         destination.GenderId = _refDataService.GetGenderId(source.SexRegisteredAtBirth);
         destination.CommunicationLanguageId = _refDataService.GetCommunicationLanguageId(source.SelectedLocale);
         destination.DailyLifeImpactId = _refDataService.GetDailyLifeImpactId(source.DisabilityDescription);
-        
+
+        destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
+
         ParticipantAddressMapper.Map(source.Address, destination);
 
         MapHealthConditions(source, destination);
