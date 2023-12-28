@@ -25,10 +25,5 @@
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     </ItemGroup>
-    
-    <ItemGroup>
-        <Folder Include="HttpMessageHandlers" />
-        <Folder Include="Utils\" />
-    </ItemGroup>
 
 </Project>
