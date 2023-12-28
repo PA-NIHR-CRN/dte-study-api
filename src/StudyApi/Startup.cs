@@ -71,16 +71,17 @@ namespace StudyApi
                 httpClient.BaseAddress = new Uri(settings.BaseUrl);
             });
 
-            if (Environment.IsEnvironment("Development") || Environment.IsDevelopment())
+            if (Environment.IsDevelopment())
             {
                 services.AddCors(options =>
                 {
-                    options.AddPolicy(name: "AllowLocal",
-                        policy =>
-                        {
-                            policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod()
-                                .AllowCredentials();
-                        });
+                    options.AddPolicy("AllowLocal", builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
+                    });
                 });
             }
 
@@ -232,7 +233,8 @@ namespace StudyApi
             }
         }
 
-        public void Configure(IApplicationBuilder app, IApiVersionDescriptionProvider provider)
+        public void Configure(IApplicationBuilder app, IApiVersionDescriptionProvider provider,
+            IOptions<DevSettings> devSettings)
         {
             app.UseIpRateLimiting();
 
@@ -251,11 +253,11 @@ namespace StudyApi
 
             app.UseRouting();
 
-            if (Environment.IsEnvironment("Development") || Environment.IsDevelopment())
+            if (Environment.IsDevelopment() || devSettings.Value.AllowLocalCors)
             {
                 app.UseCors("AllowLocal");
             }
-            
+
 
             app.UseCookiePolicy(new CookiePolicyOptions
             {
