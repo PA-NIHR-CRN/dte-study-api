@@ -15,16 +15,22 @@ namespace StudyApi
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
+                })
                 .AddAwsSecrets()
-                .ConfigureLogging(logger => {
-                    var options = new LambdaLoggerOptions {
+                .ConfigureLogging(logger =>
+                {
+                    var options = new LambdaLoggerOptions
+                    {
                         IncludeException = true,
                     };
 
                     logger.AddLambdaLogger(options);
                 })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
-                .ConfigureAppConfiguration((hostContext, configurationBuilder) => configurationBuilder.AddUserSecrets<Program>())
-            ;
+                .ConfigureAppConfiguration((hostContext, configurationBuilder) =>
+                    configurationBuilder.AddUserSecrets<Program>());
     }
 }
