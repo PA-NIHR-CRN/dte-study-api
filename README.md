@@ -62,6 +62,6 @@ To use the API, send HTTP requests to the endpoint that was created by the API G
 
 To use the project, you can follow these steps:
 
-1. Set the environment variable `ASPNETCORE_ENVIRONMENT` to `Development`.
+1. Set the environment variable `ASPNETCORE_ENVIRONMENT` to `Local`.
 2. Start the project.
 3. Access the API through `https://localhost:5001/swagger`.

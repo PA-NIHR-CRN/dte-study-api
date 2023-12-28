@@ -17,7 +17,7 @@ namespace StudyApi.Extensions
         {
             return hostBuilder.ConfigureAppConfiguration((hostingContext, configBuilder) =>
             {
-                if (hostingContext.HostingEnvironment.IsDevelopment()) return;
+                if (hostingContext.HostingEnvironment.IsEnvironment("Local")) return;
 
                 configBuilder.AddAwsSecrets();
             });
@@ -27,7 +27,7 @@ namespace StudyApi.Extensions
         {
             return hostBuilder.ConfigureAppConfiguration((hostingContext, configBuilder) =>
             {
-                if (hostingContext.HostingEnvironment.IsDevelopment()) return;
+                if (hostingContext.HostingEnvironment.IsEnvironment("Local")) return;
 
                 configBuilder.AddAwsSecrets();
             });

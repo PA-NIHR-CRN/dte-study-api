@@ -71,7 +71,7 @@ namespace StudyApi
                 httpClient.BaseAddress = new Uri(settings.BaseUrl);
             });
 
-            if (Environment.IsDevelopment())
+            if (Environment.IsEnvironment("Development") || Environment.IsDevelopment())
             {
                 services.AddCors(options =>
                 {
@@ -251,7 +251,7 @@ namespace StudyApi
 
             app.UseRouting();
 
-            if (Environment.IsDevelopment())
+            if (Environment.IsEnvironment("Development") || Environment.IsDevelopment())
             {
                 app.UseCors("AllowLocal");
             }
