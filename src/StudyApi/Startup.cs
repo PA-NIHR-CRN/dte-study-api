@@ -71,19 +71,16 @@ namespace StudyApi
                 httpClient.BaseAddress = new Uri(settings.BaseUrl);
             });
 
-            if (Environment.IsDevelopment())
+            services.AddCors(options =>
             {
-                services.AddCors(options =>
+                options.AddPolicy("AllowLocal", builder =>
                 {
-                    options.AddPolicy("AllowLocal", builder =>
-                    {
-                        builder.WithOrigins("http://localhost:3000")
-                            .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials();
-                    });
+                    builder.WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
-            }
+            });
 
             services.AddApiVersioning(opts =>
             {
