@@ -248,13 +248,11 @@ namespace StudyApi
                 }
             });
 
-            app.UseRouting();
-
             if (Environment.IsDevelopment() || devSettings.Value.AllowLocalCors)
             {
                 app.UseCors("AllowLocal");
             }
-
+            app.UseRouting();
 
             app.UseCookiePolicy(new CookiePolicyOptions
             {
