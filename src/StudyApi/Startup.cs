@@ -75,7 +75,7 @@ namespace StudyApi
             {
                 options.AddPolicy("AllowLocal", builder =>
                 {
-                    builder.WithOrigins("http://localhost:3000")
+                    builder.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
@@ -252,6 +252,7 @@ namespace StudyApi
             {
                 app.UseCors("AllowLocal");
             }
+
             app.UseRouting();
 
             app.UseCookiePolicy(new CookiePolicyOptions
