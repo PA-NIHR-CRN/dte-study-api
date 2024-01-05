@@ -43,6 +43,7 @@ namespace StudyApi.DependencyRegistrations
             services.AddSingleton<IHeaderService, HeaderService>();
             services.AddScoped<ISessionService, SessionService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<ILocationService, LocationService>();
             
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
             services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();

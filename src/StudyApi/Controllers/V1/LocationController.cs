@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Application.Contracts;
 using Application.Locations.V1.Queries;
 using Application.Responses.V1.Addresses;
 using Dte.Common.Responses;
@@ -17,13 +18,13 @@ namespace StudyApi.Controllers.V1;
 [Authorize("AnyAuthenticatedUser")]
 public class LocationController : Controller
 {
-    private readonly IMediator _mediator;
+    private readonly ILocationService _locationService;
 
-    public LocationController(IMediator mediator)
+    public LocationController(ILocationService locationService)
     {
-        _mediator = mediator;
+        _locationService = locationService;
     }
-        
+
     /// <summary>
     /// [Authorize("AnyAuthenticatedUser")] Get addresses by postcode
     /// </summary>
@@ -34,6 +35,6 @@ public class LocationController : Controller
     [HttpGet("postcode/{postcode}")]
     public async Task<IActionResult> GetAddressesByPostcode(string postcode)
     {
-        return Ok(await _mediator.Send(new GetAddressesByPostcodeQuery(postcode)));
+        return Ok(await _locationService.GetAddressesByPostcodeAsync(postcode));
     }
 }
