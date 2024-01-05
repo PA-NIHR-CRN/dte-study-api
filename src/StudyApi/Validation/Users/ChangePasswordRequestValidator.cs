@@ -1,14 +1,12 @@
 using FluentValidation;
 using StudyApi.Requests.Users;
 
-namespace StudyApi.Validation.Users
+namespace StudyApi.Validation.Users;
+
+public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
 {
-    public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
+    public ChangePasswordRequestValidator()
     {
-        public ChangePasswordRequestValidator()
-        {
-            RuleFor(x => x.OldPassword).NotEmpty();
-            RuleFor(x => x.NewPassword).NotEmpty();
-        }
+        RuleFor(x => x.NewPassword).NotEmpty();
     }
 }

@@ -1,10 +1,8 @@
 using System.Threading.Tasks;
+using Application.Contracts;
 using Application.Extensions;
 using Application.Responses.V1.Users;
-using Application.Users.V1.Commands;
-using Application.Users.V1.Queries;
 using Dte.Common.Responses;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,13 +14,13 @@ namespace StudyApi.Controllers.V1;
 [ApiController]
 [ApiVersion("1")]
 [Route("api/password")]
-public class PasswordController: Controller
+public class PasswordController : Controller
 {
-    private readonly IMediator _mediator;
+    private readonly IUserService _userService;
 
-    public PasswordController(IMediator mediator)
+    public PasswordController(IUserService userService)
     {
-        _mediator = mediator;
+        _userService = userService;
     }
 
     /// <summary>
@@ -36,9 +34,7 @@ public class PasswordController: Controller
     [HttpPost("forgotpassword")]
     public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordRequest request)
     {
-        var response = await _mediator.Send(new ForgotPasswordCommand(request.Email));
-
-        return Ok(response);
+        return Ok(await _userService.ForgotPasswordAsync(request.Email));
     }
 
     /// <summary>
@@ -52,10 +48,7 @@ public class PasswordController: Controller
     [HttpPost("confirmforgotpassword")]
     public async Task<IActionResult> ConfirmForgotPasswordAsync([FromBody] ConfirmForgotPasswordRequest request)
     {
-        var response =
-            await _mediator.Send(new ConfirmForgotPasswordCommand(request.Code, request.UserId, request.Password));
-
-        return Ok(response);
+        return Ok(await _userService.ConfirmForgotPasswordAsync(request.Code, request.UserId, request.Password));
     }
 
     /// <summary>
@@ -67,10 +60,10 @@ public class PasswordController: Controller
     [HttpGet("passwordpolicy")]
     public async Task<IActionResult> GetPasswordPolicy()
     {
-        return Ok(await _mediator.Send(new GetPasswordPolicyQuery()));
+        return Ok(await _userService.GetPasswordPolicyTypeAsync());
     }
-    
-    
+
+
     /// <summary>
     /// [AllowAnonymous] Change user password
     /// </summary>
@@ -82,8 +75,6 @@ public class PasswordController: Controller
     [HttpPost("changepassword")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        var email = User.GetUserEmail();
-        return Ok(await _mediator.Send(new ChangePasswordCommand(email, request.OldPassword,
-            request.NewPassword)));
+        return Ok(await _userService.ChangePasswordAsync(User.GetUserEmail(), request.NewPassword));
     }
 }

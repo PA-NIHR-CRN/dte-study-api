@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Contracts;
-using Application.Locations.V1.Queries;
 using Application.Responses.V1.Addresses;
 using Dte.Common.Responses;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
