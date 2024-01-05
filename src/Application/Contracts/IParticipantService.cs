@@ -19,7 +19,7 @@ public interface IParticipantService
     Task UpdateParticipantDemographicsAsync(ParticipantDemographics entity);
     Task NhsLoginAsync(ParticipantDetails entity);
     Task UpdateParticipantEmailAsync(string requestParticipantId, string requestNewEmail);
-    Task DeleteUserAsync(string requestParticipantId);
+    Task<Response<object>> DeleteUserAsync(string requestParticipantId);
     Task StoreMfaCodeAsync(string username, string code);
     Task<MfaValidationResult> ValidateMfaCodeAsync(string username, string code);
 }

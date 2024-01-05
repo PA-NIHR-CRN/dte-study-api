@@ -174,12 +174,12 @@ public class ParticipantService : IParticipantService
         await _participantRepository.UpdateParticipantDetailsAsync(participant);
     }
 
-    public async Task DeleteUserAsync(string participantId)
+    public async Task<Response<object>> DeleteUserAsync(string participantId)
     {
         try
         {
             var entity = await _participantRepository.GetParticipantDetailsAsync(participantId);
-            if (entity == null) return;
+            if (entity == null) return new Response<object>();
 
             var baseUrl = _emailSettings.WebAppBaseUrl;
             var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
@@ -207,12 +207,15 @@ public class ParticipantService : IParticipantService
 
 
             var linkedEntity = await GetParticipantDetailsByEmailAsync(linkedEmail);
-            if (linkedEntity == null) return;
+            if (linkedEntity == null) return new Response<object>();
             await RemoveParticipantDataAsync(linkedEntity);
+            
+            return new Response<object>();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Delete-error = {EMessage}", ex.Message);
+            return new Response<object>();
         }
     }
 

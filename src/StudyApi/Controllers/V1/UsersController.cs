@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Application.Contracts;
 using Application.Extensions;
 using Application.Responses.V1.Users;
-using Application.Users.V1.Commands;
 using Dte.Common.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -19,13 +18,13 @@ namespace StudyApi.Controllers.V1;
 [Route("api/users")]
 public class UsersController : Controller
 {
-    private readonly IMediator _mediator;
     private readonly IUserService _userService;
+    private readonly IParticipantService _participantService;
 
-    public UsersController(IMediator mediator, IUserService userService)
+    public UsersController(IUserService userService, IParticipantService participantService)
     {
-        _mediator = mediator;
         _userService = userService;
+        _participantService = participantService;
     }
 
     /// <summary>
@@ -39,9 +38,7 @@ public class UsersController : Controller
     [HttpPost("resendverificationemail")]
     public async Task<IActionResult> ResendVerificationEmailAsync([FromBody] ResendVerificationEmailRequest request)
     {
-        var response = await _mediator.Send(new ResendVerificationEmailCommand(request.UserId));
-
-        return Ok(response);
+        return Ok(_userService.ResendVerificationEmailAsync(request.UserId));
     }
 
     /// <summary>
@@ -55,7 +52,7 @@ public class UsersController : Controller
     [HttpPost("confirmsignup")]
     public async Task<IActionResult> ConfirmSignUpAsync([FromBody] ConfirmSignUpRequest request)
     {
-        var response = await _mediator.Send(new ConfirmSignUpCommand(request.Code, request.UserId));
+        var response = await _userService.ConfirmSignUpAsync(request.Code, request.UserId);
 
         return Ok(new { IsSuccess = response.IsSuccess });
     }
@@ -71,8 +68,7 @@ public class UsersController : Controller
     [HttpDelete("deleteparticipantaccount")]
     public async Task<IActionResult> DeleteParticipantAccount()
     {
-        return Ok(await _mediator.Send(
-            new DeleteParticipantAccountCommand(User.GetUserEmail(), User.GetParticipantId())));
+        return Ok(await _participantService.DeleteUserAsync(User.GetParticipantId()));
     }
 
     /// <summary>
@@ -87,7 +83,14 @@ public class UsersController : Controller
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequest request)
     {
         var currentEmail = User.GetUserEmail();
-        return Ok(await _mediator.Send(new ChangeEmailCommand(User.GetParticipantId(), currentEmail,
-            request.NewEmail)));
+
+        var clientResponse = await _userService.ChangeEmailAsync(currentEmail, request.NewEmail);
+
+        if (clientResponse != null && clientResponse.IsSuccess)
+        {
+            await _participantService.UpdateParticipantEmailAsync(User.GetParticipantId(), request.NewEmail);
+        }
+
+        return Ok(clientResponse);
     }
 }
