@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Application.Settings;
@@ -142,37 +141,15 @@ namespace StudyApi
 
             services.AddAuthorization(options =>
             {
-                var allRoles = typeof(AppRoles).GetFields().Select(x => x.GetValue(null)?.ToString());
-                var scopes = new[] { AppScopes.TokenParse };
-
                 // No roles
                 options.AddPolicy("AnyAuthenticatedUser", builder => builder
                     .RequireAuthenticatedUser()
-                );
-
-                // For specified roles
-                options.AddPolicy("Admin", builder => builder
-                    .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Admin)
-                );
-
-                options.AddPolicy("Lead", builder => builder
-                        .RequireAuthenticatedUser()
-                        .RequireRole(AppRoles.Admin, AppRoles.Lead) // TODO - Admin might not have access to lead
-                );
-
-                //Scopes
-                options.AddPolicy("TokenReadWrite", builder => builder
-                    .RequireScopes(scopes)
-                    .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Lead)
                 );
             });
 
             // Applications / Features
             services.AddApplication();
             services.AddInfrastructure(Configuration, Environment.EnvironmentName);
-            services.AddMessaging(Configuration);
 
             // All others
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
@@ -248,13 +225,12 @@ namespace StudyApi
                 }
             });
 
-            app.UseRouting();
-
             if (Environment.IsDevelopment() || devSettings.Value.AllowLocalCors)
             {
                 app.UseCors("AllowLocal");
             }
-
+            
+            app.UseRouting();
 
             app.UseCookiePolicy(new CookiePolicyOptions
             {

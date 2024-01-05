@@ -5,11 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -45,35 +42,6 @@ namespace Infrastructure.Services
                 Expires = DateTime.UtcNow.AddMinutes(60).AddMinutes(-5),
                 SigningCredentials = signingCredentials,
             };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var jwtToken = tokenHandler.WriteToken(token);
-
-            return jwtToken;
-        }
-
-        public async Task<string> CreateSSOJwtAsync(string jti, CancellationToken cancellationToken)
-        {
-            var signingCredentials = await GetSigningCredentialsAsync(cancellationToken);
-
-            var now = DateTime.UtcNow;
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Issuer = nhsLoginSettings.ClientId,
-                IssuedAt = now,
-                Expires = now.AddSeconds(60),
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                }),
-                SigningCredentials = signingCredentials,
-            };
-            if (tokenDescriptor.Claims == null)
-            {
-                tokenDescriptor.Claims = new Dictionary<string, object>();
-            }
-            tokenDescriptor.Claims.Add("code", jti);
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);

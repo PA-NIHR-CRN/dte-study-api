@@ -11,26 +11,6 @@ namespace Application.Extensions
         {
             return principal.Claims.FirstOrDefault(x => x.Type == "email")?.Value;
         }
-
-        public static bool IsExternalProviderUser(this ClaimsPrincipal principal, string externalProviderName = null)
-        {
-            var id = principal.FindFirstValue("cognito:username");
-
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                return false;
-            }
-
-            var split = id.Split("_");
-
-            if (split.Length == 1)
-            {
-                return false;
-            }
-            
-            return string.IsNullOrWhiteSpace(externalProviderName) || 
-                   string.Equals(externalProviderName, split[0], StringComparison.InvariantCultureIgnoreCase);
-        }
         
         public static string GetParticipantId(this ClaimsPrincipal principal)
         {

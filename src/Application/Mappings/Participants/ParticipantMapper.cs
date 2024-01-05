@@ -1,5 +1,4 @@
 using Application.Models.Participants;
-using Application.Participants.V1.Commands.Participants;
 using Application.Responses.V1.Participants;
 using Domain.Entities.Participants;
 

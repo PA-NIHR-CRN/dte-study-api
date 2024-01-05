@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Amazon.CognitoIdentityProvider;
 using Application.Models.MFA;
 using Application.Responses.V1.Users;
 using Dte.Common.Responses;
@@ -14,7 +13,6 @@ namespace Application.Contracts
         Task<Response<SignUpResponse>> SignUpAsync(string email, string password);
         Task<Response<object>> ConfirmSignUpAsync(string code, string userId);
         Task<Response<SignUpResponse>> AdminCreateUserSetPasswordAsync(string email, string password);
-        Task<AdminGetUserResponse> AdminGetUserAsync(string email);
         Task<Response<object>> DeleteUserAsync(string accessToken);
         Task<bool> UserExistsAsync(string email);
         Task<PasswordPolicyTypeResponse> GetPasswordPolicyTypeAsync();

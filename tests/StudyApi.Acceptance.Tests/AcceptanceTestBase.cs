@@ -1,7 +1,6 @@
 using System;
 using System.Net;
 using System.Security.Claims;
-using Application.Settings;
 using Dte.Api.Acceptance.Test.Helpers.Clients;
 using Dte.Api.Acceptance.Test.Helpers.Extensions;
 using Dte.Common.Authentication;
@@ -9,7 +8,6 @@ using Dte.Common.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using StudyApi.Acceptance.Tests.Clients;
-using StudyApi.Common;
 
 namespace StudyApi.Acceptance.Tests
 {
@@ -47,7 +45,6 @@ namespace StudyApi.Acceptance.Tests
         protected void LoginAsAdmin()
         {
             TestApi.AddClaims(new Claim("cognito:username", $"{Guid.NewGuid().ToString()}"));
-            TestApi.AddClaims(new Claim("cognito:groups", AppRoles.Admin));
         }
         
         protected void LoginAsParticipant()

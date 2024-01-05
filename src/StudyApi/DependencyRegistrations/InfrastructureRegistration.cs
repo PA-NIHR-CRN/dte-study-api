@@ -13,9 +13,6 @@ using Dte.Common.Contracts;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Location.Api.Client;
-using Dte.Reference.Data.Api.Client;
-using Dte.Study.Management.Api.Client;
-using Infrastructure.Factories;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
@@ -43,9 +40,7 @@ namespace StudyApi.DependencyRegistrations
             services.AddSingleton<IClock, Clock>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IMessageSenderFactory, MessageSenderFactory>();
             services.AddSingleton<IHeaderService, HeaderService>();
-            services.AddScoped<IFeatureFlagService, FeatureFlagService>();
             services.AddScoped<ISessionService, SessionService>();
             
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
@@ -68,13 +63,10 @@ namespace StudyApi.DependencyRegistrations
             services.AddDefaultAWSOptions(configuration.GetAWSOptions());
 
             // Clients
-
             var clientsSettings = configuration.GetSection(ClientsSettings.SectionName).Get<ClientsSettings>();
             var logger = services.BuildServiceProvider().GetService<ILoggerFactory>().CreateLogger("StudyApi.DependencyRegistrations.InfrastructureRegistration");
 
-            services.AddHttpClientWithRetry<IStudyManagementApiClient, StudyManagementApiClient>(clientsSettings.StudyManagementService, 2, logger);
             services.AddHttpClientWithRetry<ILocationApiClient, LocationApiClient>(clientsSettings.LocationService, 2, logger);
-            services.AddHttpClientWithRetry<IReferenceDataApiClient, ReferenceDataApiClient>(clientsSettings.ReferenceDataService, 2, logger);
 
             var devSettings = configuration.GetSection(DevSettings.SectionName).Get<DevSettings>();
 

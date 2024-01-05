@@ -1,7 +1,6 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
-using Amazon.DynamoDBv2.Model;
 using Dte.Common.Exceptions;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
