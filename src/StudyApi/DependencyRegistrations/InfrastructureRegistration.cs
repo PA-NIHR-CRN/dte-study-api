@@ -42,6 +42,7 @@ namespace StudyApi.DependencyRegistrations
             services.AddScoped<IEmailService, EmailService>();
             services.AddSingleton<IHeaderService, HeaderService>();
             services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
             
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
             services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();
