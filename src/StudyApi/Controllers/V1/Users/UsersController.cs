@@ -335,7 +335,7 @@ namespace StudyApi.Controllers.V1.Users
                     request.ConsentRegistration, null, request.DateOfBirth, ""));
             }
 
-            return Ok(new { IsSuccess = true });
+            return Ok(response);
         }
 
         public class NhsSignUpRequestLocal
