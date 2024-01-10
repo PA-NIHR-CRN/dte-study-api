@@ -916,7 +916,7 @@ namespace Infrastructure.Services
                         await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
                     }
 
-                    throw new UsernameExistsException("User already exists");
+                    throw new UsernameExistsException(email);
                 }
 
                 // check if user exists in participant details table and send email
@@ -942,7 +942,7 @@ namespace Infrastructure.Services
 
                     await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
 
-                    throw new UsernameExistsException("Username already exists");
+                    throw new UsernameExistsException(email);
                 }
 
                 var response = await _provider.SignUpAsync(new SignUpRequest
