@@ -177,22 +177,22 @@ public class Functions
 
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
-            _dbContext.Database.ExecuteSqlRaw("""
-                SET autocommit=0; 
-                SET unique_checks=0; 
-                SET foreign_key_checks=0;
-                """);
+            _dbContext.Database.ExecuteSqlRaw(@"
+    SET autocommit=0;
+    SET unique_checks=0;
+    SET foreign_key_checks=0;
+");
 
             _dbContext.Participants.AddRange(participantCollection);
 
             _logger.LogInformation("Saving...");
             _dbContext.SaveChanges();
 
-            _dbContext.Database.ExecuteSqlRaw("""
-                SET autocommit=1; 
-                SET unique_checks=1; 
-                SET foreign_key_checks=1;
-                """);
+            _dbContext.Database.ExecuteSqlRaw(@"
+    SET autocommit=1;
+    SET unique_checks=1;
+    SET foreign_key_checks=1;
+");
 
             _logger.LogInformation("Committing transaction...");
             transaction.Commit();
