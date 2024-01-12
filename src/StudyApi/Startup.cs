@@ -273,6 +273,7 @@ namespace StudyApi
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseMiddleware<SessionExpiryMiddleware>();
+            app.UseMiddleware<MaintenanceMiddleware>();
 
             app
                 .UseHsts()
