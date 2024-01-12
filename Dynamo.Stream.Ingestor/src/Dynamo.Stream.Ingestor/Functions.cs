@@ -119,7 +119,7 @@ public class Functions
     {
         if (!idMap.ContainsKey(id))
         {
-            idMap[id] = [participant];
+            idMap[id] = new List<Participant> { participant };
         }
         else
         {
