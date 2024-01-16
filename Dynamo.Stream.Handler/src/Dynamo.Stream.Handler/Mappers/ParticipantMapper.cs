@@ -123,7 +123,10 @@ public class ParticipantMapper : IParticipantMapper
         destination.CommunicationLanguageId = _refDataService.GetCommunicationLanguageId(source.SelectedLocale);
         destination.DailyLifeImpactId = _refDataService.GetDailyLifeImpactId(source.DisabilityDescription);
 
-        destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
+        if (!destination.SourceReferences.Any(x => x.Pk == record.PK()))
+        {
+            destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
+        }
 
         ParticipantAddressMapper.Map(source.Address, destination);
 

@@ -56,6 +56,7 @@ public static class ParticipantQueryableExtensions
         return source
             .Include(x => x.Address)
             .Include(x => x.HealthConditions)
-            .Include(x => x.ParticipantIdentifiers);
+            .Include(x => x.ParticipantIdentifiers)
+            .Include(x => x.SourceReferences);
     }
 }
