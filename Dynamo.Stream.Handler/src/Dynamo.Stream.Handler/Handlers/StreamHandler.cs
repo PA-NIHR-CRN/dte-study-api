@@ -65,7 +65,12 @@ public class StreamHandler : IStreamHandler
                     failures.Add(new BatchItemFailure { ItemIdentifier = currentRecordSequenceNumber });
 
                     // If there is one failure the whole batch is retried, exit early here.
-                    return failures;
+                    // Support 'Report batch item failures: Yes'
+                    // return failures;
+
+                    // Do not support partial batch failure.
+                    // See 'Report batch item failures: No'
+                    throw;
                 }
             }
         }
