@@ -1,0 +1,66 @@
+name: Stream Handler Manual Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment Environment (dev, oat, prod)'
+        required: true
+        default: 'dev'
+        
+jobs:
+  build_test_deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [ dev, oat, prod ]
+    env:
+      PREFIX: ${{ (matrix.env == 'dev' && 'crnccd') || 'crnccp' }}
+      
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure AWS credentials for dev
+        if: matrix.env == 'dev'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Configure AWS credentials for prod and oat
+        if: matrix.env == 'prod' || matrix.env == 'oat'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Build Run Number and Build Id
+        run: echo ${{ github.run_number }}-${{ github.run_id }}
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Add Nuget Source
+        run: dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+        
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
+
+      - name: Deploy
+        run: |
+          dotnet tool install -g Amazon.Lambda.Tools
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler ${{ env.PREFIX }}-lambda-${{ matrix.env }}-dte-participant-stream --function-role ${{ env.PREFIX }}-iam-${{ matrix.env }}-dte-role -ev "ASPNETCORE_ENVIRONMENT=Production;DTE_BUILD_STRING=${{ matrix.env }}-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=${{ env.PREFIX }}-secret-${{ matrix.env }}-rds-aurora-mysql-dte-stream-s" --function-publish true
+
+      - name: Update alias to point to new version
+        run: |
+          VERSION=$(aws lambda list-versions-by-function --function-name ${{ env.PREFIX }}-lambda-${{ matrix.env }}-dte-participant-stream --query "Versions[-1]" | jq -r .Version)
+          aws lambda update-alias --function-name ${{ env.PREFIX }}-lambda-${{ matrix.env }}-dte-participant-stream --name main --function-version $VERSION
