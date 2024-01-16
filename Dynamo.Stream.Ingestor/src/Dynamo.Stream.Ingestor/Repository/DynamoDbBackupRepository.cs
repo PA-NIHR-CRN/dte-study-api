@@ -1,4 +1,5 @@
-﻿using Amazon.DynamoDBv2.Model;
+﻿using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -23,6 +25,7 @@ namespace Dynamo.Stream.Ingestor.Repository
         public DynamoDbBackupRepository(ILogger<DynamoDbBackupRepository> logger, IOptions<DynamoDbBackupSettings> settings)
         {
             _settings = settings.Value;
+            _logger = logger;
 
             var summary = JsonSerializer.Deserialize<ManifestSummary>(File.ReadAllText(Path.Combine(_settings.RootPath, _settings.ExportName, "manifest-summary.json")));
 
@@ -32,7 +35,6 @@ namespace Dynamo.Stream.Ingestor.Repository
 
             files = File.ReadLines(Path.Combine(_settings.RootPath, summary.ManifestFilesS3Key))
                 .Select(x => JsonSerializer.Deserialize<ManifestFile>(x));
-            _logger = logger;
         }
 
         public async IAsyncEnumerable<Dictionary<string, AttributeValue>> GetAllParticipantsAsAttributeMapsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -55,13 +57,14 @@ namespace Dynamo.Stream.Ingestor.Repository
                 var sr = new StreamReader(ms, Encoding.UTF8);
 
                 cancellationToken.ThrowIfCancellationRequested();
-                var item = await sr.ReadLineAsync();
 
-                while (item != null)
+                string item = null;
+                while ((item = await sr.ReadLineAsync()) != null)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    var document = Amazon.DynamoDBv2.DocumentModel.Document.FromJson(item);
-                    yield return document.ToAttributeMap();
+                    var itemResponse = JsonSerializer.Deserialize(item, ItemResponseSerializerContext.Default.ItemResponse);
+
+                    yield return itemResponse.Item;
                 }
             }
         }

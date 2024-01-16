@@ -22,7 +22,9 @@ public class ParticipantDbContext : DbContext
     {
         base.OnConfiguring(optionsBuilder);
 
-        optionsBuilder.AddInterceptors(new SoftDeleteInterceptor(),
+        optionsBuilder.AddInterceptors(
+            new DisableAutoDetectChangesInterceptor(),
+            new SoftDeleteInterceptor(),
             new TimestampInterceptor());
     }
 
@@ -54,6 +56,7 @@ public static class ParticipantQueryableExtensions
         return source
             .Include(x => x.Address)
             .Include(x => x.HealthConditions)
-            .Include(x => x.ParticipantIdentifiers);
+            .Include(x => x.ParticipantIdentifiers)
+            .Include(x => x.SourceReferences);
     }
 }

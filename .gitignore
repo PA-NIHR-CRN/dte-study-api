@@ -411,3 +411,4 @@ src/StudyApi/appsettings.json
 src/StudyApi/private_key.pem
 docker/dynamodb/shared-local-instance.db
 volume/
+/Dynamo.Stream.Handler/src/Dynamo.Stream.Handler/DeployDatabase.sql
