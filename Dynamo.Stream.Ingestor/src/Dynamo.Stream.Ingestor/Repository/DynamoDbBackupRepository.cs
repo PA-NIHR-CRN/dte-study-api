@@ -27,7 +27,7 @@ namespace Dynamo.Stream.Ingestor.Repository
             _settings = settings.Value;
             _logger = logger;
 
-            var summary = JsonSerializer.Deserialize<ManifestSummary>(File.ReadAllText(Path.Combine(_settings.RootPath, "AWSDynamoDB", _settings.ExportName, "manifest-summary.json")));
+            var summary = JsonSerializer.Deserialize<ManifestSummary>(File.ReadAllText(Path.Combine(_settings.RootPath, _settings.ExportName, "manifest-summary.json")));
 
             _logger.LogInformation("Reading backup {exportArn}. Item Count: {exportItemCount}", summary.ExportArn, summary.ItemCount);
 

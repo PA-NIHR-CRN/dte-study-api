@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Amazon.Lambda;
 using Amazon.Lambda.Core;
 using Dynamo.Stream.Handler.Entities;
 using Dynamo.Stream.Ingestor.Repository;
@@ -7,12 +6,10 @@ using Dynamo.Stream.Ingestor.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Dynamo.Stream.Ingestor.Extensions;
 using Dynamo.Stream.Handler.Handlers;
 using Polly;
 using Dynamo.Stream.Handler.Mappers;
 using Dynamo.Stream.Handler.Extensions;
-using System.Diagnostics.Eventing.Reader;
 using Amazon.DynamoDBv2.Model;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -177,22 +174,22 @@ public class Functions
 
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
-            _dbContext.Database.ExecuteSqlRaw(@"
-    SET autocommit=0;
-    SET unique_checks=0;
-    SET foreign_key_checks=0;
-");
+            _dbContext.Database.ExecuteSqlRaw("""
+                SET autocommit=0;
+                SET unique_checks=0;
+                SET foreign_key_checks=0;
+                """);
 
             _dbContext.Participants.AddRange(participantCollection);
 
             _logger.LogInformation("Saving...");
             _dbContext.SaveChanges();
 
-            _dbContext.Database.ExecuteSqlRaw(@"
-    SET autocommit=1;
-    SET unique_checks=1;
-    SET foreign_key_checks=1;
-");
+            _dbContext.Database.ExecuteSqlRaw("""
+                SET autocommit=1;
+                SET unique_checks=1;
+                SET foreign_key_checks=1;
+                """);
 
             _logger.LogInformation("Committing transaction...");
             transaction.Commit();
