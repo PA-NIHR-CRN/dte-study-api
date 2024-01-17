@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -11,13 +12,15 @@ using Application.Models.MFA;
 using Application.Participants.V1.Commands.Participants;
 using Application.Responses.V1.Users;
 using Application.Settings;
-using Application.Content;
 using Domain.Entities.Participants;
+using Dte.Common;
+using Dte.Common.Contracts;
 using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
 using Dte.Common.Extensions;
 using Dte.Common.Helpers;
 using Dte.Common.Http;
+using Dte.Common.Models;
 using Dte.Common.Responses;
 using FluentValidation.Results;
 using Infrastructure.Clients;
@@ -44,18 +47,20 @@ namespace Infrastructure.Services
         private readonly AwsSettings _awsSettings;
         private readonly ILogger<UserService> _logger;
         private readonly IEmailService _emailService;
-        private readonly EmailSettings _emailSettings;
         private readonly NhsLoginHttpClient _nhsLoginHttpClient;
         private readonly IMediator _mediator;
         private readonly DevSettings _devSettings;
         private readonly IParticipantService _participantService;
         private readonly IDataProtector _dataProtector;
+        private readonly IContentfulService _contentfulService;
+        private readonly ContentfulSettings _contentfulSettings;
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
-            AwsSettings awsSettings, ILogger<UserService> logger, EmailSettings emailSettings,
+            AwsSettings awsSettings, ILogger<UserService> logger,
             IEmailService emailService, IParticipantService participantService,
             NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings,
-            IDataProtectionProvider dataProtector)
+            IDataProtectionProvider dataProtector, IContentfulService contentfulService,
+            ContentfulSettings contentfulSettings)
 
         {
             _provider = provider;
@@ -63,12 +68,13 @@ namespace Infrastructure.Services
             _awsSettings = awsSettings;
             _logger = logger;
             _emailService = emailService;
-            _emailSettings = emailSettings;
             _nhsLoginHttpClient = nhsLoginHttpClient;
             _mediator = mediator;
             _devSettings = devSettings.Value;
             _participantService = participantService;
             _dataProtector = dataProtector.CreateProtector("mfa.login.details");
+            _contentfulService = contentfulService;
+            _contentfulSettings = contentfulSettings;
         }
 
         private string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null)
@@ -218,13 +224,13 @@ namespace Infrastructure.Services
             }
             catch (CodeMismatchException ex)
             {
-                return HandleMfaException(ex, "MFA_Code_Mismatch");
+                return HandleMfaException(ex, ErrorCode.MfaCodeMismatch);
             }
             catch (NotAuthorizedException ex)
             {
                 if (ex.Message == "Invalid session for the user, session is expired.")
                 {
-                    return HandleMfaException(ex, "MFA_Session_Expired");
+                    return HandleMfaException(ex, ErrorCode.MfaSessionExpired);
                 }
                 else
                 {
@@ -233,7 +239,10 @@ namespace Infrastructure.Services
             }
             catch (ExpiredCodeException ex)
             {
-                return HandleMfaException(ex, ex.Message == "Your software token has already been used once." ? "Mfa_Used_Token" : ErrorCode.MfaCodeExpired);
+                return HandleMfaException(ex,
+                    ex.Message == "Your software token has already been used once."
+                        ? "Mfa_Used_Token"
+                        : ErrorCode.MfaCodeExpired);
             }
             catch (Exception ex)
             {
@@ -271,7 +280,7 @@ namespace Infrastructure.Services
                 }
 
                 return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), "No_Mfa_Challenge",
+                    nameof(UserService), ErrorCode.MfaNoChallenge,
                     mfaDetails, _headerService.GetConversationId());
             }
             catch (Exception ex)
@@ -301,25 +310,20 @@ namespace Infrastructure.Services
                 var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
                 var code = GenerateOtpCode();
 
-                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                        "Confirm your email address")
-                    .Replace("###TEXT_REPLACE1###",
-                        $"{code} is your Be Part of Research security code.")
-                    .Replace("###TEXT_REPLACE2###",
-                        "This code will expire after 5 minutes.")
-                    .Replace("###TEXT_REPLACE3###",
-                        "")
-                    .Replace("###TEXT_REPLACE4###",
-                        "")
-                    .Replace("###LINK_REPLACE###", "")
-                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                    .Replace("###TEXT_REPLACE5###",
-                        "")
-                    .Replace("###TEXT_REPLACE6###", "");
-
                 var participant = await _participantService.GetParticipantDetailsAsync(mfaLoginDetails.Username);
 
-                await _emailService.SendEmailAsync(participant.Email, "Be Part of Research security code", htmlBody);
+                var contentfulEmailRequest = new EmailContentRequest
+                {
+                    EmailName = _contentfulSettings.EmailTemplates.MfaEmailConfirmation,
+                    FirstName = participant.Firstname,
+                    Code = code,
+                    SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
+                };
+
+                var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
+
+                await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
+                    contentfulEmail.EmailBody);
 
                 await _participantService.StoreMfaCodeAsync(mfaLoginDetails.Username, code);
 
@@ -358,9 +362,12 @@ namespace Infrastructure.Services
 
                 return mfaValidationResult switch
                 {
-                    MfaValidationResult.UserNotFound => CreateErrorResponse(ErrorCode.MfaUserNotFound, "User not found"),
-                    MfaValidationResult.CodeExpired => CreateErrorResponse(ErrorCode.MfaCodeExpired, "Code has expired"),
-                    MfaValidationResult.CodeInvalid => CreateErrorResponse(ErrorCode.MfaCodeMismatch, "Code is invalid"),
+                    MfaValidationResult.UserNotFound =>
+                        CreateErrorResponse(ErrorCode.MfaUserNotFound, "User not found"),
+                    MfaValidationResult.CodeExpired =>
+                        CreateErrorResponse(ErrorCode.MfaCodeExpired, "Code has expired"),
+                    MfaValidationResult.CodeInvalid =>
+                        CreateErrorResponse(ErrorCode.MfaCodeMismatch, "Code is invalid"),
                     MfaValidationResult.Success => Response<string>.CreateSuccessfulResponse(
                         _headerService.GetConversationId()),
                     _ => throw new ArgumentOutOfRangeException()
@@ -409,13 +416,13 @@ namespace Infrastructure.Services
             }
             catch (CodeMismatchException ex)
             {
-                return HandleMfaException(ex, "MFA_Code_Mismatch");
+                return HandleMfaException(ex, ErrorCode.MfaCodeMismatch);
             }
             catch (NotAuthorizedException ex)
             {
                 return HandleMfaException(ex,
                     ex.Message == "Invalid session for the user, session is expired."
-                        ? "MFA_Session_Expired"
+                        ? ErrorCode.MfaSessionExpired
                         : "Not_Authorized");
             }
             catch (Exception ex)
@@ -493,25 +500,18 @@ namespace Infrastructure.Services
                 if (!string.IsNullOrEmpty(existingPhoneNumber))
                 {
                     // get user email
-                    var email = user.UserAttributes.FirstOrDefault(x => x.Name == "email")?.Value;
-                    var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                            "Be Part of Research mobile phone number verified")
-                        .Replace("###TEXT_REPLACE1###",
-                            $"The new mobile phone number provided to secure your account has been verified. We will send a security code to this number each time you sign in.")
-                        .Replace("###TEXT_REPLACE2###",
-                            "This will not change any telephone numbers stored in the personal details section of your account. Please sign in to your account if you need to change these.")
-                        .Replace("###TEXT_REPLACE3###",
-                            "")
-                        .Replace("###TEXT_REPLACE4###",
-                            "")
-                        .Replace("###LINK_REPLACE###", "")
-                        .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                        .Replace("###TEXT_REPLACE5###",
-                            "")
-                        .Replace("###TEXT_REPLACE6###", "");
+                    var participant = await _participantService.GetParticipantDetailsAsync(username);
 
-                    await _emailService.SendEmailAsync(email, "Be Part of Research mobile phone number verified",
-                        htmlBody);
+                    var contentfulEmailRequest = new EmailContentRequest
+                    {
+                        EmailName = _contentfulSettings.EmailTemplates.MfaMobileNumberVerification,
+                        FirstName = participant.Firstname,
+                        SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
+                    };
+
+                    var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
+                    await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
+                        contentfulEmail.EmailBody);
                 }
 
                 await _provider.AdminUpdateUserAttributesAsync(request);
@@ -704,13 +704,13 @@ namespace Infrastructure.Services
             }
             catch (CodeMismatchException ex)
             {
-                return HandleMfaException(ex, "MFA_Code_Mismatch");
+                return HandleMfaException(ex, ErrorCode.MfaCodeMismatch);
             }
             catch (NotAuthorizedException ex)
             {
                 if (ex.Message == "Invalid session for the user, session is expired.")
                 {
-                    return HandleMfaException(ex, "MFA_Session_Expired");
+                    return HandleMfaException(ex, ErrorCode.MfaSessionExpired);
                 }
                 else
                 {
@@ -721,7 +721,7 @@ namespace Infrastructure.Services
             {
                 if (ex.Message == "Code mismatch")
                 {
-                    return HandleMfaException(ex, "MFA_Code_Mismatch");
+                    return HandleMfaException(ex, ErrorCode.MfaCodeMismatch);
                 }
                 else
                 {
@@ -736,7 +736,8 @@ namespace Infrastructure.Services
 
         private static bool IsUnder18(DateTime dateOfBirth) => DateTime.Now.AddYears(-18).Date < dateOfBirth.Date;
 
-        public async Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl)
+        public async Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl,
+            string selectedLocale)
         {
             try
             {
@@ -769,6 +770,7 @@ namespace Infrastructure.Services
                     Lastname = nhsUserInfo.LastName,
                     NhsId = nhsUserInfo.NhsId,
                     NhsNumber = nhsUserInfo.NhsNumber,
+                    SelectedLocale = selectedLocale
                 });
 
                 return Response<NhsLoginResponse>.CreateSuccessfulContentResponse(response,
@@ -805,7 +807,8 @@ namespace Infrastructure.Services
             return exceptionResponse;
         }
 
-        public async Task<Response<SignUpResponse>> NhsSignUpAsync(bool consentRegistration, string token)
+        public async Task<Response<SignUpResponse>> NhsSignUpAsync(bool consentRegistration, string selectedLocale,
+            string token)
         {
             try
             {
@@ -813,27 +816,19 @@ namespace Infrastructure.Services
 
                 await _mediator.Send(new CreateParticipantDetailsCommand("", nhsUserInfo.Email,
                     nhsUserInfo.FirstName, nhsUserInfo.LastName,
-                    consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber));
+                    consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber,
+                    selectedLocale));
 
-                var baseUrl = _emailSettings.WebAppBaseUrl;
-                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                        "New Be Part of Research Account")
-                    .Replace("###TEXT_REPLACE1###",
-                        $"Thank you for registering for Be Part of Research using your NHS login or through the NHS App. You will need to use the NHS login option on the <a href=\"{baseUrl}Participants/Options\">Be Part of Research</a> website each time you access your account.")
-                    .Replace("###TEXT_REPLACE2###",
-                        "By signing up, you are joining our community of amazing volunteers who are helping researchers to understand more about health and care conditions. Please visit the <a href=\"https://bepartofresearch.nihr.ac.uk/taking-part/how-to-take-part\">How to take part</a> section of the website to find out about other ways to take part in health and care research.")
+                var request = new EmailContentRequest
+                {
+                    EmailName = _contentfulSettings.EmailTemplates.NhsSignUp,
+                    FirstName = nhsUserInfo.FirstName,
+                    SelectedLocale = new CultureInfo(selectedLocale ?? SelectedLocale.Default),
+                };
 
-                     .Replace("###TEXT_REPLACE3###",
-                        "<a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\">Sign up to our newsletter</a> to receive all our research news, studies you can take part in and other opportunities helping to shape health and care research from across the UK.")
-                    .Replace("###TEXT_REPLACE4###",
-                        "If you close your NHS login account, your Be Part of Research account will remain open and if you would also like to close your Be Part of Research account you will need to email <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>.")
-                    .Replace("###LINK_REPLACE###", "")
-                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                    .Replace("###TEXT_REPLACE5###",
-                        "Thank you for your ongoing commitment and support.")
-                    .Replace("###TEXT_REPLACE6###", "");
-
-                await _emailService.SendEmailAsync(nhsUserInfo.Email, "Be Part of Research", htmlBody);
+                var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
+                await _emailService.SendEmailAsync(nhsUserInfo.Email, contentfulEmail.EmailSubject,
+                    contentfulEmail.EmailBody);
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
                     new SignUpResponse { UserConsents = true, }, _headerService.GetConversationId());
@@ -849,7 +844,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password)
+        public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password, string selectedLocale)
         {
             try
             {
@@ -897,54 +892,40 @@ namespace Infrastructure.Services
                                 $"User with email {email} not found", _headerService.GetConversationId());
                         }
 
-                        var baseUrl = _emailSettings.WebAppBaseUrl;
-                        var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                                "Be Part of Research registration attempt")
-                            .Replace("###TEXT_REPLACE1###",
-                                $"Hi {System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(participant.Firstname.ToLower())},")
-                            .Replace("###TEXT_REPLACE2###",
-                                "An attempt has been made to register again for Be Part of Research using your email address. As you already have an account with us, there is no need to re-register.")
-                            .Replace("###TEXT_REPLACE3###",
-                                "If you need to access your account please sign in using the link below. If you cannot remember your password, you can choose to reset it from the sign-in page.")
-                            .Replace("###LINK_REPLACE###", $"{baseUrl}UserLogin")
-                            .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                            .Replace("###TEXT_REPLACE4###",
-                                "If you did not attempt to re-register please ignore this email.")
-                            .Replace("###TEXT_REPLACE5###", "Thank you for your ongoing commitment and support.")
-                            .Replace("###TEXT_REPLACE6###", "");
+                        var request = new EmailContentRequest
+                        {
+                            EmailName = _contentfulSettings.EmailTemplates.EmailAccountExists,
+                            SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
+                            FirstName = participant.Firstname,
+                        };
 
-                        await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
+                        var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
+
+                        await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
+                            contentfulEmail.EmailBody);
+                        
+                        throw new UsernameExistsException(email);
                     }
-
-                    return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { IsSuccess = true, }, _headerService.GetConversationId());
                 }
+
 
                 // check if user exists in participant details table and send email
                 var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
                 if (participantDetails != null)
                 {
-                    var baseUrl = _emailSettings.WebAppBaseUrl;
-                    var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                            "Be Part of Research registration attempt")
-                        .Replace("###TEXT_REPLACE1###",
-                            $"Hi {System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(participantDetails.Firstname.ToLower())},")
-                        .Replace("###TEXT_REPLACE2###",
-                            "An attempt to log into your Be Part of Research account using this email address has been made. As you created your account using your NHS login information, you need to use that option to login to your Be Part of Research account. ")
-                        .Replace("###TEXT_REPLACE3###",
-                            "Please use the link below and select the NHS login button to continue.")
-                        .Replace("###LINK_REPLACE###",
-                            $"<a href=\"{baseUrl}participants/options\">{baseUrl}participants/options</a>")
-                        .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                        .Replace("###TEXT_REPLACE4###",
-                            "If you did not attempt to re-register please ignore this email.")
-                        .Replace("###TEXT_REPLACE5###", "Thank you for your ongoing commitment and support.")
-                        .Replace("###TEXT_REPLACE6###", "");
+                    var request = new EmailContentRequest
+                    {
+                        EmailName = _contentfulSettings.EmailTemplates.NhsAccountExists,
+                        SelectedLocale = new CultureInfo(participantDetails.SelectedLocale ?? SelectedLocale.Default),
+                        FirstName = participantDetails.Firstname,
+                    };
 
-                    await _emailService.SendEmailAsync(email, "Be Part of Research registration attempt", htmlBody);
+                    var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
 
-                    return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                        new SignUpResponse { IsSuccess = true, }, _headerService.GetConversationId());
+                    await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject,
+                        contentfulEmail.EmailBody);
+
+                    throw new UsernameExistsException(email);
                 }
 
                 var response = await _provider.SignUpAsync(new SignUpRequest
@@ -952,6 +933,10 @@ namespace Infrastructure.Services
                     ClientId = _awsSettings.CognitoAppClientIds[0],
                     Username = email,
                     Password = password,
+                    ClientMetadata = new Dictionary<string, string>
+                    {
+                        { "selectedLocale", selectedLocale ?? "en-GB" }
+                    }
                 });
 
                 if (_devSettings.AutoConfirmNewCognitoSignup)
@@ -964,16 +949,20 @@ namespace Infrastructure.Services
                 }
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                    new SignUpResponse { IsSuccess = true, UserId = response.UserSub}, _headerService.GetConversationId());
+                    new SignUpResponse { IsSuccess = true, UserId = response.UserSub },
+                    _headerService.GetConversationId());
             }
             catch (UsernameExistsException ex)
             {
                 _logger.LogError(ex,
                     $"Error signing up user {email}, username already exists");
                 // Return a generic success response, to appear as though registration was successful
-                return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                    new SignUpResponse { IsSuccess = true }, _headerService.GetConversationId());
+                return Response<SignUpResponse>.CreateErrorMessageResponse(
+                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
+                    ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.",
+                    _headerService.GetConversationId());
             }
+
             catch (InvalidParameterException ex)
             {
                 _logger.LogError(ex,
@@ -983,6 +972,7 @@ namespace Infrastructure.Services
                     ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.",
                     _headerService.GetConversationId());
             }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex,
@@ -1296,24 +1286,18 @@ namespace Infrastructure.Services
                 if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
                     return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                         _headerService.GetConversationId());
-                var baseUrl = _emailSettings.WebAppBaseUrl;
-                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                        "Password Reset Attempt")
-                    .Replace("###TEXT_REPLACE1###",
-                        "A request has been received to change the password for your Be Part of Research account. We were unable to complete this request because your account was created with your NHS login information. You will need to use this option on each occasion to access your account and update your details.")
-                    .Replace("###TEXT_REPLACE2###",
-                        "Please use the link below and select the NHS login button to continue.")
-                    .Replace("###TEXT_REPLACE3###",
-                        "")
-                    .Replace("###LINK_REPLACE###",
-                        $"<a href=\"{baseUrl}participants/options\">{baseUrl}participants/options</a>")
-                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                    .Replace("###TEXT_REPLACE4###",
-                        "If you have not attempted to reset your password, please contact us by email at <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>")
-                    .Replace("###TEXT_REPLACE5###", "")
-                    .Replace("###TEXT_REPLACE6###", "");
 
-                await _emailService.SendEmailAsync(email, "Be Part of Research password reset", htmlBody);
+                var request = new EmailContentRequest
+                {
+                    EmailName = _contentfulSettings.EmailTemplates.NhsPasswordReset,
+                    SelectedLocale = new CultureInfo(participantDetails.SelectedLocale ?? SelectedLocale.Default),
+                    FirstName = participantDetails.Firstname,
+                };
+
+                var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
+
+                await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject,
+                    contentfulEmail.EmailBody);
 
                 return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                     _headerService.GetConversationId());
@@ -1336,7 +1320,6 @@ namespace Infrastructure.Services
 
             return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(_headerService.GetConversationId());
         }
-
 
         public async Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code,
             string userId, string password)
@@ -1401,7 +1384,6 @@ namespace Infrastructure.Services
                 }
 
                 return Response<object>.CreateSuccessfulResponse();
-
             }
             catch (LimitExceededException ex)
             {
@@ -1424,7 +1406,7 @@ namespace Infrastructure.Services
                 return exceptionResponse;
             }
         }
-        
+
         public async Task<Response<object>> ChangeEmailAsync(string currentEmail, string newEmail)
         {
             try

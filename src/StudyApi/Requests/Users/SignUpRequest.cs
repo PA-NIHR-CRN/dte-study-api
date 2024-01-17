@@ -10,5 +10,6 @@ namespace StudyApi.Requests.Users
         public string Lastname { get; set; }
         public bool ConsentRegistration { get; set; }
         public DateTime DateOfBirth { get; set; }
+        public string SelectedLocale { get; set; }
     }
 }

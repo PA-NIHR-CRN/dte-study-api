@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Contracts;
@@ -10,11 +11,13 @@ namespace Application.Users.V1.Commands
     public class NhsSignUpCommand : IRequest<Response<SignUpResponse>>
     {
         private bool ConsentRegistration { get; }
+        private string SelectedLocale { get; }
         private string Token { get; }
 
-        public NhsSignUpCommand(bool consentRegistration, string token)
+        public NhsSignUpCommand(bool consentRegistration, string selectedLocale, string token)
         {
             ConsentRegistration = consentRegistration;
+            SelectedLocale = selectedLocale;
             Token = token;
         }
 
@@ -31,7 +34,7 @@ namespace Application.Users.V1.Commands
             public async Task<Response<SignUpResponse>> Handle(NhsSignUpCommand request,
                 CancellationToken cancellationToken)
             {
-                return await _userService.NhsSignUpAsync(request.ConsentRegistration, request.Token);
+                return await _userService.NhsSignUpAsync(request.ConsentRegistration, request.SelectedLocale, request.Token);
             }
         }
     }

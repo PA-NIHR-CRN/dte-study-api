@@ -32,6 +32,7 @@ namespace Application.Mappings.Participants
                 ConsentRegistration = source.ConsentRegistration,
                 ConsentRegistrationAtUtc = source.ConsentRegistrationAtUtc,
                 RemovalOfConsentRegistrationAtUtc = source.RemovalOfConsentRegistrationAtUtc,
+                SelectedLocale = source.SelectedLocale,
             };
         }
 
@@ -50,7 +51,8 @@ namespace Application.Mappings.Participants
                 Disability = source.Disability,
                 DisabilityDescription = source.DisabilityDescription,
                 HealthConditionInterests = source.HealthConditionInterests,
-                HasDemographics = source.HasDemographics
+                HasDemographics = source.HasDemographics,
+                SelectedLocale = source.SelectedLocale ?? "en-GB"
             };
         }
     }
