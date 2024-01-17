@@ -62,6 +62,8 @@ namespace StudyApi
             services.AddSingleton(clientsSettings);
             services.AddSingleton(emailSettings);
 
+            services.AddTransient(provider => Configuration);
+
             services.Configure<NhsLoginSettings>(Configuration.GetSection("NhsLogin"));
 
             services.AddHttpClient<NhsLoginHttpClient>((serviceProvider, httpClient) =>
@@ -273,6 +275,12 @@ namespace StudyApi
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseMiddleware<SessionExpiryMiddleware>();
+
+            app.UseWhen(context =>
+                // bypass maintainence mode middleware for configuration controller
+                !context.Request.Path.StartsWithSegments("/api/configuration"),
+                config => config.UseMiddleware<MaintenanceMiddleware>()
+            );
 
             app
                 .UseHsts()
