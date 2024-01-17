@@ -47,3 +47,4 @@ jobs:
         run: |
           VERSION=$(aws lambda list-versions-by-function --function-name crnccs-lambda-uat-dte-study-api --query "Versions[-1]" | jq -r .Version)
           aws lambda update-alias --function-name crnccs-lambda-uat-dte-study-api --name main --function-version $VERSION
+

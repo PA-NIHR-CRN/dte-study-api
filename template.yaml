@@ -19,8 +19,6 @@ Resources:
       Environment:
         Variables:
           ASPNETCORE_ENVIRONMENT: PassInFromRunConfiguration
-          Cpms__UserName: PassInFromRunConfiguration
-          Cpms__Password: PassInFromRunConfiguration
           AWS_SECRET_MANAGER_SECRET_NAME: PassInFromRunConfiguration
       Events:
         GetAllStudies:

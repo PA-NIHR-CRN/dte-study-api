@@ -66,6 +66,8 @@ namespace StudyApi
             services.AddSingleton(appSettings);
             services.AddSingleton(contentfulSettings);              
 
+            services.AddTransient(provider => Configuration);
+
             services.Configure<NhsLoginSettings>(Configuration.GetSection("NhsLogin"));
 
             services.AddHttpClient<NhsLoginHttpClient>((serviceProvider, httpClient) =>
@@ -255,11 +257,11 @@ namespace StudyApi
 
             app.UseRouting();
 
-            if (Environment.IsDevelopment() || string.Equals(Environment.EnvironmentName, "sandbox",
-                    StringComparison.InvariantCultureIgnoreCase))
+            if (Environment.IsDevelopment())
             {
                 app.UseCors("AllowLocal");
             }
+            
 
             app.UseCookiePolicy(new CookiePolicyOptions
             {
@@ -277,6 +279,12 @@ namespace StudyApi
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseMiddleware<SessionExpiryMiddleware>();
+
+            app.UseWhen(context =>
+                // bypass maintainence mode middleware for configuration controller
+                !context.Request.Path.StartsWithSegments("/api/configuration"),
+                config => config.UseMiddleware<MaintenanceMiddleware>()
+            );
 
             app
                 .UseHsts()
