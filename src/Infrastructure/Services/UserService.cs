@@ -903,11 +903,9 @@ namespace Infrastructure.Services
 
                         await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
                             contentfulEmail.EmailBody);
+                        
+                        throw new UsernameExistsException(email);
                     }
-
-                    return Response<SignUpResponse>.CreateErrorMessageResponse(
-                        ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.SignUpError,
-                        "", _headerService.GetConversationId());
                 }
 
 
@@ -927,7 +925,7 @@ namespace Infrastructure.Services
                     await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject,
                         contentfulEmail.EmailBody);
 
-                    throw new UsernameExistsException("Username already exists");
+                    throw new UsernameExistsException(email);
                 }
 
                 var response = await _provider.SignUpAsync(new SignUpRequest
