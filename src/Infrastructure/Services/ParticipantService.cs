@@ -1,22 +1,21 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
-using Amazon.DynamoDBv2.Model;
+using Application.Constants;
 using Application.Contracts;
 using Application.Mappings.Participants;
 using Application.Models.MFA;
-using Application.Models.Participants;
 using Application.Responses.V1.Participants;
 using Application.Settings;
-using Application.Content;
 using Domain.Entities.Participants;
+using Dte.Common;
 using Dte.Common.Contracts;
 using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
-using Dte.Common.Responses;
-using Infrastructure.Clients;
+using Dte.Common.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -31,12 +30,14 @@ public class ParticipantService : IParticipantService
     private readonly IClock _clock;
     private readonly ILogger<UserService> _logger;
     private readonly IEmailService _emailService;
+    private readonly IContentfulService _contentfulService;
+    private readonly ContentfulSettings _contentfulSettings;
     private readonly EmailSettings _emailSettings;
 
     public ParticipantService(IParticipantRepository participantRepository, IClock clock,
         IAmazonCognitoIdentityProvider provider, AwsSettings awsSettings,
         ILogger<UserService> logger, EmailSettings emailSettings,
-        IEmailService emailService)
+        IEmailService emailService, IContentfulService contentfulService, ContentfulSettings contentfulSettings)
     {
         _participantRepository = participantRepository;
         _clock = clock;
@@ -44,6 +45,8 @@ public class ParticipantService : IParticipantService
         _awsSettings = awsSettings;
         _logger = logger;
         _emailService = emailService;
+        _contentfulService = contentfulService;
+        _contentfulSettings = contentfulSettings;
         _emailSettings = emailSettings;
     }
 
@@ -92,6 +95,7 @@ public class ParticipantService : IParticipantService
             ConsentRegistrationAtUtc = participant.ConsentRegistration ? _clock.Now() : (DateTime?)null,
             RemovalOfConsentRegistrationAtUtc = (DateTime?)null,
             CreatedAtUtc = _clock.Now(),
+            SelectedLocale = request.SelectedLocale
         };
         // check if demographic data is complete
         var demographics = await _participantRepository
@@ -132,6 +136,7 @@ public class ParticipantService : IParticipantService
             participant.DateOfBirth = request.DateOfBirth;
             participant.NhsNumber = request.NhsNumber;
             participant.UpdatedAtUtc = _clock.Now();
+            participant.SelectedLocale = request.SelectedLocale;
 
             await _participantRepository.UpdateParticipantDetailsAsync(participant);
             return;
@@ -180,26 +185,16 @@ public class ParticipantService : IParticipantService
         {
             var entity = await _participantRepository.GetParticipantDetailsAsync(participantId);
             if (entity == null) return;
+            
+            var contentfulEmailRequest = new EmailContentRequest
+            {
+                EmailName = _contentfulSettings.EmailTemplates.DeleteAccount,
+                SelectedLocale = new CultureInfo(entity.SelectedLocale ?? SelectedLocale.Default)
+            };
+                
+            var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
 
-            var baseUrl = _emailSettings.WebAppBaseUrl;
-            var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                    "Closure of Be Part of Research Account")
-                .Replace("###TEXT_REPLACE1###",
-                    "This email is to confirm the closure of your Be Part of Research account. If you would still like to hear from us, you can<a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\"> sign up to our newsletter</a> to receive all our research news, and hear about studies and other opportunities to help shape health and care research from across the UK.")
-                .Replace("###TEXT_REPLACE2###",
-                    "If you would like to register again in future, please visit the <a href=\"https://volunteer.bepartofresearch.nihr.ac.uk/Participants/introduction\">registration page</a>.")
-                 .Replace("###TEXT_REPLACE3###",
-                    "Thank you for your support.")
-                .Replace("###TEXT_REPLACE4###",
-                    "")
-                .Replace("###LINK_REPLACE###", "")
-                .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                .Replace("###TEXT_REPLACE5###",
-                    "")
-                .Replace("###TEXT_REPLACE6###",
-                    "");
-
-            await _emailService.SendEmailAsync(entity.Email, "Be Part of Research", htmlBody);
+            await _emailService.SendEmailAsync(entity.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
 
             var linkedEmail = entity.Email;
             await SaveAnonymisedDemographicParticipantDataAsync(entity);

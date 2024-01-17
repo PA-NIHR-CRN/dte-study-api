@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Extensions;
 using Application.Constants;
 using Application.Contracts;
-using Application.Content;
 using Application.Mappings.Participants;
 using Application.Models.Participants;
-using Application.Settings;
 using Domain.Entities.Participants;
+using Dte.Common;
 using Dte.Common.Contracts;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
+using Dte.Common.Models;
 using Dte.Common.Responses;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -23,6 +23,7 @@ namespace Application.Participants.V1.Commands.Participants
 {
     public class CreateParticipantDemographicsCommand : IRequest<Response<object>>
     {
+        private const string DefaultLocale = "en-GB";
         public string ParticipantId { get; }
         public string MobileNumber { get; }
         public string LandlineNumber { get; }
@@ -65,22 +66,22 @@ namespace Application.Participants.V1.Commands.Participants
                 Response<object>>
         {
             private readonly IParticipantRepository _participantRepository;
-            private readonly IClock _clock;
             private readonly IHeaderService _headerService;
             private readonly ILogger<CreateParticipantDemographicsCommandHandler> _logger;
             private readonly IEmailService _emailService;
-            private readonly EmailSettings _emailSettings;
+            private readonly IContentfulService _contentfulService;
+            private readonly ContentfulSettings _contentfulSettings;
 
             public CreateParticipantDemographicsCommandHandler(IParticipantRepository participantRepository,
-                IClock clock, IHeaderService headerService, ILogger<CreateParticipantDemographicsCommandHandler> logger,
-                EmailSettings emailSettings,IEmailService emailService)
+                IHeaderService headerService, ILogger<CreateParticipantDemographicsCommandHandler> logger,
+                IEmailService emailService, IContentfulService contentfulService, ContentfulSettings contentfulSettings)
             {
                 _participantRepository = participantRepository;
-                _clock = clock;
                 _headerService = headerService;
                 _logger = logger;
                 _emailService = emailService;
-                _emailSettings = emailSettings;
+                _contentfulService = contentfulService;
+                _contentfulSettings = contentfulSettings;
             }
 
             public async Task<Response<object>> Handle(CreateParticipantDemographicsCommand request,
@@ -89,32 +90,36 @@ namespace Application.Participants.V1.Commands.Participants
                 try
                 {
                     var updateExisting = false;
-                   
+
                     var entity = await _participantRepository.GetParticipantDemographicsAsync(request.ParticipantId);
 
-                    if(!entity.HasDemographics)
+                    _logger.LogInformation("Participant: {SerializeObject}", JsonConvert.SerializeObject(entity));
+
+                    if (!entity.HasDemographics)
                     {
                         var user = await _participantRepository.GetParticipantDetailsAsync(request.ParticipantId);
                         if (user.NhsId is null)
                         {
-                            var baseUrl = _emailSettings.WebAppBaseUrl;
-                            var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                                    "New Be Part of Research Account")
-                                .Replace("###TEXT_REPLACE1###",
-                                    "Thank you for registering for Be Part of Research.")
-                                .Replace("###TEXT_REPLACE2###",
-                                    $"By signing up, you are joining our community of amazing volunteers who are helping researchers to understand more about health and care conditions. Please visit the <a href=\"https://bepartofresearch.nihr.ac.uk/taking-part/how-to-take-part\">How to take part</a> section of the website to find out about other ways to take part in health and care research.")
-                                 .Replace("###TEXT_REPLACE3###",
-                                    $"<a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\">Sign up to our newsletter</a> to receive all our research news, studies you can take part in and other opportunities helping to shape health and care research from across the UK.")
-                                .Replace("###TEXT_REPLACE4###",
-                                    "")
-                                .Replace("###LINK_REPLACE###", "")
-                                .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                                .Replace("###TEXT_REPLACE5###",
-                                    $"Thank you for your ongoing commitment and support.")
-                                .Replace("###TEXT_REPLACE6###", "");
+                            _logger.LogInformation(
+                                "Sending email with name {EmailTemplatesNewAccount} to {UserEmail} for participant {UserParticipantId}",
+                                _contentfulSettings.EmailTemplates.NewAccount, user.Email, user.ParticipantId);
 
-                            await _emailService.SendEmailAsync(user.Email, "Be Part of Research", htmlBody);
+                            var contentfulEmailRequest = new EmailContentRequest
+                            {
+                                EmailName = _contentfulSettings.EmailTemplates.NewAccount,
+                                SelectedLocale = new CultureInfo(user.SelectedLocale ?? SelectedLocale.Default),
+                            };
+                            
+                            _logger.LogInformation("ContentfulEmailRequest: {SerializeObject}",
+                                JsonConvert.SerializeObject(contentfulEmailRequest));
+
+                            var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
+                            
+                            _logger.LogInformation("ContentfulEmail: {SerializeObject}",
+                                JsonConvert.SerializeObject(contentfulEmail));
+
+                            await _emailService.SendEmailAsync(user.Email, contentfulEmail.EmailSubject,
+                                contentfulEmail.EmailBody);
                         }
                     }
 
@@ -148,6 +153,8 @@ namespace Application.Participants.V1.Commands.Participants
 
                     if (updateExisting)
                     {
+                        _logger.LogInformation("Updating participant demographics for {ParticipantId}",
+                            request.ParticipantId);
                         await _participantRepository.UpdateParticipantDemographicsAsync(entity);
                     }
                     else
@@ -161,7 +168,7 @@ namespace Application.Participants.V1.Commands.Participants
                 {
                     var exceptionResponse = Response<object>.CreateExceptionResponse(
                         ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UpdateParticipantDetailsCommand.UpdateParticipantDetailsCommandHandler), "err", ex,
+                        nameof(CreateParticipantDemographicsCommandHandler), "err", ex,
                         _headerService.GetConversationId());
                     _logger.LogError(ex,
                         $"Unknown error creating participant demographics for {request.ParticipantId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");

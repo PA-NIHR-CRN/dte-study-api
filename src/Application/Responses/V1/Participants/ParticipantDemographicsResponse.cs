@@ -16,6 +16,7 @@ namespace Application.Responses.V1.Participants
         public string EthnicBackground { get; set; }
         public bool? Disability { get; set; }
         public string DisabilityDescription { get; set; }
+        public string SelectedLocale { get; set; }
         public IEnumerable<string> HealthConditionInterests { get; set; }
         public bool ConsentContact { get; set; }
         public bool HasDemographics { get; set; }

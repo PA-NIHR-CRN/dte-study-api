@@ -9,14 +9,16 @@ namespace Application.Users.V1.Commands;
 
 public class SignUpCommand : IRequest<Response<SignUpResponse>>
 {
-    public SignUpCommand(string email, string password)
+    public SignUpCommand(string email, string password, string selectedLocale)
     {
         Email = email;
         Password = password;
+        SelectedLocale = selectedLocale;
     }
 
     private string Email { get; }
     private string Password { get; }
+    private string SelectedLocale { get; }
 
     public class CreateUserCommandHandler : IRequestHandler<SignUpCommand, Response<SignUpResponse>>
     {
@@ -29,7 +31,7 @@ public class SignUpCommand : IRequest<Response<SignUpResponse>>
 
         public async Task<Response<SignUpResponse>> Handle(SignUpCommand request, CancellationToken cancellationToken)
         {
-            return await _userService.SignUpAsync(request.Email, request.Password);
+            return await _userService.SignUpAsync(request.Email, request.Password, request.SelectedLocale);
         }
     }
 }

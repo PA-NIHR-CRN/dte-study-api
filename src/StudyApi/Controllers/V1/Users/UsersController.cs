@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using Application.Participants.V1.Commands.Participants;
 using Application.Responses.V1.Users;
@@ -164,11 +165,11 @@ namespace StudyApi.Controllers.V1.Users
             await _userService.UpdateCognitoPhoneNumberAsync(request.MfaDetails, request.PhoneNumber);
             var response = await _userService.SetUpMfaAsync(request.MfaDetails);
 
-             return !response.IsSuccess
+            return !response.IsSuccess
                 ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
                 : Ok(response);
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] Login
         /// </summary>
@@ -181,12 +182,12 @@ namespace StudyApi.Controllers.V1.Users
         public async Task<IActionResult> ReissueMfaSession([FromBody] SetUpMfaRequest request)
         {
             var response = await _userService.ReissueMfaSessionAsync(request.MfaDetails);
-            
+
             return !response.IsSuccess
                 ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
                 : Ok(response);
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] Login
         /// </summary>
@@ -201,7 +202,7 @@ namespace StudyApi.Controllers.V1.Users
             var email = await _userService.SendEmailOtpAsync(request.MfaDetails);
             return Ok(email);
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] Login
         /// </summary>
@@ -214,11 +215,10 @@ namespace StudyApi.Controllers.V1.Users
         public async Task<IActionResult> GetMaskedMobile([FromBody] SetUpMfaRequest request)
         {
             var maskedMobile = await _userService.GetMaskedMobile(request.MfaDetails);
-            
+
             return Ok(maskedMobile);
-            
         }
-        
+
         /// <summary>
         /// [AllowAnonymous] ValidateEmailOtp
         /// </summary>
@@ -232,7 +232,7 @@ namespace StudyApi.Controllers.V1.Users
         {
             var response = await _userService.ValidateEmailOtpAsync(request.MfaDetails, request.MfaCode);
 
-             return !response.IsSuccess
+            return !response.IsSuccess
                 ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
                 : Ok(response);
         }
@@ -282,7 +282,8 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("verifytokenmfa")]
         public async Task<IActionResult> VerifySoftwareTokenAsync([FromBody] VerifyMfaRequest request)
         {
-            var response = await _userService.VerifySoftwareTokenAsync(request.AuthenticatorAppCode, request.SessionId, request.MfaDetails);
+            var response = await _userService.VerifySoftwareTokenAsync(request.AuthenticatorAppCode, request.SessionId,
+                request.MfaDetails);
 
             return Ok(response);
         }
@@ -299,7 +300,7 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("nhslogin")]
         public async Task<IActionResult> NhsLogin([FromBody] NhsLoginRequest request)
         {
-            var response = await _mediator.Send(new NhsLoginCommand(request.Code, request.RedirectUrl));
+            var response = await _mediator.Send(new NhsLoginCommand(request.Code, request.RedirectUrl, request.SelectedLocale));
 
             if (!response.IsSuccess)
             {
@@ -326,18 +327,22 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("signup")]
         public async Task<IActionResult> SignUpUserAsync([FromBody] SignUpRequest request)
         {
-            var response = await _mediator.Send(new SignUpCommand(request.Email, request.Password));
+            var response = await _mediator.Send(new SignUpCommand(request.Email, request.Password, request.SelectedLocale));
 
-            await _mediator.Send(new CreateParticipantDetailsCommand(
-                response.Content.UserId, request.Email, request.Firstname, request.Lastname,
-                request.ConsentRegistration, null, request.DateOfBirth, ""));
-
-            return Ok(new { IsSuccess = response.IsSuccess });
+            if (response.IsSuccess)
+            {
+                await _mediator.Send(new CreateParticipantDetailsCommand(
+                    response.Content.UserId, request.Email, request.Firstname, request.Lastname,
+                    request.ConsentRegistration, null, request.DateOfBirth, "", request.SelectedLocale));
+            }
+            
+            return Ok(response);
         }
-
+        
         public class NhsSignUpRequestLocal
         {
             public bool ConsentRegistration { get; set; }
+            public string SelectedLocale { get; set; }
         }
 
         /// <summary>
@@ -354,7 +359,8 @@ namespace StudyApi.Controllers.V1.Users
             if (HttpContext.Request.Cookies.TryGetValue(NhsAccessTokenCookieName, out var cookieValue))
             {
                 var accessToken = _dataProtector.Unprotect(cookieValue);
-                var response = await _mediator.Send(new NhsSignUpCommand(request.ConsentRegistration, accessToken));
+                var response = await _mediator.Send(new NhsSignUpCommand(request.ConsentRegistration,
+                    request.SelectedLocale, accessToken));
 
                 if (response.IsSuccess)
                 {
