@@ -272,21 +272,15 @@ public class ParticipantService : IParticipantService
             CreatedAtUtc = entity.CreatedAtUtc,
             NhsId = entity.NhsId ?? null,
             ParticipantId = entity.ParticipantId ?? null,
-            DateOfBirth = entity.DateOfBirth
+            DateOfBirth = entity.DateOfBirth,
+            GenderIsSameAsSexRegisteredAtBirth = entity.GenderIsSameAsSexRegisteredAtBirth,
+            EthnicGroup = entity.EthnicGroup,
+            Disability = entity.Disability,
+            Address = entity.Address.Clear()
         };
 
         await _participantRepository.CreateAnonymisedDemographicParticipantDataAsync(anonEntity);
-
-        var demographics = await _participantRepository.GetParticipantDemographicsAsync(StripPrimaryKey(entity.Pk));
-        if (demographics == null) return;
-        demographics.Pk = primaryKey;
-        demographics.Sk = DeletedKey();
-        demographics.MobileNumber = demographics.LandlineNumber = null;
-        demographics.Disability = false;
-        demographics.Address?.Clear();
-        demographics.HealthConditionInterests?.Clear();
-
-        await _participantRepository.UpdateParticipantDemographicsAsync(demographics);
+        
     }
 
     public async Task<ParticipantDetails> GetParticipantDetailsAsync(string participantId)
