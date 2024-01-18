@@ -16,13 +16,14 @@ public class ParticipantAddress
         return postcodeWithoutSpace[..^3];
     }
 
-    public void Clear()
+    public ParticipantAddress Clear()
     {
         AddressLine1 = null;
         AddressLine2 = null;
         AddressLine3 = null;
         AddressLine4 = null;
-        Town = null;
+        Town = Town;
         Postcode = GetOutcodeFromPostcode(Postcode);
+        return this;
     }
 }
