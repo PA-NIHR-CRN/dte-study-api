@@ -14,17 +14,17 @@ namespace Dynamo.Stream.Handler.Migrations
                 SELECT p.Id,
                        p.RegistrationConsent,
                        p.RegistrationConsentAtUtc,
-                       p.RemovalOfConsentRegistrationAtUtc,
-                       p.DateOfBirth,
-                       p.GenderIsSameAsSexRegisteredAtBirth,
-                       p.EthnicGroup,
-                       p.HasLongTermCondition,
                        p.CreatedAt,
                        p.UpdatedAt,
+                       p.EthnicGroup,
+                       p.DateOfBirth,
+                       p.RemovalOfConsentRegistrationAtUtc,
+                       p.HasLongTermCondition,
+                       p.GenderIsSameAsSexRegisteredAtBirth,
                        p.IsDeleted,
+                       p.DailyLifeImpactId,
                        p.CommunicationLanguageId,
-                       p.GenderId,
-                       p.DailyLifeImpactId
+                       p.GenderId
                 FROM Participants p
                 GROUP BY p.Id;
             ");
@@ -32,9 +32,9 @@ namespace Dynamo.Stream.Handler.Migrations
             // SQL command to create AnonymisedAddressView
             migrationBuilder.Sql(@"
                 CREATE VIEW ParticipantAddress_Anonymised AS
-                SELECT LEFT(TRIM(pa.Postcode), CHAR_LENGTH(TRIM(pa.Postcode)) - 3) AS Outcode, 
+                SELECT pa.Id,
                 pa.Town,
-                pa.Id,
+                LEFT(TRIM(pa.Postcode), CHAR_LENGTH(TRIM(pa.Postcode)) - 3) AS Outcode, 
                 pa.ParticipantId,
                 pa.IsDeleted
                 FROM ParticipantAddress pa;
