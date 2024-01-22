@@ -10,25 +10,33 @@ namespace Dynamo.Stream.Handler.Migrations
         {
             // SQL command to create AnonymisedParticipantView
             migrationBuilder.Sql(@"
-                CREATE VIEW AnonymisedParticipantView AS
+                CREATE VIEW Participants_Anonymised AS
                 SELECT p.Id,
-                       p.RegistrationConsent                                                AS ConsentRegistration,
-                       p.RegistrationConsentAtUtc                                     AS ConsentRegistrationAtUtc,
+                       p.RegistrationConsent,
+                       p.RegistrationConsentAtUtc,
                        p.RemovalOfConsentRegistrationAtUtc,
                        p.DateOfBirth,
-                       p.GenderIsSameAsSexRegisteredAtBirth                AS SexRegisteredAtBirth,
+                       p.GenderIsSameAsSexRegisteredAtBirth,
                        p.EthnicGroup,
-                       p.HasLongTermCondition                                        AS Disability,
-                       p.CreatedAt                                                              AS CreatedAtUtc,
-                       p.UpdatedAt                                                             AS UpdatedAtUtc
+                       p.HasLongTermCondition,
+                       p.CreatedAt,
+                       p.UpdatedAt,
+                       p.IsDeleted,
+                       p.CommunicationLanguageId,
+                       p.GenderId,
+                       p.DailyLifeImpactId
                 FROM Participants p
                 GROUP BY p.Id;
             ");
 
             // SQL command to create AnonymisedAddressView
             migrationBuilder.Sql(@"
-                CREATE VIEW AnonymisedAddressView AS
-                SELECT LEFT(TRIM(pa.Postcode), CHAR_LENGTH(TRIM(pa.Postcode)) - 3) AS Outcode, pa.Town
+                CREATE VIEW ParticipantAddress_Anonymised AS
+                SELECT LEFT(TRIM(pa.Postcode), CHAR_LENGTH(TRIM(pa.Postcode)) - 3) AS Outcode, 
+                pa.Town,
+                pa.Id,
+                pa.ParticipantId,
+                pa.IsDeleted
                 FROM ParticipantAddress pa;
             ");
         }
