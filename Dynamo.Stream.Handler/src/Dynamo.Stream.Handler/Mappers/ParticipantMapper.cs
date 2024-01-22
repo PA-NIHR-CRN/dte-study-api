@@ -122,6 +122,8 @@ public class ParticipantMapper : IParticipantMapper
         destination.GenderId = _refDataService.GetGenderId(source.SexRegisteredAtBirth);
         destination.CommunicationLanguageId = _refDataService.GetCommunicationLanguageId(source.SelectedLocale);
         destination.DailyLifeImpactId = _refDataService.GetDailyLifeImpactId(source.DisabilityDescription);
+        destination.CreatedAt = source.CreatedAtUtc;
+        destination.UpdatedAt = source.UpdatedAtUtc.HasValue ? source.UpdatedAtUtc.Value : source.CreatedAtUtc;
 
         if (!destination.SourceReferences.Any(x => x.Pk == record.PK()))
         {
