@@ -26,7 +26,15 @@ namespace Dynamo.Stream.Handler.Entities.Interceptors
             {
                 if (entry is { State: EntityState.Added, Entity: ITimestamped inserted })
                 {
-                    inserted.CreatedAt = inserted.UpdatedAt = DateTime.UtcNow;
+                    if (inserted.CreatedAt == default)
+                    {
+                        inserted.CreatedAt = DateTime.UtcNow;
+                    }
+
+                    if (inserted.UpdatedAt == default)
+                    {
+                        inserted.UpdatedAt = inserted.CreatedAt;
+                    }
                 }
 
                 if (entry is { State: EntityState.Modified, Entity: ITimestamped updated })

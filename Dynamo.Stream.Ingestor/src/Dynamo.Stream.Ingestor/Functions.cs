@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Dynamo.Stream.Handler.Handlers;
-using Polly;
 using Dynamo.Stream.Handler.Mappers;
 using Dynamo.Stream.Handler.Extensions;
 using Amazon.DynamoDBv2.Model;
+using Dynamo.Stream.Handler.Enums;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -56,7 +56,7 @@ public class Functions
 
             _logger.LogInformation("{count} distinct identifiers.", idMap.Keys.Count);
             _logger.LogInformation("{count} distinct participants.", participants.Count);
-            _logger.LogInformation("{count} distinct source references (PKs).", participants.SelectMany(x => x.SourceReferences).Count());
+            _logger.LogInformation("{count} distinct source references (PKs).", participants.SelectMany(x => x.SourceReferences).DistinctBy(x => x.Pk).Count());
 
             _logger.LogInformation("Processed all participants in {ElapsedTime}", sw.Elapsed);
 
@@ -146,12 +146,16 @@ public class Functions
     {
         var uniqueParticipants = new List<Participant>();
 
+        var map = new Dictionary<Guid, Participant>();
+        List<int> identifierTypePrecendence = [(int)IdentifierTypes.Deleted, (int)IdentifierTypes.ParticipantId, (int)IdentifierTypes.NhsId];
+
         foreach (var item in idMap.Values)
         {
-            var primaryParticipant = item.First();
+            var primaryParticipant = item
+                .OrderBy(x => x.ParticipantIdentifiers.Select(y => identifierTypePrecendence.IndexOf(y.IdentifierTypeId)).DefaultIfEmpty(0).Max())
+                .OrderBy(x => x.CreatedAt)
+                .Last();
 
-            // TODO: any precedence rules we need to follow when combining
-            // participants?
 
             // Combine identifiers of all the duplicate participants.
             primaryParticipant.ParticipantIdentifiers = item
@@ -162,7 +166,29 @@ public class Functions
             // Combine source references of all the duplicates.
             primaryParticipant.SourceReferences = item.SelectMany(x => x.SourceReferences).ToList();
 
-            uniqueParticipants.Add(primaryParticipant);
+            var existingParticipant = primaryParticipant.ParticipantIdentifiers.Select(x => map.GetValueOrDefault(x.Value)).Where(x => x != null).Distinct().SingleOrDefault();
+
+            if (existingParticipant == null)
+            {
+                existingParticipant = primaryParticipant;
+                uniqueParticipants.Add(existingParticipant);
+            }
+            else
+            {
+                existingParticipant.ParticipantIdentifiers = existingParticipant.ParticipantIdentifiers.UnionBy(primaryParticipant.ParticipantIdentifiers, x => $"{x.IdentifierTypeId}-{x.Value}").ToList();
+
+                existingParticipant.SourceReferences = existingParticipant.SourceReferences.UnionBy(primaryParticipant.SourceReferences, x => x.Pk).ToList();
+            }
+
+            foreach (var i in existingParticipant.ParticipantIdentifiers)
+            {
+                if (map.ContainsKey(i.Value) && map[i.Value] != existingParticipant)
+                {
+                    throw new DuplicateItemException($"Duplicate item '{i.Value}'");
+                }
+
+                map[i.Value] = existingParticipant;
+            }
         }
 
         return uniqueParticipants;
