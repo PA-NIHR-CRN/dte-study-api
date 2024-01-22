@@ -1,5 +1,8 @@
+using Dynamo.Stream.Handler.Entities.Configuration;
 using Dynamo.Stream.Handler.Entities.Interceptors;
 using Dynamo.Stream.Handler.Entities.RefData;
+using Dynamo.Stream.Handler.Entities.System;
+using Dynamo.Stream.Handler.Handlers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dynamo.Stream.Handler.Entities;
@@ -17,6 +20,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<Gender> Genders { get; set; } = null!;
     public DbSet<HealthCondition> HealthConditions { get; set; } = null!;
     public DbSet<IdentifierType> IdentifierTypes { get; set; } = null!;
+    public DbSet<SysConfiguration> SysConfigurations { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -46,6 +50,13 @@ public class ParticipantDbContext : DbContext
         var values = identifiers.Select(id => id.Value).ToList();
 
         return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value)));
+    }
+
+    public void ThrowIfInMaintenanceMode() { 
+        if (SysConfigurations.Any(x => x.Name == nameof(SysConfigurationConfiguration.ConfigurationKeys.IsInMaintenanceMode) && x.Value == $"{true}"))
+        {
+            throw new MaintenanceModeException();
+        }
     }
 }
 
