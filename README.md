@@ -14,8 +14,11 @@ The API interacts with participant-api and location-api to provide information a
 ## How to Install and Run the Project
 To run the project, you will need to have the following installed on your machine:
 
-- .NET Core 6 SDK or later
-- AWS CLI
+- [.NET Core 6 SDK or later](#net-core-6-sdk-or-later)
+- [Homebrew](#homebrew)
+- [AWS CLI](#aws-cli)
+- [C# dev kit extension for VS Code](#c-dev-kit-extension-for-vs-code)
+- [VS Code Solution Explorer extension](#vs-code-solution-explorer-extension)
 
 To run the project, follow these steps:
 1. Clone the repository to your local machine.
@@ -26,36 +29,29 @@ dotnet dev-certs https --clean
 dotnet dev-certs https
 dotnet dev-certs https --trust
 ```
-3. Right click on the study-api project and select properties. When the modal pops up select run/configurations/default and set the environment variable ASPNETCORE_ENVIRONMENT to Development.
-4. Install the AWS CLI by running the following command:
+3. Right click on the study-api project and select properties. When the modal pops up select run/configurations/default and set the environment variable ASPNETCORE_ENVIRONMENT to Development or add launchSettings.json to the study-api project in a Properties folder with the following content:
 ```
-brew install awscli
+{
+  "profiles": {
+    "study-api": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
 ```
-5. Run `aws configure` and add the `AccessKeyId` and `SecretAccessKey` which can be generated on AWS.
+5. Run `aws configure` and add the `AccessKeyId`, `SecretAccessKey` and `Region` which can be obtained from the dev secret user on AWS.
 ```
 aws configure
 ```
-6. Get your device ID from AWS.
-7. Get new `AccessKeyId`, `SecretAccessKey`, and `SessionToken` to get around MFA.
+7. Add nuget package
 ```
-aws sts get-session-token --serial-number replaceMeWithDeviceID --token-code replaceMeWithTokenFromDevice
+dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 ```
-8. Run `aws configure` and add the new `AccessKeyId` and `SecretAccessKey` when prompted.
-```
-aws configure
-```
-9. Set the new session key inside of your configure file.
-```
-aws configure set aws_session_token replaceMeWithSessionToken
-```
-10. To access the API directly go to https://localhost:5001/swagger.
+Secrets can be obtained from the team
 
-11. To generate a new token you must delete your `aws_session_token` from your `aws` credentials file, restart the process at stage 4 and add your original `AccessKeyId` and `SecretAccessKey`. This is because the session token is only valid for 1 day.
-
-If you ever need to see or update any of the configure options, these can be found by running the following command on Mac:
-```
-open ~/.aws/credentials
-```
 
 ## Usage
 To use the API, send HTTP requests to the endpoint that was created by the API Gateway deployment.
@@ -65,3 +61,43 @@ To use the project, you can follow these steps:
 1. Set the environment variable `ASPNETCORE_ENVIRONMENT` to `Development`.
 2. Start the project.
 3. Access the API through `https://localhost:5001/swagger`.
+
+## Pre-requisites
+### .NET Core 6 SDK or later
+1. The project requires .NET Core 6 SDK or later to be installed on your machine. You can download the latest version of .NET Core from [here](https://dotnet.microsoft.com/download/dotnet/6.0).
+2. Sym-link your .NET SDK by running the following command in your terminal(this will require sudo access):
+For Mac M1:
+```
+sudo ln -s /usr/local/share/dotnet/dotnet /usr/local/bin/
+```
+For Mac Intel:
+```
+sudo ln -s /usr/local/share/dotnet/x64/dotnet /usr/local/bin/
+```
+3. Add the PATH to your .NET SDK to your `~/.zshrc` or `~/.bashrc` file:
+```
+PATH="/usr/local/share/dotnet:$PATH"
+```
+
+
+### Homebrew
+1. Homebrew is a package manager for macOS. You can install Homebrew by running the following command in your terminal:
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+2. Add the PATH to Homebrew to your `~/.zshrc` or `~/.bashrc` file:
+```
+PATH="/opt/homebrew/bin:$PATH"
+```
+
+### AWS CLI
+The AWS CLI is a command-line tool that allows you to interact with AWS services. You can install the AWS CLI by running the following command in your terminal:
+```
+brew install awscli
+```
+
+### C# dev kit extension for VS Code
+The C# dev kit extension for VS Code allows you to develop .NET Core applications in VS Code. You can install the extension by searching for `C#` in the extensions tab in VS Code.
+
+### VS Code Solution Explorer extension
+The VS Code Solution Explorer extension allows you to view the solution explorer in VS Code. You can install the extension by searching for `Solution Explorer` in the extensions tab in VS Code.  More information about the extension can be found [here](https://marketplace.visualstudio.com/items?itemName=fernandoescolar.vscode-solution-explorer).
