@@ -147,7 +147,7 @@ public class Functions
         var uniqueParticipants = new List<Participant>();
 
         var map = new Dictionary<Guid, Participant>();
-        List<int> identifierTypePrecendence = [(int)IdentifierTypes.Deleted, (int)IdentifierTypes.ParticipantId, (int)IdentifierTypes.NhsId];
+        var identifierTypePrecendence = new List<int> { (int)IdentifierTypes.Deleted, (int)IdentifierTypes.ParticipantId, (int)IdentifierTypes.NhsId };
 
         foreach (var item in idMap.Values)
         {

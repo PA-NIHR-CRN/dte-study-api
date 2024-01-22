@@ -9054,6 +9054,33 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.ToTable("SourceReference");
                 });
 
+            modelBuilder.Entity("Dynamo.Stream.Handler.Entities.System.SysConfiguration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SysConfiguration", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "IsInMaintenanceMode",
+                            Value = "False"
+                        });
+                });
+
             modelBuilder.Entity("Dynamo.Stream.Handler.Entities.Participant", b =>
                 {
                     b.HasOne("Dynamo.Stream.Handler.Entities.RefData.CommunicationLanguage", "CommunicationLanguage")
