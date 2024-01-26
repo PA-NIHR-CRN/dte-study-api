@@ -64,7 +64,7 @@ namespace StudyApi
             services.AddSingleton(clientsSettings);
             services.AddSingleton(emailSettings);
             services.AddSingleton(appSettings);
-            services.AddSingleton(contentfulSettings);              
+            services.AddSingleton(contentfulSettings);
 
             services.AddTransient(provider => Configuration);
 
@@ -77,7 +77,7 @@ namespace StudyApi
                 httpClient.BaseAddress = new Uri(settings.BaseUrl);
             });
 
-            if (Environment.IsDevelopment())
+            if (Environment.IsEnvironment("local"))
             {
                 services.AddCors(options =>
                 {
@@ -123,7 +123,7 @@ namespace StudyApi
             });
 
             var dataprotection = services.AddDataProtection();
-            if (!Environment.IsDevelopment())
+            if (!Environment.IsEnvironment("local"))
             {
                 dataprotection.PersistKeysToAWSSystemsManager("/BPOR/DataProtection");
             }
@@ -137,7 +137,8 @@ namespace StudyApi
                     options.Cookie.IsEssential = true;
                     options.SlidingExpiration = true;
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                    options.Cookie.SameSite = Environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict;
+                    options.Cookie.SameSite =
+                        Environment.IsEnvironment("local") ? SameSiteMode.None : SameSiteMode.Strict;
 
                     options.Events.OnRedirectToLogin = (context) =>
                     {
@@ -257,16 +258,17 @@ namespace StudyApi
 
             app.UseRouting();
 
-            if (Environment.IsDevelopment())
+            if (Environment.IsEnvironment("local"))
             {
                 app.UseCors("AllowLocal");
             }
-            
 
             app.UseCookiePolicy(new CookiePolicyOptions
             {
-                MinimumSameSitePolicy = Environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict,
-                Secure = Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always,
+                MinimumSameSitePolicy = Environment.IsEnvironment("local") ? SameSiteMode.None : SameSiteMode.Strict,
+                Secure = Environment.IsEnvironment("local")
+                    ? CookieSecurePolicy.SameAsRequest
+                    : CookieSecurePolicy.Always,
                 OnAppendCookie = context =>
                 {
                     if (context.CookieName == ".BPOR.Session")
@@ -281,8 +283,8 @@ namespace StudyApi
             app.UseMiddleware<SessionExpiryMiddleware>();
 
             app.UseWhen(context =>
-                // bypass maintainence mode middleware for configuration controller
-                !context.Request.Path.StartsWithSegments("/api/configuration"),
+                    // bypass maintainence mode middleware for configuration controller
+                    !context.Request.Path.StartsWithSegments("/api/configuration"),
                 config => config.UseMiddleware<MaintenanceMiddleware>()
             );
 
