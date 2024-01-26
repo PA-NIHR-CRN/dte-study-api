@@ -28,7 +28,9 @@ using Infrastructure.Exceptions;
 using Infrastructure.Services.Mocks;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -57,6 +59,7 @@ namespace Infrastructure.Services
         private readonly IContentfulService _contentfulService;
         private readonly ContentfulSettings _contentfulSettings;
         private readonly IMockIdentityService _mockIdentityService;
+        private readonly IWebHostEnvironment _environment;
 
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
@@ -64,7 +67,8 @@ namespace Infrastructure.Services
             IEmailService emailService, IParticipantService participantService,
             NhsLoginHttpClient nhsLoginHttpClient, IOptionsMonitor<DevSettings> devSettings,
             IDataProtectionProvider dataProtector, IContentfulService contentfulService,
-            ContentfulSettings contentfulSettings, IMockIdentityService mockIdentityService)
+            ContentfulSettings contentfulSettings, IMockIdentityService mockIdentityService,
+            IWebHostEnvironment environment)
 
         {
             _provider = provider;
@@ -80,6 +84,7 @@ namespace Infrastructure.Services
             _contentfulService = contentfulService;
             _contentfulSettings = contentfulSettings;
             _mockIdentityService = mockIdentityService;
+            _environment = environment;
         }
 
         private string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null)
@@ -404,7 +409,7 @@ namespace Infrastructure.Services
             try
             {
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-                if (_devSettings.CurrentValue.BypassMfa)
+                if (_devSettings.CurrentValue.BypassMfa && !_environment.IsProduction())
                 {
                     return Response<string>.CreateSuccessfulContentResponse(
                         _mockIdentityService.CreateMockIdToken(mfaLoginDetails.Username),
@@ -951,7 +956,7 @@ namespace Infrastructure.Services
                     }
                 });
 
-                if (_devSettings.CurrentValue.AutoConfirmNewCognitoSignup)
+                if (_devSettings.CurrentValue.AutoConfirmNewCognitoSignup && !_environment.IsProduction())
                 {
                     await _provider.AdminConfirmSignUpAsync(new AdminConfirmSignUpRequest
                     {
