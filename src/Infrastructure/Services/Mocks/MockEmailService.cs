@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Application.Contracts;
 
-namespace Infrastructure.Services
+namespace Infrastructure.Services.Mocks
 {
     public class MockEmailService : IEmailService
     {

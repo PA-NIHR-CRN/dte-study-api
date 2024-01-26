@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
@@ -22,9 +23,9 @@ using Dte.Common.Helpers;
 using Dte.Common.Http;
 using Dte.Common.Models;
 using Dte.Common.Responses;
-using FluentValidation.Results;
 using Infrastructure.Clients;
 using Infrastructure.Exceptions;
+using Infrastructure.Services.Mocks;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -37,6 +38,7 @@ using ConfirmForgotPasswordResponse = Application.Responses.V1.Users.ConfirmForg
 using ForgotPasswordResponse = Application.Responses.V1.Users.ForgotPasswordResponse;
 using ResendConfirmationCodeResponse = Application.Responses.V1.Users.ResendConfirmationCodeResponse;
 using SignUpResponse = Application.Responses.V1.Users.SignUpResponse;
+using ValidationFailure = FluentValidation.Results.ValidationFailure;
 
 namespace Infrastructure.Services
 {
@@ -49,18 +51,20 @@ namespace Infrastructure.Services
         private readonly IEmailService _emailService;
         private readonly NhsLoginHttpClient _nhsLoginHttpClient;
         private readonly IMediator _mediator;
-        private readonly DevSettings _devSettings;
+        private readonly IOptionsMonitor<DevSettings> _devSettings;
         private readonly IParticipantService _participantService;
         private readonly IDataProtector _dataProtector;
         private readonly IContentfulService _contentfulService;
         private readonly ContentfulSettings _contentfulSettings;
+        private readonly IMockIdentityService _mockIdentityService;
+
 
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
             AwsSettings awsSettings, ILogger<UserService> logger,
             IEmailService emailService, IParticipantService participantService,
-            NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings,
+            NhsLoginHttpClient nhsLoginHttpClient, IOptionsMonitor<DevSettings> devSettings,
             IDataProtectionProvider dataProtector, IContentfulService contentfulService,
-            ContentfulSettings contentfulSettings)
+            ContentfulSettings contentfulSettings, IMockIdentityService mockIdentityService)
 
         {
             _provider = provider;
@@ -70,11 +74,12 @@ namespace Infrastructure.Services
             _emailService = emailService;
             _nhsLoginHttpClient = nhsLoginHttpClient;
             _mediator = mediator;
-            _devSettings = devSettings.Value;
+            _devSettings = devSettings;
             _participantService = participantService;
             _dataProtector = dataProtector.CreateProtector("mfa.login.details");
             _contentfulService = contentfulService;
             _contentfulSettings = contentfulSettings;
+            _mockIdentityService = mockIdentityService;
         }
 
         private string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null)
@@ -399,6 +404,13 @@ namespace Infrastructure.Services
             try
             {
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+                if (_devSettings.CurrentValue.BypassMfa)
+                {
+                    return Response<string>.CreateSuccessfulContentResponse(
+                        _mockIdentityService.CreateMockIdToken(mfaLoginDetails.Username),
+                        _headerService.GetConversationId());
+                }
+
                 var request = CreateAuthChallengeRequest("SMS_MFA", mfaLoginDetails.SessionId, mfaLoginDetails.Username,
                     mfaCode, "SMS_MFA_CODE");
                 var response = await _provider.AdminRespondToAuthChallengeAsync(request);
@@ -903,7 +915,7 @@ namespace Infrastructure.Services
 
                         await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
                             contentfulEmail.EmailBody);
-                        
+
                         throw new UsernameExistsException(email);
                     }
                 }
@@ -939,7 +951,7 @@ namespace Infrastructure.Services
                     }
                 });
 
-                if (_devSettings.AutoConfirmNewCognitoSignup)
+                if (_devSettings.CurrentValue.AutoConfirmNewCognitoSignup)
                 {
                     await _provider.AdminConfirmSignUpAsync(new AdminConfirmSignUpRequest
                     {

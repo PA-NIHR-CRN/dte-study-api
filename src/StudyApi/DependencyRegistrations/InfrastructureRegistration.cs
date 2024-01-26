@@ -19,6 +19,7 @@ using Dte.Study.Management.Api.Client;
 using Infrastructure.Factories;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
+using Infrastructure.Services.Mocks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -53,6 +54,7 @@ namespace StudyApi.DependencyRegistrations
             services.AddScoped<IContentfulService, ContentfulService>();
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
             services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();
+            services.AddTransient<IMockIdentityService, MockIdentityService>();
 
 
             // Contentful set up
@@ -91,6 +93,7 @@ namespace StudyApi.DependencyRegistrations
                 clientsSettings.ReferenceDataService, 2, logger);
 
             var devSettings = configuration.GetSection(DevSettings.SectionName).Get<DevSettings>();
+            services.Configure<DevSettings>(configuration.GetSection(DevSettings.SectionName));
 
             // If not Prod, then enable stubs
             if (devSettings.EnableStubs && !ProdEnvironmentNames.Any(x =>
