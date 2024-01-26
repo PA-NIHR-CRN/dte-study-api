@@ -22,6 +22,7 @@ using Dte.Common.Responses;
 using FluentValidation.Results;
 using Infrastructure.Clients;
 using Infrastructure.Exceptions;
+using Infrastructure.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -484,7 +485,7 @@ namespace Infrastructure.Services
                     Username = userId
                 });
 
-                if (!IsSuccessHttpStatusCode((int)response.HttpStatusCode))
+                if (!HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode))
                 {
                     _logger.LogError($"Confirm SignUp user returned response code: {response.HttpStatusCode}");
                 }
@@ -599,7 +600,7 @@ namespace Infrastructure.Services
                     }
                 }
 
-                return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
+                return HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode)
                     ? new AdminGetUserResponse
                     {
                         Email = email, Id = response.Username, Status = response.UserStatus?.ToString(),
@@ -655,7 +656,7 @@ namespace Infrastructure.Services
                         _headerService.GetConversationId());
                 }
 
-                return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
+                return HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode)
                     ? Response<object>.CreateSuccessfulResponse()
                     : Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.DeleteParticipantAccountError,
@@ -684,35 +685,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<PasswordPolicyTypeResponse> GetPasswordPolicyTypeAsync()
-        {
-            try
-            {
-                var describeUserPoolResponse = await _provider.DescribeUserPoolAsync(new DescribeUserPoolRequest
-                    { UserPoolId = _awsSettings.CognitoPoolId });
 
-                if (describeUserPoolResponse?.UserPool?.Policies?.PasswordPolicy == null) return null;
-
-                var passwordPolicy = describeUserPoolResponse.UserPool.Policies.PasswordPolicy;
-
-                return new PasswordPolicyTypeResponse
-                {
-                    MinimumLength = passwordPolicy.MinimumLength,
-                    RequireLowercase = passwordPolicy.RequireLowercase,
-                    RequireNumbers = passwordPolicy.RequireNumbers,
-                    RequireSymbols = passwordPolicy.RequireSymbols,
-                    RequireUppercase = passwordPolicy.RequireUppercase,
-                    AllowedPasswordSymbols = string.Join(" ", PasswordHelper.SymbolList),
-                    WeakPasswords = PasswordHelper.WeakPasswords
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Could not get Cognito password policy");
-
-                return null;
-            }
-        }
 
         public async Task<Response<ResendConfirmationCodeResponse>> ResendVerificationEmailAsync(string userId)
         {
@@ -729,7 +702,7 @@ namespace Infrastructure.Services
                     });
 
                     // Log the response for internal tracking but do not return specifics to the client
-                    if (!IsSuccessHttpStatusCode((int)response.HttpStatusCode))
+                    if (!HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode))
                     {
                         _logger.LogError(
                             $"Resend verification email response returned code: {response.HttpStatusCode} for userId {userId}");
@@ -797,7 +770,7 @@ namespace Infrastructure.Services
                     Username = email
                 });
 
-                if (!IsSuccessHttpStatusCode((int)response.HttpStatusCode))
+                if (!HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode))
                 {
                     _logger.LogWarning("ForgotPasswordAsync returned: {response}",
                         JsonConvert.SerializeObject(response));
@@ -811,89 +784,9 @@ namespace Infrastructure.Services
         public async Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code,
             string userId, string password)
         {
-            try
-            {
-                var passwordErrors = await ValidatePassword(password);
 
-                if (passwordErrors.Any())
-                {
-                    return Response<ConfirmForgotPasswordResponse>.CreateErrorMessageResponse(
-                        ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.PasswordValidationError,
-                        $"Password validation errors: {string.Join("; ", passwordErrors)}",
-                        _headerService.GetConversationId());
-                }
-
-                var response = await _provider.ConfirmForgotPasswordAsync(new ConfirmForgotPasswordRequest
-                {
-                    ClientId = _awsSettings.CognitoAppClientIds[0],
-                    ConfirmationCode = code,
-                    Username = userId,
-                    Password = password
-                });
-
-                return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
-                    ? Response<ConfirmForgotPasswordResponse>.CreateSuccessfulResponse(
-                        _headerService.GetConversationId())
-                    : Response<ConfirmForgotPasswordResponse>.CreateErrorMessageResponse(
-                        ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.ConfirmForgotPasswordError,
-                        $"Confirm Forgot password response returned code: {response.HttpStatusCode}",
-                        _headerService.GetConversationId());
-            }
-            catch (Exception ex)
-            {
-                var exceptionResponse = Response<ConfirmForgotPasswordResponse>.CreateExceptionResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
-                    _headerService.GetConversationId());
-                _logger.LogError(ex,
-                    $"Unknown error confirming forgot password with userId {userId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
-                return exceptionResponse;
-            }
         }
 
-        public async Task<Response<object>> ChangePasswordAsync(string email, string newPassword)
-        {
-            try
-            {
-                var response = await _provider.AdminSetUserPasswordAsync(new AdminSetUserPasswordRequest
-                {
-                    UserPoolId = _awsSettings.CognitoPoolId,
-                    Username = email,
-                    Password = newPassword,
-                    Permanent = true
-                });
-
-                if (response.HttpStatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.ChangePasswordError,
-                        $"Change user password returned response code: {response.HttpStatusCode}",
-                        _headerService.GetConversationId());
-                }
-
-                return Response<object>.CreateSuccessfulResponse();
-
-            }
-            catch (LimitExceededException ex)
-            {
-                return Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), ErrorCode.ChangePasswordErrorLimitExceeded, ex,
-                    _headerService.GetConversationId());
-            }
-            catch (NotAuthorizedException ex)
-            {
-                return Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), ErrorCode.ChangePasswordErrorUnauthorised, ex,
-                    _headerService.GetConversationId());
-            }
-            catch (Exception ex)
-            {
-                var exceptionResponse = Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), ErrorCode.InternalServerError, ex, _headerService.GetConversationId());
-                _logger.LogError(ex,
-                    $"Unknown error changing user password\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
-                return exceptionResponse;
-            }
-        }
         
         public async Task<Response<object>> ChangeEmailAsync(string currentEmail, string newEmail)
         {
@@ -919,7 +812,7 @@ namespace Infrastructure.Services
                         _headerService.GetConversationId());
                 }
 
-                return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
+                return HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode)
                     ? Response<object>.CreateSuccessfulResponse()
                     : Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.ChangeEmailError,
@@ -947,37 +840,6 @@ namespace Infrastructure.Services
                 return exceptionResponse;
             }
         }
-
-        private async Task<List<string>> ValidatePassword(string password)
-        {
-            var passwordPolicyTypeResponse = await GetPasswordPolicyTypeAsync();
-
-            List<string> passwordErrors;
-            if (passwordPolicyTypeResponse == null)
-            {
-                _logger.LogWarning($"Could not get password policy. So using default policy!");
-                passwordErrors = PasswordHelper.PasswordRequirements(password).ToList();
-            }
-            else
-            {
-                passwordErrors = PasswordHelper.PasswordRequirements
-                (
-                    password,
-                    passwordPolicyTypeResponse.MinimumLength,
-                    passwordPolicyTypeResponse.RequireLowercase,
-                    passwordPolicyTypeResponse.RequireNumbers,
-                    passwordPolicyTypeResponse.RequireSymbols,
-                    passwordPolicyTypeResponse.RequireUppercase
-                ).ToList();
-            }
-
-            return passwordErrors;
-        }
-
-        private static bool IsSuccessHttpStatusCode(int httpStatusCode) => httpStatusCode >= StatusCodes.Status200OK &&
-                                                                           httpStatusCode <
-                                                                           StatusCodes.Status300MultipleChoices;
-    }
 
     public class MfaLoginDetails
     {

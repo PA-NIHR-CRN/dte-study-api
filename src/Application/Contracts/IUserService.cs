@@ -15,14 +15,8 @@ namespace Application.Contracts
         Task<Response<SignUpResponse>> AdminCreateUserSetPasswordAsync(string email, string password);
         Task<Response<object>> DeleteUserAsync(string accessToken);
         Task<bool> UserExistsAsync(string email);
-        Task<PasswordPolicyTypeResponse> GetPasswordPolicyTypeAsync();
-        Task<Response<ResendConfirmationCodeResponse>> ResendVerificationEmailAsync(string userId);
-        Task<Response<ForgotPasswordResponse>> ForgotPasswordAsync(string email);
 
-        Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code, string userId,
-            string password);
 
-        Task<Response<object>> ChangePasswordAsync(string participantId, string newPassword);
         Task<Response<object>> ChangeEmailAsync(string currentEmail, string newEmail);
 
     }
