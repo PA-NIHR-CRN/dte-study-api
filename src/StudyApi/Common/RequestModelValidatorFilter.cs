@@ -28,7 +28,7 @@ namespace StudyApi.Common
                 _logger.LogWarning("Request Validation Failed: {Errors}", errorsString);
 
                 // Set a generic error message if not in development
-                if (!_environment.IsDevelopment())
+                if (!_environment.IsEnvironment("local") || !_environment.IsDevelopment())
                 {
                     errorsString = "Your request contains invalid parameters. Please check and try again.";
                 }

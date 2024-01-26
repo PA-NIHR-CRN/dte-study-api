@@ -17,7 +17,7 @@ namespace StudyApi.Extensions
         {
             return hostBuilder.ConfigureAppConfiguration((hostingContext, configBuilder) =>
             {
-                if (hostingContext.HostingEnvironment.IsDevelopment()) return;
+                if (!hostingContext.HostingEnvironment.IsEnvironment("local")) return;
 
                 configBuilder.AddAwsSecrets();
             });
@@ -27,7 +27,7 @@ namespace StudyApi.Extensions
         {
             return hostBuilder.ConfigureAppConfiguration((hostingContext, configBuilder) =>
             {
-                if (hostingContext.HostingEnvironment.IsDevelopment()) return;
+                if (!hostingContext.HostingEnvironment.IsEnvironment("local")) return;
 
                 configBuilder.AddAwsSecrets();
             });
@@ -41,7 +41,7 @@ namespace StudyApi.Extensions
             {
                 throw new Exception($"The {AwsSecretManagerSecretName} environment variable has not been set");
             }
-            
+
             var allowedSecretNames = new[] { awsSecretsName };
 
             configurationBuilder.AddSecretsManager(configurator: opts =>
@@ -54,13 +54,16 @@ namespace StudyApi.Extensions
         // Only load entries that start with any of the allowed prefixes
         private static bool HasValue(IEnumerable<string> allowedSecretNames, SecretListEntry entry)
         {
-            return allowedSecretNames.Any(prefix => string.Equals(prefix, entry.Name, StringComparison.CurrentCultureIgnoreCase));
+            return allowedSecretNames.Any(prefix =>
+                string.Equals(prefix, entry.Name, StringComparison.CurrentCultureIgnoreCase));
         }
 
         // Strip the prefix and replace '__' with ':'
         private static string GenerateKey(IEnumerable<string> allowedSecretNames, string entryName)
         {
-            return entryName[(allowedSecretNames.First(x => entryName.StartsWith(x, StringComparison.CurrentCultureIgnoreCase)).Length + 1)..].Replace("__", ":");
+            return entryName[
+                (allowedSecretNames.First(x => entryName.StartsWith(x, StringComparison.CurrentCultureIgnoreCase))
+                    .Length + 1)..].Replace("__", ":");
         }
     }
 }
