@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Application.Constants;
+using Application.Content;
 using Application.Contracts;
 using Application.Responses.V1.Users;
 using Application.Settings;
@@ -18,7 +19,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ConfirmForgotPasswordResponse = Application.Responses.V1.Users.ConfirmForgotPasswordResponse;
 using ForgotPasswordResponse = Application.Responses.V1.Users.ForgotPasswordResponse;
-using ResendConfirmationCodeResponse = Application.Responses.V1.Users.ResendConfirmationCodeResponse;
 
 namespace Infrastructure.Services;
 
@@ -27,14 +27,24 @@ public class PasswordService : IPasswordService
     private readonly AwsSettings _awsSettings;
     private readonly IAmazonCognitoIdentityProvider _provider;
     private readonly IHeaderService _headerService;
+    private readonly IUserService _userService;
+    private readonly IEmailService _emailService;
+    private readonly IParticipantService _participantService;
+    private readonly EmailSettings _emailSettings;
     private readonly ILogger<PasswordService> _logger;
 
     public PasswordService(ILogger<PasswordService> logger, AwsSettings awsSettings,
-        IAmazonCognitoIdentityProvider provider, IHeaderService headerService)
+        IAmazonCognitoIdentityProvider provider, IHeaderService headerService, IUserService userService,
+        IEmailService emailService, IParticipantService participantService, EmailSettings emailSettings)
+
     {
         _awsSettings = awsSettings;
         _provider = provider;
         _headerService = headerService;
+        _userService = userService;
+        _emailService = emailService;
+        _participantService = participantService;
+        _emailSettings = emailSettings;
         _logger = logger;
     }
 
@@ -68,14 +78,59 @@ public class PasswordService : IPasswordService
         }
     }
 
-    public async Task<Response<ResendConfirmationCodeResponse>> ResendVerificationEmailAsync(string userId)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<Response<ForgotPasswordResponse>> ForgotPasswordAsync(string email)
     {
-        throw new NotImplementedException();
+        _logger.LogInformation("email: {email}", email);
+
+        var user = await _userService.AdminGetUserAsync(email);
+
+        _logger.LogInformation(JsonConvert.SerializeObject(user));
+
+        if (user == null || !user.Enabled)
+        {
+            var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
+            if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
+                return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
+                    _headerService.GetConversationId());
+            var baseUrl = _emailSettings.WebAppBaseUrl;
+            var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
+                    "Password Reset Attempt")
+                .Replace("###TEXT_REPLACE1###",
+                    "A request has been received to change the password for your Be Part of Research account. We were unable to complete this request because your account was created with your NHS login information. You will need to use this option on each occasion to access your account and update your details.")
+                .Replace("###TEXT_REPLACE2###",
+                    "Please use the link below and select the NHS login button to continue.")
+                .Replace("###TEXT_REPLACE3###",
+                    "")
+                .Replace("###LINK_REPLACE###",
+                    $"<a href=\"{baseUrl}participants/options\">{baseUrl}participants/options</a>")
+                .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
+                .Replace("###TEXT_REPLACE4###",
+                    "If you have not attempted to reset your password, please contact us by email at <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>")
+                .Replace("###TEXT_REPLACE5###", "")
+                .Replace("###TEXT_REPLACE6###", "");
+
+            await _emailService.SendEmailAsync(email, "Be Part of Research password reset", htmlBody);
+
+            return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
+                _headerService.GetConversationId());
+        }
+
+        if (user.Status == UserStatusType.CONFIRMED)
+        {
+            var response = await _provider.ForgotPasswordAsync(new ForgotPasswordRequest
+            {
+                ClientId = _awsSettings.CognitoAppClientIds[0],
+                Username = email
+            });
+
+            if (!HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode))
+            {
+                _logger.LogWarning("ForgotPasswordAsync returned: {Response}",
+                    JsonConvert.SerializeObject(response));
+            }
+        }
+
+        return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(_headerService.GetConversationId());
     }
 
     public async Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code, string userId,
@@ -114,8 +169,7 @@ public class PasswordService : IPasswordService
             var exceptionResponse = Response<ConfirmForgotPasswordResponse>.CreateExceptionResponse(
                 ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
                 _headerService.GetConversationId());
-            _logger.LogError(ex,
-                $"Unknown error confirming forgot password with userId {userId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+            _logger.LogError(ex, "Unknown error confirming forgot password with userId {UserId}\\r\\n{SerializeObject}", userId, JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
             return exceptionResponse;
         }
     }

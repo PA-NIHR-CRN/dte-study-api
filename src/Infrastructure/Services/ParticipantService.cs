@@ -3,11 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
-using Amazon.DynamoDBv2.Model;
 using Application.Contracts;
 using Application.Mappings.Participants;
 using Application.Models.MFA;
-using Application.Models.Participants;
 using Application.Responses.V1.Participants;
 using Application.Settings;
 using Application.Content;
@@ -16,8 +14,7 @@ using Dte.Common.Contracts;
 using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
 using Dte.Common.Responses;
-using Infrastructure.Clients;
-using Microsoft.AspNetCore.Http;
+using Infrastructure.Helpers;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -29,13 +26,13 @@ public class ParticipantService : IParticipantService
     private readonly AwsSettings _awsSettings;
     private readonly IParticipantRepository _participantRepository;
     private readonly IClock _clock;
-    private readonly ILogger<UserService> _logger;
+    private readonly ILogger<ParticipantService> _logger;
     private readonly IEmailService _emailService;
     private readonly EmailSettings _emailSettings;
 
     public ParticipantService(IParticipantRepository participantRepository, IClock clock,
         IAmazonCognitoIdentityProvider provider, AwsSettings awsSettings,
-        ILogger<UserService> logger, EmailSettings emailSettings,
+        ILogger<ParticipantService> logger, EmailSettings emailSettings,
         IEmailService emailService)
     {
         _participantRepository = participantRepository;
@@ -51,11 +48,6 @@ public class ParticipantService : IParticipantService
     private static string DeletedKey() => "DELETED#";
     private static string StripPrimaryKey(string pk) => pk.Replace("PARTICIPANT#", "");
 
-    private static bool IsSuccessHttpStatusCode(int httpStatusCode) =>
-        httpStatusCode >= StatusCodes.Status200OK &&
-        httpStatusCode <
-        StatusCodes.Status300MultipleChoices;
-
     private async Task<string> AdminGetUserAsync(string email)
     {
         try
@@ -66,7 +58,7 @@ public class ParticipantService : IParticipantService
                 Username = email
             });
 
-            return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
+            return HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode)
                 ? response.Username
                 : null;
         }
@@ -245,8 +237,7 @@ public class ParticipantService : IParticipantService
 
         return MfaValidationResult.Success;
     }
-
-
+    
     private async Task RemoveParticipantDataAsync(ParticipantDetails entity)
     {
         var participantId = StripPrimaryKey(entity.Pk);

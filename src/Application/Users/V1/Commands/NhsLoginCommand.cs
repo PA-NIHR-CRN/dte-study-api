@@ -20,18 +20,18 @@ namespace Application.Users.V1.Commands
 
         public class NhsLoginCommandHandler : IRequestHandler<NhsLoginCommand, Response<NhsLoginResponse>>
         {
-            private readonly IUserService _userService;
+            private readonly INhsLoginService _nhsLoginService;
 
             public NhsLoginCommandHandler(
-                IUserService userService)
+                INhsLoginService nhsService)
             {
-                _userService = userService;
+                _nhsLoginService = nhsService;
             }
 
             public async Task<Response<NhsLoginResponse>> Handle(NhsLoginCommand request,
                 CancellationToken cancellationToken)
             {
-                return await _userService.NhsLoginAsync(request.Code, request.RedirectUrl);
+                return await _nhsLoginService.NhsLoginAsync(request.Code, request.RedirectUrl);
             }
         }
     }

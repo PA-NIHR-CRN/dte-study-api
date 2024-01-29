@@ -10,10 +10,12 @@ using Application.Content;
 using Application.Contracts;
 using Application.Models.MFA;
 using Application.Settings;
+using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Common.Responses;
+using FluentValidation.Results;
 using Infrastructure.Exceptions;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
@@ -22,7 +24,7 @@ using PhoneNumbers;
 
 namespace Infrastructure.Services;
 
-public class MfaService: IMfaService
+public class MfaService : IMfaService
 {
     private readonly ILogger<MfaService> _logger;
     private readonly IHeaderService _headerService;
@@ -31,10 +33,11 @@ public class MfaService: IMfaService
     private readonly AwsSettings _awsSettings;
     private readonly IParticipantService _participantService;
     private readonly IEmailService _emailService;
+    private readonly IUserService _userService;
 
     public MfaService(ILogger<MfaService> logger, IHeaderService headerService, IAmazonCognitoIdentityProvider provider,
         IDataProtector dataProtector, AwsSettings awsSettings, IParticipantService participantService,
-        IEmailService emailService)
+        IEmailService emailService, IUserService userService)
     {
         _logger = logger;
         _headerService = headerService;
@@ -43,6 +46,7 @@ public class MfaService: IMfaService
         _awsSettings = awsSettings;
         _participantService = participantService;
         _emailService = emailService;
+        _userService = userService;
     }
 
     public string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null)
@@ -114,66 +118,67 @@ public class MfaService: IMfaService
     }
 
     public async Task<Response<string>> ReissueMfaSessionAsync(string requestMfaDetails)
+    {
+        var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
+        return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password,
+            ErrorCode.MfaReissueSession);
+    }
+
+    public async Task<Response<string>> VerifySoftwareTokenAsync(string code, string sessionId, string mfaDetails)
+    {
+        var tokenRequest = new VerifySoftwareTokenRequest
         {
-            var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
-            return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password,
-                ErrorCode.MfaReissueSession);
-        }
+            Session = sessionId,
+            UserCode = code,
+        };
 
-        public async Task<Response<string>> VerifySoftwareTokenAsync(string code, string sessionId, string mfaDetails)
+        try
         {
-            var tokenRequest = new VerifySoftwareTokenRequest
+            var response = await _provider.VerifySoftwareTokenAsync(tokenRequest);
+
+            if (response.Status != VerifySoftwareTokenResponseType.SUCCESS)
             {
-                Session = sessionId,
-                UserCode = code,
-            };
-
-            try
-            {
-                var response = await _provider.VerifySoftwareTokenAsync(tokenRequest);
-
-                if (response.Status != VerifySoftwareTokenResponseType.SUCCESS)
-                {
-                    return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.AuthenticationError, "Invalid MFA code",
-                        _headerService.GetConversationId());
-                }
-
-                var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-                return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password,
-                    ErrorCode.MfaSoftwareTokenChallenge);
+                return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                    nameof(UserService), ErrorCode.AuthenticationError, "Invalid MFA code",
+                    _headerService.GetConversationId());
             }
-            catch (CodeMismatchException ex)
+
+            var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
+            return await LoginAndHandleResponse(mfaLoginDetails.Username, mfaLoginDetails.Password,
+                ErrorCode.MfaSoftwareTokenChallenge);
+        }
+        catch (CodeMismatchException ex)
+        {
+            return HandleMfaException(ex, "MFA_Code_Mismatch");
+        }
+        catch (NotAuthorizedException ex)
+        {
+            if (ex.Message == "Invalid session for the user, session is expired.")
+            {
+                return HandleMfaException(ex, "MFA_Session_Expired");
+            }
+            else
+            {
+                return HandleMfaException(ex, "Not_Authorized");
+            }
+        }
+        catch (EnableSoftwareTokenMFAException ex)
+        {
+            if (ex.Message == "Code mismatch")
             {
                 return HandleMfaException(ex, "MFA_Code_Mismatch");
             }
-            catch (NotAuthorizedException ex)
-            {
-                if (ex.Message == "Invalid session for the user, session is expired.")
-                {
-                    return HandleMfaException(ex, "MFA_Session_Expired");
-                }
-                else
-                {
-                    return HandleMfaException(ex, "Not_Authorized");
-                }
-            }
-            catch (EnableSoftwareTokenMFAException ex)
-            {
-                if (ex.Message == "Code mismatch")
-                {
-                    return HandleMfaException(ex, "MFA_Code_Mismatch");
-                }
-                else
-                {
-                    return HandleMfaException(ex, "Error");
-                }
-            }
-            catch (Exception ex)
+            else
             {
                 return HandleMfaException(ex, "Error");
             }
         }
+        catch (Exception ex)
+        {
+            return HandleMfaException(ex, "Error");
+        }
+    }
+
     private string GenerateOtpCode()
     {
         var random = new Random();
@@ -296,6 +301,16 @@ public class MfaService: IMfaService
         }
     }
 
+    private Response<string> CreateErrorResponse(string errorCode, string errorMessage)
+    {
+        var errorResponse = Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+            nameof(UserService), errorCode, errorMessage, _headerService.GetConversationId());
+
+        _logger.LogError(errorMessage);
+
+        return errorResponse;
+    }
+
     public Task<string> GetMaskedMobile(string requestMfaDetails)
     {
         var mfaLoginDetails = DeserializeMfaLoginDetails(requestMfaDetails);
@@ -303,6 +318,23 @@ public class MfaService: IMfaService
         var phoneNumber = mfaLoginDetails.PhoneNumber;
 
         return Task.FromResult(string.IsNullOrEmpty(phoneNumber) ? string.Empty : phoneNumber);
+    }
+
+    private AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
+        string username, string code, string codeKey)
+    {
+        return new AdminRespondToAuthChallengeRequest
+        {
+            ClientId = _awsSettings.CognitoAppClientIds[0],
+            ChallengeName = ChallengeNameType.FindValue(challengeName),
+            Session = sessionId,
+            UserPoolId = _awsSettings.CognitoPoolId,
+            ChallengeResponses = new Dictionary<string, string>
+            {
+                { "USERNAME", username },
+                { codeKey, code }
+            }
+        };
     }
 
     public async Task<Response<string>> RespondToMfaChallengeAsync(string mfaCode, string mfaDetails)
@@ -484,7 +516,7 @@ public class MfaService: IMfaService
                 });
 
                 // get a new session id
-                var loginResponse = await LoginAsync(username, mfaLoginDetails.Password);
+                var loginResponse = await _userService.LoginAsync(username, mfaLoginDetails.Password);
 
                 var newMfaDetails = loginResponse.Errors.First().Detail;
                 mfaLoginDetails = DeserializeMfaLoginDetails(newMfaDetails);
@@ -550,7 +582,7 @@ public class MfaService: IMfaService
             }
 
             // log the user in again to get the new tokens with mfa enabled
-            var loginResponse = await LoginAsync(username, password);
+            var loginResponse = await _userService.LoginAsync(username, password);
 
             if (!loginResponse.IsSuccess)
             {
@@ -585,5 +617,20 @@ public class MfaService: IMfaService
             JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
 
         return exceptionResponse;
+    }
+
+    private async Task<Response<string>> LoginAndHandleResponse(string username, string password,
+        string errorDetail)
+    {
+        var loginResponse = await _userService.LoginAsync(username, password);
+
+        if (loginResponse.IsSuccess)
+            return Response<string>.CreateSuccessfulContentResponse(loginResponse.Content,
+                _headerService.GetConversationId());
+
+        var newMfaDetails = loginResponse.Errors.First().Detail;
+        return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+            nameof(UserService), errorDetail, newMfaDetails,
+            _headerService.GetConversationId());
     }
 }

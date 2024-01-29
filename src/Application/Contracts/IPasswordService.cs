@@ -9,7 +9,6 @@ public interface IPasswordService
 {
     Task<List<string>> ValidatePassword(string password);
     Task<PasswordPolicyTypeResponse> GetPasswordPolicyTypeAsync();
-    Task<Response<ResendConfirmationCodeResponse>> ResendVerificationEmailAsync(string userId);
     Task<Response<ForgotPasswordResponse>> ForgotPasswordAsync(string email);
 
     Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code, string userId,

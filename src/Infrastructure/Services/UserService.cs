@@ -7,32 +7,17 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Application.Constants;
 using Application.Contracts;
-using Application.Models.MFA;
-using Application.Participants.V1.Commands.Participants;
-using Application.Responses.V1.Users;
 using Application.Settings;
 using Application.Content;
-using Domain.Entities.Participants;
-using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
 using Dte.Common.Extensions;
-using Dte.Common.Helpers;
 using Dte.Common.Http;
 using Dte.Common.Responses;
-using FluentValidation.Results;
-using Infrastructure.Clients;
-using Infrastructure.Exceptions;
 using Infrastructure.Helpers;
-using MediatR;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using PhoneNumbers;
 using AdminGetUserResponse = Application.Responses.V1.Users.AdminGetUserResponse;
-using ConfirmForgotPasswordResponse = Application.Responses.V1.Users.ConfirmForgotPasswordResponse;
-using ForgotPasswordResponse = Application.Responses.V1.Users.ForgotPasswordResponse;
 using ResendConfirmationCodeResponse = Application.Responses.V1.Users.ResendConfirmationCodeResponse;
 using SignUpResponse = Application.Responses.V1.Users.SignUpResponse;
 
@@ -46,16 +31,16 @@ namespace Infrastructure.Services
         private readonly ILogger<UserService> _logger;
         private readonly IEmailService _emailService;
         private readonly EmailSettings _emailSettings;
-        private readonly NhsLoginHttpClient _nhsLoginHttpClient;
         private readonly IMfaService _mfaService;
-        private readonly IMediator _mediator;
+        private readonly IPasswordService _passwordService;
         private readonly DevSettings _devSettings;
         private readonly IParticipantService _participantService;
 
-        public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
+        public UserService(IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
             AwsSettings awsSettings, ILogger<UserService> logger, EmailSettings emailSettings,
-            IEmailService emailService, IParticipantService participantService,
-            NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings, IMfaService mfaService)
+            IEmailService emailService, IParticipantService participantService, IOptions<DevSettings> devSettings,
+            IMfaService mfaService,
+            IPasswordService passwordService)
 
         {
             _provider = provider;
@@ -64,14 +49,11 @@ namespace Infrastructure.Services
             _logger = logger;
             _emailService = emailService;
             _emailSettings = emailSettings;
-            _nhsLoginHttpClient = nhsLoginHttpClient;
             _mfaService = mfaService;
-            _mediator = mediator;
+            _passwordService = passwordService;
             _devSettings = devSettings.Value;
             _participantService = participantService;
         }
-
-
 
         public async Task<Response<string>> LoginAsync(string email, string password)
         {
@@ -152,179 +134,11 @@ namespace Infrastructure.Services
             }
         }
 
-
-
-
-        private AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
-            string username, string code, string codeKey)
-        {
-            return new AdminRespondToAuthChallengeRequest
-            {
-                ClientId = _awsSettings.CognitoAppClientIds[0],
-                ChallengeName = ChallengeNameType.FindValue(challengeName),
-                Session = sessionId,
-                UserPoolId = _awsSettings.CognitoPoolId,
-                ChallengeResponses = new Dictionary<string, string>
-                {
-                    { "USERNAME", username },
-                    { codeKey, code }
-                }
-            };
-        }
-
-
-
-
-
-
-
-
-        private Response<string> CreateErrorResponse(string errorCode, string errorMessage)
-        {
-            var errorResponse = Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                nameof(UserService), errorCode, errorMessage, _headerService.GetConversationId());
-
-            _logger.LogError(errorMessage);
-
-            return errorResponse;
-        }
-        
-
-        private async Task<Response<string>> LoginAndHandleResponse(string username, string password,
-            string errorDetail)
-        {
-            var loginResponse = await LoginAsync(username, password);
-
-            if (loginResponse.IsSuccess)
-                return Response<string>.CreateSuccessfulContentResponse(loginResponse.Content,
-                    _headerService.GetConversationId());
-
-            var newMfaDetails = loginResponse.Errors.First().Detail;
-            return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                nameof(UserService), errorDetail, newMfaDetails,
-                _headerService.GetConversationId());
-        }
-
-        private static bool IsUnder18(DateTime dateOfBirth) => DateTime.Now.AddYears(-18).Date < dateOfBirth.Date;
-
-        public async Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl)
-        {
-            try
-            {
-                var tokens = await _nhsLoginHttpClient.GetTokensFromAuthorizationCode(code, redirectUrl);
-
-                var response = new NhsLoginResponse
-                {
-                    IdToken = tokens.IdToken,
-                    AccessToken = tokens.AccessToken,
-                };
-
-                var nhsUserInfo = await _nhsLoginHttpClient.GetUserInfoAsync(tokens.AccessToken);
-
-                // check if nhsUserInfo.DateOfBirth is under 18 and return an error if so
-                if (nhsUserInfo.DateOfBirth.HasValue && IsUnder18(nhsUserInfo.DateOfBirth.Value))
-                {
-                    return Response<NhsLoginResponse>.CreateErrorMessageResponse(
-                        ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.UserIsUnderage,
-                        "User is under 18",
-                        _headerService.GetConversationId()
-                    );
-                }
-
-                await _participantService.NhsLoginAsync(new ParticipantDetails
-                {
-                    ConsentRegistration = false,
-                    DateOfBirth = nhsUserInfo.DateOfBirth,
-                    Email = nhsUserInfo.Email,
-                    Firstname = nhsUserInfo.FirstName,
-                    Lastname = nhsUserInfo.LastName,
-                    NhsId = nhsUserInfo.NhsId,
-                    NhsNumber = nhsUserInfo.NhsNumber,
-                });
-
-                return Response<NhsLoginResponse>.CreateSuccessfulContentResponse(response,
-                    _headerService.GetConversationId());
-            }
-            catch (HttpServiceException ex)
-            {
-                if (ex.ResponseContent !=
-                    JsonConvert.SerializeObject(new { Message = ErrorCode.UnableToMatchAccounts }))
-                {
-                    return HandleNhsLoginException(ex);
-                }
-
-                var errorResponse = Response<NhsLoginResponse>.CreateErrorMessageResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.UnableToMatchAccounts,
-                    "Unable to match account details",
-                    _headerService.GetConversationId());
-
-                return errorResponse;
-            }
-            catch (Exception ex)
-            {
-                return HandleNhsLoginException(ex);
-            }
-        }
-
-        private Response<NhsLoginResponse> HandleNhsLoginException(Exception ex)
-        {
-            var exceptionResponse = Response<NhsLoginResponse>.CreateExceptionResponse(
-                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
-                _headerService.GetConversationId());
-            _logger.LogError(ex,
-                $"Unknown error logging in with NHS login\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
-            return exceptionResponse;
-        }
-
-        public async Task<Response<SignUpResponse>> NhsSignUpAsync(bool consentRegistration, string token)
-        {
-            try
-            {
-                var nhsUserInfo = await _nhsLoginHttpClient.GetUserInfoAsync(token);
-
-                await _mediator.Send(new CreateParticipantDetailsCommand("", nhsUserInfo.Email,
-                    nhsUserInfo.FirstName, nhsUserInfo.LastName,
-                    consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber));
-
-                var baseUrl = _emailSettings.WebAppBaseUrl;
-                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                        "New Be Part of Research Account")
-                    .Replace("###TEXT_REPLACE1###",
-                        $"Thank you for registering for Be Part of Research using your NHS login or through the NHS App. You will need to use the NHS login option on the <a href=\"{baseUrl}Participants/Options\">Be Part of Research</a> website each time you access your account.")
-                    .Replace("###TEXT_REPLACE2###",
-                        "By signing up, you are joining our community of amazing volunteers who are helping researchers to understand more about health and care conditions. Please visit the <a href=\"https://bepartofresearch.nihr.ac.uk/taking-part/how-to-take-part\">How to take part</a> section of the website to find out about other ways to take part in health and care research.")
-
-                     .Replace("###TEXT_REPLACE3###",
-                        "<a href=\"https://nihr.us14.list-manage.com/subscribe?u=299dc02111e8a68172029095f&id=3b030a1027\">Sign up to our newsletter</a> to receive all our research news, studies you can take part in and other opportunities helping to shape health and care research from across the UK.")
-                    .Replace("###TEXT_REPLACE4###",
-                        "If you close your NHS login account, your Be Part of Research account will remain open and if you would also like to close your Be Part of Research account you will need to email <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>.")
-                    .Replace("###LINK_REPLACE###", "")
-                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                    .Replace("###TEXT_REPLACE5###",
-                        "Thank you for your ongoing commitment and support.")
-                    .Replace("###TEXT_REPLACE6###", "");
-
-                await _emailService.SendEmailAsync(nhsUserInfo.Email, "Be Part of Research", htmlBody);
-
-                return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                    new SignUpResponse { UserConsents = true, }, _headerService.GetConversationId());
-            }
-            catch (Exception ex)
-            {
-                var exceptionResponse = Response<SignUpResponse>.CreateExceptionResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
-                    _headerService.GetConversationId());
-                _logger.LogError(ex,
-                    $"Unknown error logging in with NHS login\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
-                return exceptionResponse;
-            }
-        }
-
         public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password)
         {
             try
             {
-                var passwordErrors = await ValidatePassword(password);
+                var passwordErrors = await _passwordService.ValidatePassword(password);
 
                 if (passwordErrors.Any())
                 {
@@ -435,7 +249,8 @@ namespace Infrastructure.Services
                 }
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                    new SignUpResponse { IsSuccess = true, UserId = response.UserSub}, _headerService.GetConversationId());
+                    new SignUpResponse { IsSuccess = true, UserId = response.UserSub },
+                    _headerService.GetConversationId());
             }
             catch (UsernameExistsException ex)
             {
@@ -521,7 +336,7 @@ namespace Infrastructure.Services
                         _headerService.GetConversationId());
                 }
 
-                var passwordErrors = await ValidatePassword(password);
+                var passwordErrors = await _passwordService.ValidatePassword(password);
 
                 if (passwordErrors.Any())
                 {
@@ -538,7 +353,7 @@ namespace Infrastructure.Services
                     MessageAction = "SUPPRESS"
                 });
 
-                if (!IsSuccessHttpStatusCode((int)createResponse.HttpStatusCode))
+                if (!HttpStatusCodeHelper.IsSuccess(createResponse.HttpStatusCode))
                 {
                     return Response<SignUpResponse>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.AdminCreateUserError, "Create user error",
@@ -550,7 +365,7 @@ namespace Infrastructure.Services
                     UserPoolId = _awsSettings.CognitoPoolId, Username = email, Password = password, Permanent = true
                 });
 
-                return IsSuccessHttpStatusCode((int)setPasswordResponse.HttpStatusCode)
+                return HttpStatusCodeHelper.IsSuccess(setPasswordResponse.HttpStatusCode)
                     ? Response<SignUpResponse>.CreateSuccessfulResponse(_headerService.GetConversationId())
                     : Response<SignUpResponse>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.AdminSetUserPasswordError,
@@ -577,66 +392,6 @@ namespace Infrastructure.Services
                 _logger.LogError(ex,
                     $"Unknown error for admin create and set user password\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
                 return exceptionResponse;
-            }
-        }
-
-        public async Task<AdminGetUserResponse> AdminGetUserAsync(string email)
-        {
-            try
-            {
-                var response = await _provider.AdminGetUserAsync(new AdminGetUserRequest
-                {
-                    UserPoolId = _awsSettings.CognitoPoolId,
-                    Username = email
-                });
-
-                Boolean authenticatedMobileVerified = false;
-
-                foreach (var attribute in response.UserAttributes)
-                {
-                    if (attribute.Name.Equals("phone_number_verified") && attribute.Value.Equals("true"))
-                    {
-                        authenticatedMobileVerified = true;
-                    }
-                }
-
-                return HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode)
-                    ? new AdminGetUserResponse
-                    {
-                        Email = email, Id = response.Username, Status = response.UserStatus?.ToString(),
-                        CreatedDate = response.UserCreateDate, LastModifiedDate = response.UserLastModifiedDate,
-                        Enabled = response.Enabled, AuthenticatedMobileVerified = authenticatedMobileVerified
-                    }
-                    : null;
-            }
-            catch (UserNotFoundException)
-            {
-                return null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Could not get user: {email}");
-                throw;
-            }
-        }
-
-        public async Task<bool> UserExistsAsync(string email)
-        {
-            try
-            {
-                var response = await _provider.AdminGetUserAsync(new AdminGetUserRequest
-                    { UserPoolId = _awsSettings.CognitoPoolId, Username = email });
-
-                return response is { HttpStatusCode: HttpStatusCode.OK };
-            }
-            catch (UserNotFoundException)
-            {
-                return false;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "AdminGetUserAsync failed");
-                throw;
             }
         }
 
@@ -685,8 +440,6 @@ namespace Infrastructure.Services
             }
         }
 
-
-
         public async Task<Response<ResendConfirmationCodeResponse>> ResendVerificationEmailAsync(string userId)
         {
             try
@@ -724,70 +477,6 @@ namespace Infrastructure.Services
             }
         }
 
-
-        public async Task<Response<ForgotPasswordResponse>> ForgotPasswordAsync(string email)
-        {
-            _logger.LogInformation("email: {email}", email);
-
-            var user = await AdminGetUserAsync(email);
-
-            _logger.LogInformation(JsonConvert.SerializeObject(user));
-
-            if (user == null || !user.Enabled)
-            {
-                var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
-                if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
-                    return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
-                        _headerService.GetConversationId());
-                var baseUrl = _emailSettings.WebAppBaseUrl;
-                var htmlBody = EmailTemplate.GetHtmlTemplate().Replace("###TITLE_REPLACE1###",
-                        "Password Reset Attempt")
-                    .Replace("###TEXT_REPLACE1###",
-                        "A request has been received to change the password for your Be Part of Research account. We were unable to complete this request because your account was created with your NHS login information. You will need to use this option on each occasion to access your account and update your details.")
-                    .Replace("###TEXT_REPLACE2###",
-                        "Please use the link below and select the NHS login button to continue.")
-                    .Replace("###TEXT_REPLACE3###",
-                        "")
-                    .Replace("###LINK_REPLACE###",
-                        $"<a href=\"{baseUrl}participants/options\">{baseUrl}participants/options</a>")
-                    .Replace("###LINK_DISPLAY_VALUE_REPLACE###", "block")
-                    .Replace("###TEXT_REPLACE4###",
-                        "If you have not attempted to reset your password, please contact us by email at <a href=\"mailto:Bepartofresearch@nihr.ac.uk\">Bepartofresearch@nihr.ac.uk</a>")
-                    .Replace("###TEXT_REPLACE5###", "")
-                    .Replace("###TEXT_REPLACE6###", "");
-
-                await _emailService.SendEmailAsync(email, "Be Part of Research password reset", htmlBody);
-
-                return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
-                    _headerService.GetConversationId());
-            }
-
-            if (user.Status == UserStatusType.CONFIRMED)
-            {
-                var response = await _provider.ForgotPasswordAsync(new ForgotPasswordRequest
-                {
-                    ClientId = _awsSettings.CognitoAppClientIds[0],
-                    Username = email
-                });
-
-                if (!HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode))
-                {
-                    _logger.LogWarning("ForgotPasswordAsync returned: {response}",
-                        JsonConvert.SerializeObject(response));
-                }
-            }
-
-            return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(_headerService.GetConversationId());
-        }
-
-
-        public async Task<Response<ConfirmForgotPasswordResponse>> ConfirmForgotPasswordAsync(string code,
-            string userId, string password)
-        {
-
-        }
-
-        
         public async Task<Response<object>> ChangeEmailAsync(string currentEmail, string newEmail)
         {
             try
@@ -841,11 +530,64 @@ namespace Infrastructure.Services
             }
         }
 
-    public class MfaLoginDetails
-    {
-        public string Username { get; set; }
-        public string SessionId { get; set; }
-        public string Password { get; set; }
-        public string PhoneNumber { get; set; }
+        public async Task<AdminGetUserResponse> AdminGetUserAsync(string email)
+        {
+            try
+            {
+                var response = await _provider.AdminGetUserAsync(new AdminGetUserRequest
+                {
+                    UserPoolId = _awsSettings.CognitoPoolId,
+                    Username = email
+                });
+
+                Boolean authenticatedMobileVerified = false;
+
+                foreach (var attribute in response.UserAttributes)
+                {
+                    if (attribute.Name.Equals("phone_number_verified") && attribute.Value.Equals("true"))
+                    {
+                        authenticatedMobileVerified = true;
+                    }
+                }
+
+                return HttpStatusCodeHelper.IsSuccess(response.HttpStatusCode)
+                    ? new AdminGetUserResponse
+                    {
+                        Email = email, Id = response.Username, Status = response.UserStatus?.ToString(),
+                        CreatedDate = response.UserCreateDate, LastModifiedDate = response.UserLastModifiedDate,
+                        Enabled = response.Enabled, AuthenticatedMobileVerified = authenticatedMobileVerified
+                    }
+                    : null;
+            }
+            catch (UserNotFoundException)
+            {
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Could not get user: {email}");
+                throw;
+            }
+        }
+
+        private async Task<bool> UserExistsAsync(string email)
+        {
+            try
+            {
+                var response = await _provider.AdminGetUserAsync(new AdminGetUserRequest
+                    { UserPoolId = _awsSettings.CognitoPoolId, Username = email });
+
+                return response is { HttpStatusCode: HttpStatusCode.OK };
+            }
+            catch (UserNotFoundException)
+            {
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AdminGetUserAsync failed");
+                throw;
+            }
+        }
     }
 }

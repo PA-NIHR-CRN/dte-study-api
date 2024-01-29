@@ -20,18 +20,18 @@ namespace Application.Users.V1.Commands
 
         public class CreateUserCommandHandler : IRequestHandler<NhsSignUpCommand, Response<SignUpResponse>>
         {
-            private readonly IUserService _userService;
+            private readonly INhsLoginService _nhsLoginService;
 
             public CreateUserCommandHandler(
-                IUserService userService)
+                INhsLoginService nhsLoginService)
             {
-                _userService = userService;
+                _nhsLoginService = nhsLoginService;
             }
 
             public async Task<Response<SignUpResponse>> Handle(NhsSignUpCommand request,
                 CancellationToken cancellationToken)
             {
-                return await _userService.NhsSignUpAsync(request.ConsentRegistration, request.Token);
+                return await _nhsLoginService.NhsSignUpAsync(request.ConsentRegistration, request.Token);
             }
         }
     }

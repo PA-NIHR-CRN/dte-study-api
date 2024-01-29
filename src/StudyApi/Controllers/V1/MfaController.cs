@@ -16,17 +16,17 @@ namespace StudyApi.Controllers.V1;
 [ApiVersion("1")]
 [Route("api/mfa")]
 [AllowAnonymous]
-public class MfaController: Controller
+public class MfaController : Controller
 {
-    private readonly IUserService _userService;
     private readonly IAuthenticationService _authenticationService;
+    private readonly IMfaService _mfaService;
 
-    public MfaController(IUserService userService, IAuthenticationService authenticationService)
+    public MfaController(IAuthenticationService authenticationService, IMfaService mfaService)
     {
-        _userService = userService;
         _authenticationService = authenticationService;
+        _mfaService = mfaService;
     }
-    
+
     /// <summary>
     /// [AllowAnonymous] RespondToMfaChallenge
     /// </summary>
@@ -38,7 +38,7 @@ public class MfaController: Controller
     public async Task<IActionResult> RespondToMfaChallengeAsync([FromBody] RespondToMfaRequest request)
     {
         var response =
-            await _userService.RespondToMfaChallengeAsync(request.MfaCode, request.MfaDetails);
+            await _mfaService.RespondToMfaChallengeAsync(request.MfaCode, request.MfaDetails);
 
         if (!response.IsSuccess)
         {
@@ -61,7 +61,7 @@ public class MfaController: Controller
     public async Task<IActionResult> RespondToTotpMfaChallengeAsync([FromBody] RespondToMfaRequest request)
     {
         var response =
-            await _userService.RespondToTotpMfaChallengeAsync(request.MfaCode, request.MfaDetails);
+            await _mfaService.RespondToTotpMfaChallengeAsync(request.MfaCode, request.MfaDetails);
 
         if (!response.IsSuccess)
         {
@@ -72,8 +72,8 @@ public class MfaController: Controller
         await _authenticationService.CreateSessionAndLoginAsync(response.Content, sessionId);
         return Ok(response);
     }
-    
-        /// <summary>
+
+    /// <summary>
     /// [AllowAnonymous] Login
     /// </summary>
     /// <response code="200">When IsSuccess true</response>
@@ -83,14 +83,14 @@ public class MfaController: Controller
     [HttpPost("setupsmsmfa")]
     public async Task<IActionResult> SetUpMfaAsync([FromBody] SetUpMfaRequest request)
     {
-        await _userService.UpdateCognitoPhoneNumberAsync(request.MfaDetails, request.PhoneNumber);
-        var response = await _userService.SetUpMfaAsync(request.MfaDetails);
+        await _mfaService.UpdateCognitoPhoneNumberAsync(request.MfaDetails, request.PhoneNumber);
+        var response = await _mfaService.SetUpMfaAsync(request.MfaDetails);
 
         return !response.IsSuccess
             ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
             : Ok(response);
     }
-        
+
     /// <summary>
     /// [AllowAnonymous] Login
     /// </summary>
@@ -101,13 +101,13 @@ public class MfaController: Controller
     [HttpPost("reissuesession")]
     public async Task<IActionResult> ReissueMfaSession([FromBody] SetUpMfaRequest request)
     {
-        var response = await _userService.ReissueMfaSessionAsync(request.MfaDetails);
-            
+        var response = await _mfaService.ReissueMfaSessionAsync(request.MfaDetails);
+
         return !response.IsSuccess
             ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
             : Ok(response);
     }
-        
+
     /// <summary>
     /// [AllowAnonymous] Login
     /// </summary>
@@ -118,11 +118,11 @@ public class MfaController: Controller
     [HttpPost("sendmfaotpemail")]
     public async Task<IActionResult> SendMfaOtpEmail([FromBody] SetUpMfaRequest request)
     {
-        var email = await _userService.SendEmailOtpAsync(request.MfaDetails);
+        var email = await _mfaService.SendEmailOtpAsync(request.MfaDetails);
         return Ok(email);
     }
-    
-        /// <summary>
+
+    /// <summary>
     /// [AllowAnonymous] Login
     /// </summary>
     /// <response code="200">When IsSuccess true</response>
@@ -132,12 +132,11 @@ public class MfaController: Controller
     [HttpPost("getmaskedmobile")]
     public async Task<IActionResult> GetMaskedMobile([FromBody] SetUpMfaRequest request)
     {
-        var maskedMobile = await _userService.GetMaskedMobile(request.MfaDetails);
-            
+        var maskedMobile = await _mfaService.GetMaskedMobile(request.MfaDetails);
+
         return Ok(maskedMobile);
-            
     }
-        
+
     /// <summary>
     /// [AllowAnonymous] ValidateEmailOtp
     /// </summary>
@@ -148,7 +147,7 @@ public class MfaController: Controller
     [HttpPost("validatemfaotpemail")]
     public async Task<IActionResult> ValidateEmailOtp([FromBody] RespondToMfaRequest request)
     {
-        var response = await _userService.ValidateEmailOtpAsync(request.MfaDetails, request.MfaCode);
+        var response = await _mfaService.ValidateEmailOtpAsync(request.MfaDetails, request.MfaCode);
 
         return !response.IsSuccess
             ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
@@ -165,7 +164,7 @@ public class MfaController: Controller
     [HttpPost("resendmfachallenge")]
     public async Task<IActionResult> ResendMfaChallenge([FromBody] SetUpMfaRequest request)
     {
-        var response = await _userService.ResendMfaChallenge(request.MfaDetails);
+        var response = await _mfaService.ResendMfaChallenge(request.MfaDetails);
 
         return !response.IsSuccess
             ? Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors))
@@ -182,12 +181,12 @@ public class MfaController: Controller
     [HttpPost("setuptokenmfa")]
     public async Task<IActionResult> SetUpTokenMfaAsync([FromBody] SetUpMfaRequest request)
     {
-        var response = await _userService.GenerateTotpToken(request.MfaDetails);
+        var response = await _mfaService.GenerateTotpToken(request.MfaDetails);
 
         return Ok(Response<TotpTokenResult>.CreateSuccessfulContentResponse(response));
     }
-    
-    
+
+
     /// <summary>
     /// [AllowAnonymous] VerifySoftwareTokenAsync
     /// </summary>
@@ -198,7 +197,9 @@ public class MfaController: Controller
     [HttpPost("verifytokenmfa")]
     public async Task<IActionResult> VerifySoftwareTokenAsync([FromBody] VerifyMfaRequest request)
     {
-        var response = await _userService.VerifySoftwareTokenAsync(request.AuthenticatorAppCode, request.SessionId, request.MfaDetails);
+        var response =
+            await _mfaService.VerifySoftwareTokenAsync(request.AuthenticatorAppCode, request.SessionId,
+                request.MfaDetails);
 
         return Ok(response);
     }

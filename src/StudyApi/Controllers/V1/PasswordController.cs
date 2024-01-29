@@ -16,11 +16,11 @@ namespace StudyApi.Controllers.V1;
 [Route("api/password")]
 public class PasswordController : Controller
 {
-    private readonly IUserService _userService;
+    private readonly IPasswordService _passwordService;
 
-    public PasswordController(IUserService userService)
+    public PasswordController(IPasswordService passwordService)
     {
-        _userService = userService;
+        _passwordService = passwordService;
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class PasswordController : Controller
     [HttpPost("forgotpassword")]
     public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordRequest request)
     {
-        return Ok(await _userService.ForgotPasswordAsync(request.Email));
+        return Ok(await _passwordService.ForgotPasswordAsync(request.Email));
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public class PasswordController : Controller
     [HttpPost("confirmforgotpassword")]
     public async Task<IActionResult> ConfirmForgotPasswordAsync([FromBody] ConfirmForgotPasswordRequest request)
     {
-        return Ok(await _userService.ConfirmForgotPasswordAsync(request.Code, request.UserId, request.Password));
+        return Ok(await _passwordService.ConfirmForgotPasswordAsync(request.Code, request.UserId, request.Password));
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class PasswordController : Controller
     [HttpGet("passwordpolicy")]
     public async Task<IActionResult> GetPasswordPolicy()
     {
-        return Ok(await _userService.GetPasswordPolicyTypeAsync());
+        return Ok(await _passwordService.GetPasswordPolicyTypeAsync());
     }
 
 
@@ -75,6 +75,6 @@ public class PasswordController : Controller
     [HttpPost("changepassword")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        return Ok(await _userService.ChangePasswordAsync(User.GetUserEmail(), request.NewPassword));
+        return Ok(await _passwordService.ChangePasswordAsync(User.GetUserEmail(), request.NewPassword));
     }
 }
