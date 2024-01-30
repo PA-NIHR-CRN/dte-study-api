@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
@@ -409,7 +408,7 @@ namespace Infrastructure.Services
             try
             {
                 var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-                if (_devSettings.CurrentValue.BypassMfa && !_environment.IsProduction())
+                if (_devSettings.CurrentValue.BypassMfa)
                 {
                     return Response<string>.CreateSuccessfulContentResponse(
                         _mockIdentityService.CreateMockIdToken(mfaLoginDetails.Username),
