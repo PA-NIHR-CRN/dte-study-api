@@ -31,6 +31,12 @@ namespace StudyApi.DependencyRegistrations
     {
         private static readonly string[] ProdEnvironmentNames = { "production", "prod", "live" };
 
+        private static bool IsProdEnvironment(string environmentName)
+        {
+            return ProdEnvironmentNames.Any(x =>
+                string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase));
+        }
+
         public static IServiceCollection AddInfrastructure(this IServiceCollection services,
             IConfiguration configuration, string environmentName)
         {
@@ -54,8 +60,6 @@ namespace StudyApi.DependencyRegistrations
             services.AddScoped<IContentfulService, ContentfulService>();
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
             services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();
-            services.AddTransient<IMockIdentityService, MockIdentityService>();
-
 
             // Contentful set up
             services.AddContentfulServices(configuration);
@@ -96,12 +100,16 @@ namespace StudyApi.DependencyRegistrations
             services.Configure<DevSettings>(configuration.GetSection(DevSettings.SectionName));
 
             // If not Prod, then enable stubs
-            if (devSettings.EnableStubs && !ProdEnvironmentNames.Any(x =>
-                    string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
+            if (devSettings.EnableStubs && IsProdEnvironment(environmentName))
             {
                 // Enable local stubs
                 services.AddScoped<IEmailService, MockEmailService>();
                 services.AddSingleton<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
+            }
+
+            if (!IsProdEnvironment(environmentName))
+            {
+                services.AddTransient<IMockIdentityService, MockIdentityService>();
             }
 
             return services;

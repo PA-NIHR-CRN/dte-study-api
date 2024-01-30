@@ -77,7 +77,7 @@ namespace StudyApi
                 httpClient.BaseAddress = new Uri(settings.BaseUrl);
             });
 
-            if (Environment.IsEnvironment("local"))
+            if (Environment.IsDevelopment())
             {
                 services.AddCors(options =>
                 {
@@ -123,7 +123,7 @@ namespace StudyApi
             });
 
             var dataprotection = services.AddDataProtection();
-            if (!Environment.IsEnvironment("local"))
+            if (!Environment.IsDevelopment())
             {
                 dataprotection.PersistKeysToAWSSystemsManager("/BPOR/DataProtection");
             }
@@ -138,7 +138,7 @@ namespace StudyApi
                     options.SlidingExpiration = true;
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                     options.Cookie.SameSite =
-                        Environment.IsEnvironment("local") ? SameSiteMode.None : SameSiteMode.Strict;
+                        Environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict;
 
                     options.Events.OnRedirectToLogin = (context) =>
                     {
@@ -258,15 +258,15 @@ namespace StudyApi
 
             app.UseRouting();
 
-            if (Environment.IsEnvironment("local"))
+            if (Environment.IsDevelopment())
             {
                 app.UseCors("AllowLocal");
             }
 
             app.UseCookiePolicy(new CookiePolicyOptions
             {
-                MinimumSameSitePolicy = Environment.IsEnvironment("local") ? SameSiteMode.None : SameSiteMode.Strict,
-                Secure = Environment.IsEnvironment("local")
+                MinimumSameSitePolicy = Environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict,
+                Secure = Environment.IsDevelopment()
                     ? CookieSecurePolicy.SameAsRequest
                     : CookieSecurePolicy.Always,
                 OnAppendCookie = context =>
