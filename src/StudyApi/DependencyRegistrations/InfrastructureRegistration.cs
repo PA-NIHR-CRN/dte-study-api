@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Amazon;
 using Amazon.CognitoIdentityProvider;
 using Amazon.DynamoDBv2;
@@ -20,8 +18,10 @@ using Infrastructure.Factories;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
 using Infrastructure.Services.Mocks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StudyApi.Mocks;
 
@@ -29,16 +29,8 @@ namespace StudyApi.DependencyRegistrations
 {
     public static class InfrastructureRegistration
     {
-        private static readonly string[] ProdEnvironmentNames = { "production", "prod", "live" };
-
-        private static bool IsProdEnvironment(string environmentName)
-        {
-            return ProdEnvironmentNames.Any(x =>
-                string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase));
-        }
-
         public static IServiceCollection AddInfrastructure(this IServiceCollection services,
-            IConfiguration configuration, string environmentName)
+            IConfiguration configuration, IWebHostEnvironment environment)
         {
             // Rate limiting
             services.AddMemoryCache();
@@ -99,17 +91,16 @@ namespace StudyApi.DependencyRegistrations
             var devSettings = configuration.GetSection(DevSettings.SectionName).Get<DevSettings>();
             services.Configure<DevSettings>(configuration.GetSection(DevSettings.SectionName));
 
-            // If not Prod, then enable stubs
-            if (devSettings.EnableStubs && IsProdEnvironment(environmentName))
+            if (environment.IsProduction())
             {
-                // Enable local stubs
-                services.AddScoped<IEmailService, MockEmailService>();
-                services.AddSingleton<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
+                return services;
             }
 
-            if (!IsProdEnvironment(environmentName))
+            services.AddTransient<IMockIdentityService, MockIdentityService>();
+            if (devSettings.EnableStubs)
             {
-                services.AddTransient<IMockIdentityService, MockIdentityService>();
+                services.AddTransient<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
+                services.AddTransient<IEmailService, MockEmailService>();
             }
 
             return services;
