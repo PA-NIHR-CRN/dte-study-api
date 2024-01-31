@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Threading.Tasks;
 using Application.Participants.V1.Commands.Participants;
 using Application.Responses.V1.Users;
@@ -28,6 +27,7 @@ using Application.Contracts;
 using Application.Models.MFA;
 using Dte.Common.Exceptions.Common;
 using Microsoft.AspNetCore.DataProtection;
+using IAuthenticationService = Application.Contracts.IAuthenticationService;
 
 namespace StudyApi.Controllers.V1.Users
 {
@@ -42,15 +42,18 @@ namespace StudyApi.Controllers.V1.Users
         private readonly IDataProtector _dataProtector;
         private readonly ISessionService _sessionService;
         private readonly IUserService _userService;
+        private readonly IAuthenticationService _authenticationService;
 
         public UsersController(IMediator mediator, ILogger<UsersController> logger,
-            IDataProtectionProvider dataProtector, ISessionService sessionService, IUserService userService)
+            IDataProtectionProvider dataProtector, ISessionService sessionService, IUserService userService,
+            IAuthenticationService authenticationService)
         {
             _mediator = mediator;
             _logger = logger;
             _dataProtector = dataProtector.CreateProtector("nhs.login.cookies");
             _sessionService = sessionService;
             _userService = userService;
+            _authenticationService = authenticationService;
         }
 
         private async Task CreateSessionAndLogin(string jwtToken, string sessionId)
@@ -115,7 +118,7 @@ namespace StudyApi.Controllers.V1.Users
         public async Task<IActionResult> RespondToMfaChallengeAsync([FromBody] RespondToMfaRequest request)
         {
             var response =
-                await _userService.RespondToMfaChallengeAsync(request.MfaCode, request.MfaDetails);
+                await _authenticationService.RespondToMfaChallengeAsync(request.MfaCode, request.MfaDetails);
 
             if (!response.IsSuccess)
             {
@@ -300,7 +303,8 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("nhslogin")]
         public async Task<IActionResult> NhsLogin([FromBody] NhsLoginRequest request)
         {
-            var response = await _mediator.Send(new NhsLoginCommand(request.Code, request.RedirectUrl, request.SelectedLocale));
+            var response =
+                await _mediator.Send(new NhsLoginCommand(request.Code, request.RedirectUrl, request.SelectedLocale));
 
             if (!response.IsSuccess)
             {
@@ -327,7 +331,8 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("signup")]
         public async Task<IActionResult> SignUpUserAsync([FromBody] SignUpRequest request)
         {
-            var response = await _mediator.Send(new SignUpCommand(request.Email, request.Password, request.SelectedLocale));
+            var response =
+                await _mediator.Send(new SignUpCommand(request.Email, request.Password, request.SelectedLocale));
 
             if (response.IsSuccess)
             {
@@ -335,10 +340,10 @@ namespace StudyApi.Controllers.V1.Users
                     response.Content.UserId, request.Email, request.Firstname, request.Lastname,
                     request.ConsentRegistration, null, request.DateOfBirth, "", request.SelectedLocale));
             }
-            
+
             return Ok(response);
         }
-        
+
         public class NhsSignUpRequestLocal
         {
             public bool ConsentRegistration { get; set; }

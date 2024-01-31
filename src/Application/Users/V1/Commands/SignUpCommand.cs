@@ -22,16 +22,16 @@ public class SignUpCommand : IRequest<Response<SignUpResponse>>
 
     public class CreateUserCommandHandler : IRequestHandler<SignUpCommand, Response<SignUpResponse>>
     {
-        private readonly IUserService _userService;
+        private readonly IAuthenticationService _authenticationService;
 
-        public CreateUserCommandHandler(IUserService userService)
+        public CreateUserCommandHandler(IAuthenticationService authenticationService)
         {
-            _userService = userService;
+            _authenticationService = authenticationService;
         }
 
         public async Task<Response<SignUpResponse>> Handle(SignUpCommand request, CancellationToken cancellationToken)
         {
-            return await _userService.SignUpAsync(request.Email, request.Password, request.SelectedLocale);
+            return await _authenticationService.SignUpAsync(request.Email, request.Password, request.SelectedLocale);
         }
     }
 }

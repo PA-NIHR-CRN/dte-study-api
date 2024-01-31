@@ -17,6 +17,7 @@ using Dte.Study.Management.Api.Client;
 using Infrastructure.Factories;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
+using Infrastructure.Services.AuthenticationService;
 using Infrastructure.Services.Mocks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -52,11 +53,11 @@ namespace StudyApi.DependencyRegistrations
             services.AddScoped<IContentfulService, ContentfulService>();
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
             services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();
+            services.AddTransient<IAuthenticationService, ProdAuthenticationService>();
 
             // Contentful set up
             services.AddContentfulServices(configuration);
-
-
+            
             // AWS
             var awsSettings = configuration.GetSection(AwsSettings.SectionName).Get<AwsSettings>();
             var amazonDynamoDbConfig = new AmazonDynamoDBConfig();
@@ -97,6 +98,7 @@ namespace StudyApi.DependencyRegistrations
             }
 
             services.AddTransient<IMockIdentityService, MockIdentityService>();
+            services.AddTransient<IAuthenticationService, DevAuthenticationService>();
             if (devSettings.EnableStubs)
             {
                 services.AddTransient<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
