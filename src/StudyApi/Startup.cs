@@ -180,7 +180,7 @@ namespace StudyApi
 
             // Applications / Features
             services.AddApplication();
-            services.AddInfrastructure(Configuration, Environment.EnvironmentName);
+            services.AddInfrastructure(Configuration, Environment);
             services.AddMessaging(Configuration);
 
             // All others
