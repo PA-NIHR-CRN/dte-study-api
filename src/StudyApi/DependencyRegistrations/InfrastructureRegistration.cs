@@ -14,10 +14,10 @@ using Dte.Common.Services;
 using Dte.Location.Api.Client;
 using Dte.Reference.Data.Api.Client;
 using Dte.Study.Management.Api.Client;
+using Infrastructure.Decorators;
 using Infrastructure.Factories;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
-using Infrastructure.Services.AuthenticationService;
 using Infrastructure.Services.Mocks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -53,7 +53,7 @@ namespace StudyApi.DependencyRegistrations
             services.AddScoped<IContentfulService, ContentfulService>();
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
             services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();
-            services.AddTransient<IAuthenticationService, ProdAuthenticationService>();
+            services.AddTransient<IAuthenticationService, AuthenticationService>();
 
             // Contentful set up
             services.AddContentfulServices(configuration);
@@ -92,17 +92,14 @@ namespace StudyApi.DependencyRegistrations
             var devSettings = configuration.GetSection(DevSettings.SectionName).Get<DevSettings>();
             services.Configure<DevSettings>(configuration.GetSection(DevSettings.SectionName));
 
-            if (environment.IsProduction())
+            if (!environment.IsProduction())
             {
-                return services;
-            }
-
-            services.AddTransient<IMockIdentityService, MockIdentityService>();
-            services.AddTransient<IAuthenticationService, DevAuthenticationService>();
-            if (devSettings.EnableStubs)
-            {
-                services.AddTransient<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
-                services.AddTransient<IEmailService, MockEmailService>();
+                services.Decorate<IAuthenticationService, DevAuthenticationService>();
+                if (devSettings.EnableStubs)
+                {
+                    services.AddTransient<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
+                    services.AddTransient<IEmailService, MockEmailService>();
+                }
             }
 
             return services;

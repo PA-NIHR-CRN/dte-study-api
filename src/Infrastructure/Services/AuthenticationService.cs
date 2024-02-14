@@ -18,22 +18,22 @@ using Dte.Common.Responses;
 using Microsoft.Extensions.Logging;
 using SignUpResponse = Application.Responses.V1.Users.SignUpResponse;
 
-namespace Infrastructure.Services.AuthenticationService;
+namespace Infrastructure.Services;
 
-public class ProdAuthenticationService : IAuthenticationService
+public class AuthenticationService : IAuthenticationService
 {
     private readonly IAmazonCognitoIdentityProvider _provider;
     private readonly IHeaderService _headerService;
     private readonly AwsSettings _awsSettings;
-    private readonly ILogger<ProdAuthenticationService> _logger;
+    private readonly ILogger<AuthenticationService> _logger;
     private readonly IEmailService _emailService;
     private readonly IParticipantService _participantService;
     private readonly IContentfulService _contentfulService;
     private readonly ContentfulSettings _contentfulSettings;
     private readonly IUserService _userService;
 
-    public ProdAuthenticationService(IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
-        AwsSettings awsSettings, ILogger<ProdAuthenticationService> logger, IEmailService emailService,
+    public AuthenticationService(IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
+        AwsSettings awsSettings, ILogger<AuthenticationService> logger, IEmailService emailService,
         IParticipantService participantService, IContentfulService contentfulService,
         ContentfulSettings contentfulSettings, IUserService userService)
 
