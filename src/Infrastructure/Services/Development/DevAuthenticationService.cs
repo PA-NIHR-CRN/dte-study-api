@@ -6,33 +6,35 @@ using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Application.Contracts;
+using Application.Models.MFA;
 using Application.Settings;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Common.Responses;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SignUpResponse = Application.Responses.V1.Users.SignUpResponse;
 
-namespace Infrastructure.Decorators;
+namespace Infrastructure.Services.Development;
 
 public class DevAuthenticationService : IAuthenticationService
 {
     private readonly IAuthenticationService _authenticationService;
     private readonly IOptionsMonitor<DevSettings> _devSettings;
-    private readonly IUserService _userService;
+    private readonly IDataProtector _dataProtector;
     private readonly IHeaderService _headerService;
     private readonly AwsSettings _awsSettings;
     private readonly IAmazonCognitoIdentityProvider _provider;
     private static readonly byte[] Key = Encoding.ASCII.GetBytes("This is a test key");
 
     public DevAuthenticationService(IAuthenticationService authenticationService,
-        IOptionsMonitor<DevSettings> devSettings, IUserService userService, IHeaderService headerService,
+        IOptionsMonitor<DevSettings> devSettings, IDataProtectionProvider dataProtector, IHeaderService headerService,
         AwsSettings awsSettings, IAmazonCognitoIdentityProvider provider)
     {
         _authenticationService = authenticationService;
         _devSettings = devSettings;
-        _userService = userService;
+        _dataProtector = dataProtector.CreateProtector("mfa.login.details");
         _headerService = headerService;
         _awsSettings = awsSettings;
         _provider = provider;
@@ -87,12 +89,14 @@ public class DevAuthenticationService : IAuthenticationService
     {
         if (_devSettings.CurrentValue.BypassMfa)
         {
-            var mfaLoginDetails = _userService.DeserializeMfaLoginDetails(mfaDetails);
+            var mfaLoginDetails = MfaLoginDetails.FromProtectedString(_dataProtector, mfaDetails);
             return Response<string>.CreateSuccessfulContentResponse(
                 CreateLocalIdToken(mfaLoginDetails.Username),
                 _headerService.GetConversationId());
         }
-
-        return await _authenticationService.RespondToMfaChallengeAsync(mfaCode, mfaDetails);
+        else
+        {
+            return await _authenticationService.RespondToMfaChallengeAsync(mfaCode, mfaDetails);
+        }
     }
 }

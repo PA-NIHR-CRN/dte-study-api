@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using Application.Contracts;
 
-namespace Infrastructure.Services.Mocks
+namespace Infrastructure.Services.Development
 {
-    public class MockEmailService : IEmailService
+    public class NullEmailService : IEmailService
     {
         public Task SendEmailAsync(string to, string subject, string body)
         {
