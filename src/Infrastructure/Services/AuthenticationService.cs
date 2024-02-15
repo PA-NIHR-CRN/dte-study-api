@@ -7,6 +7,7 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Application.Constants;
 using Application.Contracts;
+using Application.Models.MFA;
 using Application.Settings;
 using Dte.Common;
 using Dte.Common.Contracts;
@@ -15,6 +16,7 @@ using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Common.Models;
 using Dte.Common.Responses;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using SignUpResponse = Application.Responses.V1.Users.SignUpResponse;
 
@@ -31,11 +33,12 @@ public class AuthenticationService : IAuthenticationService
     private readonly IContentfulService _contentfulService;
     private readonly ContentfulSettings _contentfulSettings;
     private readonly IUserService _userService;
+    private readonly IDataProtector _dataProtector;
 
     public AuthenticationService(IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
         AwsSettings awsSettings, ILogger<AuthenticationService> logger, IEmailService emailService,
         IParticipantService participantService, IContentfulService contentfulService,
-        ContentfulSettings contentfulSettings, IUserService userService)
+        ContentfulSettings contentfulSettings, IUserService userService, IDataProtectionProvider dataProtector)
 
     {
         _provider = provider;
@@ -47,6 +50,7 @@ public class AuthenticationService : IAuthenticationService
         _contentfulService = contentfulService;
         _contentfulSettings = contentfulSettings;
         _userService = userService;
+        _dataProtector = dataProtector.CreateProtector("mfa.login.details");
     }
 
     public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password, string selectedLocale)
@@ -181,7 +185,7 @@ public class AuthenticationService : IAuthenticationService
     {
         try
         {
-            var mfaLoginDetails = _userService.DeserializeMfaLoginDetails(mfaDetails);
+            var mfaLoginDetails = MfaLoginDetails.FromProtectedString(_dataProtector, mfaDetails);
 
             var request = _userService.CreateAuthChallengeRequest("SMS_MFA", mfaLoginDetails.SessionId,
                 mfaLoginDetails.Username,

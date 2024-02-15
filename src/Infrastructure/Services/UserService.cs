@@ -74,24 +74,7 @@ namespace Infrastructure.Services
             _contentfulSettings = contentfulSettings;
         }
 
-        private string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null)
-        {
-            var sessionId = response.Session;
-            var username = response.ChallengeParameters["USER_ID_FOR_SRP"];
-            // conditionally add phone number if it exists
-            var phoneNumber = response.ChallengeParameters.ContainsKey("CODE_DELIVERY_DESTINATION")
-                ? response.ChallengeParameters["CODE_DELIVERY_DESTINATION"]
-                : null;
 
-
-            return _dataProtector.Protect(JsonConvert.SerializeObject(new MfaLoginDetails
-            {
-                SessionId = sessionId,
-                Username = username,
-                Password = password,
-                PhoneNumber = phoneNumber
-            }));
-        }
 
         public async Task<Response<string>> LoginAsync(string email, string password)
         {
@@ -109,27 +92,27 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminInitiateAuthAsync(request);
-                var mfaDetails = GenerateMfaDetails(response, password);
+                var protectedString = MfaLoginDetails.ToProtectedString(_dataProtector, response);
 
                 if (response.ChallengeName == ChallengeNameType.MFA_SETUP)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.MfaSetupChallenge,
-                        mfaDetails, _headerService.GetConversationId());
+                        protectedString, _headerService.GetConversationId());
                 }
 
                 if (response.ChallengeName == ChallengeNameType.SMS_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.MfaSmsChallenge,
-                        mfaDetails, _headerService.GetConversationId());
+                        protectedString, _headerService.GetConversationId());
                 }
 
                 if (response.ChallengeName == ChallengeNameType.SOFTWARE_TOKEN_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.MfaSoftwareTokenChallenge,
-                        mfaDetails, _headerService.GetConversationId());
+                        protectedString, _headerService.GetConversationId());
                 }
 
                 if (response?.AuthenticationResult != null)
@@ -267,18 +250,18 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminInitiateAuthAsync(request);
-                var mfaDetails = GenerateMfaDetails(response, mfaLoginDetails.Password);
+                var protectedString = MfaLoginDetails.ToProtectedString(_dataProtector, response, mfaLoginDetails.Password);
 
                 if (response.ChallengeName == ChallengeNameType.SMS_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.MfaSmsChallenge,
-                        mfaDetails, _headerService.GetConversationId());
+                        protectedString, _headerService.GetConversationId());
                 }
 
                 return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                     nameof(UserService), ErrorCode.MfaNoChallenge,
-                    mfaDetails, _headerService.GetConversationId());
+                    protectedString, _headerService.GetConversationId());
             }
             catch (Exception ex)
             {

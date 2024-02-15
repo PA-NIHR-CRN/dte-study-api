@@ -45,7 +45,6 @@ namespace Application.Contracts
         Response<string> HandleMfaException(Exception ex, string errorType);
         AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
             string username, string code, string codeKey);
-        MfaLoginDetails DeserializeMfaLoginDetails(string mfaDetails);
         Task<List<string>> ValidatePassword(string password);
     }
 }

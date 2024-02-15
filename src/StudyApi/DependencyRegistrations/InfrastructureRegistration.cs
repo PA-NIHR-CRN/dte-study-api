@@ -14,11 +14,10 @@ using Dte.Common.Services;
 using Dte.Location.Api.Client;
 using Dte.Reference.Data.Api.Client;
 using Dte.Study.Management.Api.Client;
-using Infrastructure.Decorators;
 using Infrastructure.Factories;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
-using Infrastructure.Services.Mocks;
+using Infrastructure.Services.Development;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -98,7 +97,7 @@ namespace StudyApi.DependencyRegistrations
                 if (devSettings.EnableStubs)
                 {
                     services.AddTransient<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
-                    services.AddTransient<IEmailService, MockEmailService>();
+                    services.AddTransient<IEmailService, NullEmailService>();
                 }
             }
 
