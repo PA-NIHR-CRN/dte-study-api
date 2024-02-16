@@ -64,7 +64,7 @@ namespace StudyApi
             services.AddSingleton(clientsSettings);
             services.AddSingleton(emailSettings);
             services.AddSingleton(appSettings);
-            services.AddSingleton(contentfulSettings);              
+            services.AddSingleton(contentfulSettings);
 
             services.AddTransient(provider => Configuration);
 
@@ -137,7 +137,8 @@ namespace StudyApi
                     options.Cookie.IsEssential = true;
                     options.SlidingExpiration = true;
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                    options.Cookie.SameSite = Environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict;
+                    options.Cookie.SameSite =
+                        Environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict;
 
                     options.Events.OnRedirectToLogin = (context) =>
                     {
@@ -179,7 +180,7 @@ namespace StudyApi
 
             // Applications / Features
             services.AddApplication();
-            services.AddInfrastructure(Configuration, Environment.EnvironmentName);
+            services.AddInfrastructure(Configuration, Environment);
             services.AddMessaging(Configuration);
 
             // All others
@@ -261,12 +262,13 @@ namespace StudyApi
             {
                 app.UseCors("AllowLocal");
             }
-            
 
             app.UseCookiePolicy(new CookiePolicyOptions
             {
                 MinimumSameSitePolicy = Environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict,
-                Secure = Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always,
+                Secure = Environment.IsDevelopment()
+                    ? CookieSecurePolicy.SameAsRequest
+                    : CookieSecurePolicy.Always,
                 OnAppendCookie = context =>
                 {
                     if (context.CookieName == ".BPOR.Session")
@@ -281,8 +283,8 @@ namespace StudyApi
             app.UseMiddleware<SessionExpiryMiddleware>();
 
             app.UseWhen(context =>
-                // bypass maintainence mode middleware for configuration controller
-                !context.Request.Path.StartsWithSegments("/api/configuration"),
+                    // bypass maintainence mode middleware for configuration controller
+                    !context.Request.Path.StartsWithSegments("/api/configuration"),
                 config => config.UseMiddleware<MaintenanceMiddleware>()
             );
 

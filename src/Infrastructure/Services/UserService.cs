@@ -22,14 +22,12 @@ using Dte.Common.Helpers;
 using Dte.Common.Http;
 using Dte.Common.Models;
 using Dte.Common.Responses;
-using FluentValidation.Results;
 using Infrastructure.Clients;
 using Infrastructure.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using PhoneNumbers;
 using AdminGetUserResponse = Application.Responses.V1.Users.AdminGetUserResponse;
@@ -37,6 +35,7 @@ using ConfirmForgotPasswordResponse = Application.Responses.V1.Users.ConfirmForg
 using ForgotPasswordResponse = Application.Responses.V1.Users.ForgotPasswordResponse;
 using ResendConfirmationCodeResponse = Application.Responses.V1.Users.ResendConfirmationCodeResponse;
 using SignUpResponse = Application.Responses.V1.Users.SignUpResponse;
+using ValidationFailure = FluentValidation.Results.ValidationFailure;
 
 namespace Infrastructure.Services
 {
@@ -49,18 +48,17 @@ namespace Infrastructure.Services
         private readonly IEmailService _emailService;
         private readonly NhsLoginHttpClient _nhsLoginHttpClient;
         private readonly IMediator _mediator;
-        private readonly DevSettings _devSettings;
         private readonly IParticipantService _participantService;
         private readonly IDataProtector _dataProtector;
         private readonly IContentfulService _contentfulService;
         private readonly ContentfulSettings _contentfulSettings;
 
+
         public UserService(IMediator mediator, IAmazonCognitoIdentityProvider provider, IHeaderService headerService,
             AwsSettings awsSettings, ILogger<UserService> logger,
             IEmailService emailService, IParticipantService participantService,
-            NhsLoginHttpClient nhsLoginHttpClient, IOptions<DevSettings> devSettings,
-            IDataProtectionProvider dataProtector, IContentfulService contentfulService,
-            ContentfulSettings contentfulSettings)
+            NhsLoginHttpClient nhsLoginHttpClient, IDataProtectionProvider dataProtector,
+            IContentfulService contentfulService, ContentfulSettings contentfulSettings)
 
         {
             _provider = provider;
@@ -70,31 +68,13 @@ namespace Infrastructure.Services
             _emailService = emailService;
             _nhsLoginHttpClient = nhsLoginHttpClient;
             _mediator = mediator;
-            _devSettings = devSettings.Value;
             _participantService = participantService;
             _dataProtector = dataProtector.CreateProtector("mfa.login.details");
             _contentfulService = contentfulService;
             _contentfulSettings = contentfulSettings;
         }
 
-        private string GenerateMfaDetails(AdminInitiateAuthResponse response, string password = null)
-        {
-            var sessionId = response.Session;
-            var username = response.ChallengeParameters["USER_ID_FOR_SRP"];
-            // conditionally add phone number if it exists
-            var phoneNumber = response.ChallengeParameters.ContainsKey("CODE_DELIVERY_DESTINATION")
-                ? response.ChallengeParameters["CODE_DELIVERY_DESTINATION"]
-                : null;
 
-
-            return _dataProtector.Protect(JsonConvert.SerializeObject(new MfaLoginDetails
-            {
-                SessionId = sessionId,
-                Username = username,
-                Password = password,
-                PhoneNumber = phoneNumber
-            }));
-        }
 
         public async Task<Response<string>> LoginAsync(string email, string password)
         {
@@ -112,27 +92,27 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminInitiateAuthAsync(request);
-                var mfaDetails = GenerateMfaDetails(response, password);
+                var protectedString = MfaLoginDetails.ToProtectedString(_dataProtector, response);
 
                 if (response.ChallengeName == ChallengeNameType.MFA_SETUP)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.MfaSetupChallenge,
-                        mfaDetails, _headerService.GetConversationId());
+                        protectedString, _headerService.GetConversationId());
                 }
 
                 if (response.ChallengeName == ChallengeNameType.SMS_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.MfaSmsChallenge,
-                        mfaDetails, _headerService.GetConversationId());
+                        protectedString, _headerService.GetConversationId());
                 }
 
                 if (response.ChallengeName == ChallengeNameType.SOFTWARE_TOKEN_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.MfaSoftwareTokenChallenge,
-                        mfaDetails, _headerService.GetConversationId());
+                        protectedString, _headerService.GetConversationId());
                 }
 
                 if (response?.AuthenticationResult != null)
@@ -175,11 +155,11 @@ namespace Infrastructure.Services
             }
         }
 
-        private MfaLoginDetails DeserializeMfaLoginDetails(string mfaDetails) =>
+        public MfaLoginDetails DeserializeMfaLoginDetails(string mfaDetails) =>
             JsonConvert.DeserializeObject<MfaLoginDetails>(_dataProtector.Unprotect(mfaDetails));
 
 
-        private AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
+        public AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
             string username, string code, string codeKey)
         {
             return new AdminRespondToAuthChallengeRequest
@@ -196,7 +176,7 @@ namespace Infrastructure.Services
             };
         }
 
-        private Response<string> HandleMfaException(Exception ex, string errorType)
+        public Response<string> HandleMfaException(Exception ex, string errorType)
         {
             var exceptionResponse = Response<string>.CreateErrorMessageResponse(
                 ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), errorType,
@@ -270,18 +250,18 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminInitiateAuthAsync(request);
-                var mfaDetails = GenerateMfaDetails(response, mfaLoginDetails.Password);
+                var protectedString = MfaLoginDetails.ToProtectedString(_dataProtector, response, mfaLoginDetails.Password);
 
                 if (response.ChallengeName == ChallengeNameType.SMS_MFA)
                 {
                     return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                         nameof(UserService), ErrorCode.MfaSmsChallenge,
-                        mfaDetails, _headerService.GetConversationId());
+                        protectedString, _headerService.GetConversationId());
                 }
 
                 return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                     nameof(UserService), ErrorCode.MfaNoChallenge,
-                    mfaDetails, _headerService.GetConversationId());
+                    protectedString, _headerService.GetConversationId());
             }
             catch (Exception ex)
             {
@@ -393,45 +373,6 @@ namespace Infrastructure.Services
 
             return Task.FromResult(string.IsNullOrEmpty(phoneNumber) ? string.Empty : phoneNumber);
         }
-
-        public async Task<Response<string>> RespondToMfaChallengeAsync(string mfaCode, string mfaDetails)
-        {
-            try
-            {
-                var mfaLoginDetails = DeserializeMfaLoginDetails(mfaDetails);
-                var request = CreateAuthChallengeRequest("SMS_MFA", mfaLoginDetails.SessionId, mfaLoginDetails.Username,
-                    mfaCode, "SMS_MFA_CODE");
-                var response = await _provider.AdminRespondToAuthChallengeAsync(request);
-
-                if (response?.AuthenticationResult == null)
-                {
-                    _logger.LogError("AWS Cognito returned as response without an AuthenticationResult");
-                    return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.AuthenticationError,
-                        "Authentication Result from the service provider was null", _headerService.GetConversationId());
-                }
-
-                return Response<string>.CreateSuccessfulContentResponse(response.AuthenticationResult.IdToken,
-                    _headerService.GetConversationId());
-            }
-            catch (CodeMismatchException ex)
-            {
-                return HandleMfaException(ex, ErrorCode.MfaCodeMismatch);
-            }
-            catch (NotAuthorizedException ex)
-            {
-                return HandleMfaException(ex,
-                    ex.Message == "Invalid session for the user, session is expired."
-                        ? ErrorCode.MfaSessionExpired
-                        : "Not_Authorized");
-            }
-            catch (Exception ex)
-            {
-                var response = HandleMfaException(ex, "Unknown error responding to mfa challenge");
-                return response;
-            }
-        }
-
 
         private string CleanPhoneNumber(string phoneNumber)
         {
@@ -841,146 +782,6 @@ namespace Infrastructure.Services
                 _logger.LogError(ex,
                     $"Unknown error logging in with NHS login\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
                 return exceptionResponse;
-            }
-        }
-
-        public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password, string selectedLocale)
-        {
-            try
-            {
-                var passwordErrors = await ValidatePassword(password);
-
-                if (passwordErrors.Any())
-                {
-                    return Response<SignUpResponse>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                        nameof(UserService), ErrorCode.PasswordValidationError,
-                        $"Password validation errors: {string.Join("; ", passwordErrors)}",
-                        _headerService.GetConversationId());
-                }
-
-                bool cognitoUserExists = await UserExistsAsync(email);
-
-                if (cognitoUserExists)
-                {
-                    _logger.LogInformation("Attempted to create user with email {Email} but user already exists",
-                        email);
-                    var cognitoUser = await _provider.AdminGetUserAsync(new AdminGetUserRequest
-                        { UserPoolId = _awsSettings.CognitoPoolId, Username = email });
-
-
-                    // if user is not verified, resend confirmation code
-                    if (cognitoUser.UserStatus == UserStatusType.UNCONFIRMED)
-                    {
-                        var resendConfirmationCodeResponse = await ResendVerificationEmailAsync(email);
-
-                        if (!resendConfirmationCodeResponse.IsSuccess)
-                        {
-                            return Response<SignUpResponse>.CreateErrorMessageResponse(
-                                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.SignUpError,
-                                $"Error resending confirmation code to user with email {email}",
-                                _headerService.GetConversationId());
-                        }
-                    }
-                    else
-                    {
-                        // get participant details using id
-                        var participant = await _participantService.GetParticipantDetailsAsync(cognitoUser.Username);
-                        if (participant == null)
-                        {
-                            return Response<SignUpResponse>.CreateErrorMessageResponse(
-                                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.SignUpError,
-                                $"User with email {email} not found", _headerService.GetConversationId());
-                        }
-
-                        var request = new EmailContentRequest
-                        {
-                            EmailName = _contentfulSettings.EmailTemplates.EmailAccountExists,
-                            SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
-                            FirstName = participant.Firstname,
-                        };
-
-                        var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
-
-                        await _emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
-                            contentfulEmail.EmailBody);
-                        
-                        throw new UsernameExistsException(email);
-                    }
-                }
-
-
-                // check if user exists in participant details table and send email
-                var participantDetails = await _participantService.GetParticipantDetailsByEmailAsync(email);
-                if (participantDetails != null)
-                {
-                    var request = new EmailContentRequest
-                    {
-                        EmailName = _contentfulSettings.EmailTemplates.NhsAccountExists,
-                        SelectedLocale = new CultureInfo(participantDetails.SelectedLocale ?? SelectedLocale.Default),
-                        FirstName = participantDetails.Firstname,
-                    };
-
-                    var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
-
-                    await _emailService.SendEmailAsync(participantDetails.Email, contentfulEmail.EmailSubject,
-                        contentfulEmail.EmailBody);
-
-                    throw new UsernameExistsException(email);
-                }
-
-                var response = await _provider.SignUpAsync(new SignUpRequest
-                {
-                    ClientId = _awsSettings.CognitoAppClientIds[0],
-                    Username = email,
-                    Password = password,
-                    ClientMetadata = new Dictionary<string, string>
-                    {
-                        { "selectedLocale", selectedLocale ?? "en-GB" }
-                    }
-                });
-
-                if (_devSettings.AutoConfirmNewCognitoSignup)
-                {
-                    await _provider.AdminConfirmSignUpAsync(new AdminConfirmSignUpRequest
-                    {
-                        Username = email,
-                        UserPoolId = _awsSettings.CognitoPoolId,
-                    });
-                }
-
-                return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                    new SignUpResponse { IsSuccess = true, UserId = response.UserSub },
-                    _headerService.GetConversationId());
-            }
-            catch (UsernameExistsException ex)
-            {
-                _logger.LogError(ex,
-                    $"Error signing up user {email}, username already exists");
-                // Return a generic success response, to appear as though registration was successful
-                return Response<SignUpResponse>.CreateErrorMessageResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
-                    ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.",
-                    _headerService.GetConversationId());
-            }
-
-            catch (InvalidParameterException ex)
-            {
-                _logger.LogError(ex,
-                    $"Invalid parameters provided for user signup {email}");
-                return Response<SignUpResponse>.CreateErrorMessageResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
-                    ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.",
-                    _headerService.GetConversationId());
-            }
-
-            catch (Exception ex)
-            {
-                _logger.LogError(ex,
-                    $"Unknown error signing up user with email {email}");
-                return Response<SignUpResponse>.CreateErrorMessageResponse(
-                    ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
-                    ErrorCode.InternalServerError, "An error occurred during sign up. Please try again later.",
-                    _headerService.GetConversationId());
             }
         }
 
@@ -1460,7 +1261,7 @@ namespace Infrastructure.Services
             }
         }
 
-        private async Task<List<string>> ValidatePassword(string password)
+        public async Task<List<string>> ValidatePassword(string password)
         {
             var passwordPolicyTypeResponse = await GetPasswordPolicyTypeAsync();
 
@@ -1489,13 +1290,5 @@ namespace Infrastructure.Services
         private static bool IsSuccessHttpStatusCode(int httpStatusCode) => httpStatusCode >= StatusCodes.Status200OK &&
                                                                            httpStatusCode <
                                                                            StatusCodes.Status300MultipleChoices;
-    }
-
-    public class MfaLoginDetails
-    {
-        public string Username { get; set; }
-        public string SessionId { get; set; }
-        public string Password { get; set; }
-        public string PhoneNumber { get; set; }
     }
 }

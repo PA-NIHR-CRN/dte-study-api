@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Amazon;
 using Amazon.CognitoIdentityProvider;
 using Amazon.DynamoDBv2;
@@ -19,8 +17,11 @@ using Dte.Study.Management.Api.Client;
 using Infrastructure.Factories;
 using Infrastructure.Persistence;
 using Infrastructure.Services;
+using Infrastructure.Services.Development;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StudyApi.Mocks;
 
@@ -28,10 +29,8 @@ namespace StudyApi.DependencyRegistrations
 {
     public static class InfrastructureRegistration
     {
-        private static readonly string[] ProdEnvironmentNames = { "production", "prod", "live" };
-
         public static IServiceCollection AddInfrastructure(this IServiceCollection services,
-            IConfiguration configuration, string environmentName)
+            IConfiguration configuration, IWebHostEnvironment environment)
         {
             // Rate limiting
             services.AddMemoryCache();
@@ -53,12 +52,11 @@ namespace StudyApi.DependencyRegistrations
             services.AddScoped<IContentfulService, ContentfulService>();
             services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
             services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();
-
+            services.AddTransient<IAuthenticationService, AuthenticationService>();
 
             // Contentful set up
             services.AddContentfulServices(configuration);
-
-
+            
             // AWS
             var awsSettings = configuration.GetSection(AwsSettings.SectionName).Get<AwsSettings>();
             var amazonDynamoDbConfig = new AmazonDynamoDBConfig();
@@ -91,14 +89,16 @@ namespace StudyApi.DependencyRegistrations
                 clientsSettings.ReferenceDataService, 2, logger);
 
             var devSettings = configuration.GetSection(DevSettings.SectionName).Get<DevSettings>();
+            services.Configure<DevSettings>(configuration.GetSection(DevSettings.SectionName));
 
-            // If not Prod, then enable stubs
-            if (devSettings.EnableStubs && !ProdEnvironmentNames.Any(x =>
-                    string.Equals(x, environmentName, StringComparison.OrdinalIgnoreCase)))
+            if (!environment.IsProduction())
             {
-                // Enable local stubs
-                services.AddScoped<IEmailService, MockEmailService>();
-                services.AddSingleton<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
+                services.Decorate<IAuthenticationService, DevAuthenticationService>();
+                if (devSettings.EnableStubs)
+                {
+                    services.AddTransient<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
+                    services.AddTransient<IEmailService, NullEmailService>();
+                }
             }
 
             return services;
