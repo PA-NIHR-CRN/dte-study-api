@@ -92,7 +92,7 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminInitiateAuthAsync(request);
-                var protectedString = MfaLoginDetails.ToProtectedString(_dataProtector, response);
+                var protectedString = MfaLoginDetails.ToProtectedString(_dataProtector, response, password);
 
                 if (response.ChallengeName == ChallengeNameType.MFA_SETUP)
                 {
