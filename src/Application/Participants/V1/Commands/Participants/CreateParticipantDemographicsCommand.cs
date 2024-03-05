@@ -23,7 +23,6 @@ namespace Application.Participants.V1.Commands.Participants
 {
     public class CreateParticipantDemographicsCommand : IRequest<Response<object>>
     {
-        private const string DefaultLocale = "en-GB";
         public string ParticipantId { get; }
         public string MobileNumber { get; }
         public string LandlineNumber { get; }
@@ -63,7 +62,7 @@ namespace Application.Participants.V1.Commands.Participants
 
         public class
             CreateParticipantDemographicsCommandHandler : IRequestHandler<CreateParticipantDemographicsCommand,
-                Response<object>>
+            Response<object>>
         {
             private readonly IParticipantRepository _participantRepository;
             private readonly IHeaderService _headerService;
@@ -98,31 +97,24 @@ namespace Application.Participants.V1.Commands.Participants
                     if (!entity.HasDemographics)
                     {
                         var user = await _participantRepository.GetParticipantDetailsAsync(request.ParticipantId);
-                        if (user.NhsId is null)
+
+                        var contentfulEmailRequest = new EmailContentRequest
                         {
-                            _logger.LogInformation(
-                                "Sending email with name {EmailTemplatesNewAccount} to {UserEmail} for participant {UserParticipantId}",
-                                _contentfulSettings.EmailTemplates.NewAccount, user.Email, user.ParticipantId);
+                            EmailName = _contentfulSettings.EmailTemplates.NhsSignUp,
+                            SelectedLocale = new CultureInfo(user.SelectedLocale ?? SelectedLocale.Default),
+                        };
 
-                            var contentfulEmailRequest = new EmailContentRequest
-                            {
-                                EmailName = _contentfulSettings.EmailTemplates.NewAccount,
-                                SelectedLocale = new CultureInfo(user.SelectedLocale ?? SelectedLocale.Default),
-                            };
-                            
-                            _logger.LogInformation("ContentfulEmailRequest: {SerializeObject}",
-                                JsonConvert.SerializeObject(contentfulEmailRequest));
+                        var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
+                        
+                        _logger.LogInformation(
+                            "Sending email with name {EmailTemplatesNhsSignUp} to {UserEmail} for participant {UserParticipantId} with content {ContentfulEmail}",
+                            _contentfulSettings.EmailTemplates.NhsSignUp, user.Email, user.ParticipantId,
+                            JsonConvert.SerializeObject(contentfulEmail));
 
-                            var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
-                            
-                            _logger.LogInformation("ContentfulEmail: {SerializeObject}",
-                                JsonConvert.SerializeObject(contentfulEmail));
-
-                            await _emailService.SendEmailAsync(user.Email, contentfulEmail.EmailSubject,
-                                contentfulEmail.EmailBody);
-                        }
+                        await _emailService.SendEmailAsync(user.Email, contentfulEmail.EmailSubject,
+                            contentfulEmail.EmailBody);
                     }
-
+                    
                     if (entity == null)
                     {
                         entity = new ParticipantDemographics
