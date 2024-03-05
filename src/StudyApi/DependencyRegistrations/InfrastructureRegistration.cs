@@ -93,11 +93,12 @@ namespace StudyApi.DependencyRegistrations
 
             if (!environment.IsProduction())
             {
-                services.Decorate<IAuthenticationService, DevAuthenticationService>();
+                services.Decorate<IAuthenticationService, DevAuthenticationService>(); 
+                services.Decorate<IEmailService, NullEmailService>();
+                
                 if (devSettings.EnableStubs)
                 {
                     services.AddTransient<IAmazonCognitoIdentityProvider, MockCognitoProvider>();
-                    services.AddTransient<IEmailService, NullEmailService>();
                 }
             }
 

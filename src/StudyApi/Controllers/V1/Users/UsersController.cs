@@ -43,10 +43,11 @@ namespace StudyApi.Controllers.V1.Users
         private readonly ISessionService _sessionService;
         private readonly IUserService _userService;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IParticipantService _participantService;
 
         public UsersController(IMediator mediator, ILogger<UsersController> logger,
             IDataProtectionProvider dataProtector, ISessionService sessionService, IUserService userService,
-            IAuthenticationService authenticationService)
+            IAuthenticationService authenticationService, IParticipantService participantService)
         {
             _mediator = mediator;
             _logger = logger;
@@ -54,6 +55,7 @@ namespace StudyApi.Controllers.V1.Users
             _sessionService = sessionService;
             _userService = userService;
             _authenticationService = authenticationService;
+            _participantService = participantService;
         }
 
         private async Task CreateSessionAndLogin(string jwtToken, string sessionId)
@@ -511,8 +513,7 @@ namespace StudyApi.Controllers.V1.Users
         [HttpDelete("deleteparticipantaccount")]
         public async Task<IActionResult> DeleteParticipantAccount()
         {
-            return Ok(await _mediator.Send(
-                new DeleteParticipantAccountCommand(User.GetUserEmail(), User.GetParticipantId())));
+            return Ok(_participantService.DeleteUserAsync(User.GetParticipantId()));
         }
 
         /// <summary>
