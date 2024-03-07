@@ -74,8 +74,6 @@ namespace Infrastructure.Services
             _contentfulSettings = contentfulSettings;
         }
 
-
-
         public async Task<Response<string>> LoginAsync(string email, string password)
         {
             var request = new AdminInitiateAuthRequest
@@ -759,17 +757,6 @@ namespace Infrastructure.Services
                     nhsUserInfo.FirstName, nhsUserInfo.LastName,
                     consentRegistration, nhsUserInfo.NhsId, nhsUserInfo.DateOfBirth.Value, nhsUserInfo.NhsNumber,
                     selectedLocale));
-
-                var request = new EmailContentRequest
-                {
-                    EmailName = _contentfulSettings.EmailTemplates.NhsSignUp,
-                    FirstName = nhsUserInfo.FirstName,
-                    SelectedLocale = new CultureInfo(selectedLocale ?? SelectedLocale.Default),
-                };
-
-                var contentfulEmail = await _contentfulService.GetEmailContentAsync(request);
-                await _emailService.SendEmailAsync(nhsUserInfo.Email, contentfulEmail.EmailSubject,
-                    contentfulEmail.EmailBody);
 
                 return Response<SignUpResponse>.CreateSuccessfulContentResponse(
                     new SignUpResponse { UserConsents = true, }, _headerService.GetConversationId());
