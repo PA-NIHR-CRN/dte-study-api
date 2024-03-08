@@ -11,20 +11,17 @@ on:
 jobs:
   build_test_deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        env: [ dev, test, uat, oat, prod ]
     env:
-      PREFIX: ${{ 
-        (matrix.env == 'dev' || matrix.env == 'test' && 'crnccd') ||
-        (matrix.env == 'uat' && 'crnccs') ||
-        (matrix.env == 'oat' || matrix.env == 'prod' && 'crnccp')}}
-
+      ENVIRONMENT: ${{ github.event.inputs.environment }} # Use the dispatched environment input directly.
+      PREFIX: ${{
+        (github.event.inputs.environment == 'dev' || github.event.inputs.environment == 'test') && 'crnccd' ||
+        (github.event.inputs.environment == 'uat') && 'crnccs' ||
+        (github.event.inputs.environment == 'oat' || github.event.inputs.environment == 'prod') && 'crnccp'}}
       
     steps:
       - uses: actions/checkout@v4
       - name: Configure AWS credentials for dev/test
-        if: matrix.env == 'dev' || matrix.env == 'test'
+        if: ${{ env.ENVIRONMENT }} == 'dev' || ${{ env.ENVIRONMENT }} == 'test'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
@@ -32,7 +29,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Configure AWS credentials for uat
-        if: matrix.env == 'uat'
+        if: ${{ env.ENVIRONMENT }} == 'uat'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID }}
@@ -40,7 +37,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Configure AWS credentials for prod and oat
-        if: matrix.env == 'prod' || matrix.env == 'oat'
+        if: ${{ env.ENVIRONMENT }} == 'prod' || ${{ env.ENVIRONMENT }} == 'oat'
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
@@ -70,9 +67,9 @@ jobs:
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler ${{ env.PREFIX }}-lambda-${{ matrix.env }}-dte-participant-stream --function-role ${{ env.PREFIX }}-iam-${{ matrix.env }}-dte-role -ev "ASPNETCORE_ENVIRONMENT=Production;DTE_BUILD_STRING=${{ matrix.env }}-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=${{ env.PREFIX }}-secret-${{ matrix.env }}-rds-aurora-mysql-dte-stream-s" --function-publish true
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler ${{ env.PREFIX }}-lambda-${{ env.ENVIRONMENT }}-dte-participant-stream --function-role ${{ env.PREFIX }}-iam-${{ env.ENVIRONMENT }}-dte-role -ev "ASPNETCORE_ENVIRONMENT=Production;DTE_BUILD_STRING=${{ env.ENVIRONMENT }}-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=${{ env.PREFIX }}-secret-${{ env.ENVIRONMENT }}-rds-aurora-mysql-dte-stream-s" --function-publish true
 
       - name: Update alias to point to new version
         run: |
-          VERSION=$(aws lambda list-versions-by-function --function-name ${{ env.PREFIX }}-lambda-${{ matrix.env }}-dte-participant-stream --query "Versions[-1]" | jq -r .Version)
-          aws lambda update-alias --function-name ${{ env.PREFIX }}-lambda-${{ matrix.env }}-dte-participant-stream --name main --function-version $VERSION
+          VERSION=$(aws lambda list-versions-by-function --function-name ${{ env.PREFIX }}-lambda-${{ env.ENVIRONMENT }}-dte-participant-stream --query "Versions[-1]" | jq -r .Version)
+          aws lambda update-alias --function-name ${{ env.PREFIX }}-lambda-${{ env.ENVIRONMENT }}-dte-participant-stream --name main --function-version $VERSION
