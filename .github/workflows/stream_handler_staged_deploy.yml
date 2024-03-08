@@ -50,8 +50,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: reference-data-api-artifact
-          path: src/StudyApi/bin/Release/net6.0/publish/
+          name: stream-handler-artifact
+          path: Dynamo.Stream.Handler/src/Dynamo.Stream.Handler/bin/Release/net6.0/publish/
   
   QA_deploy:
     runs-on: ubuntu-latest
@@ -61,8 +61,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
         with:
-          name: reference-data-api-artifact
-          path: src/StudyApi/bin/Release/net6.0/publish/
+          name: stream-handler-artifact
+          path: Dynamo.Stream.Handler/src/Dynamo.Stream.Handler/bin/Release/net6.0/publish/
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -91,8 +91,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
         with:
-          name: reference-data-api-artifact
-          path: src/StudyApi/bin/Release/net6.0/publish/
+          name: stream-handler-artifact
+          path: Dynamo.Stream.Handler/src/Dynamo.Stream.Handler/bin/Release/net6.0/publish/
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -121,8 +121,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
         with:
-          name: reference-data-api-artifact
-          path: src/StudyApi/bin/Release/net6.0/publish/
+          name: stream-handler-artifact
+          path: Dynamo.Stream.Handler/src/Dynamo.Stream.Handler/bin/Release/net6.0/publish/
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -151,8 +151,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
         with:
-          name: reference-data-api-artifact
-          path: src/StudyApi/bin/Release/net6.0/publish/
+          name: stream-handler-artifact
+          path: Dynamo.Stream.Handler/src/Dynamo.Stream.Handler/bin/Release/net6.0/publish/
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
