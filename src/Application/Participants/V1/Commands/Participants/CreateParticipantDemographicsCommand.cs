@@ -137,6 +137,7 @@ namespace Application.Participants.V1.Commands.Participants
                     entity.Disability = request.Disability;
                     entity.DisabilityDescription = request.DisabilityDescription;
                     entity.HealthConditionInterests = request.HealthConditionInterests?.ToList();
+                    entity.Stage2CompleteUtc = DateTime.UtcNow;
 
                     if (request.Address != null)
                     {
