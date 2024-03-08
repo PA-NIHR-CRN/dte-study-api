@@ -124,6 +124,7 @@ public class ParticipantMapper : IParticipantMapper
         destination.DailyLifeImpactId = _refDataService.GetDailyLifeImpactId(source.DisabilityDescription);
         destination.CreatedAt = source.CreatedAtUtc;
         destination.UpdatedAt = source.UpdatedAtUtc.HasValue ? source.UpdatedAtUtc.Value : source.CreatedAtUtc;
+        destination.Stage2CompleteUtc = source.Stage2CompleteUtc;
 
         if (!destination.SourceReferences.Any(x => x.Pk == record.PK()))
         {
