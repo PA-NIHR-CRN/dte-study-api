@@ -98,23 +98,27 @@ namespace Application.Participants.V1.Commands.Participants
                     {
                         var user = await _participantRepository.GetParticipantDetailsAsync(request.ParticipantId);
 
+                        var emailTemplate = user.NhsId is null
+                            ? _contentfulSettings.EmailTemplates.NewAccount
+                            : _contentfulSettings.EmailTemplates.NhsSignUp;
+
                         var contentfulEmailRequest = new EmailContentRequest
                         {
-                            EmailName = _contentfulSettings.EmailTemplates.NhsSignUp,
+                            EmailName = emailTemplate,
                             SelectedLocale = new CultureInfo(user.SelectedLocale ?? SelectedLocale.Default),
                         };
 
                         var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
-                        
+
                         _logger.LogInformation(
                             "Sending email with name {EmailTemplatesNhsSignUp} to {UserEmail} for participant {UserParticipantId} with content {ContentfulEmail}",
-                            _contentfulSettings.EmailTemplates.NhsSignUp, user.Email, user.ParticipantId,
+                            emailTemplate, user.Email, user.ParticipantId,
                             JsonConvert.SerializeObject(contentfulEmail));
 
                         await _emailService.SendEmailAsync(user.Email, contentfulEmail.EmailSubject,
                             contentfulEmail.EmailBody);
                     }
-                    
+
                     if (entity == null)
                     {
                         entity = new ParticipantDemographics
