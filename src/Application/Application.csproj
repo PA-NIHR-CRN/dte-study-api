@@ -14,7 +14,7 @@
         <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.93" />
         <PackageReference Include="Dte.Common" Version="1.7.7" />
         <PackageReference Include="Dte.Location.Api.Client" Version="1.0.2" />
-        <PackageReference Include="Dte.Reference.Data.Api.Client" Version="1.0.0" />
+        <PackageReference Include="Dte.Reference.Data.Api.Client" Version="1.0.4" />
         <PackageReference Include="Dte.Study.Management.Api.Client" Version="1.0.2" />
         <PackageReference Include="MediatR" Version="10.0.1" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />

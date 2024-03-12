@@ -24,6 +24,7 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
 
     public bool RegistrationConsent { get; set; }
     public DateTime? RegistrationConsentAtUtc { get; set; }
+    public DateTime? Stage2CompleteUtc { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

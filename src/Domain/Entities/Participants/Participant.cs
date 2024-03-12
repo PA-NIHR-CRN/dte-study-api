@@ -24,6 +24,7 @@ public class Participant
     [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? ConsentRegistrationAtUtc { get; set; }
     [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? RemovalOfConsentRegistrationAtUtc { get; set; }
     [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? UpdatedAtUtc { get; set; }
+    [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? Stage2CompleteUtc { get; set; }
     [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime CreatedAtUtc { get; set; }
     [DynamoDBProperty] public string MobileNumber { get; set; }
     [DynamoDBProperty] public string LandlineNumber { get; set; }
