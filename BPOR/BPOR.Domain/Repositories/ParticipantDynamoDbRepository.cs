@@ -4,6 +4,7 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Interfaces;
+using BPOR.Domain.Utils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -16,21 +17,19 @@ public class ParticipantDynamoDbRepository(
     DynamoDBOperationConfig config)
     : IParticipantRepository
 {
-    private static string ParticipantKey(string participantId) => $"PARTICIPANT#{participantId}";
-    private static string ParticipantKey() => "PARTICIPANT#";
-
     public async Task<DynamoParticipant> GetParticipantAsync(string participantId, CancellationToken cancellationToken)
     {
-        return await context.LoadAsync<DynamoParticipant>(ParticipantKey(participantId), ParticipantKey(),
+        return await context.LoadAsync<DynamoParticipant>(KeyUtils.ParticipantKey(participantId),
+            KeyUtils.ParticipantKey(),
             config, cancellationToken);
     }
 
     public async Task CreateParticipantAsync(DynamoParticipant entity, CancellationToken cancellationToken)
     {
-        entity.Pk = ParticipantKey(string.IsNullOrEmpty(entity.ParticipantId)
+        entity.Pk = KeyUtils.ParticipantKey(string.IsNullOrEmpty(entity.ParticipantId)
             ? entity.NhsId
             : entity.ParticipantId);
-        entity.Sk = ParticipantKey();
+        entity.Sk = KeyUtils.ParticipantKey();
 
         await context.SaveAsync(entity, config, cancellationToken);
     }

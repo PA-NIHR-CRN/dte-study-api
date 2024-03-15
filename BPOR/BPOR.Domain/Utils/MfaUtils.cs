@@ -2,7 +2,7 @@ using Dte.Common.Exceptions;
 using FluentValidation.Results;
 using PhoneNumbers;
 
-namespace BPOR.Infrastructure.Utils;
+namespace BPOR.Domain.Utils;
 
 public static class MfaUtils
 {

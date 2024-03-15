@@ -1,10 +1,10 @@
 using BPOR.Domain.Entities;
+using BPOR.Domain.Utils;
 using BPOR.Infrastructure.Clients;
 using BPOR.Infrastructure.Constants;
 using BPOR.Infrastructure.Interfaces;
 using BPOR.Infrastructure.Responses.V1.Nhs;
 using BPOR.Infrastructure.Responses.V1.Users;
-using BPOR.Infrastructure.Utils;
 using Dte.Common.Exceptions;
 using Dte.Common.Exceptions.Common;
 using Dte.Common.Extensions;

@@ -1,4 +1,4 @@
-namespace BPOR.Infrastructure.Utils;
+namespace BPOR.Domain.Utils;
 
 public static class AgeUtils
 {

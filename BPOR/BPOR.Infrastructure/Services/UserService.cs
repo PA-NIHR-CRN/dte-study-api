@@ -3,13 +3,13 @@ using Amazon.CognitoIdentityProvider.Model;
 using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Constants;
 using BPOR.Infrastructure.Interfaces;
-using BPOR.Infrastructure.Utils;
 using Dte.Common.Exceptions.Common;
 using Dte.Common.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Net;
+using BPOR.Domain.Utils;
 
 namespace BPOR.Infrastructure.Services;
 
