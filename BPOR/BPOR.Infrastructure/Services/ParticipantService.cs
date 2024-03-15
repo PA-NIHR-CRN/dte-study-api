@@ -229,7 +229,7 @@ public class ParticipantService(
             await RemoveCognitoUserAsync(participantId, cancellationToken);
         }
 
-        await participantRepository.DeleteParticipantAsync(entity.Pk, cancellationToken);
+        await participantRepository.DeleteParticipantAsync(entity, cancellationToken);
     }
 
     private async Task RemoveCognitoUserAsync(string username, CancellationToken cancellationToken)

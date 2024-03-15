@@ -41,9 +41,9 @@ public class ParticipantDynamoDbRepository(
         return entity;
     }
 
-    public async Task DeleteParticipantAsync(string participantId, CancellationToken cancellationToken)
+    public async Task DeleteParticipantAsync(DynamoParticipant participant, CancellationToken cancellationToken)
     {
-        await context.DeleteAsync(participantId, config, cancellationToken);
+        await context.DeleteAsync(participant, config, cancellationToken);
     }
 
     public async Task<DynamoParticipant> QueryIndexForParticipantAsync(string query, string colName,
@@ -79,7 +79,7 @@ public class ParticipantDynamoDbRepository(
             logger.LogInformation("item: {Item}", JsonConvert.SerializeObject(item, Formatting.Indented));
 
             var participant = context.FromDocument<DynamoParticipant>(Document.FromAttributeMap(item));
-            return await GetParticipantAsync(participant.Pk.Replace("PARTICIPANT#", ""), cancellationToken);
+            return await GetParticipantAsync(KeyUtils.StripPrimaryKey(participant.Pk), cancellationToken);
         }
         catch (Exception e)
         {
