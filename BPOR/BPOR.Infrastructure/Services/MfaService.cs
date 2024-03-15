@@ -36,56 +36,45 @@ public class MfaService(
 {
     public async Task<Response<string>> SetUpMfaAsync(string mfaDetails, CancellationToken cancellationToken)
     {
-        try
+        // set up mfa device on cognito.  This may be a phone or a software token
+        var mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, mfaDetails);
+        var username = mfaLoginDetails.Username;
+        var password = mfaLoginDetails.Password;
+
+        // set up the mfa device on cognito with sms
+        var request = new AdminSetUserMFAPreferenceRequest
         {
-            // set up mfa device on cognito.  This may be a phone or a software token
-            var mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, mfaDetails);
-            var username = mfaLoginDetails.Username;
-            var password = mfaLoginDetails.Password;
-
-            // set up the mfa device on cognito with sms
-            var request = new AdminSetUserMFAPreferenceRequest
+            UserPoolId = awsSettings.CognitoPoolId,
+            Username = username,
+            SMSMfaSettings = new SMSMfaSettingsType
             {
-                UserPoolId = awsSettings.CognitoPoolId,
-                Username = username,
-                SMSMfaSettings = new SMSMfaSettingsType
-                {
-                    Enabled = true,
-                    PreferredMfa = true,
-                },
-            };
+                Enabled = true,
+                PreferredMfa = true,
+            },
+        };
 
-            var response = await provider.AdminSetUserMFAPreferenceAsync(request, cancellationToken);
+        var response = await provider.AdminSetUserMFAPreferenceAsync(request, cancellationToken);
 
-            if (response.HttpStatusCode != HttpStatusCode.OK)
-            {
-                logger.LogError("AWS Cognito returned a response without an AuthenticationResult");
-                return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), ErrorCode.AuthenticationError,
-                    "Authentication Result from the service provider was null");
-            }
-
-            // log the user in again to get the new tokens with mfa enabled
-            var loginResponse = await authService.LoginAsync(username, password, cancellationToken);
-
-            if (!loginResponse.IsSuccess)
-            {
-                var newMfaDetails = loginResponse.Errors.First().Detail;
-                return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), ErrorCode.MfaSmsChallenge,
-                    newMfaDetails);
-            }
-
-            return Response<string>.CreateSuccessfulContentResponse(response.HttpStatusCode.ToString());
-        }
-        catch (Exception ex)
+        if (response.HttpStatusCode != HttpStatusCode.OK)
         {
-            var exceptionResponse = Response<string>.CreateExceptionResponse(
-                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex);
-            logger.LogError(ex, "Unknown error setting up mfa\\r\\n{SerializeObject}",
-                JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
-            return exceptionResponse;
+            logger.LogError("AWS Cognito returned a response without an AuthenticationResult");
+            return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                nameof(UserService), ErrorCode.AuthenticationError,
+                "Authentication Result from the service provider was null");
         }
+
+        // log the user in again to get the new tokens with mfa enabled
+        var loginResponse = await authService.LoginAsync(username, password, cancellationToken);
+
+        if (!loginResponse.IsSuccess)
+        {
+            var newMfaDetails = loginResponse.Errors.First().Detail;
+            return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                nameof(UserService), ErrorCode.MfaSmsChallenge,
+                newMfaDetails);
+        }
+
+        return Response<string>.CreateSuccessfulContentResponse(response.HttpStatusCode.ToString());
     }
 
     public async Task<Response<string>> VerifySoftwareTokenAsync(string code, string sessionId, string mfaDetails,
@@ -136,10 +125,6 @@ public class MfaService(
             {
                 return HandleMfaException(ex, "Error");
             }
-        }
-        catch (Exception ex)
-        {
-            return HandleMfaException(ex, "Error");
         }
     }
 
@@ -200,74 +185,53 @@ public class MfaService(
 
             throw new CognitoPhoneNumberUpdateException(exceptionResponse.ToString());
         }
-        catch (Exception e)
-        {
-            var exceptionResponse = Response<string>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
-                nameof(UserService), "Cognito_Phone_Number_Update_Exception", e);
-
-            logger.LogError(e, "Error updating cognito phone number");
-
-            throw new CognitoPhoneNumberUpdateException(exceptionResponse.ToString());
-        }
     }
 
     public async Task<TotpTokenResult> GenerateTotpTokenAsync(string mfaDetails, CancellationToken cancellationToken)
     {
-        try
-        {
-            var mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, mfaDetails);
-            var username = mfaLoginDetails.Username;
+        var mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, mfaDetails);
+        var username = mfaLoginDetails.Username;
 
-            // get user and delete phone number
-            var user = await provider.AdminGetUserAsync(new AdminGetUserRequest
+        // get user and delete phone number
+        var user = await provider.AdminGetUserAsync(new AdminGetUserRequest
+        {
+            Username = username,
+            UserPoolId = awsSettings.CognitoPoolId
+        }, cancellationToken);
+
+        var phoneNumber = user.UserAttributes.FirstOrDefault(x => x.Name == "phone_number")?.Value;
+
+        if (!string.IsNullOrEmpty(phoneNumber))
+        {
+            // delete the phone number
+            await provider.AdminDeleteUserAttributesAsync(new AdminDeleteUserAttributesRequest
             {
                 Username = username,
-                UserPoolId = awsSettings.CognitoPoolId
+                UserPoolId = awsSettings.CognitoPoolId,
+                UserAttributeNames = ["phone_number"]
             }, cancellationToken);
 
-            var phoneNumber = user.UserAttributes.FirstOrDefault(x => x.Name == "phone_number")?.Value;
+            // get a new session id
+            var loginResponse = await authService.LoginAsync(username, mfaLoginDetails.Password, cancellationToken);
 
-            if (!string.IsNullOrEmpty(phoneNumber))
-            {
-                // delete the phone number
-                await provider.AdminDeleteUserAttributesAsync(new AdminDeleteUserAttributesRequest
-                {
-                    Username = username,
-                    UserPoolId = awsSettings.CognitoPoolId,
-                    UserAttributeNames = ["phone_number"]
-                }, cancellationToken);
-
-                // get a new session id
-                var loginResponse = await authService.LoginAsync(username, mfaLoginDetails.Password, cancellationToken);
-
-                var newMfaDetails = loginResponse.Errors.First().Detail;
-                mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, mfaDetails);
-            }
-
-            var associateRequest = new AssociateSoftwareTokenRequest
-            {
-                Session = mfaLoginDetails.SessionId,
-            };
-
-            var associateResponse = await provider.AssociateSoftwareTokenAsync(associateRequest, cancellationToken);
-            var secretCode = associateResponse.SecretCode;
-
-            return new TotpTokenResult
-            {
-                SecretCode = secretCode,
-                SessionId = associateResponse.Session,
-                Username = username,
-            };
+            var newMfaDetails = loginResponse.Errors.First().Detail;
+            mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, mfaDetails);
         }
-        catch (Exception e)
+
+        var associateRequest = new AssociateSoftwareTokenRequest
         {
-            var exceptionResponse = Response<string>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
-                nameof(UserService), ErrorCode.InternalServerError, e);
+            Session = mfaLoginDetails.SessionId,
+        };
 
-            logger.LogError(e, "Error generating totp token");
+        var associateResponse = await provider.AssociateSoftwareTokenAsync(associateRequest, cancellationToken);
+        var secretCode = associateResponse.SecretCode;
 
-            throw new Exception(exceptionResponse.ToString());
-        }
+        return new TotpTokenResult
+        {
+            SecretCode = secretCode,
+            SessionId = associateResponse.Session,
+            Username = username,
+        };
     }
 
     private AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
@@ -324,10 +288,6 @@ public class MfaService(
                     ? "Mfa_Used_Token"
                     : ErrorCode.MfaCodeExpired);
         }
-        catch (Exception ex)
-        {
-            return HandleMfaException(ex, "Unknown error responding to mfa challenge");
-        }
     }
 
     public async Task<Response<string>> ResendMfaChallengeAsync(string requestMfaDetails,
@@ -347,72 +307,47 @@ public class MfaService(
             }
         };
 
-        try
+
+        var response = await provider.AdminInitiateAuthAsync(request, cancellationToken);
+        var protectedString = MfaLoginDetails.ToProtectedString(dataProtector, response, mfaLoginDetails.Password);
+
+        if (response.ChallengeName == ChallengeNameType.SMS_MFA)
         {
-            var response = await provider.AdminInitiateAuthAsync(request, cancellationToken);
-            var protectedString = MfaLoginDetails.ToProtectedString(dataProtector, response, mfaLoginDetails.Password);
-
-            if (response.ChallengeName == ChallengeNameType.SMS_MFA)
-            {
-                return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                    nameof(UserService), ErrorCode.MfaSmsChallenge,
-                    protectedString);
-            }
-
             return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                nameof(UserService), ErrorCode.MfaNoChallenge,
+                nameof(UserService), ErrorCode.MfaSmsChallenge,
                 protectedString);
         }
-        catch (Exception ex)
-        {
-            var exceptionResponse = Response<string>.CreateExceptionResponse(
-                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex);
 
-            logger.LogError(ex,
-                "Unknown error resending mfa challenge for user with username {Username}\\r\\n{SerializeObject}",
-                mfaLoginDetails.Username, JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
-
-            return exceptionResponse;
-        }
+        return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+            nameof(UserService), ErrorCode.MfaNoChallenge,
+            protectedString);
     }
 
 
     public async Task<Response<string>> SendEmailOtpAsync(string requestMfaDetails, CancellationToken cancellationToken)
     {
-        try
+        var mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, requestMfaDetails);
+        var code = MfaUtils.GenerateOtpCode();
+
+        var participant =
+            await participantService.GetParticipantAsync(mfaLoginDetails.Username, cancellationToken);
+
+        var contentfulEmailRequest = new EmailContentRequest
         {
-            var mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, requestMfaDetails);
-            var code = MfaUtils.GenerateOtpCode();
+            EmailName = contentfulSettings.Value.EmailTemplates.MfaEmailConfirmation,
+            FirstName = participant.Firstname,
+            Code = code,
+            SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
+        };
 
-            var participant =
-                await participantService.GetParticipantAsync(mfaLoginDetails.Username, cancellationToken);
+        var contentfulEmail = await contentfulService.GetEmailContentAsync(contentfulEmailRequest);
 
-            var contentfulEmailRequest = new EmailContentRequest
-            {
-                EmailName = contentfulSettings.Value.EmailTemplates.MfaEmailConfirmation,
-                FirstName = participant.Firstname,
-                Code = code,
-                SelectedLocale = new CultureInfo(participant.SelectedLocale ?? SelectedLocale.Default),
-            };
+        await emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
+            contentfulEmail.EmailBody, cancellationToken);
 
-            var contentfulEmail = await contentfulService.GetEmailContentAsync(contentfulEmailRequest);
+        await participantService.StoreMfaCodeAsync(mfaLoginDetails.Username, code, cancellationToken);
 
-            await emailService.SendEmailAsync(participant.Email, contentfulEmail.EmailSubject,
-                contentfulEmail.EmailBody, cancellationToken);
-
-            await participantService.StoreMfaCodeAsync(mfaLoginDetails.Username, code, cancellationToken);
-
-            return Response<string>.CreateSuccessfulContentResponse(participant.Email);
-        }
-        catch (Exception ex)
-        {
-            var exceptionResponse = Response<string>.CreateExceptionResponse(
-                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex);
-
-            logger.LogError(ex, "Error sending email otp code");
-
-            return exceptionResponse;
-        }
+        return Response<string>.CreateSuccessfulContentResponse(participant.Email);
     }
 
     private Response<string> CreateErrorResponse(string errorCode, string errorMessage)
@@ -428,34 +363,22 @@ public class MfaService(
     public async Task<Response<string>> ValidateEmailOtpAsync(string requestMfaDetails, string code,
         CancellationToken cancellationToken)
     {
-        try
+        var mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, requestMfaDetails);
+        var mfaValidationResult =
+            await participantService.ValidateMfaCodeAsync(mfaLoginDetails.Username, code, cancellationToken);
+
+        return mfaValidationResult switch
         {
-            var mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, requestMfaDetails);
-            var mfaValidationResult =
-                await participantService.ValidateMfaCodeAsync(mfaLoginDetails.Username, code, cancellationToken);
-
-            return mfaValidationResult switch
-            {
-                MfaValidationResultEnum.UserNotFound =>
-                    CreateErrorResponse(ErrorCode.MfaUserNotFound, "User not found"),
-                MfaValidationResultEnum.CodeExpired =>
-                    CreateErrorResponse(ErrorCode.MfaCodeExpired, "Code has expired"),
-                MfaValidationResultEnum.CodeInvalid =>
-                    CreateErrorResponse(ErrorCode.MfaCodeMismatch, "Code is invalid"),
-                MfaValidationResultEnum.Success => Response<string>.CreateSuccessfulResponse(
-                ),
-                _ => throw new ArgumentOutOfRangeException()
-            };
-        }
-        catch (Exception ex)
-        {
-            var exceptionResponse = Response<string>.CreateExceptionResponse(
-                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex);
-
-            logger.LogError(ex, "Error validating email otp code");
-
-            return exceptionResponse;
-        }
+            MfaValidationResultEnum.UserNotFound =>
+                CreateErrorResponse(ErrorCode.MfaUserNotFound, "User not found"),
+            MfaValidationResultEnum.CodeExpired =>
+                CreateErrorResponse(ErrorCode.MfaCodeExpired, "Code has expired"),
+            MfaValidationResultEnum.CodeInvalid =>
+                CreateErrorResponse(ErrorCode.MfaCodeMismatch, "Code is invalid"),
+            MfaValidationResultEnum.Success => Response<string>.CreateSuccessfulResponse(
+            ),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     public async Task<Response<string>> ReissueMfaSessionAsync(string requestMfaDetails,

@@ -62,29 +62,22 @@ public class ParticipantDynamoDbRepository(
 
         logger.LogInformation("request: {Request}", JsonConvert.SerializeObject(request, Formatting.Indented));
 
-        try
+
+        var response = await client.QueryAsync(request, cancellationToken);
+
+        logger.LogInformation("response: {Response}", JsonConvert.SerializeObject(response, Formatting.Indented));
+
+        var items = response.Items;
+        if (items.Count == 0)
         {
-            var response = await client.QueryAsync(request, cancellationToken);
-
-            logger.LogInformation("response: {Response}", JsonConvert.SerializeObject(response, Formatting.Indented));
-
-            var items = response.Items;
-            if (items.Count == 0)
-            {
-                return null;
-            }
-
-            var item = items.OrderByDescending(x => DateTime.Parse(x["CreatedAtUtc"].S)).First();
-
-            logger.LogInformation("item: {Item}", JsonConvert.SerializeObject(item, Formatting.Indented));
-
-            var participant = context.FromDocument<DynamoParticipant>(Document.FromAttributeMap(item));
-            return await GetParticipantAsync(KeyUtils.StripPrimaryKey(participant.Pk), cancellationToken);
+            return null;
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+
+        var item = items.OrderByDescending(x => DateTime.Parse(x["CreatedAtUtc"].S)).First();
+
+        logger.LogInformation("item: {Item}", JsonConvert.SerializeObject(item, Formatting.Indented));
+
+        var participant = context.FromDocument<DynamoParticipant>(Document.FromAttributeMap(item));
+        return await GetParticipantAsync(KeyUtils.StripPrimaryKey(participant.Pk), cancellationToken);
     }
 }

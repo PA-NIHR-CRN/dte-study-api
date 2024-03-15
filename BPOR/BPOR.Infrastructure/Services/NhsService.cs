@@ -58,66 +58,34 @@ public class NhsService(
             return Response<NhsLoginResponse>.CreateSuccessfulContentResponse(response,
                 headerService.GetConversationId());
         }
-        catch (HttpServiceException ex)
+        catch (ConflictException)
         {
-            if (ex.ResponseContent !=
-                JsonConvert.SerializeObject(new { Message = ErrorCode.UnableToMatchAccounts }))
-            {
-                return HandleNhsLoginException(ex);
-            }
-
             var errorResponse = Response<NhsLoginResponse>.CreateErrorMessageResponse(
                 ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.UnableToMatchAccounts,
-                "Unable to match account details",
-                headerService.GetConversationId());
+                "Unable to match accounts");
 
             return errorResponse;
-        }
-        catch (Exception ex)
-        {
-            return HandleNhsLoginException(ex);
         }
     }
 
     public async Task<Response<SignUpResponse>> NhsSignUpAsync(bool consent, string selectedLocale, string token,
         CancellationToken cancellationToken)
     {
-        try
+        var nhsUserInfo = await nhsLoginHttpClient.GetUserInfoAsync(token, cancellationToken);
+
+        await participantService.CreateParticipantAsync(new DynamoParticipant
         {
-            var nhsUserInfo = await nhsLoginHttpClient.GetUserInfoAsync(token, cancellationToken);
+            ConsentRegistration = consent,
+            DateOfBirth = nhsUserInfo.DateOfBirth.Value,
+            Email = nhsUserInfo.Email,
+            Firstname = nhsUserInfo.FirstName,
+            Lastname = nhsUserInfo.LastName,
+            NhsId = nhsUserInfo.NhsId,
+            NhsNumber = nhsUserInfo.NhsNumber,
+            SelectedLocale = selectedLocale
+        }, cancellationToken);
 
-            await participantService.CreateParticipantAsync(new DynamoParticipant
-            {
-                ConsentRegistration = consent,
-                DateOfBirth = nhsUserInfo.DateOfBirth.Value,
-                Email = nhsUserInfo.Email,
-                Firstname = nhsUserInfo.FirstName,
-                Lastname = nhsUserInfo.LastName,
-                NhsId = nhsUserInfo.NhsId,
-                NhsNumber = nhsUserInfo.NhsNumber,
-                SelectedLocale = selectedLocale
-            }, cancellationToken);
-
-            return Response<SignUpResponse>.CreateSuccessfulContentResponse(
-                new SignUpResponse { UserConsents = true, });
-        }
-        catch (Exception ex)
-        {
-            var exceptionResponse = Response<SignUpResponse>.CreateExceptionResponse(
-                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex);
-            logger.LogError(ex, "Unknown error logging in with NHS login\\r\\n{SerializeObject}",
-                JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
-            return exceptionResponse;
-        }
-    }
-
-    private Response<NhsLoginResponse> HandleNhsLoginException(Exception ex)
-    {
-        var exceptionResponse = Response<NhsLoginResponse>.CreateExceptionResponse(
-            ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
-            headerService.GetConversationId());
-        logger.LogError(ex, "Unknown error logging in with NHS login\\r\\n{SerializeObject}",
-            JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
-        return exceptionResponse;
+        return Response<SignUpResponse>.CreateSuccessfulContentResponse(
+            new SignUpResponse { UserConsents = true, });
     }
 }

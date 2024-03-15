@@ -94,14 +94,6 @@ public class AuthService(
             return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                 nameof(UserService), ErrorCode.AuthenticationNotAuthorized, "");
         }
-        catch (Exception ex)
-        {
-            var exceptionResponse = Response<string>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
-                nameof(UserService), ErrorCode.InternalServerError, ex);
-            logger.LogError(ex, "Unknown error logging in user with email {Email}\\r\\n{SerializeObject}", email,
-                JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
-            return exceptionResponse;
-        }
     }
 
 

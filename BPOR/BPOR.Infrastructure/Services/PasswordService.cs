@@ -31,35 +31,26 @@ public class PasswordService(
 {
     public async Task<PasswordPolicyTypeResponse> GetPasswordPolicyTypeAsync(CancellationToken cancellationToken)
     {
-        try
+        var describeUserPoolResponse = await provider.DescribeUserPoolAsync(new DescribeUserPoolRequest
+            { UserPoolId = awsSettings.Value.CognitoPoolId }, cancellationToken);
+
+        if (describeUserPoolResponse?.UserPool?.Policies?.PasswordPolicy == null)
         {
-            var describeUserPoolResponse = await provider.DescribeUserPoolAsync(new DescribeUserPoolRequest
-                { UserPoolId = awsSettings.Value.CognitoPoolId }, cancellationToken);
-
-            if (describeUserPoolResponse?.UserPool?.Policies?.PasswordPolicy == null)
-            {
-                return null;
-            }
-
-            var passwordPolicy = describeUserPoolResponse.UserPool.Policies.PasswordPolicy;
-
-            return new PasswordPolicyTypeResponse
-            {
-                MinimumLength = passwordPolicy.MinimumLength,
-                RequireLowercase = passwordPolicy.RequireLowercase,
-                RequireNumbers = passwordPolicy.RequireNumbers,
-                RequireSymbols = passwordPolicy.RequireSymbols,
-                RequireUppercase = passwordPolicy.RequireUppercase,
-                AllowedPasswordSymbols = string.Join(" ", PasswordHelper.SymbolList),
-                WeakPasswords = PasswordHelper.WeakPasswords
-            };
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Could not get Cognito password policy");
-
             return null;
         }
+
+        var passwordPolicy = describeUserPoolResponse.UserPool.Policies.PasswordPolicy;
+
+        return new PasswordPolicyTypeResponse
+        {
+            MinimumLength = passwordPolicy.MinimumLength,
+            RequireLowercase = passwordPolicy.RequireLowercase,
+            RequireNumbers = passwordPolicy.RequireNumbers,
+            RequireSymbols = passwordPolicy.RequireSymbols,
+            RequireUppercase = passwordPolicy.RequireUppercase,
+            AllowedPasswordSymbols = string.Join(" ", PasswordHelper.SymbolList),
+            WeakPasswords = PasswordHelper.WeakPasswords
+        };
     }
 
     public async Task<Response<ForgotPasswordResponse>> ForgotPasswordAsync(string email,

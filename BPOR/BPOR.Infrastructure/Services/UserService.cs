@@ -7,7 +7,6 @@ using Dte.Common.Exceptions.Common;
 using Dte.Common.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using System.Net;
 using BPOR.Domain.Utils;
 
@@ -23,37 +22,27 @@ public class UserService(
     public async Task<Response<ResendConfirmationCodeResponse>> ResendVerificationEmailAsync(string userId,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var getUserResponse = await AdminGetUserAsync(userId, cancellationToken);
+        var getUserResponse = await AdminGetUserAsync(userId, cancellationToken);
 
-            if (getUserResponse.UserStatus != UserStatusType.CONFIRMED)
+        if (getUserResponse.UserStatus != UserStatusType.CONFIRMED)
+        {
+            var response = await provider.ResendConfirmationCodeAsync(new ResendConfirmationCodeRequest
             {
-                var response = await provider.ResendConfirmationCodeAsync(new ResendConfirmationCodeRequest
-                {
-                    Username = userId,
-                    ClientId = awsSettings.Value.CognitoAppClientIds[0]
-                }, cancellationToken);
+                Username = userId,
+                ClientId = awsSettings.Value.CognitoAppClientIds[0]
+            }, cancellationToken);
 
-                // Log the response for internal tracking but do not return specifics to the client
-                if (!HttpUtils.IsSuccessStatusCode((int)response.HttpStatusCode))
-                {
-                    logger.LogError(
-                        "Resend verification email response returned code: {ResponseHttpStatusCode} for userId {UserId}",
-                        response.HttpStatusCode, userId);
-                }
+            // Log the response for internal tracking but do not return specifics to the client
+            if (!HttpUtils.IsSuccessStatusCode((int)response.HttpStatusCode))
+            {
+                logger.LogError(
+                    "Resend verification email response returned code: {ResponseHttpStatusCode} for userId {UserId}",
+                    response.HttpStatusCode, userId);
             }
-
-            // Always return the same generic response regardless of user state or other conditions
-            return Response<ResendConfirmationCodeResponse>.CreateSuccessfulResponse();
         }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Unknown error resending verification email for userId {UserId}", userId);
 
-            // In case of an exception also return the generic message
-            return Response<ResendConfirmationCodeResponse>.CreateSuccessfulResponse();
-        }
+        // Always return the same generic response regardless of user state or other conditions
+        return Response<ResendConfirmationCodeResponse>.CreateSuccessfulResponse();
     }
 
     public async Task<object?> ConfirmSignUpAsync(string code, string userId, CancellationToken cancellationToken)
@@ -87,13 +76,6 @@ public class UserService(
         catch (ExpiredCodeException ex)
         {
             logger.LogError(ex, "Expired code error during confirmation for user {UserId}", userId);
-            return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
-                nameof(UserService), ErrorCode.InternalServerError,
-                "An error occurred during confirmation. Please try again.");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Unknown error confirming user signup with userId {UserId}", userId);
             return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                 nameof(UserService), ErrorCode.InternalServerError,
                 "An error occurred during confirmation. Please try again.");
@@ -147,14 +129,6 @@ public class UserService(
             return Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
                 ErrorCode.ChangeEmailErrorUnauthorised, ex);
         }
-        catch (Exception ex)
-        {
-            var exceptionResponse = Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
-                nameof(UserService), ErrorCode.InternalServerError, ex);
-            logger.LogError(ex, "Unknown error changing user email\\r\\n{SerializeObject}",
-                JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
-            return exceptionResponse;
-        }
     }
 
     public async Task<AdminGetUserResponse> AdminGetUserAsync(string email, CancellationToken cancellationToken)
@@ -185,11 +159,6 @@ public class UserService(
         catch (UserNotFoundException)
         {
             return false;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "AdminGetUserAsync failed");
-            throw;
         }
     }
 }

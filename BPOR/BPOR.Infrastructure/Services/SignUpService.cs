@@ -136,21 +136,12 @@ public class SignUpService(
                 ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
                 ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.");
         }
-
         catch (InvalidParameterException ex)
         {
             logger.LogError(ex, "Invalid parameters provided for user signup {Email}", email);
             return Response<SignUpResponse>.CreateErrorMessageResponse(
                 ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
                 ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.");
-        }
-
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Unknown error signing up user with email {Email}", email);
-            return Response<SignUpResponse>.CreateErrorMessageResponse(
-                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
-                ErrorCode.InternalServerError, "An error occurred during sign up. Please try again later.");
         }
     }
 }
