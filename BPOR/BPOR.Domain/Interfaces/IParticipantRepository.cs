@@ -8,6 +8,7 @@ public interface IParticipantRepository
     Task CreateParticipantAsync(DynamoParticipant entity, CancellationToken cancellationToken);
     Task<DynamoParticipant> UpdateParticipantAsync(DynamoParticipant entity, CancellationToken cancellationToken);
     Task DeleteParticipantAsync(string participantId, CancellationToken cancellationToken);
+
     Task<DynamoParticipant> QueryIndexForParticipantAsync(string query, string colName,
         CancellationToken cancellationToken);
 }

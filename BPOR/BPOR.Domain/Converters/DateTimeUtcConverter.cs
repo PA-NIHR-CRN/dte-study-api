@@ -5,7 +5,7 @@ namespace BPOR.Domain.Converters;
 
 public class DateTimeUtcConverter : IPropertyConverter
 {
-    public DynamoDBEntry ToEntry(object value) => (DateTime) value;
+    public DynamoDBEntry ToEntry(object value) => (DateTime)value;
 
     public object FromEntry(DynamoDBEntry entry)
     {

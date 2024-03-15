@@ -8,34 +8,24 @@ using Microsoft.Extensions.Options;
 
 namespace BPOR.Infrastructure.Clients;
 
-public class NhsLoginHttpClient
+public class NhsLoginHttpClient(
+    HttpClient httpClient,
+    ILogger<NhsLoginHttpClient> logger,
+    IOptions<NhsLoginSettings> nhsLoginSettings,
+    IClientAssertionJwtProvider clientAssertionJwtProvider)
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<NhsLoginHttpClient> _logger;
-    private readonly IClientAssertionJwtProvider clientAssertionJwtProvider;
-    private readonly NhsLoginSettings nhsLoginSettings;
-
-    public NhsLoginHttpClient(HttpClient httpClient, ILogger<NhsLoginHttpClient> logger,
-        IOptions<NhsLoginSettings> nhsLoginSettings, IClientAssertionJwtProvider clientAssertionJwtProvider)
-    {
-        _httpClient = httpClient;
-        _logger = logger;
-        this.clientAssertionJwtProvider = clientAssertionJwtProvider;
-        this.nhsLoginSettings = nhsLoginSettings.Value;
-    }
-
     public async Task<TokenResponse> GetTokensFromAuthorizationCode(string authorizationCode, string redirectUrl,
         CancellationToken cancellationToken = default)
     {
         var bearerToken = await clientAssertionJwtProvider.CreateClientAssertionJwtAsync(cancellationToken);
 
-        var response = await _httpClient.PostAsync(nhsLoginSettings.TokenEndpoint,
+        var response = await httpClient.PostAsync(nhsLoginSettings.Value.TokenEndpoint,
             new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 { "grant_type", "authorization_code" },
                 { "code", authorizationCode },
                 { "redirect_uri", redirectUrl },
-                { "client_id", nhsLoginSettings.ClientId },
+                { "client_id", nhsLoginSettings.Value.ClientId },
                 { "client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer" },
                 { "client_assertion", bearerToken }
             }), cancellationToken);
@@ -47,16 +37,16 @@ public class NhsLoginHttpClient
 
     public async Task<NhsUserInfo> GetUserInfoAsync(string accessToken, CancellationToken cancellationToken = default)
     {
-        var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, nhsLoginSettings.UserInfoEndpoint);
+        var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, nhsLoginSettings.Value.UserInfoEndpoint);
 
         userInfoRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         // get the user details from the NHS login API using the access token we got back from the token endpoint above
-        var userInfo = await _httpClient.SendAsync(userInfoRequest, cancellationToken);
+        var userInfo = await httpClient.SendAsync(userInfoRequest, cancellationToken);
 
         if (!userInfo.IsSuccessStatusCode)
         {
-            _logger.LogError("GetUserInfoAsync() - {Reason}, {Message}", userInfo.ReasonPhrase,
+            logger.LogError("GetUserInfoAsync() - {Reason}, {Message}", userInfo.ReasonPhrase,
                 await userInfo.Content.ReadAsStringAsync(cancellationToken));
         }
 

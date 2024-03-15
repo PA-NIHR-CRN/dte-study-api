@@ -12,7 +12,8 @@ namespace BPOR.Domain.Repositories;
 public class ParticipantDynamoDbRepository(
     IAmazonDynamoDB client,
     IDynamoDBContext context,
-    ILogger<ParticipantDynamoDbRepository> logger, DynamoDBOperationConfig config)
+    ILogger<ParticipantDynamoDbRepository> logger,
+    DynamoDBOperationConfig config)
     : IParticipantRepository
 {
     private static string ParticipantKey(string participantId) => $"PARTICIPANT#{participantId}";

@@ -8,5 +8,4 @@ public class DevelopmentSettings
     public bool IsInMaintenance { get; set; }
     public bool BypassMfa { get; set; }
     public bool ShouldBypassEmail { get; set; }
-    
 }

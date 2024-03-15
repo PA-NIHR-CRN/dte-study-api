@@ -5,7 +5,7 @@ namespace BPOR.Domain.Entities;
 
 public class DynamoParticipant
 {
-     [DynamoDBHashKey("PK")] public string Pk { get; set; } // PARTICIPANT#1
+    [DynamoDBHashKey("PK")] public string Pk { get; set; } // PARTICIPANT#1
     [DynamoDBRangeKey("SK")] public string Sk { get; set; } //PARTICIPANT#
 
     [DynamoDBProperty] public string ParticipantId { get; set; }
@@ -19,11 +19,22 @@ public class DynamoParticipant
     [DynamoDBProperty] public DateTime? DateOfBirth { get; set; }
     [DynamoDBProperty] public string MfaChangePhoneCode { get; set; }
     [DynamoDBProperty] public DateTime? MfaChangePhoneCodeExpiry { get; set; }
-    [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? ConsentRegistrationAtUtc { get; set; }
-    [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? RemovalOfConsentRegistrationAtUtc { get; set; }
-    [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? UpdatedAtUtc { get; set; }
-    [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? Stage2CompleteUtc { get; set; }
-    [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime CreatedAtUtc { get; set; }
+
+    [DynamoDBProperty(typeof(DateTimeUtcConverter))]
+    public DateTime? ConsentRegistrationAtUtc { get; set; }
+
+    [DynamoDBProperty(typeof(DateTimeUtcConverter))]
+    public DateTime? RemovalOfConsentRegistrationAtUtc { get; set; }
+
+    [DynamoDBProperty(typeof(DateTimeUtcConverter))]
+    public DateTime? UpdatedAtUtc { get; set; }
+
+    [DynamoDBProperty(typeof(DateTimeUtcConverter))]
+    public DateTime? Stage2CompleteUtc { get; set; }
+
+    [DynamoDBProperty(typeof(DateTimeUtcConverter))]
+    public DateTime CreatedAtUtc { get; set; }
+
     [DynamoDBProperty] public string MobileNumber { get; set; }
     [DynamoDBProperty] public string LandlineNumber { get; set; }
     [DynamoDBProperty] public ParticipantAddress Address { get; set; }
