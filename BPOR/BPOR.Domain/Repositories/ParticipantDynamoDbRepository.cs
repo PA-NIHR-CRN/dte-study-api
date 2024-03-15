@@ -4,9 +4,7 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Interfaces;
-using BPOR.Domain.Settings;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace BPOR.Domain.Repositories;
@@ -14,20 +12,16 @@ namespace BPOR.Domain.Repositories;
 public class ParticipantDynamoDbRepository(
     IAmazonDynamoDB client,
     IDynamoDBContext context,
-    IOptions<AwsSettings> awsSettings,
-    ILogger<ParticipantDynamoDbRepository> logger)
+    ILogger<ParticipantDynamoDbRepository> logger, DynamoDBOperationConfig config)
     : IParticipantRepository
 {
-    private readonly DynamoDBOperationConfig _config = new()
-        { OverrideTableName = awsSettings.Value.ParticipantRegistrationDynamoDbTableName };
-
     private static string ParticipantKey(string participantId) => $"PARTICIPANT#{participantId}";
     private static string ParticipantKey() => "PARTICIPANT#";
 
     public async Task<DynamoParticipant> GetParticipantAsync(string participantId, CancellationToken cancellationToken)
     {
         return await context.LoadAsync<DynamoParticipant>(ParticipantKey(participantId), ParticipantKey(),
-            _config, cancellationToken);
+            config, cancellationToken);
     }
 
     public async Task CreateParticipantAsync(DynamoParticipant entity, CancellationToken cancellationToken)
@@ -37,19 +31,19 @@ public class ParticipantDynamoDbRepository(
             : entity.ParticipantId);
         entity.Sk = ParticipantKey();
 
-        await context.SaveAsync(entity, _config, cancellationToken);
+        await context.SaveAsync(entity, config, cancellationToken);
     }
 
     public async Task<DynamoParticipant> UpdateParticipantAsync(DynamoParticipant entity,
         CancellationToken cancellationToken)
     {
-        await context.SaveAsync(entity, _config, cancellationToken);
+        await context.SaveAsync(entity, config, cancellationToken);
         return entity;
     }
 
     public async Task DeleteParticipantAsync(string participantId, CancellationToken cancellationToken)
     {
-        await context.DeleteAsync(participantId, _config, cancellationToken);
+        await context.DeleteAsync(participantId, config, cancellationToken);
     }
 
     public async Task<DynamoParticipant> QueryIndexForParticipantAsync(string query, string colName,
@@ -57,7 +51,7 @@ public class ParticipantDynamoDbRepository(
     {
         var request = new QueryRequest
         {
-            TableName = _config.OverrideTableName,
+            TableName = config.OverrideTableName,
             KeyConditionExpression = $"{colName} = :value",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
             {

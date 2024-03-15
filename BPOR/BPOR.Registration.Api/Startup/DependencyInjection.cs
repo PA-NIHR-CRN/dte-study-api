@@ -81,6 +81,11 @@ public static class DependencyInjection
             };
             return new AmazonSimpleEmailServiceClient(config);
         });
+        
+        services.AddSingleton<DynamoDBOperationConfig>(_ => new DynamoDBOperationConfig
+        {
+            OverrideTableName = awsSettings.Value.ParticipantRegistrationDynamoDbTableName
+        });
 
         //TODO test this
         services.AddDefaultAWSOptions(configuration.GetAWSOptions());
