@@ -186,4 +186,28 @@ public class MfaController(
 
         return Ok(response);
     }
+    
+    /// <summary>
+    /// [AllowAnonymous] RespondToTotpMfaChallengeAsync
+    /// </summary>
+    /// <response code="200">When IsSuccess true</response>
+    /// <response code="500">Server side error</response>
+    [AllowAnonymous]
+    [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
+    [HttpPost("respondtototpmfachallenge")]
+    public async Task<IActionResult> RespondToTotpMfaChallengeAsync([FromBody] RespondToMfaRequest request, CancellationToken cancellationToken)
+    {
+        var response =
+            await mfaService.RespondToTotpMfaChallengeAsync(request.MfaCode, request.MfaDetails, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            return Ok(Response<UserLoginResponse>.CreateErrorMessageResponse(response.Errors));
+        }
+
+        var sessionId = Guid.NewGuid().ToString();
+        await authService.CreateSessionAndLoginAsync(response.Content, sessionId, cancellationToken);
+        return Ok(response);
+    }
 }
