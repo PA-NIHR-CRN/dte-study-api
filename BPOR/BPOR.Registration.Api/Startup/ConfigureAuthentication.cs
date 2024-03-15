@@ -5,7 +5,8 @@ namespace BPOR.Registration.Api.Startup;
 
 public static class ConfigureAuthentication
 {
-    public static IServiceCollection AddAuthentication(this IServiceCollection services, IHostEnvironment hostEnvironment)
+    public static IServiceCollection AddAuthentication(this IServiceCollection services,
+        IHostEnvironment hostEnvironment)
     {
         services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -33,7 +34,7 @@ public static class ConfigureAuthentication
                 .RequireAuthenticatedUser()
             );
         });
-        
+
         return services;
     }
 }

@@ -20,7 +20,7 @@ public static class UpdateParticipantMapper
         destination.DisabilityDescription = source.DisabilityDescription;
         destination.HealthConditionInterests = source.HealthConditionInterests;
         destination.UpdatedAtUtc = DateTime.Now;
-        Registration.Api.Mappers.ParticipantAddressMapper.Map(source.Address, destination.Address);
+        ParticipantAddressMapper.Map(source.Address, destination.Address);
         destination.SelectedLocale = source.SelectedLocale;
         destination.SexRegisteredAtBirth = source.SexRegisteredAtBirth;
 

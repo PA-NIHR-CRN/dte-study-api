@@ -29,7 +29,8 @@ public class PasswordController : Controller
     [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<ForgotPasswordResponse>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
     [HttpPost("forgotpassword")]
-    public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordRequest request,
+        CancellationToken cancellationToken)
     {
         var response = await _passwordService.ForgotPasswordAsync(request.Email, cancellationToken);
 
@@ -45,7 +46,8 @@ public class PasswordController : Controller
     [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<ConfirmForgotPasswordResponse>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
     [HttpPost("confirmforgotpassword")]
-    public async Task<IActionResult> ConfirmForgotPasswordAsync([FromBody] ConfirmForgotPasswordRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ConfirmForgotPasswordAsync([FromBody] ConfirmForgotPasswordRequest request,
+        CancellationToken cancellationToken)
     {
         var response =
             await _passwordService.ConfirmForgotPasswordAsync(request.Code, request.UserId, request.Password,
@@ -53,7 +55,7 @@ public class PasswordController : Controller
 
         return Ok(response);
     }
-    
+
     /// <summary>
     /// [AllowAnonymous] Get the current Cognito password policy
     /// </summary>
@@ -65,7 +67,7 @@ public class PasswordController : Controller
     {
         return Ok(await _passwordService.GetPasswordPolicyTypeAsync(cancellationToken));
     }
-    
+
     /// <summary>
     /// [AllowAnonymous] Change user password
     /// </summary>
@@ -75,9 +77,10 @@ public class PasswordController : Controller
     [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<object>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
     [HttpPost("changepassword")]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request,
+        CancellationToken cancellationToken)
     {
         var email = User.GetUserEmail();
-        return Ok(await _passwordService.ChangePasswordAsync(email,  request.NewPassword, cancellationToken));
+        return Ok(await _passwordService.ChangePasswordAsync(email, request.NewPassword, cancellationToken));
     }
 }

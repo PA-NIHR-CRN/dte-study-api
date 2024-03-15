@@ -7,6 +7,7 @@ namespace NIHR.Infrastructure.Clients
 {
     public interface ILocationApiClient
     {
-        Task<IEnumerable<PostcodeAddressModel>> GetAddressesByPostcodeAsync(string postcode, CancellationToken cancellationToken);
+        Task<IEnumerable<PostcodeAddressModel>> GetAddressesByPostcodeAsync(string postcode,
+            CancellationToken cancellationToken);
     }
 }

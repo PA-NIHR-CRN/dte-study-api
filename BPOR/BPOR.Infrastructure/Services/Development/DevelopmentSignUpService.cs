@@ -15,7 +15,8 @@ public class DevelopmentSignUpService(
     AwsSettings awsSettings)
     : ISignUpService
 {
-    public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password, string selectedLocale, CancellationToken cancellationToken)
+    public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password, string selectedLocale,
+        CancellationToken cancellationToken)
     {
         var response = await signUpService.SignUpAsync(email, password, selectedLocale, cancellationToken);
         if (devSettings.Value.AutoConfirmNewCognitoSignup)

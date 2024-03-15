@@ -33,7 +33,8 @@ public class AuthController(
     [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
     [HttpPost("login")]
-    public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request,
+        CancellationToken cancellationToken)
     {
         var response = await authService.LoginAsync(request.Email, request.Password, cancellationToken);
         if (!response.IsSuccess)
@@ -45,7 +46,7 @@ public class AuthController(
         await authService.CreateSessionAndLoginAsync(response.Content, sessionId, cancellationToken);
         return Ok(response);
     }
-    
+
     /// <summary>
     /// [AllowAnonymous] SignUp user
     /// </summary>
@@ -55,9 +56,11 @@ public class AuthController(
     [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<SignUpResponse>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
     [HttpPost("signup")]
-    public async Task<IActionResult> SignUpUserAsync([FromBody] SignUpRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> SignUpUserAsync([FromBody] SignUpRequest request,
+        CancellationToken cancellationToken)
     {
-        var response = await signUpService.SignUpAsync(request.Email, request.Password, request.SelectedLocale, cancellationToken);
+        var response = await signUpService.SignUpAsync(request.Email, request.Password, request.SelectedLocale,
+            cancellationToken);
 
         if (response.IsSuccess)
         {
@@ -71,13 +74,13 @@ public class AuthController(
                 DateOfBirth = request.DateOfBirth,
                 SelectedLocale = request.SelectedLocale
             };
-            
+
             await participantService.CreateParticipantAsync(participant, cancellationToken);
         }
 
         return Ok(response);
     }
-    
+
     /// <summary>
     /// Dummy endpoint to refresh session cookie
     /// </summary>

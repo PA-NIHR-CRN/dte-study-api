@@ -27,7 +27,8 @@ public class SignUpService(
     IOptions<AwsSettings> awsSettings)
     : ISignUpService
 {
-    public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password, string selectedLocale, CancellationToken cancellationToken)
+    public async Task<Response<SignUpResponse>> SignUpAsync(string email, string password, string selectedLocale,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -38,7 +39,7 @@ public class SignUpService(
                 return Response<SignUpResponse>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                     nameof(UserService), ErrorCode.PasswordValidationError,
                     $"Password validation errors: {string.Join("; ", passwordErrors)}"
-                   );
+                );
             }
 
             bool cognitoUserExists = await userService.UserExistsAsync(email, cancellationToken);
@@ -54,17 +55,21 @@ public class SignUpService(
                 // if user is not verified, resend confirmation code
                 if (cognitoUser.UserStatus == UserStatusType.UNCONFIRMED)
                 {
-                    var resendConfirmationCodeResponse = await userService.ResendVerificationEmailAsync(email, cancellationToken);
+                    var resendConfirmationCodeResponse =
+                        await userService.ResendVerificationEmailAsync(email, cancellationToken);
 
                     if (!resendConfirmationCodeResponse.IsSuccess)
                     {
-                        return Response<SignUpResponse>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.SignUpError, $"Error resending confirmation code to user with email {email}");
+                        return Response<SignUpResponse>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
+                            nameof(UserService), ErrorCode.SignUpError,
+                            $"Error resending confirmation code to user with email {email}");
                     }
                 }
                 else
                 {
                     // get participant details using id
-                    var participant = await participantService.GetParticipantAsync(cognitoUser.Username, cancellationToken);
+                    var participant =
+                        await participantService.GetParticipantAsync(cognitoUser.Username, cancellationToken);
                     if (participant == null)
                     {
                         return Response<SignUpResponse>.CreateErrorMessageResponse(
@@ -90,7 +95,8 @@ public class SignUpService(
 
 
             // check if user exists in participant details table and send email
-            var participantDetails = await participantService.GetParticipantDetailsByEmailAsync(email, cancellationToken);
+            var participantDetails =
+                await participantService.GetParticipantDetailsByEmailAsync(email, cancellationToken);
             if (participantDetails != null)
             {
                 var request = new EmailContentRequest
@@ -119,7 +125,8 @@ public class SignUpService(
                 }
             }, cancellationToken);
 
-            return Response<SignUpResponse>.CreateSuccessfulContentResponse(new SignUpResponse { IsSuccess = true, UserId = response.UserSub });
+            return Response<SignUpResponse>.CreateSuccessfulContentResponse(new SignUpResponse
+                { IsSuccess = true, UserId = response.UserSub });
         }
         catch (UsernameExistsException ex)
         {

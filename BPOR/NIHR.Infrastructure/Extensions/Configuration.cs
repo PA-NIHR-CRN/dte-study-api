@@ -15,7 +15,8 @@ namespace NIHR.Infrastructure.Extensions
 {
     public static class Configuration
     {
-        public static IServiceCollection ConfigureNihrLogging(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection ConfigureNihrLogging(this IServiceCollection services,
+            IConfiguration configuration)
         {
             var loggerOptions = new LambdaLoggerOptions
             {
@@ -41,7 +42,7 @@ namespace NIHR.Infrastructure.Extensions
                     loggingBuilder.AddConsole().AddDebug();
                 }
             });
-            
+
             return services;
         }
 
@@ -67,7 +68,7 @@ namespace NIHR.Infrastructure.Extensions
                     () => new AmazonSecretsManagerClient(
                         RegionEndpoint.GetBySystemName(secretsManagerSettings.Region)));
             }
-            
+
             return configuration;
         }
 

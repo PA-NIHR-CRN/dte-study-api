@@ -77,11 +77,11 @@ public static class DependencyInjection
         {
             var config = new AmazonSimpleEmailServiceConfig
             {
-                RegionEndpoint = RegionEndpoint.EUWest2 
+                RegionEndpoint = RegionEndpoint.EUWest2
             };
             return new AmazonSimpleEmailServiceClient(config);
         });
-        
+
         services.AddSingleton<DynamoDBOperationConfig>(_ => new DynamoDBOperationConfig
         {
             OverrideTableName = awsSettings.Value.ParticipantRegistrationDynamoDbTableName
@@ -96,12 +96,12 @@ public static class DependencyInjection
 
         services.AddHttpClientWithRetry<ILocationApiClient, LocationApiClient>(clientsSettings.Value.LocationService, 2,
             logger);
-        
+
         services.AddHttpClient<NhsLoginHttpClient>((serviceProvider, httpClient) =>
         {
             httpClient.BaseAddress = new Uri(nhsLoginSettings.Value.BaseUrl);
         });
-        
+
         if (hostEnvironment.IsDevelopment())
         {
             services.AddCors(options =>
@@ -120,6 +120,7 @@ public static class DependencyInjection
         {
             dataProtection.PersistKeysToAWSSystemsManager("/BPOR/DataProtection");
         }
+
         services.AddHttpContextAccessor();
 
 
@@ -127,7 +128,7 @@ public static class DependencyInjection
 
         //TODO confirm health check 
         services.AddHealthChecks();
-        
+
 
         if (hostEnvironment.IsDevelopment())
         {
@@ -137,7 +138,7 @@ public static class DependencyInjection
         {
             ConfigureStagingServices(configuration, hostEnvironment, services);
         }
-        
+
         return services;
     }
 

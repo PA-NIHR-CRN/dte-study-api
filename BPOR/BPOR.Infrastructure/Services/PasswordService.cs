@@ -71,8 +71,9 @@ public class PasswordService(
 
         if (user == null || !user.Enabled)
         {
-            var participantDetails = await participantService.GetParticipantDetailsByEmailAsync(email, cancellationToken);
-            
+            var participantDetails =
+                await participantService.GetParticipantDetailsByEmailAsync(email, cancellationToken);
+
             if (string.IsNullOrWhiteSpace(participantDetails?.NhsId))
                 return Response<ForgotPasswordResponse>.CreateSuccessfulResponse(
                 );
@@ -154,7 +155,6 @@ public class PasswordService(
     {
         try
         {
-            
             var passwordErrors = await ValidatePasswordAsync(newPassword, cancellationToken);
 
             if (passwordErrors.Any())
@@ -163,6 +163,7 @@ public class PasswordService(
                     nameof(UserService), ErrorCode.PasswordValidationError,
                     $"Password validation errors: {string.Join("; ", passwordErrors)}");
             }
+
             var response = await provider.AdminSetUserPasswordAsync(new AdminSetUserPasswordRequest
             {
                 UserPoolId = awsSettings.Value.CognitoPoolId,

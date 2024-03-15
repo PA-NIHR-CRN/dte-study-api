@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Microsoft.Extensions.Configuration.Json;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SecretsManager;
 using Amazon.SecretsManager.Model;

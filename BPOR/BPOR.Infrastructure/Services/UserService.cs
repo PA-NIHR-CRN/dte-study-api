@@ -16,7 +16,8 @@ namespace BPOR.Infrastructure.Services;
 public class UserService(
     IAmazonCognitoIdentityProvider provider,
     IOptions<AwsSettings> awsSettings,
-    ILogger<UserService> logger, IParticipantService participantService)
+    ILogger<UserService> logger,
+    IParticipantService participantService)
     : IUserService
 {
     public async Task<Response<ResendConfirmationCodeResponse>> ResendVerificationEmailAsync(string userId,
@@ -122,17 +123,18 @@ public class UserService(
                 return Response<object>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
                     nameof(UserService), ErrorCode.ChangeEmailError, "Change user email error");
             }
-            
+
             if (HttpUtils.IsSuccessStatusCode((int)response.HttpStatusCode))
             {
-                var participant = await participantService.GetParticipantDetailsByEmailAsync(currentEmail, cancellationToken);
+                var participant =
+                    await participantService.GetParticipantDetailsByEmailAsync(currentEmail, cancellationToken);
                 if (participant != null)
                 {
                     participant.Email = newEmail;
                     await participantService.UpdateParticipantAsync(participant, cancellationToken);
                 }
             }
-            
+
             return Response<object>.CreateSuccessfulResponse();
         }
         catch (InvalidParameterException ex)

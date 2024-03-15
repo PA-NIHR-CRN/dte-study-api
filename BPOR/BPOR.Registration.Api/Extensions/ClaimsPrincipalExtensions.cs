@@ -25,15 +25,15 @@ public static class ClaimsPrincipalExtensions
         {
             return false;
         }
-            
-        return string.IsNullOrWhiteSpace(externalProviderName) || 
+
+        return string.IsNullOrWhiteSpace(externalProviderName) ||
                string.Equals(externalProviderName, split[0], StringComparison.InvariantCultureIgnoreCase);
     }
-        
+
     public static string GetParticipantId(this ClaimsPrincipal principal)
     {
         var id = principal.FindFirstValue("cognito:username");
-       
+
         if (string.IsNullOrWhiteSpace(id))
         {
             var nhsId = principal.FindFirstValue(JwtRegisteredClaimNames.Sub);
@@ -42,7 +42,7 @@ public static class ClaimsPrincipalExtensions
         }
 
         var split = id.Split("_");
-            
+
         return split.LastOrDefault();
     }
 
@@ -52,6 +52,7 @@ public static class ClaimsPrincipalExtensions
         {
             throw new ArgumentNullException(nameof(principal));
         }
+
         var claim = principal.FindFirst(claimType);
         return claim?.Value;
     }

@@ -4,7 +4,8 @@ namespace BPOR.Infrastructure.Mappers;
 
 public static class NhsParticipantMapper
 {
-    public static DynamoParticipant MapNewUserFromRequestAndParticipant(this DynamoParticipant request, DynamoParticipant participant)
+    public static DynamoParticipant MapNewUserFromRequestAndParticipant(this DynamoParticipant request,
+        DynamoParticipant participant)
     {
         return new DynamoParticipant
         {
@@ -16,8 +17,8 @@ public static class NhsParticipantMapper
             Lastname = request.Lastname,
             ConsentRegistration = participant.ConsentRegistration,
             DateOfBirth = request.DateOfBirth,
-            ConsentRegistrationAtUtc = participant.ConsentRegistration ? DateTime.UtcNow : (DateTime?)null,
-            RemovalOfConsentRegistrationAtUtc = (DateTime?)null,
+            ConsentRegistrationAtUtc = participant.ConsentRegistration ? DateTime.UtcNow : null,
+            RemovalOfConsentRegistrationAtUtc = null,
             CreatedAtUtc = DateTime.UtcNow,
             SelectedLocale = request.SelectedLocale,
             GenderIsSameAsSexRegisteredAtBirth = participant.GenderIsSameAsSexRegisteredAtBirth,

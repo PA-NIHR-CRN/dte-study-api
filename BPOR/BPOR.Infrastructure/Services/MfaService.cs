@@ -5,6 +5,7 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Constants;
+using BPOR.Infrastructure.Enum;
 using BPOR.Infrastructure.Exceptions;
 using BPOR.Infrastructure.Interfaces;
 using BPOR.Infrastructure.Models.Mfa;
@@ -435,13 +436,13 @@ public class MfaService(
 
             return mfaValidationResult switch
             {
-                MfaValidationResult.UserNotFound =>
+                MfaValidationResultEnum.UserNotFound =>
                     CreateErrorResponse(ErrorCode.MfaUserNotFound, "User not found"),
-                MfaValidationResult.CodeExpired =>
+                MfaValidationResultEnum.CodeExpired =>
                     CreateErrorResponse(ErrorCode.MfaCodeExpired, "Code has expired"),
-                MfaValidationResult.CodeInvalid =>
+                MfaValidationResultEnum.CodeInvalid =>
                     CreateErrorResponse(ErrorCode.MfaCodeMismatch, "Code is invalid"),
-                MfaValidationResult.Success => Response<string>.CreateSuccessfulResponse(
+                MfaValidationResultEnum.Success => Response<string>.CreateSuccessfulResponse(
                 ),
                 _ => throw new ArgumentOutOfRangeException()
             };

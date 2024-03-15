@@ -32,7 +32,7 @@ public static class MfaUtils
         // Ensure the phone number is in the correct format for cognito i.e., +441234567890 E164
         return phoneUtil.Format(number, PhoneNumberFormat.E164);
     }
-    
+
     public static string GenerateOtpCode()
     {
         var random = new Random();

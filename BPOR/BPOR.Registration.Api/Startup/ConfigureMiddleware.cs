@@ -53,7 +53,7 @@ public static class ConfigureMiddleware
                 endpoints.MapControllers();
                 endpoints.MapGet("/", async context => { await context.Response.WriteAsync("Study API V0.1.2"); });
             });
-        
+
         return app;
     }
 

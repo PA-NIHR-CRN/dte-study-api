@@ -46,7 +46,7 @@ public class UserController(IUserService userService)
     {
         return Ok(await userService.ConfirmSignUpAsync(request.Code, request.UserId, cancellationToken));
     }
-    
+
 
     /// <summary>
     /// [AllowAnonymous] Change user email

@@ -60,7 +60,8 @@ public class SessionService(IParticipantRepository participantRepository, ILogge
             participantId);
     }
 
-    public async Task<bool> ValidateSessionAsync(string participantId, string sessionId, CancellationToken cancellationToken = default)
+    public async Task<bool> ValidateSessionAsync(string participantId, string sessionId,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
         {

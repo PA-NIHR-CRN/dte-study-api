@@ -186,7 +186,7 @@ public class MfaController(
 
         return Ok(response);
     }
-    
+
     /// <summary>
     /// [AllowAnonymous] RespondToTotpMfaChallengeAsync
     /// </summary>
@@ -196,7 +196,8 @@ public class MfaController(
     [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<UserLoginResponse>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
     [HttpPost("respondtototpmfachallenge")]
-    public async Task<IActionResult> RespondToTotpMfaChallengeAsync([FromBody] RespondToMfaRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> RespondToTotpMfaChallengeAsync([FromBody] RespondToMfaRequest request,
+        CancellationToken cancellationToken)
     {
         var response =
             await mfaService.RespondToTotpMfaChallengeAsync(request.MfaCode, request.MfaDetails, cancellationToken);

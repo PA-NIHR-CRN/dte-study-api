@@ -5,6 +5,7 @@ using BPOR.Domain.Entities;
 using BPOR.Domain.Interfaces;
 using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Constants;
+using BPOR.Infrastructure.Enum;
 using BPOR.Infrastructure.Interfaces;
 using BPOR.Infrastructure.Mappers;
 using BPOR.Infrastructure.Models.Mfa;
@@ -97,42 +98,42 @@ public class ParticipantService(
         await participantRepository.UpdateParticipantAsync(participant, cancellationToken);
     }
 
-    public async Task<MfaValidationResult> ValidateMfaCodeAsync(string username, string code,
+    public async Task<MfaValidationResultEnum> ValidateMfaCodeAsync(string username, string code,
         CancellationToken cancellationToken)
     {
         var participant = await participantRepository.GetParticipantAsync(username, cancellationToken);
 
         if (participant == null)
         {
-            return MfaValidationResult.UserNotFound;
+            return MfaValidationResultEnum.UserNotFound;
         }
 
         if (participant.MfaChangePhoneCodeExpiry < DateTime.UtcNow)
         {
-            return MfaValidationResult.CodeExpired;
+            return MfaValidationResultEnum.CodeExpired;
         }
 
         if (participant.MfaChangePhoneCode != code)
         {
-            return MfaValidationResult.CodeInvalid;
+            return MfaValidationResultEnum.CodeInvalid;
         }
 
-        return MfaValidationResult.Success;
+        return MfaValidationResultEnum.Success;
     }
 
     //TODO confirm if this is needed
-    private async Task CreateUserAndDeactivateOldUserAsync(DynamoParticipant request, DynamoParticipant participant, CancellationToken cancellationToken)
+    private async Task CreateUserAndDeactivateOldUserAsync(DynamoParticipant request, DynamoParticipant participant,
+        CancellationToken cancellationToken)
     {
-       
         var entity = request.MapNewUserFromRequestAndParticipant(participant);
-        
+
         await participantRepository.CreateParticipantAsync(entity, cancellationToken);
 
         var response = await provider.AdminDisableUserAsync(new AdminDisableUserRequest
-            {
-                Username = participant.ParticipantId,
-                UserPoolId = awsSettings.Value.CognitoPoolId
-            }, cancellationToken);
+        {
+            Username = participant.ParticipantId,
+            UserPoolId = awsSettings.Value.CognitoPoolId
+        }, cancellationToken);
 
         if ((int)response.HttpStatusCode < 200 || (int)response.HttpStatusCode > 299)
         {

@@ -11,13 +11,12 @@ public static class ParticipantAddressMapper
         {
             return;
         }
-        
+
         destination.AddressLine1 = source.AddressLine1;
         destination.AddressLine2 = source.AddressLine2;
         destination.AddressLine3 = source.AddressLine3;
         destination.AddressLine4 = source.AddressLine4;
         destination.Town = source.Town;
         destination.Postcode = source.Postcode;
-        
     }
 }

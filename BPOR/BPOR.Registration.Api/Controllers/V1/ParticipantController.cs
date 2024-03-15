@@ -45,7 +45,8 @@ public class ParticipantController(IParticipantService participantService) : Con
     [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(Response<object>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = null)]
     [HttpPut("details")]
-    public async Task<IActionResult> UpdateParticipant([FromBody] UpdateParticipantRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateParticipant([FromBody] UpdateParticipantRequest request,
+        CancellationToken cancellationToken)
     {
         var participant = await participantService.GetParticipantAsync(User.GetParticipantId(), cancellationToken);
         if (participant == null)
@@ -73,11 +74,11 @@ public class ParticipantController(IParticipantService participantService) : Con
         {
             return NotFound();
         }
-        
+
         participant.SelectedLocale = request.SelectedLocale;
         return Ok(await participantService.UpdateParticipantAsync(participant, cancellationToken));
     }
-    
+
     /// <summary>
     /// [AnyAuthenticatedUser] Delete own user account
     /// </summary>
