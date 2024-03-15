@@ -1,54 +1,94 @@
 using System;
-using System.IO;
-using Microsoft.Extensions.Configuration.Json;
-using System.Text;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.SecretsManager;
 using Amazon.SecretsManager.Model;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace NIHR.Infrastructure.Configuration
 {
-    public class AwsSecretsManagerConfigurationProvider : JsonStreamConfigurationProvider
+    public class AwsSecretsManagerConfigurationProvider : ConfigurationProvider
     {
+        private readonly IAmazonSecretsManager _client;
         private readonly string _secretName;
-        private readonly Func<IAmazonSecretsManager> _secretsManagerClientFactory;
 
-        public AwsSecretsManagerConfigurationProvider(JsonStreamConfigurationSource source, string secretName,
-            Func<IAmazonSecretsManager> secretsManagerClientFactory) : base(source)
+        public AwsSecretsManagerConfigurationProvider(IAmazonSecretsManager client, string secretName)
         {
+            _client = client;
             _secretName = secretName;
-            _secretsManagerClientFactory = secretsManagerClientFactory;
         }
 
-        public override void Load()
+        public override async void Load()
         {
-            var secretsManager = _secretsManagerClientFactory.Invoke();
+            await LoadAsync();
+        }
 
-            var response = secretsManager.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName })
-                .GetAwaiter().GetResult();
+        private async Task LoadAsync()
+        {
+            var response = await _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName });
 
-            var jsonStream = response.SecretBinary;
-
-            if (response.SecretString != null)
+            var secretString = response.SecretString;
+            if (string.IsNullOrEmpty(secretString))
             {
-                jsonStream = new MemoryStream(Encoding.UTF8.GetBytes(response.SecretString));
+                throw new InvalidOperationException($"Secret {_secretName} is empty or not found.");
             }
 
-            if (jsonStream != null)
+            ParseSecret(secretString);
+        }
+
+        private void ParseSecret(string secretString)
+        {
+            try
             {
-                base.Load(jsonStream); // Stream will be disposed correctly in here.
+                var jToken = JToken.Parse(secretString);
+                var data = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                ExtractValues(jToken, prefix: string.Empty, data);
+                Data = data;
             }
-            else
+            catch (JsonReaderException ex)
             {
-                throw new AmazonSecretsManagerException(
-                    $"Failed to load Secrets Manager secret with key {_secretName}.");
+                throw new FormatException(
+                    $"The secret value for {_secretName} is not in a recognized format. Expected JSON.", ex);
             }
         }
 
-        public Task ForceReloadAsync()
+        private static void ExtractValues(JToken token, string prefix, IDictionary<string, string> data)
         {
-            Load();
-            return Task.CompletedTask;
+            switch (token.Type)
+            {
+                case JTokenType.Object:
+                    foreach (var child in token.Children<JProperty>())
+                    {
+                        ExtractValues(child.Value, JoinKey(prefix, child.Name), data);
+                    }
+
+                    break;
+                case JTokenType.Array:
+                    var index = 0;
+                    foreach (var child in token.Children())
+                    {
+                        ExtractValues(child, JoinKey(prefix, index.ToString()), data);
+                        index++;
+                    }
+
+                    break;
+                default:
+                    data[prefix] = token.ToString();
+                    break;
+            }
+        }
+
+        private static string JoinKey(string prefix, string key)
+        {
+            return string.IsNullOrEmpty(prefix) ? key : $"{prefix}:{key.Replace("__", ":")}";
+        }
+
+        public async Task ForceReloadAsync()
+        {
+            await LoadAsync();
+            OnReload();
         }
     }
 }

@@ -15,6 +15,9 @@ namespace NIHR.Infrastructure.Extensions
 {
     public static class Configuration
     {
+        
+        //TODO chat with chris about this global exception handling
+       
         public static IServiceCollection ConfigureNihrLogging(this IServiceCollection services,
             IConfiguration configuration)
         {

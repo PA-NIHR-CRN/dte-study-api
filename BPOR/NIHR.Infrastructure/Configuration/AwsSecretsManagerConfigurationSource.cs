@@ -19,7 +19,7 @@ namespace NIHR.Infrastructure.Configuration
 
         public override IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            return new AwsSecretsManagerConfigurationProvider(this, _secretName, _secretsManagerClientFactory);
+            return new AwsSecretsManagerConfigurationProvider(_secretsManagerClientFactory(), _secretName);
         }
     }
 }
