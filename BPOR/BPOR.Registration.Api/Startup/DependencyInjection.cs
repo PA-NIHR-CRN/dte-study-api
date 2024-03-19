@@ -31,9 +31,6 @@ public static class DependencyInjection
         services.GetSectionAndValidate<ContentfulSettings>(configuration);
         services.GetSectionAndValidate<AppSettings>(configuration);
         services.GetSectionAndValidate<EmailSettings>(configuration);
-        var nhsLoginSettings = services.GetSectionAndValidate<NhsLoginSettings>(configuration);
-        var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
-        var awsSettings = services.GetSectionAndValidate<AwsSettings>(configuration);
 
         // Rate limiting
         services.AddMemoryCache();
@@ -43,7 +40,6 @@ public static class DependencyInjection
         services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
         // Infrastructure dependencies
-        services.AddSingleton<IClock, Clock>();
         services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
         services.AddScoped<IParticipantService, ParticipantService>();
         services.AddScoped<IUserService, UserService>();
@@ -54,43 +50,110 @@ public static class DependencyInjection
         services.AddTransient<IPrivateKeyProvider, NhsLoginPrivateKeyProvider>();
         services.AddTransient<IClientAssertionJwtProvider, NhsLoginClientAssertionJwtProvider>();
         services.AddTransient<IAuthService, AuthService>();
+        services.AddTransient<IMfaService, MfaService>();
+        services.AddTransient<INhsService, NhsService>();
+        services.AddTransient<IPasswordService, PasswordService>();
+        services.AddTransient<ISignUpService, SignUpService>();
+        services.AddTransient<IRespondToMfaChallengeService, RespondToMfaChallengeService>();
 
-        // Contentful set up
+        // Additional services
         services.AddContentfulServices(configuration);
-
-        // AWS
-        var amazonDynamoDbConfig = new AmazonDynamoDBConfig();
-        var amazonCognitoConfig = new AmazonCognitoIdentityProviderConfig();
-        if (!string.IsNullOrWhiteSpace(awsSettings.Value.ServiceUrl))
-        {
-            amazonDynamoDbConfig.ServiceURL = awsSettings.Value.ServiceUrl;
-            amazonCognitoConfig.ServiceURL = awsSettings.Value.ServiceUrl;
-        }
-
-        services.AddScoped<IAmazonDynamoDB>(_ => new AmazonDynamoDBClient(amazonDynamoDbConfig));
-        services.AddScoped<IDynamoDBContext>(_ =>
-            new DynamoDBContext(new AmazonDynamoDBClient(amazonDynamoDbConfig)));
-        amazonCognitoConfig.RegionEndpoint = RegionEndpoint.GetBySystemName(awsSettings.Value.CognitoRegion);
-        services.AddScoped<IAmazonCognitoIdentityProvider>(_ =>
-            new AmazonCognitoIdentityProviderClient(amazonCognitoConfig));
-        services.AddSingleton<IAmazonSimpleEmailService>(sp =>
-        {
-            var config = new AmazonSimpleEmailServiceConfig
-            {
-                RegionEndpoint = RegionEndpoint.EUWest2
-            };
-            return new AmazonSimpleEmailServiceClient(config);
-        });
-
-        services.AddSingleton<DynamoDBOperationConfig>(_ => new DynamoDBOperationConfig
-        {
-            OverrideTableName = awsSettings.Value.ParticipantRegistrationDynamoDbTableName
-        });
-
-        //TODO test this
-        services.AddDefaultAWSOptions(configuration.GetAWSOptions());
+        services.ConfigureAwsServices(configuration);
+        services.AddHttpContextAccessor();
 
         // Clients
+        services.AddHttpClients(configuration);
+        
+        // CORS
+        services.AddCors(hostEnvironment);
+
+        var dataProtection = services.AddDataProtection();
+        if (!hostEnvironment.IsDevelopment())
+        {
+            dataProtection.PersistKeysToAWSSystemsManager("/BPOR/DataProtection");
+        }
+        
+        var build = System.Environment.GetEnvironmentVariable("DTE_BUILD_STRING") ?? "Unknown";
+
+        //TODO confirm health check 
+        services.AddHealthChecks();
+
+
+        if (hostEnvironment.IsDevelopment())
+        {
+            services.ConfigureDevelopmentServices(configuration);
+        }
+        else if (hostEnvironment.IsStaging())
+        {
+            services.ConfigureStagingServices(configuration);
+        }
+
+        return services;
+    }
+
+    private static void ConfigureStagingServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.GetSectionAndValidate<DevelopmentSettings>(configuration);
+        services.Decorate<IEmailService, DevelopmentEmailService>();
+        services.Decorate<IRespondToMfaChallengeService, DevelopmentRespondToMfaChallengeService>();
+        services.Decorate<ISignUpService, DevelopmentSignUpService>();
+    }
+
+    private static void ConfigureDevelopmentServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.GetSectionAndValidate<DevelopmentSettings>(configuration);
+        services.Decorate<IEmailService, DevelopmentEmailService>();
+        services.Decorate<IRespondToMfaChallengeService, DevelopmentRespondToMfaChallengeService>();
+        services.Decorate<ISignUpService, DevelopmentSignUpService>();
+    }
+
+    private static void ConfigureAwsServices(this IServiceCollection services, IConfiguration configuration)
+    {
+
+        var awsSettings = services.GetSectionAndValidate<AwsSettings>(configuration).Value;
+        
+        // Configure Amazon DynamoDB
+        var dynamoDbConfig = new AmazonDynamoDBConfig();
+        if (!string.IsNullOrWhiteSpace(awsSettings.ServiceUrl))
+        {
+            dynamoDbConfig.ServiceURL = awsSettings.ServiceUrl;
+        }
+        var dynamoDbClient = new AmazonDynamoDBClient(dynamoDbConfig);
+        services.AddSingleton<IAmazonDynamoDB>(dynamoDbClient);
+        services.AddSingleton<IDynamoDBContext, DynamoDBContext>(_ => new DynamoDBContext(dynamoDbClient));
+
+        // Configure Amazon Cognito Identity Provider
+        var cognitoConfig = new AmazonCognitoIdentityProviderConfig
+        {
+            RegionEndpoint = RegionEndpoint.GetBySystemName(awsSettings.CognitoRegion)
+        };
+        if (!string.IsNullOrWhiteSpace(awsSettings.ServiceUrl))
+        {
+            cognitoConfig.ServiceURL = awsSettings.ServiceUrl;
+        }
+        services.AddSingleton<IAmazonCognitoIdentityProvider>(new AmazonCognitoIdentityProviderClient(cognitoConfig));
+
+        // Configure Amazon Simple Email Service
+        var sesConfig = new AmazonSimpleEmailServiceConfig
+        {
+            RegionEndpoint = RegionEndpoint.GetBySystemName(awsSettings.CognitoRegion)
+        };
+        services.AddSingleton<IAmazonSimpleEmailService>(new AmazonSimpleEmailServiceClient(sesConfig));
+
+        // DynamoDB Operation Configuration
+        services.AddSingleton(new DynamoDBOperationConfig
+        {
+            OverrideTableName = awsSettings.ParticipantRegistrationDynamoDbTableName
+        });
+
+        // Configure AWS Options globally if needed
+        services.AddDefaultAWSOptions(configuration.GetAWSOptions());
+    }
+    
+    private static void AddHttpClients(this IServiceCollection services, IConfiguration configuration)
+    {
+        var nhsLoginSettings = services.GetSectionAndValidate<NhsLoginSettings>(configuration);
+        var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
             .CreateLogger("BPOR.Registration.Api.Startup.DependencyInjection");
 
@@ -101,7 +164,10 @@ public static class DependencyInjection
         {
             httpClient.BaseAddress = new Uri(nhsLoginSettings.Value.BaseUrl);
         });
-
+    }
+    
+    private static void AddCors(this IServiceCollection services, IHostEnvironment hostEnvironment)
+    {
         if (hostEnvironment.IsDevelopment())
         {
             services.AddCors(options =>
@@ -114,49 +180,5 @@ public static class DependencyInjection
                     });
             });
         }
-
-        var dataProtection = services.AddDataProtection();
-        if (!hostEnvironment.IsDevelopment())
-        {
-            dataProtection.PersistKeysToAWSSystemsManager("/BPOR/DataProtection");
-        }
-
-        services.AddHttpContextAccessor();
-
-
-        var build = System.Environment.GetEnvironmentVariable("DTE_BUILD_STRING") ?? "Unknown";
-
-        //TODO confirm health check 
-        services.AddHealthChecks();
-
-
-        if (hostEnvironment.IsDevelopment())
-        {
-            ConfigureDevelopmentServices(configuration, hostEnvironment, services);
-        }
-        else if (hostEnvironment.IsStaging())
-        {
-            ConfigureStagingServices(configuration, hostEnvironment, services);
-        }
-
-        return services;
-    }
-
-    private static void ConfigureStagingServices(IConfiguration configuration, IHostEnvironment hostEnvironment,
-        IServiceCollection services)
-    {
-        services.GetSectionAndValidate<DevelopmentSettings>(configuration);
-        services.Decorate<IEmailService, DevelopmentEmailService>();
-        services.Decorate<IRespondToMfaChallengeService, DevelopmentRespondToMfaChallengeService>();
-        services.Decorate<ISignUpService, DevelopmentSignUpService>();
-    }
-
-    private static void ConfigureDevelopmentServices(IConfiguration configuration, IHostEnvironment hostEnvironment,
-        IServiceCollection services)
-    {
-        services.GetSectionAndValidate<DevelopmentSettings>(configuration);
-        services.Decorate<IEmailService, DevelopmentEmailService>();
-        services.Decorate<IRespondToMfaChallengeService, DevelopmentRespondToMfaChallengeService>();
-        services.Decorate<ISignUpService, DevelopmentSignUpService>();
     }
 }

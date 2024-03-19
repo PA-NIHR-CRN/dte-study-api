@@ -234,7 +234,7 @@ public class MfaService(
         };
     }
 
-    private AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
+    public AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
         string username, string code, string codeKey)
     {
         return new AdminRespondToAuthChallengeRequest
@@ -398,7 +398,7 @@ public class MfaService(
         return string.IsNullOrEmpty(phoneNumber) ? string.Empty : phoneNumber;
     }
 
-    private Response<string> HandleMfaException(Exception ex, string errorType)
+    public Response<string> HandleMfaException(Exception ex, string errorType)
     {
         var exceptionResponse = Response<string>.CreateErrorMessageResponse(
             ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), errorType,

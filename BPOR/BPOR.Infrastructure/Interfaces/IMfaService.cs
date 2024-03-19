@@ -1,3 +1,4 @@
+using Amazon.CognitoIdentityProvider.Model;
 using BPOR.Infrastructure.Models.Mfa;
 using Dte.Common.Responses;
 
@@ -24,4 +25,8 @@ public interface IMfaService
 
     Task<Response<string>> ReissueMfaSessionAsync(string requestMfaDetails, CancellationToken cancellationToken);
     Task<string> GetMaskedMobile(string requestMfaDetails);
+    Response<string> HandleMfaException(Exception ex, string errorType);
+
+    public AdminRespondToAuthChallengeRequest CreateAuthChallengeRequest(string challengeName, string sessionId,
+        string username, string code, string codeKey);
 }
