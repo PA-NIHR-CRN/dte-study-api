@@ -55,7 +55,7 @@ namespace NIHR.Infrastructure.Extensions
             return !string.IsNullOrEmpty(executionEnv) && executionEnv.StartsWith("AWS_Lambda_");
         }
 
-        public static ConfigurationManager AddNihrConfiguration(this ConfigurationManager configuration,
+        public static ConfigurationManager AddNihrConfiguration(this ConfigurationManager configuration, IServiceCollection services,
             IHostEnvironment hostEnvironment)
         {
             if (hostEnvironment.IsDevelopment())
@@ -64,7 +64,7 @@ namespace NIHR.Infrastructure.Extensions
                     .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
             }
 
-            var secretsManagerSettings = configuration.GetSection("AwsSecretsManager").Get<AwsSecretsManagerSettings>();
+            var secretsManagerSettings = services.GetSectionAndValidate<AwsSecretsManagerSettings>(configuration).Value;
             if (secretsManagerSettings.Enabled)
             {
                 configuration.AddAwsSecretsManager(secretsManagerSettings.SecretName,

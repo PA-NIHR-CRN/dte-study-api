@@ -5,7 +5,7 @@ namespace NIHR.Infrastructure.Settings
 {
     public class AwsSecretsManagerSettings : IValidatableObject
     {
-        public const string SectionName = "AwsSecretsManager";
+        public static string SectionName => "AwsSecretsManagerSettings";
         public bool Enabled { get; set; } = true;
         public string Region { get; set; } = string.Empty;
         public string SecretName { get; set; } = string.Empty;

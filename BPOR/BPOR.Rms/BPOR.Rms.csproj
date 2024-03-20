@@ -13,4 +13,13 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+<!-- TODO  check this package issue-->
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.27" />
+    </ItemGroup>
+
 </Project>

@@ -20,7 +20,7 @@ public static class Startup
     public static void ConfigureServices(IServiceCollection services, IHostEnvironment hostEnvironment) 
     {
         // configuration
-        var configuration = new ConfigurationManager().AddNihrConfiguration(hostEnvironment);
+        var configuration = new ConfigurationManager().AddNihrConfiguration(services, hostEnvironment);
         services.AddSingleton(configuration);
 
         // db setup
