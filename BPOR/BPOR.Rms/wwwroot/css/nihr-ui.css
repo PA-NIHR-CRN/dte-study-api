@@ -1,0 +1,210 @@
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    position: relative;
+}
+
+.govuk-header {
+    background-color: #193e72;
+    border-color: #ced5db;
+    border-bottom-width: 1px;
+    flex-direction: column;
+    display: flex;
+}
+
+.govuk-header__container {
+    padding-top: 0;
+    border-bottom-width: 0;
+    margin-bottom: 0;
+    align-items: center;
+    height: 65px;
+    justify-content: space-between;
+    display: flex;
+}
+
+.header-content-container {
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.header-content-left {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.header-content-right {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.header-content-right .govuk-header__logotype {
+    gap: 10px;
+    align-items: center;
+    display: flex;
+}
+
+.button-container {
+    display: flex;
+    height: 3rem;
+    width: 3rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-container {
+    width: 3rem;
+    height: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    cursor: pointer;
+    outline: none;
+    position: relative; /* For the circle focus */
+}
+
+.icon-container:focus::before {
+    content: '';
+    position: absolute;
+    height: 3rem;
+    width: 3rem;
+    border-radius: 50%;
+    border: 2px solid white;
+    background-color: #305280;
+}
+
+.line {
+    width: 18px;
+    height: 2px;
+    background-color: black;
+    transition: transform 0.3s ease, opacity 0.5s ease;
+    border-radius: 3px;
+    background-color: white;
+    z-index: 1;
+}
+
+/* Adjusted transformations for the arrow state */
+.icon-container.clicked .line1 {
+    transform: translateX(-5px) translateY(2px) rotate(-45deg);
+    width: 10px;
+}
+
+.icon-container.clicked .line3 {
+    transform: translateX(-5px) translateY(-2px) rotate(45deg);
+    width: 10px;
+}
+
+
+.heading {
+    display: none; /* Hidden on small screens */
+    color: white;
+}
+
+#nihr-side-nav {
+    position: absolute;
+    bottom: 0;
+    top: 65px;
+    left: 0;
+    width: 250px;
+    background-color: white;
+    box-shadow: 2px 0px 4px 0 rgba(0,0,0,.1);
+    overflow: hidden;
+    z-index: 20;
+    height: calc(100% - 65px);
+    width: 50px;
+    transition: width 0.3s ease;
+}
+
+/* Class to add when showing the side nav */
+#nihr-side-nav.show {
+    width: 270px;
+}
+
+#nihr-side-nav.show ul {
+    list-style: none;
+    margin: 0;
+    padding: 12px;
+}
+
+#nihr-side-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    transition: all 0.2s cubic-bezier(.4,0,.2,1) !important;
+}
+
+#nihr-side-nav li a {
+    display: flex;
+    text-decoration: none;
+    color: #193e72;
+    padding: 12px;
+    font-size: 1rem;
+    line-height: 1.25;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+#nihr-side-nav li a:hover {
+    text-decoration: underline;
+}
+
+#nihr-side-nav li a svg {
+    height: 21px;
+    width: 21px;
+    margin-right: 16px; /* Adjust based on design */
+}
+
+#nihr-side-nav li a span {
+    white-space: nowrap;
+    opacity: 1;
+    transform: translateX(0);
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+
+@media screen and (min-width: 640px) { /* Tailwind's 'sm' breakpoint */
+    .heading {
+        display: block;
+    }
+}
+
+.nihr-button-primary {
+    background-color: #193e72;
+    color: white;
+    border: 1px solid #193e72;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.nihr-button-primary:hover {
+    background-color: #305280;
+}
+
+.nihr-button-secondary {
+    background-color: white;
+    color: #193e72;
+    border-radius: 5px;
+    border: 2px solid #193E72;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.nihr-button-secondary:hover {
+    background-color: #f2f2f2;
+}

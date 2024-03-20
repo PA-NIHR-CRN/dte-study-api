@@ -3,47 +3,86 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"] - BPOR.Rms</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/BPOR.Rms.styles.css" asp-append-version="true"/>
+    <title>@ViewData["Title"] - Registry Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/govuk-frontend.min.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/nihr-ui.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/nihr-typography.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/nihr-component-ui.css" asp-append-version="true"/>
+    
 </head>
 <body>
-<header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container-fluid">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BPOR.Rms</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                    </li>
-                </ul>
+<script>
+        document.body.className += 'js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
+    </script>
+<a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
+    <header class="govuk-header" role="banner">
+        <div class="govuk-header__container govuk-header__container--full-width">
+            <div class="header-content-container">
+                <div class="header-content-left">
+                    <div class="button-container">
+                        <div class="icon-container" tabindex="0" onclick="toggleNavigation()">
+                            <span class="line line1"></span>
+                            <span class="line line2"></span>
+                            <span class="line line3"></span>
+                        </div>
+                    </div>
+                    <h1 class="heading govuk-heading-m govuk-!-margin-bottom-0 govuk-!-margin-left-4">Registry Management System</h1>
+                </div>
+                <div class="header-content-right">
+                    <a href="https://www.nihr.ac.uk/" class="govuk-header__link govuk-!-margin-left-4" target="_blank" aria-label="Go to nihr.ac.uk (opens in new window)">
+                        <span class="govuk-header__logotype">
+                            <img alt="National Institute for Health and Care Research logo" loading="lazy" width="154" height="18" decoding="async" data-nimg="1" style="color:transparent" src="/images/nihr.svg">
+                        </span>
+                    </a>
+                </div>
             </div>
         </div>
+    </header>
+    <nav id="nihr-side-nav" role="navigation" aria-label="Main application links">
+        <ul>
+            <li>
+                <a href="/" class="govuk-!-padding-left-3 govuk-!-padding-right-3 govuk-!-padding-top-3 govuk-!-padding-bottom-3 govuk-link govuk-link--no-visited-state">
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17" fill="currentColor" aria-hidden="true">
+                            <g fill-rule="evenodd" stroke="none" stroke-width="1">
+                                <g fill-rule="nonzero" transform="translate(-22 -88)">
+                                    <g transform="translate(20 85)">
+                                        <path d="M10 20L10 14 14 14 14 20 19 20 19 12 22 12 12 3 2 12 5 12 5 20z"></path>
+                                    </g>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                    <span>Home</span>
+                </a>
+                <a href="/Account/Logout" class="govuk-!-padding-left-3 govuk-!-padding-right-3 govuk-!-padding-top-3 govuk-!-padding-bottom-3 govuk-link govuk-link--no-visited-state">
+                    <div>
+                        <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 512 512" transform="scale(-1, 1)">
+                            <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z" />
+                        </svg>
+                    </div>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
     </nav>
-</header>
-<div class="container">
-    <main role="main" class="pb-3">
-        @RenderBody()
-    </main>
-</div>
-
-<footer class="border-top footer text-muted">
-    <div class="container">
-        &copy; 2024 - BPOR.Rms - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <div class="govuk-width-container">
+        <main class="govuk-main-wrapper" id="main-content" role="main">
+            @RenderBody()
+        </main>
     </div>
-</footer>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
+
+<script type="module" src="~/js/govuk-frontend.min.js"></script>
+<script type="module">
+        import {
+            initAll
+        } from '/js/govuk-frontend.min.js'
+        initAll()
+    </script>
+<script src="~/js/layout.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
