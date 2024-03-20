@@ -5,7 +5,7 @@ namespace BPOR.Registration.Api.Mappers;
 
 public static class ParticipantAddressMapper
 {
-    public static void Map(CreateParticipantAddressRequest source, ParticipantAddress destination)
+    public static void Map(CreateParticipantAddressRequest source, DynamoParticipantAddress destination)
     {
         if (source == null)
         {

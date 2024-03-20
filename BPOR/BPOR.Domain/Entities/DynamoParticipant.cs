@@ -37,7 +37,7 @@ public class DynamoParticipant
 
     [DynamoDBProperty] public string MobileNumber { get; set; }
     [DynamoDBProperty] public string LandlineNumber { get; set; }
-    [DynamoDBProperty] public ParticipantAddress Address { get; set; }
+    [DynamoDBProperty] public DynamoParticipantAddress Address { get; set; }
     [DynamoDBProperty] public string SexRegisteredAtBirth { get; set; }
     [DynamoDBProperty] public bool? GenderIsSameAsSexRegisteredAtBirth { get; set; }
     [DynamoDBProperty] public string EthnicGroup { get; set; }

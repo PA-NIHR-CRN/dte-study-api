@@ -10,9 +10,25 @@
         <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.301.19"/>
         <PackageReference Include="Dte.Common" Version="1.7.7"/>
         <PackageReference Include="libphonenumber-csharp" Version="8.13.32" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1"/>
         <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2"/>
+        <PackageReference Include="MySqlConnector" Version="2.3.5" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Entities\Configuration\HealthConditions.txt" />
+        <EmbeddedResource Include="Entities\Configuration\HealthConditions.txt" />
     </ItemGroup>
 
 </Project>
