@@ -1,6 +1,6 @@
 namespace BPOR.Domain.Entities;
 
-public class ParticipantAddress
+public class DynamoParticipantAddress
 {
     public string AddressLine1 { get; set; }
     public string AddressLine2 { get; set; }
@@ -16,7 +16,7 @@ public class ParticipantAddress
         return postcodeWithoutSpace[..^3];
     }
 
-    public ParticipantAddress Clear()
+    public DynamoParticipantAddress Clear()
     {
         AddressLine1 = null;
         AddressLine2 = null;
