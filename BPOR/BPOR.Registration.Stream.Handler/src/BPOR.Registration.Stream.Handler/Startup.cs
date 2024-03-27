@@ -12,9 +12,10 @@ using Microsoft.Extensions.Hosting;
 using NIHR.Infrastructure.Extensions;
 using NIHR.Infrastructure.Settings;
 
+[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
+
 namespace BPOR.Registration.Stream.Handler;
 
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 public static class Startup
 {
     public static void ConfigureServices(IServiceCollection services, IHostEnvironment hostEnvironment) 
@@ -26,7 +27,7 @@ public static class Startup
         // db setup
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
-        services.AddDbContext<AuroraParticipantDbContext>(options =>
+        services.AddDbContext<AuroraDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
         services.AddScoped<IDynamoDBContext>(x => new DynamoDBContext(new AmazonDynamoDBClient()));
 

@@ -10,7 +10,7 @@ using static Amazon.Lambda.DynamoDBEvents.StreamsEventResponse;
 namespace BPOR.Registration.Stream.Handler.Handlers;
 
 public class StreamHandler(
-    AuroraParticipantDbContext dbContext,
+    AuroraDbContext dbContext,
     ILogger<StreamHandler> logger,
     IParticipantMapper participantMapper)
     : IStreamHandler

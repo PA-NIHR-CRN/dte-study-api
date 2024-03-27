@@ -11,69 +11,53 @@
     <link rel="stylesheet" href="~/css/nihr-ui.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/nihr-typography.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/nihr-component-ui.css" asp-append-version="true"/>
-    
+    @* <link rel="stylesheet" href="~/{APP ASSEMBLY}.styles.css" /> *@
+    <link rel="stylesheet" href="~/BPOR.Rms.styles.css" asp-append-version="true"/>
+
+
 </head>
 <body>
 <script>
         document.body.className += 'js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
     </script>
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
-    <header class="govuk-header" role="banner">
-        <div class="govuk-header__container govuk-header__container--full-width">
-            <div class="header-content-container">
-                <div class="header-content-left">
-                    <div class="button-container">
-                        <div class="icon-container" tabindex="0" onclick="toggleNavigation()">
-                            <span class="line line1"></span>
-                            <span class="line line2"></span>
-                            <span class="line line3"></span>
-                        </div>
+<header class="govuk-header" role="banner">
+    <div class="govuk-header__container govuk-header__container--full-width">
+        <div class="header-content-container">
+            <div class="header-content-left">
+                <h1 class="govuk-heading-m govuk-!-margin-bottom-0 govuk-!-margin-left-4 heading-white">Registry Management System</h1>
+            </div>
+            <div class="header-content-right">
+                <div class="settings-cog">
+                    <i class="fas fa-cog fa-lg" aria-hidden="true"></i>
+                    <div class="settings-dropdown" style="display: none;">
+                        <a href="/Account/Logout" class="govuk-!-padding-left-3 govuk-!-padding-right-3 govuk-!-padding-top-3 govuk-!-padding-bottom-3 govuk-link govuk-link--no-visited-state" style="display: flex; ">
+                            <div>
+                                <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 512 512" transform="scale(-1, 1)">
+                                    <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"/>
+                                </svg>
+                            </div>
+                            <span class="govuk-!-margin-left-2">Logout</span>
+                        </a>
                     </div>
-                    <h1 class="heading govuk-heading-m govuk-!-margin-bottom-0 govuk-!-margin-left-4">Registry Management System</h1>
                 </div>
-                <div class="header-content-right">
-                    <a href="https://www.nihr.ac.uk/" class="govuk-header__link govuk-!-margin-left-4" target="_blank" aria-label="Go to nihr.ac.uk (opens in new window)">
-                        <span class="govuk-header__logotype">
-                            <img alt="National Institute for Health and Care Research logo" loading="lazy" width="154" height="18" decoding="async" data-nimg="1" style="color:transparent" src="/images/nihr.svg">
-                        </span>
-                    </a>
-                </div>
+                <a href="https://www.nihr.ac.uk/" class="govuk-header__link govuk-!-margin-left-4" target="_blank" aria-label="Go to nihr.ac.uk (opens in new window)">
+                    <span class="govuk-header__logotype">
+                        <img alt="National Institute for Health and Care Research logo" loading="lazy" width="154" height="18" decoding="async" data-nimg="1" style="color:transparent" src="/images/nihr.svg">
+                    </span>
+                </a>
             </div>
         </div>
-    </header>
-    <nav id="nihr-side-nav" role="navigation" aria-label="Main application links">
-        <ul>
-            <li>
-                <a href="/" class="govuk-!-padding-left-3 govuk-!-padding-right-3 govuk-!-padding-top-3 govuk-!-padding-bottom-3 govuk-link govuk-link--no-visited-state">
-                    <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17" fill="currentColor" aria-hidden="true">
-                            <g fill-rule="evenodd" stroke="none" stroke-width="1">
-                                <g fill-rule="nonzero" transform="translate(-22 -88)">
-                                    <g transform="translate(20 85)">
-                                        <path d="M10 20L10 14 14 14 14 20 19 20 19 12 22 12 12 3 2 12 5 12 5 20z"></path>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <span>Home</span>
-                </a>
-                <a href="/Account/Logout" class="govuk-!-padding-left-3 govuk-!-padding-right-3 govuk-!-padding-top-3 govuk-!-padding-bottom-3 govuk-link govuk-link--no-visited-state">
-                    <div>
-                        <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 512 512" transform="scale(-1, 1)">
-                            <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z" />
-                        </svg>
-                    </div>
-                    <span>Logout</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-    <div class="govuk-width-container">
-        <main class="govuk-main-wrapper" id="main-content" role="main">
-            @RenderBody()
-        </main>
     </div>
+</header>
+<div class="progress-bar-container" style="width: 100%; background-color: #b1b4b6; height: 10px; position: relative;display: none;">
+    <div id="progress-bar" class="progress-bar" style="width: 50%; height: 100%; background-color: #1d70b8; position: absolute; "></div>
+</div>
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        @RenderBody()
+    </main>
+</div>
 
 <script type="module" src="~/js/govuk-frontend.min.js"></script>
 <script type="module">

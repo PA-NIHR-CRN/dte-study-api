@@ -1,0 +1,22 @@
+@using BPOR.Rms.Views.ViewComponents
+@model BPOR.Domain.Entities.Study
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div style="flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 50px; display: flex">
+    @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+    {
+        new("All Studies", "/Study/Index"),
+        new("Study Page", "/Study/Index")
+    })
+    
+    @await Html.PartialAsync("Partials/Details/_StudyDetailsHeader", Model)
+    @await Html.PartialAsync("Partials/Details/_StudyStatistics", Model)
+    @await Html.PartialAsync("Partials/Details/_EmailTable", Model)
+    @await Html.PartialAsync("Partials/Details/_VolunteerTable", Model)
+    @await Html.PartialAsync("Partials/Details/_StudyDetails", Model)
+</div>

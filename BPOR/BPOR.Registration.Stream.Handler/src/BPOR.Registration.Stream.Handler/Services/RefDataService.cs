@@ -14,9 +14,9 @@ public class RefDataService : IRefDataService
     private readonly Lazy<List<CommunicationLanguage>> _communicationLanguageRefData;
     private readonly Lazy<List<DailyLifeImpact>> _dailyLifeImpactRefData;
     private readonly object _lockObject = new object();
-    private readonly AuroraParticipantDbContext _dbContext;
+    private readonly AuroraDbContext _dbContext;
 
-    public RefDataService(AuroraParticipantDbContext dbContext, ILogger<RefDataService> logger)
+    public RefDataService(AuroraDbContext dbContext, ILogger<RefDataService> logger)
     {
         _dbContext = dbContext;
         _logger = logger;

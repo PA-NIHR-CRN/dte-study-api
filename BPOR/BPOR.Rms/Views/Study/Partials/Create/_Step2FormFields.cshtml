@@ -1,0 +1,60 @@
+@model BPOR.Rms.Models.Study.StudyFormViewModel
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["StudyName"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="StudyName" class="govuk-label">
+        @Html.DisplayNameFor(model => model.StudyName)
+    </label>
+    @if (Html.ViewData.ModelState["StudyName"]?.Errors.Count > 0)
+    {
+        <span class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.StudyName)
+        </span>
+    }
+    <textarea asp-for="StudyName" class="govuk-textarea @(Html.ViewData.ModelState["StudyName"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" aria-describedby="@(Html.ViewData.ModelState["StudyName"]?.Errors.Count > 0 ? "study-name-error" : "")"></textarea>
+</div>
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["AnonymousEnrolment"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h1 class="govuk-fieldset__heading">
+                Is this study using anonymous enrolment?
+            </h1>
+        </legend>
+        @if (Html.ViewData.ModelState["AnonymousEnrolment"]?.Errors.Count > 0)
+        {
+            <span id="anonymous-enrolment-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span>
+                Please select an option.
+            </span>
+        }
+        <div class="govuk-radios" data-module="govuk-radios">
+            <div class="govuk-radios__item">
+                <input asp-for="AnonymousEnrolment" class="govuk-radios__input" id="AnonymousEnrolment_Yes" value="true" type="radio">
+                <label class="govuk-label govuk-radios__label" for="AnonymousEnrolment_Yes">
+                    Yes
+                </label>
+            </div>
+            <div class="govuk-radios__item">
+                <input asp-for="AnonymousEnrolment" class="govuk-radios__input" id="AnonymousEnrolment_No" value="false" type="radio">
+                <label class="govuk-label govuk-radios__label" for="AnonymousEnrolment_No">
+                    No
+                </label>
+            </div>
+        </div>
+    </fieldset>
+</div>
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="CpmsId" class="govuk-label">
+        @Html.DisplayNameFor(model => model.CpmsId)
+    </label>
+    @if (Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0)
+    {
+        <span id="cpms-id-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.CpmsId)
+        </span>
+    }
+    <input asp-for="CpmsId" class="govuk-input @(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "govuk-input--error" : "")" aria-describedby="@(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "cpms-id-error" : "")"/>
+</div>

@@ -1,0 +1,61 @@
+@model BPOR.Domain.Entities.Study
+
+<h2 class="govuk-heading-l">Study details</h2>
+
+<dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Id)</span></a>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.StudyName)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @Html.DisplayFor(model => model.StudyName)
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.StudyName)</span></a>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.CpmsId)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @Html.DisplayFor(model => model.CpmsId)
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.CpmsId)</span></a>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.FullName)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @Html.DisplayFor(model => model.FullName)
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.FullName)</span></a>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.EmailAddress)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @Html.DisplayFor(model => model.EmailAddress)
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.EmailAddress)</span></a>
+        </dd>
+    </div>
+</dl>

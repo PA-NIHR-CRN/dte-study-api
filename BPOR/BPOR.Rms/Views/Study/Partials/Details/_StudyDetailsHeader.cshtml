@@ -1,0 +1,8 @@
+@model BPOR.Domain.Entities.Study
+
+<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    <h1 class="govuk-heading-l" style="margin: 0;">
+        @Html.DisplayFor(model => model.StudyName)
+    </h1>
+    @Html.ActionLink("Find volunteers", "", "", new { studyId = Model.Id }, new { @class = "govuk-button", data_module = "govuk-button" })
+</div>

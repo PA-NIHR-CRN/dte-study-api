@@ -1,19 +1,20 @@
 .govuk-button {
-    background-color: #005EA5;
+    background-color: #193E72;
     border: 0;
     border-radius: 5px;
     color: #FFFFFF;
     cursor: pointer;
     display: inline-block;
-    font-size: 20px;
     font-weight: 700;
-    line-height: 1;
     padding: 10px 20px;
     text-align: center;
     text-decoration: none;
     width: auto;    
-    height: 44px;
     flex-shrink: 0;
+    font-size: 18px;
+    font-family: Lato, serif;
+    line-height: 27px;
+    word-wrap: break-word
 }
 
 .govuk-button:hover {
@@ -55,4 +56,29 @@
     color: #193E72;
     background: #FFFFFF;
     border: 2px solid #193E72;
+}
+
+.progress-bar-container {
+    width: 100%;
+    background-color: #b1b4b6; /* Light grey background */
+    height: 10px;
+    position: relative;
+}
+
+.progress-bar {
+    width: 50%; /* Initial progress */
+    height: 100%;
+    background-color: #1d70b8; /* GOV.UK blue */
+    position: absolute;
+}
+
+.govuk-input {
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    font-size: 18px;
+    font-family: Lato, serif;
+    line-height: 27px;
+    word-wrap: break-word;
+    border: 2px solid #0B0C0C;
 }

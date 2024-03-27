@@ -1,0 +1,36 @@
+@model BPOR.Rms.Models.Study.StudyFormViewModel
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["FullName"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="FullName" class="govuk-label" for="FullName">
+        @Html.DisplayNameFor(model => model.FullName)
+    </label>
+    @if (Html.ViewData.ModelState["FullName"]?.Errors.Count > 0)
+    {
+        <span id="FullName-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.FullName)
+        </span>
+        <input asp-for="FullName" class="govuk-input govuk-input--error" id="FullName" aria-describedby="FullName-error" value="@(Model.FullName)"/>
+    }
+    else
+    {
+        <input asp-for="FullName" class="govuk-input" id="FullName" value="@(Model.FullName)"/>
+    }
+</div>
+<div class="govuk-form-group @(Html.ViewData.ModelState["EmailAddress"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="EmailAddress" class="govuk-label" for="EmailAddress">
+        @Html.DisplayNameFor(model => model.EmailAddress)
+    </label>
+    @if (Html.ViewData.ModelState["EmailAddress"]?.Errors.Count > 0)
+    {
+        <span id="EmailAddress-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.EmailAddress)
+        </span>
+        <input asp-for="EmailAddress" class="govuk-input govuk-input--error" id="EmailAddress" aria-describedby="EmailAddress-error"/>
+    }
+    else
+    {
+        <input asp-for="EmailAddress" class="govuk-input" id="EmailAddress" value="@(Model.EmailAddress)"/>
+    }
+</div>

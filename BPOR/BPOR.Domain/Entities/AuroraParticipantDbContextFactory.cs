@@ -9,19 +9,19 @@ using NIHR.Infrastructure.Settings;
 namespace BPOR.Domain.Entities;
 
 public class AuroraParticipantDbContextFactory(IHostEnvironment environment)
-    : IDesignTimeDbContextFactory<AuroraParticipantDbContext>
+    : IDesignTimeDbContextFactory<AuroraDbContext>
 {
-    public AuroraParticipantDbContext CreateDbContext(string[] args)
+    public AuroraDbContext CreateDbContext(string[] args)
     {
         var services = new ServiceCollection();
         var configuration = new ConfigurationManager().AddNihrConfiguration(services, environment);
 
         var connectionString = services.GetSectionAndValidate<DbSettings>(configuration).Value.BuildConnectionString();
 
-        var options = new DbContextOptionsBuilder<AuroraParticipantDbContext>()
+        var options = new DbContextOptionsBuilder<AuroraDbContext>()
             .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
             .Options;
 
-        return new AuroraParticipantDbContext(options);
+        return new AuroraDbContext(options);
     }
 }

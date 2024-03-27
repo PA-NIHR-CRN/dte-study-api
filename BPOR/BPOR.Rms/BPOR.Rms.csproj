@@ -11,18 +11,35 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+      <Content Update="Views\Study\Index.cshtml.css">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
+      <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
 <!-- TODO  check this package issue-->
       <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.27" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.3" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.3" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.3" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.3">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     </ItemGroup>
-
     <ItemGroup>
-      <Folder Include="Views\Studies\" />
+        <None Update="Views/Study/Partials/_StudyList.cshtml.css" SingleFile="true" CssScope="custom-scope-identifier" />
     </ItemGroup>
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+    </PropertyGroup>
 </Project>

@@ -15,11 +15,11 @@
         <PackageReference Include="Amazon.Lambda.Core" Version="2.2.0"/>
         <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.0"/>
         <PackageReference Include="Amazon.Lambda.DynamoDBEvents" Version="2.3.0"/>
-        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.300.0"/>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.301.19"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\BPOR.Domain\BPOR.Domain.csproj" />
+        <ProjectReference Include="..\..\..\BPOR.Domain\BPOR.Domain.csproj"/>
     </ItemGroup>
 </Project>

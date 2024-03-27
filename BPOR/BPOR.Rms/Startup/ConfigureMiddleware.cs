@@ -20,7 +20,7 @@ public static class ConfigureMiddleware
 
         app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
+            pattern: "{controller=Study}/{action=Index}/{id?}");
 
 
         return app;

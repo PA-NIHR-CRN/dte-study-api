@@ -84,7 +84,6 @@ body {
     background-color: black;
     transition: transform 0.3s ease, opacity 0.5s ease;
     border-radius: 3px;
-    background-color: white;
     z-index: 1;
 }
 
@@ -97,80 +96,6 @@ body {
 .icon-container.clicked .line3 {
     transform: translateX(-5px) translateY(-2px) rotate(45deg);
     width: 10px;
-}
-
-
-.heading {
-    display: none; /* Hidden on small screens */
-    color: white;
-}
-
-#nihr-side-nav {
-    position: absolute;
-    bottom: 0;
-    top: 65px;
-    left: 0;
-    width: 250px;
-    background-color: white;
-    box-shadow: 2px 0px 4px 0 rgba(0,0,0,.1);
-    overflow: hidden;
-    z-index: 20;
-    height: calc(100% - 65px);
-    width: 50px;
-    transition: width 0.3s ease;
-}
-
-/* Class to add when showing the side nav */
-#nihr-side-nav.show {
-    width: 270px;
-}
-
-#nihr-side-nav.show ul {
-    list-style: none;
-    margin: 0;
-    padding: 12px;
-}
-
-#nihr-side-nav ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    transition: all 0.2s cubic-bezier(.4,0,.2,1) !important;
-}
-
-#nihr-side-nav li a {
-    display: flex;
-    text-decoration: none;
-    color: #193e72;
-    padding: 12px;
-    font-size: 1rem;
-    line-height: 1.25;
-    align-items: center;
-    transition: transform 0.3s ease;
-}
-
-#nihr-side-nav li a:hover {
-    text-decoration: underline;
-}
-
-#nihr-side-nav li a svg {
-    height: 21px;
-    width: 21px;
-    margin-right: 16px; /* Adjust based on design */
-}
-
-#nihr-side-nav li a span {
-    white-space: nowrap;
-    opacity: 1;
-    transform: translateX(0);
-    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
-}
-
-
-@media screen and (min-width: 640px) { /* Tailwind's 'sm' breakpoint */
-    .heading {
-        display: block;
-    }
 }
 
 .nihr-button-primary {
@@ -208,3 +133,133 @@ body {
 .nihr-button-secondary:hover {
     background-color: #f2f2f2;
 }
+
+.govuk-tag {
+    border-radius: 50px;
+    background: #EEF2F3;
+}
+
+.pill-container {
+    padding-top: 1px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background: #EEF2F3;
+    border-radius: 50px;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 10px;
+    display: inline-flex
+}
+
+.pill-content {
+    justify-content: flex-start;
+    align-items: flex-start;
+    display: inline-flex
+}
+
+.pill-test {
+    color: #193E72;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 24px;
+    word-wrap: break-word
+}
+
+.nihr-flex-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #193e72;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.vl {
+    border-left: 1px solid #193e72;
+    height: 100%;
+}
+
+.split-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.split-row > * {
+    align-self: center;
+}
+
+.settings-cog {
+    position: relative;
+    display: inline-block;
+}
+
+.settings-dropdown {
+    position: absolute;
+    right: 0;
+    background-color: #fff;
+    min-width: 160px;
+    z-index: 1;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.settings-dropdown a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.settings-dropdown a:hover {
+    background-color: #ddd;
+}
+
+/* pagination.css */
+.pagination-container {
+    width: 100%;
+    height: 100%;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+}
+
+.pagination-item {
+    background: white;
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+}
+
+.pagination-label {
+    padding: 10px 15px;
+    background: #193E72;
+    color: white;
+    font-size: 19px;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px -1px 0px white inset;
+}
+
+.pagination-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+
+.dot {
+    width: 3px;
+    height: 3px;
+    background: #505A5F;
+    border-radius: 9999px;
+}
+

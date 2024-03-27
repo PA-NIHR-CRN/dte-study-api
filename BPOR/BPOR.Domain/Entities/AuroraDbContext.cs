@@ -7,9 +7,9 @@ using NIHR.Infrastructure.Exceptions;
 
 namespace BPOR.Domain.Entities;
 
-public class AuroraParticipantDbContext : DbContext
+public class AuroraDbContext : DbContext
 {
-    public AuroraParticipantDbContext(DbContextOptions<AuroraParticipantDbContext> options) : base(options)
+    public AuroraDbContext(DbContextOptions options) : base(options)
     {
     }
 
@@ -21,6 +21,7 @@ public class AuroraParticipantDbContext : DbContext
     public DbSet<HealthCondition> HealthConditions { get; set; } = null!;
     public DbSet<IdentifierType> IdentifierTypes { get; set; } = null!;
     public DbSet<SysConfiguration> SysConfigurations { get; set; } = null!;
+    public DbSet<Study> Studies { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -42,7 +43,7 @@ public class AuroraParticipantDbContext : DbContext
             modelBuilder.Entity(type).ToTable("SysRef" + type.Name);
         }
 
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuroraParticipantDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuroraDbContext).Assembly);
     }
 
     public IQueryable<AuroraParticipant> GetParticipantByLinkedIdentifiers(List<Identifier> identifiers)
