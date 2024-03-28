@@ -5,11 +5,13 @@ EXPOSE 8080
 EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG GITHUB_TOKEN
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["BPOR/BPOR.Rms/BPOR.Rms.csproj", "BPOR.Rms/"]
 COPY ["BPOR/NIHR.Infrastructure/NIHR.Infrastructure.csproj", "NIHR.Infrastructure/"]
 COPY ["BPOR/BPOR.Infrastructure/BPOR.Infrastructure.csproj", "BPOR.Infrastructure/"]
+RUN dotnet dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }}  --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 RUN dotnet restore "BPOR.Rms/BPOR.Rms.csproj"
 COPY . .
 WORKDIR "/src/BPOR.Rms"
