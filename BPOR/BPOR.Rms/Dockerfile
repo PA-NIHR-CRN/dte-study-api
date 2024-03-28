@@ -8,6 +8,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["BPOR/BPOR.Rms/BPOR.Rms.csproj", "BPOR.Rms/"]
+COPY ["BPOR/NIHR.Infrastructure/NIHR.Infrastructure.csproj", "NIHR.Infrastructure/"]
+COPY ["BPOR/BPOR.Infrastructure/BPOR.Infrastructure.csproj", "BPOR.Infrastructure/"]
 RUN dotnet restore "BPOR.Rms/BPOR.Rms.csproj"
 COPY . .
 WORKDIR "/src/BPOR.Rms"
