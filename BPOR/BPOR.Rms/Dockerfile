@@ -11,7 +11,7 @@ WORKDIR /src
 COPY ["BPOR/BPOR.Rms/BPOR.Rms.csproj", "BPOR.Rms/"]
 COPY ["BPOR/NIHR.Infrastructure/NIHR.Infrastructure.csproj", "NIHR.Infrastructure/"]
 COPY ["BPOR/BPOR.Infrastructure/BPOR.Infrastructure.csproj", "BPOR.Infrastructure/"]
-RUN dotnet dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }}  --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+RUN dotnet dotnet nuget add source --username USERNAME --password  $GITHUB_TOKEN  --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 RUN dotnet restore "BPOR.Rms/BPOR.Rms.csproj"
 COPY . .
 WORKDIR "/src/BPOR.Rms"
