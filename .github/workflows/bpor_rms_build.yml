@@ -1,0 +1,97 @@
+name: Deploy BPOR RMS container
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: eu-west-2
+
+jobs:
+  build:
+    name: 'Build'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # - uses: ./.github/actions/setup-node
+      # - name: Install
+      #   run: npm ci --no-audit --no-fund
+      # - name: Build
+      #   # Inject the minimum amount of env vars needed to build the project
+      #   # The docker build will fail if any other environment variables are not injected correctly
+      #   run: |
+      #     touch apps/web/.env.local
+      #     npm run db:generate
+      #     npm run build
+
+  deploy-dev:
+    needs: [build]
+    environment: DEV
+    name: 'Deploy Dev'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials (dev)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REPOSITORY: crnccd-ecr-dev-bpor-rms-repository
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_NAME_TAG: bpor-rms
+          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
+        run: |
+          echo "Using registry ${{ env.ECR_REGISTRY }}"
+          echo "Tagging image with ${{ env.IMAGE_NAME_TAG}} and ${{ env.IMAGE_SHA_TAG }}"
+          docker build -f BPOR/BPOR.Rms/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG .
+          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
+
+      # - name: Generate task definition file from container
+      #   run: |
+      #     aws ecs describe-task-definition --task-definition crnccd-ecs-dev-se-task-definition --query taskDefinition > ./task-definition.json
+      #     echo $(cat ./task-definition.json | jq 'del(
+      #             .taskDefinitionArn,
+      #             .requiresAttributes,
+      #             .compatibilities,
+      #             .revision,
+      #             .status,
+      #             .registeredAt,
+      #             .registeredBy
+      #         )') > ./task-definition.json
+      # - name: Fill in the new image ID in the Amazon ECS task definition
+      #   id: task-def
+      #   env:
+      #     ECS_TASK_DEFINITION: ./task-definition.json
+      #     CONTAINER_NAME: crnccd-ecs-dev-se-container
+      #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+      #   with:
+      #     task-definition: ${{ env.ECS_TASK_DEFINITION }}
+      #     container-name: ${{ env.CONTAINER_NAME }}
+      #     image: ${{ steps.build-image.outputs.image }}
+      #     environment-variables: |
+
+      # - name: Remove Github Actions IP from RDS security group (Dev)
+      #   run: |
+      #     aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
+      # - name: Deploy Amazon ECS task definition
+      #   env:
+      #     ECS_SERVICE: crnccd-ecs-dev-se-service
+      #     ECS_CLUSTER: crnccd-ecs-dev-se-cluster
+      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      #   with:
+      #     task-definition: ${{ steps.task-def.outputs.task-definition }}
+      #     service: ${{ env.ECS_SERVICE }}
+      #     cluster: ${{ env.ECS_CLUSTER }}
+      #     wait-for-service-stability: true
