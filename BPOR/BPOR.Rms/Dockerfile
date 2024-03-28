@@ -16,7 +16,7 @@ COPY ["BPOR/BPOR.Domain/Entities/Configuration/HealthConditions.txt", "BPOR.Doma
 COPY ["BPOR/BPOR.Domain/BPOR.Domain.csproj", "BPOR.Domain/"]
 RUN dotnet nuget add source --username $NUGET_PACKAGE_USERNAME --password $NUGET_PACKAGE_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 RUN dotnet restore "BPOR.Rms/BPOR.Rms.csproj"
-COPY . .
+COPY "BPOR/BPOR.Rms" "BPOR.Rms"
 WORKDIR "/src/BPOR.Rms"
 RUN dotnet build "BPOR.Rms.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
