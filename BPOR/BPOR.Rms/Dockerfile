@@ -7,7 +7,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["BPOR.Rms.csproj", "BPOR.Rms/"]
+COPY ["BPOR/BPOR.Rms/BPOR.Rms.csproj", "BPOR.Rms/"]
 RUN dotnet restore "BPOR.Rms/BPOR.Rms.csproj"
 COPY . .
 WORKDIR "/src/BPOR.Rms"
