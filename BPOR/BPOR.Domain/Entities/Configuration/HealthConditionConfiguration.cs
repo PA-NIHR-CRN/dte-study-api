@@ -7,7 +7,7 @@ namespace BPOR.Domain.Entities.Configuration;
 
 public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondition>
 {
-    private const string HealthConditionResourceSuffix = "Configuration.HealthConditions.txt";
+    private const string HealthConditionResourceSuffix = "Configuration/HealthConditions.txt";
 
     public void Configure(EntityTypeBuilder<HealthCondition> builder)
     {
