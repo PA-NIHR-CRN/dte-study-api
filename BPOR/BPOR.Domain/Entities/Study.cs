@@ -5,25 +5,14 @@ namespace BPOR.Domain.Entities;
 
 public class Study : ISoftDelete, ITimestamped
 {
-    [Key]
-    [Display(Name = "Study ID")]
-    public int Id { get; set; }
+    [Key] public int Id { get; set; }
 
-    [Required]
-    [Display(Name = "Main contact")]
-    public string FullName { get; set; }
+    [MaxLength(255)] public string FullName { get; set; }
+    [MaxLength(255)] public string EmailAddress { get; set; }
 
-    [Required]
-    [EmailAddress]
-    [Display(Name = "Email address")]
-    public string EmailAddress { get; set; }
+    [MaxLength(255)] public string StudyName { get; set; }
 
-    [Required]
-    [Display(Name = "Study name")]
-    public string StudyName { get; set; }
-
-    [Display(Name = "CPMS ID")]
-    public string CpmsId { get; set; }
+    public long CpmsId { get; set; }
     public bool IsAnonymous { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }

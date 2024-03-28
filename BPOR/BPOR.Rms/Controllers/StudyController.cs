@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities;
+using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,27 +12,41 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
     public async Task<IActionResult> Index(string? searchString, int currentPage = 1)
     {
         var pageSize = 4;
-        var studiesQuery = context.Study.AsQueryable();
+        // var studiesQuery = context.Studies.AsQueryable();
+        //
+        // if (!string.IsNullOrEmpty(searchString))
+        // {
+        //     searchString = searchString.Trim();
+        //     var isParsedInt = int.TryParse(searchString, out var searchInt);
+        //     studiesQuery = studiesQuery.Where(s => (isParsedInt && s.Id == searchInt)
+        //                                            || s.StudyName.Contains(searchString) // TODO investigate full text search
+        //                                            || (isParsedInt && s.CpmsId == searchInt));
+        // }
 
-        if (!string.IsNullOrEmpty(searchString))
-        {
-            searchString = searchString.Trim();
-            studiesQuery = studiesQuery.Where(s => s.Id.ToString().Contains(searchString)
-                                                   || s.StudyName.Contains(searchString)
-                                                   || s.CpmsId.Contains(searchString));
-        }
+        // TODO batch up the 2 queries to avoid 2 round trips to the database
+        int totalCount = 2;
 
-        int totalCount = await studiesQuery.CountAsync();
-
-        var paginatedStudies = await studiesQuery
-            .OrderByDescending(s => s.Id)
-            .Skip((currentPage - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
+//         var paginatedStudies = await studiesQuery
+//             .OrderByDescending(s => s.Id)
+//             .Skip((currentPage - 1) * pageSize)
+//             .Take(pageSize).Select(Projections.StudyAsStudyListModel())
+//             .ToListAsync();
+// //TODO extension method for pagination of IQueryable<T> to avoid repeating the same code .AsPaginated(pageSize, currentPage)
+//         
+        // TODO create paginated results<T> generic class
         var viewModel = new StudiesViewModel
         {
-            Studies = paginatedStudies,
+            Studies = new List<StudyModel>
+            {
+                new StudyModel
+                {
+                    Id = 1,
+                    FullName = "John Doe",
+                    EmailAddress = "helll@test.com",
+                    CpmsId = 5,
+                    StudyName = "Test Study",
+                },
+            },
             CurrentPage = currentPage,
             TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
             HasSearched = !string.IsNullOrEmpty(searchString),
@@ -39,6 +54,7 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
 
         return View(viewModel);
     }
+
 
     // GET: Study/Details/5
     public async Task<IActionResult> Details(int? id)
@@ -48,7 +64,7 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
             return NotFound();
         }
 
-        var study = await context.Study
+        var study = await context.Studies
             .FirstOrDefaultAsync(m => m.Id == id);
         if (study == null)
         {
@@ -73,16 +89,15 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
         [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,IsAnonymousEnrollment,Step")]
         StudyFormViewModel model, string action)
     {
-
         if (action == "Next" && model.Step == 1)
         {
             ModelState.Remove("StudyName");
             ModelState.Remove("IsAnonymous");
             ModelState.Remove("CpmsId");
-            
+
             if (ModelState.IsValid)
             {
-                model.Step = 2; 
+                model.Step = 2;
                 return View(model);
             }
         }
@@ -90,7 +105,7 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
         {
             ModelState.Remove("FullName");
             ModelState.Remove("EmailAddress");
-            
+
             if (ModelState.IsValid)
             {
                 var study = new Study
@@ -104,12 +119,12 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                 };
-                
+
                 context.Add(study);
                 await context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            
+
             return View(model);
         }
 
@@ -125,7 +140,7 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
             return NotFound();
         }
 
-        var study = await context.Study.FindAsync(id);
+        var study = await context.Studies.FindAsync(id);
         if (study == null)
         {
             return NotFound();
@@ -181,7 +196,7 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
             return NotFound();
         }
 
-        var study = await context.Study
+        var study = await context.Studies
             .FirstOrDefaultAsync(m => m.Id == id);
         if (study == null)
         {
@@ -196,10 +211,10 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var study = await context.Study.FindAsync(id);
+        var study = await context.Studies.FindAsync(id);
         if (study != null)
         {
-            context.Study.Remove(study);
+            context.Studies.Remove(study);
         }
 
         await context.SaveChangesAsync();
@@ -208,6 +223,6 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
 
     private bool StudyExists(int id)
     {
-        return context.Study.Any(e => e.Id == id);
+        return context.Studies.Any(e => e.Id == id);
     }
 }

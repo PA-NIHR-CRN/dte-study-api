@@ -21,5 +21,5 @@ public class StudyFormViewModel
     [Display(Name = "Anonymous enrolment")]
     public bool AnonymousEnrolment { get; set; }
 
-    [Display(Name = "CPMS ID")] public string CpmsId { get; set; }
+    [Display(Name = "CPMS ID")] public long CpmsId { get; set; }
 }

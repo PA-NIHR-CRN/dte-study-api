@@ -38,6 +38,12 @@
     word-wrap: break-word;
     text-align: center;
   }
+  
+  @@media  {
+    .stat-card {
+      flex: 1 1 calc(50% - 20px); /* Adjust so that 2 cards fit evenly into the row, accounting for gap */
+    }
+  }
 </style>
 
 <div class="stat-cards-container">

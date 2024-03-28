@@ -1,8 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace BPOR.Rms.Models.Study;
 
 public class StudiesViewModel
 {
-    public IEnumerable<Domain.Entities.Study> Studies { get; set; }
+    public IEnumerable<StudyModel> Studies { get; set; }
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
     public bool HasPreviousPage => CurrentPage > 1;
@@ -10,3 +12,4 @@ public class StudiesViewModel
     public bool HasSearched { get; set; }
     
 }
+
