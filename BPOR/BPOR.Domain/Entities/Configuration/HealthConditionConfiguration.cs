@@ -7,7 +7,7 @@ namespace BPOR.Domain.Entities.Configuration;
 
 public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondition>
 {
-    private const string HealthConditionResourceSuffix = "Configuration/HealthConditions.txt";
+    private const string HealthConditionResourceSuffix = "Configuration.HealthConditions.txt";
 
     public void Configure(EntityTypeBuilder<HealthCondition> builder)
     {
@@ -26,13 +26,13 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
 
         if (string.IsNullOrWhiteSpace(resourceName))
         {
-            throw new FileNotFoundException($"Email template resource '{HealthConditionResourceSuffix}' not found.");
+            throw new FileNotFoundException($"Resource with suffix '{HealthConditionResourceSuffix}' not found.");
         }
 
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream == null)
         {
-            throw new FileNotFoundException($"Email template resource '{HealthConditionResourceSuffix}' not found.");
+            throw new FileNotFoundException($"Resource with suffix '{HealthConditionResourceSuffix}' not found.");
         }
 
         using var reader = new StreamReader(stream);

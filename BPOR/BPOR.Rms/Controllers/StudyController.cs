@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities;
+using BPOR.Domain.Extensions;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
 using Microsoft.AspNetCore.Mvc;
@@ -12,43 +13,29 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
     public async Task<IActionResult> Index(string? searchString, int currentPage = 1)
     {
         var pageSize = 4;
-        // var studiesQuery = context.Studies.AsQueryable();
-        //
-        // if (!string.IsNullOrEmpty(searchString))
-        // {
-        //     searchString = searchString.Trim();
-        //     var isParsedInt = int.TryParse(searchString, out var searchInt);
-        //     studiesQuery = studiesQuery.Where(s => (isParsedInt && s.Id == searchInt)
-        //                                            || s.StudyName.Contains(searchString) // TODO investigate full text search
-        //                                            || (isParsedInt && s.CpmsId == searchInt));
-        // }
+        var studiesQuery = context.Studies.AsQueryable();
 
-        // TODO batch up the 2 queries to avoid 2 round trips to the database
-        int totalCount = 2;
+        if (!string.IsNullOrEmpty(searchString))
+        {
+            searchString = searchString.Trim();
+            var isParsedInt = int.TryParse(searchString, out var searchInt);
+            studiesQuery = studiesQuery.Where(s => (isParsedInt && s.Id == searchInt) ||
+                                                   s.StudyName.Contains(
+                                                       searchString) // TODO investigate full text search
+                                                   || (isParsedInt && s.CpmsId == searchInt));
+        }
 
-//         var paginatedStudies = await studiesQuery
-//             .OrderByDescending(s => s.Id)
-//             .Skip((currentPage - 1) * pageSize)
-//             .Take(pageSize).Select(Projections.StudyAsStudyListModel())
-//             .ToListAsync();
-// //TODO extension method for pagination of IQueryable<T> to avoid repeating the same code .AsPaginated(pageSize, currentPage)
-//         
+        // TODO create paginated results<T> generic class look at rider annotations, what am I getting back? Can we get a paginated result back that is a generic type?List<T> whatever it is
+        // selector, source, pageIndex, pageSize(which can be defaulted)
+        var paginatedStudies = await studiesQuery.OrderByDescending(s => s.Id)
+            .ToPaginatedListAsync(Projections.StudyAsStudyListModel(), currentPage, pageSize);
+
         // TODO create paginated results<T> generic class
         var viewModel = new StudiesViewModel
         {
-            Studies = new List<StudyModel>
-            {
-                new StudyModel
-                {
-                    Id = 1,
-                    FullName = "John Doe",
-                    EmailAddress = "helll@test.com",
-                    CpmsId = 5,
-                    StudyName = "Test Study",
-                },
-            },
+            Studies = paginatedStudies.Items,
             CurrentPage = currentPage,
-            TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+            TotalPages = (int)Math.Ceiling((double)paginatedStudies.TotalCount / pageSize),
             HasSearched = !string.IsNullOrEmpty(searchString),
         };
 

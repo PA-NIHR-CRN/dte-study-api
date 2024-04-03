@@ -7,7 +7,6 @@
 <div class="govuk-grid-column-full">
     <div class="govuk-grid-row split-row">
         <a asp-action="Index" class="govuk-back-link">Back</a>
-        <p class="govuk-body">0%</p>
     </div>
 </div>
 
@@ -37,18 +36,18 @@
         <input type="hidden" asp-for="Step" value="@Model.Step"/>
 
         <div style="@(Model.Step == 1 ? "" : "display:none;")">
-            @await Html.PartialAsync("Partials/Create/_Step1FormFields", Model)
+            @await Html.PartialAsync("Partials/Shared/_Step1FormFields", Model)
         </div>
 
         <div style="@(Model.Step == 2 ? "" : "display:none;")">
-            @await Html.PartialAsync("Partials/Create/_Step2FormFields", Model);
+            @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model);
         </div>
 
 
         <div class="govuk-button-group">
             @if (Model.Step == 1)
             {
-                @Html.ActionLink("Cancel", "Index", "Study", null, new { @class = "govuk-button govuk-button--inverse", data_module = "govuk-button" })
+                @Html.ActionLink("Cancel", "Index", "Study", null, new { @class = "govuk-button govuk-button--secondary", data_module = "govuk-button" })
                 <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Next</button>
             }
             else if (Model.Step == 2)

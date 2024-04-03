@@ -8,15 +8,18 @@ using NIHR.Infrastructure.Settings;
 
 namespace BPOR.Domain.Entities;
 
-public class AuroraParticipantDbContextFactory(IHostEnvironment environment)
-    : IDesignTimeDbContextFactory<AuroraDbContext>
+public class AuroraParticipantDbContextFactory() : IDesignTimeDbContextFactory<AuroraDbContext>
 {
     public AuroraDbContext CreateDbContext(string[] args)
     {
-        var services = new ServiceCollection();
-        var configuration = new ConfigurationManager().AddNihrConfiguration(services, environment);
+        IConfigurationRoot configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.user.json", optional: true)
+            .Build();
+        
+        var dbSettings = configuration.GetSection(DbSettings.SectionName).Get<DbSettings>();
 
-        var connectionString = services.GetSectionAndValidate<DbSettings>(configuration).Value.BuildConnectionString();
+        var connectionString = dbSettings.BuildConnectionString();
 
         var options = new DbContextOptionsBuilder<AuroraDbContext>()
             .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
