@@ -3,7 +3,24 @@ body, nav, div, p, span, a, h1, h2, h3, h4, h5, h6 {
 }
 
 a {
+    color: rgb(29, 112, 184);
+}
+
+a:visited {
+    color: rgb(29, 112, 184);
+}
+
+a:hover {
     color: #193E72;
+    text-decoration-color: rgb(25, 62, 114);
+    text-decoration-line: underline;
+    text-decoration-thickness: max(3px, 0.1875rem, 0.12em);
+}
+
+a:focus {
+    text-decoration: none;
+    background-color: rgb(254, 212, 122);
+    box-shadow: rgb(254, 212, 122) 0px -2px, rgb(33, 43, 50) 0px 4px;
 }
 
 .govuk-heading-xl {
@@ -85,7 +102,8 @@ a {
 }
 
 
-@media screen and (min-width: 640px) { /* Tailwind's 'sm' breakpoint */
+@media screen and (min-width: 640px) {
+    /* Tailwind's 'sm' breakpoint */
     .heading-white {
         display: block;
     }

@@ -17,9 +17,9 @@
 <div class="govuk-form-group @(Html.ViewData.ModelState["AnonymousEnrolment"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <h1 class="govuk-fieldset__heading">
+            <h2 class="govuk-label">
                 Is this study using anonymous enrolment?
-            </h1>
+            </h2>
         </legend>
         @if (Html.ViewData.ModelState["AnonymousEnrolment"]?.Errors.Count > 0)
         {
@@ -47,7 +47,7 @@
 
 <div class="govuk-form-group @(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="CpmsId" class="govuk-label">
-        @Html.DisplayNameFor(model => model.CpmsId)
+        @Html.DisplayNameFor(model => model.CpmsId)  (optional)
     </label>
     @if (Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0)
     {
@@ -56,5 +56,5 @@
             @Html.ValidationMessageFor(model => model.CpmsId)
         </span>
     }
-    <input asp-for="CpmsId" class="govuk-input @(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "govuk-input--error" : "")" aria-describedby="@(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "cpms-id-error" : "")"/>
+    <input asp-for="CpmsId" class="govuk-input govuk-input--width-10 govuk-input @(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "govuk-input--error" : "")" aria-describedby="@(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "cpms-id-error" : "")"/>
 </div>

@@ -6,16 +6,14 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="col-10 offset-1">
-    @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
-    {
-        new("All Studies", "/Study/Index"),
-        new("Study Page", "/Study/Index")
-    })
-    
-    @await Html.PartialAsync("Partials/Details/_StudyDetailsHeader", Model)
-    @await Html.PartialAsync("Partials/Details/_StudyStatistics", Model)
-    @await Html.PartialAsync("Partials/Details/_EmailTable", Model)
-    @await Html.PartialAsync("Partials/Details/_VolunteerTable", Model)
-    @await Html.PartialAsync("Partials/Details/_StudyDetails", Model)
-</div>
+@await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+{
+    new("All Studies", "/Study/Index"),
+    new("Study Page", "/Study/Index")
+})
+
+@await Html.PartialAsync("Partials/Details/_StudyDetailsHeader", Model)
+@await Html.PartialAsync("Partials/Details/_StudyStatistics", Model)
+@await Html.PartialAsync("Partials/Details/_EmailTable", Model)
+@await Html.PartialAsync("Partials/Details/_VolunteerTable", Model)
+@await Html.PartialAsync("Partials/Details/_StudyDetails", Model)

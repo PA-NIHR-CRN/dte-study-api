@@ -1,5 +1,47 @@
 @model BPOR.Rms.Models.Study.StudiesViewModel
 
+<style>
+    .govuk-pagination__link:hover {
+        background-color: #f0f0f0;
+    }
+
+    .govuk-pagination__item--current {
+        background-color: #193e72;
+        color: white;
+    }
+    
+    .govuk-pagination__item--current:hover {
+        background-color: rgb(71, 101, 142);
+    }
+    
+    .govuk-pagination__item--current .govuk-pagination__link:hover {
+        background-color: rgb(71, 101, 142);
+    }
+    
+    .govuk-pagination__item--current .govuk-pagination__link {
+        border: none;
+        background: #193e72;
+    }
+
+    .pagination-label {
+    background: white;
+    }
+    .govuk-pagination__link:visited {
+        color: #193e72;
+    }
+    
+    .govuk-pagination__item a:focus {
+            outline: none;
+            color: #193E72;
+            top: 0px;
+            background: rgb(254, 212, 122);
+            border: 0.25rem solid rgb(254, 212, 122);
+            border-radius: 4px 4px 0px 0px;
+            box-shadow: rgb(25, 62, 114) 0px 4px 0px 0px;
+    }
+
+</style>
+
 <nav class="govuk-pagination pagination-container" role="navigation" aria-label="Pagination">
     <ul class="govuk-pagination__list pagination-item">
         @if (Model.HasPreviousPage)

@@ -4,29 +4,30 @@
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="col-6 offset-1">
+<div class="govuk-grid-row">
     <a asp-action="Index" class="govuk-back-link">Back</a>
-
-
-    <h1 class="govuk-heading-xl">Add a study to use the Be Part of Research registry</h1>
-
-    <p class="govuk-body">All fields are mandatory unless specified otherwise</p>
-
-    @await Html.PartialAsync("../Shared/_ErrorSummary", Model)
 </div>
-<div class="col-3 offset-1">
-    <form asp-action="Create">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <input type="hidden" asp-for="Step" value="@Model.Step"/>
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
 
-        <div style="@(Model.Step == 1 ? "" : "display:none;")">
-            @await Html.PartialAsync("Partials/Shared/_Step1FormFields", Model)
-        </div>
+        <h1 class="govuk-heading-xl">Add a study to use the Be Part of Research registry</h1>
 
-        <div style="@(Model.Step == 2 ? "" : "display:none;")">
-            @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model)
-        </div>
+        @await Html.PartialAsync("../Shared/_ErrorSummary", Model)
 
-        @await Html.PartialAsync("Partials/Create/_CreateButtonGroup", Model)
-    </form>
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Step" value="@Model.Step"/>
+
+            <div style="@(Model.Step == 1 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/Shared/_Step1FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 2 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model)
+            </div>
+
+            @await Html.PartialAsync("Partials/Create/_CreateButtonGroup", Model)
+        </form>
+
+    </div>
 </div>

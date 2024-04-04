@@ -7,19 +7,18 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="col-6 offset-1">
-@await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
-{
-    new("All Studies", "/Study/Index"),
-    new("Study Page", $"/Study/Details/{Model.Id}"),
-    new("Edit Study", "/Study/Edit")
-})
-
-
-<h1 class="govuk-heading-xl">Edit study details</h1>
+<div class="govuk-grid-row">
+    @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+    {
+        new("All Studies", "/Study/Index"),
+        new("Study Page", $"/Study/Details/{Model.Id}"),
+        new("Edit Study", "/Study/Edit")
+    })
 </div>
-<div class="row">
-    <div class="col-3 offset-1">
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+
+        <h1 class="govuk-heading-xl">Edit study details</h1>
         @await Html.PartialAsync("../Shared/_ErrorSummary", Model)
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
