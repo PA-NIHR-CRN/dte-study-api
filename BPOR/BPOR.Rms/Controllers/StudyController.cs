@@ -8,7 +8,7 @@ using NIHR.Infrastructure.Interfaces;
 
 namespace BPOR.Rms.Controllers;
 
-public class StudyController(AuroraDbContext context, IIdentityProviderService identityProviderService) : Controller
+public class StudyController(AuroraDbContext context) : Controller
 {
     public async Task<IActionResult> Index(string? searchString, int currentPage = 1)
     {
@@ -90,9 +90,6 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
         }
         else if (action == "Save" && model.Step == 2)
         {
-            ModelState.Remove("FullName");
-            ModelState.Remove("EmailAddress");
-
             if (ModelState.IsValid)
             {
                 var study = new Study
@@ -119,21 +116,33 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
         return View(model);
     }
 
-    // GET: Study/Edit/5
-    public async Task<IActionResult> Edit(int? id)
+    public async Task<IActionResult> Edit(int? id, int field)
     {
         if (id == null)
         {
             return NotFound();
         }
 
-        var study = await context.Studies.FindAsync(id);
-        if (study == null)
+        var studyModel = await context.Studies
+            .Where(s => s.Id == id)
+            .Select(Projections.StudyAsStudyListModel())
+            .FirstOrDefaultAsync();
+        if (studyModel == null)
         {
             return NotFound();
         }
 
-        return View(study);
+        var studyFormViewModel = new StudyFormViewModel
+        {
+            Id = studyModel.Id,
+            FullName = studyModel.FullName,
+            EmailAddress = studyModel.EmailAddress,
+            StudyName = studyModel.StudyName,
+            CpmsId = studyModel.CpmsId,
+            Step = field,
+        };
+
+        return View(studyFormViewModel);
     }
 
     // POST: Study/Edit/5
@@ -142,10 +151,10 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
-        [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,IsDeleted,CreatedAt,UpdatedAt")]
-        Study studyController)
+        [Bind("Id,FullName,EmailAddress,StudyName,CpmsId, Step")]
+        StudyFormViewModel model)
     {
-        if (id != studyController.Id)
+        if (id != model.Id)
         {
             return NotFound();
         }
@@ -154,12 +163,25 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
         {
             try
             {
-                context.Update(studyController);
+                var studyToUpdate = await context.Studies.FirstOrDefaultAsync(s => s.Id == model.Id);
+
+                if (studyToUpdate == null)
+                {
+                    return NotFound();
+                }
+
+                studyToUpdate.FullName = model.FullName;
+                studyToUpdate.EmailAddress = model.EmailAddress;
+                studyToUpdate.StudyName = model.StudyName;
+                studyToUpdate.CpmsId = model.CpmsId;
+                studyToUpdate.IsAnonymous = model.AnonymousEnrolment; // TODO check if we need this
+                studyToUpdate.UpdatedAt = DateTime.UtcNow;
+
                 await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!StudyExists(studyController.Id))
+                if (!StudyExists(model.Id))
                 {
                     return NotFound();
                 }
@@ -169,43 +191,10 @@ public class StudyController(AuroraDbContext context, IIdentityProviderService i
                 }
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Details), new { id = model.Id });
         }
 
-        return View(studyController);
-    }
-
-    // GET: Study/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var study = await context.Studies
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (study == null)
-        {
-            return NotFound();
-        }
-
-        return View(study);
-    }
-
-    // POST: Study/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        var study = await context.Studies.FindAsync(id);
-        if (study != null)
-        {
-            context.Studies.Remove(study);
-        }
-
-        await context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+        return View(model);
     }
 
     private bool StudyExists(int id)

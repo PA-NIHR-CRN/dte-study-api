@@ -4,6 +4,8 @@ namespace BPOR.Rms.Models.Study;
 
 public class StudyFormViewModel
 {
+    // TODO check if a neew model is needed for id vs no id
+    public int Id { get; set; }
     public int Step { get; set; } = 1;
 
     [Required(ErrorMessage = "Please enter a name")]
@@ -21,5 +23,7 @@ public class StudyFormViewModel
     [Display(Name = "Anonymous enrolment")]
     public bool AnonymousEnrolment { get; set; }
 
-    [Display(Name = "CPMS ID")] public long CpmsId { get; set; }
+    [Display(Name = "CPMS ID")] 
+    [RegularExpression(@"^\d+$", ErrorMessage = "Please enter a valid CPMS ID")]
+    public long? CpmsId { get; set; }
 }

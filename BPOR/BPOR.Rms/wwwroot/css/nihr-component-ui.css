@@ -1,64 +1,100 @@
-/* Base button styling */
+/* Primary button base style */
 .govuk-button {
-    background-color: #193E72; /* Dark blue */
+    background-color: #193E72; /* Assuming this is the default blue */
     color: #FFFFFF; /* White */
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    padding: 10px 20px;
     font-size: 18px;
     line-height: 27px;
-    border: 2px solid transparent; /* Prepared for focus state */
     border-radius: 5px;
     text-align: center;
     text-decoration: none;
     font-family: "Lato", serif;
+    white-space: nowrap; /* Prevent text from wrapping */
+    width: auto;
+    box-shadow: none;
+    padding-left: 1em;
+    padding-right: 1em;
+    margin: 0px;
+    border: 0.25rem solid rgb(25, 62, 114);
+    outline: transparent solid 0.25rem;
 }
 
-.govuk-button:hover {
-    background-color: #47658E; /* Lighter blue */
-}
-
+.govuk-button:active,
+.govuk-button:focus:not(:active):not(:hover),
 .govuk-button:focus {
-    outline: none; /* Remove default focus outline */
-    border-radius: 4px;
-    border: 4px solid #193E72;
-    background: #FED47A;
+    outline: none;
     color: #193E72;
+    top: 0px;
+    background: rgb(254, 212, 122);
+    border: 0.25rem solid rgb(254, 212, 122);
+    border-radius: 4px 4px 0px 0px;
+    box-shadow: rgb(25, 62, 114) 0px 4px 0px 0px;
+    
 }
 
-.govuk-button:active {
-    background-color: #305280; /* Slightly darker blue */
-    border-color: #FED47A; /* Light gold */
+/* Handling hover, focus, active, and disabled states */
+.govuk-button:hover {
+    background-color: rgb(71, 101, 142);
+    border: 0.25rem solid rgb(71, 101, 142);
+    color: rgb(255, 255, 255);
+    width: auto;
+    box-shadow: none;
+    padding-left: 1em;
+    padding-right: 1em;
 }
 
 .govuk-button:disabled {
     background-color: #BFC1C3; /* Grey */
     color: #FFFFFF; /* White */
     cursor: not-allowed;
+    box-shadow: none;
 }
 
-/* Secondary button styling */
+/* Secondary button base style */
 .govuk-button--secondary {
     background-color: #FFFFFF; /* White */
-    color: #193E72; /* Dark blue */
-    border: 2px solid #193E72; /* Dark blue */
+    color: rgb(25, 62, 114); /* Dark blue */
+    box-shadow: none;
+    width: auto;
+    padding-left: 1em;
+    padding-right: 1em;
+    margin: 0px;
+    border: 0.25rem solid rgb(25, 62, 114);
+    outline: transparent solid 0.25rem;
 }
 
+/* Handling hover and focus states for secondary */
 .govuk-button--secondary:hover {
-    background-color: #f2f2f2; /* Light grey */
+    box-shadow: none;
+    background-color: rgb(71, 101, 142);
+    border: 0.25rem solid rgb(71, 101, 142);
+    color: rgb(255, 255, 255);
+    width: auto;
+    padding-left: 1em;
+    padding-right: 1em;
+    outline: transparent solid 0.25rem;
 }
 
-/* Possibly additional focus styles for secondary if needed */
+.govuk-button--secondary:active,
+.govuk-button--secondary:focus:not(:active):not(:hover),
 .govuk-button--secondary:focus {
-    outline: none; /* Remove default focus outline */
-    border-radius: 4px;
-    border: 4px solid #193E72;
-    background: #FED47A;
+    outline: none;
     color: #193E72;
+    top: 0px;
+    background: rgb(254, 212, 122);
+    border: 0.25rem solid rgb(254, 212, 122);
+    border-radius: 4px 4px 0px 0px;
+    box-shadow: rgb(25, 62, 114) 0px 4px 0px 0px;
 }
+
+.govuk-button--secondary:visited {
+    color: rgb(25, 62, 114);
+}
+
 
 
 .progress-bar-container {
@@ -76,12 +112,19 @@
 }
 
 .govuk-input {
-    border-radius: 5px;
-    padding: 10px;
     width: 100%;
     font-size: 18px;
     font-family: Lato, serif;
     line-height: 27px;
     word-wrap: break-word;
-    border: 2px solid #0B0C0C;
+    border-radius: 0.3rem;
+    padding: 1em;
+    border-color: rgb(145, 145, 145);
+}
+
+.govuk-input:focus {
+    padding: 0.9em;
+    border: 4px solid rgb(25, 62, 114);
+    box-shadow: none;
+    outline: rgb(254, 212, 122) solid 4px;
 }

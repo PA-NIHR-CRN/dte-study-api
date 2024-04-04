@@ -11,10 +11,6 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
-      <Content Update="Views\Study\Index.cshtml.css">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -37,9 +33,6 @@
     </ItemGroup>
     <ItemGroup>
         <None Update="Views/Study/Partials/_StudyList.cshtml.css" SingleFile="true" CssScope="custom-scope-identifier" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Views\Study\Partials\Create\" />
     </ItemGroup>
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>

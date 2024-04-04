@@ -1,5 +1,5 @@
 @model BPOR.Rms.Models.Study.StudiesViewModel
-<link href="/_StudyList.cshtml.css" rel="stylesheet" />
+<link href="/_StudyList.cshtml.css" rel="stylesheet"/>
 
 
 @if (Model.HasSearched)
@@ -33,14 +33,19 @@
                             </div>
                         </div>
                     </div>
-                    <div style="padding-top: 1px; padding-left: 10px; padding-right: 10px; background: #EEF2F3; border-radius: 50px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 10px; display: inline-flex">
-                        <div style="justify-content: flex-start; align-items: flex-start; display: inline-flex">
-                            <div style="color: #193E72; font-size: 14px;  font-weight: 700; line-height: 24px; word-wrap: break-word">CPMS ID:&nbsp;</div>
-                            <div style="color: #193E72; font-size: 14px;  font-weight: 700; line-height: 24px; word-wrap: break-word">
-                                @Html.DisplayFor(modelItem => item.CpmsId)
+                    @* only show cpms id if it exists(this is a long) *@
+                    @if (item.CpmsId != null)
+                    {
+                        <div style="padding-top: 1px; padding-left: 10px; padding-right: 10px; background: #EEF2F3; border-radius: 50px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 10px; display: inline-flex">
+                            <div style="justify-content: flex-start; align-items: flex-start; display: inline-flex">
+                                <div style="color: #193E72; font-size: 14px;  font-weight: 700; line-height: 24px; word-wrap: break-word">CPMS ID:&nbsp;</div>
+                                <div style="color: #193E72; font-size: 14px;  font-weight: 700; line-height: 24px; word-wrap: break-word">
+                                    @Html.DisplayFor(modelItem => item.CpmsId)
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    }
+
                 </div>
                 <div style="align-self: stretch; flex: 1 1 0; color: #0B0C0C; font-size: 24px;  font-weight: 700; line-height: 36px; word-wrap: break-word">
                     @Html.DisplayFor(modelItem => item.StudyName)
@@ -59,10 +64,12 @@
                         </p>
                     </div>
                 </div>
+                <div style="width: 1px; height: 100%; background: #ACBCC3"></div>
             </div>
+            
             <div style="width: 154px; align-self: stretch; justify-content: flex-start; align-items: flex-start; gap: 40px; display: flex">
 
-                <div style="width: 1px; height: 100%; background: #ACBCC3"></div>
+                
                 <div style="height: 148px; flex-direction: column; justify-content: space-between; align-items: flex-start; display: inline-flex">
                     <div style="flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 10px; display: flex">
                         <div style="flex-direction: column; justify-content: flex-start; align-items: flex-start; display: flex">

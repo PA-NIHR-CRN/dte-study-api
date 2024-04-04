@@ -5,14 +5,14 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-@await Html.PartialAsync("Partials/Index/_StudyListHeader", Model)
-@await Html.PartialAsync("Partials/Index/_StudySearchForm", Model)
-@await Html.PartialAsync("Partials/Index/_StudyList", Model)
-@await Html.PartialAsync("Partials/Index/_Pagination", Model)
-
-
-
-
-
-
+<div class="govuk-grid-row">
+    @await Html.PartialAsync("Partials/Index/_StudyListHeader", Model)
+    
+</div>
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-three-quarters">
+        @await Html.PartialAsync("Partials/Index/_StudySearchForm", Model)
+        @await Html.PartialAsync("Partials/Index/_StudyList", Model)
+        @await Html.PartialAsync("Partials/Index/_Pagination", Model)
+    </div>
+</div>

@@ -21,5 +21,5 @@ public class StudyModel
     public string StudyName { get; set; }
 
     [Display(Name = "CPMS ID")]
-    public long CpmsId { get; set; }
+    public long? CpmsId { get; set; }
 }

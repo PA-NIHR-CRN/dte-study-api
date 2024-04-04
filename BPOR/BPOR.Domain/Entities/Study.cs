@@ -12,7 +12,7 @@ public class Study : ISoftDelete, ITimestamped
 
     [MaxLength(255)] public string StudyName { get; set; }
 
-    public long CpmsId { get; set; }
+    public long? CpmsId { get; set; }
     public bool IsAnonymous { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }

@@ -1,23 +1,13 @@
 @model BPOR.Rms.Models.Study.StudiesViewModel
 
-<style>
-    .govuk-header__container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-</style>
-
-<div class=" govuk-header__container">
-    <div class="govuk-grid-column">
-        <h1 class="govuk-heading-xl">All Studies</h1>
-    </div>
-    <div class="govuk-grid-column">
-        <div class="govuk-button-group">
-            @Html.ActionLink("Add study", "Create", "Study", null, new { @id = "addStudyBtn", @class = "govuk-button govuk-button--secondary", data_module = "govuk-button--secondary" })
-            <button type="button" class="govuk-button govuk-button" data-module="govuk-button">
-                Find volunteers
-            </button>
-        </div>
+<div class="govuk-grid-column-three-quarters">
+    <h1 class="govuk-heading-xl mb-1">All Studies</h1>
+</div>
+<div class="govuk-grid-column-one-quarter">
+    <div class="govuk-button-group">
+        @Html.ActionLink("  Add study", "Create", "Study", null, new { @id = "addStudyBtn", @class = "govuk-button govuk-button--secondary", data_module = "govuk-button--secondary" })
+        <button type="button" class="govuk-button govuk-button" data-module="govuk-button">
+            Find volunteers
+        </button>
     </div>
 </div>

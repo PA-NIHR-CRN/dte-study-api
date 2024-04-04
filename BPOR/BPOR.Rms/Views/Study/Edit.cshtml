@@ -1,62 +1,42 @@
-@model BPOR.Domain.Entities.Study
+@using BPOR.Rms.Views.ViewComponents
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model BPOR.Rms.Models.Study.StudyFormViewModel
 
 @{
     ViewData["Title"] = "Edit";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
+<div class="col-6 offset-1">
+@await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+{
+    new("All Studies", "/Study/Index"),
+    new("Study Page", $"/Study/Details/{Model.Id}"),
+    new("Edit Study", "/Study/Edit")
+})
 
-<h4>Study</h4>
-<hr />
+
+<h1 class="govuk-heading-xl">Edit study details</h1>
+</div>
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-3 offset-1">
+        @await Html.PartialAsync("../Shared/_ErrorSummary", Model)
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="FullName" class="control-label"></label>
-                <input asp-for="FullName" class="form-control" />
-                <span asp-validation-for="FullName" class="text-danger"></span>
+            <input type="hidden" asp-for="Id"/>
+            <input type="hidden" asp-for="Step" value="@Model.Step"/>
+
+            <div style="@(Model.Step == 1 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/Shared/_Step1FormFields", Model)
             </div>
-            <div class="form-group">
-                <label asp-for="EmailAddress" class="control-label"></label>
-                <input asp-for="EmailAddress" class="form-control" />
-                <span asp-validation-for="EmailAddress" class="text-danger"></span>
+
+            <div style="@(Model.Step == 2 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model)
             </div>
-            <div class="form-group">
-                <label asp-for="StudyName" class="control-label"></label>
-                <input asp-for="StudyName" class="form-control" />
-                <span asp-validation-for="StudyName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CpmsId" class="control-label"></label>
-                <input asp-for="CpmsId" class="form-control" />
-                <span asp-validation-for="CpmsId" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+            <div class="govuk-button-group">
+                <button type="submit" class="govuk-button" data_module="govuk-button">Update</button>
+                @Html.ActionLink("Cancel", "Details", "Study", new { id = Model.Id }, new { data_module = "govuk-button" })
             </div>
         </form>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-

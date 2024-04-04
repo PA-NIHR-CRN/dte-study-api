@@ -22,7 +22,7 @@
             @Html.DisplayFor(model => model.StudyName)
         </dd>
         <dd class="govuk-summary-list__actions">
-            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.StudyName)</span></a>
+            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id" asp-route-field="2">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.StudyName)</span></a>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -33,7 +33,7 @@
             @Html.DisplayFor(model => model.CpmsId)
         </dd>
         <dd class="govuk-summary-list__actions">
-            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.CpmsId)</span></a>
+            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id" asp-route-field="2">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.CpmsId)</span></a>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -44,7 +44,7 @@
             @Html.DisplayFor(model => model.FullName)
         </dd>
         <dd class="govuk-summary-list__actions">
-            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.FullName)</span></a>
+            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.FullName)</span></a>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -55,7 +55,7 @@
             @Html.DisplayFor(model => model.EmailAddress)
         </dd>
         <dd class="govuk-summary-list__actions">
-            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.EmailAddress)</span></a>
+            <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.EmailAddress)</span></a>
         </dd>
     </div>
 </dl>

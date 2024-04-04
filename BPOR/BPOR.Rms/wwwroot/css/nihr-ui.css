@@ -5,6 +5,10 @@ body {
     position: relative;
 }
 
+.govuk-width-container {
+    max-width: 1500px;
+}
+
 .govuk-header {
     background-color: #193e72;
     border-color: #ced5db;

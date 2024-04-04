@@ -6,8 +6,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
-<div style="flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 50px; display: flex">
+<div class="col-10 offset-1">
     @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
     {
         new("All Studies", "/Study/Index"),
