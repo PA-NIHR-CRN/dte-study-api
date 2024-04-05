@@ -1,8 +1,12 @@
-@model BPOR.Domain.Entities.Study
+@model BPOR.Rms.Models.Study.StudyDetailsViewModel
 
-<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+<div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
     <h1 class="govuk-heading-l" style="margin: 0;">
-        @Html.DisplayFor(model => model.StudyName)
+        @Html.DisplayFor(model => model.Study.StudyName)
     </h1>
-    @Html.ActionLink("Find volunteers", "", "", new { studyId = Model.Id }, new { @class = "govuk-button", data_module = "govuk-button" })
+    @Html.ActionLink("Find volunteers", "", "", new { studyId = Model.Study.Id }, new { @class = "govuk-button", data_module = "govuk-button" })
 </div>
+
+@await Html.PartialAsync("../Shared/_NotificationBanner", Model.Notification)
+
+

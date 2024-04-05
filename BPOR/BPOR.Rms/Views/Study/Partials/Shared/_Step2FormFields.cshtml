@@ -18,14 +18,14 @@
     <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <h2 class="govuk-label">
-                Is this study using anonymous enrolment?
+                @Html.DisplayNameFor(model => model.AnonymousEnrolment)
             </h2>
         </legend>
         @if (Html.ViewData.ModelState["AnonymousEnrolment"]?.Errors.Count > 0)
         {
             <span id="anonymous-enrolment-error" class="govuk-error-message">
                 <span class="govuk-visually-hidden">Error:</span>
-                Please select an option.
+                @Html.ValidationMessageFor(model => model.AnonymousEnrolment)
             </span>
         }
         <div class="govuk-radios" data-module="govuk-radios">
@@ -47,7 +47,7 @@
 
 <div class="govuk-form-group @(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="CpmsId" class="govuk-label">
-        @Html.DisplayNameFor(model => model.CpmsId)  (optional)
+        @Html.DisplayNameFor(model => model.CpmsId) (optional)
     </label>
     @if (Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0)
     {

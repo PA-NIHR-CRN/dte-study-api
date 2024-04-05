@@ -30,6 +30,7 @@ a:focus {
     font-style: normal;
     font-weight: 700;
     line-height: 72px;
+    margin-bottom: 0;
 }
 
 .govuk-heading-l {

@@ -66,7 +66,6 @@
     outline: transparent solid 0.25rem;
 }
 
-/* Handling hover and focus states for secondary */
 .govuk-button--secondary:hover {
     box-shadow: none;
     background-color: rgb(71, 101, 142);
@@ -105,8 +104,13 @@
     box-shadow: none;
 }
 
+.govuk-button--secondary:hover:active {
+    color: #193E72;
+}
 
-
+.govuk-button--secondary:hover:focus {
+    color: #193E72;
+}
 
 
 .progress-bar-container {
@@ -163,23 +167,37 @@
     font-family: Lato, serif;
     font-weight: bold;
 }
-
+.govuk-skip-link,
+.govuk-link,
 .govuk-back-link {
     font-family: Lato, serif;
     text-decoration: none;
-    color: #193E72;
+    color: rgb(29, 112, 184);
 }
 
+.govuk-link:hover,
 .govuk-back-link:hover {
+    color: #193E72;
     text-decoration: underline;
 }
 
-.govuk-back-link:visited {
+.govuk-link:hover:visited,
+.govuk-back-link:hover:visited {
     color: #193E72;
+    text-decoration: underline;
 }
 
+.govuk-link:visited,
+.govuk-back-link:visited {
+    color: rgb(29, 112, 184);
+}
+
+.govuk-header__link:focus,
+.govuk-skip-link:focus,
+.govuk-link:focus,
 .govuk-back-link:focus {
     text-decoration: none;
     background-color: rgb(254, 212, 122);
     box-shadow: rgb(254, 212, 122) 0px -2px, rgb(33, 43, 50) 0px 4px;
+    color: #193E72;
 }

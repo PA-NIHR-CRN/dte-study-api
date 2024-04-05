@@ -8,22 +8,23 @@ public class StudyFormViewModel
     public int Id { get; set; }
     public int Step { get; set; } = 1;
 
-    [Required(ErrorMessage = "Please enter a name")]
-    [Display(Name = "Main contact name for study")]
+    [Required(ErrorMessage = "Enter the name of the main contact for the study")]
+    [Display(Name = "Name of main contact for the study")]
     public string FullName { get; set; }
 
-    [Required(ErrorMessage = "Please enter an email address")]
-    [EmailAddress(ErrorMessage = "Please enter a valid email address")]
-    [Display(Name = "Main contact email address")]
+    [Required(ErrorMessage = "Enter the email address of the main contact for the study")]
+    [EmailAddress(ErrorMessage = "Enter an email address in the correct format, like name@example.com")]
+    [Display(Name = "Email address of main contact for the study")]
     public string EmailAddress { get; set; }
-    [Required(ErrorMessage = "Please enter a study name")]
+    [Required(ErrorMessage = "Enter the study name")]
     [Display(Name = "Study Name")]
     public string StudyName { get; set; }
 
-    [Display(Name = "Anonymous enrolment")]
-    public bool AnonymousEnrolment { get; set; }
+    [Display(Name = "Is study enrolment anonymous?")]
+    [Required(ErrorMessage = "Select whether study enrolment is anonymous")]
+    public bool? AnonymousEnrolment { get; set; }
 
     [Display(Name = "CPMS ID")] 
-    [RegularExpression(@"^\d+$", ErrorMessage = "Please enter a valid CPMS ID")]
+    [RegularExpression(@"^\d+$", ErrorMessage = "Enter a CPMS ID in the correct format, like 12345")]
     public long? CpmsId { get; set; }
 }

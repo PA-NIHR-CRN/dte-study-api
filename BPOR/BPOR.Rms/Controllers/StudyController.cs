@@ -4,24 +4,25 @@ using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using NIHR.Infrastructure.Interfaces;
 
 namespace BPOR.Rms.Controllers;
 
 public class StudyController(AuroraDbContext context) : Controller
 {
-    public async Task<IActionResult> Index(string? searchString, int currentPage = 1)
+    public async Task<IActionResult> Index(string? searchTerm, int currentPage = 1)
     {
-        var pageSize = 4;
+        var pageSize = 9;
         var studiesQuery = context.Studies.AsQueryable();
 
-        if (!string.IsNullOrEmpty(searchString))
+        if (!string.IsNullOrEmpty(searchTerm))
         {
-            searchString = searchString.Trim();
-            var isParsedInt = int.TryParse(searchString, out var searchInt);
+            searchTerm = searchTerm.Trim();
+            var isParsedInt = int.TryParse(searchTerm, out var searchInt);
             studiesQuery = studiesQuery.Where(s => (isParsedInt && s.Id == searchInt) ||
                                                    s.StudyName.Contains(
-                                                       searchString) // TODO investigate full text search
+                                                       searchTerm) // TODO investigate full text search
                                                    || (isParsedInt && s.CpmsId == searchInt));
         }
 
@@ -36,7 +37,8 @@ public class StudyController(AuroraDbContext context) : Controller
             Studies = paginatedStudies.Items,
             CurrentPage = currentPage,
             TotalPages = (int)Math.Ceiling((double)paginatedStudies.TotalCount / pageSize),
-            HasSearched = !string.IsNullOrEmpty(searchString),
+            HasSearched = !string.IsNullOrEmpty(searchTerm),
+            SearchTerm = searchTerm,
         };
 
         return View(viewModel);
@@ -52,10 +54,19 @@ public class StudyController(AuroraDbContext context) : Controller
         }
 
         var study = await context.Studies
-            .FirstOrDefaultAsync(m => m.Id == id);
+            .Where(s => s.Id == id)
+            .Select(Projections.StudyAsStudyDetailsViewModel())
+            .FirstOrDefaultAsync();
+        
         if (study == null)
         {
             return NotFound();
+        }
+        
+        
+        if (TempData["Notification"] != null)
+        {
+            study.Notification = JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"].ToString());
         }
 
         return View(study);
@@ -73,13 +84,13 @@ public class StudyController(AuroraDbContext context) : Controller
     [HttpPost]
     // [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-        [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,IsAnonymousEnrollment,Step")]
+        [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,AnonymousEnrolment,Step")]
         StudyFormViewModel model, string action)
     {
         if (action == "Next" && model.Step == 1)
         {
             ModelState.Remove("StudyName");
-            ModelState.Remove("IsAnonymous");
+            ModelState.Remove("AnonymousEnrolment");
             ModelState.Remove("CpmsId");
 
             if (ModelState.IsValid)
@@ -98,7 +109,7 @@ public class StudyController(AuroraDbContext context) : Controller
                     EmailAddress = model.EmailAddress,
                     StudyName = model.StudyName,
                     CpmsId = model.CpmsId,
-                    IsAnonymous = model.AnonymousEnrolment,
+                    IsAnonymous = model.AnonymousEnrolment ?? false,
                     IsDeleted = false,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
@@ -106,7 +117,17 @@ public class StudyController(AuroraDbContext context) : Controller
 
                 context.Add(study);
                 await context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                
+                var notification = new NotificationBannerModel
+                {
+                    IsSuccess = true,
+                    Heading = "Success",
+                    Body = "Your study has been successfully created.", 
+                };
+
+                TempData["Notification"] = JsonConvert.SerializeObject(notification);
+                
+                return RedirectToAction(nameof(Details), new { id = study.Id });
             }
 
             return View(model);
@@ -174,7 +195,7 @@ public class StudyController(AuroraDbContext context) : Controller
                 studyToUpdate.EmailAddress = model.EmailAddress;
                 studyToUpdate.StudyName = model.StudyName;
                 studyToUpdate.CpmsId = model.CpmsId;
-                studyToUpdate.IsAnonymous = model.AnonymousEnrolment; // TODO check if we need this
+                studyToUpdate.IsAnonymous = model.AnonymousEnrolment ?? false; // TODO investigate if this is needed in update
                 studyToUpdate.UpdatedAt = DateTime.UtcNow;
 
                 await context.SaveChangesAsync();

@@ -1,0 +1,18 @@
+@model BPOR.Rms.Models.NotificationBannerModel
+
+@if (Model != null)
+{
+    <div class="govuk-notification-banner @(Model.IsSuccess ? "govuk-notification-banner--success" : "govuk-notification-banner--failure")" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+        <div class="govuk-notification-banner__header">
+            <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                @Model.Heading
+            </h2>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.Body))
+        {
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-body">@Html.Raw(Model.Body)</p>
+            </div>
+        }
+    </div>
+}

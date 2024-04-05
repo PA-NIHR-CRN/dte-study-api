@@ -1,15 +1,5 @@
 <style>
-.stat-cards-container {
-  display: flex;
-  flex-wrap: nowrap; /* Prevent wrapping to ensure a single row */
-  justify-content: space-evenly; /* Evenly space the flex items */
-  align-items: flex-start;
-  gap: 20px; /* Adjust gap between cards if needed, though space-evenly handles spacing */
-  width: 100%;
-}
-
 .stat-card {
-  flex: 1 1 calc(33.333% - 20px); /* Adjust so that 3 cards fit evenly into the row, accounting for gap */
   padding: 20px;
   background: white;
   box-shadow: 0px 0px 4px rgba(11, 12, 12, 0.25);
@@ -18,8 +8,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
 }
+
 
 
   .stat-card-number {
@@ -39,24 +29,39 @@
     text-align: center;
   }
   
-  @@media  {
-    .stat-card {
-      flex: 1 1 calc(50% - 20px); /* Adjust so that 2 cards fit evenly into the row, accounting for gap */
+  @@media (max-width: 640px) {
+  .card-wrapper{
+    margin-bottom: 20px;
     }
+
   }
+ 
 </style>
 
-<div class="stat-cards-container">
-    <div class="stat-card">
-        <div class="stat-card-number">2,500</div>
-        <div class="stat-card-text">Total Emailed</div>
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-third">
+        <div class="card-wrapper">
+            <div class="stat-card">
+                <div class="stat-card-number">2,500</div>
+                <div class="stat-card-text">Total Emailed</div>
+            </div>
+        </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-card-number">738</div>
-        <div class="stat-card-text">Total Interested</div>
+    <div class="govuk-grid-column-one-third">
+        <div class="card-wrapper">
+            <div class="stat-card">
+                <div class="stat-card-number">738</div>
+                <div class="stat-card-text">Total Interested</div>
+            </div>
+        </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-card-number">125</div>
-        <div class="stat-card-text">Enrolled</div>
+    <div class="govuk-grid-column-one-third">
+        <div class="card-wrapper">
+            <div class="stat-card">
+                <div class="stat-card-number">125</div>
+                <div class="stat-card-text">Enrolled</div>
+            </div>
+        </div>
     </div>
 </div>
+
