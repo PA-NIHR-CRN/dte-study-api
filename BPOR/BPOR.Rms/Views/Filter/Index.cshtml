@@ -1,0 +1,39 @@
+@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+@using BPOR.Rms.Views.ViewComponents
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-grid-row">
+    @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+    {
+        new("All Studies", "/Study/Index"),
+        new("Study Page", $"/Study/Details/1"),
+        new("Edit Study", "/Study/Edit")
+    })
+</div>
+
+<div class="govuk-grid-column-two-thirds">
+
+    <h1 class="govuk-heading-xl">
+        Select the criteria you want your volunteers to match
+    </h1>
+
+    <h4 class="govuk-heading-m">
+        Research
+    </h4>
+
+    @await Html.PartialAsync("Partials/_StudySelection")
+    @await Html.PartialAsync("Partials/_VolunteerInclusionExclusionCriteria")
+    @await Html.PartialAsync("Partials/_AreasOfResearch")
+    @await Html.PartialAsync("Partials/_RegistrationDate")
+    @await Html.PartialAsync("Partials/_Location")
+    @await Html.PartialAsync("Partials/_Demographics")
+
+</div>
+
+<div class="govuk-grid-column-one-third">
+    @Html.ActionLink("Search volunteers", "Details", "Study", new { id = 1 }, new { @class = "govuk-button", data_module = "govuk-button" })
+    @Html.ActionLink("Clear filters", "Index", "Filter", new { id = 1 }, new { @class = "govuk-button  govuk-button--secondary", data_module = "govuk-button" })
+</div>

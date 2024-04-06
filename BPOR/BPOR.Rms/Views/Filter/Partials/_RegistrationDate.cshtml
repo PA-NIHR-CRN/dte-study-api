@@ -1,0 +1,61 @@
+@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+
+<div class="govuk-form-group">
+    <fieldset class="govuk-fieldset" role="group" aria-describedby="registration-date-hint">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h1 class="govuk-fieldset__heading">
+                Date of volunteer registration
+            </h1>
+        </legend>
+        <div id="registration-date-hint" class="govuk-hint">
+            Enter to and from dates to filter volunteers by the date their account was created.
+        </div>
+        <div>
+            <h6>From</h6>
+            <div class="govuk-date-input" id="registration-date-from">
+                <!-- Day -->
+                <div class="govuk-date-input__item">
+                    <label class="govuk-label" asp-for="RegistrationFromDateDay">@Html.DisplayNameFor(model => model.RegistrationFromDateDay)</label>
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-2" asp-for="RegistrationFromDateDay" autocomplete="off" value="@(Model.RegistrationFromDateDay)">
+                    <span asp-validation-for="RegistrationFromDateDay" class="text-danger"></span>
+                </div>
+                <!-- Month -->
+                <div class="govuk-date-input__item">
+                    <label class="govuk-label" asp-for="RegistrationFromDateMonth">@Html.DisplayNameFor(model => model.RegistrationFromDateMonth)</label>
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-2" asp-for="RegistrationFromDateMonth" autocomplete="off" value="@(Model.RegistrationFromDateMonth)">
+                    <span asp-validation-for="RegistrationFromDateMonth" class="text-danger"></span>
+                </div>
+                <!-- Year -->
+                <div class="govuk-date-input__item">
+                    <label class="govuk-label" asp-for="RegistrationFromDateYear">@Html.DisplayNameFor(model => model.RegistrationFromDateYear)</label>
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="RegistrationFromDateYear" autocomplete="off" value="@(Model.RegistrationFromDateYear)">
+                    <span asp-validation-for="RegistrationFromDateYear" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        
+                <div>
+                    <h6>From</h6>
+                    <div class="govuk-date-input" id="registration-date-to">
+                        <!-- Day -->
+                        <div class="govuk-date-input__item">
+                            <label class="govuk-label" asp-for="RegistrationToDateDay">@Html.DisplayNameFor(model => model.RegistrationToDateDay)</label>
+                            <input class="govuk-input govuk-date-input__input govuk-input--width-2" asp-for="RegistrationToDateDay" autocomplete="off" value="@(Model.RegistrationToDateDay)">
+                            <span asp-validation-for="RegistrationToDateDay" class="text-danger"></span>
+                        </div>
+                        <!-- Month -->
+                        <div class="govuk-date-input__item">
+                            <label class="govuk-label" asp-for="RegistrationToDateMonth">@Html.DisplayNameFor(model => model.RegistrationToDateMonth)</label>
+                            <input class="govuk-input govuk-date-input__input govuk-input--width-2" asp-for="RegistrationToDateMonth" autocomplete="off" value="@(Model.RegistrationToDateMonth)">
+                            <span asp-validation-for="RegistrationToDateMonth" class="text-danger"></span>
+                        </div>
+                        <!-- Year -->
+                        <div class="govuk-date-input__item">
+                            <label class="govuk-label" asp-for="RegistrationToDateYear">@Html.DisplayNameFor(model => model.RegistrationToDateYear)</label>
+                            <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="RegistrationToDateYear" autocomplete="off" value="@(Model.RegistrationToDateYear)">
+                            <span asp-validation-for="RegistrationToDateYear" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+    </fieldset>
+</div>
