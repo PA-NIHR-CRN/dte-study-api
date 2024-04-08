@@ -57,16 +57,17 @@ public class StudyController(AuroraDbContext context) : Controller
             .Where(s => s.Id == id)
             .Select(Projections.StudyAsStudyDetailsViewModel())
             .FirstOrDefaultAsync();
-        
+
         if (study == null)
         {
             return NotFound();
         }
-        
-        
+
+
         if (TempData["Notification"] != null)
         {
-            study.Notification = JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"].ToString());
+            study.Notification =
+                JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"].ToString());
         }
 
         return View(study);
@@ -117,17 +118,12 @@ public class StudyController(AuroraDbContext context) : Controller
 
                 context.Add(study);
                 await context.SaveChangesAsync();
-                
-                var notification = new NotificationBannerModel
-                {
-                    IsSuccess = true,
-                    Heading = "Success",
-                    Body = "Your study has been successfully created.", 
-                };
 
-                TempData["Notification"] = JsonConvert.SerializeObject(notification);
-                
-                return RedirectToAction(nameof(Details), new { id = study.Id });
+                return RedirectToAction(nameof(AddStudySuccess), new AddStudySuccessViewModel
+                {
+                    Id = study.Id,
+                    StudyName = study.StudyName,
+                });
             }
 
             return View(model);
@@ -135,6 +131,12 @@ public class StudyController(AuroraDbContext context) : Controller
 
         // For "Back" action or if validation fails, just return to the current view
         return View(model);
+    }
+
+    // succss
+    public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
+    {
+        return View(viewModel);
     }
 
     public async Task<IActionResult> Edit(int? id, int field)
@@ -180,7 +182,7 @@ public class StudyController(AuroraDbContext context) : Controller
         {
             return NotFound();
         }
-        
+
         ModelState.Remove("AnonymousEnrolment");
 
         if (ModelState.IsValid)

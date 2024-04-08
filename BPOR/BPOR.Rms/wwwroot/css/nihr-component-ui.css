@@ -14,7 +14,6 @@
     text-decoration: none;
     font-family: "Lato", serif;
     white-space: nowrap; /* Prevent text from wrapping */
-    width: auto;
     box-shadow: none;
     padding-left: 1em;
     padding-right: 1em;
@@ -40,7 +39,6 @@
     background-color: rgb(71, 101, 142);
     border: 0.25rem solid rgb(71, 101, 142);
     color: rgb(255, 255, 255);
-    width: auto;
     box-shadow: none;
     padding-left: 1em;
     padding-right: 1em;
@@ -58,7 +56,6 @@
     background-color: #FFFFFF; /* White */
     color: rgb(25, 62, 114); /* Dark blue */
     box-shadow: none;
-    width: auto;
     padding-left: 1em;
     padding-right: 1em;
     margin: 0px;
@@ -71,7 +68,6 @@
     background-color: rgb(71, 101, 142);
     border: 0.25rem solid rgb(71, 101, 142);
     color: rgb(255, 255, 255);
-    width: auto;
     padding-left: 1em;
     padding-right: 1em;
     outline: transparent solid 0.25rem;
