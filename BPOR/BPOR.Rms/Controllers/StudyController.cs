@@ -161,6 +161,7 @@ public class StudyController(AuroraDbContext context) : Controller
             StudyName = studyModel.StudyName,
             CpmsId = studyModel.CpmsId,
             Step = field,
+            IsEditMode = true,
         };
 
         return View(studyFormViewModel);
@@ -179,6 +180,8 @@ public class StudyController(AuroraDbContext context) : Controller
         {
             return NotFound();
         }
+        
+        ModelState.Remove("AnonymousEnrolment");
 
         if (ModelState.IsValid)
         {
@@ -195,7 +198,6 @@ public class StudyController(AuroraDbContext context) : Controller
                 studyToUpdate.EmailAddress = model.EmailAddress;
                 studyToUpdate.StudyName = model.StudyName;
                 studyToUpdate.CpmsId = model.CpmsId;
-                studyToUpdate.IsAnonymous = model.AnonymousEnrolment ?? false; // TODO investigate if this is needed in update
                 studyToUpdate.UpdatedAt = DateTime.UtcNow;
 
                 await context.SaveChangesAsync();

@@ -1,11 +1,17 @@
 @model BPOR.Rms.Models.Study.StudyFormViewModel
 
+<style>
+    .govuk-back-link {
+    cursor: pointer;
+    }
+</style>
+
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="govuk-grid-row">
-    <a asp-action="Index" class="govuk-back-link">Back</a>
+    <a class="govuk-back-link" onclick="window.history.back()">Back</a>
 </div>
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
