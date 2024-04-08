@@ -108,6 +108,62 @@
     color: #193E72;
 }
 
+.govuk-button-submit {
+    background-color: #059c55; /* Assuming this is the default blue */
+    color: #FFFFFF; /* White */
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 27px;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    font-family: "Lato", serif;
+    white-space: nowrap; /* Prevent text from wrapping */
+    width: auto;
+    height: 50px;
+    box-shadow: none;
+    padding-left: 1em;
+    padding-right: 1em;
+    margin: 0px;
+    border: 0.25rem solid #059c55;
+    outline: transparent solid 0.25rem;
+}
+
+    .govuk-button-submit:active,
+    .govuk-button-submit:focus:not(:active):not(:hover),
+    .govuk-button-submit:focus {
+        outline: none;
+        color: #193E72;
+        top: 0px;
+        background: rgb(254, 212, 122);
+        border: 0.25rem solid rgb(254, 212, 122);
+        border-radius: 4px 4px 0px 0px;
+        box-shadow: rgb(25, 62, 114) 0px 4px 0px 0px;
+    }
+
+    /* Handling hover, focus, active, and disabled states */
+    .govuk-button-submit:hover {
+        background-color: #46e399;
+        border: #46e399;
+        color: rgb(255, 255, 255);
+        width: auto;
+        box-shadow: none;
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+    .govuk-button-submit:disabled {
+        background-color: #BFC1C3; /* Grey */
+        border: 0.25rem solid #BFC1C3;
+        color: #FFFFFF; /* White */
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
 
 .progress-bar-container {
     width: 100%;
@@ -163,6 +219,23 @@
     font-family: Lato, serif;
     font-weight: bold;
 }
+
+.govuk-label--l {
+    font-size: 1.5rem;
+    line-height: 1.1111111111
+}
+
+.govuk-label--m {
+    font-size: 1rem;
+    line-height: 1.1111111111
+}
+
+.govuk-label--n {
+    font-size: 1rem;
+    line-height: 1.1111111111;
+    font-weight: 500;
+}
+
 .govuk-skip-link,
 .govuk-link,
 .govuk-back-link {
@@ -196,4 +269,134 @@
     background-color: rgb(254, 212, 122);
     box-shadow: rgb(254, 212, 122) 0px -2px, rgb(33, 43, 50) 0px 4px;
     color: #193E72;
+}
+
+.govuk-grid-row-age-range .govuk-form-group {
+    display: flex;
+}
+
+    .govuk-grid-row-age-range .govuk-form-group label {
+        flex: 0 0 auto;
+        margin-right: 10px;
+    }
+
+    .govuk-grid-row-age-range .govuk-form-group input {
+        flex: 1 1 auto;
+    }
+
+.govuk-age-input {
+    font-size: 0
+}
+
+    .govuk-age-input:after {
+        content: "";
+        display: block;
+        clear: both
+    }
+
+.govuk-age-input__item {
+    display: inline-block;
+    margin-right: 20px;
+    margin-bottom: 0
+}
+
+.govuk-age-input__label {
+    display: block
+}
+
+.govuk-age-input__input {
+    margin-bottom: 0
+}
+
+.govuk-select {
+    font-family: GDS Transport, arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.25;
+    box-sizing: border-box;
+    min-width: 11.5em;
+    max-width: 100%;
+    height: 2.5rem;
+    padding: 5px;
+    border: 2px solid #0b0c0c;
+    color: #0b0c0c;
+    background-color: #fff;
+    border-radius: 0.3rem
+}
+
+.sticky-container {
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.filter-buttons-container {
+    text-align: center;
+}
+
+.filer-setup-campaign-btn {
+    margin-top:10px;
+}
+
+.divide-container {
+    height: 2px;
+    background-color: lightgrey;
+    margin: 20px 0;
+    width: 100%;
+}
+
+/*Mobile*/
+@media (min-width:320px) {
+    .filter-count-container {
+        position: relative;
+        top: 0;
+        border: 2px solid;
+        border-color: lightgrey;
+        border-radius: 0.5rem;
+        height: 400px;
+        width: 380px;
+        align-items: center;
+        display: grid;
+        margin-top: 50px;
+        padding: 20px;
+    }
+}
+
+/*Tablet*/
+@media (min-width:801px) {
+    .filter-count-container {
+        position: relative;
+        top: 0;
+        border: 2px solid;
+        border-color: lightgrey;
+        border-radius: 0.5rem;
+        height: 400px;
+        width: 380px;
+        align-items: center;
+        display: grid;
+        margin-top: 50px;
+        padding: 20px;
+    }
+}
+
+/*Desktop*/
+@media (min-width:1050px) {
+    .filter-count-container {
+        position: fixed;
+        top: 0;
+        border: 2px solid;
+        border-color: lightgrey;
+        border-radius: 0.5rem;
+        height: 400px;
+        width: 380px;
+        float: right;
+        align-items: center;
+        display: grid;
+        margin-top: 200px;
+        padding: 20px;
+    }
 }

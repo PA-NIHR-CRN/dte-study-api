@@ -30,7 +30,8 @@ a:focus {
     font-style: normal;
     font-weight: 700;
     line-height: 72px;
-    margin-bottom: 0;
+    margin-top: 20px;
+    margin-bottom: 50px;
 }
 
 .govuk-heading-l {
@@ -108,4 +109,14 @@ a:focus {
     .heading-white {
         display: block;
     }
+}
+
+.govuk-checkboxes__label {
+    align-self: center;
+    max-width: calc(100% - 74px);
+    margin-bottom: 0;
+    padding: 7px 15px;
+    cursor: pointer;
+    touch-action: manipulation;
+    font-weight: normal !important;
 }
