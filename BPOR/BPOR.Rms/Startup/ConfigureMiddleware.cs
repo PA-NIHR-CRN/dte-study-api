@@ -21,6 +21,8 @@ public static class ConfigureMiddleware
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Study}/{action=Index}/{id?}");
+        
+        app.UseHealthChecks("/api/health");
 
 
         return app;

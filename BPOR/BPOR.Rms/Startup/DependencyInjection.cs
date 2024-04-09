@@ -32,6 +32,8 @@ public static class DependencyInjection
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
                 x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
+        services.AddHealthChecks();
+
         if (hostEnvironment.IsDevelopment())
         {
             services.RegisterDevelopmentServices(configuration);
