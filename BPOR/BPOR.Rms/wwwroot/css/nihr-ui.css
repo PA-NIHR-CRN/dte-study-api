@@ -9,6 +9,13 @@ body {
     max-width: 1500px;
 }
 
+@media (min-width:801px) and (max-width:1600px) {
+    .govuk-width-container {
+        max-width: 1500px;
+        margin-left: 60px;
+    }
+}
+
 .govuk-header {
     background-color: #193e72;
     border-color: #ced5db;

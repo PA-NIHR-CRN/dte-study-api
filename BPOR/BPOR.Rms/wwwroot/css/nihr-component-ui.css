@@ -339,7 +339,7 @@
 }
 
 .filer-setup-campaign-btn {
-    margin-top:10px;
+    margin-top: 10px;
 }
 
 .divide-container {
@@ -367,10 +367,17 @@
 }
 
 /*Tablet*/
-@media (min-width:801px) {
+@media (min-width:801px) and (max-width:1049px) {
+    .sticky-container {
+        position: absolute;
+        top: 3450px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin-left: 20px
+    }
+
     .filter-count-container {
-        position: relative;
-        top: 0;
         border: 2px solid;
         border-color: lightgrey;
         border-radius: 0.5rem;
