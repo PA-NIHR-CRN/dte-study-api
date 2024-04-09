@@ -1,9 +1,9 @@
+@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+
 <h2 class="govuk-heading-l">Demographic</h2>
 <div class="govuk-form-group">
-    <h3 class="govuk-label-wrapper">
-        <label class="govuk-label govuk-label--l" for="event-name">
-            Age range
-        </label>
+    <h3 class="govuk-label govuk-label--l">
+        Age range
     </h3>
     <div id="event-name-hint" class="govuk-hint">
         Please specify the age range you wish to filter. The minimum starting age is 18.
@@ -11,45 +11,45 @@
     <div class="govuk-grid-row-age-range">
         <div class="govuk-form-group">
             <div class="govuk-age-input__item">
-                <label class="govuk-label" for="event-name">
+                <label class="govuk-label" for="txtAgeFrom">
                     From
                 </label>
-                <input class="govuk-input govuk-age-input__input govuk-input--width-10" id="event-name" name="eventName" type="text" />
+                <input class="govuk-input govuk-age-input__input govuk-input--width-10" id="txtAgeFrom" name="txtAgeFrom" type="text" />
             </div>
             <div class="govuk-age-input__item">
-                <label class="govuk-label" for="event-name">
+                <label class="govuk-label" for="txtAgeTo">
                     To
                 </label>
-                <input class="govuk-input govuk-age-input__input govuk-input--width-10" id="event-name" name="eventName" type="text" />
+                <input class="govuk-input govuk-age-input__input govuk-input--width-10" id="txtAgeTo" name="txtAgeTo" type="text" />
             </div>
         </div>
     </div>
 </div>
 <div class="govuk-form-group">
-    <fieldset class="govuk-fieldset" aria-describedby="waste-hint">
+    <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <h3 class="govuk-label govuk-label--l">
                 Sex registered at birth
             </h3>
         </legend>
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste" name="waste" type="checkbox" value="carcasses">
-                <label class="govuk-label govuk-checkboxes__label" for="waste">
-                    Male
-                </label>
-            </div>
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-2" name="waste" type="checkbox" value="mines">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-2">
-                    Female
-                </label>
-            </div>
+            @{
+                foreach (var gender in Model.SexRegisteredAtBirth)
+                {
+                    var chkId = "chkGender" + gender.Text;
+                    <div class="govuk-checkboxes__item">
+                        <input class="govuk-checkboxes__input" id="@chkId" name="@chkId" type="checkbox" value="@gender.Value" checked="@gender.Selected">
+                        <label class="govuk-label govuk-checkboxes__label" for="@chkId">
+                            @gender.Text
+                        </label>
+                    </div>
+                }
+            }
         </div>
     </fieldset>
 </div>
 <div class="govuk-form-group">
-    <fieldset class="govuk-fieldset" aria-describedby="waste-hint">
+    <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <h3 class="govuk-label govuk-label--l">
                 Is gender same as sex registered at birth?
@@ -57,20 +57,20 @@
         </legend>
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste" name="waste" type="checkbox" value="carcasses">
-                <label class="govuk-label govuk-checkboxes__label" for="waste">
+                <input class="govuk-checkboxes__input" id="chkSexRegisteredAtBirth_Yes" name="chkSexRegisteredAtBirth_Yes" type="checkbox">
+                <label class="govuk-label govuk-checkboxes__label" for="chkSexRegisteredAtBirth_Yes">
                     Yes
                 </label>
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-2" name="waste" type="checkbox" value="mines">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-2">
+                <input class="govuk-checkboxes__input" id="chkSexRegisteredAtBirth_No" name="chkSexRegisteredAtBirth_No" type="checkbox">
+                <label class="govuk-label govuk-checkboxes__label" for="chkSexRegisteredAtBirth_No">
                     No
                 </label>
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-3" name="waste" type="checkbox" value="farm">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-3">
+                <input class="govuk-checkboxes__input" id="chkSexRegisteredAtBirth_PreferNotToSay" name="chkSexRegisteredAtBirth_PreferNotToSay" type="checkbox">
+                <label class="govuk-label govuk-checkboxes__label" for="chkSexRegisteredAtBirth_PreferNotToSay">
                     Prefer not to say
                 </label>
             </div>
@@ -78,7 +78,7 @@
     </fieldset>
 </div>
 <div class="govuk-form-group">
-    <fieldset class="govuk-fieldset" aria-describedby="waste-hint">
+    <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <h3 class="govuk-label govuk-label--l">
                 Ethnic group
@@ -86,32 +86,32 @@
         </legend>
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste" name="waste" type="checkbox" value="carcasses">
-                <label class="govuk-label govuk-checkboxes__label" for="waste">
+                <input class="govuk-checkboxes__input" id="chkEthnic_Asian" name="chkEthnic_Asian" type="checkbox">
+                <label class="govuk-label govuk-checkboxes__label" for="chkEthnic_Asian">
                     Asian
                 </label>
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-2" name="waste" type="checkbox" value="mines">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-2">
+                <input class="govuk-checkboxes__input" id="chkEthnic_Black" name="chkEthnic_Black" type="checkbox">
+                <label class="govuk-label govuk-checkboxes__label" for="chkEthnic_Black">
                     Black
                 </label>
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-3" name="waste" type="checkbox" value="farm">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-3">
+                <input class="govuk-checkboxes__input" id="chkEthnic_Mixed" name="chkEthnic_Mixed" type="checkbox">
+                <label class="govuk-label govuk-checkboxes__label" for="chkEthnic_Mixed">
                     Mixed
                 </label>
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-3" name="waste" type="checkbox" value="farm">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-3">
+                <input class="govuk-checkboxes__input" id="chkEthnic_Other" name="chkEthnic_Other" type="checkbox">
+                <label class="govuk-label govuk-checkboxes__label" for="chkEthnic_Other">
                     Other
                 </label>
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-3" name="waste" type="checkbox" value="farm">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-3">
+                <input class="govuk-checkboxes__input" id="chkEthnic_White" name="chkEthnic_White" type="checkbox">
+                <label class="govuk-label govuk-checkboxes__label" for="chkEthnic_White">
                     White
                 </label>
             </div>

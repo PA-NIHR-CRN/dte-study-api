@@ -1,3 +1,5 @@
+using BPOR.Domain.Entities;
+using BPOR.Domain.Entities.RefData;
 using System.ComponentModel.DataAnnotations;
 
 namespace BPOR.Rms.Models.Filter;
@@ -11,12 +13,12 @@ public class VolunteerFilterViewModel
     // Volunteer criteria
     public bool ExcludeContacted { get; set; }
     public bool ExcludeRegisteredInterest { get; set; }
-    public bool ExcludeEnrolled { get; set; }
     public bool ExcludeCompletedRegistration { get; set; }
+    public bool ExcludeRecruited { get; set; }
     public bool IncludeContacted { get; set; }
     public bool IncludeRegisteredInterest { get; set; }
     public bool IncludeCompletedRegistration { get; set; }
-    public bool IncludeEnrolled { get; set; }
+    public bool IncludeRecruited { get; set; }
 
     // Areas of research volunteers are interested in
     public string SelectedLocation { get; set; }
@@ -57,9 +59,11 @@ public class VolunteerFilterViewModel
     // Demographic information
     public int? AgeFrom { get; set; }
     public int? AgeTo { get; set; }
+    public IEnumerable<SelectListItem> SexRegisteredAtBirth { get; set; }
     public bool? IsGenderSameAsSexRegisteredAtBirth { get; set; }
     public IEnumerable<string> SelectedEthnicGroups { get; set; }
     public IEnumerable<SelectListItem> EthnicGroups { get; set; }
+    public string VolunteerCount { get; set; }
 
     // Additional properties as needed for other form fields
 }

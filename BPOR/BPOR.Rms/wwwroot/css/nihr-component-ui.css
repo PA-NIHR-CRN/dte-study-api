@@ -109,7 +109,7 @@
 }
 
 .govuk-button-submit {
-    background-color: #059c55; /* Assuming this is the default blue */
+    background-color: #1a6e46; /* Green */
     color: #FFFFFF; /* White */
     cursor: pointer;
     display: inline-flex;
@@ -129,7 +129,7 @@
     padding-left: 1em;
     padding-right: 1em;
     margin: 0px;
-    border: 0.25rem solid #059c55;
+    border: 0.25rem solid #1a6e46;
     outline: transparent solid 0.25rem;
 }
 

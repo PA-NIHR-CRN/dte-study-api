@@ -1,54 +1,56 @@
 <div class="govuk-form-group">
-    <fieldset class="govuk-fieldset" aria-describedby="waste-hint">
-        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste" name="waste" type="checkbox" value="carcasses">
-                <label class="govuk-label govuk-checkboxes__label" for="waste">
-                    Exclude those contacted
-                </label>
+    <fieldset class="govuk-fieldset" aria-label="Select which options to filter volunteers by">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="chkExcludeContacted" type="checkbox" />
+                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeContacted">
+                        Exclude those contacted
+                    </label>
+                </div>
+                <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="chkExcludeRegisteredInterest" type="checkbox">
+                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeRegisteredInterest">
+                        Exclude registered interest
+                    </label>
+                </div>
+                <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="chkExcludeCompletedRegistration" type="checkbox">
+                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeCompletedRegistration">
+                        Exclude those who have completed registration
+                    </label>
+                </div>
+                <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="chkExcludeRecruited" type="checkbox">
+                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeRecruited">
+                        Exclude recruited
+                    </label>
+                </div>
+                <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="chkIncludeThoseContacted" type="checkbox">
+                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeThoseContacted">
+                        Only include those contacted
+                    </label>
+                </div>
+                <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="chkIncludeRegisteredInterest" type="checkbox">
+                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeRegisteredInterest">
+                        Only include registered interest
+                    </label>
+                </div>
+                <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="chkIncludeCompletedRegistration" type="checkbox">
+                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeCompletedRegistration">
+                        Only include those who have completed registration
+                    </label>
+                </div>
+                <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="chkIncludeRecruited" type="checkbox">
+                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeRecruited">
+                        Only include recruited
+                    </label>
+                </div>
             </div>
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-2" name="waste" type="checkbox" value="mines">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-2">
-                    Exclude registered interest
-                </label>
-            </div>
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-3" name="waste" type="checkbox" value="farm">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-3">
-                    Exclude those who have completed registration
-                </label>
-            </div>
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-3" name="waste" type="checkbox" value="farm">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-3">
-                    Exclude recruited
-                </label>
-            </div>
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-3" name="waste" type="checkbox" value="farm">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-3">
-                    Only include those contacted
-                </label>
-            </div>
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-3" name="waste" type="checkbox" value="farm">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-3">
-                    Only include registered interest
-                </label>
-            </div>
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-3" name="waste" type="checkbox" value="farm">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-3">
-                    Only include those who have completed registration
-                </label>
-            </div>
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="waste-3" name="waste" type="checkbox" value="farm">
-                <label class="govuk-label govuk-checkboxes__label" for="waste-3">
-                    Only include recruited
-                </label>
-            </div>
-        </div>
+        </legend>      
     </fieldset>
 </div>
