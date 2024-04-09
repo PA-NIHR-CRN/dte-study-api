@@ -101,6 +101,11 @@ namespace NIHR.Infrastructure.Extensions
             }
 
             var settings = configuration.GetSection(sectionName).Get<T>();
+            
+            if (settings == null)
+            {
+                settings = BindFlatConfigurationKeys<T>(configuration, sectionName);
+            }
 
             services.AddOptions<T>()
                 .BindConfiguration(sectionName)
@@ -108,6 +113,24 @@ namespace NIHR.Infrastructure.Extensions
                 .ValidateOnStart();
 
             return Options.Create(settings);
+        }
+        
+        private static T BindFlatConfigurationKeys<T>(IConfiguration configuration, string sectionName) where T : class, new()
+        {
+            var instance = new T();
+            var properties = typeof(T).GetProperties();
+
+            foreach (var property in properties)
+            {
+                var key = $"{sectionName}__{property.Name}";
+                var value = configuration[key];
+                if (value != null)
+                {
+                    property.SetValue(instance, Convert.ChangeType(value, property.PropertyType));
+                }
+            }
+
+            return instance;
         }
     }
 }
