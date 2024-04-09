@@ -1,0 +1,14 @@
+@model BPOR.Rms.Models.Email.SetupCampaignViewModel
+
+<div class="govuk-form-group">
+    <h1 class="govuk-label-wrapper">
+        <label class="govuk-label govuk-label--l" for="volunteer-numbers" asp-for="TotalVolunteers">
+            @Html.DisplayFor(modelItem => modelItem.TotalVolunteers)
+        </label>
+    </h1>
+    <div id="volunteer-numbers-hint" class="govuk-hint">
+        Indicate a number equal to or smaller than the total number of volunteers matching your criteria.
+    </div>
+    <input class="govuk-input govuk-input--width-10" id="volunteer-numbers" name="accountNumber" type="text" spellcheck="false" aria-describedby="volunteer-numbers-hint" inputmode="numeric" id="total-volunteers" asp-for="TotalVolunteers">
+    <span> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers)</span>
+</div>

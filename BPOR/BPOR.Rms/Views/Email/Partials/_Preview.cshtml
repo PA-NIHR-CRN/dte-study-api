@@ -1,0 +1,14 @@
+@model BPOR.Rms.Models.Email.SetupCampaignViewModel
+
+<div class="govuk-form-group">
+    <h1 class="govuk-label-wrapper">
+        <label class="govuk-label govuk-label--l" for="preview-email">
+            @Html.DisplayNameFor(modelItem => modelItem.PreviewEmails)
+        </label>
+    </h1>
+    <div id="preview-email-hint" class="govuk-hint">
+        Specify the email address(s) you want any preview emails to be delivered to. These should be comma separated. For example, user@email.com, user2@email.com
+    </div>
+    <input class="govuk-input govuk-input--width-10" id="preview-email" name="accountNumber" type="text" spellcheck="false" aria-describedby="preview-email-hint" inputmode="numeric">
+    @Html.ActionLink("Send preview email", "AddStudySuccess", "Study", new { }, new { @class = "govuk-button govuk-button--secondary", data_module = "govuk-button" })
+</div>

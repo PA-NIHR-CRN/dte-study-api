@@ -1,0 +1,21 @@
+@model BPOR.Rms.Models.Email.EmailSuccessViewModel
+
+@{
+    ViewData["Title"] = "EmailSuccess";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half-from-desktop">
+        <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title">
+                Request to send emails for @Html.DisplayFor(model => model.StudyName) has been submitted to GOV.UK Notify
+            </h1>
+        </div>
+    </div>
+</div>
+
+<div class="govuk-button-group">
+    @Html.ActionLink("View Study", "Details", "Study", new { id = Model.Id }, new { @class = "govuk-button", data_module = "govuk-button" })
+    @Html.ActionLink("All Studies", "Index", "Study", null, new { @class = "govuk-button govuk-button--secondary", data_module = "govuk-button" })
+</div>

@@ -1,0 +1,21 @@
+@using BPOR.Rms.Views.ViewComponents
+@model BPOR.Rms.Models.Email.SetupCampaignViewModel
+
+<div class="govuk-grid-column-two-thirds">
+    @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+    {
+        new("All Studies", "/Study/Index"),
+        new("Study", "/Study/Index"),
+        new("Find volunteers", "/Study/Email"),
+        new("Set up email0cCampaign", "/Email/SetupCampaign")
+    })
+    <h1 class="govuk-heading-l">Set up an email campaign</h1>
+
+
+    <form asp-action="SetupCampaign" method="post">
+        @await Html.PartialAsync("Partials/_TemplateSelect")
+        @await Html.PartialAsync("Partials/_Preview")
+        @await Html.PartialAsync("Partials/_TotalNumbers")
+        @await Html.PartialAsync("Partials/_Footer")
+    </form>
+</div>
