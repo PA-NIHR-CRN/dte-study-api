@@ -8,7 +8,7 @@ namespace BPOR.Rms.Controllers;
 
 public class FilterController(ParticipantDbContext context) : Controller
 {
-    List<Expression<Func<AuroraParticipant, bool>>> filters = new List<Expression<Func<AuroraParticipant, bool>>>();
+    List<Expression<Func<Participant, bool>>> filters = new List<Expression<Func<Participant, bool>>>();
 
     public IActionResult Index(VolunteerFilterViewModel model)
     {
@@ -23,7 +23,7 @@ public class FilterController(ParticipantDbContext context) : Controller
         FilterBySexRegisteredAtBirth(model.IsSexMale, model.IsSexFemale, model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No, model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay);
         FilterByEthnicity(model.Ethnicity_Asian, model.Ethnicity_Black, model.Ethnicity_Mixed, model.Ethnicity_Other, model.Ethnicity_White);
 
-        IQueryable<AuroraParticipant> query = context.Participants.AsQueryable();
+        IQueryable<Participant> query = context.Participants.AsQueryable();
 
         foreach (var filter in filters)
         {
@@ -66,11 +66,14 @@ public class FilterController(ParticipantDbContext context) : Controller
 
     public void FilterByEthnicity(bool Ethnicity_Asian, bool Ethnicity_Black, bool Ethnicity_Mixed, bool Ethnicity_Other, bool Ethnicity_White)
     {
-        filters.Add(p =>
+        if (Ethnicity_Asian || Ethnicity_Black || Ethnicity_Mixed || Ethnicity_Other || Ethnicity_White)
+        {
+            filters.Add(p =>
                        (Ethnicity_Asian && p.EthnicGroup == "asian") ||
                        (Ethnicity_Black && p.EthnicGroup == "black") ||
                        (Ethnicity_Mixed && p.EthnicGroup == "mixed") ||
                        (Ethnicity_Other && p.EthnicGroup == "other") ||
                        (Ethnicity_White && p.EthnicGroup == "white"));
+        }     
     }
 }
