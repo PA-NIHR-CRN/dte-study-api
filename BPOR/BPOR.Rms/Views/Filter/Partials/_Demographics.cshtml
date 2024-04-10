@@ -11,16 +11,12 @@
     <div class="govuk-grid-row-age-range">
         <div class="govuk-form-group">
             <div class="govuk-age-input__item">
-                <label class="govuk-label" for="txtAgeFrom">
-                    From
-                </label>
-                <input class="govuk-input govuk-age-input__input govuk-input--width-10" id="txtAgeFrom" name="txtAgeFrom" type="text" />
+                @Html.LabelFor(m => Model.AgeFrom, new { @class = "govuk-label" })
+                <input asp-for="AgeFrom" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" />
             </div>
             <div class="govuk-age-input__item">
-                <label class="govuk-label" for="txtAgeTo">
-                    To
-                </label>
-                <input class="govuk-input govuk-age-input__input govuk-input--width-10" id="txtAgeTo" name="txtAgeTo" type="text" />
+                @Html.LabelFor(m => Model.AgeTo, new { @class = "govuk-label" })
+                <input asp-for="AgeTo" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" />
             </div>
         </div>
     </div>

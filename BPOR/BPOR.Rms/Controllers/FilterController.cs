@@ -1,3 +1,4 @@
+using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,7 @@ public class FilterController(ParticipantDbContext context) : Controller
     {
         int volunteerCount = 0;
 
+        FilerByAge(model.AgeFrom, model.AgeTo);
         FilterBySexRegisteredAtBirth(model.IsSexMale, model.IsSexFemale, model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No, model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay);
         FilterByEthnicity(model.Ethnicity_Asian, model.Ethnicity_Black, model.Ethnicity_Mixed, model.Ethnicity_Other, model.Ethnicity_White);
 
@@ -35,6 +37,17 @@ public class FilterController(ParticipantDbContext context) : Controller
         model.VolunteerCount = volunteerCount == 0 ? "-" : volunteerCount.ToString();
         
         return View("Index", model);
+    }
+
+    public void FilerByAge(int? AgeFrom, int? AgeTo)
+    {
+        if (AgeFrom != null && AgeTo != null)
+        {
+            DateTime fromDate = AgeTo.HasValue ? DateTime.Today.AddYears(-AgeTo.Value) : DateTime.MinValue;
+            DateTime toDate = AgeFrom.HasValue ? DateTime.Today.AddYears(-AgeFrom.Value) : DateTime.MaxValue;
+
+            filters.Add(p => p.DateOfBirth >= fromDate && p.DateOfBirth <= toDate);
+        }
     }
 
     public void FilterBySexRegisteredAtBirth(bool IsSexMale, bool IsSexFemale, bool IsGenderSameAsSexRegisteredAtBirth_Yes, bool IsGenderSameAsSexRegisteredAtBirth_No, bool IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
@@ -69,11 +82,11 @@ public class FilterController(ParticipantDbContext context) : Controller
         if (Ethnicity_Asian || Ethnicity_Black || Ethnicity_Mixed || Ethnicity_Other || Ethnicity_White)
         {
             filters.Add(p =>
-                       (Ethnicity_Asian && p.EthnicGroup == "asian") ||
-                       (Ethnicity_Black && p.EthnicGroup == "black") ||
-                       (Ethnicity_Mixed && p.EthnicGroup == "mixed") ||
-                       (Ethnicity_Other && p.EthnicGroup == "other") ||
-                       (Ethnicity_White && p.EthnicGroup == "white"));
+                       (Ethnicity_Asian && p.EthnicGroup.ToLower() == "asian") ||
+                       (Ethnicity_Black && p.EthnicGroup.ToLower() == "black") ||
+                       (Ethnicity_Mixed && p.EthnicGroup.ToLower() == "mixed") ||
+                       (Ethnicity_Other && p.EthnicGroup.ToLower() == "other") ||
+                       (Ethnicity_White && p.EthnicGroup.ToLower() == "white"));
         }     
     }
 }

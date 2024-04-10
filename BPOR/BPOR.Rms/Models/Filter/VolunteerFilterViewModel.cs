@@ -57,7 +57,11 @@ public class VolunteerFilterViewModel
     public int? SearchRadiusMiles { get; set; }
 
     // Demographic information
+    [Display(Name = "From")]
+    [Range(18, int.MaxValue, ErrorMessage = "Enter a whole number equal to or more than 18")]
     public int? AgeFrom { get; set; }
+    [Display(Name = "To")]
+    [Range(18, int.MaxValue, ErrorMessage = "Enter a whole number equal to or more than 18")]
     public int? AgeTo { get; set; }
 
     [Display(Name = "Male")]
