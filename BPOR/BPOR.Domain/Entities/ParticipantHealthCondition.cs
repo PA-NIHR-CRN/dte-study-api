@@ -18,6 +18,6 @@ public class ParticipantHealthCondition: ISoftDelete, ITimestamped
     public DateTime UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
 
-    public AuroraParticipant Participant { get; set; }
+    public Participant Participant { get; set; }
     public HealthCondition HealthCondition { get; set; }
 }

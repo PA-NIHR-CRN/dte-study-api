@@ -8,9 +8,9 @@ using NIHR.Infrastructure.Settings;
 
 namespace BPOR.Domain.Entities;
 
-public class AuroraParticipantDbContextFactory() : IDesignTimeDbContextFactory<AuroraDbContext>
+public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<ParticipantDbContext>
 {
-    public AuroraDbContext CreateDbContext(string[] args)
+    public ParticipantDbContext CreateDbContext(string[] args)
     {
         IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
@@ -21,10 +21,10 @@ public class AuroraParticipantDbContextFactory() : IDesignTimeDbContextFactory<A
 
         var connectionString = dbSettings.BuildConnectionString();
 
-        var options = new DbContextOptionsBuilder<AuroraDbContext>()
+        var options = new DbContextOptionsBuilder<ParticipantDbContext>()
             .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
             .Options;
 
-        return new AuroraDbContext(options);
+        return new ParticipantDbContext(options);
     }
 }

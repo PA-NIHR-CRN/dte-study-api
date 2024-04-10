@@ -4,19 +4,16 @@ using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace BPOR.Domain.Migrations
 {
-    [DbContext(typeof(AuroraDbContext))]
-    [Migration("20240328170803_Initial")]
-    partial class Initial
+    [DbContext(typeof(ParticipantDbContext))]
+    partial class ParticipantDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,7 +22,7 @@ namespace BPOR.Domain.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("BPOR.Domain.Entities.AuroraParticipant", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.Participant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -115,7 +112,7 @@ namespace BPOR.Domain.Migrations
                     b.ToTable("Participants");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.AuroraParticipantAddress", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.ParticipantAddress", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -158,7 +155,7 @@ namespace BPOR.Domain.Migrations
                     b.HasIndex("ParticipantId")
                         .IsUnique();
 
-                    b.ToTable("AuroraParticipantAddress");
+                    b.ToTable("ParticipantAddress");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.ParticipantHealthCondition", b =>
@@ -9035,6 +9032,29 @@ namespace BPOR.Domain.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SysRefIdentifierType", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "ParticipantId",
+                            Description = "ParticipantId",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "NhsId",
+                            Description = "NhsId",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "Deleted",
+                            Description = "Deleted",
+                            IsDeleted = false
+                        });
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.SourceReference", b =>
@@ -9068,7 +9088,7 @@ namespace BPOR.Domain.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<long>("CpmsId")
+                    b.Property<long?>("CpmsId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
@@ -9132,7 +9152,7 @@ namespace BPOR.Domain.Migrations
                         });
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.AuroraParticipant", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.Participant", b =>
                 {
                     b.HasOne("BPOR.Domain.Entities.RefData.CommunicationLanguage", "CommunicationLanguage")
                         .WithMany()
@@ -9153,11 +9173,11 @@ namespace BPOR.Domain.Migrations
                     b.Navigation("Gender");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.AuroraParticipantAddress", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.ParticipantAddress", b =>
                 {
-                    b.HasOne("BPOR.Domain.Entities.AuroraParticipant", "Participant")
+                    b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
                         .WithOne("Address")
-                        .HasForeignKey("BPOR.Domain.Entities.AuroraParticipantAddress", "ParticipantId")
+                        .HasForeignKey("BPOR.Domain.Entities.ParticipantAddress", "ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -9172,7 +9192,7 @@ namespace BPOR.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BPOR.Domain.Entities.AuroraParticipant", "Participant")
+                    b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
                         .WithMany("HealthConditions")
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -9191,7 +9211,7 @@ namespace BPOR.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BPOR.Domain.Entities.AuroraParticipant", "Participant")
+                    b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
                         .WithMany("ParticipantIdentifiers")
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -9204,7 +9224,7 @@ namespace BPOR.Domain.Migrations
 
             modelBuilder.Entity("BPOR.Domain.Entities.SourceReference", b =>
                 {
-                    b.HasOne("BPOR.Domain.Entities.AuroraParticipant", "Participant")
+                    b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
                         .WithMany("SourceReferences")
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -9213,7 +9233,7 @@ namespace BPOR.Domain.Migrations
                     b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.AuroraParticipant", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.Participant", b =>
                 {
                     b.Navigation("Address");
 

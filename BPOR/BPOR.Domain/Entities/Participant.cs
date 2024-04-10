@@ -4,9 +4,9 @@ using NIHR.Infrastructure.Entities;
 
 namespace BPOR.Domain.Entities;
 
-public class AuroraParticipant : ISoftDelete, ITimestamped, IPersonalInformation
+public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
 {
-    public AuroraParticipant()
+    public Participant()
     {
         DailyLifeImpact = null!;
         CommunicationLanguage = null!;
@@ -54,7 +54,7 @@ public class AuroraParticipant : ISoftDelete, ITimestamped, IPersonalInformation
     public ICollection<ParticipantIdentifier> ParticipantIdentifiers { get; set; } =
         new List<ParticipantIdentifier>();
 
-    public AuroraParticipantAddress? Address { get; set; }
+    public ParticipantAddress? Address { get; set; }
 
     public ICollection<SourceReference> SourceReferences { get; set; } = new List<SourceReference>();
 

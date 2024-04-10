@@ -29,7 +29,7 @@ namespace BPOR.Domain.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     StudyName = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CpmsId = table.Column<long>(type: "bigint", nullable: false),
+                    CpmsId = table.Column<long>(type: "bigint", nullable: true),
                     IsAnonymous = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -206,7 +206,7 @@ namespace BPOR.Domain.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "AuroraParticipantAddress",
+                name: "ParticipantAddress",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -228,9 +228,9 @@ namespace BPOR.Domain.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AuroraParticipantAddress", x => x.Id);
+                    table.PrimaryKey("PK_ParticipantAddress", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AuroraParticipantAddress_Participants_ParticipantId",
+                        name: "FK_ParticipantAddress_Participants_ParticipantId",
                         column: x => x.ParticipantId,
                         principalTable: "Participants",
                         principalColumn: "Id",
@@ -1592,9 +1592,19 @@ namespace BPOR.Domain.Migrations
                     { 1231, "Supplements", "Supplements", false }
                 });
 
+            migrationBuilder.InsertData(
+                table: "SysRefIdentifierType",
+                columns: new[] { "Id", "Code", "Description", "IsDeleted" },
+                values: new object[,]
+                {
+                    { 1, "ParticipantId", "ParticipantId", false },
+                    { 2, "NhsId", "NhsId", false },
+                    { 3, "Deleted", "Deleted", false }
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_AuroraParticipantAddress_ParticipantId",
-                table: "AuroraParticipantAddress",
+                name: "IX_ParticipantAddress_ParticipantId",
+                table: "ParticipantAddress",
                 column: "ParticipantId",
                 unique: true);
 
@@ -1648,7 +1658,7 @@ namespace BPOR.Domain.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AuroraParticipantAddress");
+                name: "ParticipantAddress");
 
             migrationBuilder.DropTable(
                 name: "ParticipantHealthCondition");

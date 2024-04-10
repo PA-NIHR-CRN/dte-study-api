@@ -14,18 +14,18 @@ public class RefDataService : IRefDataService
     private readonly Lazy<List<CommunicationLanguage>> _communicationLanguageRefData;
     private readonly Lazy<List<DailyLifeImpact>> _dailyLifeImpactRefData;
     private readonly object _lockObject = new object();
-    private readonly AuroraDbContext _dbContext;
+    private readonly ParticipantDbContext _participantDbContext;
 
-    public RefDataService(AuroraDbContext dbContext, ILogger<RefDataService> logger)
+    public RefDataService(ParticipantDbContext participantDbContext, ILogger<RefDataService> logger)
     {
-        _dbContext = dbContext;
+        _participantDbContext = participantDbContext;
         _logger = logger;
 
         _genderRefData = new Lazy<List<Gender>>(() =>
         {
             lock (_lockObject)
             {
-                return dbContext.Genders.AsNoTracking().ToList();
+                return participantDbContext.Genders.AsNoTracking().ToList();
             }
         });
 
@@ -33,7 +33,7 @@ public class RefDataService : IRefDataService
         {
             lock (_lockObject)
             {
-                return dbContext.HealthConditions.AsNoTracking().ToList();
+                return participantDbContext.HealthConditions.AsNoTracking().ToList();
             }
         });
 
@@ -41,7 +41,7 @@ public class RefDataService : IRefDataService
         {
             lock (_lockObject)
             {
-                return dbContext.IdentifierTypes.AsNoTracking().ToList();
+                return participantDbContext.IdentifierTypes.AsNoTracking().ToList();
             }
         });
 
@@ -49,7 +49,7 @@ public class RefDataService : IRefDataService
         {
             lock (_lockObject)
             {
-                return dbContext.CommunicationLanguages.AsNoTracking().ToList();
+                return participantDbContext.CommunicationLanguages.AsNoTracking().ToList();
             }
         });
 
@@ -57,7 +57,7 @@ public class RefDataService : IRefDataService
         {
             lock (_lockObject)
             {
-                return dbContext.DailyLifeImpacts.AsNoTracking().ToList();
+                return participantDbContext.DailyLifeImpacts.AsNoTracking().ToList();
             }
         });
     }
@@ -107,8 +107,8 @@ public class RefDataService : IRefDataService
             };
             UpdateCache(newRefData);
 
-            _dbContext.Add(newRefData);
-            _dbContext.SaveChanges();
+            _participantDbContext.Add(newRefData);
+            _participantDbContext.SaveChanges();
             
             return newRefData.Id;
         }

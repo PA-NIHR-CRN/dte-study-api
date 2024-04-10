@@ -19,7 +19,7 @@ public class ParticipantMapper : IParticipantMapper
         _refDataService = refDataService;
     }
 
-    private void MapIdentifiers(DynamoParticipant source, AuroraParticipant participant)
+    private void MapIdentifiers(DynamoParticipant source, Participant participant)
     {
         // Get dictionary of identifiers from source
         var identifiers = ExtractIdentifiers(new Dictionary<string, AttributeValue>
@@ -53,7 +53,7 @@ public class ParticipantMapper : IParticipantMapper
 
     }
 
-    private void MapHealthConditions(DynamoParticipant source, AuroraParticipant participant)
+    private void MapHealthConditions(DynamoParticipant source, Participant participant)
     {
         //  Stage one registration does not have health conditions
         if (source.HealthConditionInterests == null && !participant.HealthConditions.Any())
@@ -98,7 +98,7 @@ public class ParticipantMapper : IParticipantMapper
     }
 
 
-    public AuroraParticipant Map(Dictionary<string, AttributeValue> record, AuroraParticipant destination)
+    public Participant Map(Dictionary<string, AttributeValue> record, Participant destination)
     {
         var doc = Document.FromAttributeMap(record);
 

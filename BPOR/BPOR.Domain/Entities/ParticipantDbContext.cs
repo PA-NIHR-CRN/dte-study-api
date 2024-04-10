@@ -7,13 +7,13 @@ using NIHR.Infrastructure.Exceptions;
 
 namespace BPOR.Domain.Entities;
 
-public class AuroraDbContext : DbContext
+public class ParticipantDbContext : Microsoft.EntityFrameworkCore.DbContext
 {
-    public AuroraDbContext(DbContextOptions options) : base(options)
+    public ParticipantDbContext(DbContextOptions options) : base(options)
     {
     }
 
-    public DbSet<AuroraParticipant> Participants { get; set; } = null!;
+    public DbSet<Participant> Participants { get; set; } = null!;
     public DbSet<ParticipantIdentifier> ParticipantIdentifiers { get; set; } = null!;
     public DbSet<DailyLifeImpact> DailyLifeImpacts { get; set; } = null!;
     public DbSet<CommunicationLanguage> CommunicationLanguages { get; set; } = null!;
@@ -43,10 +43,10 @@ public class AuroraDbContext : DbContext
             modelBuilder.Entity(type).ToTable("SysRef" + type.Name);
         }
 
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuroraDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ParticipantDbContext).Assembly);
     }
 
-    public IQueryable<AuroraParticipant> GetParticipantByLinkedIdentifiers(List<Identifier> identifiers)
+    public IQueryable<Participant> GetParticipantByLinkedIdentifiers(List<Identifier> identifiers)
     {
         var values = identifiers.Select(id => id.Value).ToList();
 
@@ -66,7 +66,7 @@ public class AuroraDbContext : DbContext
 
 public static class ParticipantQueryableExtensions
 {
-    public static IQueryable<AuroraParticipant> ForUpdate(this IQueryable<AuroraParticipant> source)
+    public static IQueryable<Participant> ForUpdate(this IQueryable<Participant> source)
     {
         return source
             .Include(x => x.Address)

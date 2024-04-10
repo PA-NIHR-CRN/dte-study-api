@@ -9,5 +9,5 @@ public class SourceReference
     public string Pk { get; set; } = null!;
     public int ParticipantId { get; set; }
 
-    public AuroraParticipant Participant { get; set; } = null!;
+    public Participant Participant { get; set; } = null!;
 }

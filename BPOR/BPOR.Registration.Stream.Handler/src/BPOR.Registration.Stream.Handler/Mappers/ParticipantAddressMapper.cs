@@ -4,11 +4,11 @@ namespace BPOR.Registration.Stream.Handler.Mappers;
 
 public static class ParticipantAddressMapper
 {
-    public static AuroraParticipantAddress? Map(DynamoParticipantAddress? source, AuroraParticipant? destination)
+    public static ParticipantAddress? Map(DynamoParticipantAddress? source, Participant? destination)
     {
         if (source != null && destination?.Address == null)
         {
-            destination.Address = new AuroraParticipantAddress();
+            destination.Address = new ParticipantAddress();
         }
 
         if (source != null && destination != null)

@@ -10,7 +10,7 @@ using static Amazon.Lambda.DynamoDBEvents.StreamsEventResponse;
 namespace BPOR.Registration.Stream.Handler.Handlers;
 
 public class StreamHandler(
-    AuroraDbContext dbContext,
+    ParticipantDbContext participantDbContext,
     ILogger<StreamHandler> logger,
     IParticipantMapper participantMapper)
     : IStreamHandler
@@ -18,7 +18,7 @@ public class StreamHandler(
     public async Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(DynamoDBEvent dynamoDbEvent,
         CancellationToken cancellationToken)
     {
-        dbContext.ThrowIfInMaintenanceMode();
+        participantDbContext.ThrowIfInMaintenanceMode();
 
         var failures = new List<BatchItemFailure>();
         // TODO: how do we handle out of order events if they are indeed out of order?
@@ -53,7 +53,7 @@ public class StreamHandler(
 
                     await ProcessRecordAsync(record, cancellationToken);
 
-                    await dbContext.SaveChangesAsync(cancellationToken);
+                    await participantDbContext.SaveChangesAsync(cancellationToken);
 
                     logger.LogInformation("Record processing complete");
                 }
@@ -103,12 +103,12 @@ public class StreamHandler(
         await InsertAsync(record.Dynamodb.NewImage, cancellationToken);
     }
 
-    private async Task<AuroraParticipant> InsertAsync(Dictionary<string, AttributeValue> image,
+    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image,
         CancellationToken cancellationToken)
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
-        var targetParticipant = await dbContext.GetParticipantByLinkedIdentifiers(identifiers)
+        var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -116,7 +116,7 @@ public class StreamHandler(
         if (targetParticipant == null)
         {
             // No linked participant exists, create a new one.
-            targetParticipant = dbContext.Participants.Add(new AuroraParticipant()).Entity;
+            targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
         }
 
         return participantMapper.Map(image, targetParticipant);
@@ -126,14 +126,14 @@ public class StreamHandler(
         CancellationToken cancellationToken)
     {
         var identifiers = participantMapper.ExtractIdentifiers(record.Dynamodb.NewImage);
-        var participant = await dbContext.GetParticipantByLinkedIdentifiers(identifiers)
+        var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
         if (participant == null)
         {
             participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await participantDbContext.SaveChangesAsync(cancellationToken);
         }
 
         participantMapper.Map(record.Dynamodb.NewImage, participant);
@@ -143,14 +143,14 @@ public class StreamHandler(
         CancellationToken cancellationToken)
     {
         var identifiers = participantMapper.ExtractIdentifiers(record.Dynamodb.OldImage);
-        var participant = await dbContext.GetParticipantByLinkedIdentifiers(identifiers)
+        var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
             .Include(x => x.ParticipantIdentifiers)
             .SingleOrDefaultAsync(cancellationToken);
 
         if (participant == null)
         {
             participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await participantDbContext.SaveChangesAsync(cancellationToken);
         }
 
         // TODO: are we removing the Participant here, or just the ParticipantIdentifer?
@@ -158,11 +158,11 @@ public class StreamHandler(
         var idsToRemove =
             participant.ParticipantIdentifiers.Where(x => identifiers.Select(y => y.Value).Contains(x.Value));
 
-        dbContext.ParticipantIdentifiers.RemoveRange(idsToRemove);
+        participantDbContext.ParticipantIdentifiers.RemoveRange(idsToRemove);
 
         if (participant.ParticipantIdentifiers.Except(idsToRemove).All(x => x.IsDeleted))
         {
-            dbContext.Participants.Remove(participant);
+            participantDbContext.Participants.Remove(participant);
         }
     }
 }

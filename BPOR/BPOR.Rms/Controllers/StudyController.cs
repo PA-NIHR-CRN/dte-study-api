@@ -9,7 +9,7 @@ using NIHR.Infrastructure.Interfaces;
 
 namespace BPOR.Rms.Controllers;
 
-public class StudyController(AuroraDbContext context) : Controller
+public class StudyController(ParticipantDbContext context) : Controller
 {
     public async Task<IActionResult> Index(string? searchTerm, int currentPage = 1)
     {

@@ -3,9 +3,9 @@ using NIHR.Infrastructure.Entities;
 
 namespace BPOR.Domain.Entities;
 
-public class AuroraParticipantAddress : IPersonalInformation, ISoftDelete
+public class ParticipantAddress : IPersonalInformation, ISoftDelete
 {
-    public AuroraParticipantAddress()
+    public ParticipantAddress()
     {
         Participant = null!;
     }
@@ -29,7 +29,7 @@ public class AuroraParticipantAddress : IPersonalInformation, ISoftDelete
     public int ParticipantId { get; set; }
 
     [Required]
-    public AuroraParticipant Participant { get; set; }
+    public Participant Participant { get; set; }
     public bool IsDeleted { get; set; }
 
     private static string? GetOutcodeFromPostcode(string? postcode)

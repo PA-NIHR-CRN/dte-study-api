@@ -22,5 +22,5 @@ public class ParticipantIdentifier : ISoftDelete
     public bool IsDeleted { get; set; }
 
     public IdentifierType Type { get; set; }
-    public AuroraParticipant Participant { get; set; }
+    public Participant Participant { get; set; }
 }

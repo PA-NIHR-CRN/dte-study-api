@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(AuroraDbContext context) : Controller
+public class FilterController(ParticipantDbContext context) : Controller
 {
     public IActionResult Index(VolunteerFilterViewModel model)
     {
