@@ -11,16 +11,12 @@
     <div class="govuk-grid-row-age-range">
         <div class="govuk-form-group">
             <div class="govuk-age-input__item">
-                <label class="govuk-label" for="txtAgeFrom">
-                    From
-                </label>
-                <input class="govuk-input govuk-age-input__input govuk-input--width-10" id="txtAgeFrom" name="txtAgeFrom" type="text" />
+                @Html.LabelFor(m => Model.AgeFrom, new { @class = "govuk-label" })
+                <input asp-for="AgeFrom" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" />
             </div>
             <div class="govuk-age-input__item">
-                <label class="govuk-label" for="txtAgeTo">
-                    To
-                </label>
-                <input class="govuk-input govuk-age-input__input govuk-input--width-10" id="txtAgeTo" name="txtAgeTo" type="text" />
+                @Html.LabelFor(m => Model.AgeTo, new { @class = "govuk-label" })
+                <input asp-for="AgeTo" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" />
             </div>
         </div>
     </div>
@@ -33,18 +29,17 @@
             </h3>
         </legend>
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-            @{
-                foreach (var gender in Model.SexRegisteredAtBirth)
-                {
-                    var chkId = "chkGender" + gender.Text;
-                    <div class="govuk-checkboxes__item">
-                        <input class="govuk-checkboxes__input" id="@chkId" name="@chkId" type="checkbox" value="@gender.Value" checked="@gender.Selected">
-                        <label class="govuk-label govuk-checkboxes__label" for="@chkId">
-                            @gender.Text
-                        </label>
-                    </div>
-                }
-            }
+            @* @Html.ValidationMessageFor(model => model.IsSexMale) *@
+
+            <div class="govuk-checkboxes__item">
+                <input asp-for="IsSexMale" class="govuk-checkboxes__input" id="IsSexMale" type="checkbox" />
+                @Html.LabelFor(m => Model.IsSexMale, new { @class = "govuk-label govuk-checkboxes__label" })
+            </div>
+
+            <div class="govuk-checkboxes__item">
+                <input asp-for="IsSexFemale" class="govuk-checkboxes__input" id="IsSexFemale" type="checkbox" />
+                @Html.LabelFor(m => Model.IsSexFemale, new { @class = "govuk-label govuk-checkboxes__label" })
+            </div>
         </div>
     </fieldset>
 </div>
@@ -57,22 +52,16 @@
         </legend>
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="chkSexRegisteredAtBirth_Yes" name="chkSexRegisteredAtBirth_Yes" type="checkbox">
-                <label class="govuk-label govuk-checkboxes__label" for="chkSexRegisteredAtBirth_Yes">
-                    Yes
-                </label>
+                <input asp-for="IsGenderSameAsSexRegisteredAtBirth_Yes" class="govuk-checkboxes__input" id="IsGenderSameAsSexRegisteredAtBirth_Yes" type="checkbox" />
+                @Html.LabelFor(m => Model.IsGenderSameAsSexRegisteredAtBirth_Yes, new { @class = "govuk-label govuk-checkboxes__label" })
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="chkSexRegisteredAtBirth_No" name="chkSexRegisteredAtBirth_No" type="checkbox">
-                <label class="govuk-label govuk-checkboxes__label" for="chkSexRegisteredAtBirth_No">
-                    No
-                </label>
+                <input asp-for="IsGenderSameAsSexRegisteredAtBirth_No" class="govuk-checkboxes__input" id="IsGenderSameAsSexRegisteredAtBirth_No" type="checkbox" />
+                @Html.LabelFor(m => Model.IsGenderSameAsSexRegisteredAtBirth_No, new { @class = "govuk-label govuk-checkboxes__label" })
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="chkSexRegisteredAtBirth_PreferNotToSay" name="chkSexRegisteredAtBirth_PreferNotToSay" type="checkbox">
-                <label class="govuk-label govuk-checkboxes__label" for="chkSexRegisteredAtBirth_PreferNotToSay">
-                    Prefer not to say
-                </label>
+                <input asp-for="IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay" class="govuk-checkboxes__input" id="IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay" type="checkbox" />
+                @Html.LabelFor(m => Model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay, new { @class = "govuk-label govuk-checkboxes__label" })
             </div>
         </div>
     </fieldset>
@@ -86,34 +75,24 @@
         </legend>
         <div class="govuk-checkboxes" data-module="govuk-checkboxes">
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="chkEthnic_Asian" name="chkEthnic_Asian" type="checkbox">
-                <label class="govuk-label govuk-checkboxes__label" for="chkEthnic_Asian">
-                    Asian
-                </label>
+                <input asp-for="Ethnicity_Asian" class="govuk-checkboxes__input" id="Ethnicity_Asian" type="checkbox" />
+                @Html.LabelFor(m => Model.Ethnicity_Asian, new { @class = "govuk-label govuk-checkboxes__label" })
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="chkEthnic_Black" name="chkEthnic_Black" type="checkbox">
-                <label class="govuk-label govuk-checkboxes__label" for="chkEthnic_Black">
-                    Black
-                </label>
+                <input asp-for="Ethnicity_Black" class="govuk-checkboxes__input" id="Ethnicity_Black" type="checkbox" />
+                @Html.LabelFor(m => Model.Ethnicity_Black, new { @class = "govuk-label govuk-checkboxes__label" })
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="chkEthnic_Mixed" name="chkEthnic_Mixed" type="checkbox">
-                <label class="govuk-label govuk-checkboxes__label" for="chkEthnic_Mixed">
-                    Mixed
-                </label>
+                <input asp-for="Ethnicity_Mixed" class="govuk-checkboxes__input" id="Ethnicity_Mixed" type="checkbox" />
+                @Html.LabelFor(m => Model.Ethnicity_Mixed, new { @class = "govuk-label govuk-checkboxes__label" })
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="chkEthnic_Other" name="chkEthnic_Other" type="checkbox">
-                <label class="govuk-label govuk-checkboxes__label" for="chkEthnic_Other">
-                    Other
-                </label>
+                <input asp-for="Ethnicity_Other" class="govuk-checkboxes__input" id="Ethnicity_Other" type="checkbox" />
+                @Html.LabelFor(m => Model.Ethnicity_Other, new { @class = "govuk-label govuk-checkboxes__label" })
             </div>
             <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="chkEthnic_White" name="chkEthnic_White" type="checkbox">
-                <label class="govuk-label govuk-checkboxes__label" for="chkEthnic_White">
-                    White
-                </label>
+                <input asp-for="Ethnicity_White" class="govuk-checkboxes__input" id="Ethnicity_White" type="checkbox" />
+                @Html.LabelFor(m => Model.Ethnicity_White, new { @class = "govuk-label govuk-checkboxes__label" })
             </div>
         </div>
     </fieldset>
