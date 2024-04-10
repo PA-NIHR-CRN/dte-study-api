@@ -59,13 +59,33 @@ public class VolunteerFilterViewModel
     // Demographic information
     public int? AgeFrom { get; set; }
     public int? AgeTo { get; set; }
-    public IEnumerable<SelectListItem> SexRegisteredAtBirth { get; set; }
-    public bool? IsGenderSameAsSexRegisteredAtBirth { get; set; }
-    public IEnumerable<string> SelectedEthnicGroups { get; set; }
-    public IEnumerable<SelectListItem> EthnicGroups { get; set; }
-    public string VolunteerCount { get; set; }
 
-    // Additional properties as needed for other form fields
+    [Display(Name = "Male")]
+    [Required(ErrorMessage = "At least one property must be selected.")]
+    public bool IsSexMale { get; set; }
+
+    [Display(Name = "Female")]
+    [Required(ErrorMessage = "At least one property must be selected.")]
+    public bool IsSexFemale { get; set; }
+
+    [Display(Name = "Yes")]
+    public bool IsGenderSameAsSexRegisteredAtBirth_Yes { get; set; }
+    [Display(Name = "No")]
+    public bool IsGenderSameAsSexRegisteredAtBirth_No { get; set; }
+    [Display(Name = "Prefer Not To Say")]
+    public bool IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay { get; set; }
+    [Display(Name = "Asian")]
+    public bool Ethnicity_Asian { get; set; }
+    [Display(Name = "Black")]
+    public bool Ethnicity_Black { get; set; }
+    [Display(Name = "Mixed")]
+    public bool Ethnicity_Mixed { get; set; }
+    [Display(Name = "Other")]
+    public bool Ethnicity_Other { get; set; }
+    [Display(Name = "White")]
+    public bool Ethnicity_White { get; set; }
+    public string VolunteerCount { get; set; } = "-";
+
 }
 
 // Supporting classes for dropdowns
