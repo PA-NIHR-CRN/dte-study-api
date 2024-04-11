@@ -120,3 +120,9 @@ a:focus {
     touch-action: manipulation;
     font-weight: normal !important;
 }
+
+.text-danger {
+    font-family: "Lato", sans-serif;
+    font-size: 15px;
+    color:red;
+}
