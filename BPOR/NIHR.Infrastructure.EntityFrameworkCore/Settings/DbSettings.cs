@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using MySqlConnector;
 
-namespace NIHR.Infrastructure.Settings
+namespace NIHR.Infrastructure.EntityFrameworkCore
 {
     public class DbSettings : IValidatableObject
     {
@@ -12,19 +11,6 @@ namespace NIHR.Infrastructure.Settings
         public string Host { get; set; } = null!;
         public int Port { get; set; }
         public string Database { get; set; } = null!;
-
-        public string BuildConnectionString()
-        {
-            var connectionStringBuilder = new MySqlConnectionStringBuilder
-            {
-                Server = Host,
-                Port = (uint)Port,
-                UserID = Username,
-                Password = Password,
-                Database = Database,
-            };
-            return connectionStringBuilder.ConnectionString;
-        }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

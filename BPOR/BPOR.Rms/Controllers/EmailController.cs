@@ -9,29 +9,28 @@ public class EmailController : Controller
     {
         return Task.FromResult<IActionResult>(View());
     }
-    
+
     [HttpPost]
-    public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model)
+    public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
         if (ModelState.IsValid)
         {
             // Do something
-            
+
             return RedirectToAction("EmailSuccess", new EmailSuccessViewModel
             {
                 Id = 1,
                 StudyName = model.StudyName
             });
         }
+
         return RedirectToAction("EmailSuccess", new EmailSuccessViewModel
         {
             Id = 1,
             StudyName = model.StudyName
         });
-        
-        return View(model);
     }
-    
+
     public Task<IActionResult> EmailSuccess(EmailSuccessViewModel model)
     {
         return Task.FromResult<IActionResult>(View(model));

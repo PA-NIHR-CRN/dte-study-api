@@ -1,6 +1,5 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
-using Amazon.Lambda.Core;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Handlers;
 using BPOR.Registration.Stream.Handler.Mappers;
@@ -9,10 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Extensions;
-using NIHR.Infrastructure.Settings;
 
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
 namespace BPOR.Registration.Stream.Handler;
 
