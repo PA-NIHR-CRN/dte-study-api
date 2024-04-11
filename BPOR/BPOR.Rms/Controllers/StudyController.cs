@@ -11,7 +11,14 @@ namespace BPOR.Rms.Controllers;
 
 public class StudyController(ParticipantDbContext context) : Controller
 {
-    public async Task<IActionResult> Index(string? searchTerm, int currentPage = 1)
+    
+    [HttpPost]
+    public IActionResult PerformSearch(string searchTerm, int currentPage = 1)
+    {
+        return RedirectToAction("Index", new { searchTerm, currentPage, hasSearched = true });
+    }
+    
+    public async Task<IActionResult> Index(string? searchTerm, int currentPage = 1, bool hasSearched = false,bool hasBeenReset = false)
     {
         var pageSize = 9;
         var studiesQuery = context.Studies.AsQueryable();
@@ -37,8 +44,9 @@ public class StudyController(ParticipantDbContext context) : Controller
             Studies = paginatedStudies.Items,
             CurrentPage = currentPage,
             TotalPages = (int)Math.Ceiling((double)paginatedStudies.TotalCount / pageSize),
-            HasSearched = !string.IsNullOrEmpty(searchTerm),
+            HasSearched =hasSearched,
             SearchTerm = searchTerm,
+            HasBeenReset = hasBeenReset,
         };
 
         return View(viewModel);

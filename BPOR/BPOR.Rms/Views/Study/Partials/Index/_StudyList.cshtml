@@ -45,6 +45,7 @@
     }
     .study-card-recruited-numbers {
     margin-top: 10px;
+    margin-bottom: 10px;
   
     }
     .govuk-body {
@@ -208,6 +209,13 @@
         </div>
     }
 }
+
+@if(Model.HasBeenReset)
+{
+    <div class="govuk-inset-text">
+        The search results have been reset and all studies are listed.
+    </div>
+}
 @if (Model.Studies.Any())
 {
     <div class="study-card-container">
@@ -260,7 +268,7 @@
 
     </div>
 }
-else
+else if(!Model.HasSearched)
 {
     <div class="no-studies-card">
         <h1 class="govuk-heading-l">No studies added</h1>

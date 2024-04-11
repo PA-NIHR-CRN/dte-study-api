@@ -6,7 +6,14 @@
         display: flex;
         justify-content: flex-end; 
     }
+    
 }
+@@media screen and (max-width: 768px) {
+            #findVolunteerBtn {
+                order: -1;
+            }
+ 
+    }
 </style>
 
 <div class="govuk-grid-column-one-half">
@@ -17,8 +24,6 @@
 <div class="govuk-grid-column-one-half right-align-buttons-desktop">
     <div class="govuk-button-group govuk-!-margin-bottom-0">
         @Html.ActionLink(" Add study", "Create", "Study", null, new { @id = "addStudyBtn", @class = "govuk-button govuk-button--secondary", data_module = "govuk-button--secondary" })
-        <button type="button" class="govuk-button govuk-button" data-module="govuk-button">
-            Find volunteers
-        </button>
+        @Html.ActionLink(" Find volunteers", "Index", "Filter", null, new { @id = "findVolunteerBtn",  @class = "govuk-button", data_module = "govuk-button" })
     </div>
 </div>
