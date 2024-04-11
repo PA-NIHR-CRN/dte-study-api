@@ -1,6 +1,7 @@
 using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
+using HandlebarsDotNet.ValueProviders;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Linq.Expressions;
@@ -19,27 +20,67 @@ public class FilterController(ParticipantDbContext context) : Controller
     [HttpPost]
     public IActionResult FilterVolunteers(VolunteerFilterViewModel model)
     {
-        int volunteerCount = 0;
+        ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth, model.RegistrationFromDateYear,
+                                     model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
+        ValidateAge(model.AgeFrom, model.AgeTo);
 
-        FilerByAge(model.AgeFrom, model.AgeTo);
-        FilterBySexRegisteredAtBirth(model.IsSexMale, model.IsSexFemale, model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No, model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay);
-        FilterByEthnicity(model.Ethnicity_Asian, model.Ethnicity_Black, model.Ethnicity_Mixed, model.Ethnicity_Other, model.Ethnicity_White);
-
-        IQueryable<Participant> query = context.Participants.AsQueryable();
-
-        foreach (var filter in filters)
+        if (ModelState.IsValid)
         {
-            query = query.Where(filter);
+            int volunteerCount = 0;
+
+            FilterByRegistrationDate(model.RegistrationFromDateDay, model.RegistrationFromDateMonth, model.RegistrationFromDateYear,
+                                     model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
+            FilterByAge(model.AgeFrom, model.AgeTo);
+            FilterBySexRegisteredAtBirth(model.IsSexMale, model.IsSexFemale, model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No, model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay);
+            FilterByEthnicity(model.Ethnicity_Asian, model.Ethnicity_Black, model.Ethnicity_Mixed, model.Ethnicity_Other, model.Ethnicity_White);
+
+            IQueryable<Participant> query = context.Participants.AsQueryable();
+
+            foreach (var filter in filters)
+            {
+                query = query.Where(filter);
+            }
+
+            volunteerCount = query.Count();
+
+            model.VolunteerCount = volunteerCount == 0 ? "-" : volunteerCount.ToString();
         }
-
-        volunteerCount = query.Count();
-
-        model.VolunteerCount = volunteerCount == 0 ? "-" : volunteerCount.ToString();
         
         return View("Index", model);
     }
 
-    public void FilerByAge(int? AgeFrom, int? AgeTo)
+    private void ValidateAge(int? ageFrom, int? ageTo)
+    {
+        if (ageFrom.HasValue && ageTo.HasValue)
+        {
+            if (ageFrom > ageTo)
+            {
+                ModelState.AddModelError("AgeFrom", "The minimum age must be lower than the maximum age");
+            }
+        }
+    }
+
+    public void FilterByRegistrationDate(int? RegistrationFromDateDay, int? RegistrationFromDateMonth, int? RegistrationFromDateYear,
+        int? RegistrationToDateDay, int? RegistrationToDateMonth, int? RegistrationToDateYear)
+    {
+        if ((RegistrationFromDateDay != null && RegistrationFromDateMonth != null && RegistrationFromDateYear != null) ||
+             (RegistrationToDateDay != null && RegistrationToDateMonth != null && RegistrationToDateYear != null))
+        {
+            if (RegistrationToDateDay.HasValue)
+            {
+                RegistrationToDateDay++;
+            }
+
+            DateTime? RegistrationFromDate = ConstructDate(RegistrationFromDateYear, RegistrationFromDateMonth, RegistrationFromDateDay);
+            DateTime? RegistrationToDate = ConstructDate(RegistrationToDateYear, RegistrationToDateMonth, RegistrationToDateDay);
+
+            filters.Add(p =>
+            (!RegistrationFromDate.HasValue || p.RegistrationConsentAtUtc >= RegistrationFromDate) &&
+            (!RegistrationToDate.HasValue || p.RegistrationConsentAtUtc <= RegistrationToDate));
+        }
+    }
+
+    public void FilterByAge(int? AgeFrom, int? AgeTo)
     {
         if (AgeFrom != null && AgeTo != null)
         {
@@ -88,5 +129,101 @@ public class FilterController(ParticipantDbContext context) : Controller
                        (Ethnicity_Other && p.EthnicGroup.ToLower() == "other") ||
                        (Ethnicity_White && p.EthnicGroup.ToLower() == "white"));
         }     
+    }
+
+    private void ValidateRegistrationDates(int? RegistrationFromDateDay, int? RegistrationFromDateMonth, int? RegistrationFromDateYear,
+        int? RegistrationToDateDay, int? RegistrationToDateMonth, int? RegistrationToDateYear)
+    {
+        if ((RegistrationFromDateDay != null && RegistrationFromDateMonth != null && RegistrationFromDateYear != null) ||
+             (RegistrationToDateDay != null && RegistrationToDateMonth != null && RegistrationToDateYear != null))
+        {
+            DateTime? RegistrationFromDate = ConstructDate(RegistrationFromDateYear, RegistrationFromDateMonth, RegistrationFromDateDay);
+            DateTime? RegistrationToDate = ConstructDate(RegistrationToDateYear, RegistrationToDateMonth, RegistrationToDateDay);
+
+            if (RegistrationFromDate.HasValue && RegistrationFromDate.Value.Date >= DateTime.Today)
+            {
+                ModelState.AddModelError("RegistrationFromDateDay", "The date of volunteer registration must be before today");
+            }
+
+            if (RegistrationToDate.HasValue && RegistrationToDate.Value.Date >= DateTime.Today)
+            {
+                ModelState.AddModelError("RegistrationToDateDay", "The date of volunteer registration must be before today");
+            }
+
+            if (RegistrationFromDateYear.HasValue && RegistrationFromDateYear < 2022)
+            {
+                ModelState.AddModelError("RegistrationFromDateYear", "Year must be a number that is 2022 or later");
+            }
+
+            if (RegistrationToDateYear.HasValue && RegistrationToDateYear < 2022)
+            {
+                ModelState.AddModelError("RegistrationToDateYear", "Year must be a number that is 2022 or later");
+            }
+
+            if (RegistrationFromDate.HasValue && RegistrationToDate.HasValue)
+            {
+                if (RegistrationFromDate > RegistrationToDate)
+                {
+                    ModelState.AddModelError("RegistrationFromDateDay", "Registration 'From' date must be before 'To' date");
+                }
+            }
+        }
+        else
+        {
+            List<DateValues> fromDateValues = new List<DateValues>();
+            List<DateValues> toDateValues = new List<DateValues>();
+
+            if (RegistrationFromDateDay != null || RegistrationFromDateMonth != null || RegistrationFromDateYear != null)
+            {
+                fromDateValues.Add(new DateValues { Key = "RegistrationFromDateDay", Unit = "day", Value = RegistrationFromDateDay });
+                fromDateValues.Add(new DateValues { Key = "RegistrationFromDateMonth", Unit = "month", Value = RegistrationFromDateMonth });
+                fromDateValues.Add(new DateValues { Key = "RegistrationFromDateYear", Unit = "year", Value = RegistrationFromDateYear });
+
+                foreach (var val in fromDateValues)
+                {
+                    if (val.Value == null)
+                    {
+                        ModelState.AddModelError(val.Key, "The date of volunteer registration must include a " + val.Unit);
+                    }
+                }
+            }
+
+            if (RegistrationToDateDay != null || RegistrationToDateMonth != null || RegistrationToDateYear != null)
+            {
+                fromDateValues.Add(new DateValues { Key = "RegistrationToDateDay", Unit = "day", Value = RegistrationToDateDay });
+                fromDateValues.Add(new DateValues { Key = "RegistrationToDateMonth", Unit = "month", Value = RegistrationToDateMonth });
+                fromDateValues.Add(new DateValues { Key = "RegistrationToDateYear", Unit = "year", Value = RegistrationToDateYear });
+
+                foreach (var val in fromDateValues)
+                {
+                    if (val.Value == null)
+                    {
+                        ModelState.AddModelError(val.Key, "The date of volunteer registration must include a " + val.Unit);
+                    }
+                }
+            }
+        }
+    }
+
+    public static DateTime? ConstructDate(int? year, int? month, int? day)
+    {
+        if (!year.HasValue || !month.HasValue || !day.HasValue)
+            return null;
+
+        try
+        {
+            return new DateTime(year.Value, month.Value, day.Value);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return null;
+        }
+    }
+
+    public class DateValues
+    {
+        public string Key { get; set; }
+        public string Unit { get; set; }
+        public int? Value { get; set; }
     }
 }

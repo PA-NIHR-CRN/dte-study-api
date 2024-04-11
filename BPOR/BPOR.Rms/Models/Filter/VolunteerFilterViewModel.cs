@@ -7,8 +7,8 @@ namespace BPOR.Rms.Models.Filter;
 public class VolunteerFilterViewModel
 {
     // Study selection
-    public string SelectedStudy { get; set; }
-    public IEnumerable<SelectListItem> Studies { get; set; }
+    //public string SelectedStudy { get; set; }
+    //public IEnumerable<SelectListItem> Studies { get; set; }
 
     // Volunteer criteria
     public bool ExcludeContacted { get; set; }
@@ -21,8 +21,8 @@ public class VolunteerFilterViewModel
     public bool IncludeRecruited { get; set; }
 
     // Areas of research volunteers are interested in
-    public string SelectedLocation { get; set; }
-    public IEnumerable<SelectListItem> Locations { get; set; }
+    //public string SelectedLocation { get; set; }
+    //public IEnumerable<SelectListItem> Locations { get; set; }
 
     // Date of volunteer registration
     // From Date
@@ -35,7 +35,7 @@ public class VolunteerFilterViewModel
     public int? RegistrationFromDateMonth { get; set; }
 
     [Display(Name = "Year")]
-    [Range(1900, 2100, ErrorMessage = "Year must be a reasonable value")]
+    [Range(2022, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? RegistrationFromDateYear { get; set; }
 
     // To Date
@@ -48,12 +48,12 @@ public class VolunteerFilterViewModel
     public int? RegistrationToDateMonth { get; set; }
 
     [Display(Name = "Year")]
-    [Range(1900, 2100, ErrorMessage = "Year must be a reasonable value")]
+    [Range(2022, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? RegistrationToDateYear { get; set; }
 
     // Postcode districts and Full postcode
-    public string PostcodeDistricts { get; set; }
-    public string FullPostcode { get; set; }
+    //public string PostcodeDistricts { get; set; }
+    //public string FullPostcode { get; set; }
     public int? SearchRadiusMiles { get; set; }
 
     // Demographic information
@@ -65,11 +65,11 @@ public class VolunteerFilterViewModel
     public int? AgeTo { get; set; }
 
     [Display(Name = "Male")]
-    [Required(ErrorMessage = "At least one property must be selected.")]
+    [Required]
     public bool IsSexMale { get; set; }
 
     [Display(Name = "Female")]
-    [Required(ErrorMessage = "At least one property must be selected.")]
+    [Required]
     public bool IsSexFemale { get; set; }
 
     [Display(Name = "Yes")]
