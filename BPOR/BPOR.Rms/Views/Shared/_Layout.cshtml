@@ -20,7 +20,24 @@
     </script>
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 @await Html.PartialAsync("_Header")
+@if (ViewData["ShowProgressBar"] as bool? ?? false)
+{
+    @await RenderSectionAsync("ProgressBar", required: false)
+}
 <div class="govuk-width-container">
+    @if (ViewData["ShowBackLink"] as bool? ?? false)
+    {
+        <div class="govuk-back-link-container">
+            @if (ViewData["ShowBackLink"] as bool? ?? false)
+            {
+                <a class="govuk-back-link" onclick="window.history.back()">Back</a>
+            }
+            @if (ViewData["ShowProgressBar"] as bool? ?? false)
+            {
+                <span class="govuk-progress-percentage">@ViewData["ProgressPercentage"]%</span>
+            }
+        </div>
+    }
     <main class="govuk-main-wrapper" id="main-content" role="main">
         @RenderBody()
     </main>

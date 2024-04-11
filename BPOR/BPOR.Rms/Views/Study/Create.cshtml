@@ -1,8 +1,14 @@
 @model BPOR.Rms.Models.Study.StudyFormViewModel
 
 <style>
-    .govuk-back-link {
-    cursor: pointer;
+    .progress-bar-container {
+        width: 100%;
+        background-color: #DAEEE2;
+    }
+    .progress-bar {
+        background-color: #46A86C;
+        height: 10px;
+        width: 0%;
     }
 </style>
 
@@ -10,18 +16,21 @@
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="govuk-grid-row">
-    <a class="govuk-back-link" onclick="window.history.back()">Back</a>
-</div>
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
 
+@section ProgressBar {
+    <div class="progress-bar-container" aria-labelledby="form-progress">
+        <div id="form-progress" class="progress-bar" style="width: @((Model.Step - 1) / 2.0 * 100)%;"></div>
+    </div>
+}
+
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
         <h1 class="govuk-heading-xl">Add a study to use the Be Part of Research registry</h1>
 
         @await Html.PartialAsync("../Shared/_ErrorSummary", Model)
 
         <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Step" value="@Model.Step"/>
 
             <div style="@(Model.Step == 1 ? "" : "display:none;")">

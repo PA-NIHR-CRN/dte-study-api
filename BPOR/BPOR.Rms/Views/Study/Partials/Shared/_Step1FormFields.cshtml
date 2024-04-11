@@ -11,11 +11,11 @@
             <span class="govuk-visually-hidden">Error:</span>
             @Html.ValidationMessageFor(model => model.FullName)
         </span>
-        <input asp-for="FullName" class="govuk-input govuk-input--width-20 govuk-input govuk-input--error" id="FullName" aria-describedby="FullName-error" value="@(Model.FullName)"/>
+        <input asp-for="FullName" class="govuk-input  govuk-input govuk-input--error" id="FullName" aria-describedby="FullName-error" value="@(Model.FullName)"/>
     }
     else
     {
-        <input asp-for="FullName" class="govuk-input--width-20 govuk-input" id="FullName" value="@(Model.FullName)"/>
+        <input asp-for="FullName" class=" govuk-input" id="FullName" value="@(Model.FullName)"/>
     }
 </div>
 <div class="govuk-form-group @(Html.ViewData.ModelState["EmailAddress"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
@@ -28,10 +28,10 @@
             <span class="govuk-visually-hidden">Error:</span>
             @Html.ValidationMessageFor(model => model.EmailAddress)
         </span>
-        <input asp-for="EmailAddress" class="govuk-input--width-20 govuk-input govuk-input--error" id="EmailAddress" aria-describedby="EmailAddress-error"/>
+        <input asp-for="EmailAddress" class=" govuk-input govuk-input--error" id="EmailAddress" aria-describedby="EmailAddress-error"/>
     }
     else
     {
-        <input asp-for="EmailAddress" class="govuk-input--width-20 govuk-input" id="EmailAddress" value="@(Model.EmailAddress)"/>
+        <input asp-for="EmailAddress" class=" govuk-input" id="EmailAddress" value="@(Model.EmailAddress)"/>
     }
 </div>

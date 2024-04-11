@@ -4,6 +4,7 @@ namespace BPOR.Rms.Models.Study;
 
 public class StudiesViewModel
 {
+    public string Role { get; set; } = "Researcher"; // Default value is "Researcher
     public IEnumerable<StudyModel> Studies { get; set; }
     public string SearchTerm { get; set; }
     public int CurrentPage { get; set; }

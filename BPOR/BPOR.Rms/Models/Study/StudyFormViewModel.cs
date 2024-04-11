@@ -17,14 +17,15 @@ public class StudyFormViewModel
     public string EmailAddress { get; set; }
 
     [Required(ErrorMessage = "Enter the study name")]
-    [Display(Name = "Long Study Name")]
+    [Display(Name = "Long study name")]
     public string StudyName { get; set; }
 
     [Display(Name = "CPMS ID")]
     [RegularExpression(@"^\d+$", ErrorMessage = "Enter a CPMS ID in the correct format, like 12345")]
     public long? CpmsId { get; set; }
-    [Display(Name = "Is study enrolment anonymous?")]
-    [Required(ErrorMessage = "Select whether study enrolment is anonymous")]
+    
+    [Display(Name = "Is this study recruiting identifiable participants?")]
+    [Required(ErrorMessage = "Select whether the study is recruiting identifiable participants")]
     public bool? AnonymousEnrolment { get; set; }
     
     public bool IsEditMode { get; set; }

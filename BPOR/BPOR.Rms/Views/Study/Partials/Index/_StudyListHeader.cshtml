@@ -1,11 +1,22 @@
 @model BPOR.Rms.Models.Study.StudiesViewModel
 
-<div class="govuk-grid-column-three-quarters">
-    <h1 class="govuk-heading-xl mb-1">All Studies</h1>
+<style>
+@@media screen and (min-width: 709px) { /* Adjust this breakpoint to suit your design */
+    .right-align-buttons-desktop {
+        display: flex;
+        justify-content: flex-end; 
+    }
+}
+</style>
+
+<div class="govuk-grid-column-one-half">
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-0">
+        @(Model.Role == "Researcher" ? "My Studies" : "All Studies")
+    </h1>
 </div>
-<div class="govuk-grid-column-one-quarter">
-    <div class="govuk-button-group">
-        @Html.ActionLink("  Add study", "Create", "Study", null, new { @id = "addStudyBtn", @class = "govuk-button govuk-button--secondary", data_module = "govuk-button--secondary" })
+<div class="govuk-grid-column-one-half right-align-buttons-desktop">
+    <div class="govuk-button-group govuk-!-margin-bottom-0">
+        @Html.ActionLink(" Add study", "Create", "Study", null, new { @id = "addStudyBtn", @class = "govuk-button govuk-button--secondary", data_module = "govuk-button--secondary" })
         <button type="button" class="govuk-button govuk-button" data-module="govuk-button">
             Find volunteers
         </button>

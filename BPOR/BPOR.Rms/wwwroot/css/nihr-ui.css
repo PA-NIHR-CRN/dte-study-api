@@ -20,7 +20,7 @@ body {
     background-color: #193e72;
     border-color: #ced5db;
     border-bottom-width: 1px;
-    flex-direction: column;
+    flex-direction: row;
     display: flex;
     
 }
@@ -28,18 +28,18 @@ body {
 .govuk-header__container {
     padding-top: 0;
     border-bottom-width: 0;
-    margin-bottom: 0;
-    align-items: center;
     height: 65px;
     justify-content: space-between;
     display: flex;
     max-width: 1500px;
+    width: 100%;
+    margin: 0 auto; /* Centers the container */
 }
 
 .header-content-container {
     justify-content: space-between;
     display: flex;
-    align-items: center;
+    flex-direction: row;
     width: 100%;
 }
 
@@ -152,33 +152,6 @@ body {
     background: #EEF2F3;
 }
 
-.pill-container {
-    padding-top: 1px;
-    padding-left: 10px;
-    padding-right: 10px;
-    background: #EEF2F3;
-    border-radius: 50px;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    gap: 10px;
-    display: inline-flex
-}
-
-.pill-content {
-    justify-content: flex-start;
-    align-items: flex-start;
-    display: inline-flex
-}
-
-.pill-test {
-    color: #193E72;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 24px;
-    word-wrap: break-word
-}
-
 .nihr-flex-container {
     display: flex;
     flex-direction: row;
@@ -276,3 +249,8 @@ body {
     border-radius: 9999px;
 }
 
+.govuk-back-link-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
