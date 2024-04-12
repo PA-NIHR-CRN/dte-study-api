@@ -23,7 +23,85 @@ public class FilterController(ParticipantDbContext context) : Controller
 
     private void SetStudyExclusionFilters(VolunteerFilterViewModel model)
     {
+        // Contacted Select
+        bool? includeContacted = null;
 
+        if (model.ExcludeContacted)
+        {
+            includeContacted = false;
+        }
+
+        if (model.IncludeContacted)
+        {
+            includeContacted = true;
+        }
+
+        model.VolunteersContacted = new List<SelectListItem> 
+        {
+            new SelectListItem{ Value = "3", Text = "No Preference", Selected = includeContacted == null ? true : false },
+            new SelectListItem{ Value = "1", Text = "Include", Selected = includeContacted == true ? true : false },
+            new SelectListItem{ Value = "2", Text = "Exclude", Selected = includeContacted == false ? true : false }
+        };
+
+        // Completed Registration Select
+        bool? includeCompletedRegistration = null;
+
+        if (model.ExcludeCompletedRegistration)
+        {
+            includeCompletedRegistration = false;
+        }
+
+        if (model.IncludeCompletedRegistration)
+        {
+            includeCompletedRegistration = true;
+        }
+
+        model.VolunteersCompletedRegistration = new List<SelectListItem>
+        {
+            new SelectListItem{ Value = "3", Text = "No Preference", Selected = includeCompletedRegistration == null ? true : false },
+            new SelectListItem{ Value = "1", Text = "Include", Selected = includeCompletedRegistration == true ? true : false },
+            new SelectListItem{ Value = "2", Text = "Exclude", Selected = includeCompletedRegistration == false ? true : false }
+        };
+
+        // Recruited Select
+        bool? includeRecruited = null;
+
+        if (model.ExcludeRecruited)
+        {
+            includeRecruited = false;
+        }
+
+        if (model.IncludeRecruited)
+        {
+            includeRecruited = true;
+        }
+
+        model.VolunteersRecruited = new List<SelectListItem>
+        {
+            new SelectListItem{ Value = "3", Text = "No Preference", Selected = includeRecruited == null ? true : false },
+            new SelectListItem{ Value = "1", Text = "Include", Selected = includeRecruited == true ? true : false },
+            new SelectListItem{ Value = "2", Text = "Exclude", Selected = includeRecruited == false ? true : false }
+        };
+
+        // Registered Interest Select
+        bool? includeRegisteredInterest = null;
+
+        if (model.ExcludeRegisteredInterest)
+        {
+            includeRegisteredInterest = false;
+        }
+
+        if (model.IncludeRegisteredInterest)
+        {
+            includeRegisteredInterest = true;
+        }
+
+        model.VolunteersRegisteredInterest = new List<SelectListItem>
+        {
+            new SelectListItem{ Value = "3", Text = "No Preference", Selected = includeRegisteredInterest == null ? true : false },
+            new SelectListItem{ Value = "1", Text = "Include", Selected = includeRegisteredInterest == true ? true : false },
+            new SelectListItem{ Value = "2", Text = "Exclude", Selected = includeRegisteredInterest == false ? true : false }
+        };
     }
 
     private void SetStudiesSelectList(VolunteerFilterViewModel model)
@@ -66,7 +144,10 @@ public class FilterController(ParticipantDbContext context) : Controller
         {
             SetStudiesSelectList(model);
         }
-        
+
+        SetStudyExclusionFilters(model);
+
+
         return View("Index", model);
     }
 

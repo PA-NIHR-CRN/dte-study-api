@@ -408,3 +408,23 @@
         padding: 20px;
     }
 }
+
+.exclusion_label{
+    width: 350px;
+    padding: 10px 0px !important;
+}
+
+/*Mobile*/
+@media (max-width:801px) {
+    .govuk-input_select__wrapper {
+        display: block;
+    }
+}
+
+@media (min-width:802px) {
+    .govuk-input_select__wrapper {
+        display: flex;
+        margin-top: 5px;
+    }
+}
+

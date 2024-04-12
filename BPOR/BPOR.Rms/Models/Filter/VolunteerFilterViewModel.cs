@@ -14,7 +14,17 @@ public class VolunteerFilterViewModel
     public int? SelectedStudy { get; set; }
 
     public IEnumerable<SelectListItem>? Studies { get; set; }
-    //public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
+    [Display(Name = "Volunteers contacted")]
+    public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
+
+    [Display(Name = "Volunteers recruited")]
+    public IEnumerable<SelectListItem>? VolunteersRecruited { get; set; }
+
+    [Display(Name = "Volunteers registered interest")]
+    public IEnumerable<SelectListItem>? VolunteersRegisteredInterest { get; set; }
+
+    [Display(Name = "Volunteers completed registration")]
+    public IEnumerable<SelectListItem>? VolunteersCompletedRegistration { get; set; }
 
     // Volunteer criteria
     [Display(Name = "Exclude those contacted")]
@@ -74,8 +84,13 @@ public class VolunteerFilterViewModel
 
     // Postcode districts and Full postcode
     //public string PostcodeDistricts { get; set; }
-    //public string FullPostcode { get; set; }
-    public int? SearchRadiusMiles { get; set; }
+    [Display(Name = "Full postcode")]
+    [UKPostcode(ErrorMessage = "Enter a full UK postcode")]
+    public string? FullPostcode { get; set; }
+
+    [Display(Name = "Radius")]
+    [IntegerOrDecimal(ErrorMessage = "Enter a whole number or a number with one decimal place, like 8 or 1.3")]
+    public decimal? SearchRadiusMiles { get; set; }
 
     // Demographic information
     [Display(Name = "From")]

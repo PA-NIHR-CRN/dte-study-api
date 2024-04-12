@@ -1,3 +1,5 @@
+@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+
 <h2 class="govuk-heading-l">Location</h2>
 
 <div class="govuk-form-group">
@@ -17,27 +19,23 @@
 
 <div class="govuk-form-group">
     <h3 class="govuk-label-wrapper">
-        <label class="govuk-label govuk-label--l" for="txtFullPostcode">
-            Full postcode
-        </label>
+        @Html.LabelFor(m => Model.FullPostcode, new { @class = "govuk-label govuk-label--l" })
     </h3>
     <div id="event-name-hint" class="govuk-hint">
         For example: EC1A 1BB.
     </div>
-    <input class="govuk-input govuk-input--width-10" id="txtFullPostcode" name="txtFullPostcode" type="text">
+    <input asp-for="FullPostcode" class="govuk-input govuk-input--width-10" type="text" />
 </div>
 
 <div class="govuk-form-group">
     <h3 class="govuk-label-wrapper">
-        <label class="govuk-label govuk-label--l" for="txtMiles">
-            Radius
-        </label>
+        @Html.LabelFor(m => Model.SearchRadiusMiles, new { @class = "govuk-label govuk-label--l" })
     </h3>
     <div id="event-name-hint" class="govuk-hint">
         Indicate the radius for searching volunteers based on the provided full postcode.
     </div>
     <div class="govuk-input__wrapper">
-        <input class="govuk-input govuk-input--width-5" id="txtMiles" type="text" spellcheck="false">
+        <input asp-for="SearchRadiusMiles" class="govuk-input govuk-input--width-5" type="text" />
         <div class="govuk-input__suffix" aria-hidden="true">Miles</div>
     </div>
 </div>
