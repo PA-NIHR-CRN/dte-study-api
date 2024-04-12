@@ -3,6 +3,7 @@ using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using HandlebarsDotNet.ValueProviders;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -14,12 +15,33 @@ public class FilterController(ParticipantDbContext context) : Controller
 
     public IActionResult Index(VolunteerFilterViewModel model)
     {
+        SetStudiesSelectList(model);
+        SetStudyExclusionFilters(model);
+
         return View(model);
+    }
+
+    private void SetStudyExclusionFilters(VolunteerFilterViewModel model)
+    {
+
+    }
+
+    private void SetStudiesSelectList(VolunteerFilterViewModel model)
+    {
+        model.Studies = context.Studies.Where(x => !x.IsDeleted).Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.StudyName }).ToList();
     }
 
     [HttpPost]
     public IActionResult FilterVolunteers(VolunteerFilterViewModel model)
     {
+        bool areFilterset = AreFiltersSet(model);
+
+        if (!areFilterset)
+        {
+            model.VolunteerCount = "-";
+            ModelState.AddModelError("","Please select a filter");
+        }
+
         ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth, model.RegistrationFromDateYear,
                                      model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
         ValidateAge(model.AgeFrom, model.AgeTo);
@@ -36,6 +58,8 @@ public class FilterController(ParticipantDbContext context) : Controller
 
             IQueryable<Participant> query = context.Participants.AsQueryable();
 
+            filters.Add(p => !p.IsDeleted);
+
             foreach (var filter in filters)
             {
                 query = query.Where(filter);
@@ -45,18 +69,56 @@ public class FilterController(ParticipantDbContext context) : Controller
 
             model.VolunteerCount = volunteerCount == 0 ? "-" : volunteerCount.ToString();
         }
+
+        if (model.SelectedStudy == null)
+        {
+            SetStudiesSelectList(model);
+        }
         
         return View("Index", model);
     }
 
+    private bool AreFiltersSet(VolunteerFilterViewModel model)
+    {
+        if (!model.ExcludeContacted &&
+            !model.ExcludeRegisteredInterest &&
+            !model.ExcludeCompletedRegistration &&
+            !model.ExcludeRecruited &&
+            !model.IncludeContacted &&
+            !model.IncludeRegisteredInterest &&
+            !model.IncludeCompletedRegistration &&
+            !model.IncludeRecruited &&
+            !model.RegistrationFromDateDay.HasValue &&
+            !model.RegistrationFromDateMonth.HasValue &&
+            !model.RegistrationFromDateYear.HasValue &&
+            !model.RegistrationToDateDay.HasValue &&
+            !model.RegistrationToDateMonth.HasValue &&
+            !model.RegistrationToDateYear.HasValue &&
+            !model.SearchRadiusMiles.HasValue &&
+            !model.AgeFrom.HasValue &&
+            !model.AgeTo.HasValue &&
+            !model.IsSexMale &&
+            !model.IsSexFemale &&
+            !model.IsGenderSameAsSexRegisteredAtBirth_Yes &&
+            !model.IsGenderSameAsSexRegisteredAtBirth_No &&
+            !model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay &&
+            !model.Ethnicity_Asian &&
+            !model.Ethnicity_Black &&
+            !model.Ethnicity_Mixed &&
+            !model.Ethnicity_Other &&
+            !model.Ethnicity_White)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     private void ValidateAge(int? ageFrom, int? ageTo)
     {
-        if (ageFrom.HasValue && ageTo.HasValue)
+        if (ageFrom > ageTo)
         {
-            if (ageFrom > ageTo)
-            {
-                ModelState.AddModelError("AgeFrom", "The minimum age must be lower than the maximum age");
-            }
+            ModelState.AddModelError("AgeFrom", "The minimum age must be lower than the maximum age");
         }
     }
 
@@ -80,9 +142,9 @@ public class FilterController(ParticipantDbContext context) : Controller
         }
     }
 
-    public void FilterByAge(int? AgeFrom, int? AgeTo)
+    private void FilterByAge(int? AgeFrom, int? AgeTo)
     {
-        if (AgeFrom != null && AgeTo != null)
+        if (AgeFrom != null || AgeTo != null)
         {
             DateTime fromDate = AgeTo.HasValue ? DateTime.Today.AddYears(-AgeTo.Value) : DateTime.MinValue;
             DateTime toDate = AgeFrom.HasValue ? DateTime.Today.AddYears(-AgeFrom.Value) : DateTime.MaxValue;
@@ -91,7 +153,7 @@ public class FilterController(ParticipantDbContext context) : Controller
         }
     }
 
-    public void FilterBySexRegisteredAtBirth(bool IsSexMale, bool IsSexFemale, bool IsGenderSameAsSexRegisteredAtBirth_Yes, bool IsGenderSameAsSexRegisteredAtBirth_No, bool IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
+    private void FilterBySexRegisteredAtBirth(bool IsSexMale, bool IsSexFemale, bool IsGenderSameAsSexRegisteredAtBirth_Yes, bool IsGenderSameAsSexRegisteredAtBirth_No, bool IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
     {
         if (IsSexMale || IsSexFemale)
         {
@@ -118,7 +180,7 @@ public class FilterController(ParticipantDbContext context) : Controller
         }     
     }
 
-    public void FilterByEthnicity(bool Ethnicity_Asian, bool Ethnicity_Black, bool Ethnicity_Mixed, bool Ethnicity_Other, bool Ethnicity_White)
+    private void FilterByEthnicity(bool Ethnicity_Asian, bool Ethnicity_Black, bool Ethnicity_Mixed, bool Ethnicity_Other, bool Ethnicity_White)
     {
         if (Ethnicity_Asian || Ethnicity_Black || Ethnicity_Mixed || Ethnicity_Other || Ethnicity_White)
         {
@@ -205,7 +267,7 @@ public class FilterController(ParticipantDbContext context) : Controller
         }
     }
 
-    public static DateTime? ConstructDate(int? year, int? month, int? day)
+    private static DateTime? ConstructDate(int? year, int? month, int? day)
     {
         if (!year.HasValue || !month.HasValue || !day.HasValue)
             return null;

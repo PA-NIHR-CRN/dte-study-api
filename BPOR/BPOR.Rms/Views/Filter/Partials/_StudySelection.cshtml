@@ -1,11 +1,7 @@
+@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+
 <div class="govuk-form-group">
-    <label class="govuk-label govuk-label--l" for="sort">
-        Select a study (if applicable) you want to find volunteers for
-    </label>
-    <select class="govuk-select" id="sort" name="sort">
-        <option value="published">Recently published</option>
-        <option value="updated" selected>Recently updated</option>
-        <option value="views">Most views</option>
-        <option value="comments">Most comments</option>
-    </select>
+    @Html.LabelFor(m => Model.SelectedStudy, new { @class = "govuk-label govuk-label--l" })
+
+    @Html.DropDownListFor(m => m.SelectedStudy, Model.Studies, "Select an item", new { @class = "govuk-select" })
 </div>

@@ -27,10 +27,10 @@
             Research
         </h2>
 
-        @await Html.PartialAsync("Partials/_StudySelection")
-        @await Html.PartialAsync("Partials/_VolunteerInclusionExclusionCriteria")
+        @await Html.PartialAsync("Partials/_StudySelection", Model)
+        @await Html.PartialAsync("Partials/_VolunteerInclusionExclusionCriteria", Model)
         @await Html.PartialAsync("Partials/_AreasOfResearch")
-        @await Html.PartialAsync("Partials/_RegistrationDate")
+        @await Html.PartialAsync("Partials/_RegistrationDate", Model)
         @await Html.PartialAsync("Partials/_Location")
         @await Html.PartialAsync("Partials/_Demographics", Model)
 

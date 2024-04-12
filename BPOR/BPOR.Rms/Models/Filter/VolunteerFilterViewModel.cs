@@ -1,5 +1,8 @@
+using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.RefData;
+using CsvHelper.Configuration.Attributes;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace BPOR.Rms.Models.Filter;
@@ -7,17 +10,35 @@ namespace BPOR.Rms.Models.Filter;
 public class VolunteerFilterViewModel
 {
     // Study selection
-    //public string SelectedStudy { get; set; }
-    //public IEnumerable<SelectListItem> Studies { get; set; }
+    [Display(Name = "Select a study (if applicable) you want to find volunteers for")]
+    public int? SelectedStudy { get; set; }
+
+    public IEnumerable<SelectListItem>? Studies { get; set; }
+    //public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
 
     // Volunteer criteria
+    [Display(Name = "Exclude those contacted")]
     public bool ExcludeContacted { get; set; }
+
+    [Display(Name = "Exclude registered interest")]
     public bool ExcludeRegisteredInterest { get; set; }
+
+    [Display(Name = "Exclude those who have completed registration")]
     public bool ExcludeCompletedRegistration { get; set; }
+
+    [Display(Name = "Exclude recruited")]
     public bool ExcludeRecruited { get; set; }
+
+    [Display(Name = "Only include those contacted")]
     public bool IncludeContacted { get; set; }
+
+    [Display(Name = "Only include registered interest")]
     public bool IncludeRegisteredInterest { get; set; }
+
+    [Display(Name = "Only include those who have completed registration")]
     public bool IncludeCompletedRegistration { get; set; }
+
+    [Display(Name = "Only include recruited")]
     public bool IncludeRecruited { get; set; }
 
     // Areas of research volunteers are interested in
@@ -90,12 +111,4 @@ public class VolunteerFilterViewModel
     public bool Ethnicity_White { get; set; }
     public string VolunteerCount { get; set; } = "-";
 
-}
-
-// Supporting classes for dropdowns
-public class SelectListItem
-{
-    public string Text { get; set; }
-    public string Value { get; set; }
-    public bool Selected { get; set; }
 }

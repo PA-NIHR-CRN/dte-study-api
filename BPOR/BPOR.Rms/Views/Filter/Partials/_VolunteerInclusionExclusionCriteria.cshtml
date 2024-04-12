@@ -1,54 +1,40 @@
+@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+
 <div class="govuk-form-group">
     <fieldset class="govuk-fieldset" aria-label="Select which options to filter volunteers by">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             <div class="govuk-checkboxes" data-module="govuk-checkboxes">
                 <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkExcludeContacted" type="checkbox" />
-                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeContacted">
-                        Exclude those contacted
-                    </label>
+                    <input asp-for="ExcludeContacted" class="govuk-checkboxes__input" id="ExcludeContacted" type="checkbox" />
+                    @Html.LabelFor(m => Model.ExcludeContacted, new { @class = "govuk-label govuk-checkboxes__label" })
                 </div>
                 <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkExcludeRegisteredInterest" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeRegisteredInterest">
-                        Exclude registered interest
-                    </label>
+                    <input asp-for="ExcludeRegisteredInterest" class="govuk-checkboxes__input" id="ExcludeRegisteredInterest" type="checkbox" />
+                    @Html.LabelFor(m => Model.ExcludeRegisteredInterest, new { @class = "govuk-label govuk-checkboxes__label" })
                 </div>
                 <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkExcludeCompletedRegistration" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeCompletedRegistration">
-                        Exclude those who have completed registration
-                    </label>
+                    <input asp-for="ExcludeCompletedRegistration" class="govuk-checkboxes__input" id="ExcludeCompletedRegistration" type="checkbox" />
+                    @Html.LabelFor(m => Model.ExcludeCompletedRegistration, new { @class = "govuk-label govuk-checkboxes__label" })
                 </div>
                 <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkExcludeRecruited" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeRecruited">
-                        Exclude recruited
-                    </label>
+                    <input asp-for="ExcludeRecruited" class="govuk-checkboxes__input" id="ExcludeRecruited" type="checkbox" />
+                    @Html.LabelFor(m => Model.ExcludeRecruited, new { @class = "govuk-label govuk-checkboxes__label" })
                 </div>
                 <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkIncludeThoseContacted" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeThoseContacted">
-                        Only include those contacted
-                    </label>
+                    <input asp-for="IncludeContacted" class="govuk-checkboxes__input" id="IncludeContacted" type="checkbox" />
+                    @Html.LabelFor(m => Model.IncludeContacted, new { @class = "govuk-label govuk-checkboxes__label" })
                 </div>
                 <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkIncludeRegisteredInterest" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeRegisteredInterest">
-                        Only include registered interest
-                    </label>
+                    <input asp-for="IncludeRegisteredInterest" class="govuk-checkboxes__input" id="IncludeRegisteredInterest" type="checkbox" />
+                    @Html.LabelFor(m => Model.IncludeRegisteredInterest, new { @class = "govuk-label govuk-checkboxes__label" })
                 </div>
                 <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkIncludeCompletedRegistration" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeCompletedRegistration">
-                        Only include those who have completed registration
-                    </label>
+                    <input asp-for="IncludeCompletedRegistration" class="govuk-checkboxes__input" id="IncludeCompletedRegistration" type="checkbox" />
+                    @Html.LabelFor(m => Model.IncludeCompletedRegistration, new { @class = "govuk-label govuk-checkboxes__label" })
                 </div>
                 <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkIncludeRecruited" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeRecruited">
-                        Only include recruited
-                    </label>
+                    <input asp-for="IncludeRecruited" class="govuk-checkboxes__input" id="IncludeRecruited" type="checkbox" />
+                    @Html.LabelFor(m => Model.IncludeRecruited, new { @class = "govuk-label govuk-checkboxes__label" })
                 </div>
             </div>
         </legend>      
