@@ -242,6 +242,7 @@
     font-family: Lato, serif;
     text-decoration: none;
     color: rgb(29, 112, 184);
+    cursor: pointer;
 }
 
 .govuk-link:hover,

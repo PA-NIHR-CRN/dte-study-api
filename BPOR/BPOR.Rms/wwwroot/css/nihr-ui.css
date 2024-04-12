@@ -147,11 +147,6 @@ body {
     background-color: #f2f2f2;
 }
 
-.govuk-tag {
-    border-radius: 50px;
-    background: #EEF2F3;
-}
-
 .nihr-flex-container {
     display: flex;
     flex-direction: row;
@@ -253,4 +248,11 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+@media screen and (min-width: 709px) {
+    .right-align-buttons-desktop {
+        display: flex;
+        justify-content: flex-end;
+    }
 }

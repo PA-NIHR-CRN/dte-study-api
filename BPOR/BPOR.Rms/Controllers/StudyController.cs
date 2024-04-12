@@ -229,6 +229,13 @@ public class StudyController(ParticipantDbContext context) : Controller
                     throw;
                 }
             }
+            
+            TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
+            {
+                IsSuccess = true,
+                Heading = "Study details updated",
+                Body = $"{model.StudyName} has been successfully updated",
+            });
 
             return RedirectToAction(nameof(Details), new { id = model.Id });
         }

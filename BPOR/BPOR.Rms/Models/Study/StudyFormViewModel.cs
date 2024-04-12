@@ -17,7 +17,7 @@ public class StudyFormViewModel
     public string EmailAddress { get; set; }
 
     [Required(ErrorMessage = "Enter the study name")]
-    [Display(Name = "Long study name")]
+    [Display(Name = "Study name")]
     public string StudyName { get; set; }
 
     [Display(Name = "CPMS ID")]
