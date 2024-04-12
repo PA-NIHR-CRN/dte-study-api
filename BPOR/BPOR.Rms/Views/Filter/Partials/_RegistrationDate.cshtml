@@ -35,21 +35,21 @@
         {
             <span id="RegistrationFromDateDay-error" class="govuk-error-message">
                 <span class="govuk-visually-hidden">Error:</span>
-                @Html.ValidationMessageFor(model => model.RegistrationFromDateDay)
+                @Html.ValidationMessageFor(model => model.RegistrationToDateDay)
             </span>
         }
         @if (Html.ViewData.ModelState["RegistrationToDateMonth"]?.Errors.Count > 0)
         {
             <span id="RegistrationFromDateMonth-error" class="govuk-error-message">
                 <span class="govuk-visually-hidden">Error:</span>
-                @Html.ValidationMessageFor(model => model.RegistrationFromDateMonth)
+                @Html.ValidationMessageFor(model => model.RegistrationToDateMonth)
             </span>
         }
         @if (Html.ViewData.ModelState["RegistrationToDateYear"]?.Errors.Count > 0)
         {
             <span id="RegistrationFromDateYear-error" class="govuk-error-message">
                 <span class="govuk-visually-hidden">Error:</span>
-                @Html.ValidationMessageFor(model => model.RegistrationFromDateYear)
+                @Html.ValidationMessageFor(model => model.RegistrationToDateYear)
             </span>
         }
         <div>

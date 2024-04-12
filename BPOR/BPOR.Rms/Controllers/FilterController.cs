@@ -34,14 +34,6 @@ public class FilterController(ParticipantDbContext context) : Controller
     [HttpPost]
     public IActionResult FilterVolunteers(VolunteerFilterViewModel model)
     {
-        bool areFilterset = AreFiltersSet(model);
-
-        if (!areFilterset)
-        {
-            model.VolunteerCount = "-";
-            ModelState.AddModelError("","Please select a filter");
-        }
-
         ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth, model.RegistrationFromDateYear,
                                      model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
         ValidateAge(model.AgeFrom, model.AgeTo);
@@ -76,42 +68,6 @@ public class FilterController(ParticipantDbContext context) : Controller
         }
         
         return View("Index", model);
-    }
-
-    private bool AreFiltersSet(VolunteerFilterViewModel model)
-    {
-        if (!model.ExcludeContacted &&
-            !model.ExcludeRegisteredInterest &&
-            !model.ExcludeCompletedRegistration &&
-            !model.ExcludeRecruited &&
-            !model.IncludeContacted &&
-            !model.IncludeRegisteredInterest &&
-            !model.IncludeCompletedRegistration &&
-            !model.IncludeRecruited &&
-            !model.RegistrationFromDateDay.HasValue &&
-            !model.RegistrationFromDateMonth.HasValue &&
-            !model.RegistrationFromDateYear.HasValue &&
-            !model.RegistrationToDateDay.HasValue &&
-            !model.RegistrationToDateMonth.HasValue &&
-            !model.RegistrationToDateYear.HasValue &&
-            !model.SearchRadiusMiles.HasValue &&
-            !model.AgeFrom.HasValue &&
-            !model.AgeTo.HasValue &&
-            !model.IsSexMale &&
-            !model.IsSexFemale &&
-            !model.IsGenderSameAsSexRegisteredAtBirth_Yes &&
-            !model.IsGenderSameAsSexRegisteredAtBirth_No &&
-            !model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay &&
-            !model.Ethnicity_Asian &&
-            !model.Ethnicity_Black &&
-            !model.Ethnicity_Mixed &&
-            !model.Ethnicity_Other &&
-            !model.Ethnicity_White)
-        {
-            return false;
-        }
-
-        return true;
     }
 
     private void ValidateAge(int? ageFrom, int? ageTo)
