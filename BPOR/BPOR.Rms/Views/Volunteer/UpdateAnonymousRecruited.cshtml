@@ -1,0 +1,35 @@
+@using BPOR.Rms.Views.ViewComponents
+@model BPOR.Rms.Models.Volunteer.UpdateAnonymousRecruitedViewModel
+
+@await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+{
+    new("My Studies", "/Study/Index"),
+    new("Study", "/Study/Index"),
+    new("Update newly recruited volunteers", "/Study/Edit")
+})
+
+<h1 class="govuk-heading-xl">Update recruited volunteers</h1>
+<h4>
+    @Html.DisplayFor(model => model.StudyName)
+</h4>
+@await Html.PartialAsync("../Shared/_RecuitedTable")
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["LatestRecruitmentTotal"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="LatestRecruitmentTotal" class="govuk-label" for="LatestRecruitmentTotal">
+        @Html.DisplayNameFor(model => model.LatestRecruitmentTotal)
+    </label>
+    @if (Html.ViewData.ModelState["LatestRecruitmentTotal"]?.Errors.Count > 0)
+    {
+        <span id="LatestRecruitmentTotal-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.LatestRecruitmentTotal)
+        </span>
+        <input asp-for="LatestRecruitmentTotal" class="govuk-input  govuk-input govuk-input--error" id="LatestRecruitmentTotal" aria-describedby="LatestRecruitmentTotal-error" value="@(Model.LatestRecruitmentTotal)"/>
+    }
+    else
+    {
+        <input asp-for="LatestRecruitmentTotal" class=" govuk-input" id="LatestRecruitmentTotal" value="@(Model.LatestRecruitmentTotal)"/>
+    }
+</div>
+
+@Html.ActionLink("Submit volunteer numbers", "Details", "Study", new { id = Model.StudyId }, new { @class = "govuk-back-link" })

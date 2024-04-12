@@ -202,10 +202,17 @@
         </div>
     }
 
-    @if (Model.Studies.Any())
+    @if (Model.Studies.Count() > 1)
     {
         <div class="govuk-inset-text">
-            @Model.Studies.Count() results match your search
+            @Model.Studies.Count() results match your search.
+        </div>
+    }
+    
+    @if(Model.Studies.Count() == 1)
+    {
+        <div class="govuk-inset-text">
+            1 study matches your search.
         </div>
     }
 }

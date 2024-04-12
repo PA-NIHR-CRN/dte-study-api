@@ -1,3 +1,5 @@
+@model BPOR.Rms.Models.Study.StudyDetailsViewModel
+
 <h2 class="govuk-heading-l govuk-!-margin-0">Volunteers</h2>
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
@@ -7,38 +9,16 @@
     </div>
     <div class="govuk-grid-column-one-half right-align-buttons-desktop">
         <div class="govuk-button-group govuk-!-margin-bottom-0">
-            @Html.ActionLink(" Update recruitment total", "Index", "Filter", null, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
+            @if(Model.Study.AnonymousEnrolment)
+            {
+                @Html.ActionLink("Update recruitment total", "UpdateAnonymousRecruited", "Volunteer", new { id = Model.Study.Id }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
+            }
+            else
+            {
+                @Html.ActionLink("Add enrollments", "UpdateRecruited", "Volunteer", new { id = Model.Study.Id }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
+            }
         </div>
     </div>
 </div>
 
-<table class="govuk-table" style="width: 100%;">
-
-    <thead class="govuk-table__head">
-    <tr class="govuk-table__row">
-        <th scope="col" class="govuk-table__header ">Number recruited</th>
-        <th scope="col" class="govuk-table__header ">Date added</th>
-    </tr>
-    </thead>
-    <tbody class="govuk-table__body">
-    <tr class="govuk-table__row">
-        <td class="govuk-table__cell">
-            125
-        </td>
-        <td class="govuk-table__cell">20/04/2024</td>
-    </tr>
-    <tr class="govuk-table__row">
-        <td class="govuk-table__cell">
-            30
-        </td>
-        <td class="govuk-table__cell">27/03/2024</td>
-    </tr>
-    <tr class="govuk-table__row">
-        <td class="govuk-table__cell">
-            25
-        </td>
-        <td class="govuk-table__cell">01/02/2024</td>
-    </tr>
-
-    </tbody>
-</table>
+@await Html.PartialAsync("../Shared/_RecuitedTable")
