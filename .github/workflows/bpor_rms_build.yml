@@ -12,7 +12,7 @@ jobs:
     name: 'Build'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # - uses: ./.github/actions/setup-node
       # - name: Install
       #   run: npm ci --no-audit --no-fund
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Configure AWS credentials (dev)
         uses: aws-actions/configure-aws-credentials@v2
