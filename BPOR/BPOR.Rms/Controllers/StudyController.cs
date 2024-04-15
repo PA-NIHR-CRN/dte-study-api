@@ -99,9 +99,6 @@ public class StudyController(ParticipantDbContext context) : Controller
         [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,AnonymousEnrolment,Step")]
         StudyFormViewModel model, string action)
     {
-        ViewData["ShowBackLink"] = true;
-        ViewData["ShowProgressBar"] = true;
-        ViewData["ProgressPercentage"] = model.Step * 50;
         if (action == "Next" && model.Step == 1)
         {
             ModelState.Remove("StudyName");
@@ -111,6 +108,9 @@ public class StudyController(ParticipantDbContext context) : Controller
             if (ModelState.IsValid)
             {
                 model.Step = 2;
+                ViewData["ShowBackLink"] = true;
+                ViewData["ShowProgressBar"] = true;
+                ViewData["ProgressPercentage"] = model.Step * 50;
                 return View(model);
             }
         }
@@ -140,6 +140,9 @@ public class StudyController(ParticipantDbContext context) : Controller
                 });
             }
 
+            ViewData["ShowBackLink"] = true;
+            ViewData["ShowProgressBar"] = true;
+            ViewData["ProgressPercentage"] = model.Step * 50;
             return View(model);
         }
 

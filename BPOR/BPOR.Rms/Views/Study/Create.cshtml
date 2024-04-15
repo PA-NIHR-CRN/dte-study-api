@@ -1,15 +1,7 @@
 @model BPOR.Rms.Models.Study.StudyFormViewModel
 
 <style>
-    .progress-bar-container {
-        width: 100%;
-        background-color: #DAEEE2;
-    }
-    .progress-bar {
-        background-color: #46A86C;
-        height: 10px;
-        width: 0%;
-    }
+
 </style>
 
 @{
@@ -18,9 +10,7 @@
 }
 
 @section ProgressBar {
-    <div class="progress-bar-container" aria-labelledby="form-progress">
-        <div id="form-progress" class="progress-bar" style="width: @((Model.Step - 1) / 2.0 * 100)%;"></div>
-    </div>
+    @await Html.PartialAsync("Partials/_ProgressBar", Model)
 }
 
 
@@ -28,7 +18,7 @@
     <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
         <h1 class="govuk-heading-xl">Add a study to use the Be Part of Research registry</h1>
 
-        @await Html.PartialAsync("../Shared/_ErrorSummary", Model)
+        @await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
         <form asp-action="Create">
             <input type="hidden" asp-for="Step" value="@Model.Step"/>
@@ -41,7 +31,7 @@
                 @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model)
             </div>
 
-            @await Html.PartialAsync("Partials/Create/_CreateButtonGroup", Model)
+            @await Html.PartialAsync("Partials/_CreateButtonGroup", Model)
         </form>
 
     </div>

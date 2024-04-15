@@ -1,0 +1,17 @@
+@model  dynamic
+
+<style>
+    .progress-bar-container {
+        width: 100%;
+        background-color: #DAEEE2;
+    }
+    .progress-bar {
+        background-color: #46A86C;
+        height: 10px;
+        width: 0%;
+    }
+</style>
+
+<div class="progress-bar-container" aria-labelledby="form-progress">
+    <div id="form-progress" class="progress-bar" style="width: @((Model.Step - 1) / (double)Model.TotalSteps * 100)%;"></div>
+</div>

@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace BPOR.Rms.Models.Study;
+namespace BPOR.Rms.Models.Researcher;
 
-public class StudyFormViewModel
+public class ResearcherStudyFormViewModel
 {
     public int Id { get; set; }
     public int Step { get; set; } = 1;
-    public int TotalSteps { get; set; } = 2;
+    public int TotalSteps { get; set; } = 10;
 
     [Required(ErrorMessage = "Enter the name of the main contact for the study")]
     [Display(Name = "Name of main contact for the study")]

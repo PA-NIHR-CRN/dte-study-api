@@ -1,0 +1,55 @@
+@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+
+<style>
+</style>
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section ProgressBar {
+    @await Html.PartialAsync("../Shared/Partials/_ProgressBar", Model)
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
+        <h1 class="govuk-heading-xl">Add a study to use the Be Part of Research registry</h1>
+
+        @await Html.PartialAsync("../Shared/Partials/_ErrorSummary", Model)
+
+        <form asp-action="Create">
+            <input type="hidden" asp-for="Step" value="@Model.Step"/>
+
+            @* <div style="@(Model.Step == 1 ? "" : "display:none;")"> *@
+            @*     @await Html.PartialAsync("Partials/Shared/_Step1FormFields", Model) *@
+            @* </div> *@
+            @* *@
+            @* <div style="@(Model.Step == 2 ? "" : "display:none;")"> *@
+            @*     @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model) *@
+            @* </div> *@
+            @* <div style="@(Model.Step == 3 ? "" : "display:none;")"> *@
+            @*     @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model) *@
+            @* </div> *@
+            @* <div style="@(Model.Step == 4 ? "" : "display:none;")"> *@
+            @*     @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model) *@
+            @* </div> *@
+            @* <div style="@(Model.Step == 5 ? "" : "display:none;")"> *@
+            @*     @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model) *@
+            @* </div> *@
+            @* <div style="@(Model.Step == 6 ? "" : "display:none;")"> *@
+            @*     @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model) *@
+            @* </div> *@
+            @* <div style="@(Model.Step == 7 ? "" : "display:none;")"> *@
+            @*     @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model) *@
+            @* </div> *@
+            @* <div style="@(Model.Step == 8 ? "" : "display:none;")"> *@
+            @*     @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model) *@
+            @* </div> *@
+            
+
+            @await Html.PartialAsync("../Shared/Partials/_CreateButtonGroup", Model)
+        </form>
+
+    </div>
+</div>
