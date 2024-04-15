@@ -1,56 +1,29 @@
+@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+
 <div class="govuk-form-group">
     <fieldset class="govuk-fieldset" aria-label="Select which options to filter volunteers by">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-                <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkExcludeContacted" type="checkbox" />
-                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeContacted">
-                        Exclude those contacted
-                    </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkExcludeRegisteredInterest" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeRegisteredInterest">
-                        Exclude registered interest
-                    </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkExcludeCompletedRegistration" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeCompletedRegistration">
-                        Exclude those who have completed registration
-                    </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkExcludeRecruited" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkExcludeRecruited">
-                        Exclude recruited
-                    </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkIncludeThoseContacted" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeThoseContacted">
-                        Only include those contacted
-                    </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkIncludeRegisteredInterest" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeRegisteredInterest">
-                        Only include registered interest
-                    </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkIncludeCompletedRegistration" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeCompletedRegistration">
-                        Only include those who have completed registration
-                    </label>
-                </div>
-                <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="chkIncludeRecruited" type="checkbox">
-                    <label class="govuk-label govuk-checkboxes__label" for="chkIncludeRecruited">
-                        Only include recruited
-                    </label>
-                </div>
+
+            <div class="govuk-input_select__wrapper">
+                @Html.LabelFor(m => Model.VolunteersContacted, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
+                @Html.DropDownListFor(m => m.VolunteersContacted, Model.VolunteersContacted, new { @class = "govuk-select" })
             </div>
+
+            <div class="govuk-input_select__wrapper">
+                @Html.LabelFor(m => Model.VolunteersRegisteredInterest, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
+                @Html.DropDownListFor(m => m.VolunteersRegisteredInterest, Model.VolunteersRegisteredInterest, new { @class = "govuk-select" })
+            </div>
+
+            <div class="govuk-input_select__wrapper">
+                @Html.LabelFor(m => Model.VolunteersCompletedRegistration, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
+                @Html.DropDownListFor(m => m.VolunteersCompletedRegistration, Model.VolunteersCompletedRegistration, new { @class = "govuk-select" })
+            </div>
+
+            <div class="govuk-input_select__wrapper">
+                @Html.LabelFor(m => Model.VolunteersRecruited, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
+                @Html.DropDownListFor(m => m.VolunteersRecruited, Model.VolunteersRecruited, new { @class = "govuk-select" })
+            </div>
+  
         </legend>      
     </fieldset>
 </div>

@@ -1,5 +1,8 @@
+using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.RefData;
+using CsvHelper.Configuration.Attributes;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace BPOR.Rms.Models.Filter;
@@ -7,22 +10,51 @@ namespace BPOR.Rms.Models.Filter;
 public class VolunteerFilterViewModel
 {
     // Study selection
-    public string SelectedStudy { get; set; }
-    public IEnumerable<SelectListItem> Studies { get; set; }
+    [Display(Name = "Select a study (if applicable) you want to find volunteers for")]
+    public SelectListItem? SelectedStudy { get; set; }
+
+    public IEnumerable<SelectListItem>? Studies { get; set; }
+    [Display(Name = "Volunteers contacted")]
+    public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
+
+    [Display(Name = "Volunteers recruited")]
+    public IEnumerable<SelectListItem>? VolunteersRecruited { get; set; }
+
+    [Display(Name = "Volunteers registered interest")]
+    public IEnumerable<SelectListItem>? VolunteersRegisteredInterest { get; set; }
+
+    [Display(Name = "Volunteers completed registration")]
+    public IEnumerable<SelectListItem>? VolunteersCompletedRegistration { get; set; }
 
     // Volunteer criteria
+    [Display(Name = "Exclude those contacted")]
     public bool ExcludeContacted { get; set; }
+
+    [Display(Name = "Exclude registered interest")]
     public bool ExcludeRegisteredInterest { get; set; }
+
+    [Display(Name = "Exclude those who have completed registration")]
     public bool ExcludeCompletedRegistration { get; set; }
+
+    [Display(Name = "Exclude recruited")]
     public bool ExcludeRecruited { get; set; }
+
+    [Display(Name = "Only include those contacted")]
     public bool IncludeContacted { get; set; }
+
+    [Display(Name = "Only include registered interest")]
     public bool IncludeRegisteredInterest { get; set; }
+
+    [Display(Name = "Only include those who have completed registration")]
     public bool IncludeCompletedRegistration { get; set; }
+
+    [Display(Name = "Only include recruited")]
     public bool IncludeRecruited { get; set; }
 
     // Areas of research volunteers are interested in
-    public string SelectedLocation { get; set; }
-    public IEnumerable<SelectListItem> Locations { get; set; }
+    [Display(Name = "Areas of research volunteers are interested in")]
+    public SelectListItem? SelectedLocation { get; set; }
+    public IEnumerable<SelectListItem>? Locations { get; set; }
 
     // Date of volunteer registration
     // From Date
@@ -35,7 +67,7 @@ public class VolunteerFilterViewModel
     public int? RegistrationFromDateMonth { get; set; }
 
     [Display(Name = "Year")]
-    [Range(1900, 2100, ErrorMessage = "Year must be a reasonable value")]
+    [Range(2022, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? RegistrationFromDateYear { get; set; }
 
     // To Date
@@ -48,13 +80,20 @@ public class VolunteerFilterViewModel
     public int? RegistrationToDateMonth { get; set; }
 
     [Display(Name = "Year")]
-    [Range(1900, 2100, ErrorMessage = "Year must be a reasonable value")]
+    [Range(2022, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? RegistrationToDateYear { get; set; }
 
     // Postcode districts and Full postcode
-    public string PostcodeDistricts { get; set; }
-    public string FullPostcode { get; set; }
-    public int? SearchRadiusMiles { get; set; }
+    [Display(Name = "Postcode districts")]
+    public string? PostcodeDistricts { get; set; }
+
+    [Display(Name = "Full postcode")]
+    [UKPostcode(ErrorMessage = "Enter a full UK postcode")]
+    public string? FullPostcode { get; set; }
+
+    [Display(Name = "Radius")]
+    [IntegerOrDecimal(ErrorMessage = "Enter a whole number or a number with one decimal place, like 8 or 1.3")]
+    public decimal? SearchRadiusMiles { get; set; }
 
     // Demographic information
     [Display(Name = "From")]
@@ -65,11 +104,11 @@ public class VolunteerFilterViewModel
     public int? AgeTo { get; set; }
 
     [Display(Name = "Male")]
-    [Required(ErrorMessage = "At least one property must be selected.")]
+    [Required]
     public bool IsSexMale { get; set; }
 
     [Display(Name = "Female")]
-    [Required(ErrorMessage = "At least one property must be selected.")]
+    [Required]
     public bool IsSexFemale { get; set; }
 
     [Display(Name = "Yes")]
@@ -90,12 +129,4 @@ public class VolunteerFilterViewModel
     public bool Ethnicity_White { get; set; }
     public string VolunteerCount { get; set; } = "-";
 
-}
-
-// Supporting classes for dropdowns
-public class SelectListItem
-{
-    public string Text { get; set; }
-    public string Value { get; set; }
-    public bool Selected { get; set; }
 }

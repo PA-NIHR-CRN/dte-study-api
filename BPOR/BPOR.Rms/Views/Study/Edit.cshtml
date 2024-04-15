@@ -19,7 +19,7 @@
     <div class="govuk-grid-column-one-half">
 
         <h1 class="govuk-heading-xl">Edit study details</h1>
-        @await Html.PartialAsync("../Shared/_ErrorSummary", Model)
+        @await Html.PartialAsync("Partials/_ErrorSummary", Model)
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id"/>

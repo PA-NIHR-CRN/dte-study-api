@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BPOR.Domain.Migrations
+namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
     partial class ParticipantDbContextModelSnapshot : ModelSnapshot
@@ -9104,10 +9104,10 @@ namespace BPOR.Domain.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<bool>("IsAnonymous")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsRecruitingIdentifiableParticipants")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("StudyName")

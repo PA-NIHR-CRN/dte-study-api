@@ -1,27 +1,26 @@
 @model BPOR.Rms.Models.Study.StudyFormViewModel
 
 <style>
-    .govuk-back-link {
-    cursor: pointer;
-    }
+
 </style>
 
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="govuk-grid-row">
-    <a class="govuk-back-link" onclick="window.history.back()">Back</a>
-</div>
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-half">
 
+@section ProgressBar {
+    @await Html.PartialAsync("Partials/_ProgressBar", Model)
+}
+
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
         <h1 class="govuk-heading-xl">Add a study to use the Be Part of Research registry</h1>
 
-        @await Html.PartialAsync("../Shared/_ErrorSummary", Model)
+        @await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
         <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Step" value="@Model.Step"/>
 
             <div style="@(Model.Step == 1 ? "" : "display:none;")">
@@ -32,7 +31,7 @@
                 @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model)
             </div>
 
-            @await Html.PartialAsync("Partials/Create/_CreateButtonGroup", Model)
+            @await Html.PartialAsync("Partials/_CreateButtonGroup", Model)
         </form>
 
     </div>

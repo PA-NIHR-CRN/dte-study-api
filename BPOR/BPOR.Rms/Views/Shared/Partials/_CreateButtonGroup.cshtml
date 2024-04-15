@@ -1,11 +1,10 @@
 <div class="govuk-button-group">
-    @if (Model.Step == 1)
+    @if (Model.Step != Model.TotalSteps)
     {
         <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Next</button>
     }
-    else if (Model.Step == 2)
+    else
     {
         <button type="submit" name="action" value="Save" class="govuk-button" data_module="govuk-button">Save</button>
     }
-    @Html.ActionLink("Cancel", "Index", "Study", null, new { data_module = "govuk-button" })
 </div>

@@ -6,6 +6,7 @@ public class StudyFormViewModel
 {
     public int Id { get; set; }
     public int Step { get; set; } = 1;
+    public int TotalSteps { get; set; } = 2;
 
     [Required(ErrorMessage = "Enter the name of the main contact for the study")]
     [Display(Name = "Name of main contact for the study")]
@@ -17,15 +18,16 @@ public class StudyFormViewModel
     public string EmailAddress { get; set; }
 
     [Required(ErrorMessage = "Enter the study name")]
-    [Display(Name = "Long Study Name")]
+    [Display(Name = "Study name")]
     public string StudyName { get; set; }
 
     [Display(Name = "CPMS ID")]
     [RegularExpression(@"^\d+$", ErrorMessage = "Enter a CPMS ID in the correct format, like 12345")]
     public long? CpmsId { get; set; }
-    [Display(Name = "Is study enrolment anonymous?")]
-    [Required(ErrorMessage = "Select whether study enrolment is anonymous")]
-    public bool? AnonymousEnrolment { get; set; }
+    
+    [Display(Name = "Is this study recruiting identifiable participants?")]
+    [Required(ErrorMessage = "Select whether the study is recruiting identifiable participants")]
+    public bool? IsRecruitingIdentifiableParticipants { get; set; }
     
     public bool IsEditMode { get; set; }
 }

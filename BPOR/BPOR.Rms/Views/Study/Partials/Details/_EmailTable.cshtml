@@ -1,24 +1,80 @@
-<h2 class="govuk-heading-l">Emails sent</h2>
-<table class="govuk-table" style="width: 100%;">
-    
-    <thead class="govuk-table__head">
-    <tr class="govuk-table__row">
-        <th scope="col" class="govuk-table__header">Date/time sent</th>
-        <th scope="col" class="govuk-table__header">Email Template</th>
-        <th scope="col" class="govuk-table__header"># Volunteers Emailed</th>
-        <th scope="col" class="govuk-table__header"># Registered Interest</th>
-        <th scope="col" class="govuk-table__header">Bounced</th>
-    </tr>
-    </thead>
-    <tbody class="govuk-table__body">
-    <tr class="govuk-table__row">
-        <td class="govuk-table__cell">
-            19/02/2024, 09:00
-        </td>
-        <td class="govuk-table__cell">Enrolment Template</td>
-        <td class="govuk-table__cell">2,500</td>
-        <td class="govuk-table__cell">738</td>
-        <td class="govuk-table__cell">12</td>
-    </tr>
-    </tbody>
-</table>
+<style>
+    /* Base styles for all tags */
+    .govuk-tag {
+        border-radius: 3px;
+        text-align: center;
+        font-family: Lato, serif;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 24px;
+        font-feature-settings: 'clig' off, 'liga' off;
+        display: flex;
+        height: 23px;
+        padding: 5px 8px 4px 8px;
+        justify-content: center;
+        align-items: center;
+        align-self: stretch;
+    }
+
+    /* Specific styles for orange tag */
+    .govuk-tag--orange {
+        background: #FDEBD8;
+        color: #494949;
+    }
+
+    /* Specific styles for green tag */
+    .govuk-tag--green {
+        background: #388555;
+        color: #FFFFFF;
+    }
+</style>
+
+
+<div>
+    <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Emails sent</h2>
+    <table class="govuk-table" style="width: 100%;">
+
+        <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header ">Date/time sent</th>
+            <th scope="col" class="govuk-table__header ">Email Template</th>
+            <th scope="col" class="govuk-table__header ">Number Emailed</th>
+            <th scope="col" class="govuk-table__header ">Registered Interest</th>
+            <th scope="col" class="govuk-table__header ">Bounced</th>
+            <th scope="col" class="govuk-table__header ">Status</th>
+        </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">
+                19/02/2024, 09:00
+            </td>
+            <td class="govuk-table__cell">Recruitment Template</td>
+            <td class="govuk-table__cell">1,675 / 2,000</td>
+            <td class="govuk-table__cell">738</td>
+            <td class="govuk-table__cell">12</td>
+            <td class="govuk-table__cell">
+                <strong class="govuk-tag govuk-tag--orange">
+                    In progress
+                </strong>
+            </td>
+        </tr>
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">
+                19/02/2024, 09:00
+            </td>
+            <td class="govuk-table__cell">Recruitment Template</td>
+            <td class="govuk-table__cell">2,500</td>
+            <td class="govuk-table__cell">738</td>
+            <td class="govuk-table__cell">12</td>
+            <td class="govuk-table__cell">
+                <strong class="govuk-tag govuk-tag--green">
+                    Sent
+                </strong>
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+</div>

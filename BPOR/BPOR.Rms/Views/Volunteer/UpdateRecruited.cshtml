@@ -1,0 +1,43 @@
+@using BPOR.Rms.Views.ViewComponents
+@model BPOR.Rms.Models.Volunteer.UpdateRecruitedViewModel
+
+@await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+{
+    new("My Studies", "/Study/Index"),
+    new("Study", "/Study/Index"),
+    new("Update newly recruited volunteers", "/Study/Edit")
+})
+
+<h1 class="govuk-heading-xl">Update recruited volunteers</h1>
+<h4>
+    @Html.DisplayFor(model => model.StudyName)
+</h4>
+<p class="govuk-body">
+    Each volunteer will have been given a unique volunteer reference when they were contacted by Be Part of Research.
+</p>
+<p class="govuk-body">
+    Please enter your list of these numbers into the text area below. Each number should be on its own line.
+</p>
+<p class="govuk-body">
+    For example,
+    <br>9834342
+    <br>9374897
+    <br>3473874
+    <br>8347438
+</p>
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="VolunteerReferenceNumbers" class="govuk-label">
+        @Html.DisplayNameFor(model => model.VolunteerReferenceNumbers)
+    </label>
+    @if (Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0)
+    {
+        <span class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.VolunteerReferenceNumbers)
+        </span>
+    }
+    <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea @(Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" aria-describedby="@(Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0 ? "study-name-error" : "")"></textarea>
+</div>
+
+@Html.ActionLink("Submit volunteer numbers", "Details", "Study", new { id = Model.StudyId }, new { @class = "govuk-button" })

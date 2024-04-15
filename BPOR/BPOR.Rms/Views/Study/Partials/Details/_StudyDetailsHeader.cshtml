@@ -1,10 +1,14 @@
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 
-<div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;">
-    <h1 class="govuk-heading-l" style="margin: 0;">
-        @Html.DisplayFor(model => model.Study.StudyName)
-    </h1>
-    @Html.ActionLink("Find volunteers", "Index", "Filter", new { studyId = Model.Study.Id }, new { @class = "govuk-button", data_module = "govuk-button" })
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+        <h1 class="govuk-heading-l">
+            @Html.DisplayFor(model => model.Study.StudyName)
+        </h1>
+    </div>
+    <div class="govuk-grid-column-one-half right-align-buttons-desktop">
+        <div class="govuk-button-group govuk-!-margin-bottom-0">
+            @Html.ActionLink("Find volunteers", "Index", "Filter", new { studyId = Model.Study.Id }, new { @class = "govuk-button", data_module = "govuk-button" })
+        </div>
+    </div>
 </div>
-
-

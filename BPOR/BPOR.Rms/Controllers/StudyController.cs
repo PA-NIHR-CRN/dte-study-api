@@ -10,7 +10,14 @@ namespace BPOR.Rms.Controllers;
 
 public class StudyController(ParticipantDbContext context) : Controller
 {
-    public async Task<IActionResult> Index(string? searchTerm, int currentPage = 1)
+    
+    [HttpPost]
+    public IActionResult PerformSearch(string searchTerm, int currentPage = 1)
+    {
+        return RedirectToAction("Index", new { searchTerm, currentPage, hasSearched = true });
+    }
+    
+    public async Task<IActionResult> Index(string? searchTerm, int currentPage = 1, bool hasSearched = false,bool hasBeenReset = false)
     {
         var pageSize = 9;
         var studiesQuery = context.Studies.AsQueryable();
@@ -36,8 +43,9 @@ public class StudyController(ParticipantDbContext context) : Controller
             Studies = paginatedStudies.Items,
             CurrentPage = currentPage,
             TotalPages = (int)Math.Ceiling((double)paginatedStudies.TotalCount / pageSize),
-            HasSearched = !string.IsNullOrEmpty(searchTerm),
+            HasSearched =hasSearched,
             SearchTerm = searchTerm ?? string.Empty,
+            HasBeenReset = hasBeenReset,
         };
 
         return View(viewModel);
@@ -75,6 +83,9 @@ public class StudyController(ParticipantDbContext context) : Controller
     // GET: Study/Create
     public IActionResult Create()
     {
+        ViewData["ShowBackLink"] = true;
+        ViewData["ShowProgressBar"] = true;
+        ViewData["ProgressPercentage"] = 0;
         return View(new StudyFormViewModel());
     }
 
@@ -84,18 +95,22 @@ public class StudyController(ParticipantDbContext context) : Controller
     [HttpPost]
     // [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-        [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,AnonymousEnrolment,Step")]
+        [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,IsRecruitingIdentifiableParticipants,Step")]
         StudyFormViewModel model, string action)
     {
+        ViewData["ShowBackLink"] = true;
+        ViewData["ShowProgressBar"] = true;
+        ViewData["ProgressPercentage"] = (model.Step - 1) * 50;
         if (action == "Next" && model.Step == 1)
         {
             ModelState.Remove("StudyName");
-            ModelState.Remove("AnonymousEnrolment");
+            ModelState.Remove("IsRecruitingIdentifiableParticipants");
             ModelState.Remove("CpmsId");
 
             if (ModelState.IsValid)
             {
                 model.Step = 2;
+                ViewData["ProgressPercentage"] = (model.Step - 1) * 50;
                 return View(model);
             }
         }
@@ -109,7 +124,7 @@ public class StudyController(ParticipantDbContext context) : Controller
                     EmailAddress = model.EmailAddress,
                     StudyName = model.StudyName,
                     CpmsId = model.CpmsId,
-                    IsAnonymous = model.AnonymousEnrolment ?? false,
+                    IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false,
                     IsDeleted = false,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
@@ -182,7 +197,7 @@ public class StudyController(ParticipantDbContext context) : Controller
             return NotFound();
         }
 
-        ModelState.Remove("AnonymousEnrolment");
+        ModelState.Remove("IsRecruitingIdentifiableParticipants");
 
         if (ModelState.IsValid)
         {
@@ -214,6 +229,13 @@ public class StudyController(ParticipantDbContext context) : Controller
                     throw;
                 }
             }
+
+            TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
+            {
+                IsSuccess = true,
+                Heading = "Study details updated",
+                Body = $"{model.StudyName} has been successfully updated",
+            });
 
             return RedirectToAction(nameof(Details), new { id = model.Id });
         }

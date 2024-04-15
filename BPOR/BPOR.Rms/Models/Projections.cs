@@ -28,6 +28,7 @@ public static class Projections
                 EmailAddress = s.EmailAddress,
                 StudyName = s.StudyName,
                 CpmsId = s.CpmsId,
+                IsRecruitingIdentifiableParticipants = s.IsRecruitingIdentifiableParticipants,
             },
         };
     }

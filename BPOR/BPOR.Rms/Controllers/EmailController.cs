@@ -13,24 +13,15 @@ public class EmailController : Controller
     [HttpPost]
     public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
-        if (ModelState.IsValid)
-        {
-            // Do something
-
-            return RedirectToAction("EmailSuccess", new EmailSuccessViewModel
-            {
-                Id = 1,
-                StudyName = model.StudyName
-            });
+        return View(model);
         }
-
-        return RedirectToAction("EmailSuccess", new EmailSuccessViewModel
+    [HttpPost]
+    public IActionResult SendEmail(SetupCampaignViewModel model)
         {
-            Id = 1,
-            StudyName = model.StudyName
-        });
+        return RedirectToAction("EmailSuccess", model);
     }
 
+    
     public Task<IActionResult> EmailSuccess(EmailSuccessViewModel model)
     {
         return Task.FromResult<IActionResult>(View(model));
