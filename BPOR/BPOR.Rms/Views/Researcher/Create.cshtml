@@ -9,14 +9,14 @@
 }
 
 @section ProgressBar {
-    @await Html.PartialAsync("../Shared/Partials/_ProgressBar", Model)
+    @await Html.PartialAsync("Partials/_ProgressBar", Model)
 }
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
         <h1 class="govuk-heading-xl">Add a study to use the Be Part of Research registry</h1>
 
-        @await Html.PartialAsync("../Shared/Partials/_ErrorSummary", Model)
+        @await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
         <form asp-action="Create">
             <input type="hidden" asp-for="Step" value="@Model.Step"/>
@@ -48,7 +48,7 @@
             @* </div> *@
             
 
-            @await Html.PartialAsync("../Shared/Partials/_CreateButtonGroup", Model)
+            @await Html.PartialAsync("Partials/_CreateButtonGroup", Model)
         </form>
 
     </div>

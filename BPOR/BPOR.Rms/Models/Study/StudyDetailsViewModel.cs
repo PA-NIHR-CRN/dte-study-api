@@ -5,7 +5,7 @@ namespace BPOR.Rms.Models.Study;
 public class StudyDetailsViewModel
 {
     public StudyModel Study { get; set; }
-    public string AnonymousEnrolmentDisplay => Study.AnonymousEnrolment ? "Yes" : "No";
+    public string IsRecruitingIdentifiableParticipantsDisplay => Study.IsRecruitingIdentifiableParticipants ? "Yes" : "No";
     public NotificationBannerModel Notification { get; set; }
 }
 

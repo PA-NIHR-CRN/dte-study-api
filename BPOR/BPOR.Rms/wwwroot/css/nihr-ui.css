@@ -250,7 +250,7 @@ body {
     align-items: center;
 }
 
-@media screen and (min-width: 709px) {
+@media screen and (min-width: 641px) {
     .right-align-buttons-desktop {
         display: flex;
         justify-content: flex-end;

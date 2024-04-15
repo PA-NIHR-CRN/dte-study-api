@@ -17,30 +17,30 @@
 
 @if (!Model.IsEditMode)
 {
-    <div class="govuk-form-group @(Html.ViewData.ModelState["AnonymousEnrolment"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <div class="govuk-form-group @(Html.ViewData.ModelState["IsRecruitingIdentifiableParticipants"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
         <fieldset class="govuk-fieldset">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
                 <h2 class="govuk-label">
-                    @Html.DisplayNameFor(model => model.AnonymousEnrolment)
+                    @Html.DisplayNameFor(model => model.IsRecruitingIdentifiableParticipants)
                 </h2>
             </legend>
-            @if (Html.ViewData.ModelState["AnonymousEnrolment"]?.Errors.Count > 0)
+            @if (Html.ViewData.ModelState["IsRecruitingIdentifiableParticipants"]?.Errors.Count > 0)
             {
                 <span id="anonymous-enrolment-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
-                    @Html.ValidationMessageFor(model => model.AnonymousEnrolment)
+                    @Html.ValidationMessageFor(model => model.IsRecruitingIdentifiableParticipants)
                 </span>
             }
             <div class="govuk-radios" data-module="govuk-radios">
                 <div class="govuk-radios__item">
-                    <input asp-for="AnonymousEnrolment" class="govuk-radios__input" id="AnonymousEnrolment_Yes" value="true" type="radio">
-                    <label class="govuk-label govuk-radios__label" for="AnonymousEnrolment_Yes">
+                    <input asp-for="IsRecruitingIdentifiableParticipants" class="govuk-radios__input" id="IsRecruitingIdentifiableParticipants_Yes" value="true" type="radio">
+                    <label class="govuk-label govuk-radios__label" for="IsRecruitingIdentifiableParticipants_Yes">
                         Yes
                     </label>
                 </div>
                 <div class="govuk-radios__item">
-                    <input asp-for="AnonymousEnrolment" class="govuk-radios__input" id="AnonymousEnrolment_No" value="false" type="radio">
-                    <label class="govuk-label govuk-radios__label" for="AnonymousEnrolment_No">
+                    <input asp-for="IsRecruitingIdentifiableParticipants" class="govuk-radios__input" id="IsRecruitingIdentifiableParticipants_No" value="false" type="radio">
+                    <label class="govuk-label govuk-radios__label" for="IsRecruitingIdentifiableParticipants_No">
                         No
                     </label>
                 </div>

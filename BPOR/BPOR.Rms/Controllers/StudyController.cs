@@ -96,21 +96,22 @@ public class StudyController(ParticipantDbContext context) : Controller
     [HttpPost]
     // [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-        [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,AnonymousEnrolment,Step")]
+        [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,IsRecruitingIdentifiableParticipants,Step")]
         StudyFormViewModel model, string action)
     {
+        ViewData["ShowBackLink"] = true;
+        ViewData["ShowProgressBar"] = true;
+        ViewData["ProgressPercentage"] = (model.Step - 1) * 50;
         if (action == "Next" && model.Step == 1)
         {
             ModelState.Remove("StudyName");
-            ModelState.Remove("AnonymousEnrolment");
+            ModelState.Remove("IsRecruitingIdentifiableParticipants");
             ModelState.Remove("CpmsId");
 
             if (ModelState.IsValid)
             {
                 model.Step = 2;
-                ViewData["ShowBackLink"] = true;
-                ViewData["ShowProgressBar"] = true;
-                ViewData["ProgressPercentage"] = model.Step * 50;
+                ViewData["ProgressPercentage"] = (model.Step - 1) * 50;
                 return View(model);
             }
         }
@@ -124,7 +125,7 @@ public class StudyController(ParticipantDbContext context) : Controller
                     EmailAddress = model.EmailAddress,
                     StudyName = model.StudyName,
                     CpmsId = model.CpmsId,
-                    IsAnonymous = model.AnonymousEnrolment ?? false,
+                    IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false,
                     IsDeleted = false,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
@@ -140,9 +141,6 @@ public class StudyController(ParticipantDbContext context) : Controller
                 });
             }
 
-            ViewData["ShowBackLink"] = true;
-            ViewData["ShowProgressBar"] = true;
-            ViewData["ProgressPercentage"] = model.Step * 50;
             return View(model);
         }
 
@@ -200,7 +198,7 @@ public class StudyController(ParticipantDbContext context) : Controller
             return NotFound();
         }
 
-        ModelState.Remove("AnonymousEnrolment");
+        ModelState.Remove("IsRecruitingIdentifiableParticipants");
 
         if (ModelState.IsValid)
         {

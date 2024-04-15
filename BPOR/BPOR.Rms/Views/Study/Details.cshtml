@@ -11,10 +11,12 @@
     new("All Studies", "/Study/Index"),
     new("Study", "/Study/Index")
 })
-
 @await Html.PartialAsync("Partials/Details/_StudyDetailsHeader", Model)
-@await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
-@await Html.PartialAsync("Partials/Details/_StudyStatistics", Model)
-@await Html.PartialAsync("Partials/Details/_EmailTable", Model)
-@await Html.PartialAsync("Partials/Details/_VolunteerTable", Model)
-@await Html.PartialAsync("Partials/Details/_StudyDetails", Model)
+<div style="display:flex;gap: 40px; flex-direction: column; width: 100%">
+
+    @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
+    @await Html.PartialAsync("Partials/Details/_StudyStatistics", Model)
+    @await Html.PartialAsync("Partials/Details/_EmailTable", Model)
+    @await Html.PartialAsync("Partials/Details/_VolunteerTable", Model)
+    @await Html.PartialAsync("Partials/Details/_StudyDetails", Model)
+</div>

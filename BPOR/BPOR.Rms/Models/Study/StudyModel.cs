@@ -22,5 +22,5 @@ public class StudyModel
     [Display(Name = "CPMS ID")] public long? CpmsId { get; set; }
 
     [Display(Name = "Is this study recruiting identifiable participants?")]
-    public bool AnonymousEnrolment { get; set; }
+    public bool IsRecruitingIdentifiableParticipants { get; set; }
 }

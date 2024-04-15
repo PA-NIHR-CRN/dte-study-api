@@ -27,7 +27,7 @@ public class StudyFormViewModel
     
     [Display(Name = "Is this study recruiting identifiable participants?")]
     [Required(ErrorMessage = "Select whether the study is recruiting identifiable participants")]
-    public bool? AnonymousEnrolment { get; set; }
+    public bool? IsRecruitingIdentifiableParticipants { get; set; }
     
     public bool IsEditMode { get; set; }
 }
