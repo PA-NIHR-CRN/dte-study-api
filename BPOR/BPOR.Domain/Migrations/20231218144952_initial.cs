@@ -4,58 +4,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
-namespace BPOR.Domain.Migrations
+namespace Dynamo.Stream.Handler.Migrations
 {
-    /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Studies",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    FullName = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    EmailAddress = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    StudyName = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CpmsId = table.Column<long>(type: "bigint", nullable: true),
-                    IsAnonymous = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Studies", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "SysConfiguration",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Value = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SysConfiguration", x => x.Id);
-                })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
@@ -64,9 +19,9 @@ namespace BPOR.Domain.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Code = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                    Code = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
@@ -82,9 +37,9 @@ namespace BPOR.Domain.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Code = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                    Code = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
@@ -100,9 +55,9 @@ namespace BPOR.Domain.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Code = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                    Code = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
@@ -118,9 +73,9 @@ namespace BPOR.Domain.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Code = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                    Code = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
@@ -136,9 +91,9 @@ namespace BPOR.Domain.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Code = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                    Code = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
@@ -154,30 +109,29 @@ namespace BPOR.Domain.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    FirstName = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    FirstName = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    LastName = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    LastName = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     RegistrationConsent = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     RegistrationConsentAtUtc = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    Stage2CompleteUtc = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Email = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    Email = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    EthnicBackground = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    EthnicBackground = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    EthnicGroup = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    EthnicGroup = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DateOfBirth = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     RemovalOfConsentRegistrationAtUtc = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     HasLongTermCondition = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     GenderIsSameAsSexRegisteredAtBirth = table.Column<bool>(type: "tinyint(1)", nullable: true),
-                    MobileNumber = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    MobileNumber = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    LandlineNumber = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    LandlineNumber = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    NHSNumber = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    NHSNumber = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     DailyLifeImpactId = table.Column<int>(type: "int", nullable: true),
@@ -211,20 +165,19 @@ namespace BPOR.Domain.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    AddressLine1 = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    AddressLine1 = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    AddressLine2 = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    AddressLine2 = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    AddressLine3 = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    AddressLine3 = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    AddressLine4 = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    AddressLine4 = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Town = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    Town = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Postcode = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    Postcode = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ParticipantId = table.Column<int>(type: "int", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    ParticipantId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -277,7 +230,9 @@ namespace BPOR.Domain.Migrations
                     ParticipantId = table.Column<int>(type: "int", nullable: false),
                     Value = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     IdentifierTypeId = table.Column<int>(type: "int", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Pk = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -296,33 +251,6 @@ namespace BPOR.Domain.Migrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "SourceReference",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Pk = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    ParticipantId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SourceReference", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SourceReference_Participants_ParticipantId",
-                        column: x => x.ParticipantId,
-                        principalTable: "Participants",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.InsertData(
-                table: "SysConfiguration",
-                columns: new[] { "Id", "Name", "Value" },
-                values: new object[] { 1, "IsInMaintenanceMode", "False" });
 
             migrationBuilder.InsertData(
                 table: "SysRefCommunicationLanguage",
@@ -873,7 +801,14 @@ namespace BPOR.Domain.Migrations
                     { 512, "Addison's disease", "Addison's disease", false },
                     { 513, "Agoraphobia", "Agoraphobia", false },
                     { 514, "Albinism", "Albinism", false },
-                    { 515, "Alcohol misuse", "Alcohol misuse", false },
+                    { 515, "Alcohol misuse", "Alcohol misuse", false }
+                });
+
+            migrationBuilder.InsertData(
+                table: "SysRefHealthCondition",
+                columns: new[] { "Id", "Code", "Description", "IsDeleted" },
+                values: new object[,]
+                {
                     { 516, "Alcohol-related liver disease", "Alcohol-related liver disease", false },
                     { 517, "Liver disease (alcohol-related)", "Liver disease (alcohol-related)", false },
                     { 518, "Allergic rhinitis", "Allergic rhinitis", false },
@@ -1397,7 +1332,14 @@ namespace BPOR.Domain.Migrations
                     { 1036, "Tay-Sachs disease", "Tay-Sachs disease", false },
                     { 1037, "Teeth grinding (bruxism)", "Teeth grinding (bruxism)", false },
                     { 1038, "Bruxism", "Bruxism", false },
-                    { 1039, "Tendonitis", "Tendonitis", false },
+                    { 1039, "Tendonitis", "Tendonitis", false }
+                });
+
+            migrationBuilder.InsertData(
+                table: "SysRefHealthCondition",
+                columns: new[] { "Id", "Code", "Description", "IsDeleted" },
+                values: new object[,]
+                {
                     { 1040, "Tennis elbow", "Tennis elbow", false },
                     { 1041, "Testicle lumps and swellings", "Testicle lumps and swellings", false },
                     { 1042, "Testicular cancer", "Testicular cancer", false },
@@ -1647,14 +1589,8 @@ namespace BPOR.Domain.Migrations
                 name: "IX_Participants_GenderId",
                 table: "Participants",
                 column: "GenderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SourceReference_ParticipantId",
-                table: "SourceReference",
-                column: "ParticipantId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
@@ -1667,22 +1603,13 @@ namespace BPOR.Domain.Migrations
                 name: "ParticipantIdentifiers");
 
             migrationBuilder.DropTable(
-                name: "SourceReference");
-
-            migrationBuilder.DropTable(
-                name: "Studies");
-
-            migrationBuilder.DropTable(
-                name: "SysConfiguration");
-
-            migrationBuilder.DropTable(
                 name: "SysRefHealthCondition");
 
             migrationBuilder.DropTable(
-                name: "SysRefIdentifierType");
+                name: "Participants");
 
             migrationBuilder.DropTable(
-                name: "Participants");
+                name: "SysRefIdentifierType");
 
             migrationBuilder.DropTable(
                 name: "SysRefCommunicationLanguage");

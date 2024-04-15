@@ -13,7 +13,7 @@
 })
 
 @await Html.PartialAsync("Partials/Details/_StudyDetailsHeader", Model)
-@await Html.PartialAsync("../Shared/_NotificationBanner", Model.Notification)
+@await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
 @await Html.PartialAsync("Partials/Details/_StudyStatistics", Model)
 @await Html.PartialAsync("Partials/Details/_EmailTable", Model)
 @await Html.PartialAsync("Partials/Details/_VolunteerTable", Model)
