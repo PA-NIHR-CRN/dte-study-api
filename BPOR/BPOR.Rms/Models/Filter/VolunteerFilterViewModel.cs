@@ -11,7 +11,7 @@ public class VolunteerFilterViewModel
 {
     // Study selection
     [Display(Name = "Select a study (if applicable) you want to find volunteers for")]
-    public int? SelectedStudy { get; set; }
+    public SelectListItem? SelectedStudy { get; set; }
 
     public IEnumerable<SelectListItem>? Studies { get; set; }
     [Display(Name = "Volunteers contacted")]
@@ -52,8 +52,9 @@ public class VolunteerFilterViewModel
     public bool IncludeRecruited { get; set; }
 
     // Areas of research volunteers are interested in
-    //public string SelectedLocation { get; set; }
-    //public IEnumerable<SelectListItem> Locations { get; set; }
+    [Display(Name = "Areas of research volunteers are interested in")]
+    public SelectListItem? SelectedLocation { get; set; }
+    public IEnumerable<SelectListItem>? Locations { get; set; }
 
     // Date of volunteer registration
     // From Date
@@ -83,7 +84,9 @@ public class VolunteerFilterViewModel
     public int? RegistrationToDateYear { get; set; }
 
     // Postcode districts and Full postcode
-    //public string PostcodeDistricts { get; set; }
+    [Display(Name = "Postcode districts")]
+    public string? PostcodeDistricts { get; set; }
+
     [Display(Name = "Full postcode")]
     [UKPostcode(ErrorMessage = "Enter a full UK postcode")]
     public string? FullPostcode { get; set; }

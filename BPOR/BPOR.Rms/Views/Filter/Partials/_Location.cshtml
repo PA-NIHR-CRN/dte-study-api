@@ -4,15 +4,13 @@
 
 <div class="govuk-form-group">
     <h3 class="govuk-label-wrapper">
-        <label class="govuk-label govuk-label--l" for="txtPostcodeDistricts">
-            Postcode districts
-        </label>
+        @Html.LabelFor(m => Model.PostcodeDistricts, new { @class = "govuk-label govuk-label--l" })
     </h3>
     <div id="event-name-hint" class="govuk-hint">
         Enter one or more postcode districts separated by commas.
         For example: SW1A, WC2B, EC1V.
     </div>
-    <input class="govuk-input" id="txtPostcodeDistricts" name="txtPostcodeDistricts" type="text">
+    <input asp-for="PostcodeDistricts" class="govuk-input" type="text" />
 </div>
 
 <h3 class="govuk-heading-m">OR</h3>

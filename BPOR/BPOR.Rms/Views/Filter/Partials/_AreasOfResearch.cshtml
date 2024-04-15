@@ -1,22 +1,11 @@
+@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+
 <div class="govuk-form-group">
-    <label class="govuk-label govuk-label--l" for="location">
-        Areas of research volunteers are interested in
-    </label>
+    @Html.LabelFor(m => Model.SelectedLocation, new { @class = "govuk-label govuk-label--l" })
     <div id="location-hint" class="govuk-hint">
         <p>Leave blank to include all volunteers and those who have not specified any areas of research. Enter one or more areas of research to refine by interests.</p>
 
         <p>If you are using a keyboard to navigate, you will need to use the tab key to move through the options in the drop-down list on this section. Use the escape key to close the list.</p>
     </div>
-    <select class="govuk-select" id="location" name="location" aria-describedby="location-hint">
-        <option value="choose" selected>Choose location</option>
-        <option value="eastmidlands">East Midlands</option>
-        <option value="eastofengland">East of England</option>
-        <option value="london">London</option>
-        <option value="northeast">North East</option>
-        <option value="northwest">North West</option>
-        <option value="southeast">South East</option>
-        <option value="southwest">South West</option>
-        <option value="westmidlands">West Midlands</option>
-        <option value="yorkshire">Yorkshire and the Humber</option>
-    </select>
+    @Html.DropDownListFor(m => m.SelectedLocation, Model.Locations, "Choose location", new { @class = "govuk-select" })
 </div>

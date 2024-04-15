@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace BPOR.Rms.Controllers;
 
@@ -17,8 +18,25 @@ public class FilterController(ParticipantDbContext context) : Controller
     {
         SetStudiesSelectList(model);
         SetStudyExclusionFilters(model);
+        SetLocationsSelectList(model);
 
         return View(model);
+    }
+
+    private void SetLocationsSelectList(VolunteerFilterViewModel model)
+    {
+        model.Locations = new List<SelectListItem>
+        {
+            new SelectListItem{ Value = "1", Text = "East Midlands", Selected = false },
+            new SelectListItem{ Value = "2", Text = "East of England", Selected = false },
+            new SelectListItem{ Value = "3", Text = "London", Selected = false },
+            new SelectListItem{ Value = "4", Text = "North East", Selected = false },
+            new SelectListItem{ Value = "5", Text = "North West", Selected = false },
+            new SelectListItem{ Value = "6", Text = "South East", Selected = false },
+            new SelectListItem{ Value = "7", Text = "South West", Selected = false },
+            new SelectListItem{ Value = "8", Text = "West Midlands", Selected = false },
+            new SelectListItem{ Value = "9", Text = "Yorkshire and the Humber", Selected = false }
+        };
     }
 
     private void SetStudyExclusionFilters(VolunteerFilterViewModel model)
@@ -114,6 +132,7 @@ public class FilterController(ParticipantDbContext context) : Controller
     {
         ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth, model.RegistrationFromDateYear,
                                      model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
+        ValidatePostcodeDistricts(model.PostcodeDistricts);
         ValidateAge(model.AgeFrom, model.AgeTo);
 
         if (ModelState.IsValid)
@@ -145,10 +164,32 @@ public class FilterController(ParticipantDbContext context) : Controller
             SetStudiesSelectList(model);
         }
 
+        if (model.SelectedLocation == null)
+        {
+            SetLocationsSelectList(model);
+        }
+
         SetStudyExclusionFilters(model);
 
 
         return View("Index", model);
+    }
+
+    private void ValidatePostcodeDistricts(string? postcodeDistricts)
+    {
+        if (!String.IsNullOrEmpty(postcodeDistricts))
+        {
+            List<string> PostcodeDistrictsList = postcodeDistricts.Split(",").ToList();
+            string pattern = @"^[A-Za-z]{1,2}[0-9][A-Za-z]?$";
+
+            foreach (var item in PostcodeDistrictsList)
+            {           
+                if (!Regex.IsMatch(item.Trim(), pattern))
+                {
+                    ModelState.AddModelError("PostcodeDistricts", "Enter a UK postcode district in the correct format, like PO15 or LS1");
+                }
+            }
+        }
     }
 
     private void ValidateAge(int? ageFrom, int? ageTo)
