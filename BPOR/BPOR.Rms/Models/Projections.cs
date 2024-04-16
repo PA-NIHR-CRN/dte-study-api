@@ -5,6 +5,8 @@ namespace BPOR.Rms.Models;
 
 public static class Projections
 {
+    public static IQueryable<StudyModel> AsStudyListModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyListModel());
+
     public static Expression<Func<Domain.Entities.Study, StudyModel>> StudyAsStudyListModel()
     {
         return s => new StudyModel

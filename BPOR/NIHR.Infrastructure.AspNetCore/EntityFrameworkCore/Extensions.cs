@@ -1,0 +1,21 @@
+﻿using BPOR.Rms.Startup;
+using Microsoft.EntityFrameworkCore;
+using NIHR.Infrastructure.EntityFrameworkCore.Paging;
+using NIHR.Infrastructure.Paging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NIHR.Infrastructure.EntityFrameworkCore.Paging
+{
+    public static class Extensions
+    {
+        public static PageDeferred<T> DeferredPage<T>(this IOrderedQueryable<T> source, IPaginationService paginationService) => source.DeferredPage(paginationService.PageSize, paginationService.Page);
+
+        public static Page<T> Page<T>(this IOrderedQueryable<T> source, IPaginationService paginationService) => source.Page(paginationService.PageSize, paginationService.Page);
+
+        public static async Task<Page<T>> PageAsync<T>(this IOrderedQueryable<T> source, IPaginationService paginationService, CancellationToken token = default) => await source.PageAsync(paginationService.PageSize, paginationService.Page, token);
+    }
+}

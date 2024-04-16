@@ -1,6 +1,7 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Extensions;
 using NIHR.Infrastructure.Interfaces;
@@ -25,6 +26,7 @@ public static class DependencyInjection
         });
 
         services.AddDistributedMemoryCache();
+        services.AddPaging();
 
         // TODO this could be reusable
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
