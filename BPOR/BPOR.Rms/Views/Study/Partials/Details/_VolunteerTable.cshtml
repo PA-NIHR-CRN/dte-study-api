@@ -10,7 +10,7 @@
     </div>
     <div class="govuk-grid-column-one-half right-align-buttons-desktop">
         <div class="govuk-button-group govuk-!-margin-bottom-0">
-            @if (Model.Study.IsRecruitingIdentifiableParticipants)
+            @if (!Model.Study.IsRecruitingIdentifiableParticipants)
             {
                 @Html.ActionLink("Update recruitment total", "UpdateAnonymousRecruited", "Volunteer", new { id = Model.Study.Id }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
             }

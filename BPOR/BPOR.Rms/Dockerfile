@@ -15,6 +15,9 @@ COPY "BPOR/NIHR.Infrastructure" "NIHR.Infrastructure"
 COPY "BPOR/BPOR.Infrastructure" "BPOR.Infrastructure"
 COPY "BPOR/BPOR.Domain" "BPOR.Domain"
 COPY "BPOR/BPOR.Rms" "BPOR.Rms"
+COPY "BPOR/NIHR.Infrastructure.EntityFrameworkCore" "NIHR.Infrastructure.EntityFrameworkCore"
+COPY "BPOR/NIHR.Infrastructure.EntityFrameworkCore.MySql" "NIHR.Infrastructure.EntityFrameworkCore.MySql"
+
 WORKDIR "/src/BPOR.Rms"
 RUN dotnet build "BPOR.Rms.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

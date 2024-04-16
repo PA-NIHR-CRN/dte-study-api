@@ -9,6 +9,10 @@
     <ItemGroup>
         <PackageReference Include="Dte.Common" Version="1.7.7" />
         <PackageReference Include="libphonenumber-csharp" Version="8.13.32" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     </ItemGroup>
 
