@@ -9,18 +9,18 @@ public class EmailController : Controller
     {
         return Task.FromResult<IActionResult>(View());
     }
-    
+
     [HttpPost]
     public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
         return View(model);
-    }
+        }
     [HttpPost]
     public IActionResult SendEmail(SetupCampaignViewModel model)
-    {
+        {
         return RedirectToAction("EmailSuccess", model);
     }
-    
+
     
     public Task<IActionResult> EmailSuccess(EmailSuccessViewModel model)
     {

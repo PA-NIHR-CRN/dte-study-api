@@ -1,6 +1,7 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Extensions;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Services;

@@ -1,10 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using NIHR.Infrastructure.Extensions;
-using NIHR.Infrastructure.Settings;
+using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 
@@ -12,6 +9,7 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
 {
     public ParticipantDbContext CreateDbContext(string[] args)
     {
+        // TODO: make this more consistent. Base factory in NIHR.Infrastructure.EntityFrameworkCore.
         IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.user.json", optional: true)

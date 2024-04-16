@@ -5,7 +5,6 @@ using BPOR.Rms.Models.Study;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using NIHR.Infrastructure.Interfaces;
 
 namespace BPOR.Rms.Controllers;
 
@@ -45,7 +44,7 @@ public class StudyController(ParticipantDbContext context) : Controller
             CurrentPage = currentPage,
             TotalPages = (int)Math.Ceiling((double)paginatedStudies.TotalCount / pageSize),
             HasSearched =hasSearched,
-            SearchTerm = searchTerm,
+            SearchTerm = searchTerm ?? string.Empty,
             HasBeenReset = hasBeenReset,
         };
 
@@ -75,7 +74,7 @@ public class StudyController(ParticipantDbContext context) : Controller
         if (TempData["Notification"] != null)
         {
             study.Notification =
-                JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"].ToString());
+                JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
         }
 
         return View(study);
@@ -230,7 +229,7 @@ public class StudyController(ParticipantDbContext context) : Controller
                     throw;
                 }
             }
-            
+
             TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
             {
                 IsSuccess = true,

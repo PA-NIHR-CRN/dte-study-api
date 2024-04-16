@@ -10,11 +10,11 @@ namespace NIHR.Infrastructure.Exceptions
         {
         }
 
-        public MaintenanceModeException(string? message) : base(message)
+        public MaintenanceModeException(string message) : base(message)
         {
         }
 
-        public MaintenanceModeException(string? message, Exception? innerException) : base(message, innerException)
+        public MaintenanceModeException(string message, Exception innerException) : base(message, innerException)
         {
         }
 

@@ -1,16 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Registration.Api", "BPOR.Registration.Api\BPOR.Registration.Api.csproj", "{51271F93-49F8-4A0B-8FAD-7911D81A0D70}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Registration.Api", "BPOR.Registration.Api\BPOR.Registration.Api.csproj", "{51271F93-49F8-4A0B-8FAD-7911D81A0D70}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Rms", "BPOR.Rms\BPOR.Rms.csproj", "{A369E709-3D8A-4F5F-8740-231DD890B949}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms", "BPOR.Rms\BPOR.Rms.csproj", "{A369E709-3D8A-4F5F-8740-231DD890B949}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Registration.Stream.Handler", "BPOR.Registration.Stream.Handler\src\BPOR.Registration.Stream.Handler\BPOR.Registration.Stream.Handler.csproj", "{CEF9BD95-2830-4833-B4A4-4B9401D55D2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Registration.Stream.Handler", "BPOR.Registration.Stream.Handler\src\BPOR.Registration.Stream.Handler\BPOR.Registration.Stream.Handler.csproj", "{CEF9BD95-2830-4833-B4A4-4B9401D55D2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Domain", "BPOR.Domain\BPOR.Domain.csproj", "{CF2BA9F4-300F-42F0-B47B-53612A3F3F50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Domain", "BPOR.Domain\BPOR.Domain.csproj", "{CF2BA9F4-300F-42F0-B47B-53612A3F3F50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Infrastructure", "BPOR.Infrastructure\BPOR.Infrastructure.csproj", "{523924DA-D2CF-43A6-BD96-10D6B1BE60A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Infrastructure", "BPOR.Infrastructure\BPOR.Infrastructure.csproj", "{523924DA-D2CF-43A6-BD96-10D6B1BE60A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.Infrastructure", "NIHR.Infrastructure\NIHR.Infrastructure.csproj", "{47722999-18CC-4C9D-8F65-B490EE8DB7D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.Infrastructure", "NIHR.Infrastructure\NIHR.Infrastructure.csproj", "{47722999-18CC-4C9D-8F65-B490EE8DB7D0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.Infrastructure.EntityFrameworkCore", "NIHR.Infrastructure.EntityFrameworkCore\NIHR.Infrastructure.EntityFrameworkCore.csproj", "{8825FB07-F7E1-48D5-9582-446A7ED30166}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.Infrastructure.EntityFrameworkCore.MySql", "NIHR.Infrastructure.EntityFrameworkCore.MySql\NIHR.Infrastructure.EntityFrameworkCore.MySql.csproj", "{614FF64A-2087-4A1C-8B23-BF44B7EF084A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +49,19 @@ Global
 		{47722999-18CC-4C9D-8F65-B490EE8DB7D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47722999-18CC-4C9D-8F65-B490EE8DB7D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47722999-18CC-4C9D-8F65-B490EE8DB7D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8825FB07-F7E1-48D5-9582-446A7ED30166}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8825FB07-F7E1-48D5-9582-446A7ED30166}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8825FB07-F7E1-48D5-9582-446A7ED30166}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8825FB07-F7E1-48D5-9582-446A7ED30166}.Release|Any CPU.Build.0 = Release|Any CPU
+		{614FF64A-2087-4A1C-8B23-BF44B7EF084A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{614FF64A-2087-4A1C-8B23-BF44B7EF084A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{614FF64A-2087-4A1C-8B23-BF44B7EF084A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{614FF64A-2087-4A1C-8B23-BF44B7EF084A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4E45AB36-07F2-4CE9-8685-CFE1BBD4AC3E}
 	EndGlobalSection
 EndGlobal
