@@ -1,11 +1,11 @@
 @model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
 
 <div class="govuk-form-group">
-    @Html.LabelFor(m => Model.SelectedLocation, new { @class = "govuk-label govuk-label--l" })
+    @Html.LabelFor(m => Model.SelectedLocations, new { @class = "govuk-label govuk-label--l" })
     <div id="location-hint" class="govuk-hint">
         <p>Leave blank to include all volunteers and those who have not specified any areas of research. Enter one or more areas of research to refine by interests.</p>
 
         <p>If you are using a keyboard to navigate, you will need to use the tab key to move through the options in the drop-down list on this section. Use the escape key to close the list.</p>
     </div>
-    @Html.DropDownListFor(m => m.SelectedLocation, Model.Locations, "Choose location", new { @class = "govuk-select" })
+    @Html.ListBoxFor(m => m.SelectedLocations, new MultiSelectList(Model.Locations, "Value", "Text"), new { @class = "govuk-multi-select", multiple = "multiple" })
 </div>

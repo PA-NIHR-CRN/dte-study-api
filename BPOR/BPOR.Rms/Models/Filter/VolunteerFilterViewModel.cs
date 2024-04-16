@@ -53,7 +53,7 @@ public class VolunteerFilterViewModel
 
     // Areas of research volunteers are interested in
     [Display(Name = "Areas of research volunteers are interested in")]
-    public SelectListItem? SelectedLocation { get; set; }
+    public List<string>? SelectedLocations { get; set; }
     public IEnumerable<SelectListItem>? Locations { get; set; }
 
     // Date of volunteer registration

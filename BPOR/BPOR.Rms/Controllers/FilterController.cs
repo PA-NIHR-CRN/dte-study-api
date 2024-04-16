@@ -164,10 +164,7 @@ public class FilterController(ParticipantDbContext context) : Controller
             SetStudiesSelectList(model);
         }
 
-        if (model.SelectedLocation == null)
-        {
-            SetLocationsSelectList(model);
-        }
+        SetLocationsSelectList(model);
 
         SetStudyExclusionFilters(model);
 
