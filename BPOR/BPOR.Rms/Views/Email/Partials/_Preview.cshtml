@@ -1,14 +1,47 @@
 @model BPOR.Rms.Models.Email.SetupCampaignViewModel
 
-<div class="govuk-form-group">
-    <h1 class="govuk-label-wrapper">
-        <label class="govuk-label govuk-label--l" for="preview-email">
-            @Html.DisplayNameFor(modelItem => modelItem.PreviewEmails)
-        </label>
-    </h1>
-    <div id="preview-email-hint" class="govuk-hint">
-        Specify the email address(s) you want any preview emails to be delivered to. These should be comma separated. For example, user@email.com, user2@email.com
+<style>
+    /* Mobile devices */
+    @@media (max-width: 640px) {
+        .govuk-input {
+            width: 100%; 
+            margin-bottom: 10px;
+        }
+    }
+
+    /* Desktop and larger devices - more than 641 */
+    @@media screen and (min-width: 641px) {
+        .govuk-input {
+            width: 70%; 
+        }
+    }
+</style>
+
+<form class="govuk-form-group" asp-action="SendPreviewEmail" method="post">
+    <div class="govuk-form-group @(Html.ViewData.ModelState["PreviewEmails"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+        <h1 class="govuk-label-wrapper">
+            <label asp-for="PreviewEmails" for="PreviewEmails" class="govuk-label govuk-label--l">
+                @Html.DisplayNameFor(model => model.PreviewEmails)
+            </label>
+        </h1>
+        <div id="PreviewEmails-hint" class="govuk-hint">
+            Specify the email address(es) you want any preview emails to be delivered to. These should be comma-separated. For example, user@email.com, user2@email.com
+        </div>
+        @if (Html.ViewData.ModelState["PreviewEmails"]?.Errors.Count > 0)
+        {
+            <span id="PreviewEmails-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span>
+                @Html.ValidationMessageFor(model => model.PreviewEmails)
+            </span>
+            <input asp-for="PreviewEmails" class="govuk-input govuk-input--error" aria-describedby="PreviewEmails-error" value="@Model.PreviewEmails"/>
+        }
+        else
+        {
+            <input asp-for="PreviewEmails" class="govuk-input" value="@Model.PreviewEmails"/>
+        }
+        <button type="submit" class="govuk-button" data-module="govuk-button" style="height: 40px" value="SendPreviewEmail" name="action">
+            Send preview email
+        </button>
     </div>
-    <input class="govuk-input govuk-input--width-10" id="preview-email" name="accountNumber" type="text" spellcheck="false" aria-describedby="preview-email-hint" inputmode="numeric">
-    @Html.ActionLink("Send preview email", "AddStudySuccess", "Study", new { }, new { @class = "govuk-button govuk-button--secondary", data_module = "govuk-button" })
-</div>
+
+</form>

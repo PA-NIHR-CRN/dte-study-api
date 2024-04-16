@@ -1,14 +1,43 @@
 @model BPOR.Rms.Models.Email.SetupCampaignViewModel
 
+<style>
+    /* Mobile devices */
+    @@media (max-width: 640px) {
+        #volunteer-numbers  {
+            width: 100%; /* Make input full width on mobile */
+        }
+        .govuk-form-group span {
+            display: none; /* Hide span on mobile */
+        }
+    }
+
+    /* Tablet devices - between 641px and 1024px */
+    @@media (min-width: 641px) and (max-width: 1024px) {
+        #volunteer-numbers  {
+            width: 50%; /* Make input 50% width on tablet */
+        }
+        .govuk-form-group span {
+            display: flex; /* Show span on tablet */
+        }
+    }
+
+    /* Desktop and larger devices - more than 1024px */
+    @@media (min-width: 1025px) {
+        #volunteer-numbers {
+            width: 30%; /* Make input 30% width on desktop */
+        }
+    }
+</style>
+
 <div class="govuk-form-group">
     <h1 class="govuk-label-wrapper">
         <label class="govuk-label govuk-label--l" for="volunteer-numbers" asp-for="TotalVolunteers">
-            @Html.DisplayFor(modelItem => modelItem.TotalVolunteers)
+            @Html.DisplayNameFor(modelItem => modelItem.TotalVolunteers)
         </label>
     </h1>
     <div id="volunteer-numbers-hint" class="govuk-hint">
         Indicate a number equal to or smaller than the total number of volunteers matching your criteria.
     </div>
-    <input class="govuk-input govuk-input--width-10" id="volunteer-numbers" name="accountNumber" type="text" spellcheck="false" aria-describedby="volunteer-numbers-hint" inputmode="numeric" id="total-volunteers" asp-for="TotalVolunteers">
+    <input class="govuk-input volunteers" id="volunteer-numbers" name="volunteer-numbers" type="text" spellcheck="false" aria-describedby="volunteer-numbers-hint" inputmode="numeric" asp-for="TotalVolunteers">
     <span> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers)</span>
 </div>

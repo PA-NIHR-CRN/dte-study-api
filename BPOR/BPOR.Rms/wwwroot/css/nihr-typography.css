@@ -126,3 +126,13 @@ a:focus {
     font-size: 15px;
     color:red;
 }
+
+.text-secondary {
+    color: #505A5F;
+    font-feature-settings: 'clig' off, 'liga' off;
+    font-family: Lato, serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 27px; 
+}

@@ -2,17 +2,28 @@
 @model BPOR.Rms.Models.Email.SetupCampaignViewModel
 
 <div class="govuk-grid-column-two-thirds">
-    @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
-    {
-        new("All Studies", "/Study/Index"),
-        new("Study", "/Study/Index"),
-        new("Find volunteers", "/Study/Email"),
-        new("Set up email0cCampaign", "/Email/SetupCampaign")
-    })
+    @{
+        var breadcrumbs = new List<BreadcrumbItem>
+        {
+            new("All Studies", "/Study/Index"),
+        };
+
+        if (Model.StudyId != null)
+        {
+            breadcrumbs.Add(new($"Study", $"/Study/Detail/{Model.StudyId}"));
+        }
+
+        breadcrumbs.Add(new("Find volunteers", "/Filter"));
+        breadcrumbs.Add(new("Set up email campaign", "/Email/SetupCampaign"));
+    }
+
+    @await Component.InvokeAsync("Breadcrumbs", breadcrumbs)
     <h1 class="govuk-heading-l">Set up an email campaign</h1>
+    <p class="contact-text">@Html.DisplayFor(x => x.StudyName)</p>
+    @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
+     @await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
-
-    <form asp-action="SetupCampaign" method="post">
+<form asp-action="HandleForms" method="post">
         @await Html.PartialAsync("Partials/_TemplateSelect")
         @await Html.PartialAsync("Partials/_Preview")
         @await Html.PartialAsync("Partials/_TotalNumbers")

@@ -1,5 +1,21 @@
 @model BPOR.Rms.Models.Email.SetupCampaignViewModel
 
+<style>
+    /* Mobile devices */
+    @@media (max-width: 640px) {
+        .govuk-select {
+            width: 100%; /* Make input full width on mobile */
+        }
+    }
+
+    /* Desktop and larger devices - more than 1024px */
+    @@media (min-width: 641px) {
+        .govuk-select {
+            width: 70%; /* Make input 30% width on desktop */
+        }
+    }
+</style>
+
 <div class="govuk-form-group">
     <label class="govuk-label" for="template">
         Select email template
@@ -8,6 +24,6 @@
         These templates are managed through your GOV UK Notify account
     </div>
     <select class="govuk-select" id="template" name="template" aria-describedby="template-hint">
-        <option value="choose" selected>Choose template</option>
+        <option value="choose" selected>Select template</option>
     </select>
 </div>
