@@ -138,7 +138,7 @@ public class FilterController(ParticipantDbContext context) : Controller
         }
     }
 
-    [HttpPost]
+    [HttpGet]
     public IActionResult FilterVolunteers(VolunteerFilterViewModel model)
     {
         ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth, model.RegistrationFromDateYear,

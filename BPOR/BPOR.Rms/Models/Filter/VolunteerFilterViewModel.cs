@@ -104,11 +104,9 @@ public class VolunteerFilterViewModel
     public int? AgeTo { get; set; }
 
     [Display(Name = "Male")]
-    [Required]
     public bool IsSexMale { get; set; }
 
     [Display(Name = "Female")]
-    [Required]
     public bool IsSexFemale { get; set; }
 
     [Display(Name = "Yes")]
