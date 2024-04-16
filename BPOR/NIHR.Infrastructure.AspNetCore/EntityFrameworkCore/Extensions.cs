@@ -1,6 +1,4 @@
-﻿using BPOR.Rms.Startup;
-using Microsoft.EntityFrameworkCore;
-using NIHR.Infrastructure.EntityFrameworkCore.Paging;
+﻿using NIHR.Infrastructure.AspNetCore;
 using NIHR.Infrastructure.Paging;
 using System;
 using System.Collections.Generic;

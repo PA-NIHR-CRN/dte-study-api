@@ -1,10 +1,10 @@
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
-using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using NIHR.Infrastructure.AspNetCore;
 using NIHR.Infrastructure.EntityFrameworkCore.Paging;
 
 namespace BPOR.Rms.Controllers;

@@ -1,4 +1,4 @@
-﻿namespace BPOR.Rms.Startup
+﻿namespace NIHR.Infrastructure.AspNetCore
 {
     public interface IPaginationService
     {

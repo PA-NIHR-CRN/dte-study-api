@@ -1,7 +1,6 @@
-﻿
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
-namespace BPOR.Rms.Startup
+namespace NIHR.Infrastructure.AspNetCore
 {
     public class PaginationService : IPaginationService
     {
