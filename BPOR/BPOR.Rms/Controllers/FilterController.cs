@@ -14,9 +14,9 @@ public class FilterController(ParticipantDbContext context) : Controller
 {
     List<Expression<Func<Participant, bool>>> filters = new List<Expression<Func<Participant, bool>>>();
 
-    public IActionResult Index(VolunteerFilterViewModel model)
+    public IActionResult Index(VolunteerFilterViewModel model, string? studyId)
     {
-        SetStudiesSelectList(model);
+        SetStudiesSelectList(model, studyId);
         SetStudyExclusionFilters(model);
         SetLocationsSelectList(model);
 
@@ -122,9 +122,20 @@ public class FilterController(ParticipantDbContext context) : Controller
         };
     }
 
-    private void SetStudiesSelectList(VolunteerFilterViewModel model)
+    private void SetStudiesSelectList(VolunteerFilterViewModel model, string? studyId)
     {
         model.Studies = context.Studies.Where(x => !x.IsDeleted).Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.StudyName }).ToList();
+
+        if (!String.IsNullOrEmpty(studyId))
+        {
+            foreach(var study in model.Studies)
+            {
+                if (study.Value == studyId)
+                {
+                    study.Selected = true;
+                }
+            }
+        }
     }
 
     [HttpPost]
@@ -161,7 +172,7 @@ public class FilterController(ParticipantDbContext context) : Controller
 
         if (model.SelectedStudy == null)
         {
-            SetStudiesSelectList(model);
+            SetStudiesSelectList(model, "");
         }
 
         SetLocationsSelectList(model);
