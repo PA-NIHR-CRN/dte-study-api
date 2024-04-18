@@ -5,21 +5,30 @@
     <div class="govuk-grid-column-one-half">
         <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Volunteers</h2>
         <h4 class="govuk-heading-m govuk-!-margin-bottom-4 govuk-!-margin-top-0">
-            Recruited (125)
+            Recruited (
+            @if (Model.Study.IsRecruitingIdentifiableParticipants)
+            {
+                @Model.TotalRecruited
+            }
+            else
+            {
+                @Model.LatestRecruitmentTotal
+            }
+            )
         </h4>
     </div>
     <div class="govuk-grid-column-one-half right-align-buttons-desktop">
         <div class="govuk-button-group govuk-!-margin-bottom-0">
             @if (!Model.Study.IsRecruitingIdentifiableParticipants)
             {
-                @Html.ActionLink("Update recruitment total", "UpdateAnonymousRecruited", "Volunteer", new { id = Model.Study.Id }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
+                @Html.ActionLink("Update recruitment total", "UpdateAnonymousRecruited", "Volunteer", new { StudyId = Model.Study.Id }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
             }
             else
             {
-                @Html.ActionLink("Add enrollments", "UpdateRecruited", "Volunteer", new { id = Model.Study.Id }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
+                @Html.ActionLink("Add enrollments", "UpdateRecruited", "Volunteer", new { StudyId = Model.Study.Id, Model.Study.StudyName }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
             }
         </div>
     </div>
-    <div class="govuk-grid-column-full"> @await Html.PartialAsync("Partials/_RecruitedTable", Model.Study)</div>
+    <div class="govuk-grid-column-full"> @await Html.PartialAsync("Partials/_RecruitedTable", Model.EnrollmentDetails)</div>
 
 </div>

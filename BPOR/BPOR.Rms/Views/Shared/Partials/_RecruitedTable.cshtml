@@ -1,28 +1,23 @@
+@model IEnumerable<BPOR.Rms.Models.Volunteer.EnrollmentDetails>
+
 <table class="govuk-table" style="width: 100%;">
     <thead class="govuk-table__head">
     <tr class="govuk-table__row">
-        <th scope="col" class="govuk-table__header ">Number recruited</th>
-        <th scope="col" class="govuk-table__header ">Date added</th>
+        <th scope="col" class="govuk-table__header">Number recruited</th>
+        <th scope="col" class="govuk-table__header">Date added</th>
     </tr>
     </thead>
     <tbody class="govuk-table__body">
-    <tr class="govuk-table__row">
-        <td class="govuk-table__cell">
-            125
-        </td>
-        <td class="govuk-table__cell">20/04/2024</td>
-    </tr>
-    <tr class="govuk-table__row">
-        <td class="govuk-table__cell">
-            30
-        </td>
-        <td class="govuk-table__cell">27/03/2024</td>
-    </tr>
-    <tr class="govuk-table__row">
-        <td class="govuk-table__cell">
-            25
-        </td>
-        <td class="govuk-table__cell">01/02/2024</td>
-    </tr>
+    @foreach (var detail in Model)
+    {
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">
+                @detail.RecruitmentTotal
+            </td>
+            <td class="govuk-table__cell">
+                @detail.CreatedAt.ToString("dd/MM/yyyy")
+            </td>
+        </tr>
+    }
     </tbody>
 </table>

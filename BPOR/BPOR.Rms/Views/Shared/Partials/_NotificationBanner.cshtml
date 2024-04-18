@@ -8,11 +8,15 @@
                 @Model.Heading
             </h2>
         </div>
-        @if (!string.IsNullOrWhiteSpace(Model.Body))
-        {
-            <div class="govuk-notification-banner__content">
+        <div class="govuk-notification-banner__content">
+            @if (!string.IsNullOrWhiteSpace(Model.Body))
+            {
                 <p class="govuk-body">@Html.Raw(Model.Body)</p>
-            </div>
-        }
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.LinkText) && !string.IsNullOrWhiteSpace(Model.LinkUrl))
+            {
+                <a class="govuk-notification-banner__link" href="@Model.LinkUrl">@Model.LinkText</a>
+            }
+        </div>
     </div>
 }

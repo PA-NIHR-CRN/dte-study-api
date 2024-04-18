@@ -208,8 +208,8 @@
             @Model.Studies.Count() results match your search.
         </div>
     }
-    
-    @if(Model.Studies.Count() == 1)
+
+    @if (Model.Studies.Count() == 1)
     {
         <div class="govuk-inset-text">
             1 study matches your search.
@@ -217,7 +217,7 @@
     }
 }
 
-@if(Model.HasBeenReset)
+@if (Model.HasBeenReset)
 {
     <div class="govuk-inset-text">
         The search results have been reset and all studies are listed.
@@ -262,11 +262,13 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="study-card-actions">
                     <div class="study-card-recruited-numbers">
                         <p class="govuk-body govuk-!-margin-0">Recruited:</p>
-                        <p class="govuk-heading-m govuk-!-margin-0 govuk-!-padding-0">125</p>
+                        <p class="govuk-heading-m govuk-!-margin-0 govuk-!-padding-0">
+                            @Html.DisplayFor(modelItem => item.LatestRecruitmentTotal)
+                        </p>
                     </div>
                     @Html.ActionLink("View study", "Details", new { id = item.Id }, new { @class = "govuk-button" })
                 </div>
@@ -275,7 +277,7 @@
 
     </div>
 }
-else if(!Model.HasSearched)
+else if (!Model.HasSearched)
 {
     <div class="no-studies-card">
         <h1 class="govuk-heading-l">No studies added</h1>

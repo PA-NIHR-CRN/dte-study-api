@@ -1,3 +1,4 @@
+@model BPOR.Rms.Models.Study.StudyDetailsViewModel
 <style>
 .stat-card {
   padding: 20px;
@@ -57,7 +58,16 @@
     <div class="govuk-grid-column-one-third">
         <div class="card-wrapper">
             <div class="stat-card">
-                <div class="stat-card-number">125</div>
+                <div class="stat-card-number">
+                    @if (Model.Study.IsRecruitingIdentifiableParticipants)
+                    {
+                        @Model.TotalRecruited
+                    }
+                    else
+                    {
+                        @Model.LatestRecruitmentTotal
+                    }
+                </div>
                 <div class="stat-card-text">Recruited</div>
             </div>
         </div>
