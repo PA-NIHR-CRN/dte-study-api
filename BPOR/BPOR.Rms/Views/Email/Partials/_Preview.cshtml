@@ -17,7 +17,7 @@
     }
 </style>
 
-<form class="govuk-form-group" asp-action="SendPreviewEmail" method="post">
+<div class="govuk-form-group">
     <div class="govuk-form-group @(Html.ViewData.ModelState["PreviewEmails"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
         <h1 class="govuk-label-wrapper">
             <label asp-for="PreviewEmails" for="PreviewEmails" class="govuk-label govuk-label--l">
@@ -43,5 +43,4 @@
             Send preview email
         </button>
     </div>
-
-</form>
+</div>

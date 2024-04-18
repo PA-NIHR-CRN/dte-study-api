@@ -16,14 +16,27 @@
     }
 </style>
 
-<div class="govuk-form-group">
-    <label class="govuk-label" for="template">
-        Select email template
+<div class="govuk-form-group" @(Html.ViewData.ModelState["SelectedTemplate"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")>
+    <label asp-for="SelectedTemplate" class="govuk-label" for="SelectedTemplate">
+        @Html.DisplayNameFor(model => model.SelectedTemplate)
     </label>
-    <div id="template-hint" class="govuk-hint">
+    <div id="SelectedTemplate-hint" class="govuk-hint">
         These templates are managed through your GOV UK Notify account
     </div>
-    <select class="govuk-select" id="template" name="template" aria-describedby="template-hint">
-        <option value="choose" selected>Select template</option>
-    </select>
+    @if (Html.ViewData.ModelState["SelectedTemplate"]?.Errors.Count > 0)
+    {
+        <span id="SelectedTemplate-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.SelectedTemplate)
+        </span>
+        <select class="govuk-select govuk-select--error" id="SelectedTemplate" asp-for="SelectedTemplate" aria-describedby="SelectedTemplate-hint SelectedTemplate-error">
+            <option value="" selected>Select template</option>
+        </select>
+    }
+    else
+    {
+        <select class="govuk-select" id="SelectedTemplate" asp-for="SelectedTemplate" aria-describedby="SelectedTemplate-hint">
+            <option value="choose" selected>Select template</option>
+        </select>
+    }
 </div>

@@ -14,8 +14,9 @@
     })
 </div>
 
-@using (Html.BeginForm("FilterVolunteers", "Filter", FormMethod.Get))
+@using (Html.BeginForm("FilterVolunteers", "Filter", FormMethod.Post))
 {
+    <input type="hidden" asp-for="StudyId" value="@Model.StudyId" />
     <div class="govuk-grid-column-two-thirds">
 
         <h1 class="govuk-heading-xl">
@@ -44,7 +45,17 @@
                     Volunteers matching criteria:
                 </h2>
 
-                <h2 class="govuk-heading-l" id="volunteerCount" aria-label="Volunteer count with current filters selected">@Model.VolunteerCount</h2>
+                <input type="hidden" asp-for="VolunteerCount" value="@Model.VolunteerCount" />
+                <h2 class="govuk-heading-l" id="volunteerCount" aria-label="Volunteer count with current filters selected">
+                @if(Model.VolunteerCount == 0 || Model.VolunteerCount == null)
+                {
+                    <span>-</span>
+                }
+                else
+                {
+                    <span>@Model.VolunteerCount</span>
+                }
+                </h2>
             </div>
 
             <div class="filter-buttons-container">
@@ -54,11 +65,11 @@
                 <div class="divide-container"></div>
 
                 @{
-                    bool disabled = Model.VolunteerCount == "0" || Model.VolunteerCount == "-";
+                    bool disabled = Model.VolunteerCount == 0 || Model.VolunteerCount == null;
                 }
 
                 <div class="filer-setup-campaign-btn">
-                    <button id="btnSetupEmailCampaign" role="button" draggable="false" class="govuk-button-submit" data-module="govuk-button" disabled="@disabled" asp-controller="Email" asp-action="SetupCampaign" formmethod="get">
+                    <button id="btnSetupEmailCampaign" role="button" draggable="false" class="govuk-button-submit" data-module="govuk-button" disabled="@disabled" asp-controller="Filter" asp-action="SetupEmailCampaign">
                         Set up an email campaign
                         <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
                             <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z" />
@@ -68,10 +79,6 @@
             </div>
         </div>
     </div>
-
-
-
-
 }
 
 

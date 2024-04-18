@@ -21,9 +21,11 @@
     <h1 class="govuk-heading-l">Set up an email campaign</h1>
     <p class="contact-text">@Html.DisplayFor(x => x.StudyName)</p>
     @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
-     @await Html.PartialAsync("Partials/_ErrorSummary", Model)
+    @await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
-<form asp-action="HandleForms" method="post">
+    <form asp-action="HandleForms" method="post">
+        <input type="hidden" asp-for="StudyId" />
+        <input type="hidden" asp-for="MaxNumbers" />
         @await Html.PartialAsync("Partials/_TemplateSelect")
         @await Html.PartialAsync("Partials/_Preview")
         @await Html.PartialAsync("Partials/_TotalNumbers")

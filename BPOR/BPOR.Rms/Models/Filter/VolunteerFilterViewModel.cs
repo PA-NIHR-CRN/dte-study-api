@@ -9,6 +9,7 @@ namespace BPOR.Rms.Models.Filter;
 
 public class VolunteerFilterViewModel
 {
+    public int StudyId { get; set; }
     // Study selection
     [Display(Name = "Select a study (if applicable) you want to find volunteers for")]
     public SelectListItem? SelectedStudy { get; set; }
@@ -125,6 +126,6 @@ public class VolunteerFilterViewModel
     public bool Ethnicity_Other { get; set; }
     [Display(Name = "White")]
     public bool Ethnicity_White { get; set; }
-    public string VolunteerCount { get; set; } = "-";
+    public int VolunteerCount { get; set; }
 
 }

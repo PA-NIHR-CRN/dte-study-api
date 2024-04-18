@@ -29,15 +29,22 @@
     }
 </style>
 
-<div class="govuk-form-group">
-    <h1 class="govuk-label-wrapper">
-        <label class="govuk-label govuk-label--l" for="volunteer-numbers" asp-for="TotalVolunteers">
-            @Html.DisplayNameFor(modelItem => modelItem.TotalVolunteers)
-        </label>
-    </h1>
-    <div id="volunteer-numbers-hint" class="govuk-hint">
-        Indicate a number equal to or smaller than the total number of volunteers matching your criteria.
-    </div>
-    <input class="govuk-input volunteers" id="volunteer-numbers" name="volunteer-numbers" type="text" spellcheck="false" aria-describedby="volunteer-numbers-hint" inputmode="numeric" asp-for="TotalVolunteers">
-    <span> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers)</span>
+<div class="govuk-form-group @(Html.ViewData.ModelState["TotalVolunteers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="TotalVolunteers" class="govuk-label" for="TotalVolunteers">
+        @Html.DisplayNameFor(model => model.TotalVolunteers)
+    </label>
+    @if (Html.ViewData.ModelState["TotalVolunteers"]?.Errors.Count > 0)
+    {
+        <span id="TotalVolunteers-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.TotalVolunteers)
+        </span>
+        <input asp-for="TotalVolunteers" class=" govuk-input govuk-input--error" id="TotalVolunteers" aria-describedby="TotalVolunteers-error"/>
+        <span> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers)</span>
+    }
+    else
+    {
+        <input asp-for="TotalVolunteers" class=" govuk-input" id="TotalVolunteers" value="@(Model.TotalVolunteers)"/>
+        <span> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers)</span>
+    }
 </div>
