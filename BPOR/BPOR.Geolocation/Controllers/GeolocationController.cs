@@ -13,8 +13,11 @@ public class GeolocationController(ParticipantDbContext context, IGeolocationSer
     {
         var participants = await context.Participants
             .Include(p => p.Address)
-            .Take(10)
+            .Take(20)
             .ToListAsync(cancellationToken);
+        
+        // filter out participants with no address
+        participants = participants.Where(p => p.Address != null).ToList();
         
         // loop through participants and add lat/lng to each
         foreach (var participant in participants)

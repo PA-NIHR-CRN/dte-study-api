@@ -1,5 +1,6 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
+using BPOR.Geolocation.Services;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ public static class DependencyInjection
         IHostEnvironment hostEnvironment)
     {
         services.AddDistributedMemoryCache();
+        services.AddScoped<IGeolocationService, GeolocationService>();
 
         // TODO this could be reusable
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
@@ -27,7 +29,7 @@ public static class DependencyInjection
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
         
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
-            .CreateLogger("BPOR.Registration.Api.Startup.DependencyInjection");
+            .CreateLogger("BPOR.Geolocation");
 
         services.AddHttpClientWithRetry<ILocationApiClient, LocationApiClient>(clientsSettings.Value.LocationService, 2,
             logger);
