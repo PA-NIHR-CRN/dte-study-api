@@ -44,5 +44,30 @@ namespace NIHR.Infrastructure.Clients
                 return new List<PostcodeAddressModel>();
             }
         }
+        
+        public async Task<LatLngModel> GetLatLngByPostcodeAsync(string postcode,
+            CancellationToken cancellationToken)
+        {
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri($"api/address/postcode/{postcode}/latlng", UriKind.Relative),
+                Method = HttpMethod.Get,
+            };
+
+            var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<LatLngModel>(jsonResponse);
+            }
+            else
+            {
+                _logger.LogError(
+                    "Failed to retrieve latlng for postcode {Postcode}. Response status: {ResponseStatusCode}",
+                    postcode, response.StatusCode);
+                return null;
+            }
+        }
     }
 }
