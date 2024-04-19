@@ -5,6 +5,7 @@ using BPOR.Domain.Entities;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
 using BPOR.Registration.Stream.Handler.Services;
+using NIHR.Infrastructure.Clients;
 
 namespace BPOR.Registration.Stream.Handler.Mappers;
 
@@ -12,11 +13,14 @@ public class ParticipantMapper : IParticipantMapper
 {
     private readonly IDynamoDBContext _context;
     private readonly IRefDataService _refDataService;
+    private readonly ILocationApiClient _locationApiClient;
 
-    public ParticipantMapper(IDynamoDBContext context, IRefDataService refDataService)
+    public ParticipantMapper(IDynamoDBContext context, IRefDataService refDataService,
+        ILocationApiClient locationApiClient)
     {
         _context = context;
         _refDataService = refDataService;
+        _locationApiClient = locationApiClient;
     }
 
     private void MapIdentifiers(DynamoParticipant source, Participant participant)
@@ -50,7 +54,6 @@ public class ParticipantMapper : IParticipantMapper
                 participant.ParticipantIdentifiers.Add(newIdentifier);
             }
         }
-
     }
 
     private void MapHealthConditions(DynamoParticipant source, Participant participant)
@@ -98,7 +101,7 @@ public class ParticipantMapper : IParticipantMapper
     }
 
 
-    public Participant Map(Dictionary<string, AttributeValue> record, Participant destination)
+    public async Task<Participant> Map(Dictionary<string, AttributeValue> record, Participant destination, CancellationToken cancellationToken)
     {
         var doc = Document.FromAttributeMap(record);
 
@@ -131,6 +134,10 @@ public class ParticipantMapper : IParticipantMapper
         }
 
         ParticipantAddressMapper.Map(source.Address, destination);
+        var latLng = await _locationApiClient.GetLatLngByPostcodeAsync(source.Address.Postcode, cancellationToken);
+
+        destination.Address.Latitude = latLng.Latitude;
+        destination.Address.Longitude = latLng.Longitude;
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);

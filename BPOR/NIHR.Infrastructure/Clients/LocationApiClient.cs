@@ -46,11 +46,11 @@ namespace NIHR.Infrastructure.Clients
         }
         
         public async Task<LatLngModel> GetLatLngByPostcodeAsync(string postcode,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri($"api/address/postcode/{postcode}/latlng", UriKind.Relative),
+                RequestUri = new Uri($"api/address/latlng/{postcode}", UriKind.Relative),
                 Method = HttpMethod.Get,
             };
 

@@ -6,5 +6,5 @@ namespace BPOR.Registration.Stream.Handler.Mappers;
 public interface IParticipantMapper
 {
     List<Identifier> ExtractIdentifiers(Dictionary<string, AttributeValue> newImage);
-    Participant Map(Dictionary<string, AttributeValue> record, Participant destination);
+    Task<Participant> Map(Dictionary<string, AttributeValue> record, Participant destination, CancellationToken cancellationToken);
 }
