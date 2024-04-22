@@ -1,10 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace NIHR.Infrastructure.AspNetCore.DependencyInjection
 {
@@ -12,6 +8,7 @@ namespace NIHR.Infrastructure.AspNetCore.DependencyInjection
     {
         public static IServiceCollection AddPaging(this IServiceCollection services)
         {
+            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             return services.AddScoped<IPaginationService, PaginationService>();
         }
     }
