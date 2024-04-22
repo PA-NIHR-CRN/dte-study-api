@@ -18,9 +18,11 @@ public class FilterController(ParticipantDbContext context) : Controller
 
     public IActionResult Index(VolunteerFilterViewModel model, string? studyId)
     {
-        SetStudiesSelectList(model, studyId);
+        SetSelectedStudy(model, studyId);
         SetStudyExclusionFilters(model);
         SetLocationsSelectList(model);
+
+        model.ShowStudyFilters = String.IsNullOrEmpty(studyId) ? false : true;
 
         return View(model);
     }
@@ -132,20 +134,13 @@ public class FilterController(ParticipantDbContext context) : Controller
         };
     }
 
-    private void SetStudiesSelectList(VolunteerFilterViewModel model, string? studyId)
+    private void SetSelectedStudy(VolunteerFilterViewModel model, string studyId)
     {
-        model.Studies = context.Studies.Where(x => !x.IsDeleted)
-            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.StudyName }).ToList();
-
         if (!String.IsNullOrEmpty(studyId))
         {
-            foreach (var study in model.Studies)
-            {
-                if (study.Value == studyId)
-                {
-                    study.Selected = true;
-                }
-            }
+            Study selectedStudy = context.Studies.Where(x => x.Id == Convert.ToInt32(studyId)).FirstOrDefault();
+
+            model.SelectedStudy = selectedStudy?.StudyName ?? string.Empty;
         }
     }
 
@@ -184,7 +179,7 @@ public class FilterController(ParticipantDbContext context) : Controller
         {
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount,
-            StudyName = model.SelectedStudy?.Value
+            StudyName = model.SelectedStudy
         };
         return RedirectToAction("SetupCampaign", "Email", campaignDetails);
     }
@@ -236,15 +231,14 @@ public class FilterController(ParticipantDbContext context) : Controller
             model.VolunteerCount = query.Count(); 
         }
 
-        if (model.SelectedStudy == null)
-        {
-            SetStudiesSelectList(model, "");
-        }
-
         SetLocationsSelectList(model);
 
         SetStudyExclusionFilters(model);
 
+        if (!String.IsNullOrEmpty(model.SelectedStudy))
+        {
+            model.ShowStudyFilters = true;
+        }
 
         return View("Index", model);
     }

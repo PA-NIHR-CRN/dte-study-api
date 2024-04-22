@@ -11,8 +11,8 @@ public class VolunteerFilterViewModel
 {
     public int StudyId { get; set; }
     // Study selection
-    [Display(Name = "Select a study (if applicable) you want to find volunteers for")]
-    public SelectListItem? SelectedStudy { get; set; }
+    [Display(Name = "Selected Study")]
+    public string? SelectedStudy { get; set; }
 
     public IEnumerable<SelectListItem>? Studies { get; set; }
     [Display(Name = "Volunteers contacted")]
@@ -130,5 +130,6 @@ public class VolunteerFilterViewModel
     [Display(Name = "White")]
     public bool Ethnicity_White { get; set; }
     public int VolunteerCount { get; set; }
+    public bool ShowStudyFilters { get; set; }
 
 }
