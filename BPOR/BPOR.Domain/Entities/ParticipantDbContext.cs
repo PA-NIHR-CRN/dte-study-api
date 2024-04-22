@@ -2,6 +2,7 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Entities.System;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
 using NIHR.Infrastructure.Entities.Interceptors;
 using NIHR.Infrastructure.Exceptions;
 
@@ -24,6 +25,7 @@ public class ParticipantDbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<Study> Studies { get; set; } = null!;
     public DbSet<ManualEnrollment> ManualEnrollments { get; set; } = null!;
     public DbSet<FilterCriteria> FilterCriterias { get; set; } = null!;
+    public DbSet<ParticipantLocation> ParticipantLocation { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -53,6 +55,27 @@ public class ParticipantDbContext : Microsoft.EntityFrameworkCore.DbContext
         var values = identifiers.Select(id => id.Value).ToList();
 
         return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value)));
+    }
+
+    public List<Participant> GetParticipantsByPostcodePrefix(List<string> postcodePrefixes)
+    {
+        // TODO refactor this as inefficient
+        var participants = Participants.Include(p => p.Address)
+            .AsEnumerable()
+            .Where(p => p.Address != null && postcodePrefixes.Any(prefix => p.Address.Postcode.StartsWith(prefix)))
+            .ToList();
+
+        return participants;
+    }
+
+
+    public IQueryable<Participant> GetParticipantsWithinRadius(Point location, double radiusInMeters)
+    {
+        return Participants
+            .Include(p => p.Address)
+            .Include(p => p.ParticipantLocation)
+            .Where(p => p.ParticipantLocation != null &&
+                        p.ParticipantLocation.Location.IsWithinDistance(location, radiusInMeters));
     }
 
     public void ThrowIfInMaintenanceMode()

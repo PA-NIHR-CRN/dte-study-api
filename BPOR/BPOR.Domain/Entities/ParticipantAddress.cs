@@ -25,8 +25,6 @@ public class ParticipantAddress : IPersonalInformation, ISoftDelete
     public string? Town { get; set; }
     [MaxLength(255)]
     public string? Postcode { get; set; }
-    public double? Latitude { get; set; }
-    public double? Longitude { get; set; }
 
     public int ParticipantId { get; set; }
 

@@ -10,7 +10,7 @@ namespace NIHR.Infrastructure.Clients
         Task<IEnumerable<PostcodeAddressModel>> GetAddressesByPostcodeAsync(string postcode,
             CancellationToken cancellationToken);
 
-        Task<LatLngModel> GetLatLngByPostcodeAsync(string postcode,
+        Task<CoordinatesModel> GetCoordinatesFromPostcodeAsync(string postcode,
             CancellationToken cancellationToken);
     }
 }

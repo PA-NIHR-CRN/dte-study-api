@@ -19,10 +19,13 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
 
         var connectionString = dbSettings.BuildConnectionString();
 
+        // UseNetTopologySuite
         var options = new DbContextOptionsBuilder<ParticipantDbContext>()
-            .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+            .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), x => x.UseNetTopologySuite()) 
             .Options;
 
         return new ParticipantDbContext(options);
     }
+    
+    
 }

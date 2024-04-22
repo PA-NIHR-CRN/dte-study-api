@@ -5,6 +5,7 @@ using BPOR.Domain.Entities;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
 using BPOR.Registration.Stream.Handler.Services;
+using NetTopologySuite.Geometries;
 using NIHR.Infrastructure.Clients;
 
 namespace BPOR.Registration.Stream.Handler.Mappers;
@@ -134,10 +135,14 @@ public class ParticipantMapper : IParticipantMapper
         }
 
         ParticipantAddressMapper.Map(source.Address, destination);
-        var latLng = await _locationApiClient.GetLatLngByPostcodeAsync(source.Address.Postcode, cancellationToken);
-
-        destination.Address.Latitude = latLng.Latitude;
-        destination.Address.Longitude = latLng.Longitude;
+        var coordinates = await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
+        
+        if (coordinates != null)
+        {
+            destination.ParticipantLocation ??= new ParticipantLocation();
+            destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+                { SRID = 4326 };
+        }
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);

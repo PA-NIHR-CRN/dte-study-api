@@ -45,12 +45,12 @@ namespace NIHR.Infrastructure.Clients
             }
         }
         
-        public async Task<LatLngModel> GetLatLngByPostcodeAsync(string postcode,
+        public async Task<CoordinatesModel> GetCoordinatesFromPostcodeAsync(string postcode,
             CancellationToken cancellationToken = default)
         {
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri($"api/address/latlng/{postcode}", UriKind.Relative),
+                RequestUri = new Uri($"api/address/coordinates/{postcode}", UriKind.Relative),
                 Method = HttpMethod.Get,
             };
 
@@ -59,7 +59,7 @@ namespace NIHR.Infrastructure.Clients
             if (response.IsSuccessStatusCode)
             {
                 var jsonResponse = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<LatLngModel>(jsonResponse);
+                return JsonConvert.DeserializeObject<CoordinatesModel>(jsonResponse);
             }
             else
             {

@@ -1,6 +1,6 @@
 namespace NIHR.Infrastructure.Models
 {
-    public class LatLngModel
+    public class CoordinatesModel
     {
         public double Latitude { get; set; }
         public double Longitude { get; set; }
