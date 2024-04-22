@@ -152,7 +152,9 @@ public class FilterController(ParticipantDbContext context) : Controller
     [HttpPost]
     public IActionResult SetupEmailCampaign(VolunteerFilterViewModel model)
     {
-        
+        DateTime? DateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
+        DateTime? DateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;
+
         var filterCriteria = new FilterCriteria
         {
             Contacted = model.IncludeContacted,
@@ -164,8 +166,8 @@ public class FilterController(ParticipantDbContext context) : Controller
                 model.RegistrationFromDateDay),
             RegistrationToDate = ConstructDate(model.RegistrationToDateYear, model.RegistrationToDateMonth,
                 model.RegistrationToDateDay),
-            DateOfBirthFrom = ConstructDate(model.AgeFrom, new DateTime().Month, new DateTime().Day),
-            DateOfBirthTo = ConstructDate(model.AgeTo, new DateTime().Month, new DateTime().Day),
+            DateOfBirthFrom = DateOfBirthFrom,
+            DateOfBirthTo = DateOfBirthTo,
             GenderId = model.IsSexMale ? 1 : model.IsSexFemale ? 2 : 3,
             GenderIsSameAsSexRegisteredAtBirth = model.IsGenderSameAsSexRegisteredAtBirth_Yes ? true :
                 model.IsGenderSameAsSexRegisteredAtBirth_No ? false : null,

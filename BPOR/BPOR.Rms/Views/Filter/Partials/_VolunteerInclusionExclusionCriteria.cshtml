@@ -15,13 +15,13 @@
             </div>
 
             <div class="govuk-input_select__wrapper">
-                @Html.LabelFor(m => Model.VolunteersCompletedRegistration, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
-                @Html.DropDownListFor(m => m.VolunteersCompletedRegistration, Model.VolunteersCompletedRegistration, new { @class = "govuk-select" })
+                @Html.LabelFor(m => Model.VolunteersRecruited, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
+                @Html.DropDownListFor(m => m.VolunteersRecruited, Model.VolunteersRecruited, new { @class = "govuk-select" })
             </div>
 
             <div class="govuk-input_select__wrapper">
-                @Html.LabelFor(m => Model.VolunteersRecruited, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
-                @Html.DropDownListFor(m => m.VolunteersRecruited, Model.VolunteersRecruited, new { @class = "govuk-select" })
+                @Html.LabelFor(m => Model.VolunteersCompletedRegistration, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
+                @Html.DropDownListFor(m => m.VolunteersCompletedRegistration, Model.VolunteersCompletedRegistration, new { @class = "govuk-select" })
             </div>
   
         </legend>      
