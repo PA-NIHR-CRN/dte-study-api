@@ -6,22 +6,22 @@
 
             <div class="govuk-input_select__wrapper">
                 @Html.LabelFor(m => Model.VolunteersContacted, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
-                @Html.DropDownListFor(m => m.VolunteersContacted, Model.VolunteersContacted, new { @class = "govuk-select" })
+                @Html.DropDownListFor(m => m.SelectedVolunteersContacted, Model.VolunteersContacted, new { @class = "govuk-select" })
             </div>
 
             <div class="govuk-input_select__wrapper">
                 @Html.LabelFor(m => Model.VolunteersRegisteredInterest, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
-                @Html.DropDownListFor(m => m.VolunteersRegisteredInterest, Model.VolunteersRegisteredInterest, new { @class = "govuk-select" })
+                @Html.DropDownListFor(m => m.SelectedVolunteersRegisteredInterest, Model.VolunteersRegisteredInterest, new { @class = "govuk-select" })
             </div>
 
             <div class="govuk-input_select__wrapper">
                 @Html.LabelFor(m => Model.VolunteersRecruited, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
-                @Html.DropDownListFor(m => m.VolunteersRecruited, Model.VolunteersRecruited, new { @class = "govuk-select" })
+                @Html.DropDownListFor(m => m.SelectedVolunteersRecruited, Model.VolunteersRecruited, new { @class = "govuk-select" })
             </div>
 
             <div class="govuk-input_select__wrapper">
                 @Html.LabelFor(m => Model.VolunteersCompletedRegistration, new { @class = "govuk-label govuk-checkboxes__label exclusion_label" })
-                @Html.DropDownListFor(m => m.VolunteersCompletedRegistration, Model.VolunteersCompletedRegistration, new { @class = "govuk-select" })
+                @Html.DropDownListFor(m => m.SelectedVolunteersCompletedRegistration, Model.VolunteersCompletedRegistration, new { @class = "govuk-select" })
             </div>
   
         </legend>      

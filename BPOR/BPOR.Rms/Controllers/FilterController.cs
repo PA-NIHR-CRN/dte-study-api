@@ -213,6 +213,7 @@ public class FilterController(ParticipantDbContext context) : Controller
         {
             int volunteerCount = 0;
 
+            FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
             FilterByRegistrationDate(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
                 model.RegistrationFromDateYear,
                 model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
@@ -272,6 +273,20 @@ public class FilterController(ParticipantDbContext context) : Controller
         {
             ModelState.AddModelError("AgeFrom", "The minimum age must be lower than the maximum age");
         }
+    }
+
+    private void FilterVolunteersCompletedRegistration(string? selectedCompletedRegistration)
+    {
+            if (selectedCompletedRegistration == "1")
+            {
+                filters.Add(p => p.Stage2CompleteUtc != null);
+            }
+
+            if (selectedCompletedRegistration == "2")
+            {
+                filters.Add(p => p.Stage2CompleteUtc == null);
+            }
+
     }
 
     public void FilterByRegistrationDate(int? RegistrationFromDateDay, int? RegistrationFromDateMonth,

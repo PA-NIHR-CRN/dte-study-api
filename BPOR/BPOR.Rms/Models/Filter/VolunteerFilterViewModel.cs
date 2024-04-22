@@ -17,16 +17,19 @@ public class VolunteerFilterViewModel
     public IEnumerable<SelectListItem>? Studies { get; set; }
     [Display(Name = "Volunteers contacted")]
     public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
+    public string? SelectedVolunteersContacted { get; set; }
 
     [Display(Name = "Volunteers recruited")]
     public IEnumerable<SelectListItem>? VolunteersRecruited { get; set; }
+    public string? SelectedVolunteersRecruited { get; set; }
 
     [Display(Name = "Volunteers registered interest")]
     public IEnumerable<SelectListItem>? VolunteersRegisteredInterest { get; set; }
+    public string? SelectedVolunteersRegisteredInterest { get; set; }
 
     [Display(Name = "Volunteers completed registration")]
     public IEnumerable<SelectListItem>? VolunteersCompletedRegistration { get; set; }
-
+    public string? SelectedVolunteersCompletedRegistration { get; set; }
     // Volunteer criteria
     [Display(Name = "Exclude those contacted")]
     public bool ExcludeContacted { get; set; }
