@@ -102,7 +102,8 @@ public class ParticipantMapper : IParticipantMapper
     }
 
 
-    public async Task<Participant> Map(Dictionary<string, AttributeValue> record, Participant destination, CancellationToken cancellationToken)
+    public async Task<Participant> Map(Dictionary<string, AttributeValue> record, Participant destination,
+        CancellationToken cancellationToken)
     {
         var doc = Document.FromAttributeMap(record);
 
@@ -135,12 +136,13 @@ public class ParticipantMapper : IParticipantMapper
         }
 
         ParticipantAddressMapper.Map(source.Address, destination);
-        var coordinates = await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
-        
+        var coordinates =
+            await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
+
         if (coordinates != null)
         {
             destination.ParticipantLocation ??= new ParticipantLocation();
-            destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+            destination.ParticipantLocation.Location = new Point(coordinates.Latitude, coordinates.Longitude)
                 { SRID = 4326 };
         }
 
