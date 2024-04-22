@@ -68,7 +68,7 @@ public class VolunteerFilterViewModel
     public int? RegistrationFromDateMonth { get; set; }
 
     [Display(Name = "Year")]
-    [Range(2022, 2100, ErrorMessage = "Year must be a reasonable value")]
+    [Range(1970, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? RegistrationFromDateYear { get; set; }
 
     // To Date
@@ -81,7 +81,7 @@ public class VolunteerFilterViewModel
     public int? RegistrationToDateMonth { get; set; }
 
     [Display(Name = "Year")]
-    [Range(2022, 2100, ErrorMessage = "Year must be a reasonable value")]
+    [Range(1970, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? RegistrationToDateYear { get; set; }
 
     // Postcode districts and Full postcode

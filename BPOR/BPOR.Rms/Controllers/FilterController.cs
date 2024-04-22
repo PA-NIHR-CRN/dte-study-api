@@ -364,24 +364,24 @@ public class FilterController(ParticipantDbContext context) : Controller
             DateTime? RegistrationToDate =
                 ConstructDate(RegistrationToDateYear, RegistrationToDateMonth, RegistrationToDateDay);
 
-            if (RegistrationFromDate.HasValue && RegistrationFromDate.Value.Date <= DateTime.Today)
+            if (RegistrationFromDate.HasValue && RegistrationFromDate.Value.Date >= DateTime.Today)
             {
                 ModelState.AddModelError("RegistrationFromDateDay",
                     "The date of volunteer registration must be before today");
             }
 
-            if (RegistrationToDate.HasValue && RegistrationToDate.Value.Date <= DateTime.Today)
+            if (RegistrationToDate.HasValue && RegistrationToDate.Value.Date >= DateTime.Today)
             {
                 ModelState.AddModelError("RegistrationToDateDay",
                     "The date of volunteer registration must be before today");
             }
 
-            if (RegistrationFromDateYear.HasValue && RegistrationFromDateYear >= 2022)
+            if (RegistrationFromDateYear.HasValue && RegistrationFromDateYear < 2022)
             {
                 ModelState.AddModelError("RegistrationFromDateYear", "Year must be a number that is 2022 or later");
             }
 
-            if (RegistrationToDateYear.HasValue && RegistrationToDateYear >= 2022)
+            if (RegistrationToDateYear.HasValue && RegistrationToDateYear < 2022)
             {
                 ModelState.AddModelError("RegistrationToDateYear", "Year must be a number that is 2022 or later");
             }
