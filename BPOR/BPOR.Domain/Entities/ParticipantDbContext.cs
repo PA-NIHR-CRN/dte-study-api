@@ -23,6 +23,7 @@ public class ParticipantDbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<SysConfiguration> SysConfigurations { get; set; } = null!;
     public DbSet<Study> Studies { get; set; } = null!;
     public DbSet<ManualEnrollment> ManualEnrollments { get; set; } = null!;
+    public DbSet<FilterCriteria> FilterCriterias { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

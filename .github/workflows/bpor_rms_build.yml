@@ -41,7 +41,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: |
             crnccd-secret-dev-bpor-rms-app-config
@@ -49,7 +49,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: 'true'
 
@@ -133,7 +133,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: |
             crnccd-secret-test-bpor-rms-app-config
@@ -141,7 +141,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: 'true'
 
@@ -224,7 +224,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: |
             crnccs-secret-uat-bpor-rms-app-config
@@ -232,7 +232,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: 'true'
 
@@ -315,7 +315,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: |
             crnccp-secret-oat-bpor-rms-app-config
@@ -323,7 +323,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: 'true'
 
@@ -406,7 +406,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: |
             crnccp-secret-prod-bpor-rms-app-config
@@ -414,7 +414,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: 'true'
 

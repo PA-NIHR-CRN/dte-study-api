@@ -9,6 +9,7 @@ namespace BPOR.Rms.Models.Filter;
 
 public class VolunteerFilterViewModel
 {
+    public int StudyId { get; set; }
     // Study selection
     [Display(Name = "Select a study (if applicable) you want to find volunteers for")]
     public SelectListItem? SelectedStudy { get; set; }
@@ -16,16 +17,19 @@ public class VolunteerFilterViewModel
     public IEnumerable<SelectListItem>? Studies { get; set; }
     [Display(Name = "Volunteers contacted")]
     public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
+    public string? SelectedVolunteersContacted { get; set; }
 
     [Display(Name = "Volunteers recruited")]
     public IEnumerable<SelectListItem>? VolunteersRecruited { get; set; }
+    public string? SelectedVolunteersRecruited { get; set; }
 
     [Display(Name = "Volunteers registered interest")]
     public IEnumerable<SelectListItem>? VolunteersRegisteredInterest { get; set; }
+    public string? SelectedVolunteersRegisteredInterest { get; set; }
 
     [Display(Name = "Volunteers completed registration")]
     public IEnumerable<SelectListItem>? VolunteersCompletedRegistration { get; set; }
-
+    public string? SelectedVolunteersCompletedRegistration { get; set; }
     // Volunteer criteria
     [Display(Name = "Exclude those contacted")]
     public bool ExcludeContacted { get; set; }
@@ -67,7 +71,7 @@ public class VolunteerFilterViewModel
     public int? RegistrationFromDateMonth { get; set; }
 
     [Display(Name = "Year")]
-    [Range(2022, 2100, ErrorMessage = "Year must be a reasonable value")]
+    [Range(1970, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? RegistrationFromDateYear { get; set; }
 
     // To Date
@@ -80,7 +84,7 @@ public class VolunteerFilterViewModel
     public int? RegistrationToDateMonth { get; set; }
 
     [Display(Name = "Year")]
-    [Range(2022, 2100, ErrorMessage = "Year must be a reasonable value")]
+    [Range(1970, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? RegistrationToDateYear { get; set; }
 
     // Postcode districts and Full postcode
@@ -125,6 +129,6 @@ public class VolunteerFilterViewModel
     public bool Ethnicity_Other { get; set; }
     [Display(Name = "White")]
     public bool Ethnicity_White { get; set; }
-    public string VolunteerCount { get; set; } = "-";
+    public int VolunteerCount { get; set; }
 
 }

@@ -9,24 +9,46 @@ public class EmailController : Controller
 {
     public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
+        ModelState.Clear();
+
+        return View(model);
+    }
+
+    public IActionResult Index(SetupCampaignViewModel model)
+    {
+        ModelState.Remove("MaxNumbers");
+        ModelState.Remove("TotalVolunteers");
+        ModelState.Remove("StudyName");
+        ModelState.Remove("SelectedTemplate");
         if (TempData["Notification"] != null)
         {
             model.Notification =
                 JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"].ToString());
         }
 
-        return View(model);
-    }
-
-    [HttpPost]
-    public IActionResult SetupCampaign()
-    {
-        return View();
+        return View("SetupCampaign", model);
     }
 
     [HttpPost]
     public IActionResult SendEmail(SetupCampaignViewModel model)
     {
+        ModelState.Remove("PreviewEmails");
+
+        if (!ModelState.IsValid)
+        {
+            if (model.TotalVolunteers > model.MaxNumbers)
+            {
+                ModelState.AddModelError("TotalVolunteers", "Total Volunteers must be less than or equal to Max Numbers.");
+                return View("SetupCampaign", model);
+            }
+            if (string.IsNullOrEmpty(model.SelectedTemplate))
+            {
+                ModelState.AddModelError("SelectedTemplate", "Please select a email template.");
+                return View("SetupCampaign", model);
+            }
+            
+            return View("SetupCampaign", model);
+        }
         return RedirectToAction("EmailSuccess", model);
     }
 
@@ -38,11 +60,6 @@ public class EmailController : Controller
 
     public IActionResult SendPreviewEmail(SetupCampaignViewModel model)
     {
-        if (ModelState.IsValid)
-        {
-            return RedirectToAction("EmailSuccess", model);
-        }
-
         if (model.PreviewEmails != null)
         {
             var emails = model.PreviewEmails.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -61,6 +78,11 @@ public class EmailController : Controller
         ModelState.Remove("StudyName");
         ModelState.Remove("SelectedTemplate");
 
+        if (!ModelState.IsValid)
+        {
+            return RedirectToAction("Index", model);
+        }
+
         TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
         {
             IsSuccess = true,
@@ -68,26 +90,19 @@ public class EmailController : Controller
             Body = $"Preview email has been sent to{model.PreviewEmails}"
         });
 
-        return RedirectToAction("SetupCampaign", model);
+        return RedirectToAction("Index", model);
     }
 
 
     [HttpPost]
     public IActionResult HandleForms(SetupCampaignViewModel model, string action)
     {
-        switch (action)
+        return action switch
         {
-            case "SetupCampaign":
-                return RedirectToAction("SetupCampaign");
-                break;
-            case "SendPreviewEmail":
-                return SendPreviewEmail(model);
-                break;
-            default:
-                break;
-        }
-
-        return RedirectToAction("SetupCampaign");
+            "SetupCampaign" => SendEmail(model),
+            "SendPreviewEmail" => SendPreviewEmail(model),
+            _ => RedirectToAction("SetupCampaign")
+        };
     }
 
     private bool IsValidEmail(string email)
