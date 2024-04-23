@@ -18,27 +18,18 @@ public class FilterController(ParticipantDbContext context) : Controller
 
     public IActionResult Index(VolunteerFilterViewModel model, string? studyId)
     {
-        SetStudiesSelectList(model, studyId);
+        SetSelectedStudy(model, studyId);
         SetStudyExclusionFilters(model);
-        SetLocationsSelectList(model);
+        SetHealthConditionSelectList(model);
+
+        model.ShowStudyFilters = String.IsNullOrEmpty(studyId) ? false : true;
 
         return View(model);
     }
 
-    private void SetLocationsSelectList(VolunteerFilterViewModel model)
+    private void SetHealthConditionSelectList(VolunteerFilterViewModel model)
     {
-        model.Locations = new List<SelectListItem>
-        {
-            new SelectListItem { Value = "1", Text = "East Midlands", Selected = false },
-            new SelectListItem { Value = "2", Text = "East of England", Selected = false },
-            new SelectListItem { Value = "3", Text = "London", Selected = false },
-            new SelectListItem { Value = "4", Text = "North East", Selected = false },
-            new SelectListItem { Value = "5", Text = "North West", Selected = false },
-            new SelectListItem { Value = "6", Text = "South East", Selected = false },
-            new SelectListItem { Value = "7", Text = "South West", Selected = false },
-            new SelectListItem { Value = "8", Text = "West Midlands", Selected = false },
-            new SelectListItem { Value = "9", Text = "Yorkshire and the Humber", Selected = false }
-        };
+        model.HealthConditions = context.HealthConditions.Where(x => !x.IsDeleted).Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Description }).OrderBy(x => x.Text).ToList();
     }
 
     private void SetStudyExclusionFilters(VolunteerFilterViewModel model)
@@ -132,20 +123,13 @@ public class FilterController(ParticipantDbContext context) : Controller
         };
     }
 
-    private void SetStudiesSelectList(VolunteerFilterViewModel model, string? studyId)
+    private void SetSelectedStudy(VolunteerFilterViewModel model, string studyId)
     {
-        model.Studies = context.Studies.Where(x => !x.IsDeleted)
-            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.StudyName }).ToList();
-
         if (!String.IsNullOrEmpty(studyId))
         {
-            foreach (var study in model.Studies)
-            {
-                if (study.Value == studyId)
-                {
-                    study.Selected = true;
-                }
-            }
+            Study selectedStudy = context.Studies.Where(x => x.Id == Convert.ToInt32(studyId)).FirstOrDefault();
+
+            model.SelectedStudy = selectedStudy?.StudyName ?? string.Empty;
         }
     }
 
@@ -184,7 +168,7 @@ public class FilterController(ParticipantDbContext context) : Controller
         {
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount,
-            StudyName = model.SelectedStudy?.Value
+            StudyName = model.SelectedStudy
         };
         return RedirectToAction("SetupCampaign", "Email", campaignDetails);
     }
@@ -201,11 +185,11 @@ public class FilterController(ParticipantDbContext context) : Controller
     }
 
     [HttpPost]
+    //[RequestFormSizeLimit(valueCountLimit: 50000)]
     public IActionResult FilterVolunteers(VolunteerFilterViewModel model)
     {
-        ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
-            model.RegistrationFromDateYear,
-            model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
+        ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth, model.RegistrationFromDateYear,
+                                    model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
         ValidatePostcodeDistricts(model.PostcodeDistricts);
         ValidateAge(model.AgeFrom, model.AgeTo);
 
@@ -214,6 +198,7 @@ public class FilterController(ParticipantDbContext context) : Controller
             int volunteerCount = 0;
 
             FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
+            FilterByAreasOfResearch(model.SelectedHealthConditions);
             FilterByRegistrationDate(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
                 model.RegistrationFromDateYear,
                 model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
@@ -236,17 +221,26 @@ public class FilterController(ParticipantDbContext context) : Controller
             model.VolunteerCount = query.Count(); 
         }
 
-        if (model.SelectedStudy == null)
-        {
-            SetStudiesSelectList(model, "");
-        }
-
-        SetLocationsSelectList(model);
+        SetHealthConditionSelectList(model);
 
         SetStudyExclusionFilters(model);
 
+        if (!String.IsNullOrEmpty(model.SelectedStudy))
+        {
+            model.ShowStudyFilters = true;
+        }
 
         return View("Index", model);
+    }
+
+    private void FilterByAreasOfResearch(List<string>? selectedHealthConditions)
+    {
+        if (selectedHealthConditions.Count > 0)
+        {
+            List<int> conditionIds = selectedHealthConditions.Select(s => int.Parse(s)).ToList();
+
+            filters.Add(p => p.HealthConditions.Any(hc => conditionIds.Contains(hc.HealthConditionId)));
+        }
     }
 
     private void ValidatePostcodeDistricts(string? postcodeDistricts)

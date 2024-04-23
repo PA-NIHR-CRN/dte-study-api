@@ -1,7 +1,10 @@
 @model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
 
-<div class="govuk-form-group">
-    @Html.LabelFor(m => Model.SelectedStudy, new { @class = "govuk-label govuk-label--l" })
-
-    @Html.DropDownListFor(m => m.SelectedStudy, Model.Studies, "Select a study", new { @class = "govuk-select" })
-</div>
+@if (Model.ShowStudyFilters)
+{
+    <div class="govuk-form-group">
+        @Html.LabelFor(m => m.SelectedStudy, new { @class = "govuk-label govuk-label--l" })
+        @Html.HiddenFor(m => m.SelectedStudy)
+        <label class="govuk-studylabel" aria-label="Selected study">@Model.SelectedStudy</label>
+    </div>
+}

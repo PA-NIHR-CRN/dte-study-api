@@ -437,4 +437,9 @@
     margin-top: 5px;
 }
 
-
+.govuk-studylabel {
+    font-family: Lato, serif;
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1.1875rem;
+}
