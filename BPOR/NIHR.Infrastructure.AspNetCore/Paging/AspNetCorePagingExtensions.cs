@@ -1,11 +1,4 @@
-﻿using NIHR.Infrastructure.AspNetCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NIHR.Infrastructure.Paging
+﻿namespace NIHR.Infrastructure.Paging
 {
     public static class AspNetCorePagingExtensions
     {

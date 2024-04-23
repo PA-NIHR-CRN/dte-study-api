@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace NIHR.Infrastructure.AspNetCore
+namespace NIHR.Infrastructure.Paging
 {
-    public class PaginationService : IPaginationService
+    public class RequestQueryParamPaginationService : IPaginationService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private const int _defaultPageSize = 10;
         private const int _defaultPage = 1;
 
-        public PaginationService(IHttpContextAccessor httpContextAccessor)
+        public RequestQueryParamPaginationService(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
         }

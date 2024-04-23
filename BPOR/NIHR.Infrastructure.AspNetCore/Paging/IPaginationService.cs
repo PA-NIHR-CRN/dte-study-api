@@ -1,4 +1,4 @@
-﻿namespace NIHR.Infrastructure.AspNetCore
+﻿namespace NIHR.Infrastructure.Paging
 {
     public interface IPaginationService
     {

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using NIHR.Infrastructure.Extensions;
 using NIHR.Infrastructure.Settings;
+using NIHR.Infrastructure.Configuration;
 
 namespace BPOR.Rms.Startup;
 

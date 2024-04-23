@@ -1,5 +1,5 @@
 using BPOR.Rms.Startup;
-using NIHR.Infrastructure.Extensions;
+using NIHR.Infrastructure.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 

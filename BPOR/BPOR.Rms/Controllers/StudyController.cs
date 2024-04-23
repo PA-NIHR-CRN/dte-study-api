@@ -4,8 +4,6 @@ using BPOR.Rms.Models.Study;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using NIHR.Infrastructure.AspNetCore;
-using NIHR.Infrastructure.EntityFrameworkCore.Paging;
 using NIHR.Infrastructure.Paging;
 using Z.EntityFramework.Plus;
 

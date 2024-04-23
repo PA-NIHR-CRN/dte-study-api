@@ -1,12 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NIHR.Infrastructure.EntityFrameworkCore.Paging;
-using NIHR.Infrastructure.Paging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Z.EntityFramework.Plus;
 
 namespace NIHR.Infrastructure.Paging
