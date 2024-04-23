@@ -10,11 +10,11 @@
 
         if (Model.StudyId != null)
         {
-            breadcrumbs.Add(new($"Study", $"/Study/Detail/{Model.StudyId}"));
+            breadcrumbs.Add(new BreadcrumbItem($"Study", $"/Study/Details/{Model.StudyId}"));
         }
 
-        breadcrumbs.Add(new("Find volunteers", "/Filter"));
-        breadcrumbs.Add(new("Set up email campaign", "/Email/SetupCampaign"));
+        breadcrumbs.Add(new BreadcrumbItem("Find volunteers", "/Filter"));
+        breadcrumbs.Add(new BreadcrumbItem("Set up email campaign", "/Email/SetupCampaign"));
     }
 
     @await Component.InvokeAsync("Breadcrumbs", breadcrumbs)

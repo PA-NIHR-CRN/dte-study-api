@@ -34,19 +34,16 @@ public class EmailController : Controller
     {
         ModelState.Remove("PreviewEmails");
 
+        if (model.TotalVolunteers > model.MaxNumbers)
+        {
+            ModelState.AddModelError("TotalVolunteers", "Total Volunteers must be less than or equal to Max Numbers.");
+        }
+        if (string.IsNullOrEmpty(model.SelectedTemplate))
+        {
+            ModelState.AddModelError("SelectedTemplate", "Please select a email template.");
+        }
         if (!ModelState.IsValid)
         {
-            if (model.TotalVolunteers > model.MaxNumbers)
-            {
-                ModelState.AddModelError("TotalVolunteers", "Total Volunteers must be less than or equal to Max Numbers.");
-                return View("SetupCampaign", model);
-            }
-            if (string.IsNullOrEmpty(model.SelectedTemplate))
-            {
-                ModelState.AddModelError("SelectedTemplate", "Please select a email template.");
-                return View("SetupCampaign", model);
-            }
-            
             return View("SetupCampaign", model);
         }
         return RedirectToAction("EmailSuccess", model);

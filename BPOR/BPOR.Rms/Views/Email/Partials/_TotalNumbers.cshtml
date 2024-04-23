@@ -40,11 +40,11 @@
             @Html.ValidationMessageFor(model => model.TotalVolunteers)
         </span>
         <input asp-for="TotalVolunteers" class=" govuk-input govuk-input--error" id="TotalVolunteers" aria-describedby="TotalVolunteers-error"/>
-        <span> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers)</span>
+        <span class="govuk-body-l body-bold" style="color: #000"> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers) max</span>
     }
     else
     {
         <input asp-for="TotalVolunteers" class=" govuk-input" id="TotalVolunteers" value="@(Model.TotalVolunteers)"/>
-        <span> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers)</span>
+        <span class="govuk-body-l body-bold" style="color: #000"> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers) max</span>
     }
 </div>

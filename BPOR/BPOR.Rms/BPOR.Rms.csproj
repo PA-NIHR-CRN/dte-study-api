@@ -35,9 +35,6 @@
     <ItemGroup>
         <None Update="Views/Study/Partials/_StudyList.cshtml.css" SingleFile="true" CssScope="custom-scope-identifier" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Views\Researcher\Partials\" />
-    </ItemGroup>
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>

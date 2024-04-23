@@ -1,0 +1,24 @@
+@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+
+<h1 class="govuk-heading-l">Add a study to use the Be Part of Research registry</h1>
+
+<p class="govuk-body">Use this form to provide information about a study so that we can confirm eligibility for the Be Part of Research registry.</p>
+<p class="govuk-body">We will ask for your contact details, and for some basic information about the study. This will include the names of any study sponsors and funders.</p>
+<p class="govuk-body">We will also ask you whether the study has been included on the NIHR portfolio.</p>
+<p class="govuk-body">All questions are mandatory unless labelled as optional.</p>
+<p class="govuk-body">When you are ready to begin, click the "Next" button below.</p>
+
+<h1 class="govuk-heading-l">Add a study to use the Be Part of Research registry</h1>
+<p class="govuk-body">For a study to use the Be Part of Research registry, it must be on the NIHR CRN portfolio and/or in receipt of NIHR funding.</p>
+<p class="govuk-body">If the study does not have NIHR funding and is awaiting confirmation of inclusion on the NIHR CRN portfolio, or is yet to be submitted, you can continue to complete this form and we can discuss this further with you at a later date.</p>
+<p class="govuk-body">If you have any questions about this requirement, please contact us directly at <a>bepartofresearch-volunteerservice@nihr.ac.uk</a></p>
+<div class="govuk-checkboxes" data-module="govuk-checkboxes">
+    <div class="govuk-checkboxes__item">
+        <input asp-for="IsTermsAndConditionsAccepted" class="govuk-checkboxes__input" id="IsSexMale" type="checkbox" />
+        <span class="govuk-govuk-label govuk-checkboxes__label">
+            I confirm I have read and agree to the <a>terms and conditions.</a>
+        </span>
+    </div>
+</div>
+
+

@@ -30,4 +30,6 @@ public class ResearcherStudyFormViewModel
     public bool? IsRecruitingIdentifiableParticipants { get; set; }
     
     public bool IsEditMode { get; set; }
+    [Required(ErrorMessage = "Accept the terms and conditions")]
+    public bool? IsTermsAndConditionsAccepted { get; set; }
 }
