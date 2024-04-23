@@ -1,14 +1,14 @@
 ﻿using NIHR.Infrastructure.AspNetCore;
-using NIHR.Infrastructure.Paging;
+using NIHR.Infrastructure.EntityFrameworkCore.Paging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NIHR.Infrastructure.EntityFrameworkCore.Paging
+namespace NIHR.Infrastructure.Paging
 {
-    public static class Extensions
+    public static class EntityFrameworkCorePagingExtensions
     {
         public static PageDeferred<T> DeferredPage<T>(this IOrderedQueryable<T> source, IPaginationService paginationService) => source.DeferredPage(paginationService.PageSize, paginationService.Page);
 

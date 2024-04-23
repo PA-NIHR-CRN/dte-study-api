@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NIHR.Infrastructure.EntityFrameworkCore.Paging;
 using NIHR.Infrastructure.Paging;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Z.EntityFramework.Plus;
 
-namespace NIHR.Infrastructure.EntityFrameworkCore.Paging
+namespace NIHR.Infrastructure.Paging
 {
     public static class Extensions
     {

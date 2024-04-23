@@ -7,24 +7,25 @@ namespace NIHR.Infrastructure.Paging
 {
     public class Page<T> : Page, IEnumerable<T>
     {
-        private ICollection<T> _items;
+        private IEnumerable<T> _items;
 
-        public Page(ICollection<T> source, int pageSize, int currentPage, long totalCount) : base(source, pageSize, currentPage, totalCount)   
+        public Page(IEnumerable<T> source, int pageSize, int currentPage, long totalCount) : base(source, pageSize, currentPage, totalCount)   
         {
             _items = source;
         }
 
-        public ICollection<T> Items { get => _items; }
+        public IEnumerable<T> Items { get => _items; }
 
         public new IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
     }
 
     public abstract class Page : IPage
     {
-        private long _totalCount;
+        protected long _totalCount;
+        protected int _pageSize;
+        protected int _currentPage;
+
         private IEnumerable _items;
-        private int _pageSize;
-        private int _currentPage;
 
         public Page(IEnumerable source, int pageSize, int currentPage, long totalCount)
         {

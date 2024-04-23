@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using NIHR.Infrastructure.AspNetCore;
 using NIHR.Infrastructure.EntityFrameworkCore.Paging;
+using NIHR.Infrastructure.Paging;
+using Z.EntityFramework.Plus;
 
 namespace BPOR.Rms.Controllers;
 
@@ -35,7 +37,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         var deferredStudiesPage = studiesQuery
             .AsStudyListModel()
             .OrderByDescending(s => s.Id)
-            .DeferredPage(paginationService);            
+            .DeferredPage(paginationService);
 
         var viewModel = new StudiesViewModel
         {
