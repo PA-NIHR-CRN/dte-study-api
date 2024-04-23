@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities;
-using BPOR.Domain.Entities.RefData;
 
 namespace BPOR.Rms.Models.Email;
 

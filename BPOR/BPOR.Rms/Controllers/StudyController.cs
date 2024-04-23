@@ -1,25 +1,25 @@
 using BPOR.Domain.Entities;
-using BPOR.Domain.Extensions;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using NIHR.Infrastructure.Paging;
+using Z.EntityFramework.Plus;
 
 namespace BPOR.Rms.Controllers;
 
-public class StudyController(ParticipantDbContext context) : Controller
+public class StudyController(ParticipantDbContext context, IPaginationService paginationService) : Controller
 {
     
     [HttpPost]
-    public IActionResult PerformSearch(string searchTerm, int currentPage = 1)
+    public IActionResult PerformSearch(string searchTerm)
     {
-        return RedirectToAction("Index", new { searchTerm, currentPage, hasSearched = true });
+        return RedirectToAction("Index", new { searchTerm, paginationService.Page, hasSearched = true });
     }
     
-    public async Task<IActionResult> Index(string? searchTerm, int currentPage = 1, bool hasSearched = false,bool hasBeenReset = false)
+    public async Task<IActionResult> Index(string? searchTerm, bool hasSearched = false, bool hasBeenReset = false, CancellationToken token = default)
     {
-        var pageSize = 9;
         var studiesQuery = context.Studies.AsQueryable();
 
         if (!string.IsNullOrEmpty(searchTerm))
@@ -32,18 +32,15 @@ public class StudyController(ParticipantDbContext context) : Controller
                                                    || (isParsedInt && s.CpmsId == searchInt));
         }
 
-        // TODO create paginated results<T> generic class look at rider annotations, what am I getting back? Can we get a paginated result back that is a generic type?List<T> whatever it is
-        // selector, source, pageIndex, pageSize(which can be defaulted)
-        var paginatedStudies = await studiesQuery.OrderByDescending(s => s.Id)
-            .ToPaginatedListAsync(Projections.StudyAsStudyListModel(), currentPage, pageSize);
+        var deferredStudiesPage = studiesQuery
+            .AsStudyListModel()
+            .OrderByDescending(s => s.Id)
+            .DeferredPage(paginationService);
 
-        // TODO create paginated results<T> generic class
         var viewModel = new StudiesViewModel
         {
-            Studies = paginatedStudies.Items,
-            CurrentPage = currentPage,
-            TotalPages = (int)Math.Ceiling((double)paginatedStudies.TotalCount / pageSize),
-            HasSearched =hasSearched,
+            Studies = await deferredStudiesPage.ValueAsync(token),
+            HasSearched = hasSearched,
             SearchTerm = searchTerm ?? string.Empty,
             HasBeenReset = hasBeenReset,
         };

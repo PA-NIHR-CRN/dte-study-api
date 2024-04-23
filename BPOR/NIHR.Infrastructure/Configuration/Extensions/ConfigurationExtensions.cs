@@ -8,16 +8,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NIHR.Infrastructure.Configuration;
 using NIHR.Infrastructure.Settings;
 
-namespace NIHR.Infrastructure.Extensions
+namespace NIHR.Infrastructure.Configuration
 {
-    public static class Configuration
+    public static class ConfigurationExtensions
     {
-        
+
         //TODO chat with chris about this global exception handling
-       
+
         public static IServiceCollection ConfigureNihrLogging(this IServiceCollection services,
             IConfiguration configuration)
         {
@@ -101,7 +100,7 @@ namespace NIHR.Infrastructure.Extensions
             }
 
             var settings = configuration.GetSection(sectionName).Get<T>();
-            
+
             if (settings == null)
             {
                 settings = BindFlatConfigurationKeys<T>(configuration, sectionName);
@@ -114,7 +113,7 @@ namespace NIHR.Infrastructure.Extensions
 
             return Options.Create(settings);
         }
-        
+
         private static T BindFlatConfigurationKeys<T>(IConfiguration configuration, string sectionName) where T : class, new()
         {
             var instance = new T();

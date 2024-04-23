@@ -20,6 +20,8 @@ public static class Projections
     }
 
 
+    public static IQueryable<StudyModel> AsStudyListModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyListModel());
+
     public static Expression<Func<Domain.Entities.Study, StudyModel>> StudyAsStudyListModel()
     {
         return s => new StudyModel
@@ -37,7 +39,7 @@ public static class Projections
                 .FirstOrDefault()
         };
     }
-
+    
     public static Expression<Func<Domain.Entities.Study, StudyDetailsViewModel>> StudyAsStudyDetailsViewModel()
     {
         return s => new StudyDetailsViewModel
@@ -64,5 +66,5 @@ public static class Projections
             StudyName = s.StudyName,
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments)
         };
-    }
+}
 }

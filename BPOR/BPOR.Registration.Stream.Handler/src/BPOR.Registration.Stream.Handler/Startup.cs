@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NIHR.Infrastructure.EntityFrameworkCore;
-using NIHR.Infrastructure.Extensions;
+using NIHR.Infrastructure.Configuration;
 
 
 namespace BPOR.Registration.Stream.Handler;
