@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace BPOR.Rms.Models.Volunteer;
 
 public class EnrollmentDetails

@@ -1,5 +1,3 @@
-using System;
-
 namespace NIHR.Infrastructure.Entities
 {
     public interface ITimestamped

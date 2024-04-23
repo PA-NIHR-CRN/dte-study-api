@@ -18,7 +18,7 @@ using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Common.Services;
 using NIHR.Infrastructure.Clients;
-using NIHR.Infrastructure.Extensions;
+using NIHR.Infrastructure.Configuration;
 
 namespace BPOR.Registration.Api.Startup;
 

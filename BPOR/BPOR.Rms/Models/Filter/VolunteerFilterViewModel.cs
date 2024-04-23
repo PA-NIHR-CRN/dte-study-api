@@ -1,7 +1,3 @@
-using Amazon.DynamoDBv2.Model;
-using BPOR.Domain.Entities;
-using BPOR.Domain.Entities.RefData;
-using CsvHelper.Configuration.Attributes;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
