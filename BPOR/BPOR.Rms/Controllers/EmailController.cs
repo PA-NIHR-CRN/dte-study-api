@@ -84,7 +84,7 @@ public class EmailController : Controller
         {
             IsSuccess = true,
             Heading = "Success",
-            Body = $"Preview email has been sent to{model.PreviewEmails}"
+            Body = $"Preview email has been sent to {model.PreviewEmails}"
         });
 
         return RedirectToAction("Index", model);

@@ -3,7 +3,7 @@
 <style>
     /* Mobile devices */
     @@media (max-width: 640px) {
-        #volunteer-numbers  {
+        #TotalVolunteers  {
             width: 100%; /* Make input full width on mobile */
         }
         .govuk-form-group span {
@@ -13,7 +13,7 @@
 
     /* Tablet devices - between 641px and 1024px */
     @@media (min-width: 641px) and (max-width: 1024px) {
-        #volunteer-numbers  {
+        #TotalVolunteers  {
             width: 50%; /* Make input 50% width on tablet */
         }
         .govuk-form-group span {
@@ -23,16 +23,19 @@
 
     /* Desktop and larger devices - more than 1024px */
     @@media (min-width: 1025px) {
-        #volunteer-numbers {
+        #TotalVolunteers {
             width: 30%; /* Make input 30% width on desktop */
         }
     }
 </style>
 
 <div class="govuk-form-group @(Html.ViewData.ModelState["TotalVolunteers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-    <label asp-for="TotalVolunteers" class="govuk-label" for="TotalVolunteers">
+    <label asp-for="TotalVolunteers" class="govuk-label govuk-label--ll" for="TotalVolunteers">
         @Html.DisplayNameFor(model => model.TotalVolunteers)
     </label>
+    <div id="TotalVolunteers-hint" class="govuk-hint">
+        Indicate a number equal to or smaller than the total number of volunteers matching your criteria.
+    </div>
     @if (Html.ViewData.ModelState["TotalVolunteers"]?.Errors.Count > 0)
     {
         <span id="TotalVolunteers-error" class="govuk-error-message">
@@ -40,11 +43,11 @@
             @Html.ValidationMessageFor(model => model.TotalVolunteers)
         </span>
         <input asp-for="TotalVolunteers" class=" govuk-input govuk-input--error" id="TotalVolunteers" aria-describedby="TotalVolunteers-error"/>
-        <span class="govuk-body-l body-bold" style="color: #000"> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers) max</span>
+        <span class="govuk-body-l body-bold" style="color: #000"> / @Model.MaxNumbers.ToString("N0") max</span>
     }
     else
     {
         <input asp-for="TotalVolunteers" class=" govuk-input" id="TotalVolunteers" value="@(Model.TotalVolunteers)"/>
-        <span class="govuk-body-l body-bold" style="color: #000"> / @Html.DisplayFor(modelItem => modelItem.MaxNumbers) max</span>
+        <span class="govuk-body-l body-bold" style="color: #000"> / @Model.MaxNumbers.ToString("N0") max</span>
     }
 </div>

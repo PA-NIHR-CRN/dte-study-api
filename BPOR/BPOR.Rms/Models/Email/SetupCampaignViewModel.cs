@@ -11,12 +11,14 @@ public class SetupCampaignViewModel
     [Range(1, int.MaxValue, ErrorMessage = "Please enter a number greater than zero for Max Numbers.")]
     public int MaxNumbers { get; set; }
 
+    [Required(ErrorMessage = "Please enter the total number of volunteers you want to send the email to.")]
     [DisplayName("How many volunteers do you want to send it to?")]
     [Range(1, int.MaxValue, ErrorMessage = "Total Volunteers must be at least 1.")]
-    public int TotalVolunteers { get; set; }
+    public int? TotalVolunteers { get; set; }
 
     public string? StudyName { get; set; }
 
+    [DisplayName("Select email template")]
     [Required(ErrorMessage = "Please select a email template.")]
     public string? SelectedTemplate { get; set; }
 

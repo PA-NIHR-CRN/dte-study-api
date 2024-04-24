@@ -19,11 +19,9 @@
 
 <div class="govuk-form-group">
     <div class="govuk-form-group @(Html.ViewData.ModelState["PreviewEmails"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-        <h1 class="govuk-label-wrapper">
             <label asp-for="PreviewEmails" for="PreviewEmails" class="govuk-label govuk-label--l">
                 @Html.DisplayNameFor(model => model.PreviewEmails)
             </label>
-        </h1>
         <div id="PreviewEmails-hint" class="govuk-hint">
             Specify the email address(es) you want any preview emails to be delivered to. These should be comma-separated. For example, user@email.com, user2@email.com
         </div>
