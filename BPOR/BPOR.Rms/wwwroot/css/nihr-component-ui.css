@@ -469,3 +469,12 @@
     border-radius: 5px;
     border: 2px solid  #0B0C0C;
 }
+
+.research-areas-list {
+    overflow-y: scroll;
+    height: 240px;
+    border: 2px solid;
+    border-color: lightgrey;
+    border-radius: 0.5rem;
+    padding: 10px;
+}
