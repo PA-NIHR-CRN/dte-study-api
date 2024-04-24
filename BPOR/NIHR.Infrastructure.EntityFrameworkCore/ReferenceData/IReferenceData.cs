@@ -1,4 +1,4 @@
-namespace BPOR.Domain.Entities.RefData;
+namespace NIHR.Infrastructure.EntityFrameworkCore;
 
 public interface IReferenceData
 {

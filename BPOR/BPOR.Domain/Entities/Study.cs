@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using NIHR.Infrastructure.Entities;
+using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 
@@ -17,6 +17,6 @@ public class Study : ISoftDelete, ITimestamped
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; } 
-    public IList<ManualEnrollment> ManualEnrollments { get; set; }
+    public ICollection<ManualEnrollment> ManualEnrollments { get; set; } = new List<ManualEnrollment>();
     
 }

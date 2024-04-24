@@ -25,7 +25,7 @@ public class FilterController(ParticipantDbContext context) : Controller
 
     private void SetHealthConditionSelectList(VolunteerFilterViewModel model)
     {
-        model.HealthConditions = context.HealthConditions.Where(x => !x.IsDeleted).Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Description }).OrderBy(x => x.Text).ToList();
+        model.HealthConditions = context.HealthConditions.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Description }).OrderBy(x => x.Text).ToList();
     }
 
     private void SetStudyExclusionFilters(VolunteerFilterViewModel model)
@@ -206,8 +206,6 @@ public class FilterController(ParticipantDbContext context) : Controller
                 model.Ethnicity_Other, model.Ethnicity_White);
 
             IQueryable<Participant> query = context.Participants.AsQueryable();
-
-            filters.Add(p => !p.IsDeleted);
 
             foreach (var filter in filters)
             {

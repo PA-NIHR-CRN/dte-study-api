@@ -122,7 +122,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
                     StudyName = model.StudyName,
                     CpmsId = model.CpmsId,
                     IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false,
-                    IsDeleted = false,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                 };
