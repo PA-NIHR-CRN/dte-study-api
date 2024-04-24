@@ -10,6 +10,9 @@ public class VolunteerFilterViewModel
     [Display(Name = "Selected Study")]
     public string? SelectedStudy { get; set; }
 
+    public string? SelectedStudyId { get; set; }
+    public string? SelectedStudyCPMSId { get; set; }
+
     public IEnumerable<SelectListItem>? Studies { get; set; }
     [Display(Name = "Volunteers contacted")]
     public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
@@ -128,4 +131,5 @@ public class VolunteerFilterViewModel
     public int VolunteerCount { get; set; }
     public bool ShowStudyFilters { get; set; }
 
+    public NotificationBannerModel? Notification { get; set; }
 }
