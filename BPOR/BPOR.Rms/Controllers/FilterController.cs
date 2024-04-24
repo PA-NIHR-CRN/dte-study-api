@@ -181,7 +181,7 @@ public class FilterController(ParticipantDbContext context) : Controller
     }
 
     [HttpPost]
-    //[RequestFormSizeLimit(valueCountLimit: 50000)]
+    [RequestFormSizeLimit(valueCountLimit: 50000)]
     public IActionResult FilterVolunteers(VolunteerFilterViewModel model)
     {
         ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth, model.RegistrationFromDateYear,

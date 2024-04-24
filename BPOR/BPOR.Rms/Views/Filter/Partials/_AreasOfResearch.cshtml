@@ -7,5 +7,17 @@
 
         <p>If you are using a keyboard to navigate, you will need to use the tab key to move through the options in the drop-down list on this section. Use the escape key to close the list.</p>
     </div>
-    @Html.ListBoxFor(m => m.SelectedHealthConditions, new MultiSelectList(Model.HealthConditions, "Value", "Text"), new { @class = "govuk-multi-select", multiple = "multiple" })
+
+    <fieldset class="govuk-fieldset">
+        <div class="govuk-checkboxes" style="overflow-y: scroll; height: 250px;" data-module="govuk-checkboxes">
+            @foreach (var item in Model.HealthConditions)
+            {
+                <div class="govuk-checkboxes__item">
+                    <input type="checkbox" class="govuk-checkboxes__input" id="@item.Value" name="SelectedHealthConditions" value="@item.Value" @(Model.SelectedHealthConditions != null && Model.SelectedHealthConditions.Contains(item.Value) ? "checked" : "") />
+                    <label for="@item.Value" class="govuk-label govuk-checkboxes__label">@item.Text</label>
+                </div>
+            }
+        </div>
+    </fieldset>
+
 </div>
