@@ -37,12 +37,12 @@ public class FilterController(ParticipantDbContext context) : Controller
         return action switch
         {
             "FilterVolunteers" => FilterVolunteers(model),
-            "ClearFilters" => ClearFilters(),
+            "ClearFilters" => ClearFilters(model),
             _ => RedirectToAction("Index")
         };
     }
 
-    public IActionResult ClearFilters()
+    public IActionResult ClearFilters(VolunteerFilterViewModel model)
     {
         TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
         {
@@ -51,7 +51,7 @@ public class FilterController(ParticipantDbContext context) : Controller
             Body = $"All previously applied filters have been removed.",
         });
 
-        return RedirectToAction("Index", "Filter");
+        return RedirectToAction("Index", "Filter", new { studyId = model.SelectedStudyId });
     }
 
     private void SetHealthConditionSelectList(VolunteerFilterViewModel model)
@@ -256,6 +256,7 @@ public class FilterController(ParticipantDbContext context) : Controller
 
         if (!String.IsNullOrEmpty(model.SelectedStudy))
         {
+            SetSelectedStudy(model, model.SelectedStudyId);
             model.ShowStudyFilters = true;
         }
 
