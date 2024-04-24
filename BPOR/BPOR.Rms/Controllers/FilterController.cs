@@ -231,7 +231,7 @@ public class FilterController(ParticipantDbContext context) : Controller
 
     private void FilterByAreasOfResearch(List<string>? selectedHealthConditions)
     {
-        if (selectedHealthConditions.Count > 0)
+        if (selectedHealthConditions != null)
         {
             List<int> conditionIds = selectedHealthConditions.Select(s => int.Parse(s)).ToList();
 
