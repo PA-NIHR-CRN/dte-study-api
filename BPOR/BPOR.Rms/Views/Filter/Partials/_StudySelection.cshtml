@@ -5,6 +5,10 @@
     <div class="govuk-form-group">
         @Html.LabelFor(m => m.SelectedStudy, new { @class = "govuk-label govuk-label--l" })
         @Html.HiddenFor(m => m.SelectedStudy)
-        <label class="govuk-studylabel" aria-label="Selected study">@Model.SelectedStudy</label>
+        @Html.HiddenFor(m => m.SelectedStudyId)
+        @Html.HiddenFor(m => m.SelectedStudyCPMSId)
+        <label class="govuk-studylabel" aria-label="Selected study name"><b>Study Name:</b> @Model.SelectedStudy</label>
+        <label class="govuk-studylabel" aria-label="Selected study ID"><b>Study ID:</b> @Model.SelectedStudyId</label>
+        <label class="govuk-studylabel" aria-label="Selected study CPMS ID"><b>CPMS ID:</b> @Model.SelectedStudyCPMSId</label>
     </div>
 }

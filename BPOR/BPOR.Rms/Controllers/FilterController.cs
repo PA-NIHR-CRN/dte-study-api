@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using BPOR.Rms.Models.Email;
+using Newtonsoft.Json;
+using BPOR.Rms.Models;
 
 namespace BPOR.Rms.Controllers;
 
@@ -18,9 +20,38 @@ public class FilterController(ParticipantDbContext context) : Controller
         SetStudyExclusionFilters(model);
         SetHealthConditionSelectList(model);
 
+        if (TempData["Notification"] != null)
+        {
+            model.Notification =
+                JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
+        }
+
         model.ShowStudyFilters = String.IsNullOrEmpty(studyId) ? false : true;
 
         return View(model);
+    }
+
+    [HttpPost]
+    public IActionResult HandleForms(VolunteerFilterViewModel model, string action)
+    {
+        return action switch
+        {
+            "FilterVolunteers" => FilterVolunteers(model),
+            "ClearFilters" => ClearFilters(model),
+            _ => RedirectToAction("Index")
+        };
+    }
+
+    public IActionResult ClearFilters(VolunteerFilterViewModel model)
+    {
+        TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
+        {
+            IsSuccess = true,
+            Heading = "",
+            Body = $"All previously applied filters have been removed.",
+        });
+
+        return RedirectToAction("Index", "Filter", new { studyId = model.SelectedStudyId });
     }
 
     private void SetHealthConditionSelectList(VolunteerFilterViewModel model)
@@ -126,6 +157,8 @@ public class FilterController(ParticipantDbContext context) : Controller
             Study selectedStudy = context.Studies.Where(x => x.Id == Convert.ToInt32(studyId)).FirstOrDefault();
 
             model.SelectedStudy = selectedStudy?.StudyName ?? string.Empty;
+            model.SelectedStudyId = selectedStudy?.Id.ToString();
+            model.SelectedStudyCPMSId = selectedStudy?.CpmsId.ToString();  
         }
     }
 
@@ -221,6 +254,7 @@ public class FilterController(ParticipantDbContext context) : Controller
 
         if (!String.IsNullOrEmpty(model.SelectedStudy))
         {
+            SetSelectedStudy(model, model.SelectedStudyId);
             model.ShowStudyFilters = true;
         }
 

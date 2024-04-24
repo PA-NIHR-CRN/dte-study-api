@@ -38,14 +38,23 @@ public class EmailController : Controller
         {
             ModelState.AddModelError("TotalVolunteers", "Total Volunteers must be less than or equal to Max Numbers.");
         }
+
         if (string.IsNullOrEmpty(model.SelectedTemplate))
         {
             ModelState.AddModelError("SelectedTemplate", "Please select a email template.");
         }
+
         if (!ModelState.IsValid)
         {
             return View("SetupCampaign", model);
         }
+
+        // implement email sending
+        // get list of volunteers for the filter criteria
+        // get a random sample of volunteers including prioticising those who have not been contacted before
+        // send email to volunteers
+        // mark volunteers as contacted in the database with the email template used
+
         return RedirectToAction("EmailSuccess", model);
     }
 

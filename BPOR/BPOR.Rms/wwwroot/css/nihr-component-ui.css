@@ -309,7 +309,7 @@
     margin-bottom: 0
 }
 
-.govuk-select {
+.govuk-select-custom {
     font-family: GDS Transport, arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -325,13 +325,6 @@
     color: #0b0c0c;
     background-color: #fff;
     border-radius: 0.3rem
-}
-
-.govuk-select:focus {
-    padding: 0.9em;
-    border: 4px solid rgb(25, 62, 114);
-    box-shadow: none;
-    outline: rgb(254, 212, 122) solid 4px;
 }
 
 .govuk-multi-select {
@@ -437,6 +430,7 @@
 .exclusion_label{
     width: 400px;
     padding: 10px 0px !important;
+
 }
 
 .govuk-input_select__wrapper {

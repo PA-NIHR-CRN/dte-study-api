@@ -24,6 +24,7 @@ public class ParticipantDbContext : NihrDbContext
     public DbSet<Study> Studies { get; set; } = null!;
     public DbSet<ManualEnrollment> ManualEnrollments { get; set; } = null!;
     public DbSet<FilterCriteria> FilterCriterias { get; set; } = null!;
+    public DbSet<EmailCampaign> EmailCampaigns { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
