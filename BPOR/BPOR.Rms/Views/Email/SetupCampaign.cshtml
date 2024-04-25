@@ -26,6 +26,7 @@
     <form asp-action="HandleForms" method="post">
         <input type="hidden" asp-for="StudyId" />
         <input type="hidden" asp-for="MaxNumbers" />
+        <input type="hidden" asp-for="FilterCriteriaId" />
         @await Html.PartialAsync("Partials/_TemplateSelect")
         @await Html.PartialAsync("Partials/_Preview")
         @await Html.PartialAsync("Partials/_TotalNumbers")

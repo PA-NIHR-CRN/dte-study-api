@@ -1,11 +1,13 @@
+using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
+using BPOR.Rms.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace BPOR.Rms.Controllers;
 
-public class EmailController : Controller
+public class EmailController(IEmailCampaignService emailCampaignService) : Controller
 {
     public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
@@ -30,7 +32,7 @@ public class EmailController : Controller
     }
 
     [HttpPost]
-    public IActionResult SendEmail(SetupCampaignViewModel model)
+    public async Task<IActionResult> SendEmail(SetupCampaignViewModel model)
     {
         ModelState.Remove("PreviewEmails");
 
@@ -48,6 +50,13 @@ public class EmailController : Controller
         {
             return View("SetupCampaign", model);
         }
+        
+        await emailCampaignService.SendCampaignAsync(new EmailCampaign
+        {
+            FilterCriteriaId = model.FilterCriteriaId,
+            TargetGroupSize = model.TotalVolunteers.Value,
+            EmailTemplateId = new Guid(model.SelectedTemplate)
+        });
 
         // implement email sending
         // get list of volunteers for the filter criteria
@@ -101,11 +110,11 @@ public class EmailController : Controller
 
 
     [HttpPost]
-    public IActionResult HandleForms(SetupCampaignViewModel model, string action)
+    public async Task<IActionResult> HandleForms(SetupCampaignViewModel model, string action)
     {
         return action switch
         {
-            "SetupCampaign" => SendEmail(model),
+            "SetupCampaign" => await SendEmail(model),
             "SendPreviewEmail" => SendPreviewEmail(model),
             _ => RedirectToAction("SetupCampaign")
         };

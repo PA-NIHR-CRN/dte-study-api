@@ -193,8 +193,10 @@ public class FilterController(ParticipantDbContext context) : Controller
         context.FilterCriterias.Add(filterCriteria);
         context.SaveChanges();
         
+        // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
         {
+            FilterCriteriaId = filterCriteria.Id,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount,
             StudyName = model.SelectedStudy

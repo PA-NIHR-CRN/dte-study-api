@@ -1,5 +1,6 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
+using BPOR.Rms.Services;
 using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
@@ -19,6 +20,7 @@ public static class DependencyInjection
 
         var identityProviderSettings = services.GetSectionAndValidate<IdentityProviderApiSettings>(configuration);
 
+        services.AddScoped<IEmailCampaignService, EmailCampaignService>();
         services.AddTransient<IIdentityProviderService, Wso2IdentityServerService>();
         services.AddHttpClient<IIdentityProviderService, Wso2IdentityServerService>(httpClient =>
         {
