@@ -26,6 +26,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<FilterCriteria> FilterCriterias { get; set; } = null!;
     public DbSet<EmailCampaign> EmailCampaigns { get; set; } = null!;
     public DbSet<ParticipantLocation> ParticipantLocation { get; set; } = null!;
+    public DbSet<ParticipantAddress> ParticipantAddress { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -42,25 +43,27 @@ public class ParticipantDbContext : DbContext
         return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value)));
     }
 
-    public List<Participant> GetParticipantsByPostcodePrefix(List<string> postcodePrefixes)
+    public IQueryable<Participant> GetParticipantsByPostcodePrefix(List<string> postcodePrefixes)
     {
-        // TODO refactor this as inefficient
-        var participants = Participants.Include(p => p.Address)
-            .AsEnumerable()
-            .Where(p => p.Address != null && postcodePrefixes.Any(prefix => p.Address.Postcode.StartsWith(prefix)))
-            .ToList();
+        IQueryable<ParticipantAddress> query = ParticipantAddress.Where(pa => false);
 
-        return participants;
+        foreach (var prefix in postcodePrefixes)
+        {
+            var localPrefix = prefix; 
+            query = ParticipantAddress
+                .Where(pa =>  EF.Functions.Like(pa.Postcode, $"{localPrefix}%"))
+                .Concat(query);
+        }
+
+        return query.Distinct().Select(pa => pa.Participant);
     }
 
 
     public IQueryable<Participant> GetParticipantsWithinRadius(Point location, double radiusInMeters)
     {
-        return Participants
-            .Include(p => p.Address)
-            .Include(p => p.ParticipantLocation)
-            .Where(p => p.ParticipantLocation != null &&
-                        p.ParticipantLocation.Location.IsWithinDistance(location, radiusInMeters));
+        return ParticipantLocation
+            .Where(pl => pl.Location.IsWithinDistance(location, radiusInMeters))
+            .Select(pl => pl.Participant);
     }
 
     public void ThrowIfInMaintenanceMode()

@@ -1,7 +1,6 @@
 name: Deploy BPOR RMS container
 
 on:
-  push:
   workflow_dispatch:
 
 env:

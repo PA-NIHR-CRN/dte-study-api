@@ -50,10 +50,10 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
     //GetParticipantsByPostcodePrefix
     [HttpGet]
     [Route("api/get-participants-by-postcode-prefix")]
-    public IActionResult GetParticipantsByPostcodePrefix(string postcodePrefix)
+    public async Task<IActionResult> GetParticipantsByPostcodePrefix(string postcodePrefix, CancellationToken cancellationToken = default)
     {
         var postcodePrefixes = postcodePrefix.Split(',').ToList();
-        var participants = context.GetParticipantsByPostcodePrefix(postcodePrefixes);
+        var participants = await context.GetParticipantsByPostcodePrefix(postcodePrefixes).ToListAsync(cancellationToken);
 
         return Ok(participants);
     }
