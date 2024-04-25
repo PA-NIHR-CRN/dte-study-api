@@ -25,18 +25,10 @@ namespace NIHR.Infrastructure.EntityFrameworkCore
             var serviceType = typeof(TService);
 
             IServiceProvider instance = accessor.Instance;
-            object? obj = instance.GetService(serviceType) ?? instance.GetService<IDbContextOptions>()?.Extensions.OfType<CoreOptionsExtension>().FirstOrDefault()?.ApplicationServiceProvider?.GetService(serviceType);
 
-            if (obj == null)
-            {
-                service = default;
-                return false;
-            }
-            else
-            {
-                service = (TService)obj;
-                return true;
-            }
+            service = (instance.GetService(serviceType) ?? instance.GetService<IDbContextOptions>()?.Extensions.OfType<CoreOptionsExtension>().FirstOrDefault()?.ApplicationServiceProvider?.GetService(serviceType)) as TService ;
+
+            return service != null;
         }
 
         private static DbContextOptionsBuilder UseNihrExtensionsImpl(DbContextOptionsBuilder optionsBuilder)
