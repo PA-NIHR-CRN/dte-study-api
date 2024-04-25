@@ -31,9 +31,11 @@ public static class DependencyInjection
         // TODO this could be reusable
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
-        services.AddDbContext<ParticipantDbContext>(options =>
+
+        services.AddDbContext<ParticipantDbContext>(options => {
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-                x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+                x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)).UseNihrExtensions();
+            });
 
         services.AddHealthChecks();
 

@@ -1,17 +1,11 @@
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace NIHR.Infrastructure.EntityFrameworkCore;
 
 public class AuditInterceptor : SaveChangesInterceptor
 {
-    private readonly ICurrentUserIdProvider _currentUserIdProvider;
-
-    public AuditInterceptor(ICurrentUserIdProvider currentUserIdProvider)
-    {
-        _currentUserIdProvider = currentUserIdProvider;
-    }
-
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
     {
         return new ValueTask<InterceptionResult<int>>(HandleAuditColumns(eventData, result));
@@ -29,12 +23,15 @@ public class AuditInterceptor : SaveChangesInterceptor
             return result;
         }
 
-        if(_currentUserIdProvider.UserId is null)
+        var _ = eventData.Context.TryGetService(out ILogger<AuditInterceptor>? logger);
+
+        if (!eventData.Context.TryGetService(out ICurrentUserIdProvider? currentUserIdProvider) || currentUserIdProvider?.UserId is null)
         {
-            // TODO: We want to track the correct user info for changes,
-            // log a warning or error here.
+            logger?.LogWarning("Unable to determine user id. Ensure that an instance of {providerName} is configured and returns the id of the current user.", nameof(ICurrentUserIdProvider));
+
             return result;
         }
+
 
         foreach (var entry in eventData.Context.ChangeTracker.Entries())
         {
@@ -42,25 +39,26 @@ public class AuditInterceptor : SaveChangesInterceptor
             {
                 if (inserted.CreatedById == default)
                 {
-                    inserted.CreatedById = _currentUserIdProvider.UserId.Value;
+                    inserted.CreatedById = currentUserIdProvider.UserId.Value;
                 }
 
                 if (inserted.UpdatedAt == default)
                 {
-                    inserted.UpdatedById = _currentUserIdProvider.UserId.Value;
+                    inserted.UpdatedById = currentUserIdProvider.UserId.Value;
                 }
             }
 
             if (entry is { State: EntityState.Modified, Entity: IAudit updated })
             {
-                updated.UpdatedById = _currentUserIdProvider.UserId.Value;
+                updated.UpdatedById = currentUserIdProvider.UserId.Value;
             }
 
             if (entry is { State: EntityState.Deleted, Entity: IAudit deleted })
             {
-                deleted.UpdatedById = _currentUserIdProvider.UserId.Value;
+                deleted.UpdatedById = currentUserIdProvider.UserId.Value;
             }
         }
+
         return result;
     }
 }

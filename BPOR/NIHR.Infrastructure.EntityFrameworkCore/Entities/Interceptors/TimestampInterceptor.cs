@@ -17,7 +17,7 @@ public class TimestampInterceptor : SaveChangesInterceptor
 
     protected static InterceptionResult<int> HandleTimestamps(DbContextEventData eventData, InterceptionResult<int> result)
     {
-        if (eventData.Context is null)
+       if (eventData.Context is null)
         {
             return result;
         }

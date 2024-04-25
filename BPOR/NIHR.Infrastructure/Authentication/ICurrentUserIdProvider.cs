@@ -1,4 +1,4 @@
-﻿namespace NIHR.Infrastructure.EntityFrameworkCore
+﻿namespace NIHR.Infrastructure
 {
     public interface ICurrentUserIdProvider
     {

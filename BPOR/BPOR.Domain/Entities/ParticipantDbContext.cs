@@ -2,14 +2,13 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Entities.System;
 using Microsoft.EntityFrameworkCore;
-using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Exceptions;
 
 namespace BPOR.Domain.Entities;
 
-public class ParticipantDbContext : NihrDbContext
+public class ParticipantDbContext : DbContext
 {
-    public ParticipantDbContext(DbContextOptions options) : base(options)
+    public ParticipantDbContext(DbContextOptions<ParticipantDbContext> options) : base(options)
     {
     }
 

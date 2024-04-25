@@ -21,6 +21,7 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
 
         var options = new DbContextOptionsBuilder<ParticipantDbContext>()
             .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+            .UseNihrExtensions()
             .Options;
 
         return new ParticipantDbContext(options);
