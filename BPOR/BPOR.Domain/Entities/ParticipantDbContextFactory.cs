@@ -19,11 +19,12 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
 
         var connectionString = dbSettings.BuildConnectionString();
 
+        // UseNetTopologySuite
         var options = new DbContextOptionsBuilder<ParticipantDbContext>()
-            .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-            .UseNihrExtensions()
-            .Options;
+            .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), x => x.UseNetTopologySuite()).UseNihrExtensions()
 
         return new ParticipantDbContext(options);
     }
+    
+    
 }

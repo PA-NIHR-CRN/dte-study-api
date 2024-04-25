@@ -49,7 +49,7 @@ public class StreamHandler(
                         record.Dynamodb.StreamViewType
                     );
 
-                    logger.LogTrace("{@record}", record);
+                    logger.LogTrace("{@Record}", record);
 
                     await ProcessRecordAsync(record, cancellationToken);
 
@@ -119,7 +119,7 @@ public class StreamHandler(
             targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
         }
 
-        return participantMapper.Map(image, targetParticipant);
+        return await participantMapper.Map(image, targetParticipant, cancellationToken);
     }
 
     private async Task ProcessModifyAsync(DynamoDBEvent.DynamodbStreamRecord record,
@@ -136,7 +136,7 @@ public class StreamHandler(
             await participantDbContext.SaveChangesAsync(cancellationToken);
         }
 
-        participantMapper.Map(record.Dynamodb.NewImage, participant);
+        await participantMapper.Map(record.Dynamodb.NewImage, participant, cancellationToken);
     }
 
     private async Task ProcessRemoveAsync(DynamoDBEvent.DynamodbStreamRecord record,
