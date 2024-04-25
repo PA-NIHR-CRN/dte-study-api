@@ -1,7 +1,11 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
+using BPOR.Infrastructure.Clients;
 using BPOR.Rms.Services;
+using Dte.Common.Authentication;
+using Dte.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
+using NIHR.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Interfaces;
@@ -21,6 +25,8 @@ public static class DependencyInjection
         var identityProviderSettings = services.GetSectionAndValidate<IdentityProviderApiSettings>(configuration);
 
         services.AddScoped<IEmailCampaignService, EmailCampaignService>();
+        services.AddScoped<IFilterService, FilterService>();
+        services.AddScoped<IPostcodeMapper, LocationApiClient>();
         services.AddTransient<IIdentityProviderService, Wso2IdentityServerService>();
         services.AddHttpClient<IIdentityProviderService, Wso2IdentityServerService>(httpClient =>
         {
@@ -33,7 +39,7 @@ public static class DependencyInjection
         // TODO this could be reusable
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
-        
+
         services.AddDbContext<ParticipantDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), builder =>
             {
@@ -41,6 +47,13 @@ public static class DependencyInjection
                 builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             }).UseNihrExtensions());
 
+        var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
+
+        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
+            ?.CreateLogger("BPOR.Rms");
+
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings.Value.LocationService, 2,
+            logger);
         services.AddHealthChecks();
 
         if (hostEnvironment.IsDevelopment())

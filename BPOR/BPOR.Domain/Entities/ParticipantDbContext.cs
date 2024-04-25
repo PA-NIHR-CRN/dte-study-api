@@ -43,21 +43,6 @@ public class ParticipantDbContext : DbContext
         return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value)));
     }
 
-    public IQueryable<Participant> GetParticipantsByPostcodePrefix(List<string> postcodePrefixes)
-    {
-        IQueryable<ParticipantAddress> query = ParticipantAddress.Where(pa => false);
-
-        foreach (var prefix in postcodePrefixes)
-        {
-            var localPrefix = prefix; 
-            query = ParticipantAddress
-                .Where(pa =>  EF.Functions.Like(pa.Postcode, $"{localPrefix}%"))
-                .Concat(query);
-        }
-
-        return query.Distinct().Select(pa => pa.Participant);
-    }
-
 
     public IQueryable<Participant> GetParticipantsWithinRadius(Point location, double radiusInMeters)
     {

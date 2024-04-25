@@ -3,7 +3,7 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 
-public class ParticipantLocation : ISoftDelete, ITimestamped
+public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformation
 {
     public int Id { get; set; }
     public Point Location { get; set; }
@@ -12,5 +12,9 @@ public class ParticipantLocation : ISoftDelete, ITimestamped
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public int ParticipantId { get; set; } 
-    public Participant Participant { get; set; }  
+    public Participant Participant { get; set; }
+    public void Anonymise()
+    {
+        Location = null!;
+    }
 }

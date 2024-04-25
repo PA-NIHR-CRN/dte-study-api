@@ -47,28 +47,28 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
         return Ok(participants);
     }
 
-    //GetParticipantsByPostcodePrefix
-    [HttpGet]
-    [Route("api/get-participants-by-postcode-prefix")]
-    public async Task<IActionResult> GetParticipantsByPostcodePrefix(string postcodePrefix, CancellationToken cancellationToken = default)
-    {
-        var postcodePrefixes = postcodePrefix.Split(',').ToList();
-        var participants = await context.GetParticipantsByPostcodePrefix(postcodePrefixes).ToListAsync(cancellationToken);
-
-        return Ok(participants);
-    }
-
-    // GetParticipantsWithinRadius
-    [HttpGet]
-    [Route("api/get-participants-within-radius")]
-    public async Task<IActionResult> GetParticipantsWithinRadius(string postcode, double radius,
-        CancellationToken cancellationToken = default)
-    {
-        var coordinates = await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
-
-        var point = new Point(coordinates.Latitude, coordinates.Longitude) { SRID = 4326 };
-        var participants = await context.GetParticipantsWithinRadius(point, radius).ToListAsync(cancellationToken);
-
-        return Ok(participants);
-    }
+    // //GetParticipantsByPostcodePrefix
+    // [HttpGet]
+    // [Route("api/get-participants-by-postcode-prefix")]
+    // public async Task<IActionResult> GetParticipantsByPostcodePrefix(string postcodePrefix, CancellationToken cancellationToken = default)
+    // {
+    //     var postcodePrefixes = postcodePrefix.Split(',').ToList();
+    //     var participants = await context.GetParticipantsByPostcodePrefix(postcodePrefixes).ToListAsync(cancellationToken);
+    //
+    //     return Ok(participants);
+    // }
+    //
+    // // GetParticipantsWithinRadius
+    // [HttpGet]
+    // [Route("api/get-participants-within-radius")]
+    // public async Task<IActionResult> GetParticipantsWithinRadius(string postcode, double radius,
+    //     CancellationToken cancellationToken = default)
+    // {
+    //     var coordinates = await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
+    //
+    //     var point = new Point(coordinates.Latitude, coordinates.Longitude) { SRID = 4326 };
+    //     var participants = await context.GetParticipantsWithinRadius(point, radius).ToListAsync(cancellationToken);
+    //
+    //     return Ok(participants);
+    // }
 }

@@ -2,18 +2,16 @@ using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using BPOR.Rms.Models.Email;
 using Newtonsoft.Json;
 using BPOR.Rms.Models;
+using BPOR.Rms.Services;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context) : Controller
+public class FilterController(ParticipantDbContext context, IFilterService filterService) : Controller
 {
-    List<Expression<Func<Participant, bool>>> filters = new List<Expression<Func<Participant, bool>>>();
-
     public IActionResult Index(VolunteerFilterViewModel model, string? studyId)
     {
         SetSelectedStudy(model, studyId);
@@ -32,11 +30,11 @@ public class FilterController(ParticipantDbContext context) : Controller
     }
 
     [HttpPost]
-    public IActionResult HandleForms(VolunteerFilterViewModel model, string action)
+    public async Task<IActionResult> HandleFormsAsync(VolunteerFilterViewModel model, string action, CancellationToken cancellationToken = default)
     {
         return action switch
         {
-            "FilterVolunteers" => FilterVolunteers(model),
+            "FilterVolunteers" => await FilterVolunteersAsync(model, cancellationToken),
             "ClearFilters" => ClearFilters(model),
             _ => RedirectToAction("Index")
         };
@@ -56,7 +54,9 @@ public class FilterController(ParticipantDbContext context) : Controller
 
     private void SetHealthConditionSelectList(VolunteerFilterViewModel model)
     {
-        model.HealthConditions = context.HealthConditions.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Description }).OrderBy(x => x.Text).ToList();
+        model.HealthConditions = context.HealthConditions
+            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Description }).OrderBy(x => x.Text)
+            .ToList();
     }
 
     private void SetStudyExclusionFilters(VolunteerFilterViewModel model)
@@ -158,7 +158,7 @@ public class FilterController(ParticipantDbContext context) : Controller
 
             model.SelectedStudy = selectedStudy?.StudyName ?? string.Empty;
             model.SelectedStudyId = selectedStudy?.Id.ToString();
-            model.SelectedStudyCPMSId = selectedStudy?.CpmsId.ToString();  
+            model.SelectedStudyCPMSId = selectedStudy?.CpmsId.ToString();
         }
     }
 
@@ -187,12 +187,11 @@ public class FilterController(ParticipantDbContext context) : Controller
             EthnicGroup = GetEthnicGroup(model),
             SearchRadiusMiles = model.SearchRadiusMiles,
             StudyId = model.StudyId
-            
         };
-        
+
         context.FilterCriterias.Add(filterCriteria);
         context.SaveChanges();
-        
+
         // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
         {
@@ -217,37 +216,18 @@ public class FilterController(ParticipantDbContext context) : Controller
 
     [HttpPost]
     [RequestFormSizeLimit(valueCountLimit: 50000)]
-    public IActionResult FilterVolunteers(VolunteerFilterViewModel model)
+    public async Task<IActionResult> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
-        ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth, model.RegistrationFromDateYear,
-                                    model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
+        ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
+            model.RegistrationFromDateYear,
+            model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
         ValidatePostcodeDistricts(model.PostcodeDistricts);
         ValidateAge(model.AgeFrom, model.AgeTo);
 
         if (ModelState.IsValid)
         {
-            int volunteerCount = 0;
-
-            FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
-            FilterByAreasOfResearch(model.SelectedHealthConditions);
-            FilterByRegistrationDate(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
-                model.RegistrationFromDateYear,
-                model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
-            FilterByAge(model.AgeFrom, model.AgeTo);
-            FilterBySexRegisteredAtBirth(model.IsSexMale, model.IsSexFemale,
-                model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No,
-                model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay);
-            FilterByEthnicity(model.Ethnicity_Asian, model.Ethnicity_Black, model.Ethnicity_Mixed,
-                model.Ethnicity_Other, model.Ethnicity_White);
-
-            IQueryable<Participant> query = context.Participants.AsQueryable();
-
-            foreach (var filter in filters)
-            {
-                query = query.Where(filter);
-            }
-
-            model.VolunteerCount = query.Count(); 
+            var query = await filterService.FilterVolunteersAsync(model, cancellationToken);
+            model.VolunteerCount = query.Count();
         }
 
         SetHealthConditionSelectList(model);
@@ -263,22 +243,14 @@ public class FilterController(ParticipantDbContext context) : Controller
         return View("Index", model);
     }
 
-    private void FilterByAreasOfResearch(List<string>? selectedHealthConditions)
-    {
-        if (selectedHealthConditions != null)
-        {
-            List<int> conditionIds = selectedHealthConditions.Select(s => int.Parse(s)).ToList();
-
-            filters.Add(p => p.HealthConditions.Any(hc => conditionIds.Contains(hc.HealthConditionId)));
-        }
-    }
 
     private void ValidatePostcodeDistricts(string? postcodeDistricts)
     {
         if (!String.IsNullOrEmpty(postcodeDistricts))
         {
             List<string> PostcodeDistrictsList = postcodeDistricts.Split(",").ToList();
-            string pattern = @"^[A-Za-z]{1,2}[0-9][A-Za-z]?$";
+            string pattern = @"^[A-Za-z]{1,2}[0-9]{1,2}[A-Za-z]?$";
+
 
             foreach (var item in PostcodeDistrictsList)
             {
@@ -299,98 +271,6 @@ public class FilterController(ParticipantDbContext context) : Controller
         }
     }
 
-    private void FilterVolunteersCompletedRegistration(string? selectedCompletedRegistration)
-    {
-            if (selectedCompletedRegistration == "1")
-            {
-                filters.Add(p => p.Stage2CompleteUtc != null);
-            }
-
-            if (selectedCompletedRegistration == "2")
-            {
-                filters.Add(p => p.Stage2CompleteUtc == null);
-            }
-
-    }
-
-    public void FilterByRegistrationDate(int? RegistrationFromDateDay, int? RegistrationFromDateMonth,
-        int? RegistrationFromDateYear,
-        int? RegistrationToDateDay, int? RegistrationToDateMonth, int? RegistrationToDateYear)
-    {
-        if ((RegistrationFromDateDay != null && RegistrationFromDateMonth != null &&
-             RegistrationFromDateYear != null) ||
-            (RegistrationToDateDay != null && RegistrationToDateMonth != null && RegistrationToDateYear != null))
-        {
-            if (RegistrationToDateDay.HasValue)
-            {
-                RegistrationToDateDay++;
-            }
-
-            DateTime? RegistrationFromDate = ConstructDate(RegistrationFromDateYear, RegistrationFromDateMonth,
-                RegistrationFromDateDay);
-            DateTime? RegistrationToDate =
-                ConstructDate(RegistrationToDateYear, RegistrationToDateMonth, RegistrationToDateDay);
-
-            filters.Add(p =>
-                (!RegistrationFromDate.HasValue || p.RegistrationConsentAtUtc >= RegistrationFromDate) &&
-                (!RegistrationToDate.HasValue || p.RegistrationConsentAtUtc <= RegistrationToDate));
-        }
-    }
-
-    private void FilterByAge(int? AgeFrom, int? AgeTo)
-    {
-        if (AgeFrom != null || AgeTo != null)
-        {
-            DateTime fromDate = AgeTo.HasValue ? DateTime.Today.AddYears(-AgeTo.Value) : DateTime.MinValue;
-            DateTime toDate = AgeFrom.HasValue ? DateTime.Today.AddYears(-AgeFrom.Value) : DateTime.MaxValue;
-
-            filters.Add(p => p.DateOfBirth >= fromDate && p.DateOfBirth <= toDate);
-        }
-    }
-
-    private void FilterBySexRegisteredAtBirth(bool IsSexMale, bool IsSexFemale,
-        bool IsGenderSameAsSexRegisteredAtBirth_Yes, bool IsGenderSameAsSexRegisteredAtBirth_No,
-        bool IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
-    {
-        if (IsSexMale || IsSexFemale)
-        {
-            if (!IsSexMale)
-            {
-                filters.Add(p => p.GenderId == 2);
-            }
-            else if (!IsSexFemale)
-            {
-                filters.Add(p => p.GenderId == 1);
-            }
-            else
-            {
-                filters.Add(p => p.GenderId == 1 || p.GenderId == 2);
-            }
-        }
-
-        if (IsGenderSameAsSexRegisteredAtBirth_Yes || IsGenderSameAsSexRegisteredAtBirth_No ||
-            IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
-        {
-            filters.Add(p =>
-                (IsGenderSameAsSexRegisteredAtBirth_Yes && p.GenderIsSameAsSexRegisteredAtBirth == true) ||
-                (IsGenderSameAsSexRegisteredAtBirth_No && p.GenderIsSameAsSexRegisteredAtBirth == false) ||
-                (IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay && p.GenderIsSameAsSexRegisteredAtBirth == null));
-        }
-    }
-
-    private void FilterByEthnicity(bool Ethnicity_Asian, bool Ethnicity_Black, bool Ethnicity_Mixed,
-        bool Ethnicity_Other, bool Ethnicity_White)
-    {
-        if (Ethnicity_Asian || Ethnicity_Black || Ethnicity_Mixed || Ethnicity_Other || Ethnicity_White)
-        {
-            filters.Add(p =>
-                (Ethnicity_Asian && p.EthnicGroup.ToLower() == "asian") ||
-                (Ethnicity_Black && p.EthnicGroup.ToLower() == "black") ||
-                (Ethnicity_Mixed && p.EthnicGroup.ToLower() == "mixed") ||
-                (Ethnicity_Other && p.EthnicGroup.ToLower() == "other") ||
-                (Ethnicity_White && p.EthnicGroup.ToLower() == "white"));
-        }
-    }
 
     private void ValidateRegistrationDates(int? RegistrationFromDateDay, int? RegistrationFromDateMonth,
         int? RegistrationFromDateYear,
