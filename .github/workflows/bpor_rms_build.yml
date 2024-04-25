@@ -1,0 +1,471 @@
+name: Deploy BPOR RMS container
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: eu-west-2
+
+jobs:
+  build:
+    name: 'Build'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+
+  deploy-dev:
+    needs: [build]
+    environment: DEV
+    name: 'Deploy Dev'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (dev)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get secrets from Secrets Manager
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            crnccd-secret-dev-bpor-rms-app-config
+          parse-json-secrets: true
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REPOSITORY: crnccd-ecr-dev-bpor-rms-repository
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_NAME_TAG: bpor-rms
+          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
+        run: |
+          echo "Using registry ${{ env.ECR_REGISTRY }}"
+          echo "Tagging image with ${{ env.IMAGE_NAME_TAG}} and ${{ env.IMAGE_SHA_TAG }}"
+          docker build -f BPOR/BPOR.Rms/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG .
+          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate task definition file from container
+        run: |
+          aws ecs describe-task-definition --task-definition crnccd-ecs-dev-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
+          echo $(cat ./task-definition.json | jq 'del(
+                  .taskDefinitionArn,
+                  .requiresAttributes,
+                  .compatibilities,
+                  .revision,
+                  .status,
+                  .registeredAt,
+                  .registeredBy
+              )') > ./task-definition.json
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        env:
+          ECS_TASK_DEFINITION: ./task-definition.json
+          CONTAINER_NAME: crnccd-ecs-dev-bpor-rms-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+          environment-variables: |
+            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            DbSettings__Port=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
+            DbSettings__Username=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
+            DbSettings__Password=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
+            DbSettings__Database=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
+            DbSettings__Host=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
+            IdentityProviderApiSettings__ClientId=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTID}}
+            IdentityProviderApiSettings__ClientSecret=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTSECRET}}
+            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
+            AwsSecretsManagerSettings__Enabled=false
+            IdentityProviderApiSettings__BaseUrl=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__BASEURL}}
+            AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AwsSecretsManagerSettings__Region=eu-west-2
+            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+
+      - name: Deploy Amazon ECS task definition
+        env:
+          ECS_SERVICE: crnccd-ecs-dev-bpor-rms-service
+          ECS_CLUSTER: crnccd-ecs-dev-bpor-rms-cluster
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-test:
+    needs: [deploy-dev]
+    environment: TEST
+    name: 'Deploy Test'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (test)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get secrets from Secrets Manager
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            crnccd-secret-test-bpor-rms-app-config
+          parse-json-secrets: true
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REPOSITORY: crnccd-ecr-test-bpor-rms-repository
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_NAME_TAG: bpor-rms
+          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
+        run: |
+          echo "Using registry ${{ env.ECR_REGISTRY }}"
+          echo "Tagging image with ${{ env.IMAGE_NAME_TAG}} and ${{ env.IMAGE_SHA_TAG }}"
+          docker build -f BPOR/BPOR.Rms/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG .
+          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate task definition file from container
+        run: |
+          aws ecs describe-task-definition --task-definition crnccd-ecs-test-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
+          echo $(cat ./task-definition.json | jq 'del(
+                  .taskDefinitionArn,
+                  .requiresAttributes,
+                  .compatibilities,
+                  .revision,
+                  .status,
+                  .registeredAt,
+                  .registeredBy
+              )') > ./task-definition.json
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        env:
+          ECS_TASK_DEFINITION: ./task-definition.json
+          CONTAINER_NAME: crnccd-ecs-test-bpor-rms-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+          environment-variables: |
+            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            DbSettings__Port=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
+            DbSettings__Username=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
+            DbSettings__Password=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
+            DbSettings__Database=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
+            DbSettings__Host=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
+            IdentityProviderApiSettings__ClientId=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTID}}
+            IdentityProviderApiSettings__ClientSecret=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTSECRET}}
+            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
+            AwsSecretsManagerSettings__Enabled=false
+            IdentityProviderApiSettings__BaseUrl=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__BASEURL}}
+            AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AwsSecretsManagerSettings__Region=eu-west-2
+            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+      - name: Deploy Amazon ECS task definition
+        env:
+          ECS_SERVICE: crnccd-ecs-test-bpor-rms-service
+          ECS_CLUSTER: crnccd-ecs-test-bpor-rms-cluster
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-uat:
+    needs: [deploy-test]
+    environment: UAT
+    name: 'Deploy Uat'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (uat)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get secrets from Secrets Manager
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            crnccs-secret-uat-bpor-rms-app-config
+          parse-json-secrets: true
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REPOSITORY: crnccs-ecr-uat-bpor-rms-repository
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_NAME_TAG: bpor-rms
+          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
+        run: |
+          echo "Using registry ${{ env.ECR_REGISTRY }}"
+          echo "Tagging image with ${{ env.IMAGE_NAME_TAG}} and ${{ env.IMAGE_SHA_TAG }}"
+          docker build -f BPOR/BPOR.Rms/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG .
+          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate task definition file from container
+        run: |
+          aws ecs describe-task-definition --task-definition crnccs-ecs-uat-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
+          echo $(cat ./task-definition.json | jq 'del(
+                  .taskDefinitionArn,
+                  .requiresAttributes,
+                  .compatibilities,
+                  .revision,
+                  .status,
+                  .registeredAt,
+                  .registeredBy
+              )') > ./task-definition.json
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        env:
+          ECS_TASK_DEFINITION: ./task-definition.json
+          CONTAINER_NAME: crnccs-ecs-uat-bpor-rms-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+          environment-variables: |
+            AuthenticationSettings__ClientSecret=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            DbSettings__Port=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
+            DbSettings__Username=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
+            DbSettings__Password=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
+            DbSettings__Database=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
+            DbSettings__Host=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
+            IdentityProviderApiSettings__ClientId=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTID}}
+            IdentityProviderApiSettings__ClientSecret=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTSECRET}}
+            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
+            AwsSecretsManagerSettings__Enabled=false
+            IdentityProviderApiSettings__BaseUrl=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__BASEURL}}
+            AuthenticationSettings__Authority=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AwsSecretsManagerSettings__Region=eu-west-2
+            AuthenticationSettings__ClientId=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+      - name: Deploy Amazon ECS task definition
+        env:
+          ECS_SERVICE: crnccs-ecs-uat-bpor-rms-service
+          ECS_CLUSTER: crnccs-ecs-uat-bpor-rms-cluster
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-oat:
+    needs: [deploy-uat]
+    environment: OAT
+    name: 'Deploy Oat'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (Oat)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get secrets from Secrets Manager
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            crnccp-secret-oat-bpor-rms-app-config
+          parse-json-secrets: true
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REPOSITORY: crnccp-ecr-oat-bpor-rms-repository
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_NAME_TAG: bpor-rms
+          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
+        run: |
+          echo "Using registry ${{ env.ECR_REGISTRY }}"
+          echo "Tagging image with ${{ env.IMAGE_NAME_TAG}} and ${{ env.IMAGE_SHA_TAG }}"
+          docker build -f BPOR/BPOR.Rms/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG .
+          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate task definition file from container
+        run: |
+          aws ecs describe-task-definition --task-definition crnccp-ecs-oat-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
+          echo $(cat ./task-definition.json | jq 'del(
+                  .taskDefinitionArn,
+                  .requiresAttributes,
+                  .compatibilities,
+                  .revision,
+                  .status,
+                  .registeredAt,
+                  .registeredBy
+              )') > ./task-definition.json
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        env:
+          ECS_TASK_DEFINITION: ./task-definition.json
+          CONTAINER_NAME: crnccp-ecs-oat-bpor-rms-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+          environment-variables: |
+            AuthenticationSettings__ClientSecret=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            DbSettings__Port=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
+            DbSettings__Username=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
+            DbSettings__Password=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
+            DbSettings__Database=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
+            DbSettings__Host=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
+            IdentityProviderApiSettings__ClientId=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTID}}
+            IdentityProviderApiSettings__ClientSecret=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTSECRET}}
+            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
+            AwsSecretsManagerSettings__Enabled=false
+            IdentityProviderApiSettings__BaseUrl=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__BASEURL}}
+            AuthenticationSettings__Authority=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AwsSecretsManagerSettings__Region=eu-west-2
+            AuthenticationSettings__ClientId=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+      - name: Deploy Amazon ECS task definition
+        env:
+          ECS_SERVICE: crnccp-ecs-oat-bpor-rms-service
+          ECS_CLUSTER: crnccp-ecs-oat-bpor-rms-cluster
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-prod:
+    needs: [deploy-oat]
+    environment: PROD
+    name: 'Deploy Prod'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (Prod)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get secrets from Secrets Manager
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            crnccp-secret-prod-bpor-rms-app-config
+          parse-json-secrets: true
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REPOSITORY: crnccp-ecr-prod-bpor-rms-repository
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_NAME_TAG: bpor-rms
+          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
+        run: |
+          echo "Using registry ${{ env.ECR_REGISTRY }}"
+          echo "Tagging image with ${{ env.IMAGE_NAME_TAG}} and ${{ env.IMAGE_SHA_TAG }}"
+          docker build -f BPOR/BPOR.Rms/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG .
+          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate task definition file from container
+        run: |
+          aws ecs describe-task-definition --task-definition crnccp-ecs-prod-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
+          echo $(cat ./task-definition.json | jq 'del(
+                  .taskDefinitionArn,
+                  .requiresAttributes,
+                  .compatibilities,
+                  .revision,
+                  .status,
+                  .registeredAt,
+                  .registeredBy
+              )') > ./task-definition.json
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        env:
+          ECS_TASK_DEFINITION: ./task-definition.json
+          CONTAINER_NAME: crnccp-ecs-prod-bpor-rms-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+          environment-variables: |
+            AuthenticationSettings__ClientSecret=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            DbSettings__Port=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
+            DbSettings__Username=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
+            DbSettings__Password=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
+            DbSettings__Database=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
+            DbSettings__Host=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
+            IdentityProviderApiSettings__ClientId=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTID}}
+            IdentityProviderApiSettings__ClientSecret=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTSECRET}}
+            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
+            AwsSecretsManagerSettings__Enabled=false
+            IdentityProviderApiSettings__BaseUrl=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__BASEURL}}
+            AuthenticationSettings__Authority=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AwsSecretsManagerSettings__Region=eu-west-2
+            AuthenticationSettings__ClientId=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+      - name: Deploy Amazon ECS task definition
+        env:
+          ECS_SERVICE: crnccp-ecs-prod-bpor-rms-service
+          ECS_CLUSTER: crnccp-ecs-prod-bpor-rms-cluster
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
