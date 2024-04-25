@@ -8,9 +8,9 @@ using NIHR.Infrastructure.Exceptions;
 
 namespace BPOR.Domain.Entities;
 
-public class ParticipantDbContext : Microsoft.EntityFrameworkCore.DbContext
+public class ParticipantDbContext : DbContext
 {
-    public ParticipantDbContext(DbContextOptions options) : base(options)
+    public ParticipantDbContext(DbContextOptions<ParticipantDbContext> options) : base(options)
     {
     }
 
@@ -25,27 +25,13 @@ public class ParticipantDbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<Study> Studies { get; set; } = null!;
     public DbSet<ManualEnrollment> ManualEnrollments { get; set; } = null!;
     public DbSet<FilterCriteria> FilterCriterias { get; set; } = null!;
+    public DbSet<EmailCampaign> EmailCampaigns { get; set; } = null!;
     public DbSet<ParticipantLocation> ParticipantLocation { get; set; } = null!;
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-
-        optionsBuilder.AddInterceptors(
-            new DisableAutoDetectChangesInterceptor(),
-            new SoftDeleteInterceptor(),
-            new TimestampInterceptor());
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var refDataTypes = typeof(IReferenceData).Assembly.GetTypes()
-            .Where(t => t != typeof(ReferenceData) && typeof(IReferenceData).IsAssignableFrom(t) && !t.IsInterface);
-
-        foreach (var type in refDataTypes)
-        {
-            modelBuilder.Entity(type).ToTable("SysRef" + type.Name);
-        }
+        base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ParticipantDbContext).Assembly);
     }

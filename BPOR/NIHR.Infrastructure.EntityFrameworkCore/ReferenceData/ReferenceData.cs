@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using NIHR.Infrastructure.Entities;
 
-namespace BPOR.Domain.Entities.RefData;
+namespace NIHR.Infrastructure.EntityFrameworkCore;
 
-public class ReferenceData : IReferenceData, ISoftDelete
+public abstract class ReferenceData : IReferenceData, ISoftDelete
 {
     protected ReferenceData()
     {
@@ -19,5 +18,6 @@ public class ReferenceData : IReferenceData, ISoftDelete
 
     [MaxLength(255)]
     public string? Description { get; set; }
+
     public bool IsDeleted { get; set; }
 }

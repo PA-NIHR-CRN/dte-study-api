@@ -1,7 +1,7 @@
 @using BPOR.Rms.Views.ViewComponents
 @model BPOR.Rms.Models.Email.SetupCampaignViewModel
 
-<div class="govuk-grid-column-two-thirds">
+<div class="govuk-grid-column-two-thirds govuk-!-margin-bottom-6">
     @{
         var breadcrumbs = new List<BreadcrumbItem>
         {
@@ -10,22 +10,23 @@
 
         if (Model.StudyId != null)
         {
-            breadcrumbs.Add(new($"Study", $"/Study/Detail/{Model.StudyId}"));
+            breadcrumbs.Add(new BreadcrumbItem($"Study", $"/Study/Details/{Model.StudyId}"));
         }
 
-        breadcrumbs.Add(new("Find volunteers", "/Filter"));
-        breadcrumbs.Add(new("Set up email campaign", "/Email/SetupCampaign"));
+        breadcrumbs.Add(new BreadcrumbItem("Find volunteers", "/Filter"));
+        breadcrumbs.Add(new BreadcrumbItem("Set up email campaign", "/Email/SetupCampaign"));
     }
 
     @await Component.InvokeAsync("Breadcrumbs", breadcrumbs)
-    <h1 class="govuk-heading-l">Set up an email campaign</h1>
-    <p class="contact-text">@Html.DisplayFor(x => x.StudyName)</p>
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-0">Set up an email campaign</h1>
+    <p class="govuk-hint body-bold">@Html.DisplayFor(x => x.StudyName)</p>
     @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
     @await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
     <form asp-action="HandleForms" method="post">
         <input type="hidden" asp-for="StudyId" />
         <input type="hidden" asp-for="MaxNumbers" />
+        <input type="hidden" asp-for="FilterCriteriaId" />
         @await Html.PartialAsync("Partials/_TemplateSelect")
         @await Html.PartialAsync("Partials/_Preview")
         @await Html.PartialAsync("Partials/_TotalNumbers")

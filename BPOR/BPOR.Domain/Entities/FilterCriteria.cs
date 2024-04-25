@@ -24,4 +24,5 @@ public class FilterCriteria
     public Gender Gender { get; set; }
     public bool? GenderIsSameAsSexRegisteredAtBirth { get; set; }
     [MaxLength(255)] public string? EthnicGroup { get; set; }
+    public ICollection<EmailCampaign>? EmailCampaigns { get; set; } = new List<EmailCampaign>();
 }

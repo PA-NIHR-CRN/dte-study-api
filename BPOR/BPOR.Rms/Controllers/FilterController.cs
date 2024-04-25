@@ -1,14 +1,12 @@
-using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
-using HandlebarsDotNet.ValueProviders;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using BPOR.Rms.Models.Email;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Newtonsoft.Json;
+using BPOR.Rms.Models;
 
 namespace BPOR.Rms.Controllers;
 
@@ -18,27 +16,47 @@ public class FilterController(ParticipantDbContext context) : Controller
 
     public IActionResult Index(VolunteerFilterViewModel model, string? studyId)
     {
-        SetStudiesSelectList(model, studyId);
+        SetSelectedStudy(model, studyId);
         SetStudyExclusionFilters(model);
-        SetLocationsSelectList(model);
+        SetHealthConditionSelectList(model);
+
+        if (TempData["Notification"] != null)
+        {
+            model.Notification =
+                JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
+        }
+
+        model.ShowStudyFilters = String.IsNullOrEmpty(studyId) ? false : true;
 
         return View(model);
     }
 
-    private void SetLocationsSelectList(VolunteerFilterViewModel model)
+    [HttpPost]
+    public IActionResult HandleForms(VolunteerFilterViewModel model, string action)
     {
-        model.Locations = new List<SelectListItem>
+        return action switch
         {
-            new SelectListItem { Value = "1", Text = "East Midlands", Selected = false },
-            new SelectListItem { Value = "2", Text = "East of England", Selected = false },
-            new SelectListItem { Value = "3", Text = "London", Selected = false },
-            new SelectListItem { Value = "4", Text = "North East", Selected = false },
-            new SelectListItem { Value = "5", Text = "North West", Selected = false },
-            new SelectListItem { Value = "6", Text = "South East", Selected = false },
-            new SelectListItem { Value = "7", Text = "South West", Selected = false },
-            new SelectListItem { Value = "8", Text = "West Midlands", Selected = false },
-            new SelectListItem { Value = "9", Text = "Yorkshire and the Humber", Selected = false }
+            "FilterVolunteers" => FilterVolunteers(model),
+            "ClearFilters" => ClearFilters(model),
+            _ => RedirectToAction("Index")
         };
+    }
+
+    public IActionResult ClearFilters(VolunteerFilterViewModel model)
+    {
+        TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
+        {
+            IsSuccess = true,
+            Heading = "",
+            Body = $"All previously applied filters have been removed.",
+        });
+
+        return RedirectToAction("Index", "Filter", new { studyId = model.SelectedStudyId });
+    }
+
+    private void SetHealthConditionSelectList(VolunteerFilterViewModel model)
+    {
+        model.HealthConditions = context.HealthConditions.Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Description }).OrderBy(x => x.Text).ToList();
     }
 
     private void SetStudyExclusionFilters(VolunteerFilterViewModel model)
@@ -132,27 +150,24 @@ public class FilterController(ParticipantDbContext context) : Controller
         };
     }
 
-    private void SetStudiesSelectList(VolunteerFilterViewModel model, string? studyId)
+    private void SetSelectedStudy(VolunteerFilterViewModel model, string studyId)
     {
-        model.Studies = context.Studies.Where(x => !x.IsDeleted)
-            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.StudyName }).ToList();
-
         if (!String.IsNullOrEmpty(studyId))
         {
-            foreach (var study in model.Studies)
-            {
-                if (study.Value == studyId)
-                {
-                    study.Selected = true;
-                }
-            }
+            Study selectedStudy = context.Studies.Where(x => x.Id == Convert.ToInt32(studyId)).FirstOrDefault();
+
+            model.SelectedStudy = selectedStudy?.StudyName ?? string.Empty;
+            model.SelectedStudyId = selectedStudy?.Id.ToString();
+            model.SelectedStudyCPMSId = selectedStudy?.CpmsId.ToString();  
         }
     }
 
     [HttpPost]
     public IActionResult SetupEmailCampaign(VolunteerFilterViewModel model)
     {
-        
+        DateTime? DateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
+        DateTime? DateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;
+
         var filterCriteria = new FilterCriteria
         {
             Contacted = model.IncludeContacted,
@@ -164,8 +179,8 @@ public class FilterController(ParticipantDbContext context) : Controller
                 model.RegistrationFromDateDay),
             RegistrationToDate = ConstructDate(model.RegistrationToDateYear, model.RegistrationToDateMonth,
                 model.RegistrationToDateDay),
-            DateOfBirthFrom = ConstructDate(model.AgeFrom, new DateTime().Month, new DateTime().Day),
-            DateOfBirthTo = ConstructDate(model.AgeTo, new DateTime().Month, new DateTime().Day),
+            DateOfBirthFrom = DateOfBirthFrom,
+            DateOfBirthTo = DateOfBirthTo,
             GenderId = model.IsSexMale ? 1 : model.IsSexFemale ? 2 : 3,
             GenderIsSameAsSexRegisteredAtBirth = model.IsGenderSameAsSexRegisteredAtBirth_Yes ? true :
                 model.IsGenderSameAsSexRegisteredAtBirth_No ? false : null,
@@ -178,11 +193,13 @@ public class FilterController(ParticipantDbContext context) : Controller
         context.FilterCriterias.Add(filterCriteria);
         context.SaveChanges();
         
+        // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
         {
+            FilterCriteriaId = filterCriteria.Id,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount,
-            StudyName = model.SelectedStudy?.Value
+            StudyName = model.SelectedStudy
         };
         return RedirectToAction("SetupCampaign", "Email", campaignDetails);
     }
@@ -199,11 +216,11 @@ public class FilterController(ParticipantDbContext context) : Controller
     }
 
     [HttpPost]
+    [RequestFormSizeLimit(valueCountLimit: 50000)]
     public IActionResult FilterVolunteers(VolunteerFilterViewModel model)
     {
-        ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
-            model.RegistrationFromDateYear,
-            model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
+        ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth, model.RegistrationFromDateYear,
+                                    model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
         ValidatePostcodeDistricts(model.PostcodeDistricts);
         ValidateAge(model.AgeFrom, model.AgeTo);
 
@@ -211,6 +228,8 @@ public class FilterController(ParticipantDbContext context) : Controller
         {
             int volunteerCount = 0;
 
+            FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
+            FilterByAreasOfResearch(model.SelectedHealthConditions);
             FilterByRegistrationDate(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
                 model.RegistrationFromDateYear,
                 model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
@@ -223,8 +242,6 @@ public class FilterController(ParticipantDbContext context) : Controller
 
             IQueryable<Participant> query = context.Participants.AsQueryable();
 
-            filters.Add(p => !p.IsDeleted);
-
             foreach (var filter in filters)
             {
                 query = query.Where(filter);
@@ -233,17 +250,27 @@ public class FilterController(ParticipantDbContext context) : Controller
             model.VolunteerCount = query.Count(); 
         }
 
-        if (model.SelectedStudy == null)
-        {
-            SetStudiesSelectList(model, "");
-        }
-
-        SetLocationsSelectList(model);
+        SetHealthConditionSelectList(model);
 
         SetStudyExclusionFilters(model);
 
+        if (!String.IsNullOrEmpty(model.SelectedStudy))
+        {
+            SetSelectedStudy(model, model.SelectedStudyId);
+            model.ShowStudyFilters = true;
+        }
 
         return View("Index", model);
+    }
+
+    private void FilterByAreasOfResearch(List<string>? selectedHealthConditions)
+    {
+        if (selectedHealthConditions != null)
+        {
+            List<int> conditionIds = selectedHealthConditions.Select(s => int.Parse(s)).ToList();
+
+            filters.Add(p => p.HealthConditions.Any(hc => conditionIds.Contains(hc.HealthConditionId)));
+        }
     }
 
     private void ValidatePostcodeDistricts(string? postcodeDistricts)
@@ -270,6 +297,20 @@ public class FilterController(ParticipantDbContext context) : Controller
         {
             ModelState.AddModelError("AgeFrom", "The minimum age must be lower than the maximum age");
         }
+    }
+
+    private void FilterVolunteersCompletedRegistration(string? selectedCompletedRegistration)
+    {
+            if (selectedCompletedRegistration == "1")
+            {
+                filters.Add(p => p.Stage2CompleteUtc != null);
+            }
+
+            if (selectedCompletedRegistration == "2")
+            {
+                filters.Add(p => p.Stage2CompleteUtc == null);
+            }
+
     }
 
     public void FilterByRegistrationDate(int? RegistrationFromDateDay, int? RegistrationFromDateMonth,
@@ -364,24 +405,24 @@ public class FilterController(ParticipantDbContext context) : Controller
             DateTime? RegistrationToDate =
                 ConstructDate(RegistrationToDateYear, RegistrationToDateMonth, RegistrationToDateDay);
 
-            if (RegistrationFromDate.HasValue && RegistrationFromDate.Value.Date <= DateTime.Today)
+            if (RegistrationFromDate.HasValue && RegistrationFromDate.Value.Date >= DateTime.Today)
             {
                 ModelState.AddModelError("RegistrationFromDateDay",
                     "The date of volunteer registration must be before today");
             }
 
-            if (RegistrationToDate.HasValue && RegistrationToDate.Value.Date <= DateTime.Today)
+            if (RegistrationToDate.HasValue && RegistrationToDate.Value.Date >= DateTime.Today)
             {
                 ModelState.AddModelError("RegistrationToDateDay",
                     "The date of volunteer registration must be before today");
             }
 
-            if (RegistrationFromDateYear.HasValue && RegistrationFromDateYear >= 2022)
+            if (RegistrationFromDateYear.HasValue && RegistrationFromDateYear < 2022)
             {
                 ModelState.AddModelError("RegistrationFromDateYear", "Year must be a number that is 2022 or later");
             }
 
-            if (RegistrationToDateYear.HasValue && RegistrationToDateYear >= 2022)
+            if (RegistrationToDateYear.HasValue && RegistrationToDateYear < 2022)
             {
                 ModelState.AddModelError("RegistrationToDateYear", "Year must be a number that is 2022 or later");
             }

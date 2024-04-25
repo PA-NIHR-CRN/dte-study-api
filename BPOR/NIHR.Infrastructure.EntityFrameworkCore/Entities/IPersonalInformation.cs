@@ -1,7 +1,6 @@
-namespace NIHR.Infrastructure.Entities
+namespace NIHR.Infrastructure.EntityFrameworkCore;
+
+public interface IPersonalInformation
 {
-    public interface IPersonalInformation
-    {
-        void Anonymise();
-    }
+    void Anonymise();
 }

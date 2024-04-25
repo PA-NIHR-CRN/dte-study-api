@@ -1,51 +1,48 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace NIHR.Infrastructure.Entities.Interceptors
+namespace NIHR.Infrastructure.EntityFrameworkCore;
+
+public class DisableAutoDetectChangesInterceptor : SaveChangesInterceptor
 {
-    public class DisableAutoDetectChangesInterceptor : SaveChangesInterceptor
+    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
-        public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
+        if (eventData.Context != null)
         {
-            if (eventData.Context != null)
-            {
-                eventData.Context.ChangeTracker.AutoDetectChangesEnabled = false;
-                eventData.Context.ChangeTracker.DetectChanges();
-            }
-
-            return result;
+            eventData.Context.ChangeTracker.AutoDetectChangesEnabled = false;
+            eventData.Context.ChangeTracker.DetectChanges();
         }
 
-        public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
-        {
-            if (eventData.Context != null)
-            {
-                eventData.Context.ChangeTracker.AutoDetectChangesEnabled = false;
-                eventData.Context.ChangeTracker.DetectChanges();
-            }
+        return result;
+    }
 
-            return new ValueTask<InterceptionResult<int>>(result);
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+    {
+        if (eventData.Context != null)
+        {
+            eventData.Context.ChangeTracker.AutoDetectChangesEnabled = false;
+            eventData.Context.ChangeTracker.DetectChanges();
         }
 
-        public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
-        {
-            if (eventData.Context != null)
-            {
-                eventData.Context.ChangeTracker.AutoDetectChangesEnabled = true;
-            }
+        return new ValueTask<InterceptionResult<int>>(result);
+    }
 
-            return result;
+    public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
+    {
+        if (eventData.Context != null)
+        {
+            eventData.Context.ChangeTracker.AutoDetectChangesEnabled = true;
         }
 
-        public override ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result, CancellationToken cancellationToken = default)
-        {
-            if (eventData.Context != null)
-            {
-                eventData.Context.ChangeTracker.AutoDetectChangesEnabled = true;
-            }
+        return result;
+    }
 
-            return new ValueTask<int>(result);
+    public override ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result, CancellationToken cancellationToken = default)
+    {
+        if (eventData.Context != null)
+        {
+            eventData.Context.ChangeTracker.AutoDetectChangesEnabled = true;
         }
+
+        return new ValueTask<int>(result);
     }
 }

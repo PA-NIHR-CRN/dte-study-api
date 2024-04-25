@@ -1,7 +1,3 @@
-using Amazon.DynamoDBv2.Model;
-using BPOR.Domain.Entities;
-using BPOR.Domain.Entities.RefData;
-using CsvHelper.Configuration.Attributes;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,22 +7,28 @@ public class VolunteerFilterViewModel
 {
     public int StudyId { get; set; }
     // Study selection
-    [Display(Name = "Select a study (if applicable) you want to find volunteers for")]
-    public SelectListItem? SelectedStudy { get; set; }
+    [Display(Name = "Selected Study")]
+    public string? SelectedStudy { get; set; }
+
+    public string? SelectedStudyId { get; set; }
+    public string? SelectedStudyCPMSId { get; set; }
 
     public IEnumerable<SelectListItem>? Studies { get; set; }
     [Display(Name = "Volunteers contacted")]
     public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
+    public string? SelectedVolunteersContacted { get; set; }
 
     [Display(Name = "Volunteers recruited")]
     public IEnumerable<SelectListItem>? VolunteersRecruited { get; set; }
+    public string? SelectedVolunteersRecruited { get; set; }
 
     [Display(Name = "Volunteers registered interest")]
     public IEnumerable<SelectListItem>? VolunteersRegisteredInterest { get; set; }
+    public string? SelectedVolunteersRegisteredInterest { get; set; }
 
     [Display(Name = "Volunteers completed registration")]
     public IEnumerable<SelectListItem>? VolunteersCompletedRegistration { get; set; }
-
+    public string? SelectedVolunteersCompletedRegistration { get; set; }
     // Volunteer criteria
     [Display(Name = "Exclude those contacted")]
     public bool ExcludeContacted { get; set; }
@@ -54,8 +56,8 @@ public class VolunteerFilterViewModel
 
     // Areas of research volunteers are interested in
     [Display(Name = "Areas of research volunteers are interested in")]
-    public List<string>? SelectedLocations { get; set; }
-    public IEnumerable<SelectListItem>? Locations { get; set; }
+    public List<string>? SelectedHealthConditions { get; set; }
+    public IEnumerable<SelectListItem>? HealthConditions { get; set; }
 
     // Date of volunteer registration
     // From Date
@@ -68,7 +70,7 @@ public class VolunteerFilterViewModel
     public int? RegistrationFromDateMonth { get; set; }
 
     [Display(Name = "Year")]
-    [Range(2022, 2100, ErrorMessage = "Year must be a reasonable value")]
+    [Range(1970, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? RegistrationFromDateYear { get; set; }
 
     // To Date
@@ -81,7 +83,7 @@ public class VolunteerFilterViewModel
     public int? RegistrationToDateMonth { get; set; }
 
     [Display(Name = "Year")]
-    [Range(2022, 2100, ErrorMessage = "Year must be a reasonable value")]
+    [Range(1970, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? RegistrationToDateYear { get; set; }
 
     // Postcode districts and Full postcode
@@ -127,5 +129,7 @@ public class VolunteerFilterViewModel
     [Display(Name = "White")]
     public bool Ethnicity_White { get; set; }
     public int VolunteerCount { get; set; }
+    public bool ShowStudyFilters { get; set; }
 
+    public NotificationBannerModel? Notification { get; set; }
 }

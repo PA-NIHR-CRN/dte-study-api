@@ -14,7 +14,7 @@
     })
 </div>
 
-@using (Html.BeginForm("FilterVolunteers", "Filter", FormMethod.Post))
+@using (Html.BeginForm("HandleForms", "Filter", FormMethod.Post))
 {
     <input type="hidden" asp-for="StudyId" value="@Model.StudyId" />
     <div class="govuk-grid-column-two-thirds">
@@ -22,6 +22,8 @@
         <h1 class="govuk-heading-xl">
             Select the criteria you want your volunteers to match
         </h1>
+
+        @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
 
         @await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
@@ -59,8 +61,14 @@
             </div>
 
             <div class="filter-buttons-container">
-                <input type="submit" value="Search volunteers" class="govuk-button" />
-                @Html.ActionLink("Clear filters", "Index", "Filter", new { id = 1 }, new { @class = "govuk-button  govuk-button--secondary", data_module = "govuk-button" })
+                @* <input type="submit" value="Search volunteers" class="govuk-button" /> *@
+                <button type="submit" value="FilterVolunteers" name="action" class="govuk-button">
+                    Filter Volunteers
+                </button>
+                @* @Html.ActionLink("Clear filters", "ClearFilters", "Filter", new { id = 1 }, new { @class = "govuk-button  govuk-button--secondary", data_module = "govuk-button" }) *@
+                <button type="submit" class="govuk-button  govuk-button--secondary" data-module="govuk-button" value="ClearFilters" name="action">
+                    Clear filters
+                </button>
 
                 <div class="divide-container"></div>
 

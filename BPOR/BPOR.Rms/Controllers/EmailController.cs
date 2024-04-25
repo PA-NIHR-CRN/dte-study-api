@@ -1,11 +1,13 @@
+using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
+using BPOR.Rms.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace BPOR.Rms.Controllers;
 
-public class EmailController : Controller
+public class EmailController(IEmailCampaignService emailCampaignService) : Controller
 {
     public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
@@ -30,25 +32,38 @@ public class EmailController : Controller
     }
 
     [HttpPost]
-    public IActionResult SendEmail(SetupCampaignViewModel model)
+    public async Task<IActionResult> SendEmail(SetupCampaignViewModel model)
     {
         ModelState.Remove("PreviewEmails");
 
+        if (model.TotalVolunteers > model.MaxNumbers)
+        {
+            ModelState.AddModelError("TotalVolunteers", "Total Volunteers must be less than or equal to Max Numbers.");
+        }
+
+        if (string.IsNullOrEmpty(model.SelectedTemplate))
+        {
+            ModelState.AddModelError("SelectedTemplate", "Please select a email template.");
+        }
+
         if (!ModelState.IsValid)
         {
-            if (model.TotalVolunteers > model.MaxNumbers)
-            {
-                ModelState.AddModelError("TotalVolunteers", "Total Volunteers must be less than or equal to Max Numbers.");
-                return View("SetupCampaign", model);
-            }
-            if (string.IsNullOrEmpty(model.SelectedTemplate))
-            {
-                ModelState.AddModelError("SelectedTemplate", "Please select a email template.");
-                return View("SetupCampaign", model);
-            }
-            
             return View("SetupCampaign", model);
         }
+        
+        await emailCampaignService.SendCampaignAsync(new EmailCampaign
+        {
+            FilterCriteriaId = model.FilterCriteriaId,
+            TargetGroupSize = model.TotalVolunteers.Value,
+            EmailTemplateId = new Guid(model.SelectedTemplate)
+        });
+
+        // implement email sending
+        // get list of volunteers for the filter criteria
+        // get a random sample of volunteers including prioticising those who have not been contacted before
+        // send email to volunteers
+        // mark volunteers as contacted in the database with the email template used
+
         return RedirectToAction("EmailSuccess", model);
     }
 
@@ -87,7 +102,7 @@ public class EmailController : Controller
         {
             IsSuccess = true,
             Heading = "Success",
-            Body = $"Preview email has been sent to{model.PreviewEmails}"
+            Body = $"Preview email has been sent to {model.PreviewEmails}"
         });
 
         return RedirectToAction("Index", model);
@@ -95,11 +110,11 @@ public class EmailController : Controller
 
 
     [HttpPost]
-    public IActionResult HandleForms(SetupCampaignViewModel model, string action)
+    public async Task<IActionResult> HandleForms(SetupCampaignViewModel model, string action)
     {
         return action switch
         {
-            "SetupCampaign" => SendEmail(model),
+            "SetupCampaign" => await SendEmail(model),
             "SendPreviewEmail" => SendPreviewEmail(model),
             _ => RedirectToAction("SetupCampaign")
         };

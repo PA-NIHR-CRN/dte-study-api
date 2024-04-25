@@ -17,7 +17,7 @@
 </style>
 
 <div class="govuk-form-group" @(Html.ViewData.ModelState["SelectedTemplate"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")>
-    <label asp-for="SelectedTemplate" class="govuk-label" for="SelectedTemplate">
+    <label asp-for="SelectedTemplate" class="govuk-label govuk-label--l" for="SelectedTemplate">
         @Html.DisplayNameFor(model => model.SelectedTemplate)
     </label>
     <div id="SelectedTemplate-hint" class="govuk-hint">
@@ -31,12 +31,14 @@
         </span>
         <select class="govuk-select govuk-select--error" id="SelectedTemplate" asp-for="SelectedTemplate" aria-describedby="SelectedTemplate-hint SelectedTemplate-error">
             <option value="" selected>Select template</option>
+            <option value="cd26ccf6-75d6-4521-884f-1693c62ed303">Template 1</option>
         </select>
     }
     else
     {
         <select class="govuk-select" id="SelectedTemplate" asp-for="SelectedTemplate" aria-describedby="SelectedTemplate-hint">
-            <option value="choose" selected>Select template</option>
+            <option value="" selected>Select template</option>
+            <option value="cd26ccf6-75d6-4521-884f-1693c62ed303">Template 1</option>
         </select>
     }
 </div>

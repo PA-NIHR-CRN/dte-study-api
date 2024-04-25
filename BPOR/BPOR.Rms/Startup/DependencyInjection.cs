@@ -1,11 +1,13 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
+using BPOR.Rms.Services;
 using Microsoft.EntityFrameworkCore;
+using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
-using NIHR.Infrastructure.Extensions;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Services;
 using NIHR.Infrastructure.Settings;
+using NIHR.Infrastructure.Configuration;
 
 namespace BPOR.Rms.Startup;
 
@@ -18,6 +20,7 @@ public static class DependencyInjection
 
         var identityProviderSettings = services.GetSectionAndValidate<IdentityProviderApiSettings>(configuration);
 
+        services.AddScoped<IEmailCampaignService, EmailCampaignService>();
         services.AddTransient<IIdentityProviderService, Wso2IdentityServerService>();
         services.AddHttpClient<IIdentityProviderService, Wso2IdentityServerService>(httpClient =>
         {
@@ -25,13 +28,16 @@ public static class DependencyInjection
         });
 
         services.AddDistributedMemoryCache();
+        services.AddPaging();
 
         // TODO this could be reusable
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
-        services.AddDbContext<ParticipantDbContext>(options =>
+
+        services.AddDbContext<ParticipantDbContext>(options => {
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-                x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+                x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)).UseNihrExtensions();
+            });
 
         services.AddHealthChecks();
 

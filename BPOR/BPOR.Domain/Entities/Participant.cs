@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities.RefData;
-using NIHR.Infrastructure.Entities;
+using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 
@@ -48,11 +48,16 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
     public CommunicationLanguage CommunicationLanguage { get; set; }
     public Gender Gender { get; set; }
 
+    public ICollection<EmailCampaignParticipant> EmailCampaignParticipants { get; set; } =
+        new List<EmailCampaignParticipant>();
     public ICollection<ParticipantHealthCondition> HealthConditions { get; set; } =
         new List<ParticipantHealthCondition>();
 
     public ICollection<ParticipantIdentifier> ParticipantIdentifiers { get; set; } =
-        new List<ParticipantIdentifier>();
+        new List<ParticipantIdentifier>();    
+    
+    public ICollection<StudyParticipantEnrollment> StudyParticipantEnrollments { get; set; } =
+        new List<StudyParticipantEnrollment>();
 
     public ParticipantAddress? Address { get; set; }
 

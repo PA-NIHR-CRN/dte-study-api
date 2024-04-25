@@ -18,10 +18,147 @@ namespace Dynamo.Stream.Handler.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaign", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("EmailTemplateId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("FilterCriteriaId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PreviewRecipients")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("TargetGroupSize")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FilterCriteriaId");
+
+                    b.ToTable("EmailCampaigns");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaignParticipant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContactEmail")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DeliveredAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("DeliveryStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmailCampaignId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("ParticipantId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RegisteredInterestAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeliveryStatusId");
+
+                    b.HasIndex("EmailCampaignId");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.ToTable("EmailCampaignParticipant");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.EngagementPreferences", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("CanContactAboutResearch")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanContactForFeedback")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WhereDidYouHear")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("EngagementPreferences");
+                });
 
             modelBuilder.Entity("BPOR.Domain.Entities.FilterCriteria", b =>
                 {
@@ -449,6 +586,54 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 4,
                             Code = "Prefer not to say",
                             Description = "Prefer not to say",
+                            IsDeleted = false
+                        });
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.RefData.EmailDeliveryStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SysRefEmailDeliveryStatus", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "Sent",
+                            Description = "Sent",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "Delivered",
+                            Description = "Delivered",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "RegisteredInterest",
+                            Description = "RegisteredInterest",
                             IsDeleted = false
                         });
                 });
@@ -9193,6 +9378,47 @@ namespace Dynamo.Stream.Handler.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BPOR.Domain.Entities.RefData.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SysRefRole", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "Admin",
+                            Description = "Admin",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "Researcher",
+                            Description = "Researcher",
+                            IsDeleted = false
+                        });
+                });
+
             modelBuilder.Entity("BPOR.Domain.Entities.SourceReference", b =>
                 {
                     b.Property<int>("Id")
@@ -9230,6 +9456,9 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
                     b.Property<string>("EmailAddress")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -9254,9 +9483,92 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Studies");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.StudyParticipantEnrollment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EnrolledAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("ParticipantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("StudyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.HasIndex("StudyId");
+
+                    b.ToTable("StudyParticipantEnrollment");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.StudyResearcher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("StudyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudyId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("StudyResearcher");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.System.SysConfiguration", b =>
@@ -9288,6 +9600,127 @@ namespace Dynamo.Stream.Handler.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BPOR.Domain.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthenticationId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContactEmail")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContactFullName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("User");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.UserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserRole");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaign", b =>
+                {
+                    b.HasOne("BPOR.Domain.Entities.FilterCriteria", null)
+                        .WithMany("EmailCampaigns")
+                        .HasForeignKey("FilterCriteriaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaignParticipant", b =>
+                {
+                    b.HasOne("BPOR.Domain.Entities.RefData.EmailDeliveryStatus", "DeliveryStatus")
+                        .WithMany()
+                        .HasForeignKey("DeliveryStatusId");
+
+                    b.HasOne("BPOR.Domain.Entities.EmailCampaign", "EmailCampaign")
+                        .WithMany("Participants")
+                        .HasForeignKey("EmailCampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
+                        .WithMany("EmailCampaignParticipants")
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DeliveryStatus");
+
+                    b.Navigation("EmailCampaign");
+
+                    b.Navigation("Participant");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.EngagementPreferences", b =>
+                {
+                    b.HasOne("BPOR.Domain.Entities.User", null)
+                        .WithOne("EngagementPreferences")
+                        .HasForeignKey("BPOR.Domain.Entities.EngagementPreferences", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("BPOR.Domain.Entities.FilterCriteria", b =>
                 {
                     b.HasOne("BPOR.Domain.Entities.RefData.Gender", "Gender")
@@ -9295,7 +9728,7 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasForeignKey("GenderId");
 
                     b.HasOne("BPOR.Domain.Entities.Study", "Study")
-                        .WithMany()
+                        .WithMany("FilterCriterias")
                         .HasForeignKey("StudyId");
 
                     b.Navigation("Gender");
@@ -9410,14 +9843,76 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("Participant");
                 });
 
+            modelBuilder.Entity("BPOR.Domain.Entities.StudyParticipantEnrollment", b =>
+                {
+                    b.HasOne("BPOR.Domain.Entities.Participant", null)
+                        .WithMany("StudyParticipantEnrollments")
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BPOR.Domain.Entities.Study", null)
+                        .WithMany("StudyParticipantEnrollments")
+                        .HasForeignKey("StudyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.StudyResearcher", b =>
+                {
+                    b.HasOne("BPOR.Domain.Entities.Study", "Study")
+                        .WithMany("StudyResearchers")
+                        .HasForeignKey("StudyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BPOR.Domain.Entities.User", "User")
+                        .WithMany("StudyResearchers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Study");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.UserRole", b =>
+                {
+                    b.HasOne("BPOR.Domain.Entities.RefData.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BPOR.Domain.Entities.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaign", b =>
+                {
+                    b.Navigation("Participants");
+                });
+
             modelBuilder.Entity("BPOR.Domain.Entities.FilterCriteria", b =>
                 {
+                    b.Navigation("EmailCampaigns");
+
                     b.Navigation("HealthConditions");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.Participant", b =>
                 {
                     b.Navigation("Address");
+
+                    b.Navigation("EmailCampaignParticipants");
 
                     b.Navigation("HealthConditions");
 
@@ -9426,6 +9921,28 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("ParticipantLocation");
 
                     b.Navigation("SourceReferences");
+
+                    b.Navigation("StudyParticipantEnrollments");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.Study", b =>
+                {
+                    b.Navigation("FilterCriterias");
+
+                    b.Navigation("ManualEnrollments");
+
+                    b.Navigation("StudyParticipantEnrollments");
+
+                    b.Navigation("StudyResearchers");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.User", b =>
+                {
+                    b.Navigation("EngagementPreferences");
+
+                    b.Navigation("StudyResearchers");
+
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.Study", b =>

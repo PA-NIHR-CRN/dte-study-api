@@ -144,6 +144,7 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(record.Dynamodb.OldImage);
         var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
+            .IgnoreQueryFilters()
             .Include(x => x.ParticipantIdentifiers)
             .SingleOrDefaultAsync(cancellationToken);
 
