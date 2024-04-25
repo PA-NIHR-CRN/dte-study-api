@@ -16,7 +16,7 @@ namespace BPOR.Registration.Stream.Handler;
 
 public static class Startup
 {
-    public static void ConfigureServices(IServiceCollection services, IHostEnvironment hostEnvironment) 
+    public static void ConfigureServices(IServiceCollection services, IHostEnvironment hostEnvironment)
     {
         // configuration
         var configuration = new ConfigurationManager().AddNihrConfiguration(services, hostEnvironment);
@@ -25,15 +25,19 @@ public static class Startup
         // db setup
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
+        
         services.AddDbContext<ParticipantDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+                x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+                      .UseNihrExtensions());
+
         services.AddScoped<IDynamoDBContext>(x => new DynamoDBContext(new AmazonDynamoDBClient()));
 
         // add application services
         services.AddSingleton<IRefDataService, RefDataService>();
         services.AddTransient<IStreamHandler, StreamHandler>();
         services.AddTransient<IParticipantMapper, ParticipantMapper>();
-        
+
         services.ConfigureNihrLogging(configuration);
     }
 }

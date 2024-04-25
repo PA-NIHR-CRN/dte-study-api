@@ -1,8 +1,7 @@
-namespace NIHR.Infrastructure.Entities
+namespace NIHR.Infrastructure.EntityFrameworkCore;
+
+public interface ITimestamped
 {
-    public interface ITimestamped
-    {
-        DateTime CreatedAt { get; set; }
-        DateTime UpdatedAt { get; set; }
-    }
+    DateTime CreatedAt { get; set; }
+    DateTime UpdatedAt { get; set; }
 }

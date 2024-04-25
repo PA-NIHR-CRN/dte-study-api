@@ -1,4 +1,4 @@
-using NIHR.Infrastructure.Entities;
+using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 

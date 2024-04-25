@@ -1,54 +1,64 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-namespace NIHR.Infrastructure.Entities.Interceptors;
+namespace NIHR.Infrastructure.EntityFrameworkCore;
 
 public class AuditInterceptor : SaveChangesInterceptor
 {
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
     {
-        return new ValueTask<InterceptionResult<int>>(HandleTimestamps(eventData, result));
+        return new ValueTask<InterceptionResult<int>>(HandleAuditColumns(eventData, result));
     }
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
-        return HandleTimestamps(eventData, result);
+        return HandleAuditColumns(eventData, result);
     }
 
-    protected static InterceptionResult<int> HandleTimestamps(DbContextEventData eventData, InterceptionResult<int> result)
+    protected InterceptionResult<int> HandleAuditColumns(DbContextEventData eventData, InterceptionResult<int> result)
     {
         if (eventData.Context is null)
         {
             return result;
         }
 
+        var _ = eventData.Context.TryGetService(out ILogger<AuditInterceptor>? logger);
+
+        if (!eventData.Context.TryGetService(out ICurrentUserIdProvider? currentUserIdProvider) || currentUserIdProvider?.UserId is null)
+        {
+            logger?.LogWarning("Unable to determine user id. Ensure that an instance of {providerName} is configured and returns the id of the current user.", nameof(ICurrentUserIdProvider));
+
+            return result;
+        }
+
+
         foreach (var entry in eventData.Context.ChangeTracker.Entries())
         {
             if (entry is { State: EntityState.Added, Entity: IAudit inserted })
             {
-                if (inserted.CreatedAt == default)
+                if (inserted.CreatedById == default)
                 {
-                    inserted.CreatedAt = DateTime.UtcNow;
+                    inserted.CreatedById = currentUserIdProvider.UserId.Value;
                 }
 
                 if (inserted.UpdatedAt == default)
                 {
-                    inserted.UpdatedAt = inserted.CreatedAt;
+                    inserted.UpdatedById = currentUserIdProvider.UserId.Value;
                 }
-                
-                // TODO: Set CreatedById and UpdatedById
             }
 
-            if (entry is { State: EntityState.Modified, Entity: ITimestamped updated })
+            if (entry is { State: EntityState.Modified, Entity: IAudit updated })
             {
-                updated.UpdatedAt = DateTime.UtcNow;
+                updated.UpdatedById = currentUserIdProvider.UserId.Value;
             }
 
-            if (entry is { State: EntityState.Deleted, Entity: ITimestamped deleted })
+            if (entry is { State: EntityState.Deleted, Entity: IAudit deleted })
             {
-                deleted.UpdatedAt = DateTime.UtcNow;
+                deleted.UpdatedById = currentUserIdProvider.UserId.Value;
             }
         }
+
         return result;
     }
 }

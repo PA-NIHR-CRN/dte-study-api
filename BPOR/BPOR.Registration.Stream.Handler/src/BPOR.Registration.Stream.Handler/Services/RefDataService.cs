@@ -2,6 +2,7 @@ using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Registration.Stream.Handler.Services;
 
@@ -25,7 +26,7 @@ public class RefDataService : IRefDataService
         {
             lock (_lockObject)
             {
-                return participantDbContext.Genders.AsNoTracking().ToList();
+                return participantDbContext.Genders.IgnoreQueryFilters().AsNoTracking().ToList();
             }
         });
 
@@ -33,7 +34,7 @@ public class RefDataService : IRefDataService
         {
             lock (_lockObject)
             {
-                return participantDbContext.HealthConditions.AsNoTracking().ToList();
+                return participantDbContext.HealthConditions.IgnoreQueryFilters().AsNoTracking().ToList();
             }
         });
 
@@ -41,7 +42,7 @@ public class RefDataService : IRefDataService
         {
             lock (_lockObject)
             {
-                return participantDbContext.IdentifierTypes.AsNoTracking().ToList();
+                return participantDbContext.IdentifierTypes.IgnoreQueryFilters().AsNoTracking().ToList();
             }
         });
 
@@ -49,7 +50,7 @@ public class RefDataService : IRefDataService
         {
             lock (_lockObject)
             {
-                return participantDbContext.CommunicationLanguages.AsNoTracking().ToList();
+                return participantDbContext.CommunicationLanguages.IgnoreQueryFilters().AsNoTracking().ToList();
             }
         });
 
@@ -57,7 +58,7 @@ public class RefDataService : IRefDataService
         {
             lock (_lockObject)
             {
-                return participantDbContext.DailyLifeImpacts.AsNoTracking().ToList();
+                return participantDbContext.DailyLifeImpacts.IgnoreQueryFilters().AsNoTracking().ToList();
             }
         });
     }
@@ -103,7 +104,6 @@ public class RefDataService : IRefDataService
             {
                 Code = code,
                 Description = code,
-                IsDeleted = false
             };
             UpdateCache(newRefData);
 

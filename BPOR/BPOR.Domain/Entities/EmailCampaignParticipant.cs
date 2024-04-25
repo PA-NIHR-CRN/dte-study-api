@@ -1,5 +1,5 @@
 using BPOR.Domain.Entities.RefData;
-using NIHR.Infrastructure.Entities;
+using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 
