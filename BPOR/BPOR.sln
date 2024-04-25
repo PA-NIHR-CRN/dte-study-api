@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.Infrastructure.AspNetC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Geolocation", "BPOR.Geolocation\BPOR.Geolocation.csproj", "{5ED83769-29C7-4504-94C3-C8962CB62500}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{7D035B4F-4ECD-4D3F-B31E-0908D729085E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,5 +77,8 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4E45AB36-07F2-4CE9-8685-CFE1BBD4AC3E}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5ED83769-29C7-4504-94C3-C8962CB62500} = {7D035B4F-4ECD-4D3F-B31E-0908D729085E}
 	EndGlobalSection
 EndGlobal

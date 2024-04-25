@@ -3,7 +3,6 @@ using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Entities.System;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
-using NIHR.Infrastructure.Entities.Interceptors;
 using NIHR.Infrastructure.Exceptions;
 
 namespace BPOR.Domain.Entities;

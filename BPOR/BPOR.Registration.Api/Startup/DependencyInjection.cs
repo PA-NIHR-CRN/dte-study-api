@@ -17,7 +17,7 @@ using Dte.Common.Contracts;
 using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Common.Services;
-using NIHR.Infrastructure.Clients;
+using NIHR.Infrastructure;
 using NIHR.Infrastructure.Configuration;
 
 namespace BPOR.Registration.Api.Startup;
@@ -157,7 +157,7 @@ public static class DependencyInjection
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
             .CreateLogger("BPOR.Registration.Api.Startup.DependencyInjection");
 
-        services.AddHttpClientWithRetry<ILocationApiClient, LocationApiClient>(clientsSettings.Value.LocationService, 2,
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings.Value.LocationService, 2,
             logger);
 
         services.AddHttpClient<NhsLoginHttpClient>((serviceProvider, httpClient) =>
