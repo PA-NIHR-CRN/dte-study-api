@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using NIHR.Infrastructure.Models;
 
-namespace NIHR.Infrastructure.Clients
+namespace NIHR.Infrastructure
 {
-    public interface ILocationApiClient
+    public interface IPostcodeMapper
     {
         Task<IEnumerable<PostcodeAddressModel>> GetAddressesByPostcodeAsync(string postcode,
             CancellationToken cancellationToken);

@@ -6,7 +6,7 @@ using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
 using BPOR.Registration.Stream.Handler.Services;
 using NetTopologySuite.Geometries;
-using NIHR.Infrastructure.Clients;
+using NIHR.Infrastructure;
 
 namespace BPOR.Registration.Stream.Handler.Mappers;
 
@@ -14,10 +14,10 @@ public class ParticipantMapper : IParticipantMapper
 {
     private readonly IDynamoDBContext _context;
     private readonly IRefDataService _refDataService;
-    private readonly ILocationApiClient _locationApiClient;
+    private readonly IPostcodeMapper _locationApiClient;
 
     public ParticipantMapper(IDynamoDBContext context, IRefDataService refDataService,
-        ILocationApiClient locationApiClient)
+        IPostcodeMapper locationApiClient)
     {
         _context = context;
         _refDataService = refDataService;

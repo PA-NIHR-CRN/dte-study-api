@@ -1,15 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using NIHR.Infrastructure;
 using NIHR.Infrastructure.Models;
 
-namespace NIHR.Infrastructure.Clients
+namespace BPOR.Infrastructure.Clients
 {
-    public class LocationApiClient : ILocationApiClient
+    public class LocationApiClient :IPostcodeMapper
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<LocationApiClient> _logger;
@@ -33,7 +29,7 @@ namespace NIHR.Infrastructure.Clients
 
             if (response.IsSuccessStatusCode)
             {
-                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var jsonResponse = await response.Content.ReadAsStringAsync(cancellationToken);
                 return JsonConvert.DeserializeObject<IEnumerable<PostcodeAddressModel>>(jsonResponse);
             }
             else
@@ -58,7 +54,8 @@ namespace NIHR.Infrastructure.Clients
 
             if (response.IsSuccessStatusCode)
             {
-                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var jsonResponse = await response.Content.ReadAsStringAsync(cancellationToken);
+                
                 return JsonConvert.DeserializeObject<CoordinatesModel>(jsonResponse);
             }
             else

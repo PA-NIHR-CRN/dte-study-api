@@ -2,11 +2,11 @@ using BPOR.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
-using NIHR.Infrastructure.Clients;
+using NIHR.Infrastructure;
 
 namespace BPOR.Geolocation.Controllers;
 
-public class GeolocationController(ParticipantDbContext context, ILocationApiClient locationApiClient) : Controller
+public class GeolocationController(ParticipantDbContext context, IPostcodeMapper locationApiClient) : Controller
 {
     [HttpGet]
     [Route("api/add-lat-lng-to-all-users")]

@@ -14,17 +14,15 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.user.json", optional: true)
             .Build();
-        
+
         var dbSettings = configuration.GetSection(DbSettings.SectionName).Get<DbSettings>();
 
         var connectionString = dbSettings.BuildConnectionString();
 
-        // UseNetTopologySuite
         var options = new DbContextOptionsBuilder<ParticipantDbContext>()
-            .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), x => x.UseNetTopologySuite()).UseNihrExtensions()
+            .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), x => x.UseNetTopologySuite())
+            .UseNihrExtensions().Options;
 
         return new ParticipantDbContext(options);
     }
-    
-    
 }

@@ -1,12 +1,13 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
+using BPOR.Infrastructure.Clients;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using NIHR.Infrastructure.Clients;
+using NIHR.Infrastructure;
+using NIHR.Infrastructure.Configuration;
 using NIHR.Infrastructure.EntityFrameworkCore;
-using NIHR.Infrastructure.Extensions;
 
 namespace BPOR.Geolocation.Startup;
 
@@ -25,7 +26,7 @@ public static class DependencyInjection
             {
                 builder.UseNetTopologySuite();
                 builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            }));
+            }).UseNihrExtensions());
 
 
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
@@ -33,7 +34,7 @@ public static class DependencyInjection
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
             .CreateLogger("BPOR.Geolocation");
 
-        services.AddHttpClientWithRetry<ILocationApiClient, LocationApiClient>(clientsSettings.Value.LocationService, 2,
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings.Value.LocationService, 2,
             logger);
 
 
