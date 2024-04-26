@@ -7,6 +7,7 @@ using BPOR.Rms.Models.Email;
 using Newtonsoft.Json;
 using BPOR.Rms.Models;
 using BPOR.Rms.Services;
+using BPOR.Domain.Entities.RefData;
 
 namespace BPOR.Rms.Controllers;
 
@@ -168,29 +169,48 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         DateTime? DateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
         DateTime? DateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;
 
+        bool? volunteersContacted = null;
+        bool? volunteersRegisteredInterest = null;
+        bool? volunteersRecruited = null;
+        bool? volunteersCompletedRegistration = null;
+
+        if (model.SelectedVolunteersContacted == "1") { volunteersContacted = true; } 
+        else if (model.SelectedVolunteersContacted == "2") { volunteersContacted = false; }
+
+        if (model.SelectedVolunteersRegisteredInterest == "1") { volunteersRegisteredInterest = true; }
+        else if (model.SelectedVolunteersRegisteredInterest == "2") { volunteersRegisteredInterest = false; }
+
+        if (model.SelectedVolunteersRecruited == "1") { volunteersRecruited = true; }
+        else if (model.SelectedVolunteersRecruited == "2") { volunteersRecruited = false; }
+
+        if (model.SelectedVolunteersCompletedRegistration == "1") { volunteersCompletedRegistration = true; }
+        else if (model.SelectedVolunteersCompletedRegistration == "2") { volunteersCompletedRegistration = false; }
+
         var filterCriteria = new FilterCriteria
         {
-            Contacted = model.IncludeContacted,
-            RegisteredInterest = model.IncludeRegisteredInterest,
-            CompletedRegistration = model.IncludeCompletedRegistration,
-            Recruited = model.IncludeRecruited,
-            PostcodeDistricts = model.PostcodeDistricts?.Split(",").ToList(),
+            IncludeContacted = volunteersContacted,
+            IncludeRegisteredInterest = volunteersRegisteredInterest,
+            IncludeCompletedRegistration = volunteersCompletedRegistration,
+            IncludeRecruited = volunteersRecruited,
             RegistrationFromDate = ConstructDate(model.RegistrationFromDateYear, model.RegistrationFromDateMonth,
                 model.RegistrationFromDateDay),
             RegistrationToDate = ConstructDate(model.RegistrationToDateYear, model.RegistrationToDateMonth,
                 model.RegistrationToDateDay),
             DateOfBirthFrom = DateOfBirthFrom,
             DateOfBirthTo = DateOfBirthTo,
-            GenderId = model.IsSexMale ? 1 : model.IsSexFemale ? 2 : 3,
-            GenderIsSameAsSexRegisteredAtBirth = model.IsGenderSameAsSexRegisteredAtBirth_Yes ? true :
-                model.IsGenderSameAsSexRegisteredAtBirth_No ? false : null,
-            EthnicGroup = GetEthnicGroup(model),
+            FullPostcode = model.FullPostcode,
             SearchRadiusMiles = model.SearchRadiusMiles,
             StudyId = model.StudyId
         };
 
         context.FilterCriterias.Add(filterCriteria);
         context.SaveChanges();
+
+        SaveAreasOfResearchFilters(filterCriteria, model.SelectedHealthConditions);
+        SavePostcodeDistrictFilters(filterCriteria, model.PostcodeDistricts);
+        SaveGenderFilter(model, filterCriteria);
+        SaveSexSameAsRegisteredAtBirthFilters(model, filterCriteria);
+        SaveEthnicityFilters(model, filterCriteria);
 
         // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
@@ -201,6 +221,178 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             StudyName = model.SelectedStudy
         };
         return RedirectToAction("SetupCampaign", "Email", campaignDetails);
+    }
+
+    private void SaveAreasOfResearchFilters(FilterCriteria filterCriteria, List<string>? selectedHealthConditions)
+    {
+        if (selectedHealthConditions?.Count > 0)
+        {
+            foreach(var item in selectedHealthConditions)
+            {
+                var areaOfInterest = new FilterAreaOfInterest
+                {
+                    FilterCriteriaId = filterCriteria.Id,
+                    HealthConditionId = Convert.ToInt32(item)
+                };
+
+                context.FilterAreaOfInterest.AddRange(areaOfInterest);
+            }
+            context.SaveChanges();
+        }
+    }
+
+    private void SavePostcodeDistrictFilters(FilterCriteria filterCriteria, string? postcodeDistricts = null)
+    {
+        if (!String.IsNullOrEmpty(postcodeDistricts))
+        {
+            var postcodeFragments = postcodeDistricts.Split(",").ToList();
+            var filterPostcodeFragments = new List<FilterPostcode>();
+
+            foreach (var frag in postcodeFragments)
+            {
+                var item = new FilterPostcode
+                {
+                    FilterCriteriaId = filterCriteria.Id,
+                    PostcodeFragment = frag
+                };
+                filterPostcodeFragments.Add(item);
+            }
+            context.FilterPostcode.AddRange(filterPostcodeFragments);
+            context.SaveChanges();
+        }
+    }
+
+    private void SaveGenderFilter(VolunteerFilterViewModel model, FilterCriteria filterCriteria)
+    {
+        if (model.IsSexMale || model.IsSexFemale)
+        {
+            var genderList = new List<FilterGender>();
+
+            if (model.IsSexMale)
+            {
+                var gender = new FilterGender
+                {
+                    FilterCriteriaId = filterCriteria.Id,
+                    GenderId = 1
+                };
+                genderList.Add(gender);
+            }
+
+            if (model.IsSexFemale)
+            {
+                var gender = new FilterGender
+                {
+                    FilterCriteriaId = filterCriteria.Id,
+                    GenderId = 2
+                };
+                genderList.Add(gender);
+            }
+
+            context.FilterGender.AddRange(genderList);
+            context.SaveChanges();
+        }
+    }
+
+    private void SaveSexSameAsRegisteredAtBirthFilters(VolunteerFilterViewModel model, FilterCriteria filterCriteria)
+    {
+        if (model.IsGenderSameAsSexRegisteredAtBirth_Yes || model.IsGenderSameAsSexRegisteredAtBirth_No || model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
+        {
+            var sexRegisteredAtBirthList = new List<FilterSexRegisteredAtBirth>();
+
+            if (model.IsGenderSameAsSexRegisteredAtBirth_Yes)
+            {
+                var item = new FilterSexRegisteredAtBirth
+                {
+                    FilterCriteriaId = filterCriteria.Id,
+                    YesNoPreferNotToSay = 1
+                };
+                sexRegisteredAtBirthList.Add(item);
+            }
+
+            if (model.IsGenderSameAsSexRegisteredAtBirth_No)
+            {
+                var item = new FilterSexRegisteredAtBirth
+                {
+                    FilterCriteriaId = filterCriteria.Id,
+                    YesNoPreferNotToSay = 2
+                };
+                sexRegisteredAtBirthList.Add(item);
+            }
+
+            if (model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
+            {
+                var item = new FilterSexRegisteredAtBirth
+                {
+                    FilterCriteriaId = filterCriteria.Id,
+                    YesNoPreferNotToSay = 3
+                };
+                sexRegisteredAtBirthList.Add(item);
+            }
+
+            context.FilterSexRegisteredAtBirth.AddRange(sexRegisteredAtBirthList);
+            context.SaveChanges();
+        }
+    }
+
+    private void SaveEthnicityFilters(VolunteerFilterViewModel model, FilterCriteria filterCriteria)
+    {
+        if (model.Ethnicity_Asian || model.Ethnicity_Black || model.Ethnicity_Mixed || model.Ethnicity_Other || model.Ethnicity_White)
+        {
+            var ethnicGroups = new List<FilterEthnicGroup>();
+
+            if (model.Ethnicity_Asian)
+            {
+                var ethnicity = new FilterEthnicGroup
+                {
+                    EthnicGroupId = 1,
+                    FilterCriteriaId = filterCriteria.Id
+                };
+                ethnicGroups.Add(ethnicity);
+            }
+
+            if (model.Ethnicity_Black)
+            {
+                var ethnicity = new FilterEthnicGroup
+                {
+                    EthnicGroupId = 2,
+                    FilterCriteriaId = filterCriteria.Id
+                };
+                ethnicGroups.Add(ethnicity);
+            }
+
+            if (model.Ethnicity_Mixed)
+            {
+                var ethnicity = new FilterEthnicGroup
+                {
+                    EthnicGroupId = 3,
+                    FilterCriteriaId = filterCriteria.Id
+                };
+                ethnicGroups.Add(ethnicity);
+            }
+
+            if (model.Ethnicity_White)
+            {
+                var ethnicity = new FilterEthnicGroup
+                {
+                    EthnicGroupId = 4,
+                    FilterCriteriaId = filterCriteria.Id
+                };
+                ethnicGroups.Add(ethnicity);
+            }
+
+            if (model.Ethnicity_Other)
+            {
+                var ethnicity = new FilterEthnicGroup
+                {
+                    EthnicGroupId = 5,
+                    FilterCriteriaId = filterCriteria.Id
+                };
+                ethnicGroups.Add(ethnicity);
+            }
+
+            context.FilterEthnicGroup.AddRange(ethnicGroups);
+            context.SaveChanges();
+        }
     }
 
     private static string? GetEthnicGroup(VolunteerFilterViewModel model)

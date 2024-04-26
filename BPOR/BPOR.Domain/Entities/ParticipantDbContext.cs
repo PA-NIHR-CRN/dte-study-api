@@ -35,6 +35,11 @@ public class ParticipantDbContext : DbContext
     public DbSet<EmailCampaign> EmailCampaigns { get; set; } = null!;
     public DbSet<ParticipantLocation> ParticipantLocation { get; set; } = null!;
     public DbSet<ParticipantAddress> ParticipantAddress { get; set; } = null!;
+    public DbSet<FilterEthnicGroup> FilterEthnicGroup { get; set; } = null!;
+    public DbSet<FilterPostcode> FilterPostcode { get; set; } = null!;
+    public DbSet<FilterAreaOfInterest> FilterAreaOfInterest { get; set; } = null!;
+    public DbSet<FilterGender> FilterGender { get; set; } = null!;
+    public DbSet<FilterSexRegisteredAtBirth> FilterSexRegisteredAtBirth { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

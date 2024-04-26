@@ -8,21 +8,21 @@ public class FilterCriteria
     public int Id { get; set; }
     public int? StudyId { get; set; }
     public Study? Study { get; set; }
-    public bool? Contacted { get; set; }
-    public bool? RegisteredInterest { get; set; }
-    public bool? CompletedRegistration { get; set; }
-    public bool? Recruited { get; set; }
-    public ICollection<ParticipantHealthCondition>? HealthConditions { get; set; }
-    public ICollection<string>? PostcodeDistricts { get; set; }
+    public bool? IncludeContacted { get; set; }
+    public bool? IncludeRegisteredInterest { get; set; }
+    public bool? IncludeCompletedRegistration { get; set; }
+    public bool? IncludeRecruited { get; set; }
     public string? FullPostcode { get; set; }
     public decimal? SearchRadiusMiles { get; set; }
     public DateTime? RegistrationFromDate { get; set; }
     public DateTime? RegistrationToDate { get; set; }
     public DateTime? DateOfBirthFrom { get; set; }
     public DateTime? DateOfBirthTo { get; set; }
-    public int? GenderId { get; set; }
-    public Gender Gender { get; set; }
-    public bool? GenderIsSameAsSexRegisteredAtBirth { get; set; }
-    [MaxLength(255)] public string? EthnicGroup { get; set; }
     public ICollection<EmailCampaign>? EmailCampaigns { get; set; } = new List<EmailCampaign>();
+    public ICollection<FilterAreaOfInterest>? FilterAreaOfInterest { get; set; } = new List<FilterAreaOfInterest>();
+    public ICollection<FilterPostcode>? FilterPostcode { get; set; } = new List<FilterPostcode>();
+    public ICollection<FilterGender>? FilterGender { get; set; } = new List<FilterGender>();
+    public ICollection<FilterSexRegisteredAtBirth>? FilterSexRegisteredAtBirth { get; set; } = new List<FilterSexRegisteredAtBirth>();
+    public ICollection<FilterEthnicGroup>? FilterEthnicGroup { get; set; } = new List<FilterEthnicGroup>();
 }
+
