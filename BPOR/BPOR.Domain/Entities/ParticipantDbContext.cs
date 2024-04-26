@@ -39,7 +39,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<FilterPostcode> FilterPostcode { get; set; } = null!;
     public DbSet<FilterAreaOfInterest> FilterAreaOfInterest { get; set; } = null!;
     public DbSet<FilterGender> FilterGender { get; set; } = null!;
-    public DbSet<FilterSexRegisteredAtBirth> FilterSexRegisteredAtBirth { get; set; } = null!;
+    public DbSet<FilterSexSameAsRegisteredAtBirth> FilterSexSameAsRegisteredAtBirth { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

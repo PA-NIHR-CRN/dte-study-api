@@ -22,7 +22,7 @@ public class FilterCriteria
     public ICollection<FilterAreaOfInterest>? FilterAreaOfInterest { get; set; } = new List<FilterAreaOfInterest>();
     public ICollection<FilterPostcode>? FilterPostcode { get; set; } = new List<FilterPostcode>();
     public ICollection<FilterGender>? FilterGender { get; set; } = new List<FilterGender>();
-    public ICollection<FilterSexRegisteredAtBirth>? FilterSexRegisteredAtBirth { get; set; } = new List<FilterSexRegisteredAtBirth>();
+    public ICollection<FilterSexSameAsRegisteredAtBirth>? FilterSexSameAsRegisteredAtBirth { get; set; } = new List<FilterSexSameAsRegisteredAtBirth>();
     public ICollection<FilterEthnicGroup>? FilterEthnicGroup { get; set; } = new List<FilterEthnicGroup>();
 }
 

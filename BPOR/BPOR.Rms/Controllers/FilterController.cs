@@ -297,11 +297,11 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
     {
         if (model.IsGenderSameAsSexRegisteredAtBirth_Yes || model.IsGenderSameAsSexRegisteredAtBirth_No || model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
         {
-            var sexRegisteredAtBirthList = new List<FilterSexRegisteredAtBirth>();
+            var sexRegisteredAtBirthList = new List<FilterSexSameAsRegisteredAtBirth>();
 
             if (model.IsGenderSameAsSexRegisteredAtBirth_Yes)
             {
-                var item = new FilterSexRegisteredAtBirth
+                var item = new FilterSexSameAsRegisteredAtBirth
                 {
                     FilterCriteriaId = filterCriteria.Id,
                     YesNoPreferNotToSay = 1
@@ -311,7 +311,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
             if (model.IsGenderSameAsSexRegisteredAtBirth_No)
             {
-                var item = new FilterSexRegisteredAtBirth
+                var item = new FilterSexSameAsRegisteredAtBirth
                 {
                     FilterCriteriaId = filterCriteria.Id,
                     YesNoPreferNotToSay = 2
@@ -321,7 +321,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
             if (model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
             {
-                var item = new FilterSexRegisteredAtBirth
+                var item = new FilterSexSameAsRegisteredAtBirth
                 {
                     FilterCriteriaId = filterCriteria.Id,
                     YesNoPreferNotToSay = 3
@@ -329,7 +329,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 sexRegisteredAtBirthList.Add(item);
             }
 
-            context.FilterSexRegisteredAtBirth.AddRange(sexRegisteredAtBirthList);
+            context.FilterSexSameAsRegisteredAtBirth.AddRange(sexRegisteredAtBirthList);
             context.SaveChanges();
         }
     }
