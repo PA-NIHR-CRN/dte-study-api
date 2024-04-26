@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Newtonsoft.Json;
 using BPOR.Rms.Models;
 using BPOR.Rms.Services;
 using BPOR.Domain.Entities.RefData;
+using Microsoft.EntityFrameworkCore;
 
 namespace BPOR.Rms.Controllers;
 
@@ -166,8 +168,8 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
     [HttpPost]
     public IActionResult SetupEmailCampaign(VolunteerFilterViewModel model)
     {
-        DateTime? DateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
-        DateTime? DateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;
+        DateTime? dateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
+        DateTime? dateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;
 
         bool? volunteersContacted = null;
         bool? volunteersRegisteredInterest = null;
@@ -196,8 +198,8 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 model.RegistrationFromDateDay),
             RegistrationToDate = ConstructDate(model.RegistrationToDateYear, model.RegistrationToDateMonth,
                 model.RegistrationToDateDay),
-            DateOfBirthFrom = DateOfBirthFrom,
-            DateOfBirthTo = DateOfBirthTo,
+            DateOfBirthFrom = dateOfBirthFrom,
+            DateOfBirthTo = dateOfBirthTo,
             FullPostcode = model.FullPostcode,
             SearchRadiusMiles = model.SearchRadiusMiles,
             StudyId = model.StudyId
@@ -419,14 +421,14 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         if (ModelState.IsValid)
         {
             var query = await filterService.FilterVolunteersAsync(model, cancellationToken);
-            model.VolunteerCount = query.Count();
+            model.VolunteerCount = await query.CountAsync(cancellationToken);
         }
 
         SetHealthConditionSelectList(model);
 
         SetStudyExclusionFilters(model);
 
-        if (!String.IsNullOrEmpty(model.SelectedStudy))
+        if (!string.IsNullOrEmpty(model.SelectedStudy))
         {
             SetSelectedStudy(model, model.SelectedStudyId);
             model.ShowStudyFilters = true;
@@ -438,13 +440,13 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
     private void ValidatePostcodeDistricts(string? postcodeDistricts)
     {
-        if (!String.IsNullOrEmpty(postcodeDistricts))
+        if (!string.IsNullOrEmpty(postcodeDistricts))
         {
-            List<string> PostcodeDistrictsList = postcodeDistricts.Split(",").ToList();
+            List<string> postcodeDistrictsList = postcodeDistricts.Split(",").ToList();
             string pattern = @"^[A-Za-z]{1,2}[0-9]{1,2}[A-Za-z]?$";
 
 
-            foreach (var item in PostcodeDistrictsList)
+            foreach (var item in postcodeDistrictsList)
             {
                 if (!Regex.IsMatch(item.Trim(), pattern))
                 {
@@ -464,44 +466,44 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
     }
 
 
-    private void ValidateRegistrationDates(int? RegistrationFromDateDay, int? RegistrationFromDateMonth,
-        int? RegistrationFromDateYear,
-        int? RegistrationToDateDay, int? RegistrationToDateMonth, int? RegistrationToDateYear)
+    private void ValidateRegistrationDates(int? registrationFromDateDay, int? registrationFromDateMonth,
+        int? registrationFromDateYear,
+        int? registrationToDateDay, int? registrationToDateMonth, int? registrationToDateYear)
     {
-        if ((RegistrationFromDateDay != null && RegistrationFromDateMonth != null &&
-             RegistrationFromDateYear != null) ||
-            (RegistrationToDateDay != null && RegistrationToDateMonth != null && RegistrationToDateYear != null))
+        if ((registrationFromDateDay != null && registrationFromDateMonth != null &&
+             registrationFromDateYear != null) ||
+            (registrationToDateDay != null && registrationToDateMonth != null && registrationToDateYear != null))
         {
-            DateTime? RegistrationFromDate = ConstructDate(RegistrationFromDateYear, RegistrationFromDateMonth,
-                RegistrationFromDateDay);
-            DateTime? RegistrationToDate =
-                ConstructDate(RegistrationToDateYear, RegistrationToDateMonth, RegistrationToDateDay);
+            DateTime? registrationFromDate = ConstructDate(registrationFromDateYear, registrationFromDateMonth,
+                registrationFromDateDay);
+            DateTime? registrationToDate =
+                ConstructDate(registrationToDateYear, registrationToDateMonth, registrationToDateDay);
 
-            if (RegistrationFromDate.HasValue && RegistrationFromDate.Value.Date >= DateTime.Today)
+            if (registrationFromDate.HasValue && registrationFromDate.Value.Date >= DateTime.Today)
             {
                 ModelState.AddModelError("RegistrationFromDateDay",
                     "The date of volunteer registration must be before today");
             }
 
-            if (RegistrationToDate.HasValue && RegistrationToDate.Value.Date >= DateTime.Today)
+            if (registrationToDate.HasValue && registrationToDate.Value.Date >= DateTime.Today)
             {
                 ModelState.AddModelError("RegistrationToDateDay",
                     "The date of volunteer registration must be before today");
             }
 
-            if (RegistrationFromDateYear.HasValue && RegistrationFromDateYear < 2022)
+            if (registrationFromDateYear.HasValue && registrationFromDateYear < 2022)
             {
                 ModelState.AddModelError("RegistrationFromDateYear", "Year must be a number that is 2022 or later");
             }
 
-            if (RegistrationToDateYear.HasValue && RegistrationToDateYear < 2022)
+            if (registrationToDateYear.HasValue && registrationToDateYear < 2022)
             {
                 ModelState.AddModelError("RegistrationToDateYear", "Year must be a number that is 2022 or later");
             }
 
-            if (RegistrationFromDate.HasValue && RegistrationToDate.HasValue)
+            if (registrationFromDate.HasValue && registrationToDate.HasValue)
             {
-                if (RegistrationFromDate > RegistrationToDate)
+                if (registrationFromDate > registrationToDate)
                 {
                     ModelState.AddModelError("RegistrationFromDateDay",
                         "Registration 'From' date must be before 'To' date");
@@ -513,15 +515,15 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             List<DateValues> fromDateValues = new List<DateValues>();
             List<DateValues> toDateValues = new List<DateValues>();
 
-            if (RegistrationFromDateDay != null || RegistrationFromDateMonth != null ||
-                RegistrationFromDateYear != null)
+            if (registrationFromDateDay != null || registrationFromDateMonth != null ||
+                registrationFromDateYear != null)
             {
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationFromDateDay", Unit = "day", Value = RegistrationFromDateDay });
+                    { Key = "RegistrationFromDateDay", Unit = "day", Value = registrationFromDateDay });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationFromDateMonth", Unit = "month", Value = RegistrationFromDateMonth });
+                    { Key = "RegistrationFromDateMonth", Unit = "month", Value = registrationFromDateMonth });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationFromDateYear", Unit = "year", Value = RegistrationFromDateYear });
+                    { Key = "RegistrationFromDateYear", Unit = "year", Value = registrationFromDateYear });
 
                 foreach (var val in fromDateValues)
                 {
@@ -533,14 +535,14 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 }
             }
 
-            if (RegistrationToDateDay != null || RegistrationToDateMonth != null || RegistrationToDateYear != null)
+            if (registrationToDateDay != null || registrationToDateMonth != null || registrationToDateYear != null)
             {
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationToDateDay", Unit = "day", Value = RegistrationToDateDay });
+                    { Key = "RegistrationToDateDay", Unit = "day", Value = registrationToDateDay });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationToDateMonth", Unit = "month", Value = RegistrationToDateMonth });
+                    { Key = "RegistrationToDateMonth", Unit = "month", Value = registrationToDateMonth });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationToDateYear", Unit = "year", Value = RegistrationToDateYear });
+                    { Key = "RegistrationToDateYear", Unit = "year", Value = registrationToDateYear });
 
                 foreach (var val in fromDateValues)
                 {

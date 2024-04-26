@@ -96,7 +96,7 @@ public class VolunteerFilterViewModel
 
     [Display(Name = "Radius")]
     [IntegerOrDecimal(ErrorMessage = "Enter a whole number or a number with one decimal place, like 8 or 1.3")]
-    public decimal? SearchRadiusMiles { get; set; }
+    public double? SearchRadiusMiles { get; set; }
 
     // Demographic information
     [Display(Name = "From")]

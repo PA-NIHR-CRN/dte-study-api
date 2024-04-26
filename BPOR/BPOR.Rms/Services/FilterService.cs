@@ -36,8 +36,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
 
         if (model.FullPostcode != null && model.SearchRadiusMiles > 0)
         {
-            var radiusInMeters = (double)(model.SearchRadiusMiles * (decimal?)1609.34); 
-            query = await FilterByRadius(model.FullPostcode, radiusInMeters, cancellationToken);
+            query = await FilterByRadius(model.FullPostcode, (double)model.SearchRadiusMiles, cancellationToken);
         }
 
         return _filters.Aggregate(query, (current, filter) => current.Where(filter));
@@ -58,13 +57,17 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         return query.Distinct().Select(pa => pa.Participant);
     }
 
-    private async Task<IQueryable<Participant>> FilterByRadius(string postcode, double radiusInMeters, CancellationToken cancellationToken = default)
+    private async Task<IQueryable<Participant>> FilterByRadius(string postcode, double radiusInMiles, CancellationToken cancellationToken = default)
     {
         var coordinates = await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
 
-        var point = new Point(coordinates.Latitude, coordinates.Longitude) { SRID = 4326 };
+        var point = new Point(coordinates.Longitude, coordinates.Latitude) { SRID = 4326 };
+
+        var distanceInMeters = radiusInMiles * 1609.344;
+        var boundingBox = point.Buffer(distanceInMeters / 111320).Envelope;
+        
         return context.ParticipantLocation
-            .Where(pl => pl.Location.IsWithinDistance(point, radiusInMeters))
+            .Where(x => x.Location.Within(boundingBox) && x.Location.IsWithinDistance(point, distanceInMeters))
             .Select(pl => pl.Participant);
     }
 

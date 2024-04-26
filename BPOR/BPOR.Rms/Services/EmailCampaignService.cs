@@ -6,17 +6,22 @@ namespace BPOR.Rms.Services;
 public class EmailCampaignService : IEmailCampaignService
 {
     private readonly ParticipantDbContext _context;
+    private readonly IFilterService _filterService;
 
-    public EmailCampaignService(ParticipantDbContext context)
+    public EmailCampaignService(ParticipantDbContext context, IFilterService filterService)
     {
         _context = context;
+        _filterService = filterService;
     }
 
     public async Task SendCampaignAsync(EmailCampaign campaign)
     {
         try
         {
-            var filter = await _context.FilterCriterias.FindAsync(campaign.FilterCriteriaId);
+            var dbFilter = await _context.FilterCriterias.FindAsync(campaign.FilterCriteriaId);
+            //
+            //
+            // var participants = await _filterService.FilterVolunteersAsync(filter);
         }
         catch (Exception e)
         {

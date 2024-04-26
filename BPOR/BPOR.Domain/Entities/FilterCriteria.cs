@@ -13,7 +13,7 @@ public class FilterCriteria
     public bool? IncludeCompletedRegistration { get; set; }
     public bool? IncludeRecruited { get; set; }
     public string? FullPostcode { get; set; }
-    public decimal? SearchRadiusMiles { get; set; }
+    public double? SearchRadiusMiles { get; set; }
     public DateTime? RegistrationFromDate { get; set; }
     public DateTime? RegistrationToDate { get; set; }
     public DateTime? DateOfBirthFrom { get; set; }
