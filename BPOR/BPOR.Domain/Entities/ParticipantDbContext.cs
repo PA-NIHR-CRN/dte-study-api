@@ -3,6 +3,7 @@ using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Entities.System;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
+using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Exceptions;
 
 namespace BPOR.Domain.Entities;
@@ -11,6 +12,13 @@ public class ParticipantDbContext : DbContext
 {
     public ParticipantDbContext(DbContextOptions<ParticipantDbContext> options) : base(options)
     {
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+
+        optionsBuilder.UseNihrExtensions();
     }
 
     public DbSet<Participant> Participants { get; set; } = null!;

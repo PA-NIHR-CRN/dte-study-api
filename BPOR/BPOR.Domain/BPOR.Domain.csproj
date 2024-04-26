@@ -36,11 +36,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Update="appsettings.user.json">
+      <None Update="appsettings.user.json">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
+      </None>
     </ItemGroup>
 
 </Project>

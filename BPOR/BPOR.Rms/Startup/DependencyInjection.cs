@@ -45,7 +45,7 @@ public static class DependencyInjection
             {
                 builder.UseNetTopologySuite();
                 builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            }).UseNihrExtensions());
+            }));
 
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
 

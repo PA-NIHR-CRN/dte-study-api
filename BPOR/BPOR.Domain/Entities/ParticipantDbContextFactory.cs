@@ -17,11 +17,17 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
 
         var dbSettings = configuration.GetSection(DbSettings.SectionName).Get<DbSettings>();
 
-        var connectionString = dbSettings.BuildConnectionString();
+        var connectionString = dbSettings?.BuildConnectionString();
+
+        if(connectionString is null)
+        {
+            throw new ArgumentNullException(nameof(connectionString), "Database connection string not configured.");
+        }
 
         var options = new DbContextOptionsBuilder<ParticipantDbContext>()
             .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), x => x.UseNetTopologySuite())
-            .UseNihrExtensions().Options;
+            .Options;
+
 
         return new ParticipantDbContext(options);
     }
