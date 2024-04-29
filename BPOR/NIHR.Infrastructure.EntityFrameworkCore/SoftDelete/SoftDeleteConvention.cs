@@ -22,6 +22,8 @@ namespace NIHR.Infrastructure.EntityFrameworkCore
             // Generates expression equivalent to
             // x => x.IsDeleted == false;
 
+            // TODO: Consider filtering out entities that are not marked as soft-delete but have a required relationship with a soft-delete entity.
+
             var parameter = Expression.Parameter(type, "x");
             var falseConstantValue = Expression.Constant(false);
             var propertyAccess = Expression.PropertyOrField(parameter, nameof(ISoftDelete.IsDeleted));
