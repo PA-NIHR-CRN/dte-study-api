@@ -18,7 +18,6 @@ namespace NIHR.Infrastructure.EntityFrameworkCore
             var extension = new NihrContextOptionsExtension();
 
             ((IDbContextOptionsBuilderInfrastructure)options).AddOrUpdateExtension(extension);
-
             return options;
         }
     }
