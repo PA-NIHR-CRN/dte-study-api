@@ -18,7 +18,7 @@ public class ParticipantDbContext : DbContext
     {
         base.OnConfiguring(optionsBuilder);
 
-        optionsBuilder.UseNihrExtensions();
+        optionsBuilder.UseNihrConventions();
     }
 
     public DbSet<Participant> Participants { get; set; } = null!;

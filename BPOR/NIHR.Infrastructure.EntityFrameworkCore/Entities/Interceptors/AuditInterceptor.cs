@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NIHR.Infrastructure.EntityFrameworkCore.Internal;
 
 namespace NIHR.Infrastructure.EntityFrameworkCore;
 
