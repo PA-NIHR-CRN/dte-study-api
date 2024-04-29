@@ -32,7 +32,7 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendEmail(SetupCampaignViewModel model)
+    public async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         ModelState.Remove("PreviewEmails");
 
@@ -50,13 +50,13 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
         {
             return View("SetupCampaign", model);
         }
-        
+
         await emailCampaignService.SendCampaignAsync(new EmailCampaign
         {
             FilterCriteriaId = model.FilterCriteriaId,
             TargetGroupSize = model.TotalVolunteers.Value,
             EmailTemplateId = new Guid(model.SelectedTemplate)
-        });
+        }, cancellationToken);
 
         // implement email sending
         // get list of volunteers for the filter criteria
@@ -110,11 +110,11 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
 
 
     [HttpPost]
-    public async Task<IActionResult> HandleForms(SetupCampaignViewModel model, string action)
+    public async Task<IActionResult> HandleForms(SetupCampaignViewModel model, string action, CancellationToken cancellationToken)
     {
         return action switch
         {
-            "SetupCampaign" => await SendEmail(model),
+            "SetupCampaign" => await SendEmail(model, cancellationToken),
             "SendPreviewEmail" => SendPreviewEmail(model),
             _ => RedirectToAction("SetupCampaign")
         };

@@ -7,4 +7,6 @@ public interface IRefDataService
     public int GetIdentifierTypeId(string identifierType);
     public int? GetCommunicationLanguageId(string language);
     public int? GetGenderId(string gender);
+    public int? GetEthnicGroupId(string ethnicGroup);
+    public int? GetEmailDeliveryStatusId(string status);
 }

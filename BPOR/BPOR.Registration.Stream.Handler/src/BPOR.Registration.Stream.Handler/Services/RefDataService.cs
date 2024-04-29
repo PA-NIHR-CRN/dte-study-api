@@ -14,6 +14,8 @@ public class RefDataService : IRefDataService
     private readonly Lazy<List<IdentifierType>> _identifierTypeRefData;
     private readonly Lazy<List<CommunicationLanguage>> _communicationLanguageRefData;
     private readonly Lazy<List<DailyLifeImpact>> _dailyLifeImpactRefData;
+    private readonly Lazy<List<DailyLifeImpact>> _ethnicGroupRefData;
+    private readonly Lazy<List<DailyLifeImpact>> _emailDeliveryStatusRefData;
     private readonly object _lockObject = new object();
     private readonly ParticipantDbContext _participantDbContext;
 
@@ -61,6 +63,7 @@ public class RefDataService : IRefDataService
                 return participantDbContext.DailyLifeImpacts.IgnoreQueryFilters().AsNoTracking().ToList();
             }
         });
+
     }
     
     private void UpdateCache<T>(T newRefData) where T : IReferenceData
@@ -145,6 +148,16 @@ public class RefDataService : IRefDataService
 
             return GetIdFromReferenceData(_genderRefData.Value, gender);
         }
+    }
+
+    public int? GetEthnicGroupId(string ethnicGroup)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int? GetEmailDeliveryStatusId(string status)
+    {
+        throw new NotImplementedException();
     }
 
     public int? GetDailyLifeImpactId(string impact)

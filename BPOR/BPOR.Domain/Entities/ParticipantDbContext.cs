@@ -56,14 +56,6 @@ public class ParticipantDbContext : DbContext
         return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value)));
     }
 
-
-    public IQueryable<Participant> GetParticipantsWithinRadius(Point location, double radiusInMeters)
-    {
-        return ParticipantLocation
-            .Where(pl => pl.Location.IsWithinDistance(location, radiusInMeters))
-            .Select(pl => pl.Participant);
-    }
-
     public void ThrowIfInMaintenanceMode()
     {
         if (SysConfigurations.Any(x =>

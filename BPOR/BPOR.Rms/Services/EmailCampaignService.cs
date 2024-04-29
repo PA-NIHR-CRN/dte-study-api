@@ -1,56 +1,57 @@
 using BPOR.Domain.Entities;
+using BPOR.Domain.Entities.RefData;
 using BPOR.Infrastructure.Interfaces;
+using BPOR.Registration.Stream.Handler.Services;
+using BPOR.Rms.Mappers;
+using BPOR.Rms.Models.Filter;
+using NIHR.Infrastructure.EntityFrameworkCore;
+using NIHR.Infrastructure.Interfaces;
+using NIHR.Infrastructure.Models;
 
 namespace BPOR.Rms.Services;
 
-public class EmailCampaignService : IEmailCampaignService
+public class EmailCampaignService(
+    ParticipantDbContext context,
+    IFilterService filterService,
+    INotificationService notificationService,
+    IRefDataService refDataService,
+    IRandomiser randomiser)
+    : IEmailCampaignService
 {
-    private readonly ParticipantDbContext _context;
-    private readonly IFilterService _filterService;
-
-    public EmailCampaignService(ParticipantDbContext context, IFilterService filterService)
-    {
-        _context = context;
-        _filterService = filterService;
-    }
-
-    public async Task SendCampaignAsync(EmailCampaign campaign)
+    public async Task SendCampaignAsync(EmailCampaign campaign, CancellationToken cancellationToken = default)
     {
         try
         {
-            var dbFilter = await _context.FilterCriterias.FindAsync(campaign.FilterCriteriaId);
-            //
-            //
-            // var participants = await _filterService.FilterVolunteersAsync(filter);
+            // Retrieve filter criteria and apply it
+            var dbFilter = await context.FilterCriterias.FindAsync(campaign.FilterCriteriaId);
+            var filter = FilterMapper.MapToFilterModel(dbFilter);
+            var volunteers = await filterService.FilterVolunteersAsync(filter, cancellationToken);
+
+            // TODO implement this logic
+            // prioritise volunteers who have not been contacted before or not contacted in a while
+            var prioritisedVolunteers = volunteers;
+
+            // Randomise the order of the volunteers
+            var selectedVolunteers = randomiser.GetRandomisedCollection(prioritisedVolunteers, campaign.TargetGroupSize.Value);
+
+            var emailAddresses = selectedVolunteers.Select(v => v.Email).ToList();
+
+            // Send emails and update records
+            foreach (var volunteer in selectedVolunteers)
+            {
+                await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
+                {
+                    EmailAddresses = emailAddresses,
+                    EmailTemplateId = campaign.EmailTemplateId,
+                }, cancellationToken);
+            }
+
+            await context.SaveChangesAsync(cancellationToken);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             throw;
         }
-        
-        
-        //
-        // if (filter == null)
-        // {
-        //     throw new ArgumentException("Filter not found");
-        // }
-
-        // use the filter criteria to search for participants
-        // var users = await _context.Participants
-        //     .Where(sr => sr.Study.FilterCriterias.Any(fc => fc.Id == FilterCriteriaId))
-        //     .Select(sr => sr.User)
-        //     .ToListAsync();
-        // foreach (var user in users)
-        // {
-        //     var email = new Email
-        //     {
-        //         To = user.ContactEmail,
-        //         Subject = filter.Name,
-        //         Body = filter.Description
-        //     };
-        //
-        //     await _emailService.SendEmailAsync(email);
-        // }
     }
 }
