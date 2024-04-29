@@ -12,6 +12,22 @@ public static class Projections
 
     public static IQueryable<EnrollmentDetails> AsEnrollmentDetails(this IQueryable<ManualEnrollment> source) => source.Select(ManualEnrollmentToEnrollmentDetails());
 
+    public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source, int step, bool isEditMode) => source.Select(StudyAsStudyFormViewModel(step, isEditMode));
+
+    public static Expression<Func<Domain.Entities.Study, StudyFormViewModel>> StudyAsStudyFormViewModel(int step, bool isEditMode)
+    {
+        return s => new StudyFormViewModel
+        {
+            Id = s.Id,
+            FullName = s.FullName,
+            EmailAddress = s.EmailAddress,
+            StudyName = s.StudyName,
+            CpmsId = s.CpmsId,
+            Step = step,
+            IsEditMode = isEditMode
+        };
+    }
+
     public static Expression<Func<Domain.Entities.Study, StudyModel>> StudyAsStudyListModel()
     {
         return s => new StudyModel

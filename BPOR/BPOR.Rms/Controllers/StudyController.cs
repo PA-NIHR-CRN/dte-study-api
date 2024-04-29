@@ -10,13 +10,13 @@ namespace BPOR.Rms.Controllers;
 
 public class StudyController(ParticipantDbContext context, IPaginationService paginationService) : Controller
 {
-    
+
     [HttpPost]
     public IActionResult PerformSearch(string searchTerm)
     {
         return RedirectToAction("Index", new { searchTerm, paginationService.Page, hasSearched = true });
     }
-    
+
     public async Task<IActionResult> Index(string? searchTerm, bool hasSearched = false, bool hasBeenReset = false, CancellationToken token = default)
     {
         var studiesQuery = context.Studies.AsQueryable();
@@ -148,34 +148,18 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         return View(viewModel);
     }
 
-    public async Task<IActionResult> Edit(int? id, int field)
+    public async Task<IActionResult> Edit(int id, int field)
     {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
         var studyModel = await context.Studies
-            .Where(s => s.Id == id)
-            .Select(Projections.StudyAsStudyListModel())
-            .FirstOrDefaultAsync();
+            .AsStudyFormViewModel(step: field, isEditMode: true)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
         if (studyModel == null)
         {
             return NotFound();
         }
 
-        var studyFormViewModel = new StudyFormViewModel
-        {
-            Id = studyModel.Id,
-            FullName = studyModel.FullName,
-            EmailAddress = studyModel.EmailAddress,
-            StudyName = studyModel.StudyName,
-            CpmsId = studyModel.CpmsId,
-            Step = field,
-            IsEditMode = true,
-        };
-
-        return View(studyFormViewModel);
+        return View(studyModel);
     }
 
     // POST: Study/Edit/5
@@ -184,21 +168,16 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
-        [Bind("Id,FullName,EmailAddress,StudyName,CpmsId, Step")]
-        StudyFormViewModel model)
+        [Bind("FullName,EmailAddress,StudyName,CpmsId, Step")]
+        StudyFormEditModel model)
     {
-        if (id != model.Id)
-        {
-            return NotFound();
-        }
-
         ModelState.Remove("IsRecruitingIdentifiableParticipants");
 
         if (ModelState.IsValid)
         {
             try
             {
-                var studyToUpdate = await context.Studies.FirstOrDefaultAsync(s => s.Id == model.Id);
+                var studyToUpdate = await context.Studies.FirstOrDefaultAsync(s => s.Id == id);
 
                 if (studyToUpdate == null)
                 {
@@ -215,7 +194,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!StudyExists(model.Id))
+                if (!StudyExists(id))
                 {
                     return NotFound();
                 }
@@ -232,7 +211,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
                 Body = $"{model.StudyName} has been successfully updated",
             });
 
-            return RedirectToAction(nameof(Details), new { id = model.Id });
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         return View(model);
