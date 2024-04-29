@@ -1,6 +1,6 @@
 ﻿namespace NIHR.Infrastructure.EntityFrameworkCore
 {
-    public interface IHardDeleteAuthorisationProvider
+    public interface IHardDeleteAuthorizationProvider
     {
         bool CanHardDelete();
     }

@@ -72,7 +72,7 @@ public class SoftDeleteInterceptor : SaveChangesInterceptor
 
         _ = eventData.Context.TryGetService(out ILogger<SoftDeleteInterceptor>? logger);
 
-        _ = eventData.Context.TryGetService(out IHardDeleteAuthorisationProvider? authorisationProvider);
+        _ = eventData.Context.TryGetService(out IHardDeleteAuthorizationProvider? authorisationProvider);
 
         if (entry.Metadata.GetRuntimeAnnotations().Any(x => x.Name == HardDeleteAnnotation && x.Value is true))
         {
