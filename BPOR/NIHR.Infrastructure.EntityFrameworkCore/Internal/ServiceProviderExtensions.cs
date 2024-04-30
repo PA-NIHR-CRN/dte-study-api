@@ -19,10 +19,15 @@ namespace NIHR.Infrastructure.EntityFrameworkCore.Internal
             return service != null;
         }
 
-        public static IServiceCollection AddEntityFrameworkNihrConventions(this IServiceCollection serviceCollection)
+        public static IServiceCollection AddEntityFrameworkNihrConventions(this IServiceCollection serviceCollection, NihrConventionOptions? conventionOptions = null)
         {
             new EntityFrameworkServicesBuilder(serviceCollection)
                 .TryAdd<IConventionSetPlugin, NihrConventionSetPlugin>();
+
+            if (conventionOptions is not null)
+            {
+                serviceCollection.AddTransient(p => conventionOptions);
+            }
 
             return serviceCollection;
         }

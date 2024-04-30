@@ -5,10 +5,19 @@ namespace NIHR.Infrastructure.EntityFrameworkCore.Internal
 {
     internal class NihrConventionSetPlugin : IConventionSetPlugin
     {
+        private readonly NihrConventionOptions _conventionOptions;
+
+        public NihrConventionSetPlugin(NihrConventionOptions conventionOptions)
+        {
+            _conventionOptions = conventionOptions;
+        }
+
         public ConventionSet ModifyConventions(ConventionSet conventionSet)
         {
-            // TODO: add configuration option to enable/disable below
-            // conventionSet.Remove(typeof(TableNameFromDbSetConvention));
+            if (!_conventionOptions.UseTableNameFromDbSet)
+            {
+                conventionSet.Remove(typeof(TableNameFromDbSetConvention));
+            }
 
             conventionSet.Add(new ReferenceDataConvention());
             conventionSet.Add(new SoftDeleteConvention());

@@ -6,11 +6,18 @@ namespace NIHR.Infrastructure.EntityFrameworkCore.Internal
 {
     internal class NihrContextOptionsExtension : IDbContextOptionsExtension
     {
+        private NihrConventionOptions _conventionOptions;
+
+        public NihrContextOptionsExtension(NihrConventionOptions conventionOptions)
+        {
+            _conventionOptions = conventionOptions;
+        }
+
         public DbContextOptionsExtensionInfo Info => new ExtensionInfo(this);
 
         public void ApplyServices(IServiceCollection services)
         {
-            services.AddEntityFrameworkNihrConventions();
+            services.AddEntityFrameworkNihrConventions(_conventionOptions);
         }
 
         public void Validate(IDbContextOptions options)

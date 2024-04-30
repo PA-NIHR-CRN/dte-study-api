@@ -2,7 +2,6 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Entities.System;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Geometries;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Exceptions;
 
@@ -18,7 +17,12 @@ public class ParticipantDbContext : DbContext
     {
         base.OnConfiguring(optionsBuilder);
 
-        optionsBuilder.UseNihrConventions();
+        optionsBuilder.UseNihrConventions(options=>
+        {
+            // For backwards compatibility with existing VS reporting schema,
+            // to be updated.
+            options.UseTableNameFromDbSet = true; 
+        });
     }
 
     public DbSet<Participant> Participants { get; set; } = null!;
