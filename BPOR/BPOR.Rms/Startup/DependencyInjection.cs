@@ -12,6 +12,7 @@ using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Services;
 using NIHR.Infrastructure.Settings;
 using NIHR.Infrastructure.Configuration;
+using BPOR.Registration.Stream.Handler.Services;
 
 namespace BPOR.Rms.Startup;
 
@@ -28,10 +29,15 @@ public static class DependencyInjection
         services.AddScoped<IFilterService, FilterService>();
         services.AddScoped<IPostcodeMapper, LocationApiClient>();
         services.AddTransient<IIdentityProviderService, Wso2IdentityServerService>();
+        services.AddTransient<IRefDataService, RefDataService>();
         services.AddHttpClient<IIdentityProviderService, Wso2IdentityServerService>(httpClient =>
         {
             httpClient.BaseAddress = new Uri(identityProviderSettings.Value.BaseUrl);
         });
+
+        // TODO: Temporary services
+        services.AddTransient<IRandomiser>(p => new Randomiser(Random.Shared));
+        services.AddTransient<INotificationService, NullNotificationService>();
 
         services.AddDistributedMemoryCache();
         services.AddPaging();
