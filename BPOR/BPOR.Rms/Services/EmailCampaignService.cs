@@ -1,10 +1,6 @@
 using BPOR.Domain.Entities;
-using BPOR.Domain.Entities.RefData;
-using BPOR.Infrastructure.Interfaces;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Mappers;
-using BPOR.Rms.Models.Filter;
-using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Models;
 
