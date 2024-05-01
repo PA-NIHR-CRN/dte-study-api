@@ -15,6 +15,7 @@ COPY "BPOR/BPOR.Infrastructure" "BPOR.Infrastructure"
 COPY "BPOR/BPOR.Domain" "BPOR.Domain"
 COPY "BPOR/BPOR.Rms" "BPOR.Rms"
 COPY "BPOR/BPOR.Registration.Stream.Handler" "BPOR.Registration.Stream.Handler"
+COPY "BPOR/NIHR.Infrastructure" "NIHR.Infrastructure"
 COPY "BPOR/NIHR.Infrastructure.AspNetCore" "NIHR.Infrastructure.AspNetCore"
 COPY "BPOR/NIHR.Infrastructure.EntityFrameworkCore" "NIHR.Infrastructure.EntityFrameworkCore"
 COPY "BPOR/NIHR.Infrastructure.EntityFrameworkCore.MySql" "NIHR.Infrastructure.EntityFrameworkCore.MySql"
@@ -30,3 +31,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "BPOR.Rms.dll"]
+
+# TODO update this dockerfile when packages are created
