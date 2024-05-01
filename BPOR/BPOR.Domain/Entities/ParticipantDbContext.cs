@@ -45,6 +45,9 @@ public class ParticipantDbContext : DbContext
     public DbSet<FilterGender> FilterGender { get; set; } = null!;
     public DbSet<FilterSexSameAsRegisteredAtBirth> FilterSexSameAsRegisteredAtBirth { get; set; } = null!;
 
+    public DbSet<User> User { get; set; } = null!;
+    public DbSet<UserRole> UserRole { get; set; } = null!;
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,7 +1,7 @@
 ﻿namespace NIHR.Infrastructure
 {
-    public interface ICurrentUserIdProvider
+    public interface ICurrentUserIdProvider<T> where T : struct
     {
-        int? UserId { get; }
+        T? UserId { get; }
     }
 }

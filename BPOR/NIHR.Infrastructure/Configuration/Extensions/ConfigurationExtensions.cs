@@ -16,9 +16,8 @@ namespace NIHR.Infrastructure.Configuration
     {
 
         //TODO chat with chris about this global exception handling
-
         public static IServiceCollection ConfigureNihrLogging(this IServiceCollection services,
-            IConfiguration configuration)
+    IConfiguration configuration)
         {
             var loggerOptions = new LambdaLoggerOptions
             {
@@ -48,14 +47,24 @@ namespace NIHR.Infrastructure.Configuration
             return services;
         }
 
+        public static IHostApplicationBuilder ConfigureNihrLogging(this IHostApplicationBuilder builder)
+        {
+            var configuration = builder.Configuration;
+            var services = builder.Services;
+
+            services.ConfigureNihrLogging(configuration);
+
+            return builder;
+        }
+
         private static bool IsRunningInLambda()
         {
             var executionEnv = Environment.GetEnvironmentVariable("AWS_EXECUTION_ENV");
             return !string.IsNullOrEmpty(executionEnv) && executionEnv.StartsWith("AWS_Lambda_");
         }
 
-        public static ConfigurationManager AddNihrConfiguration(this ConfigurationManager configuration, IServiceCollection services,
-            IHostEnvironment hostEnvironment)
+        public static IConfigurationManager AddNihrConfiguration(this IConfigurationManager configuration, IServiceCollection services,
+    IHostEnvironment hostEnvironment)
         {
             if (hostEnvironment.IsDevelopment())
             {
@@ -72,6 +81,17 @@ namespace NIHR.Infrastructure.Configuration
             }
 
             return configuration;
+        }
+
+        public static IHostApplicationBuilder AddNihrConfiguration(this IHostApplicationBuilder builder)
+        {
+            var hostEnvironment = builder.Environment;
+            var configuration = builder.Configuration;
+            var services = builder.Services;
+
+            configuration.AddNihrConfiguration(services, hostEnvironment);
+
+            return builder;
         }
 
         private static void AddAwsSecretsManager(this IConfigurationBuilder configurationBuilder, string secretName,

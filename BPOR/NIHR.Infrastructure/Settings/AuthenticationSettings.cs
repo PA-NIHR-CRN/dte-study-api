@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -6,14 +7,16 @@ namespace NIHR.Infrastructure.Settings
     public class AuthenticationSettings : IValidatableObject
     {
         public static string SectionName => "AuthenticationSettings";
-        [Required] public string Authority { get; set; } = string.Empty;
+        [Required] public Uri Authority { get; set; }
         [Required] public string ClientId { get; set; } = string.Empty;
         [Required] public string ClientSecret { get; set; } = string.Empty;
+
+        public bool Bypass { get; set; } = false;
 
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (string.IsNullOrWhiteSpace(Authority))
+            if (Authority is null)
             {
                 yield return new ValidationResult("Authority is required", new[] { nameof(Authority) });
             }

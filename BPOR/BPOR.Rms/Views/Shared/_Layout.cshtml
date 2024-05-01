@@ -19,11 +19,14 @@
         document.body.className += 'js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
     </script>
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
+
 @await Html.PartialAsync("_Header")
+
 @if (ViewData["ShowProgressBar"] as bool? ?? false)
 {
     @await RenderSectionAsync("ProgressBar", required: false)
 }
+
 <div class="govuk-width-container">
     @if (ViewData["ShowBackLink"] as bool? ?? false)
     {

@@ -9,8 +9,6 @@ using NIHR.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Interfaces;
-using NIHR.Infrastructure.Services;
-using NIHR.Infrastructure.Settings;
 using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
 
@@ -23,17 +21,16 @@ public static class DependencyInjection
     {
         services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
-        var identityProviderSettings = services.GetSectionAndValidate<IdentityProviderApiSettings>(configuration);
-
         services.AddScoped<IEmailCampaignService, EmailCampaignService>();
         services.AddScoped<IFilterService, FilterService>();
         services.AddScoped<IPostcodeMapper, LocationApiClient>();
-        services.AddTransient<IIdentityProviderService, Wso2IdentityServerService>();
+
+        services.AddScoped<ICurrentUserIdProvider<int>, SimpleCurrentUserIdProvider<int>>();
+        services.AddScoped<ICurrentUserIdAccessor<int>, SimpleCurrentUserIdAccessor<int>>();
+
+        services.AddScoped<ICurrentUserProvider<User>, CurrentUserProvider<User>>();
+
         services.AddTransient<IRefDataService, RefDataService>();
-        services.AddHttpClient<IIdentityProviderService, Wso2IdentityServerService>(httpClient =>
-        {
-            httpClient.BaseAddress = new Uri(identityProviderSettings.Value.BaseUrl);
-        });
 
         // TODO: Temporary services
         services.AddTransient<IRandomiser>(p => new Randomiser(Random.Shared));
