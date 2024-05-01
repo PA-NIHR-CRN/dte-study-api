@@ -13,6 +13,7 @@ public class StudyFormEditModel
 
     [Required(ErrorMessage = "Enter the email address of the main contact for the study")]
     [EmailAddress(ErrorMessage = "Enter an email address in the correct format, like name@example.com")]
+    [RegularExpression(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", ErrorMessage = "Enter an email address in the correct format, like name@example.com")]
     [Display(Name = "Email address of main contact for the study")]
     public string EmailAddress { get; set; }
 

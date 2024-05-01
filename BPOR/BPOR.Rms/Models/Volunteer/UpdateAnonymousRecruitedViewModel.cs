@@ -9,9 +9,9 @@ public class UpdateAnonymousRecruitedViewModel
     public int StudyId { get; set; }
 
     [Display(Name = "Latest Recruitment Total")]
-    [Required(ErrorMessage = "Please enter the total number of volunteers recruited")]
+    [Required(ErrorMessage = "Enter the total number of Be Part of Research volunteers recruited")]
     [IntegerOrDecimal(ErrorMessage = "Please enter a valid number")]
-    [Range(1, int.MaxValue, ErrorMessage = "Please enter a valid number")]
+    [Range(0, int.MaxValue, ErrorMessage = "Please enter a valid number")]
     public int? RecruitmentTotal { get; set; }
     public IEnumerable<EnrollmentDetails> EnrollmentDetails { get; set; } = new List<EnrollmentDetails>();
     public NotificationBannerModel Notification { get; set; }

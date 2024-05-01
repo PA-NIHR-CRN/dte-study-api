@@ -31,11 +31,11 @@
                 <span class="govuk-visually-hidden">Error:</span>
                 @Html.ValidationMessageFor(model => model.PreviewEmails)
             </span>
-            <input asp-for="PreviewEmails" class="govuk-input govuk-input--error" aria-describedby="PreviewEmails-error" value="@Model.PreviewEmails"/>
+            <input asp-for="PreviewEmails" class="govuk-input govuk-input--error" aria-describedby="PreviewEmails-error" value="@Model.PreviewEmails" type="text"/>
         }
         else
         {
-            <input asp-for="PreviewEmails" class="govuk-input" value="@Model.PreviewEmails"/>
+            <input asp-for="PreviewEmails" class="govuk-input" value="@Model.PreviewEmails" type="text"/>
         }
         <button type="submit" class="govuk-button" data-module="govuk-button" style="height: 40px" value="SendPreviewEmail" name="action">
             Send preview email

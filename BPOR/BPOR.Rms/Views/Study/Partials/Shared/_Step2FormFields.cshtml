@@ -60,5 +60,5 @@
             @Html.ValidationMessageFor(model => model.CpmsId)
         </span>
     }
-    <input asp-for="CpmsId" class="govuk-input govuk-input--width-10 govuk-input @(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "govuk-input--error" : "")" aria-describedby="@(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "cpms-id-error" : "")"/>
+    <input asp-for="CpmsId" class="govuk-input govuk-input--width-10 govuk-input @(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "govuk-input--error" : "")" aria-describedby="@(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "cpms-id-error" : "")" type="number" onkeydown="return event.keyCode !== 69" />
 </div>
