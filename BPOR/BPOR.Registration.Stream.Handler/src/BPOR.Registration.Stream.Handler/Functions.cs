@@ -2,7 +2,6 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
 using BPOR.Registration.Stream.Handler.Handlers;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure.Configuration;
 
@@ -18,16 +17,17 @@ public class Functions
 
     public Functions()
     {
-        var services = new ServiceCollection();
-        IHostEnvironment hostEnvironment = new LambdaHostEnvironment(
-            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "BPOR.Registration.Stream.Handler",
-            Directory.GetCurrentDirectory(), null);
+        var builder = Lambda.CreateBuilder("BPOR.Registration.Stream.Handler");
 
-        Startup.ConfigureServices(services, hostEnvironment);
-        var provider = services.BuildServiceProvider();
+        builder.AddNihrConfiguration();
+        builder.ConfigureNihrLogging();
 
-        _logger = provider.GetRequiredService<ILogger<Functions>>();
-        _streamHandler = provider.GetRequiredService<IStreamHandler>();
+        Startup.ConfigureServices(builder);
+
+        var host = builder.Build();
+
+        _logger = host.Services.GetRequiredService<ILogger<Functions>>();
+        _streamHandler = host.Services.GetRequiredService<IStreamHandler>();
     }
 
     public StreamsEventResponse ProcessStream(DynamoDBEvent dynamoDbEvent, ILambdaContext context)
