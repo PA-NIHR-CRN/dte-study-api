@@ -5,7 +5,7 @@ namespace BPOR.Rms.Models.Filter;
 
 public class VolunteerFilterViewModel
 {
-    public int StudyId { get; set; }
+    public int? StudyId { get; set; }
     // Study selection
     [Display(Name = "Selected Study")]
     public string? SelectedStudy { get; set; }
