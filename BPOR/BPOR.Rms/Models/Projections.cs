@@ -69,7 +69,7 @@ public static class Projections
         {
             StudyId = s.Id,
             StudyName = s.StudyName,
-            EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments).OrderByDescending(e => e.CreatedAt)
+            EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments).AsEnumerable()
         };
     }
 
@@ -90,7 +90,7 @@ public static class Projections
             .Select(e => new EnrollmentDetails
             {
                 RecruitmentTotal = e.TotalEnrollments,
-                CreatedAt = e.CreatedAt,
-            });
+                CreatedAt = e.CreatedAt
+            }).AsEnumerable();
     }
 }
