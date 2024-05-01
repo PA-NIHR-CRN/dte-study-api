@@ -24,9 +24,12 @@ namespace BPOR.Registration.Api.Startup;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration,
-        IHostEnvironment hostEnvironment)
+    public static IHostApplicationBuilder RegisterServices(this IHostApplicationBuilder builder)
     {
+        var services = builder.Services;
+        var configuration = builder.Configuration;
+        var hostEnvironment = builder.Environment;
+
         // Settings
         services.GetSectionAndValidate<ContentfulSettings>(configuration);
         services.GetSectionAndValidate<AppSettings>(configuration);
@@ -88,7 +91,7 @@ public static class DependencyInjection
             services.ConfigureStagingServices(configuration);
         }
 
-        return services;
+        return builder;
     }
 
     private static void ConfigureStagingServices(this IServiceCollection services, IConfiguration configuration)

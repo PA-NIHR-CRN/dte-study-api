@@ -3,11 +3,16 @@ using NIHR.Infrastructure.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddNihrConfiguration(builder.Services, builder.Environment);
+builder.AddNihrConfiguration()
+        .ConfigureNihrLogging()
+        .RegisterServices()
+        .AddAuthentication();
 
-builder.Services.AddEndpointsApiExplorer().AddSwaggerGen().ConfigureNihrLogging(builder.Configuration)
-    .RegisterServices(builder.Configuration, builder.Environment).AddAuthentication(builder.Environment);
+builder.Services
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen();
 
 var app = builder.Build();
 
-app.ConfigureSwagger().UseApplicationMiddleware(builder.Environment).Run();
+app.ConfigureSwagger()
+    .UseApplicationMiddleware(builder.Environment).Run();
