@@ -26,11 +26,11 @@
         <div class="govuk-form-group">
             <div class="govuk-age-input__item">
                 @Html.LabelFor(m => Model.AgeFrom, new { @class = "govuk-label" })
-                <input asp-for="AgeFrom" class="govuk-input govuk-age-input__input govuk-input--width-10" type="number" onkeydown="return event.keyCode !== 69" />
+                <input asp-for="AgeFrom" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" inputmode="numeric" />
             </div>
             <div class="govuk-age-input__item">
                 @Html.LabelFor(m => Model.AgeTo, new { @class = "govuk-label" })
-                <input asp-for="AgeTo" class="govuk-input govuk-age-input__input govuk-input--width-10" type="number" onkeydown="return event.keyCode !== 69" />
+                <input asp-for="AgeTo" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" inputmode="numeric" />
             </div>
         </div>
     </div>
