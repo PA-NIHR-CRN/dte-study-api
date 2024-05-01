@@ -33,7 +33,7 @@
         Indicate the radius for searching volunteers based on the provided full postcode.
     </div>
     <div class="govuk-input__wrapper">
-        <input asp-for="SearchRadiusMiles" class="govuk-input govuk-input--width-5" type="number" />
+        <input asp-for="SearchRadiusMiles" class="govuk-input govuk-input--width-5" type="number" onkeydown="return event.keyCode !== 69" />
         <div class="govuk-input__suffix" aria-hidden="true">Miles</div>
     </div>
 </div>
