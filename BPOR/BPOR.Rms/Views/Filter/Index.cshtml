@@ -6,12 +6,26 @@
 }
 
 <div class="govuk-grid-row">
-    @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+
+    @if (Model.StudyId != null)
     {
-        new("All Studies", "/Study/Index"),
-        new("Study Page", $"/Study/Details/1"),
-        new("Find Volunteers", "")
-    })
+        @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+        {
+            new("All Studies", "/Study/Index"),
+            new("Study Page", $"/Study/Details/" + Model.StudyId),
+            new("Find Volunteers", "")
+        })
+    }
+    else
+    {
+        @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
+        {
+            new("All Studies", "/Study/Index"),
+            new("Find Volunteers", "")
+        })
+    }
+
+ 
 </div>
 
 @using (Html.BeginForm("HandleForms", "Filter", FormMethod.Post))
