@@ -28,10 +28,10 @@
             <span class="govuk-visually-hidden">Error:</span>
             @Html.ValidationMessageFor(model => model.EmailAddress)
         </span>
-        <input asp-for="EmailAddress" class=" govuk-input govuk-input--error" id="EmailAddress" aria-describedby="EmailAddress-error"/>
+        <input asp-for="EmailAddress" class=" govuk-input govuk-input--error" id="EmailAddress" aria-describedby="EmailAddress-error" type="text"/>
     }
     else
     {
-        <input asp-for="EmailAddress" class=" govuk-input" id="EmailAddress" value="@(Model.EmailAddress)"/>
+        <input asp-for="EmailAddress" class=" govuk-input" id="EmailAddress" value="@(Model.EmailAddress)" type="text"/>
     }
 </div>

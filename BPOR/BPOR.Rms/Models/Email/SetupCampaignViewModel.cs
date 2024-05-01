@@ -23,7 +23,7 @@ public class SetupCampaignViewModel
     public string? SelectedTemplate { get; set; }
 
     [DisplayName("Preview email")]
-    [Required(ErrorMessage = "Email address is required.")]
+    [Required(ErrorMessage = "Enter at least one address")]
     [EmailAddress(ErrorMessage = "Enter a valid email address.")]
     public string? PreviewEmails { get; set; }
 
