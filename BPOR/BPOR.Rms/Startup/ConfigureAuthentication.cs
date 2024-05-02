@@ -79,8 +79,11 @@ public static class ConfigureAuthentication
 
         var builder = new UriBuilder(Uri)
         {
-            Scheme = "https",
+            Scheme = "https"
         };
+
+        // Remove port if not redirecting to localhost
+        builder.Port = string.Equals(builder.Host, "localhost", StringComparison.InvariantCultureIgnoreCase) ? builder.Port : -1;
 
         return builder.ToString();
     }
