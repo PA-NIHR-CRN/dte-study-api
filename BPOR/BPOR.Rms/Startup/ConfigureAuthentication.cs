@@ -47,8 +47,41 @@ public static class ConfigureAuthentication
                 options.Scope.Add("profile");
                 options.Scope.Add("email");
                 options.CallbackPath = "/signin-oidc";
+
+                // Ensure callback URLs are HTTPS.
+                // The application may be hosted as HTTP behind
+                // a HTTPS terminating load balancer.
+                // Callbacks must be the externally accessible URIs
+                // rather than what they appear to be internally.
+                options.Events.OnRedirectToIdentityProvider = MakeHttps;
+                options.Events.OnRedirectToIdentityProviderForSignOut = MakeHttps;
+
             });
 
         return builder;
+    }
+
+    private static Task MakeHttps(RedirectContext context)
+    {
+        context.ProtocolMessage.RedirectUri = MakeHttps(context.ProtocolMessage.RedirectUri);
+
+        context.ProtocolMessage.PostLogoutRedirectUri = MakeHttps(context.ProtocolMessage.PostLogoutRedirectUri);
+
+        return Task.CompletedTask;
+    }
+
+    private static string MakeHttps(string Uri)
+    {
+        if (string.IsNullOrWhiteSpace(Uri))
+        {
+            return Uri;
+        }
+
+        var builder = new UriBuilder(Uri)
+        {
+            Scheme = "https",
+        };
+
+        return builder.ToString();
     }
 }
