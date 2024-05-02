@@ -14,8 +14,8 @@ public class RefDataService : IRefDataService
     private readonly Lazy<List<IdentifierType>> _identifierTypeRefData;
     private readonly Lazy<List<CommunicationLanguage>> _communicationLanguageRefData;
     private readonly Lazy<List<DailyLifeImpact>> _dailyLifeImpactRefData;
-    private readonly Lazy<List<DailyLifeImpact>> _ethnicGroupRefData;
-    private readonly Lazy<List<DailyLifeImpact>> _emailDeliveryStatusRefData;
+    private readonly Lazy<List<EthnicGroup>> _ethnicGroupRefData;
+    private readonly Lazy<List<EmailDeliveryStatus>> _emailDeliveryStatusRefData;
     private readonly object _lockObject = new object();
     private readonly ParticipantDbContext _participantDbContext;
 
@@ -63,7 +63,14 @@ public class RefDataService : IRefDataService
                 return participantDbContext.DailyLifeImpacts.IgnoreQueryFilters().AsNoTracking().ToList();
             }
         });
-
+        
+        _emailDeliveryStatusRefData = new Lazy<List<EmailDeliveryStatus>>(() =>
+        {
+            lock (_lockObject)
+            {
+                return participantDbContext.EmailDeliveryStatus.IgnoreQueryFilters().AsNoTracking().ToList();
+            }
+        });
     }
     
     private void UpdateCache<T>(T newRefData) where T : IReferenceData
@@ -84,6 +91,12 @@ public class RefDataService : IRefDataService
                 break;
             case DailyLifeImpact dailyLifeImpact:
                 _dailyLifeImpactRefData.Value.Add(dailyLifeImpact);
+                break;
+            case EthnicGroup ethnicGroup:
+                _ethnicGroupRefData.Value.Add(ethnicGroup);
+                break;
+            case EmailDeliveryStatus emailDeliveryStatus:
+                _emailDeliveryStatusRefData.Value.Add(emailDeliveryStatus);
                 break;
             default:
                 throw new NotSupportedException($"Unknown reference data type '{typeof(T).Name}'.");
@@ -157,7 +170,15 @@ public class RefDataService : IRefDataService
 
     public int? GetEmailDeliveryStatusId(string status)
     {
-        throw new NotImplementedException();
+        using (_logger.BeginScope(nameof(GetEmailDeliveryStatusId)))
+        {
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                return null;
+            }
+
+            return GetIdFromReferenceData(_emailDeliveryStatusRefData.Value, status);
+        }
     }
 
     public int? GetDailyLifeImpactId(string impact)

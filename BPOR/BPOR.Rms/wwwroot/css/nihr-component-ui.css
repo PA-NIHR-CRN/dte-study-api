@@ -204,8 +204,9 @@
     line-height: 27px;
     word-wrap: break-word;
     border-radius: 0.3rem;
-    padding: 1em;
+    padding: 0.5em;
     border-color: rgb(145, 145, 145);
+    min-height:200px;
 }
 
 .govuk-textarea:focus {
@@ -472,3 +473,15 @@
     border-radius: 0.5rem;
     padding: 10px;
 }
+
+
+.govuk-grid-column-one-quarter-from-desktop-no-padding {
+    box-sizing: border-box;
+}
+
+@media (min-width:48.0625em) {
+    .govuk-grid-column-one-quarter-from-desktop-no-padding {
+        width: 25%;
+        float: left
+    }
+}}

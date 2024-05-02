@@ -7,8 +7,8 @@ public class EmailCampaign : IAudit, ISoftDelete
     public int Id { get; set; }
     public int FilterCriteriaId { get; set; }
     public Guid EmailTemplateId { get; set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public string? PreviewRecipients { get; set; }
     public int? TargetGroupSize { get; set; }
     public DateTime CreatedAt { get; set; }

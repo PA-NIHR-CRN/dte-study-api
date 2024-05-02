@@ -4,6 +4,7 @@ using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
@@ -12,9 +13,11 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    partial class ParticipantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240502113857_UpdateEmailRefData")]
+    partial class UpdateEmailRefData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,8 +86,7 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<string>("ContactEmail")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
@@ -92,7 +94,7 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<int>("CreatedById")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("DeliveredAt")
+                    b.Property<DateTime>("DeliveredAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int?>("DeliveryStatusId")
@@ -107,10 +109,10 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<int>("ParticipantId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("RegisteredInterestAt")
+                    b.Property<DateTime>("RegisteredInterestAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateTime?>("SentAt")
+                    b.Property<DateTime>("SentAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("UpdatedAt")

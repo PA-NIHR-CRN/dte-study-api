@@ -1,3 +1,5 @@
+@model BPOR.Rms.Models.Study.StudyDetailsViewModel
+
 <style>
     /* Base styles for all tags */
     .govuk-tag {
@@ -46,35 +48,23 @@
         </tr>
         </thead>
         <tbody class="govuk-table__body">
-        <tr class="govuk-table__row">
-            <td class="govuk-table__cell">
-                19/02/2024, 09:00
-            </td>
-            <td class="govuk-table__cell">Recruitment Template</td>
-            <td class="govuk-table__cell">1,675 / 2,000</td>
-            <td class="govuk-table__cell">738</td>
-            <td class="govuk-table__cell">12</td>
-            <td class="govuk-table__cell">
-                <strong class="govuk-tag govuk-tag--orange">
-                    In progress
-                </strong>
-            </td>
-        </tr>
-        <tr class="govuk-table__row">
-            <td class="govuk-table__cell">
-                19/02/2024, 09:00
-            </td>
-            <td class="govuk-table__cell">Recruitment Template</td>
-            <td class="govuk-table__cell">2,500</td>
-            <td class="govuk-table__cell">738</td>
-            <td class="govuk-table__cell">12</td>
-            <td class="govuk-table__cell">
-                <strong class="govuk-tag govuk-tag--green">
-                    Sent
-                </strong>
-            </td>
-        </tr>
-
+        @foreach (var emailCampaign in Model.EmailCampaigns)
+        {
+            <tr class="govuk-table__row">
+                <td class="govuk-table__cell">
+                    @emailCampaign.CreatedAt.ToString("dd/MM/yyyy, HH:mm")
+                </td>
+                <td class="govuk-table__cell">Test</td>
+                <td class="govuk-table__cell">@emailCampaign.EmailCampaignParticipants.Count()</td>
+                <td class="govuk-table__cell">0</td>
+                <td class="govuk-table__cell">0</td>
+                <td class="govuk-table__cell">
+                    <strong class="govuk-tag @(!emailCampaign.EmailCampaignParticipants.Any() ? "govuk-tag--green" : "govuk-tag--orange")">
+                        In progress
+                    </strong>
+                </td>
+            </tr>
+        }
         </tbody>
     </table>
 </div>

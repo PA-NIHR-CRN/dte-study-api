@@ -42,3 +42,28 @@
         </select>
     }
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const templateSelect = document.getElementById('SelectedTemplate');
+        const previewEmailsInput = document.getElementById('PreviewEmails');
+        const notificationBanner = document.getElementById('notification-banner');
+
+        // Function to remove the notification banner
+        const removeNotification = () => {
+            if (notificationBanner) {
+                notificationBanner.style.display = 'none';
+            }
+        };
+
+        // Event listeners to remove the banner when changes occur
+        templateSelect?.addEventListener('change', () => {
+            removeNotification();
+        });
+
+        previewEmailsInput?.addEventListener('input', () => {
+            removeNotification();
+        });
+    });
+
+</script>
