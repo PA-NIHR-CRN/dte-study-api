@@ -73,6 +73,8 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
                 JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
         }
 
+        study.HasEmailCampaigns = context.Studies.Any(s => s.FilterCriterias.Any(f => f.EmailCampaigns.Any()) && s.Id == study.Study.Id);
+
         return View(study);
     }
 
