@@ -21,7 +21,10 @@
         <div class="govuk-button-group govuk-!-margin-bottom-0">
             @if (!Model.Study.IsRecruitingIdentifiableParticipants)
             {
-                @Html.ActionLink("Update recruitment total", "UpdateAnonymousRecruited", "Volunteer", new { StudyId = Model.Study.Id }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
+                if (Model.HasEmailCampaigns)
+                {
+                    @Html.ActionLink("Update recruitment total", "UpdateAnonymousRecruited", "Volunteer", new { StudyId = Model.Study.Id }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
+                }             
             }
             else
             {
