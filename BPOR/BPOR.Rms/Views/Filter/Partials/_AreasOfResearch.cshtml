@@ -1,7 +1,7 @@
 @model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
 
 <div class="govuk-form-group">
-    @Html.LabelFor(m => Model.SelectedHealthConditions, new { @class = "govuk-label govuk-label--l" })
+    @Html.LabelFor(m => Model.SelectedHealthConditions, new { @class = "govuk-label govuk-label--l", @for = "searchInput" })
     <div id="location-hint" class="govuk-hint">
         <p>Leave blank to include all volunteers and those who have not specified any areas of research. Enter one or more areas of research to refine by interests.</p>
 

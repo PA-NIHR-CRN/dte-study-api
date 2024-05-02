@@ -14,20 +14,17 @@ public class VolunteerFilterViewModel
     public string? SelectedStudyCPMSId { get; set; }
 
     public IEnumerable<SelectListItem>? Studies { get; set; }
-    [Display(Name = "Volunteers contacted")]
     public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
+    [Display(Name = "Volunteers contacted")]
     public string? SelectedVolunteersContacted { get; set; }
-
-    [Display(Name = "Volunteers recruited")]
     public IEnumerable<SelectListItem>? VolunteersRecruited { get; set; }
+    [Display(Name = "Volunteers recruited")]
     public string? SelectedVolunteersRecruited { get; set; }
-
-    [Display(Name = "Volunteers registered interest")]
     public IEnumerable<SelectListItem>? VolunteersRegisteredInterest { get; set; }
+    [Display(Name = "Volunteers registered interest")]
     public string? SelectedVolunteersRegisteredInterest { get; set; }
-
-    [Display(Name = "Volunteers completed registration")]
     public IEnumerable<SelectListItem>? VolunteersCompletedRegistration { get; set; }
+    [Display(Name = "Volunteers completed registration")]
     public string? SelectedVolunteersCompletedRegistration { get; set; }
     // Volunteer criteria
     [Display(Name = "Exclude those contacted")]
