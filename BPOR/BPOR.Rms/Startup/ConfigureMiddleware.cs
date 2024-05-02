@@ -2,6 +2,8 @@ namespace BPOR.Rms.Startup;
 
 public static class ConfigureMiddleware
 {
+    private const string HealthCheckPath = "/api/health";
+
     public static WebApplication UseApplicationMiddleware(this WebApplication app)
     {
         if (!app.Environment.IsDevelopment())
@@ -21,9 +23,8 @@ public static class ConfigureMiddleware
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Study}/{action=Index}/{id?}");
-        
-        app.UseHealthChecks("/api/health");
 
+        app.MapHealthChecks(HealthCheckPath).AllowAnonymous();
 
         return app;
     }
