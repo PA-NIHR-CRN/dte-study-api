@@ -4,6 +4,7 @@ using BPOR.Registration.Stream.Handler.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure.Configuration;
+using NIHR.Infrastructure.Lambda;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -17,7 +18,7 @@ public class Functions
 
     public Functions()
     {
-        var builder = Lambda.CreateBuilder("BPOR.Registration.Stream.Handler");
+        var builder = LambdaHost.CreateBuilder(new LambdaApplicationOptions { ApplicationName = "BPOR.Registration.Stream.Handler" });
 
         builder.AddNihrConfiguration();
         builder.ConfigureNihrLogging();
