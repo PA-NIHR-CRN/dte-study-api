@@ -27,6 +27,7 @@
 
         <div class="govuk-form-group @(Html.ViewData.ModelState["RecruitmentTotal"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
             <input asp-for="StudyId" type="hidden"/>
+            <input asp-for="StudyName" type="hidden" />
             <label asp-for="RecruitmentTotal" class="govuk-label" for="RecruitmentTotal">
                 @Html.DisplayNameFor(model => model.RecruitmentTotal)
             </label>

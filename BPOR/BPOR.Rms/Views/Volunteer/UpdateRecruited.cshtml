@@ -8,35 +8,48 @@
     new("Update newly recruited volunteers", "/Study/Edit")
 })
 
-<h1 class="govuk-heading-xl">Update recruited volunteers</h1>
-<h4>
-    @Html.DisplayFor(model => model.StudyName)
-</h4>
-<h5 class="govuk-heading-m">Enter Be Part of Research volunteer reference numbers</h5>
-<p class="govuk-body">
-    Each volunteer will have been given a unique volunteer reference when they were contacted by Be Part of Research.
-</p>
-<p class="govuk-body">
-    Please enter your list of these numbers into the text area below. Each number should be on its own line.
-</p>
-<p class="govuk-body">
-    For example,
-    <br>9834342
-    <br>9374897
-    <br>3473874
-    <br>8347438
-</p>
-
-<form asp-action="SubmitVolunteerNumbers" asp-controller="Volunteer" method="post">
-    <div class="govuk-form-group @(Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-        @if (Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0)
-        {
-            <span class="govuk-error-message">
-                <span class="govuk-visually-hidden">Error:</span>
-                @Html.ValidationMessageFor(model => model.VolunteerReferenceNumbers)
-            </span>
-        }
-        <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea @(Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" aria-describedby="@(Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0 ? "study-name-error" : "")"></textarea>
+<div style="display: flex;flex-direction: column;gap: 50px;width: 100% ;">
+    <div>
+        <h1 class="govuk-heading-xl govuk-!-margin-bottom-0">Update recruited volunteers</h1>
+        <h4 class="text-secondary govuk-!-margin-0">
+            @Html.DisplayFor(model => model.StudyName)
+        </h4>
     </div>
-    <button type="submit" class="govuk-button">Submit volunteer numbers</button>
-</form>
+
+    <form asp-action="SubmitVolunteerNumbers" asp-controller="Volunteer" method="post">
+        <input asp-for="StudyId" type="hidden" />
+        <input asp-for="StudyName" type="hidden" />
+        <label asp-for="VolunteerReferenceNumbers" class="govuk-label" for="VolunteerReferenceNumbers">
+            @Html.DisplayNameFor(model => model.VolunteerReferenceNumbers)
+        </label>
+
+        <div id="VolunteerReferenceNumbers-hint" class="govuk-hint">
+            Each volunteer will have been given a unique volunteer reference when they were contacted by Be Part of Research.<br><br>
+            Please enter your list of these numbers into the text area below. Each number should be on its own line.<br><br>
+            For example,
+            <br>9834342
+            <br>9374897
+            <br>3473874
+            <br>8347438
+        </div>
+        
+        <div class="govuk-form-group @(Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <div class="govuk-grid-column-one-quarter-from-desktop-no-padding">
+                @if (Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0)
+                {
+                    <span id="VolunteerReferenceNumbers-error" class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @Html.ValidationMessageFor(model => model.VolunteerReferenceNumbers)
+                    </span>
+                    <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea govuk-textarea--error" aria-describedby="VolunteerReferenceNumbers-error"></textarea>
+                }
+                else
+                {
+                    <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea"></textarea>
+                }
+            </div>               
+        </div>
+
+        <button type="submit" class="govuk-button">Submit volunteer numbers</button>
+    </form>
+</div>
