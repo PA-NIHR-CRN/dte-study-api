@@ -5,7 +5,6 @@ using BPOR.Registration.Stream.Handler.Handlers;
 using BPOR.Registration.Stream.Handler.Mappers;
 using BPOR.Registration.Stream.Handler.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NIHR.Infrastructure.EntityFrameworkCore;
@@ -16,11 +15,10 @@ namespace BPOR.Registration.Stream.Handler;
 
 public static class Startup
 {
-    public static void ConfigureServices(IServiceCollection services, IHostEnvironment hostEnvironment)
+    public static void ConfigureServices(IHostApplicationBuilder hostApplicationBuilder)
     {
-        // configuration
-        var configuration = new ConfigurationManager().AddNihrConfiguration(services, hostEnvironment);
-        services.AddSingleton(configuration);
+        var services = hostApplicationBuilder.Services;
+        var configuration = hostApplicationBuilder.Configuration;
 
         // db setup
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
@@ -36,7 +34,5 @@ public static class Startup
         services.AddSingleton<IRefDataService, RefDataService>();
         services.AddTransient<IStreamHandler, StreamHandler>();
         services.AddTransient<IParticipantMapper, ParticipantMapper>();
-
-        services.ConfigureNihrLogging(configuration);
     }
 }
