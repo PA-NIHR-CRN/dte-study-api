@@ -80,6 +80,7 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
+            ASPNETCORE_ENVIRONMENT=Development
             AwsSecretsManagerSettings__Region=eu-west-2
             AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
             AwsSecretsManagerSettings__Enabled=false
