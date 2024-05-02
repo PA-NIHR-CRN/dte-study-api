@@ -50,14 +50,21 @@ public static class DependencyInjection
                 builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             }));
 
-        var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
-
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
             ?.CreateLogger("BPOR.Rms");
 
-        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings.Value.LocationService, 2,
+        // TODO: Client settings are not being validated.
+        var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
+        
+        if(clientsSettings?.Value?.LocationService?.BaseUrl is null)
+        {
+            throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings.Value.LocationService));
+        }
+
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
             logger);
-        services.AddHealthChecks();
+
+        services.AddHealthChecks().AddMySql(connectionString).AddCheck<LocationHealthCheck>("Location", Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
 
         if (hostEnvironment.IsDevelopment())
         {

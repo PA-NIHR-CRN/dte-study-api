@@ -93,6 +93,9 @@ jobs:
             AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
             AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
             AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
+            Clients__LocationService__BaseUrl=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_CLIENTS_LOCATIONSERVICE_BASEURL}}
+            Clients__LocationService__UserName=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_CLIENTS_LOCATIONSERVICE_USERNAME}}
+            Clients__LocationService__Password=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_CLIENTS_LOCATIONSERVICE_PASSWORD}}
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccd-ecs-dev-bpor-rms-service
