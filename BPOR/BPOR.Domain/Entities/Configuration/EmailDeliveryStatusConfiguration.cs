@@ -12,20 +12,27 @@ public class EmailDeliveryStatusConfiguration : IEntityTypeConfiguration<EmailDe
             new EmailDeliveryStatus
             {
                 Id = 1,
+                Code = "Pending",
+                Description = "Pending",
+                IsDeleted = false
+            },
+            new EmailDeliveryStatus
+            {
+                Id = 2,
                 Code = "Sent",
                 Description = "Sent",
                 IsDeleted = false
             },
             new EmailDeliveryStatus
             {
-                Id = 2,
+                Id = 3,
                 Code = "Delivered",
                 Description = "Delivered",
                 IsDeleted = false
             },
             new EmailDeliveryStatus
             {
-                Id = 3,
+                Id = 4,
                 Code = "RegisteredInterest",
                 Description = "RegisteredInterest",
                 IsDeleted = false

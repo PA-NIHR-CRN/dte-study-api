@@ -4,8 +4,10 @@ public class Randomiser(Random random) : IRandomiser
 {
     public ICollection<T> GetRandomisedCollection<T>(IQueryable<T> queryable, int count)
     {
-        int totalItems = queryable.Count();
-
+        // TODO can be done not in memory?
+        var allItems = queryable.ToList(); 
+        
+        int totalItems = allItems.Count;
         if (count > totalItems)
         {
             throw new ArgumentException("Requested count exceeds the total number of items available.");
@@ -16,7 +18,7 @@ public class Randomiser(Random random) : IRandomiser
             .Take(count)
             .ToList();
 
-        return queryable.Where((item, index) => randomIndices.Contains(index)).ToList();
+        return allItems.Where((item, index) => randomIndices.Contains(index)).ToList();
         
     }
 }

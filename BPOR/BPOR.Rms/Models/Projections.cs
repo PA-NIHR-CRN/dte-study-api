@@ -2,19 +2,27 @@ using System.Linq.Expressions;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Models.Volunteer;
+using EmailCampaign = BPOR.Rms.Models.Study.EmailCampaign;
+using EmailCampaignParticipant = BPOR.Rms.Models.Study.EmailCampaignParticipant;
 
 namespace BPOR.Rms.Models;
 
 public static class Projections
 {
-    public static IQueryable<StudyModel> AsStudyListModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyListModel());
-    public static IQueryable<StudyDetailsViewModel> AsStudyDetailsViewModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyDetailsViewModel());
+    public static IQueryable<StudyModel> AsStudyListModel(this IQueryable<Domain.Entities.Study> source) =>
+        source.Select(StudyAsStudyListModel());
 
-    public static IQueryable<EnrollmentDetails> AsEnrollmentDetails(this IQueryable<ManualEnrollment> source) => source.Select(ManualEnrollmentToEnrollmentDetails());
+    public static IQueryable<StudyDetailsViewModel> AsStudyDetailsViewModel(
+        this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyDetailsViewModel());
 
-    public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source, int step, bool isEditMode) => source.Select(StudyAsStudyFormViewModel(step, isEditMode));
+    public static IQueryable<EnrollmentDetails> AsEnrollmentDetails(this IQueryable<ManualEnrollment> source) =>
+        source.Select(ManualEnrollmentToEnrollmentDetails());
 
-    public static Expression<Func<Domain.Entities.Study, StudyFormViewModel>> StudyAsStudyFormViewModel(int step, bool isEditMode)
+    public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source,
+        int step, bool isEditMode) => source.Select(StudyAsStudyFormViewModel(step, isEditMode));
+
+    public static Expression<Func<Domain.Entities.Study, StudyFormViewModel>> StudyAsStudyFormViewModel(int step,
+        bool isEditMode)
     {
         return s => new StudyFormViewModel
         {
@@ -59,8 +67,24 @@ public static class Projections
                 IsRecruitingIdentifiableParticipants = s.IsRecruitingIdentifiableParticipants,
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
+
+            EmailCampaigns = s.FilterCriterias
+                .SelectMany(fc => fc.EmailCampaigns)
+                .Select(ec => new EmailCampaign
+                {
+                    TargetGroupSize = (int)ec.TargetGroupSize,
+                    EmailCampaignParticipants = ec.Participants
+                        .Select(p => new EmailCampaignParticipant
+                        {
+                            ContactEmail = p.ContactEmail,
+                            SentAt = p.SentAt,
+                            DeliveredAt = p.DeliveredAt
+                        })
+                        .ToList(),
+                })
         };
     }
+
 
     public static Expression<Func<Domain.Entities.Study, UpdateAnonymousRecruitedViewModel>>
         StudyAsUpdateAnonymousRecruitedViewModel()
@@ -83,7 +107,7 @@ public static class Projections
     }
 
     private static IEnumerable<EnrollmentDetails> GetEnrollmentDetails(
-    IEnumerable<Domain.Entities.ManualEnrollment> enrollments)
+        IEnumerable<Domain.Entities.ManualEnrollment> enrollments)
     {
         return enrollments
             .OrderByDescending(e => e.CreatedAt)
