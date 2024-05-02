@@ -12,16 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # - uses: ./.github/actions/setup-node
-      # - name: Install
-      #   run: npm ci --no-audit --no-fund
-      # - name: Build
-      #   # Inject the minimum amount of env vars needed to build the project
-      #   # The docker build will fail if any other environment variables are not injected correctly
-      #   run: |
-      #     touch apps/web/.env.local
-      #     npm run db:generate
-      #     npm run build
+
 
   deploy-dev:
     needs: [build]
@@ -89,21 +80,18 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            AwsSecretsManagerSettings__Region=eu-west-2
+            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
+            AwsSecretsManagerSettings__Enabled=false
             DbSettings__Port=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
             DbSettings__Username=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
             DbSettings__Password=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
             DbSettings__Database=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
             DbSettings__Host=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
-            IdentityProviderApiSettings__ClientId=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTID}}
-            IdentityProviderApiSettings__ClientSecret=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTSECRET}}
-            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
-            AwsSecretsManagerSettings__Enabled=false
-            IdentityProviderApiSettings__BaseUrl=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__BASEURL}}
             AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
-            AwsSecretsManagerSettings__Region=eu-west-2
-            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
-
+            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
+            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccd-ecs-dev-bpor-rms-service
@@ -181,20 +169,19 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            AwsSecretsManagerSettings__Region=eu-west-2
+            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
+            AwsSecretsManagerSettings__Enabled=false
             DbSettings__Port=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
             DbSettings__Username=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
             DbSettings__Password=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
             DbSettings__Database=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
             DbSettings__Host=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
-            IdentityProviderApiSettings__ClientId=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTID}}
-            IdentityProviderApiSettings__ClientSecret=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTSECRET}}
-            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
-            AwsSecretsManagerSettings__Enabled=false
-            IdentityProviderApiSettings__BaseUrl=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__BASEURL}}
             AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
-            AwsSecretsManagerSettings__Region=eu-west-2
-            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
+            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
+
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccd-ecs-test-bpor-rms-service
@@ -272,20 +259,18 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            AuthenticationSettings__ClientSecret=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
-            DbSettings__Port=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
-            DbSettings__Username=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
-            DbSettings__Password=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
-            DbSettings__Database=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
-            DbSettings__Host=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
-            IdentityProviderApiSettings__ClientId=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTID}}
-            IdentityProviderApiSettings__ClientSecret=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTSECRET}}
-            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
-            AwsSecretsManagerSettings__Enabled=false
-            IdentityProviderApiSettings__BaseUrl=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__BASEURL}}
-            AuthenticationSettings__Authority=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
             AwsSecretsManagerSettings__Region=eu-west-2
-            AuthenticationSettings__ClientId=${{ env.CRNCCS_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
+            AwsSecretsManagerSettings__Enabled=false
+            DbSettings__Port=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
+            DbSettings__Username=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
+            DbSettings__Password=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
+            DbSettings__Database=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
+            DbSettings__Host=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
+            AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
+            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccs-ecs-uat-bpor-rms-service
@@ -363,20 +348,18 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            AuthenticationSettings__ClientSecret=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
-            DbSettings__Port=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
-            DbSettings__Username=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
-            DbSettings__Password=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
-            DbSettings__Database=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
-            DbSettings__Host=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
-            IdentityProviderApiSettings__ClientId=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTID}}
-            IdentityProviderApiSettings__ClientSecret=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTSECRET}}
-            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
-            AwsSecretsManagerSettings__Enabled=false
-            IdentityProviderApiSettings__BaseUrl=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__BASEURL}}
-            AuthenticationSettings__Authority=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
             AwsSecretsManagerSettings__Region=eu-west-2
-            AuthenticationSettings__ClientId=${{ env.CRNCCP_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
+            AwsSecretsManagerSettings__Enabled=false
+            DbSettings__Port=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
+            DbSettings__Username=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
+            DbSettings__Password=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
+            DbSettings__Database=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
+            DbSettings__Host=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
+            AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
+            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccp-ecs-oat-bpor-rms-service
@@ -454,20 +437,18 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            AuthenticationSettings__ClientSecret=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
-            DbSettings__Port=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
-            DbSettings__Username=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
-            DbSettings__Password=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
-            DbSettings__Database=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
-            DbSettings__Host=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
-            IdentityProviderApiSettings__ClientId=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTID}}
-            IdentityProviderApiSettings__ClientSecret=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__CLIENTSECRET}}
-            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
-            AwsSecretsManagerSettings__Enabled=false
-            IdentityProviderApiSettings__BaseUrl=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_IDENTITYPROVIDERAPISETTINGS__BASEURL}}
-            AuthenticationSettings__Authority=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
             AwsSecretsManagerSettings__Region=eu-west-2
-            AuthenticationSettings__ClientId=${{ env.CRNCCP_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
+            AwsSecretsManagerSettings__Enabled=false
+            DbSettings__Port=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
+            DbSettings__Username=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
+            DbSettings__Password=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
+            DbSettings__Database=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
+            DbSettings__Host=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
+            AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
+            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
+            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
+            AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccp-ecs-prod-bpor-rms-service
