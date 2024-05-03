@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: eu-west-2
+  AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
   build:
@@ -29,13 +29,6 @@ jobs:
           aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
           aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            crnccd-secret-dev-bpor-rms-app-config
-          parse-json-secrets: true
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -80,23 +73,10 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            ASPNETCORE_ENVIRONMENT=Development
-            AwsSecretsManagerSettings__Region=eu-west-2
-            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
-            AwsSecretsManagerSettings__Enabled=false
-            DbSettings__Port=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
-            DbSettings__Username=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
-            DbSettings__Password=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
-            DbSettings__Database=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
-            DbSettings__Host=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
-            AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
-            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
-            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
-            AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
-            Clients__LocationService__BaseUrl=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_CLIENTS__LOCATIONSERVICE__BASEURL}}
-            Clients__LocationService__UserName=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_CLIENTS__LOCATIONSERVICE__USERNAME}}
-            Clients__LocationService__Password=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_CLIENTS__LOCATIONSERVICE__PASSWORD}}
-            Clients__LocationService__DefaultTimeout=${{ env.CRNCCD_SECRET_DEV_BPOR_RMS_APP_CONFIG_CLIENTS__LOCATIONSERVICE__DEFAULTTIMEOUT}}
+            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
+            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_DEV }}
+            AwsSecretsManagerSettings__Enabled=true
+
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccd-ecs-dev-bpor-rms-service
@@ -123,13 +103,6 @@ jobs:
           aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
           aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            crnccd-secret-test-bpor-rms-app-config
-          parse-json-secrets: true
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -174,18 +147,9 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            AwsSecretsManagerSettings__Region=eu-west-2
-            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
-            AwsSecretsManagerSettings__Enabled=false
-            DbSettings__Port=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
-            DbSettings__Username=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
-            DbSettings__Password=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
-            DbSettings__Database=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
-            DbSettings__Host=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
-            AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
-            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
-            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
-            AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_TEST_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
+            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
+            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_TEST }}
+            AwsSecretsManagerSettings__Enabled=true
 
       - name: Deploy Amazon ECS task definition
         env:
@@ -213,13 +177,6 @@ jobs:
           aws-access-key-id: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            crnccs-secret-uat-bpor-rms-app-config
-          parse-json-secrets: true
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -264,18 +221,10 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            AwsSecretsManagerSettings__Region=eu-west-2
-            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
-            AwsSecretsManagerSettings__Enabled=false
-            DbSettings__Port=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
-            DbSettings__Username=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
-            DbSettings__Password=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
-            DbSettings__Database=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
-            DbSettings__Host=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
-            AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
-            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
-            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
-            AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_UAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
+            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
+            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_UAT }}
+            AwsSecretsManagerSettings__Enabled=true
+
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccs-ecs-uat-bpor-rms-service
@@ -302,13 +251,6 @@ jobs:
           aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            crnccp-secret-oat-bpor-rms-app-config
-          parse-json-secrets: true
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -353,18 +295,10 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            AwsSecretsManagerSettings__Region=eu-west-2
-            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
-            AwsSecretsManagerSettings__Enabled=false
-            DbSettings__Port=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
-            DbSettings__Username=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
-            DbSettings__Password=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
-            DbSettings__Database=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
-            DbSettings__Host=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
-            AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
-            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
-            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
-            AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_OAT_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
+            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
+            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_OAT }}
+            AwsSecretsManagerSettings__Enabled=true
+
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccp-ecs-oat-bpor-rms-service
@@ -391,13 +325,6 @@ jobs:
           aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: |
-            crnccp-secret-prod-bpor-rms-app-config
-          parse-json-secrets: true
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -442,18 +369,10 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
-            AwsSecretsManagerSettings__Region=eu-west-2
-            AwsSecretsManagerSettings__SecretName=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_AWSSECRETSMANAGERSETTINGS__SECRETNAME}}
-            AwsSecretsManagerSettings__Enabled=false
-            DbSettings__Port=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__PORT}}
-            DbSettings__Username=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__USERNAME}}
-            DbSettings__Password=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__PASSWORD}}
-            DbSettings__Database=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__DATABASE}}
-            DbSettings__Host=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_DBSETTINGS__HOST}}
-            AuthenticationSettings__Authority=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__AUTHORITY}}
-            AuthenticationSettings__ClientId=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTID}}
-            AuthenticationSettings__ClientSecret=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__CLIENTSECRET}}
-            AuthenticationSettings__Bypass=${{ env.CRNCCD_SECRET_PROD_BPOR_RMS_APP_CONFIG_AUTHENTICATIONSETTINGS__BYPASS}}
+            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
+            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_PROD }}
+            AwsSecretsManagerSettings__Enabled=true
+
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccp-ecs-prod-bpor-rms-service
