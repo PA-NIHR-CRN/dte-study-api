@@ -25,14 +25,6 @@ app.UseApplicationMiddleware();
 
 app.UseMiddleware<IdgAuthenticationMiddleware>();
 
-app.UseCookiePolicy(
-    new CookiePolicyOptions
-    {
-        Secure = Debugger.IsAttached && !app.Environment.IsProduction() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always,
-        OnAppendCookie = context =>
-        {
-            Debug.WriteLine((context.CookieName));
-        }
-    });
+
 
 app.Run();

@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace BPOR.Rms.Startup;
 
 public static class ConfigureMiddleware
@@ -6,6 +8,12 @@ public static class ConfigureMiddleware
 
     public static WebApplication UseApplicationMiddleware(this WebApplication app)
     {
+        app.UseCookiePolicy(
+            new CookiePolicyOptions
+            {
+                Secure = Debugger.IsAttached && !app.Environment.IsProduction() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always,
+            });
+
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
