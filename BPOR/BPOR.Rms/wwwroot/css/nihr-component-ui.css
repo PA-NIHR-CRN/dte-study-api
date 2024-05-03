@@ -12,7 +12,6 @@
     border-radius: 5px;
     text-align: center;
     text-decoration: none;
-    font-family: "Lato", serif;
     white-space: nowrap; /* Prevent text from wrapping */
     box-shadow: none;
     padding-left: 1em;
@@ -122,7 +121,6 @@
     border-radius: 5px;
     text-align: center;
     text-decoration: none;
-    font-family: "Lato", serif;
     white-space: nowrap; /* Prevent text from wrapping */
     width: auto;
     height: 50px;
@@ -183,7 +181,6 @@
 .govuk-input {
     width: 100%;
     font-size: 18px;
-    font-family: Lato, serif;
     line-height: 27px;
     word-wrap: break-word;
     border-radius: 0.3rem;
@@ -201,7 +198,6 @@
 .govuk-textarea {
     width: 100%;
     font-size: 18px;
-    font-family: Lato, serif;
     line-height: 27px;
     word-wrap: break-word;
     border-radius: 0.3rem;
@@ -218,7 +214,6 @@
 }
 
 .govuk-label {
-    font-family: Lato, serif;
     font-weight: bold;
 }
 
@@ -241,7 +236,6 @@
 .govuk-skip-link,
 .govuk-link,
 .govuk-back-link {
-    font-family: Lato, serif;
     text-decoration: none;
     color: rgb(29, 112, 184);
     cursor: pointer;
@@ -312,7 +306,6 @@
 }
 
 .govuk-select-custom {
-    font-family: GDS Transport, arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-weight: 400;
@@ -330,7 +323,6 @@
 }
 
 .govuk-multi-select {
-    font-family: GDS Transport, arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-weight: 400;
@@ -441,7 +433,6 @@
 }
 
 .govuk-studylabel {
-    font-family: Lato, serif;
     display: block;
     margin-bottom: 5px;
     font-size: 1.1875rem;
