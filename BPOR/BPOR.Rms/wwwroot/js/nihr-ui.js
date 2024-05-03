@@ -12,16 +12,32 @@ function initialiseOptionSearch() {
         search.addEventListener('input', function () {
             var searchText = this.value.toLowerCase();
             var optionClass = this.dataset.optionClass;
-            var checkboxes = document.querySelectorAll('.' + optionClass);
+            var options = document.querySelectorAll('.' + optionClass);
+            var announcementElement = document.getElementById(search.dataset.announcementId);
 
-            checkboxes.forEach(function (checkbox) {
-                var label = checkbox.dataset.searchValue;
+            var foundCount = 0;
+            var selectedCount = 0;
+
+            options.forEach(function (option) {
+                var label = option.dataset.searchValue;
+                var checkbox = option.querySelector('input[type="checkbox"]');
+
+                option.style.display = 'none';
+
+                if (checkbox.checked) {
+                    option.style.display = 'flex';
+                    selectedCount++;
+                }
+
                 if (label.includes(searchText)) {
-                    checkbox.style.display = 'flex';
-                } else {
-                    checkbox.style.display = 'none';
+                    option.style.display = 'flex';
+                    foundCount++;
                 }
             });
+
+            var foundLabel = foundCount == 1 ? announcementElement.dataset.single : announcementElement.dataset.multiple;
+            
+            announcementElement.innerText = "" + foundCount + " " + foundLabel + ", " + selectedCount + " " + announcementElement.dataset.selected;
         });
     });
 }
