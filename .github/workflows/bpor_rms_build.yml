@@ -78,7 +78,7 @@ jobs:
           IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
         run: |
           echo "Load artefact"
-          docker load --input bpor-rms.tar
+          docker load --input $GITHUB_WORKSPACE/bpor-rms.tar
           
           # Extract the image ID from the list of images
           IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
