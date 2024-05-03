@@ -8,7 +8,10 @@
         <p>If you are using a keyboard to navigate, you will need to use the tab key to move through the options in the drop-down list on this section. Use the escape key to close the list.</p>
     </div>
 
-    <input type="text" class="govuk-input nihr-option-search" id="searchInput" placeholder="Search..." data-option-class="area-of-research-option" data-announcement-id="areas-of-interest-announcement">
+    <input type="text" class="govuk-input nihr-option-search" id="searchInput" placeholder="Search..." data-option-class="area-of-research-option" data-announcement-id="areas-of-interest-announcement" data-selected-counter-id="selected-counter">
+    <div id="selected-counter">
+        @* TODO: add selected item count *@
+    </div>
     <span id="areas-of-interest-announcement" class="govuk-visually-hidden" data-single="option found" data-multiple="options found" data-selected="selected" aria-live="polite"></span>
     <fieldset class="govuk-fieldset">
         <div class="govuk-checkboxes research-areas-list" id="areas-of-research-container" data-module="govuk-checkboxes">
