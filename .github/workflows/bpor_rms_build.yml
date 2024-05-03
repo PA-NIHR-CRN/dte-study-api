@@ -35,12 +35,12 @@ jobs:
         run: |
           echo "Using registry ${{ env.ECR_REGISTRY }}"
           echo "Tagging image with ${{ env.IMAGE_NAME_TAG}} and ${{ env.IMAGE_SHA_TAG }}"
-          docker build -f BPOR/BPOR.Rms/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG -o - . > bpor-rms.tar
+          docker build -f BPOR/BPOR.Rms/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG --output type=local,dest=/tmp/bpor-rms.tar .
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: bpor-rms
-          path: bpor-rms.tar
+          path: /tmp/bpor-rms.tar
 
   deploy-dev:
     needs: [build]
@@ -68,6 +68,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: bpor-rms
+          path: /tmp
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -78,7 +79,8 @@ jobs:
           IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
         run: |
           echo "Load artefact"
-          docker load --input $GITHUB_WORKSPACE/bpor-rms.tar
+          docker load --input /tmp/bpor-rms.tar
+          docker image ls -a
           
           # Extract the image ID from the list of images
           IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
