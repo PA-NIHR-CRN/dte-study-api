@@ -65,10 +65,9 @@ jobs:
           mask-password: 'true'
 
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bpor-rms
-          path: bpor-rms.tar
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -88,12 +87,6 @@ jobs:
           docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: bpor-rms
-          path: bpor-rms.tar
 
       - name: Generate task definition file from container
         run: |
