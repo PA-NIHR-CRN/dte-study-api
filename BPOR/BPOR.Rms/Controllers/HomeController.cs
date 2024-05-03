@@ -5,13 +5,18 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace BPOR.Rms.Controllers;
 
-[Authorize]
+[AllowAnonymous]
 public class HomeController(ILogger<HomeController> logger) : Controller
 {
     private readonly ILogger<HomeController> _logger = logger;
 
     public IActionResult Index()
     {
+        if (Request.Query.ContainsKey("sign-in") || (User?.Identity?.IsAuthenticated ?? false))
+        {
+            return RedirectToAction("Index", "Study");
+        }
+
         return View();
     }
 

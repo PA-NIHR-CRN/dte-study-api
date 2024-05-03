@@ -1,5 +1,7 @@
 ﻿using BPOR.Domain.Entities;
 using BPOR.Rms.Startup;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure;
 public class IdgAuthenticationMiddleware
@@ -19,6 +21,14 @@ public class IdgAuthenticationMiddleware
         
         ArgumentNullException.ThrowIfNull(currentUserIdAccessor, nameof(currentUserIdAccessor));
 
+        if (context.Request.Query.ContainsKey("sign-out"))
+        {
+            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            // Logout functionality will not log the user out of IDG; similar to other IDG apps in the NIHR, you will still be logged in to other tools pending session expiry
+            // await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
+
+            context.Response.Redirect("/?signed-out");
+        }
 
         var token = context.RequestAborted;
 

@@ -22,7 +22,7 @@ public static class ConfigureMiddleware
 
         app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Study}/{action=Index}/{id?}");
+            pattern: "{controller=Home}/{action=Index}");
 
         app.MapHealthChecks(HealthCheckPath).AllowAnonymous();
 
