@@ -21,16 +21,24 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     {
         ModelState.Remove("VolunteerReferenceNumbers");
 
-
         return View(model);
     }
 
     [HttpPost]
-    public IActionResult SubmitVolunteerNumbers(UpdateRecruitedViewModel model)
+    public async Task<IActionResult> SubmitVolunteerNumbers(UpdateRecruitedViewModel model)
     {
-        // get each id from the string splitting by new line
-        var volunteerIds =
-            model.VolunteerReferenceNumbers.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
+        if (!ModelState.IsValid)
+        {
+            return View("UpdateRecruited", model);
+        }
+
+        if (!String.IsNullOrEmpty(model.VolunteerReferenceNumbers))
+        {
+            // get each id from the string splitting by new line
+            var volunteerIds =
+                model.VolunteerReferenceNumbers.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
+
+        }
 
         return RedirectToAction("UpdateRecruited", model);
     }
