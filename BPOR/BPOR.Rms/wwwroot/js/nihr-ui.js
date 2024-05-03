@@ -36,8 +36,8 @@ function initialiseOptionSearch() {
             });
 
             var foundLabel = foundCount == 1 ? announcementElement.dataset.single : announcementElement.dataset.multiple;
-            
-            announcementElement.innerText = "" + foundCount + " " + foundLabel + ", " + selectedCount + " " + announcementElement.dataset.selected;
+
+            announcementElement.innerText = `${foundCount} ${foundLabel}, ${selectedCount} ${announcementElement.dataset.selected}`;
         });
     });
 }
