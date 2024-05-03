@@ -5,7 +5,7 @@ using NIHR.Infrastructure.Models;
 
 namespace BPOR.Infrastructure.Clients
 {
-    public class LocationApiClient :IPostcodeMapper
+    public class LocationApiClient : IPostcodeMapper
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<LocationApiClient> _logger;

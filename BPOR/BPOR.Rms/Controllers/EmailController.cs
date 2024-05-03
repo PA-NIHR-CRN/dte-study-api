@@ -12,7 +12,7 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
     public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
         ModelState.Clear();
-
+        model.EmailTemplates = FetchEmailTemplates();
         return View(model);
     }
 
@@ -27,6 +27,14 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
             model.Notification =
                 JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"].ToString());
         }
+        
+        if (TempData.ContainsKey("SelectedTemplateId"))
+        {
+            model.SelectedTemplateId = TempData["SelectedTemplateId"].ToString();
+            model.SelectedTemplateName = TempData["SelectedTemplateName"].ToString();
+        }
+        
+        model.EmailTemplates = FetchEmailTemplates();
 
         return View("SetupCampaign", model);
     }
@@ -41,9 +49,9 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
             ModelState.AddModelError("TotalVolunteers", "Total Volunteers must be less than or equal to Max Numbers.");
         }
 
-        if (string.IsNullOrEmpty(model.SelectedTemplate))
+        if (string.IsNullOrEmpty(model.SelectedTemplateId))
         {
-            ModelState.AddModelError("SelectedTemplate", "Please select a email template.");
+            ModelState.AddModelError("SelectedTemplate", "Please select an email template.");
         }
 
         if (!ModelState.IsValid)
@@ -55,14 +63,9 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
         {
             FilterCriteriaId = model.FilterCriteriaId,
             TargetGroupSize = model.TotalVolunteers.Value,
-            EmailTemplateId = new Guid(model.SelectedTemplate)
+            EmailTemplateId = new Guid(model.SelectedTemplateId),
+            Name = model.SelectedTemplateName
         }, cancellationToken);
-
-        // implement email sending
-        // get list of volunteers for the filter criteria
-        // get a random sample of volunteers including prioticising those who have not been contacted before
-        // send email to volunteers
-        // mark volunteers as contacted in the database with the email template used
 
         return RedirectToAction("EmailSuccess", model);
     }
@@ -91,18 +94,34 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
         ModelState.Remove("MaxNumbers");
         ModelState.Remove("TotalVolunteers");
         ModelState.Remove("StudyName");
-        ModelState.Remove("SelectedTemplate");
+        ModelState.Remove("SelectedTemplate.Name");
+        
+        // TODO can we cache this or is there a better way to do this?
+        var emailTemplates = FetchEmailTemplates();
+
+        if (model.SelectedTemplateId != null)
+        {
+            var selectedTemplateName = emailTemplates.FirstOrDefault(t => t.Id == model.SelectedTemplateId)?.Name;
+            if (selectedTemplateName != null)
+            {
+                model.SelectedTemplateName = selectedTemplateName;
+            }
+        }
+
 
         if (!ModelState.IsValid)
         {
             return RedirectToAction("Index", model);
         }
-
+        
+        TempData["SelectedTemplateId"] = model.SelectedTemplateId;
+        TempData["SelectedTemplateName"] = model.SelectedTemplateName;
         TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
         {
             IsSuccess = true,
             Heading = "Success",
-            Body = $"Preview email has been sent to {model.PreviewEmails}"
+            Body =
+                $"Preview email using template {model.SelectedTemplateName} has been sent to  {model.PreviewEmails}"
         });
 
         return RedirectToAction("Index", model);
@@ -110,7 +129,8 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
 
 
     [HttpPost]
-    public async Task<IActionResult> HandleForms(SetupCampaignViewModel model, string action, CancellationToken cancellationToken)
+    public async Task<IActionResult> HandleForms(SetupCampaignViewModel model, string action,
+        CancellationToken cancellationToken)
     {
         return action switch
         {
@@ -131,5 +151,15 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
         {
             return false;
         }
+    }
+
+    private IEnumerable<EmailTemplate> FetchEmailTemplates()
+    {
+        return new List<EmailTemplate>
+        {
+            new EmailTemplate { Id = "2bdd0916-d4b3-4fad-baa2-7f12890f3c08", Name = "Template 1" },
+            new EmailTemplate { Id = "7c3275d4-7a60-4d97-87ed-f91e8c870935", Name = "Template 2" },
+            new EmailTemplate { Id = "d825d25f-2f4a-48f5-9a7d-f34e5747ef61", Name = "Template 3" }
+        };
     }
 }

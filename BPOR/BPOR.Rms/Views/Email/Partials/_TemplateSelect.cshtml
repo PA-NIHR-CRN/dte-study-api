@@ -16,36 +16,30 @@
     }
 </style>
 
-<div class="govuk-form-group" @(Html.ViewData.ModelState["SelectedTemplate"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")>
-    <label asp-for="SelectedTemplate" class="govuk-label govuk-label--l" for="SelectedTemplate">
-        @Html.DisplayNameFor(model => model.SelectedTemplate)
+<div class="govuk-form-group" @(Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "") asp-for="SelectedTemplateId">
+    <label asp-for="SelectedTemplateId" class="govuk-label govuk-label--l" for="SelectedTemplateId">
+        @Html.DisplayNameFor(model => model.SelectedTemplateId)
     </label>
-    <div id="SelectedTemplate-hint" class="govuk-hint">
+    <div id="SelectedTemplateId-hint" class="govuk-hint">
         These templates are managed through your GOV UK Notify account
     </div>
-    @if (Html.ViewData.ModelState["SelectedTemplate"]?.Errors.Count > 0)
+    @if (Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0)
     {
-        <span id="SelectedTemplate-error" class="govuk-error-message">
+        <span id="SelectedTemplateId-error" class="govuk-error-message">
             <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.SelectedTemplate)
+            @Html.ValidationMessageFor(model => model.SelectedTemplateId)
         </span>
-        <select class="govuk-select govuk-select--error" id="SelectedTemplate" asp-for="SelectedTemplate" aria-describedby="SelectedTemplate-hint SelectedTemplate-error">
-            <option value="" selected>Select template</option>
-            <option value="cd26ccf6-75d6-4521-884f-1693c62ed303">Template 1</option>
-        </select>
+        @Html.DropDownListFor(model => model.SelectedTemplateId, new SelectList(Model.EmailTemplates, "Id", "Name"), "Select a template", new { @class = "govuk-select govuk-select--error" })
     }
     else
     {
-        <select class="govuk-select" id="SelectedTemplate" asp-for="SelectedTemplate" aria-describedby="SelectedTemplate-hint">
-            <option value="" selected>Select template</option>
-            <option value="cd26ccf6-75d6-4521-884f-1693c62ed303">Template 1</option>
-        </select>
+        @Html.DropDownListFor(model => model.SelectedTemplateId, new SelectList(Model.EmailTemplates, "Id", "Name"), "Select a template", new { @class = "govuk-select" })
     }
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const templateSelect = document.getElementById('SelectedTemplate');
+        const templateSelect = document.getElementById('SelectedTemplateId');
         const previewEmailsInput = document.getElementById('PreviewEmails');
         const notificationBanner = document.getElementById('notification-banner');
 
