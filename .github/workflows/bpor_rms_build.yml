@@ -12,17 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-
-  deploy-dev:
-    needs: [build]
-    environment: DEV
-    name: 'Deploy Dev'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
       - name: Configure AWS credentials (dev)
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -47,6 +36,57 @@ jobs:
           echo "Using registry ${{ env.ECR_REGISTRY }}"
           echo "Tagging image with ${{ env.IMAGE_NAME_TAG}} and ${{ env.IMAGE_SHA_TAG }}"
           docker build -f BPOR/BPOR.Rms/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG --output type=local,dest=bpor-rms.tar .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: bpor-rms
+          path: bpor-rms.tar
+
+  deploy-dev:
+    needs: [build]
+    environment: DEV
+    name: 'Deploy Dev'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (dev)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: bpor-rms
+          path: bpor-rms.tar
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REPOSITORY: crnccd-ecr-dev-bpor-rms-repository
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_NAME_TAG: bpor-rms
+          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
+        run: |
+          echo "Load artefact"
+          docker load --input bpor-rms.tar
+          
+          # Extract the image ID from the list of images
+          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
+
+          echo "Using registry ${{ env.ECR_REGISTRY }}"
+          docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
 
