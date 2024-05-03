@@ -20,7 +20,8 @@ public class SetupCampaignViewModel
 
     [DisplayName("Select email template")]
     [Required(ErrorMessage = "Please select a email template.")]
-    public string? SelectedTemplate { get; set; }
+    public string? SelectedTemplateId { get; set; }
+    public string? SelectedTemplateName { get; set; }
 
     [DisplayName("Preview email")]
     [Required(ErrorMessage = "Enter at least one address")]
@@ -29,4 +30,11 @@ public class SetupCampaignViewModel
 
     public NotificationBannerModel? Notification { get; set; }
     public int FilterCriteriaId { get; set; }
+    public IEnumerable<EmailTemplate> EmailTemplates { get; set; } = new List<EmailTemplate>();
+}
+
+public class EmailTemplate
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
 }

@@ -55,7 +55,8 @@ public class EmailCampaignService(
                             EmailCampaignId = campaign.Id,
                             ParticipantId = volunteer.Id,
                             DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending),
-                            SentAt = sentAt
+                            SentAt = sentAt,
+                            ContactEmail = volunteer.Email,
                         });
                     }
                 }
