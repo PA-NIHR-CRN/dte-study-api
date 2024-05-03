@@ -471,9 +471,14 @@
     box-sizing: border-box;
 }
 
+.nihr-option-search{
+     /* js-only component, will be shown in script if enabled */
+    display: none;
+}
+
 @media (min-width:48.0625em) {
     .govuk-grid-column-one-quarter-from-desktop-no-padding {
         width: 25%;
         float: left
     }
-}}
+}
