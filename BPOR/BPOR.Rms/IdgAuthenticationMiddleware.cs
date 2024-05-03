@@ -27,7 +27,7 @@ public class IdgAuthenticationMiddleware
             // Logout functionality will not log the user out of IDG; similar to other IDG apps in the NIHR, you will still be logged in to other tools pending session expiry
             // await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
 
-            context.Response.Redirect("/?signed-out");
+            context.Response.Redirect("/");
         }
 
         var token = context.RequestAborted;
