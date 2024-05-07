@@ -12,20 +12,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          IMAGE_NAME_TAG: bpor-rms
-          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
-        run: |
-          echo "Build and Output Docker image"
-          docker build -f BPOR/BPOR.Rms/Dockerfile --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -o - . > /tmp/bpor-rms.tar
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and export
+        uses: docker/build-push-action@v5
+        with:
+          context: BPOR/BPOR.Rms/Dockerfile
+          build-args: NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }}, NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }}
+          tags: bpor-rms, bpor-rms-${{ github.sha }} 
+          outputs: type=docker,dest=/tmp/bpor-rms.tar
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: bpor-rms
           path: /tmp/bpor-rms.tar
+
+      # - name: Build, tag, and push image to Amazon ECR
+      #   id: build-image
+      #   env:
+      #     IMAGE_NAME_TAG: bpor-rms
+      #     IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
+      #   run: |
+      #     echo "Build and Output Docker image"
+      #     docker build -f BPOR/BPOR.Rms/Dockerfile --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -o - . > /tmp/bpor-rms.tar
+
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: bpor-rms
+      #     path: /tmp/bpor-rms.tar
 
   deploy-dev:
     needs: [build]
