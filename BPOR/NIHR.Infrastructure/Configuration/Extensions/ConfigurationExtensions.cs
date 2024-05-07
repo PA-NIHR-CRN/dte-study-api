@@ -101,6 +101,9 @@ namespace NIHR.Infrastructure.Configuration
             configurationBuilder.Add(configurationSource);
         }
 
+        public static IOptions<T> GetSectionAndValidate<T>(this IHostApplicationBuilder builder
+            ) where T : class, new() => builder.Services.GetSectionAndValidate<T>(builder.Configuration);
+
         public static IOptions<T> GetSectionAndValidate<T>(this IServiceCollection services,
             IConfiguration configuration) where T : class, new()
         {

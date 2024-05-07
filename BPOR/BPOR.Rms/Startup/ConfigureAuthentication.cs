@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using NIHR.Infrastructure.Settings;
 using NIHR.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics;
 
 namespace BPOR.Rms.Startup;
 
@@ -61,7 +62,24 @@ public static class ConfigureAuthentication
         return builder;
     }
 
-    private static Task MakeHttps(RedirectContext context)
+    public static IHostApplicationBuilder AddAWSSystemsManagerDataProtection(this IHostApplicationBuilder builder, string parameterNamePrefix)
+    {
+        var dataprotection = builder.Services.AddDataProtection();
+
+        var developmentSettings = builder.GetSectionAndValidate<DevelopmentSettings>();
+
+        if (builder.Environment.IsProduction() ||
+            !(developmentSettings.Value.DisableSsmDataProtection ||
+                (Debugger.IsAttached && builder.Environment.IsDevelopment())
+             ))
+        {
+            dataprotection.PersistKeysToAWSSystemsManager(parameterNamePrefix);
+        }
+
+        return builder;
+    }
+
+        private static Task MakeHttps(RedirectContext context)
     {
         context.ProtocolMessage.RedirectUri = MakeHttps(context.ProtocolMessage.RedirectUri);
 
