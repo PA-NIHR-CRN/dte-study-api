@@ -86,7 +86,8 @@ jobs:
                   .revision,
                   .status,
                   .registeredAt,
-                  .registeredBy
+                  .registeredBy,
+                  .environment
               )') > ./task-definition.json
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -102,7 +103,6 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_DEV }}
             AwsSecretsManagerSettings__Enabled=true
-            AuthenticationSettings__Bypass=false
 
       - name: Deploy Amazon ECS task definition
         env:
@@ -172,7 +172,8 @@ jobs:
                   .revision,
                   .status,
                   .registeredAt,
-                  .registeredBy
+                  .registeredBy,
+                  .environment
               )') > ./task-definition.json
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -188,7 +189,6 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_TEST }}
             AwsSecretsManagerSettings__Enabled=true
-            AuthenticationSettings__Bypass=false
 
       - name: Deploy Amazon ECS task definition
         env:
