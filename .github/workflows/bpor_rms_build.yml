@@ -55,11 +55,6 @@ jobs:
           name: bpor-rms
           path: /tmp
 
-      - name: confirm tar file
-        run: |
-          ls /tmp
-          cat /tmp/bpor-rms.tar
-
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
@@ -69,11 +64,20 @@ jobs:
           IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
         run: |
           echo "Load artifact"
-          cat /tmp/bpor-rms.tar | docker import - $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG
+          file /tmp/bpor-rms.tar
+
+          docker load --input /tmp/bpor-rms.tar
+          docker image ls -a
+          
+          # Extract the image ID from the list of images
+          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
+
           echo "Using registry ${{ env.ECR_REGISTRY }}"
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
+          docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
+
+          # cat /tmp/bpor-rms.tar | docker import - $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG
 
       - name: Generate task definition file from container
         run: |
