@@ -107,19 +107,17 @@ namespace NIHR.Infrastructure.Configuration
         public static IOptions<T> GetSectionAndValidate<T>(this IServiceCollection services,
             IConfiguration configuration) where T : class, new()
         {
+            var sectionName = typeof(T).Name;
             var sectionNameProperty = typeof(T).GetProperty("SectionName");
-            if (sectionNameProperty == null)
+            if (sectionNameProperty != null)
             {
-                throw new InvalidOperationException(
-                    $"Type {typeof(T).Name} does not contain a property named 'SectionName'.");
-            }
-
-            var instance = Activator.CreateInstance<T>();
-            var sectionName = sectionNameProperty.GetValue(instance) as string;
-            if (string.IsNullOrWhiteSpace(sectionName))
-            {
-                throw new InvalidOperationException(
-                    $"The 'SectionName' property in {typeof(T).Name} cannot be null or whitespace.");
+                var instance = Activator.CreateInstance<T>();
+                sectionName = sectionNameProperty.GetValue(instance) as string;
+                if (string.IsNullOrWhiteSpace(sectionName))
+                {
+                    throw new InvalidOperationException(
+                        $"The 'SectionName' property in {typeof(T).Name} cannot be null or whitespace.");
+                }
             }
 
             var settings = configuration.GetSection(sectionName).Get<T>();
