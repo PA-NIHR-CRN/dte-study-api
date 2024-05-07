@@ -17,7 +17,7 @@ jobs:
       - name: Build and export
         uses: docker/build-push-action@v5
         with:
-          context: BPOR/BPOR.Rms/Dockerfile
+          context: BPOR/BPOR.Rms/
           build-args: NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }}, NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }}
           tags: bpor-rms, bpor-rms-${{ github.sha }} 
           outputs: type=docker,dest=/tmp/bpor-rms.tar
