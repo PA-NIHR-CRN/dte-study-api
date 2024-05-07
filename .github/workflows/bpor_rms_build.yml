@@ -18,7 +18,7 @@ jobs:
           IMAGE_NAME_TAG: bpor-rms
           IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
         run: |
-          echo "Build and Output Docker image
+          echo "Build and Output Docker image"
           docker build -f BPOR/BPOR.Rms/Dockerfile --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -o - . > /tmp/bpor-rms.tar
 
       - name: Upload artifact
