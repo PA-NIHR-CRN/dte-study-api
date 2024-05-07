@@ -55,6 +55,11 @@ jobs:
           name: bpor-rms
           path: /tmp
 
+      - name: confirm tar file
+        run: |
+          ls /tmp
+          cat /tmp/bpor-rms.tar
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
