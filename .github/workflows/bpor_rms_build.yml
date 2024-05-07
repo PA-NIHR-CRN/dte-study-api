@@ -12,20 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          IMAGE_NAME_TAG: bpor-rms
-          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
-        run: |
-          echo "Build and Output Docker image"
-          docker build -f BPOR/BPOR.Rms/Dockerfile --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -o - . > /tmp/bpor-rms.tar
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: bpor-rms
-          path: /tmp/bpor-rms.tar
+      # - name: Build, tag, and push image to Amazon ECR
+      #   id: build-image
+      #   env:
+      #     IMAGE_NAME_TAG: bpor-rms
+      #     IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
+      #   run: |
+      #     echo "Build and Output Docker image"
+      #     docker build -f BPOR/BPOR.Rms/Dockerfile --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} --output type=tar,dest=/tmp/bpor-rms.tar .
+
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: bpor-rms
+      #     path: /tmp/bpor-rms.tar
 
   deploy-dev:
     needs: [build]
@@ -49,16 +50,11 @@ jobs:
         with:
           mask-password: 'true'
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bpor-rms
-          path: /tmp
-
-      - name: confirm tar file
-        run: |
-          ls /tmp
-          cat /tmp/bpor-rms.tar
+      # - name: Download artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: bpor-rms
+      #     path: /tmp
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -68,10 +64,15 @@ jobs:
           IMAGE_NAME_TAG: bpor-rms
           IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
         run: |
-          echo "Load artifact"
-          cat /tmp/bpor-rms.tar | docker import - $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG
-          echo "Using registry ${{ env.ECR_REGISTRY }}"
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
+          # echo "Load artifact"
+          # cat /tmp/bpor-rms.tar | docker import - $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG
+
+          # echo "Using registry ${{ env.ECR_REGISTRY }}"
+          # docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
+          # docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+          # echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
+          echo "Tagging image with ${{ env.IMAGE_NAME_TAG}} and ${{ env.IMAGE_SHA_TAG }}"
+          docker build -f BPOR/BPOR.Rms/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_NAME_TAG --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG .
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
 
