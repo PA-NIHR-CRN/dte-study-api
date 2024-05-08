@@ -1,5 +1,6 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
+using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Clients;
 using BPOR.Rms.Services;
 using Dte.Common.Authentication;
@@ -63,9 +64,12 @@ public static class DependencyInjection
 
         // TODO: Client settings are not being validated.
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
+        var awsSettings = services.GetSectionAndValidate<AwsSettings>(configuration);
         
         // debug information
-        logger?.LogCritical("Client settings: {@ClientsSettings}", clientsSettings);
+        logger?.LogCritical("AWS settings: {@AwsSettings}", awsSettings.Value);
+        logger?.LogCritical("Db settings: {@DbSettings}", dbSettings.Value);
+        logger?.LogCritical("Client settings: {@ClientsSettings}", clientsSettings.Value);
 
         if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
