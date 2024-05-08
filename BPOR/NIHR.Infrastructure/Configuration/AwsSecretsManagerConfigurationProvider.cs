@@ -29,6 +29,7 @@ namespace NIHR.Infrastructure.Configuration
         private async Task LoadAsync()
         {
             var response = await _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName });
+            Console.WriteLine($"Secret response-----------------: {response.SecretString}");
             var secretString = response.SecretString;
             if (string.IsNullOrEmpty(secretString))
             {
