@@ -87,7 +87,7 @@ jobs:
                   .status,
                   .registeredAt,
                   .registeredBy,
-                  .environment
+                  .containerDefinitions[].environment
               )') > ./task-definition.json
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -173,7 +173,7 @@ jobs:
                   .status,
                   .registeredAt,
                   .registeredBy,
-                  .environment
+                  .containerDefinitions[].environment
               )') > ./task-definition.json
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -258,7 +258,8 @@ jobs:
                   .revision,
                   .status,
                   .registeredAt,
-                  .registeredBy
+                  .registeredBy,
+                  .containerDefinitions[].environment
               )') > ./task-definition.json
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -344,7 +345,8 @@ jobs:
                   .revision,
                   .status,
                   .registeredAt,
-                  .registeredBy
+                  .registeredBy,
+                  .containerDefinitions[].environment
               )') > ./task-definition.json
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -429,7 +431,8 @@ jobs:
                   .revision,
                   .status,
                   .registeredAt,
-                  .registeredBy
+                  .registeredBy,
+                  .containerDefinitions[].environment
               )') > ./task-definition.json
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
