@@ -11,6 +11,7 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
+using Newtonsoft.Json;
 
 namespace BPOR.Rms.Startup;
 
@@ -64,11 +65,12 @@ public static class DependencyInjection
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
         
         // debug information
-        logger?.LogDebug("Client settings: {@ClientsSettings}", clientsSettings);
-        
-        if(clientsSettings?.Value?.LocationService?.BaseUrl is null)
+        logger?.LogCritical("Client settings: {@ClientsSettings}", clientsSettings);
+
+        if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
-            throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings.Value.LocationService));
+            string clientSettingsJson = JsonConvert.SerializeObject(clientsSettings.Value, Formatting.Indented);
+            throw new ArgumentException($"LocationService configuration is required. Current settings: {clientSettingsJson}", nameof(clientsSettings));
         }
 
         services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
