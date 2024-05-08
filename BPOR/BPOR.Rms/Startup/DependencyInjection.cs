@@ -72,11 +72,6 @@ public static class DependencyInjection
             services.RegisterDevelopmentServices(configuration);
         }
         
-        services.AddHttpsRedirection(options =>
-        {
-            options.HttpsPort = 443;
-        });
-
         return services;
     }
 
