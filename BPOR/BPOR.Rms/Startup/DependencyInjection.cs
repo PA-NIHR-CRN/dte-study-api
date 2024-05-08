@@ -67,9 +67,9 @@ public static class DependencyInjection
         var awsSettings = services.GetSectionAndValidate<AwsSettings>(configuration);
         
         // debug information
-        logger?.LogCritical("AWS settings: {@AwsSettings}", awsSettings.Value);
-        logger?.LogCritical("Db settings: {@DbSettings}", dbSettings.Value);
-        logger?.LogCritical("Client settings: {@ClientsSettings}", clientsSettings.Value);
+        logger?.LogCritical("AWS settings: {@AwsSettings}", JsonConvert.SerializeObject(awsSettings.Value, Formatting.Indented));
+        logger?.LogCritical("Db settings: {@DbSettings}", JsonConvert.SerializeObject(dbSettings.Value, Formatting.Indented));
+        logger?.LogCritical("Client settings: {@ClientsSettings}", JsonConvert.SerializeObject(clientsSettings.Value, Formatting.Indented));
 
         if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
