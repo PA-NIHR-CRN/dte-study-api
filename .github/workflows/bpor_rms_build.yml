@@ -103,6 +103,7 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_DEV }}
             AwsSecretsManagerSettings__Enabled=true
+            ASPNETCORE_ENVIRONMENT=Staging
 
       - name: Deploy Amazon ECS task definition
         env:
@@ -189,6 +190,7 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_TEST }}
             AwsSecretsManagerSettings__Enabled=true
+            ASPNETCORE_ENVIRONMENT=Staging
 
       - name: Deploy Amazon ECS task definition
         env:
@@ -275,7 +277,7 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_UAT }}
             AwsSecretsManagerSettings__Enabled=true
-            AuthenticationSettings__Bypass=false
+            ASPNETCORE_ENVIRONMENT=Staging
 
       - name: Deploy Amazon ECS task definition
         env:
@@ -362,6 +364,7 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_OAT }}
             AwsSecretsManagerSettings__Enabled=true
+            ASPNETCORE_ENVIRONMENT=Staging
 
       - name: Deploy Amazon ECS task definition
         env:
@@ -448,6 +451,7 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_PROD }}
             AwsSecretsManagerSettings__Enabled=true
+            ASPNETCORE_ENVIRONMENT=Production
 
       - name: Deploy Amazon ECS task definition
         env:

@@ -24,11 +24,23 @@
                 if (Model.HasEmailCampaigns)
                 {
                     @Html.ActionLink("Update recruitment total", "UpdateAnonymousRecruited", "Volunteer", new { StudyId = Model.Study.Id }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
-                }             
+                }
+                else
+                {
+                    @Html.ActionLink("Update recruitment total", "UpdateAnonymousRecruited", "Volunteer", new { StudyId = Model.Study.Id }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button", @disabled = "disabled" })
+                }
             }
             else
             {
-                @Html.ActionLink("Add enrollments", "UpdateRecruited", "Volunteer", new { StudyId = Model.Study.Id, Model.Study.StudyName }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
+                if (Model.HasEmailCampaigns)
+                {
+                    @Html.ActionLink("Add enrollments", "UpdateRecruited", "Volunteer", new { StudyId = Model.Study.Id, Model.Study.StudyName }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
+                }
+                else
+                {
+                    @Html.ActionLink("Add enrollments", "UpdateRecruited", "Volunteer", new { StudyId = Model.Study.Id, Model.Study.StudyName }, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button", @disabled = "disabled" })
+                }
+                
             }
         </div>
     </div>
