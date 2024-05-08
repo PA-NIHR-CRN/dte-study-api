@@ -58,13 +58,15 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
         {
             return View("SetupCampaign", model);
         }
+        
+        var selectedTemplateId = FetchEmailTemplates().FirstOrDefault(t => t.Id == model.SelectedTemplateId)?.Name;
 
         await emailCampaignService.SendCampaignAsync(new EmailCampaign
         {
             FilterCriteriaId = model.FilterCriteriaId,
             TargetGroupSize = model.TotalVolunteers.Value,
             EmailTemplateId = new Guid(model.SelectedTemplateId),
-            Name = model.SelectedTemplateName
+            Name = selectedTemplateId
         }, cancellationToken);
 
         return RedirectToAction("EmailSuccess", model);
