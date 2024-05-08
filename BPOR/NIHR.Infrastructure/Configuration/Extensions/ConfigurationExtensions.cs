@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using NIHR.Infrastructure.Settings;
 
 namespace NIHR.Infrastructure.Configuration
@@ -73,6 +74,10 @@ namespace NIHR.Infrastructure.Configuration
             }
 
             var secretsManagerSettings = services.GetSectionAndValidate<AwsSecretsManagerSettings>(configuration).Value;
+            var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
+                ?.CreateLogger("NIHR.Infrastructure.Configuration");
+            
+            logger?.LogCritical("Secrets Manager settings: {@AwsSecretsManagerSettings}", JsonConvert.SerializeObject(secretsManagerSettings, Formatting.Indented));
             if (secretsManagerSettings.Enabled)
             {
                 configuration.AddAwsSecretsManager(secretsManagerSettings.SecretName,
