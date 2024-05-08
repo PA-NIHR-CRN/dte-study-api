@@ -222,6 +222,7 @@
 }
 @if (Model.Studies.Any())
 {
+    // TODO: Add default empty state to page control.
     <div class="study-card-container">
         @foreach (var item in Model.Studies)
         {
@@ -281,8 +282,8 @@ else if (!Model.HasSearched)
     <div class="no-studies-card">
         <h1 class="govuk-heading-l">No studies added</h1>
         <p class="govuk-body">
-            @(Model.Role == "Researcher" ? "You haven’t added any studies yet, please apply to add a study now" : "You haven’t added any studies yet, please add a study now")
+            @(Model.IsResearcher ? "You haven’t added any studies yet, please apply to add a study now" : "You haven’t added any studies yet, please add a study now")
         </p>
-        @Html.ActionLink($"{(Model.Role == "Researcher" ? "Apply to add study" : "Add study")}", "Create", "Study", null, new { @class = "govuk-button" })
+        @Html.ActionLink($"{(Model.IsResearcher ? "Apply to add study" : "Add study")}", "Create", "Study", null, new { @class = "govuk-button" })
     </div>
 }

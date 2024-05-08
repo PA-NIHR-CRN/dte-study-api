@@ -19,10 +19,10 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         {
             searchTerm = searchTerm.Trim();
             var isParsedInt = int.TryParse(searchTerm, out var searchInt);
-            studiesQuery = studiesQuery.Where(s => (isParsedInt && s.Id == searchInt) ||
-                                                   s.StudyName.Contains(
-                                                       searchTerm) // TODO investigate full text search
-                                                   || (isParsedInt && s.CpmsId == searchInt));
+            studiesQuery = studiesQuery.Where(s => (isParsedInt && s.Id == searchInt)
+                                                   || (isParsedInt && s.CpmsId == searchInt)
+                                                   // TODO investigate full text search
+                                                   || s.StudyName.Contains(searchTerm));
         }
 
         var deferredStudiesPage = studiesQuery

@@ -18,7 +18,7 @@
 
 <div class="govuk-grid-column-one-half">
     <h1 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-0">
-        @(Model.Role == "Researcher" ? "My Studies" : "All Studies")
+        @(Model.IsResearcher ? "My Studies" : "All Studies")
     </h1>
 </div>
 <div class="govuk-grid-column-one-half right-align-buttons-desktop">
