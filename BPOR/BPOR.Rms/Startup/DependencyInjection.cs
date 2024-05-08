@@ -41,6 +41,13 @@ public static class DependencyInjection
 
         // TODO this could be reusable
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
+        
+        // check for dbSettings.Value is null
+        if (dbSettings.Value is null)
+        {
+            throw new ArgumentException("DbSettings configuration is required.", nameof(dbSettings));
+        }
+        
         var connectionString = dbSettings.Value.BuildConnectionString();
 
         services.AddDbContext<ParticipantDbContext>(options =>
@@ -55,6 +62,9 @@ public static class DependencyInjection
 
         // TODO: Client settings are not being validated.
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
+        
+        // debug information
+        logger?.LogDebug("Client settings: {@ClientsSettings}", clientsSettings);
         
         if(clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
