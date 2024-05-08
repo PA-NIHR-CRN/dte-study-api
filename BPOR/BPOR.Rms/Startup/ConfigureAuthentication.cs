@@ -19,8 +19,7 @@ public static class ConfigureAuthentication
 
         var authenticationSettings = services.GetSectionAndValidate<AuthenticationSettings>(configuration).Value;
 
-        // TODO CON to reimplement after UAT
-        if(authenticationSettings.Bypass)
+        if(authenticationSettings.Bypass && !hostEnvironment.IsProduction())
         {
             return builder;
         }
