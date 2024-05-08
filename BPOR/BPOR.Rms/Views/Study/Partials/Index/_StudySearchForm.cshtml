@@ -70,7 +70,7 @@
 
 </style>
 
-<form class="govuk-form-group" asp-action="PerformSearch" asp-controller="Study">
+<form class="govuk-form-group" method="get" asp-action="Index" asp-controller="Study">
     <label class="govuk-label" for="searchBar">Search study name, study ID or CPMS ID</label>
     <div class="govuk-input__wrapper">
         <input class="govuk-input govuk-!-width-one-third" id="searchBar" name="searchTerm" type="text" value="@Model.SearchTerm">

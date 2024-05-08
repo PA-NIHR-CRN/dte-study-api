@@ -10,14 +10,8 @@ namespace BPOR.Rms.Controllers;
 
 public class StudyController(ParticipantDbContext context, IPaginationService paginationService) : Controller
 {
-
-    [HttpPost]
-    public IActionResult PerformSearch(string searchTerm)
-    {
-        return RedirectToAction("Index", new { searchTerm, paginationService.Page, hasSearched = true });
-    }
-
-    public async Task<IActionResult> Index(string? searchTerm, bool hasSearched = false, bool hasBeenReset = false, CancellationToken token = default)
+    [HttpGet]
+    public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false, CancellationToken token = default)
     {
         var studiesQuery = context.Studies.AsQueryable();
 
@@ -39,7 +33,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         var viewModel = new StudiesViewModel
         {
             Studies = await deferredStudiesPage.ValueAsync(token),
-            HasSearched = hasSearched,
+            HasSearched = Request.Query.ContainsKey(nameof(searchTerm)),
             SearchTerm = searchTerm ?? string.Empty,
             HasBeenReset = hasBeenReset,
         };
