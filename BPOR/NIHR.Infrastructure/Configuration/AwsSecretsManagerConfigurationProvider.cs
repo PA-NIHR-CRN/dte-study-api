@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Amazon.SecretsManager;
 using Amazon.SecretsManager.Model;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -14,11 +15,13 @@ namespace NIHR.Infrastructure.Configuration
     {
         private readonly IAmazonSecretsManager _client;
         private readonly string _secretName;
+        private readonly ILogger _logger;
 
-        public AwsSecretsManagerConfigurationProvider(IAmazonSecretsManager client, string secretName)
+        public AwsSecretsManagerConfigurationProvider(IAmazonSecretsManager client, string secretName, ILogger logger)
         {
             _client = client;
             _secretName = secretName;
+            _logger = logger;
         }
 
         public override async void Load()
@@ -29,7 +32,10 @@ namespace NIHR.Infrastructure.Configuration
         private async Task LoadAsync()
         {
             var response = await _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName });
-            Console.WriteLine($"Secret response-----------------: {response.SecretString}");
+            _logger.LogInformation("Retrieved secret {SerializeObject}",
+                JsonConvert.SerializeObject(response, Formatting.Indented));
+            _logger.LogCritical("Secret value for {SecretName} is {ResponseSecretString}", _secretName,
+                response.SecretString);
             var secretString = response.SecretString;
             if (string.IsNullOrEmpty(secretString))
             {
@@ -50,7 +56,8 @@ namespace NIHR.Infrastructure.Configuration
             }
             catch (JsonReaderException ex)
             {
-                throw new FormatException($"The secret value for {_secretName} is not in a recognized format. Expected JSON.", ex);
+                throw new FormatException(
+                    $"The secret value for {_secretName} is not in a recognized format. Expected JSON.", ex);
             }
         }
 
@@ -64,6 +71,7 @@ namespace NIHR.Infrastructure.Configuration
                         var childKey = JoinKey(prefix, child.Name.Replace("__", ":"));
                         ExtractValues(child.Value, childKey, data);
                     }
+
                     break;
                 case JTokenType.Array:
                     int index = 0;
@@ -72,6 +80,7 @@ namespace NIHR.Infrastructure.Configuration
                         ExtractValues(child, JoinKey(prefix, index.ToString()), data);
                         index++;
                     }
+
                     break;
                 default:
                     InsertIntoNestedDictionary(data, prefix, token.ToString());
@@ -89,8 +98,10 @@ namespace NIHR.Infrastructure.Configuration
                 {
                     currentData[keys[i]] = new Dictionary<string, object>();
                 }
+
                 currentData = (Dictionary<string, object>)currentData[keys[i]];
             }
+
             currentData[keys[^1]] = value;
         }
 
@@ -101,6 +112,7 @@ namespace NIHR.Infrastructure.Configuration
             {
                 FlattenDictionaryHelper(kvp.Key, kvp.Value, flat);
             }
+
             return flat;
         }
 
