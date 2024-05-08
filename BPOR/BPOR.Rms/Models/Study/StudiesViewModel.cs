@@ -1,4 +1,3 @@
-using BPOR.Domain.Entities;
 using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Models.Study;
