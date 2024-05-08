@@ -26,15 +26,18 @@ namespace NIHR.Infrastructure.Configuration
 
         public override async void Load()
         {
+            _logger.LogCritical("Loading secret {SecretName} in Load method", _secretName);
             await LoadAsync();
         }
 
         private async Task LoadAsync()
         {
+            _logger.LogCritical("Loading secret {SecretName} in LoadAsync method", _secretName);
             try
             {
+                _logger.LogCritical("Getting secret value for {SecretName} in try block of LoadAsync", _secretName);
                 var response = await _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName });
-                _logger.LogInformation("Retrieved secret {SerializeObject}",
+                _logger.LogCritical("Retrieved secret {SerializeObject}",
                     JsonConvert.SerializeObject(response, Formatting.Indented));
                 _logger.LogCritical("Secret value for {SecretName} is {ResponseSecretString}", _secretName,
                     response.SecretString);
@@ -48,7 +51,7 @@ namespace NIHR.Infrastructure.Configuration
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Failed to load secret {_secretName}", _secretName);
+                _logger.LogCritical(e, "Failed to load secret {SecretName}", _secretName);
                 throw;
             }
 
