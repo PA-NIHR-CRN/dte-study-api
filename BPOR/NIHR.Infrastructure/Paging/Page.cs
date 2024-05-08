@@ -7,9 +7,11 @@ namespace NIHR.Infrastructure.Paging
 {
     public class Page<T> : Page, IEnumerable<T>
     {
+        public static Page<T> Empty() => new Page<T>(Enumerable.Empty<T>(), 0, 0, 0);
+
         private IEnumerable<T> _items;
 
-        public Page(IEnumerable<T> source, int pageSize, int currentPage, long totalCount) : base(source, pageSize, currentPage, totalCount)   
+        public Page(IEnumerable<T> source, int pageSize, int currentPage, long totalCount) : base(source, pageSize, currentPage, totalCount)
         {
             _items = source;
         }
