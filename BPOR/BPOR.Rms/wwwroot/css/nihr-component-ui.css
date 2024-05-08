@@ -44,11 +44,20 @@
     padding-right: 1em;
 }
 
-.govuk-button:disabled {
-    background-color: #BFC1C3; /* Grey */
-    color: #FFFFFF; /* White */
-    cursor: not-allowed;
-    box-shadow: none;
+.govuk-button[disabled] {
+    opacity: .5;
+    pointer-events: none;
+    cursor: default;
+}
+
+.govuk-button[disabled]:hover {
+    background-color: #BFC1C3;
+    cursor: not-allowed
+}
+
+.govuk-button[disabled]:active {
+    top: 0;
+    box-shadow: 0 2px 0 #BFC1C3
 }
 
 /* Secondary button base style */
