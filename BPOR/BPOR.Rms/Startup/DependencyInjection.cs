@@ -1,5 +1,6 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
+using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Clients;
 using BPOR.Rms.Services;
 using Dte.Common.Authentication;
@@ -11,6 +12,7 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
+using Newtonsoft.Json;
 
 namespace BPOR.Rms.Startup;
 
@@ -62,13 +64,17 @@ public static class DependencyInjection
 
         // TODO: Client settings are not being validated.
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
+        var awsSettings = services.GetSectionAndValidate<AwsSettings>(configuration);
         
         // debug information
-        logger?.LogDebug("Client settings: {@ClientsSettings}", clientsSettings);
-        
-        if(clientsSettings?.Value?.LocationService?.BaseUrl is null)
+        logger?.LogCritical("AWS settings: {@AwsSettings}", awsSettings.Value);
+        logger?.LogCritical("Db settings: {@DbSettings}", dbSettings.Value);
+        logger?.LogCritical("Client settings: {@ClientsSettings}", clientsSettings.Value);
+
+        if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
-            throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings.Value.LocationService));
+            string clientSettingsJson = JsonConvert.SerializeObject(clientsSettings.Value, Formatting.Indented);
+            throw new ArgumentException($"LocationService configuration is required. Current settings: {clientSettingsJson}", nameof(clientsSettings));
         }
 
         services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
