@@ -31,18 +31,27 @@ namespace NIHR.Infrastructure.Configuration
 
         private async Task LoadAsync()
         {
-            var response = await _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName });
-            _logger.LogInformation("Retrieved secret {SerializeObject}",
-                JsonConvert.SerializeObject(response, Formatting.Indented));
-            _logger.LogCritical("Secret value for {SecretName} is {ResponseSecretString}", _secretName,
-                response.SecretString);
-            var secretString = response.SecretString;
-            if (string.IsNullOrEmpty(secretString))
+            try
             {
-                throw new InvalidOperationException($"Secret {_secretName} is empty or not found.");
+                var response = await _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName });
+                _logger.LogInformation("Retrieved secret {SerializeObject}",
+                    JsonConvert.SerializeObject(response, Formatting.Indented));
+                _logger.LogCritical("Secret value for {SecretName} is {ResponseSecretString}", _secretName,
+                    response.SecretString);
+                var secretString = response.SecretString;
+                if (string.IsNullOrEmpty(secretString))
+                {
+                    throw new InvalidOperationException($"Secret {_secretName} is empty or not found.");
+                }
+
+                ParseSecret(secretString);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to load secret {_secretName}", _secretName);
+                throw;
             }
 
-            ParseSecret(secretString);
         }
 
         private void ParseSecret(string secretString)
