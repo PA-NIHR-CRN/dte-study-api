@@ -1,6 +1,5 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
-using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Clients;
 using BPOR.Rms.Services;
 using Dte.Common.Authentication;
@@ -39,13 +38,16 @@ public static class DependencyInjection
 
         services.AddDistributedMemoryCache();
         services.AddPaging();
-        
-        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
-            ?.CreateLogger("BPOR.Rms");
 
         // TODO this could be reusable
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
-        logger?.LogDebug("Database settings: {@DbSettings}", dbSettings);
+        
+        // check for dbSettings.Value is null
+        if (dbSettings.Value is null)
+        {
+            throw new ArgumentException("DbSettings configuration is required.", nameof(dbSettings));
+        }
+        
         var connectionString = dbSettings.Value.BuildConnectionString();
 
         services.AddDbContext<ParticipantDbContext>(options =>
@@ -55,16 +57,14 @@ public static class DependencyInjection
                 builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             }));
 
-
+        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
+            ?.CreateLogger("BPOR.Rms");
 
         // TODO: Client settings are not being validated.
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
         
         // debug information
         logger?.LogDebug("Client settings: {@ClientsSettings}", clientsSettings);
-        
-        var awsSettings = services.GetSectionAndValidate<AwsSettings>(configuration);
-        logger?.LogDebug("AWS settings: {@AwsSettings}", awsSettings);
         
         if(clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
