@@ -30,13 +30,13 @@ namespace NIHR.Infrastructure.Configuration
             await LoadAsync();
         }
 
-        private Task LoadAsync()
+        private async Task LoadAsync()
         {
             _logger.LogCritical("Loading secret {SecretName} in LoadAsync method", _secretName);
             try
             {
                 _logger.LogCritical("Getting secret value for {SecretName} in try block of LoadAsync", _secretName);
-                var response = _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName }).Result;
+                var response = Task.Run(async () => await _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName })).GetAwaiter().GetResult();
                 _logger.LogCritical("Retrieved secret {SerializeObject}",
                     JsonConvert.SerializeObject(response, Formatting.Indented));
                 _logger.LogCritical("Secret value for {SecretName} is {ResponseSecretString}", _secretName,
