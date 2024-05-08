@@ -74,15 +74,11 @@ namespace NIHR.Infrastructure.Configuration
             }
 
             var secretsManagerSettings = services.GetSectionAndValidate<AwsSecretsManagerSettings>(configuration).Value;
-            var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
-                ?.CreateLogger("NIHR.Infrastructure.Configuration");
-            
-            logger?.LogCritical("Secrets Manager settings: {@AwsSecretsManagerSettings}", JsonConvert.SerializeObject(secretsManagerSettings, Formatting.Indented));
             if (secretsManagerSettings.Enabled)
             {
                 configuration.AddAwsSecretsManager(secretsManagerSettings.SecretName,
                     () => new AmazonSecretsManagerClient(
-                        RegionEndpoint.GetBySystemName(secretsManagerSettings.Region)), services);
+                        RegionEndpoint.GetBySystemName(secretsManagerSettings.Region)));
             }
 
             return configuration;
@@ -100,13 +96,9 @@ namespace NIHR.Infrastructure.Configuration
         }
 
         private static void AddAwsSecretsManager(this IConfigurationBuilder configurationBuilder, string secretName,
-            Func<IAmazonSecretsManager> secretsManagerClientFactory, IServiceCollection services)
+            Func<IAmazonSecretsManager> secretsManagerClientFactory)
         {
-            var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
-                ?.CreateLogger("NIHR.Infrastructure.Configuration");
-            
-            logger?.LogCritical("Adding AWS Secrets Manager configuration source for secret: {SecretName}", secretName);
-            var configurationSource = new AwsSecretsManagerConfigurationSource(secretName, secretsManagerClientFactory, logger);
+            var configurationSource = new AwsSecretsManagerConfigurationSource(secretName, secretsManagerClientFactory);
             configurationBuilder.Add(configurationSource);
         }
 

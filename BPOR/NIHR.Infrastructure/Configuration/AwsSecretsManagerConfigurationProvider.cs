@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Amazon.SecretsManager;
 using Amazon.SecretsManager.Model;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -15,46 +14,33 @@ namespace NIHR.Infrastructure.Configuration
     {
         private readonly IAmazonSecretsManager _client;
         private readonly string _secretName;
-        private readonly ILogger _logger;
 
-        public AwsSecretsManagerConfigurationProvider(IAmazonSecretsManager client, string secretName, ILogger logger)
+        public AwsSecretsManagerConfigurationProvider(IAmazonSecretsManager client, string secretName)
         {
             _client = client;
             _secretName = secretName;
-            _logger = logger;
         }
 
         public override async void Load()
         {
-            _logger.LogCritical("Loading secret {SecretName} in Load method", _secretName);
             await LoadAsync();
         }
 
         private async Task LoadAsync()
         {
-            _logger.LogCritical("Loading secret {SecretName} in LoadAsync method", _secretName);
-            try
-            {
-                _logger.LogCritical("Getting secret value for {SecretName} in try block of LoadAsync", _secretName);
-                var response = Task.Run(async () => await _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName })).GetAwaiter().GetResult();
-                _logger.LogCritical("Retrieved secret {SerializeObject}",
-                    JsonConvert.SerializeObject(response, Formatting.Indented));
-                _logger.LogCritical("Secret value for {SecretName} is {ResponseSecretString}", _secretName,
-                    response.SecretString);
-                var secretString = response.SecretString;
-                if (string.IsNullOrEmpty(secretString))
-                {
-                    throw new InvalidOperationException($"Secret {_secretName} is empty or not found.");
-                }
+            // TODO had to make this sync to work with ecs, ask CON if there is a better way
+            var response = Task
+                .Run(async () =>
+                    await _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName }))
+                .GetAwaiter().GetResult();
 
-                ParseSecret(secretString);
-            }
-            catch (Exception e)
+            var secretString = response.SecretString;
+            if (string.IsNullOrEmpty(secretString))
             {
-                _logger.LogCritical(e, "Failed to load secret {SecretName}", _secretName);
-                throw;
+                throw new InvalidOperationException($"Secret {_secretName} is empty or not found.");
             }
 
+            ParseSecret(secretString);
         }
 
         private void ParseSecret(string secretString)
