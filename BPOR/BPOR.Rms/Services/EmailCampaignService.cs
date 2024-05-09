@@ -24,7 +24,13 @@ public class EmailCampaignService(
             await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
             // Retrieve filter criteria and apply it
-            var dbFilter = await context.FilterCriterias.FindAsync(campaign.FilterCriteriaId, cancellationToken);
+            var dbFilter = context.FilterCriterias
+                                            .Include(fc => fc.FilterGender)
+                                            .Include(fc => fc.FilterAreaOfInterest)
+                                            .Include(fc => fc.FilterEthnicGroup)
+                                            .Include(fc => fc.FilterPostcode)
+                                            .Include(fc => fc.FilterSexSameAsRegisteredAtBirth)
+                                            .Where(fc => fc.Id == campaign.FilterCriteriaId).FirstOrDefault();
             if (dbFilter != null)
             {
                 var filter = FilterMapper.MapToFilterModel(dbFilter);
