@@ -16,6 +16,6 @@ app.ConfigureSwagger(builder.Environment);
 
 app.UseApplicationMiddleware();
 
-// app.UseMiddleware<IdgAuthenticationMiddleware>();
+app.UseMiddleware<IdgAuthenticationMiddleware>();
 
 app.Run();
