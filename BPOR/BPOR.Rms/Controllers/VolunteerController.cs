@@ -35,9 +35,43 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         if (!String.IsNullOrEmpty(model.VolunteerReferenceNumbers))
         {
             // get each id from the string splitting by new line
-            var volunteerIds =
+            var volunteerRefs =
                 model.VolunteerReferenceNumbers.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
 
+            var totalVolunteers = volunteerRefs.Length;
+            var totalEnrolled = 0;
+            var totalPreviouslyEnrolled = 0;
+
+            if (totalVolunteers > 0)
+            {
+                foreach (var reference in volunteerRefs)
+                {
+                    var studyParticipant = context.StudyParticipantEnrollment.Where(p => p.Reference == reference).FirstOrDefault();
+
+                    if (studyParticipant != null)
+                    {
+                        if (studyParticipant.EnrolledAt == null)
+                        {
+                            studyParticipant.EnrolledAt = DateTime.Now;
+                            await context.SaveChangesAsync();
+                            totalEnrolled++;
+                        }
+                        else
+                        {
+                            totalPreviouslyEnrolled++;
+                        }
+                    }
+
+                    TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
+                    {
+                        IsSuccess = true,
+                        Heading = "Success",
+                        Body = $" {totalEnrolled} of {totalVolunteers} volunteer(s) recorded as recruited.",
+                        LinkText = "Return to the study details page",
+                        LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
+                    });
+                }
+            }
         }
 
         return RedirectToAction("UpdateRecruited", model);
