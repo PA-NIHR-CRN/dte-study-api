@@ -15,11 +15,11 @@ public class IdgAuthenticationMiddleware
 
     public async Task InvokeAsync(HttpContext context, ParticipantDbContext dbContext, ICurrentUserIdAccessor<int> currentUserIdAccessor, ICurrentUserProvider<User> userProvider)
     {
-        ArgumentNullException.ThrowIfNull(context, nameof(context));
+        ArgumentNullException.ThrowIfNull(context);
         
-        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentNullException.ThrowIfNull(dbContext);
         
-        ArgumentNullException.ThrowIfNull(currentUserIdAccessor, nameof(currentUserIdAccessor));
+        ArgumentNullException.ThrowIfNull(currentUserIdAccessor);
 
         if (context.Request.Query.ContainsKey("sign-out"))
         {
@@ -33,7 +33,7 @@ public class IdgAuthenticationMiddleware
         var token = context.RequestAborted;
 
         var userId = context.User.GetId();
-        var isAuthenticated = context?.User?.Identity?.IsAuthenticated ?? false;
+        var isAuthenticated = context.User.Identity?.IsAuthenticated ?? false;
 
         if (isAuthenticated && !string.IsNullOrWhiteSpace(userId))
         {
