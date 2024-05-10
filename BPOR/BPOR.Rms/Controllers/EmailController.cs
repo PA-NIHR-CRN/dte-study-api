@@ -43,6 +43,7 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
     public async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         ModelState.Remove("PreviewEmails");
+        model.EmailTemplates = FetchEmailTemplates();
 
         if (model.TotalVolunteers > model.MaxNumbers)
         {

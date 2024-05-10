@@ -11,9 +11,12 @@
         if (Model.StudyId != null)
         {
             breadcrumbs.Add(new BreadcrumbItem($"Study", $"/Study/Details/{Model.StudyId}"));
+            breadcrumbs.Add(new BreadcrumbItem("Find volunteers", "/Filter?studyId=" + Model.StudyId));
         }
-
-        breadcrumbs.Add(new BreadcrumbItem("Find volunteers", "/Filter"));
+        else
+        {
+            breadcrumbs.Add(new BreadcrumbItem("Find volunteers", "/Filter"));
+        }
         breadcrumbs.Add(new BreadcrumbItem("Set up email campaign", "/Email/SetupCampaign"));
     }
 

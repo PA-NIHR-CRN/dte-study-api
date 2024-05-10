@@ -17,9 +17,15 @@ public class VolunteerController(ParticipantDbContext context) : Controller
             .FirstOrDefaultAsync();
     }
 
-    public IActionResult UpdateRecruited(UpdateRecruitedViewModel model)
+    public async Task<IActionResult> UpdateRecruited(UpdateRecruitedViewModel model)
     {
         ModelState.Remove("VolunteerReferenceNumbers");
+
+        if (TempData["Notification"] != null)
+        {
+            model.Notification =
+                JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
+        }
 
         return View(model);
     }
@@ -27,6 +33,8 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     [HttpPost]
     public async Task<IActionResult> SubmitVolunteerNumbers(UpdateRecruitedViewModel model)
     {
+        ModelState.Remove("Notification");
+
         if (!ModelState.IsValid)
         {
             return View("UpdateRecruited", model);
@@ -61,7 +69,10 @@ public class VolunteerController(ParticipantDbContext context) : Controller
                             totalPreviouslyEnrolled++;
                         }
                     }
+                }
 
+                if (totalEnrolled > 0)
+                {
                     TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
                     {
                         IsSuccess = true,
@@ -125,7 +136,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
             IsSuccess = true,
             Heading = "Success",
             Body = $" {model.RecruitmentTotal} volunteer(s) recorded as recruited.",
-            LinkText = "Return to study",
+            LinkText = "Return to study details page",
             LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
         });
 

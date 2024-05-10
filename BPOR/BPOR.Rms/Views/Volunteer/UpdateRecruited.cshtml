@@ -16,6 +16,8 @@
         </h4>
     </div>
 
+    @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
+
     <form asp-action="SubmitVolunteerNumbers" asp-controller="Volunteer" method="post">
         <input asp-for="StudyId" type="hidden" />
         <input asp-for="StudyName" type="hidden" />

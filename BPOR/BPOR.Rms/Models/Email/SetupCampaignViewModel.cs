@@ -19,7 +19,6 @@ public class SetupCampaignViewModel
     public string? StudyName { get; set; }
 
     [DisplayName("Select email template")]
-    [Required(ErrorMessage = "Please select a email template.")]
     public string? SelectedTemplateId { get; set; }
     public string? SelectedTemplateName { get; set; }
 
