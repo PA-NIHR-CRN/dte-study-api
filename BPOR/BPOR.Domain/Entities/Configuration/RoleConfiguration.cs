@@ -1,15 +1,15 @@
 using BPOR.Domain.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Collections.Immutable;
 
 namespace BPOR.Domain.Entities.Configuration;
 
 public class RoleConfiguration : IEntityTypeConfiguration<Role>
 {
-    public void Configure(EntityTypeBuilder<Role> builder)
+    public static ImmutableList<Role> GetRoles()
     {
-        // Seeding the Role table
-        builder.HasData(
+        var roleBuilder = new List<Role> {
             new Role
             {
                 Id = 1,
@@ -24,6 +24,16 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
                 Description = "Researcher",
                 IsDeleted = false
             }
+        };
+
+        return roleBuilder.ToImmutableList();
+    }
+
+    public void Configure(EntityTypeBuilder<Role> builder)
+    {
+        // Seeding the Role table
+        builder.HasData(
+            GetRoles()
         );
     }
 }
