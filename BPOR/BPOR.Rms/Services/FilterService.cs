@@ -141,7 +141,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
 
     private void FilterByAreasOfResearch(List<string>? selectedHealthConditions)
     {
-        if (selectedHealthConditions != null)
+        if (selectedHealthConditions != null && selectedHealthConditions.Count > 0)
         {
             List<int> conditionIds = selectedHealthConditions.Select(s => int.Parse(s)).ToList();
 

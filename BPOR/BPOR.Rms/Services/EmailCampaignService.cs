@@ -58,7 +58,7 @@ public class EmailCampaignService(
                         var volunteersToRandomise = volunteers.Where(v => !participantsNotContacted.Contains(v.Id));
                         var randomisedVolunteers = randomiser.GetRandomisedCollection(volunteersToRandomise, campaign.TargetGroupSize.Value - prioritisedVolunteers.Count());
                         var selectedVolunteers = randomisedVolunteers.Concat(prioritisedVolunteers);
-                        emailAddresses = selectedVolunteers.Select(v => v.Email).ToList();
+                        emailAddresses = selectedVolunteers.Where(v => !String.IsNullOrEmpty(v.Email)).Select(v => v.Email).ToList();
                         finalVolunteers = selectedVolunteers.ToList();
                     }
                     // If total participants not contacted exceeds target group size, randomise particpants not contacted based on target group size
@@ -66,15 +66,20 @@ public class EmailCampaignService(
                     {
                         var prioritisedVolunteers = volunteers.Where(v => participantsNotContacted.Contains(v.Id));
                         var selectedVolunteers = randomiser.GetRandomisedCollection(prioritisedVolunteers, campaign.TargetGroupSize.Value);
-                        emailAddresses = selectedVolunteers.Select(v => v.Email).ToList();
+                        emailAddresses = selectedVolunteers.Where(v => !String.IsNullOrEmpty(v.Email)).Select(v => v.Email).ToList();
                         finalVolunteers = selectedVolunteers.ToList();
                     }
                     // If total participants not contacted matches target group size, send email to those not contacted and do not randomise
                     else if (participantsNotContacted.Count() == campaign.TargetGroupSize.Value)
                     {
                         var selectedVolunteers = volunteers.Where(v => participantsNotContacted.Contains(v.Id));
-                        emailAddresses = selectedVolunteers.Select(v => v.Email).ToList();
+                        emailAddresses = selectedVolunteers.Where(v => !String.IsNullOrEmpty(v.Email)).Select(v => v.Email).ToList();
                         finalVolunteers = selectedVolunteers.ToList();
+                    }
+                    else
+                    {
+                        emailAddresses = volunteers.Where(v => !String.IsNullOrEmpty(v.Email)).Select(v => v.Email).ToList();
+                        finalVolunteers = volunteers.ToList();
                     }
 
                     await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest

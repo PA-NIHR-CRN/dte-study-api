@@ -14,7 +14,6 @@ public class FilterMapper
 
             IncludeContacted = criteria.IncludeContacted ?? false,
             IncludeRegisteredInterest = criteria.IncludeRegisteredInterest ?? false,
-            IncludeCompletedRegistration = criteria.IncludeCompletedRegistration ?? false,
             IncludeRecruited = criteria.IncludeRecruited ?? false,
 
             FullPostcode = criteria.FullPostcode,
@@ -57,6 +56,42 @@ public class FilterMapper
 
 
         };
+
+        if (criteria.IncludeCompletedRegistration == true)
+        {
+            viewModel.SelectedVolunteersCompletedRegistration = "1";
+        }
+        else if (criteria.IncludeCompletedRegistration == false)
+        {
+            viewModel.SelectedVolunteersCompletedRegistration = "2";
+        }
+
+        if (criteria.IncludeContacted == true)
+        {
+            viewModel.SelectedVolunteersContacted = "1";
+        }
+        else if (criteria.IncludeContacted == false)
+        {
+            viewModel.SelectedVolunteersContacted = "2";
+        }
+
+        if (criteria.IncludeRecruited == true)
+        {
+            viewModel.SelectedVolunteersRecruited = "1";
+        }
+        else if (criteria.IncludeRecruited == false)
+        {
+            viewModel.SelectedVolunteersRecruited = "2";
+        }
+
+        if (criteria.IncludeRegisteredInterest == true)
+        {
+            viewModel.SelectedVolunteersRegisteredInterest = "1";
+        }
+        else if (criteria.IncludeRegisteredInterest == false)
+        {
+            viewModel.SelectedVolunteersRegisteredInterest = "2";
+        }
 
         return viewModel;
     }
