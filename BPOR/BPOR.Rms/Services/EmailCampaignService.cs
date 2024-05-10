@@ -117,8 +117,7 @@ public class EmailCampaignService(
                             {
                                 StudyId = studyId.Value,
                                 ParticipantId = volunteer.Id,
-                                Reference = "1234" // TODO - generate ref number using algorithm
-
+                                Reference = GenerateVolunteerReference()
                             });
                         }
                     }
@@ -133,5 +132,30 @@ public class EmailCampaignService(
             Console.WriteLine(e);
             throw;
         }
+    }
+
+    private string GenerateVolunteerReference()
+    {
+        // Generate random 15 digit number
+        Random rand = new Random();
+        string randomNumber = "";
+
+        for (int i = 0; i < 14; i++)
+        {
+            randomNumber += rand.Next(0, 10);
+        }
+
+        randomNumber = rand.Next(1, 10) + randomNumber;
+
+        string volunteerReference = randomNumber;
+
+        var existingReference = context.StudyParticipantEnrollment.Any(e => e.Reference == volunteerReference);
+
+        if (existingReference)
+        {
+            GenerateVolunteerReference();
+        }
+
+        return volunteerReference;
     }
 }

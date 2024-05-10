@@ -136,7 +136,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
             IsSuccess = true,
             Heading = "Success",
             Body = $" {model.RecruitmentTotal} volunteer(s) recorded as recruited.",
-            LinkText = "Return to study",
+            LinkText = "Return to study details page",
             LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
         });
 
