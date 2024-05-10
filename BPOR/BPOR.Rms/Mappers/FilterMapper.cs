@@ -10,7 +10,6 @@ public class FilterMapper
         var viewModel = new VolunteerFilterViewModel
         {
             StudyId = criteria.StudyId ?? 0,
-            SelectedStudyId = criteria.StudyId?.ToString(),
 
             IncludeContacted = criteria.IncludeContacted ?? false,
             IncludeRegisteredInterest = criteria.IncludeRegisteredInterest ?? false,

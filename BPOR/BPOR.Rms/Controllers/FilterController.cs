@@ -8,14 +8,13 @@ using BPOR.Rms.Models.Email;
 using Newtonsoft.Json;
 using BPOR.Rms.Models;
 using BPOR.Rms.Services;
-using BPOR.Domain.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 
 namespace BPOR.Rms.Controllers;
 
 public class FilterController(ParticipantDbContext context, IFilterService filterService) : Controller
 {
-    public IActionResult Index(VolunteerFilterViewModel model, string? studyId)
+    public IActionResult Index(VolunteerFilterViewModel model, int? studyId)
     {
         SetSelectedStudy(model, studyId);
         SetStudyExclusionFilters(model);
@@ -27,19 +26,19 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
         }
 
-        model.ShowStudyFilters = String.IsNullOrEmpty(studyId) ? false : true;
+        model.ShowStudyFilters = model.StudyId is not null;
 
         return View(model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> HandleFormsAsync(VolunteerFilterViewModel model, string action, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Index(VolunteerFilterViewModel model, int? studyId, string action, CancellationToken cancellationToken = default)
     {
         return action switch
         {
             "FilterVolunteers" => await FilterVolunteersAsync(model, cancellationToken),
             "ClearFilters" => ClearFilters(model),
-            _ => RedirectToAction("Index")
+            _ => RedirectToAction("Index", new { studyId })
         };
     }
 
@@ -52,7 +51,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             Body = $"All previously applied filters have been removed.",
         });
 
-        return RedirectToAction("Index", "Filter", new { studyId = model.SelectedStudyId });
+        return RedirectToAction("Index", "Filter", new { studyId = model.StudyId });
     }
 
     private void SetHealthConditionSelectList(VolunteerFilterViewModel model)
@@ -153,15 +152,15 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         };
     }
 
-    private void SetSelectedStudy(VolunteerFilterViewModel model, string studyId)
+    private void SetSelectedStudy(VolunteerFilterViewModel model, int? studyId)
     {
-        if (!String.IsNullOrEmpty(studyId))
+        if (studyId is not null)
         {
-            Study selectedStudy = context.Studies.Where(x => x.Id == Convert.ToInt32(studyId)).FirstOrDefault();
+            Study selectedStudy = context.Studies.Where(x => x.Id == studyId).FirstOrDefault();
 
+            model.StudyId = selectedStudy?.Id;
             model.SelectedStudy = selectedStudy?.StudyName ?? string.Empty;
-            model.SelectedStudyId = selectedStudy?.Id.ToString();
-            model.SelectedStudyCPMSId = selectedStudy?.CpmsId.ToString();
+            model.SelectedStudyCPMSId = selectedStudy?.CpmsId;
         }
     }
 
@@ -176,7 +175,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         bool? volunteersRecruited = null;
         bool? volunteersCompletedRegistration = null;
 
-        if (model.SelectedVolunteersContacted == "1") { volunteersContacted = true; } 
+        if (model.SelectedVolunteersContacted == "1") { volunteersContacted = true; }
         else if (model.SelectedVolunteersContacted == "2") { volunteersContacted = false; }
 
         if (model.SelectedVolunteersRegisteredInterest == "1") { volunteersRegisteredInterest = true; }
@@ -229,7 +228,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
     {
         if (selectedHealthConditions?.Count > 0)
         {
-            foreach(var item in selectedHealthConditions)
+            foreach (var item in selectedHealthConditions)
             {
                 var areaOfInterest = new FilterAreaOfInterest
                 {
@@ -430,7 +429,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
         if (!string.IsNullOrEmpty(model.SelectedStudy))
         {
-            SetSelectedStudy(model, model.SelectedStudyId);
+            SetSelectedStudy(model, model.StudyId);
             model.ShowStudyFilters = true;
         }
 
@@ -519,11 +518,11 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 registrationFromDateYear != null)
             {
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationFromDateDay", Unit = "day", Value = registrationFromDateDay });
+                { Key = "RegistrationFromDateDay", Unit = "day", Value = registrationFromDateDay });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationFromDateMonth", Unit = "month", Value = registrationFromDateMonth });
+                { Key = "RegistrationFromDateMonth", Unit = "month", Value = registrationFromDateMonth });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationFromDateYear", Unit = "year", Value = registrationFromDateYear });
+                { Key = "RegistrationFromDateYear", Unit = "year", Value = registrationFromDateYear });
 
                 foreach (var val in fromDateValues)
                 {
@@ -538,11 +537,11 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             if (registrationToDateDay != null || registrationToDateMonth != null || registrationToDateYear != null)
             {
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationToDateDay", Unit = "day", Value = registrationToDateDay });
+                { Key = "RegistrationToDateDay", Unit = "day", Value = registrationToDateDay });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationToDateMonth", Unit = "month", Value = registrationToDateMonth });
+                { Key = "RegistrationToDateMonth", Unit = "month", Value = registrationToDateMonth });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationToDateYear", Unit = "year", Value = registrationToDateYear });
+                { Key = "RegistrationToDateYear", Unit = "year", Value = registrationToDateYear });
 
                 foreach (var val in fromDateValues)
                 {

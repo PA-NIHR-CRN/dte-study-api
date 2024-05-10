@@ -28,7 +28,7 @@
  
 </div>
 
-@using (Html.BeginForm("HandleForms", "Filter", FormMethod.Post))
+@using (Html.BeginForm())
 {
     <input type="hidden" asp-for="StudyId" value="@Model.StudyId" />
     <div class="govuk-grid-column-two-thirds">
