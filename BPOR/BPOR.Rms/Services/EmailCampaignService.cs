@@ -35,52 +35,17 @@ public class EmailCampaignService(
             {
                 var filter = FilterMapper.MapToFilterModel(dbFilter);
                 var volunteers = await filterService.FilterVolunteersAsync(filter, cancellationToken);
-                var participantIds = volunteers.Select(v => v.Id).ToList();
+
                 List<Participant> finalVolunteers = new List<Participant>();
 
-                if (campaign.TargetGroupSize != null && participantIds.Count() > 0)
+                if (campaign.TargetGroupSize != null && volunteers.Count() > 0)
                 {
                     List<string?> emailAddresses = new List<string?>();
 
-                    var participantsNotContacted = participantIds.Where(participantId =>
-                                                        !context.EmailCampaignParticipants.Any(ecp =>
-                                                            ecp.ParticipantId == participantId &&
-                                                            context.EmailCampaigns.Any(ec =>
-                                                                ec.Id == ecp.EmailCampaignId &&
-                                                                context.FilterCriterias.Any(fc =>
-                                                                    fc.Id == ec.FilterCriteriaId &&
-                                                                    fc.StudyId != null))));
-
-                    // Priortise those who have not been contacted, randomise the remaining volunteers
-                    if (participantsNotContacted.Count() < campaign.TargetGroupSize.Value)
-                    {
-                        var prioritisedVolunteers = volunteers.Where(v => participantsNotContacted.Contains(v.Id));
-                        var volunteersToRandomise = volunteers.Where(v => !participantsNotContacted.Contains(v.Id));
-                        var randomisedVolunteers = randomiser.GetRandomisedCollection(volunteersToRandomise, campaign.TargetGroupSize.Value - prioritisedVolunteers.Count());
-                        var selectedVolunteers = randomisedVolunteers.Concat(prioritisedVolunteers);
-                        emailAddresses = selectedVolunteers.Where(v => !String.IsNullOrEmpty(v.Email)).Select(v => v.Email).ToList();
-                        finalVolunteers = selectedVolunteers.ToList();
-                    }
-                    // If total participants not contacted exceeds target group size, randomise particpants not contacted based on target group size
-                    else if (participantsNotContacted.Count() > campaign.TargetGroupSize.Value)
-                    {
-                        var prioritisedVolunteers = volunteers.Where(v => participantsNotContacted.Contains(v.Id));
-                        var selectedVolunteers = randomiser.GetRandomisedCollection(prioritisedVolunteers, campaign.TargetGroupSize.Value);
-                        emailAddresses = selectedVolunteers.Where(v => !String.IsNullOrEmpty(v.Email)).Select(v => v.Email).ToList();
-                        finalVolunteers = selectedVolunteers.ToList();
-                    }
-                    // If total participants not contacted matches target group size, send email to those not contacted and do not randomise
-                    else if (participantsNotContacted.Count() == campaign.TargetGroupSize.Value)
-                    {
-                        var selectedVolunteers = volunteers.Where(v => participantsNotContacted.Contains(v.Id));
-                        emailAddresses = selectedVolunteers.Where(v => !String.IsNullOrEmpty(v.Email)).Select(v => v.Email).ToList();
-                        finalVolunteers = selectedVolunteers.ToList();
-                    }
-                    else
-                    {
-                        emailAddresses = volunteers.Where(v => !String.IsNullOrEmpty(v.Email)).Select(v => v.Email).ToList();
-                        finalVolunteers = volunteers.ToList();
-                    }
+                    var volunteersToRandomise = volunteers.Where(v => !String.IsNullOrEmpty(v.Email));
+                    var randomisedVolunteers = randomiser.GetRandomisedCollection(volunteersToRandomise, campaign.TargetGroupSize.Value);
+                    emailAddresses = randomisedVolunteers.Select(v => v.Email).ToList();
+                    finalVolunteers = randomisedVolunteers.ToList();
 
                     await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
                     {
@@ -91,7 +56,7 @@ public class EmailCampaignService(
                     var studyId = context.FilterCriterias.Where(fc => fc.Id == campaign.FilterCriteriaId).Select(fc => fc.StudyId).FirstOrDefault();
                     var isStudyRecruitingIdentifiable = context.Studies.Where(s => s.Id == studyId).Select(s => s.IsRecruitingIdentifiableParticipants).FirstOrDefault();
 
-                    if (!isStudyRecruitingIdentifiable)
+                    if (!isStudyRecruitingIdentifiable || studyId == null)
                     {
                         foreach (var volunteer in finalVolunteers)
                         {
