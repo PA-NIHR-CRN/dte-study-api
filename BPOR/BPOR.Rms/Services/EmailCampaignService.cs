@@ -38,7 +38,7 @@ public class EmailCampaignService(
                 var participantIds = volunteers.Select(v => v.Id).ToList();
                 List<Participant> finalVolunteers = new List<Participant>();
 
-                if (campaign.TargetGroupSize != null)
+                if (campaign.TargetGroupSize != null && participantIds.Count() > 0)
                 {
                     List<string?> emailAddresses = new List<string?>();
 
