@@ -90,35 +90,41 @@ public class EmailCampaignService(
                     {
                         foreach (var volunteer in finalVolunteers)
                         {
-                            context.EmailCampaignParticipants.Add(new Domain.Entities.EmailCampaignParticipant
+                            if (!String.IsNullOrEmpty(volunteer.Email))
                             {
-                                EmailCampaignId = campaign.Id,
-                                ParticipantId = volunteer.Id,
-                                DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending),
-                                SentAt = DateTime.UtcNow,
-                                ContactEmail = volunteer.Email,
-                            });
+                                context.EmailCampaignParticipants.Add(new Domain.Entities.EmailCampaignParticipant
+                                {
+                                    EmailCampaignId = campaign.Id,
+                                    ParticipantId = volunteer.Id,
+                                    DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending),
+                                    SentAt = DateTime.UtcNow,
+                                    ContactEmail = volunteer.Email,
+                                });
+                            }
                         }
                     }
                     else if (isStudyRecruitingIdentifiable && studyId != null)
                     {
                         foreach (var volunteer in finalVolunteers)
                         {
-                            context.EmailCampaignParticipants.Add(new Domain.Entities.EmailCampaignParticipant
+                            if (!String.IsNullOrEmpty(volunteer.Email))
                             {
-                                EmailCampaignId = campaign.Id,
-                                ParticipantId = volunteer.Id,
-                                DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending),
-                                SentAt = DateTime.UtcNow,
-                                ContactEmail = volunteer.Email,
-                            });
+                                context.EmailCampaignParticipants.Add(new Domain.Entities.EmailCampaignParticipant
+                                {
+                                    EmailCampaignId = campaign.Id,
+                                    ParticipantId = volunteer.Id,
+                                    DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending),
+                                    SentAt = DateTime.UtcNow,
+                                    ContactEmail = volunteer.Email,
+                                });
 
-                            context.StudyParticipantEnrollment.Add(new StudyParticipantEnrollment
-                            {
-                                StudyId = studyId.Value,
-                                ParticipantId = volunteer.Id,
-                                Reference = GenerateVolunteerReference()
-                            });
+                                context.StudyParticipantEnrollment.Add(new StudyParticipantEnrollment
+                                {
+                                    StudyId = studyId.Value,
+                                    ParticipantId = volunteer.Id,
+                                    Reference = GenerateVolunteerReference()
+                                });
+                            }
                         }
                     }
                 }
