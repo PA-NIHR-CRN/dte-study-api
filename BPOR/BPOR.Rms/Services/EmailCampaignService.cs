@@ -3,6 +3,7 @@ using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Constants;
 using BPOR.Rms.Mappers;
 using BPOR.Rms.Models.Study;
+using LuhnNet;
 using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Models;
@@ -124,6 +125,10 @@ public class EmailCampaignService(
         randomNumber = rand.Next(1, 10) + randomNumber;
 
         string volunteerReference = randomNumber;
+
+        var checkDigit = Luhn.CalculateCheckDigit(volunteerReference);
+
+        volunteerReference = volunteerReference + checkDigit.ToString();
 
         var existingReference = context.StudyParticipantEnrollment.Any(e => e.Reference == volunteerReference);
 
