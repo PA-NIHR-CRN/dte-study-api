@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace BPOR.Rms.Controllers;
 
-public class EmailController(IEmailCampaignService emailCampaignService) : Controller
+public class EmailController(IEmailCampaignService emailCampaignService, ParticipantDbContext context) : Controller
 {
     public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
@@ -47,12 +47,12 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
 
         if (model.TotalVolunteers > model.MaxNumbers)
         {
-            ModelState.AddModelError("TotalVolunteers", "Total Volunteers must be less than or equal to Max Numbers.");
+            ModelState.AddModelError("TotalVolunteers", "The number of volunteers to be contacted must be the same as, or less than, the 'total number of volunteer accounts matching the filter options'.");
         }
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
         {
-            ModelState.AddModelError("SelectedTemplate", "Please select an email template.");
+            ModelState.AddModelError("SelectedTemplate", "Select an email template.");
         }
 
         if (!ModelState.IsValid)
@@ -76,6 +76,11 @@ public class EmailController(IEmailCampaignService emailCampaignService) : Contr
 
     public Task<IActionResult> EmailSuccess(EmailSuccessViewModel model)
     {
+        if (model.StudyId > 0)
+        {
+            model.StudyName = context.Studies.Where(s => s.Id == model.StudyId).Select(s => s.StudyName).FirstOrDefault();
+        }
+
         return Task.FromResult<IActionResult>(View(model));
     }
 
