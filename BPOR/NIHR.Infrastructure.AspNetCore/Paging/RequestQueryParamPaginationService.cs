@@ -18,7 +18,7 @@ namespace NIHR.Infrastructure.Paging
 
         public int PageSize => int.TryParse(_httpContextAccessor?.HttpContext?.Request.Query["pageSize"], out var pageSize) ? pageSize : _defaultPageSize;
 
-        public Uri GetPageUri(int pageNumber)
+        public Uri GetPageUri(int pageNumber, string? anchorId = null)
         {
             var request = _httpContextAccessor.HttpContext.Request;
 
@@ -32,6 +32,11 @@ namespace NIHR.Infrastructure.Paging
             var newQueryString = QueryString.Create(query);
 
             var url = $"{request.PathBase}{request.Path}{newQueryString}";
+
+            if (!string.IsNullOrWhiteSpace(anchorId))
+            {
+                url = $"{url}#{anchorId}";
+            }
 
             return new Uri(url, UriKind.Relative);
         }

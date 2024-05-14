@@ -5,6 +5,6 @@
         int Page { get; }
         int PageSize { get; }
 
-        Uri GetPageUri(int pageNumber);
+        Uri GetPageUri(int pageNumber, string? anchorId = null);
     }
 }

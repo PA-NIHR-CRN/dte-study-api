@@ -62,7 +62,7 @@
                 }
             </tbody>
         </table>
-        @await Html.PartialAsync("_Pagination", Model)
+        @await Html.PartialAsync("_Pagination", Model, new ViewDataDictionary(ViewData) { { "AnchorId", "volunteer-results-list" } })
     }
     else
     {
