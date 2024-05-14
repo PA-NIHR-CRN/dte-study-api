@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using Microsoft.AspNetCore.Mvc;
@@ -8,15 +7,24 @@ using BPOR.Rms.Models.Email;
 using Newtonsoft.Json;
 using BPOR.Rms.Models;
 using BPOR.Rms.Services;
-using BPOR.Domain.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
+using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context, IFilterService filterService) : Controller
+public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService) : Controller
 {
-    public IActionResult Index(VolunteerFilterViewModel model, string? studyId)
+    public async Task<IActionResult> Index(VolunteerFilterViewModel model, int? studyId, string? activity = null, CancellationToken cancellationToken = default)
     {
+        if (activity == "FilterVolunteers")
+        {
+            await FilterVolunteersAsync(model, cancellationToken);
+        }
+        else if (activity == "ClearFilters")
+        {
+            model = ClearFilters(model);
+        }
+
         SetSelectedStudy(model, studyId);
         SetStudyExclusionFilters(model);
         SetHealthConditionSelectList(model);
@@ -27,23 +35,13 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
         }
 
-        model.ShowStudyFilters = String.IsNullOrEmpty(studyId) ? false : true;
+        model.ShowStudyFilters = model.StudyId is not null;
 
         return View(model);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> HandleFormsAsync(VolunteerFilterViewModel model, string action, CancellationToken cancellationToken = default)
-    {
-        return action switch
-        {
-            "FilterVolunteers" => await FilterVolunteersAsync(model, cancellationToken),
-            "ClearFilters" => ClearFilters(model),
-            _ => RedirectToAction("Index")
-        };
-    }
 
-    public IActionResult ClearFilters(VolunteerFilterViewModel model)
+    protected VolunteerFilterViewModel ClearFilters(VolunteerFilterViewModel model)
     {
         TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
         {
@@ -52,7 +50,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             Body = $"All previously applied filters have been removed.",
         });
 
-        return RedirectToAction("Index", "Filter", new { studyId = model.SelectedStudyId });
+        return new VolunteerFilterViewModel { StudyId = model.StudyId };
     }
 
     private void SetHealthConditionSelectList(VolunteerFilterViewModel model)
@@ -153,20 +151,19 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         };
     }
 
-    private void SetSelectedStudy(VolunteerFilterViewModel model, string studyId)
+    private void SetSelectedStudy(VolunteerFilterViewModel model, int? studyId)
     {
-        if (!String.IsNullOrEmpty(studyId))
+        if (studyId is not null)
         {
-            Study selectedStudy = context.Studies.Where(x => x.Id == Convert.ToInt32(studyId)).FirstOrDefault();
+            Study selectedStudy = context.Studies.Where(x => x.Id == studyId).FirstOrDefault();
 
+            model.StudyId = selectedStudy?.Id;
             model.SelectedStudy = selectedStudy?.StudyName ?? string.Empty;
-            model.SelectedStudyId = selectedStudy?.Id.ToString();
-            model.SelectedStudyCPMSId = selectedStudy?.CpmsId.ToString();
+            model.SelectedStudyCPMSId = selectedStudy?.CpmsId;
         }
     }
 
-    [HttpPost]
-    public IActionResult SetupEmailCampaign(VolunteerFilterViewModel model)
+     public IActionResult SetupEmailCampaign(VolunteerFilterViewModel model)
     {
         DateTime? dateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
         DateTime? dateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;
@@ -176,7 +173,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         bool? volunteersRecruited = null;
         bool? volunteersCompletedRegistration = null;
 
-        if (model.SelectedVolunteersContacted == "1") { volunteersContacted = true; } 
+        if (model.SelectedVolunteersContacted == "1") { volunteersContacted = true; }
         else if (model.SelectedVolunteersContacted == "2") { volunteersContacted = false; }
 
         if (model.SelectedVolunteersRegisteredInterest == "1") { volunteersRegisteredInterest = true; }
@@ -229,7 +226,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
     {
         if (selectedHealthConditions?.Count > 0)
         {
-            foreach(var item in selectedHealthConditions)
+            foreach (var item in selectedHealthConditions)
             {
                 var areaOfInterest = new FilterAreaOfInterest
                 {
@@ -408,9 +405,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         return null;
     }
 
-    [HttpPost]
-    [RequestFormSizeLimit(valueCountLimit: 50000)]
-    public async Task<IActionResult> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
+    protected async Task FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
         ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
             model.RegistrationFromDateYear,
@@ -422,19 +417,30 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         {
             var query = await filterService.FilterVolunteersAsync(model, cancellationToken);
             model.VolunteerCount = await query.CountAsync(cancellationToken);
+
+            if (model.ShowResults)
+            {
+                model.VolunteerResults = await query.Select(x => new VolunteerResult
+                {
+                    Id = x.Id,
+                    Email = x.Email,
+                    Postcode = x.Address == null ? null : x.Address.Postcode,
+                    AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
+                    DateOfBirth = x.DateOfBirth,
+                    Age = x.DateOfBirth.YearsTo(DateTime.Today),
+                    Gender = x.Gender.Code,
+                    Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
+                    HasRegistered = x.RegistrationConsentAtUtc,
+                    EthnicGroup = x.EthnicGroup,
+                    GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
+                })
+                .OrderBy(x => x.Id)
+                .PageAsync(paginationService, cancellationToken);
+            }
         }
-
-        SetHealthConditionSelectList(model);
-
-        SetStudyExclusionFilters(model);
-
-        if (!string.IsNullOrEmpty(model.SelectedStudy))
-        {
-            SetSelectedStudy(model, model.SelectedStudyId);
-            model.ShowStudyFilters = true;
-        }
-
-        return View("Index", model);
     }
 
 
@@ -519,11 +525,11 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 registrationFromDateYear != null)
             {
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationFromDateDay", Unit = "day", Value = registrationFromDateDay });
+                { Key = "RegistrationFromDateDay", Unit = "day", Value = registrationFromDateDay });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationFromDateMonth", Unit = "month", Value = registrationFromDateMonth });
+                { Key = "RegistrationFromDateMonth", Unit = "month", Value = registrationFromDateMonth });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationFromDateYear", Unit = "year", Value = registrationFromDateYear });
+                { Key = "RegistrationFromDateYear", Unit = "year", Value = registrationFromDateYear });
 
                 foreach (var val in fromDateValues)
                 {
@@ -538,11 +544,11 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             if (registrationToDateDay != null || registrationToDateMonth != null || registrationToDateYear != null)
             {
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationToDateDay", Unit = "day", Value = registrationToDateDay });
+                { Key = "RegistrationToDateDay", Unit = "day", Value = registrationToDateDay });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationToDateMonth", Unit = "month", Value = registrationToDateMonth });
+                { Key = "RegistrationToDateMonth", Unit = "month", Value = registrationToDateMonth });
                 fromDateValues.Add(new DateValues
-                    { Key = "RegistrationToDateYear", Unit = "year", Value = registrationToDateYear });
+                { Key = "RegistrationToDateYear", Unit = "year", Value = registrationToDateYear });
 
                 foreach (var val in fromDateValues)
                 {

@@ -8,7 +8,7 @@ namespace NIHR.Infrastructure.Paging
         public static PageDeferred<T> DeferredPage<T>(this IOrderedQueryable<T> source, int pageSize, int currentPage)
         {
             var items = source.PageItems(pageSize, currentPage).Future();
-            var totalCount = source.DeferredLongCount().FutureValue();
+            var totalCount = source.DeferredCount().FutureValue();
 
             return new PageDeferred<T>(items, pageSize, currentPage, totalCount);
         }
@@ -16,7 +16,7 @@ namespace NIHR.Infrastructure.Paging
         public static Page<T> Page<T>(this IOrderedQueryable<T> source, int pageSize, int currentPage)
         {
             var items = source.PageItems(pageSize, currentPage).ToList();
-            var totalCount = source.LongCount();
+            var totalCount = source.Count();
 
             return new Page<T>(items, pageSize, currentPage, totalCount);
         }
@@ -24,7 +24,7 @@ namespace NIHR.Infrastructure.Paging
         public static async Task<Page<T>> PageAsync<T>(this IOrderedQueryable<T> source, int pageSize, int currentPage, CancellationToken token = default)
         {
             var items = await source.PageItems(pageSize, currentPage).ToListAsync(token);
-            var totalCount = await source.LongCountAsync(token);
+            var totalCount = await source.CountAsync(token);
 
             return new Page<T>(items, pageSize, currentPage, totalCount);
         }

@@ -4,5 +4,7 @@
     {
         int Page { get; }
         int PageSize { get; }
+
+        Uri GetPageUri(int pageNumber);
     }
 }

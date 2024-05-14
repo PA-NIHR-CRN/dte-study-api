@@ -275,7 +275,7 @@
 
     </div>
 
-    @await Html.PartialAsync("Partials/Index/_Pagination", Model.Studies)
+    @await Html.PartialAsync("_Pagination", Model.Studies)
 }
 else if (!Model.HasSearched)
 {

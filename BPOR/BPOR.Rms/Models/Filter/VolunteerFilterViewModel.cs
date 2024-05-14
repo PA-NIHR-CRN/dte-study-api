@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
+using NIHR.Infrastructure.Paging;
 using System.ComponentModel.DataAnnotations;
 
 namespace BPOR.Rms.Models.Filter;
@@ -10,8 +11,7 @@ public class VolunteerFilterViewModel
     [Display(Name = "Selected Study")]
     public string? SelectedStudy { get; set; }
 
-    public string? SelectedStudyId { get; set; }
-    public string? SelectedStudyCPMSId { get; set; }
+    public long? SelectedStudyCPMSId { get; set; }
 
     public IEnumerable<SelectListItem>? Studies { get; set; }
     public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
@@ -129,4 +129,8 @@ public class VolunteerFilterViewModel
     public bool ShowStudyFilters { get; set; }
 
     public NotificationBannerModel? Notification { get; set; }
+
+    public Page<VolunteerResult> VolunteerResults { get; set; } = Page<VolunteerResult>.Empty();
+
+    public bool ShowResults { get; set; }
 }

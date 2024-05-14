@@ -5,54 +5,80 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    .volunter-count-panel {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 10em;
+    }
+</style>
+
 <div class="govuk-grid-row">
 
     @if (Model.StudyId != null)
     {
         @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
-        {
-            new("All Studies", "/Study/Index"),
-            new("Study Page", $"/Study/Details/" + Model.StudyId),
-            new("Find Volunteers", "")
-        })
+    {
+    new("All Studies", "/Study/Index"),
+    new("Study Page", $"/Study/Details/" + Model.StudyId),
+    new("Find Volunteers", "")
+    })
     }
     else
     {
         @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
-        {
-            new("All Studies", "/Study/Index"),
-            new("Find Volunteers", "")
-        })
+    {
+    new("All Studies", "/Study/Index"),
+    new("Find Volunteers", "")
+    })
     }
 
- 
+
 </div>
 
-@using (Html.BeginForm("HandleForms", "Filter", FormMethod.Post))
-{
-    <input type="hidden" asp-for="StudyId" value="@Model.StudyId" />
-    <div class="govuk-grid-column-two-thirds">
 
+@if (Model.ShowResults)
+{
+    <div class="govuk-grid-column-full volunteer-results-list testing-only">
+        <span class="govuk-caption-m">For testing purposes only</span>
+        <h2 class="govuk-heading-m">Volunteer Results</h2>
+        @await Html.PartialAsync("Partials/_FilteredVolunteerList", Model.VolunteerResults)
+    </div>
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
         <h1 class="govuk-heading-xl">
             Select the criteria you want your volunteers to match
         </h1>
-
-        @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
-
-        @await Html.PartialAsync("Partials/_ErrorSummary", Model)
-
-        <h2 class="govuk-heading-l">
-            Research
-        </h2>
-
-        @await Html.PartialAsync("Partials/_StudySelection", Model)
-        @await Html.PartialAsync("Partials/_VolunteerInclusionExclusionCriteria", Model)
-        @await Html.PartialAsync("Partials/_AreasOfResearch", Model)
-        @await Html.PartialAsync("Partials/_RegistrationDate", Model)
-        @await Html.PartialAsync("Partials/_Location", Model)
-        @await Html.PartialAsync("Partials/_Demographics", Model)
-
     </div>
+</div>
 
-    @await Html.PartialAsync("Partials/_FilterButtonsAndCount", Model)
+@using (Html.BeginForm(FormMethod.Get))
+{
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+
+            <input type="hidden" asp-for="StudyId" value="@Model.StudyId" />
+
+            @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
+
+            @await Html.PartialAsync("Partials/_ErrorSummary", Model)
+
+            <h2 class="govuk-heading-l">
+                Research
+            </h2>
+
+            @await Html.PartialAsync("Partials/_StudySelection", Model)
+            @await Html.PartialAsync("Partials/_VolunteerInclusionExclusionCriteria", Model)
+            @await Html.PartialAsync("Partials/_AreasOfResearch", Model)
+            @await Html.PartialAsync("Partials/_RegistrationDate", Model)
+            @await Html.PartialAsync("Partials/_Location", Model)
+            @await Html.PartialAsync("Partials/_Demographics", Model)
+
+        </div>
+        <div class="govuk-grid-column-one-third volunter-count-panel">
+            @await Html.PartialAsync("Partials/_FilterButtonsAndCount", Model)
+        </div>
+    </div>
 }
