@@ -348,14 +348,6 @@
     border-radius: 0.3rem
 }
 
-.filter-buttons-container {
-    text-align: center;
-}
-
-.filer-setup-campaign-btn {
-    margin-top: 10px;
-}
-
 .divide-container {
     height: 2px;
     background-color: lightgrey;

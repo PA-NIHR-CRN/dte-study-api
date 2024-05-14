@@ -28,23 +28,31 @@
     </div>
 
 
+
     <div class="filter-buttons-container">
 
-        <button type="submit" value="FilterVolunteers" name="activity" class="govuk-button">
-            Filter Volunteers
-        </button>
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-half">
+                <button type="submit" value="FilterVolunteers" name="activity" class="govuk-button">
+                    Filter Volunteers
+                </button>
+            </div>
+            <div class="govuk-grid-column-one-half">
+                <button type="submit" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="ClearFilters" name="activity">
+                    Clear filters
+                </button>
+            </div>
+        </div>
+    </div>
 
-        <button type="submit" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="ClearFilters" name="activity">
-            Clear filters
-        </button>
+    <div class="divide-container"></div>
 
-        <div class="divide-container"></div>
+    @{
+        bool disabled = Model.VolunteerCount == 0 || Model.VolunteerCount == null;
+    }
 
-        @{
-            bool disabled = Model.VolunteerCount == 0 || Model.VolunteerCount == null;
-        }
-
-        <div class="filer-setup-campaign-btn">
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full filter-setup-campaign-btn">
             <button id="btnSetupEmailCampaign" role="button" draggable="false" class="govuk-button-submit" data-module="govuk-button" disabled="@disabled" asp-controller="Filter" asp-action="SetupEmailCampaign">
                 Set up an email campaign
                 <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
