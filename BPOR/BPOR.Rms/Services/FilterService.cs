@@ -27,11 +27,12 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
             model.Ethnicity_Other, model.Ethnicity_White);
 
         var query = context.Participants.AsQueryable();
-        
+
         if (!string.IsNullOrWhiteSpace(model.PostcodeDistricts))
         {
-            var postcodeList = model.PostcodeDistricts.Split(',').Select(p => p.Trim()).ToList();
-            query = FilterByPostcodePrefix(postcodeList);
+            var postcodeList = model.PostcodeDistricts.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(p => p is not null).Select(p => p.Trim()).ToArray();
+
+            query = query.Where(StartsWithAnyPostCodeDistrictExpression(postcodeList));
         }
 
         if (model.FullPostcode != null && model.SearchRadiusMiles > 0)
@@ -42,19 +43,19 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         return _filters.Aggregate(query, (current, filter) => current.Where(filter));
     }
 
-    private IQueryable<Participant> FilterByPostcodePrefix(List<string> postcodeList)
+    private Expression<Func<Participant, bool>> StartsWithAnyPostCodeDistrictExpression(string[] postCodeDistricts)
     {
-        var query = context.ParticipantAddress.Where(pa => false);
+        var expressions = postCodeDistricts
+            .Select(s => (Expression<Func<Participant, bool>>)(p => EF.Functions.Like(p.Address.Postcode, $@"{s}%")))
+            .ToList();
 
-        foreach (var prefix in postcodeList)
-        {
-            var localPrefix = prefix; 
-            query = context.ParticipantAddress
-                .Where(pa =>  EF.Functions.Like(pa.Postcode, $"{localPrefix}%"))
-                .Concat(query);
-        }
+        if (expressions.Count == 1) return expressions[0];
 
-        return query.Distinct().Select(pa => pa.Participant);
+        var orExpression = expressions.Skip(2).Aggregate(
+            Expression.OrElse(expressions[0].Body, Expression.Invoke(expressions[1], expressions[0].Parameters[0])),
+            (x, y) => Expression.OrElse(x, Expression.Invoke(y, expressions[0].Parameters[0])));
+
+        return Expression.Lambda<Func<Participant, bool>>(orExpression, expressions[0].Parameters);
     }
 
     private async Task<IQueryable<Participant>> FilterByRadius(string postcode, double radiusInMiles, CancellationToken cancellationToken = default)
@@ -65,7 +66,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
 
         var distanceInMeters = radiusInMiles * 1609.344;
         var boundingBox = point.Buffer(distanceInMeters / 111320).Envelope;
-        
+
         return context.ParticipantLocation
             .Where(x => x.Location.Within(boundingBox) && x.Location.IsWithinDistance(point, distanceInMeters))
             .Select(pl => pl.Participant);
