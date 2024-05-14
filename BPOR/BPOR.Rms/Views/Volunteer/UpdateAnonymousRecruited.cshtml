@@ -7,6 +7,7 @@
     new("Study", $"/Study/Details/{Model.StudyId}"),
     new("Update newly recruited volunteers", "/Study/Edit")
 })
+
 <div style="display: flex;flex-direction: column;gap: 50px;width: 100% ;">
 
     <div>
@@ -15,8 +16,10 @@
             @Html.DisplayFor(model => model.StudyName)
         </h4>
     </div>
+
     @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
     @await Html.PartialAsync("Partials/_ErrorSummary", Model)
+
     <h4 class="govuk-heading-m govuk-!-margin-bottom-4 govuk-!-margin-top-0">
         Recruited (@Model.LatestRecruitmentTotal)
     </h4>

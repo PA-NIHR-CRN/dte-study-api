@@ -4,14 +4,18 @@
 {
     <div class="govuk-notification-banner @(Model.IsSuccess ? "govuk-notification-banner--success" : "govuk-notification-banner--failure")" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner" id="notification-banner">
         <div class="govuk-notification-banner__header">
-            <h3 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+            <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
                 @Model.Heading
-            </h3>
+            </h2>
         </div>
         <div class="govuk-notification-banner__content">
             @if (!string.IsNullOrWhiteSpace(Model.Body))
             {
-                <p class="govuk-body">@Html.Raw(Model.Body)</p>
+                <h3 class="govuk-body">@Html.Raw(Model.Body)</h3>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.SubBodyText))
+            {
+                <p>@Html.Raw(Model.SubBodyText)</p>
             }
             @if (!string.IsNullOrWhiteSpace(Model.LinkText) && !string.IsNullOrWhiteSpace(Model.LinkUrl))
             {

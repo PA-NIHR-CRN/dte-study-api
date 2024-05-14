@@ -5,9 +5,9 @@ namespace BPOR.Rms.Models.Volunteer;
 public class UpdateRecruitedViewModel
 {
     [Display(Name = "Enter Be Part of Research volunteer reference numbers")]
-    [Required(ErrorMessage = "Volunteer reference numbers must be provided")]
+    [Required(ErrorMessage = "Enter a Be Part of Research volunteer reference number")]
     public string? VolunteerReferenceNumbers { get; set; }
     public string StudyName { get; set; }
     public int StudyId { get; set; }
-    public NotificationBannerModel Notification { get; set; }
+    public NotificationBannerModel? Notification { get; set; }
 }

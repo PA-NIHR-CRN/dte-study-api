@@ -1,6 +1,7 @@
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Volunteer;
+using LuhnNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -54,37 +55,63 @@ public class VolunteerController(ParticipantDbContext context) : Controller
             {
                 foreach (var reference in volunteerRefs)
                 {
-                    var studyParticipant = context.StudyParticipantEnrollment.Where(p => p.Reference == reference).FirstOrDefault();
+                    bool isValid = Luhn.IsValid(reference);
 
-                    if (studyParticipant != null)
+                    if (!isValid)
                     {
-                        if (studyParticipant.EnrolledAt == null)
-                        {
-                            studyParticipant.EnrolledAt = DateTime.Now;
-                            await context.SaveChangesAsync();
-                            totalEnrolled++;
-                        }
-                        else
-                        {
-                            totalPreviouslyEnrolled++;
-                        }
+                        ModelState.AddModelError("VolunteerReferenceNumbers", "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
+                        return View("UpdateRecruited", model);
                     }
                 }
 
+                var studyParticipants = context.StudyParticipantEnrollment.Where(p => volunteerRefs.Contains(p.Reference) && p.StudyId == model.StudyId).ToList();
+
+                if (studyParticipants.Count < volunteerRefs.Length)
+                {
+                    ModelState.AddModelError("VolunteerReferenceNumbers", "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
+                    return View("UpdateRecruited", model);
+                }
+
+                foreach (var participant in studyParticipants)
+                {
+                    if (participant.EnrolledAt == null)
+                    {
+                        participant.EnrolledAt = DateTime.Now;
+                        await context.SaveChangesAsync();
+                        totalEnrolled++;
+                    }
+                    else
+                    {
+                        totalPreviouslyEnrolled++;
+                    }
+                }
+
+                string bodyText = $" {totalEnrolled} of {totalVolunteers} volunteer(s) recorded as recruited.";
+                string subBodyText = $" {totalPreviouslyEnrolled} already recorded as recruited.";
+
                 if (totalEnrolled > 0)
                 {
+                    var manualEnrollment = new ManualEnrollment
+                    {
+                        StudyId = model.StudyId,
+                        TotalEnrollments = totalEnrolled
+                    };
+                    context.ManualEnrollments.Add(manualEnrollment);
+                    await context.SaveChangesAsync();
+
                     TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
                     {
                         IsSuccess = true,
                         Heading = "Success",
-                        Body = $" {totalEnrolled} of {totalVolunteers} volunteer(s) recorded as recruited.",
+                        Body = bodyText,
+                        SubBodyText = totalPreviouslyEnrolled > 0 ? subBodyText : null,
                         LinkText = "Return to the study details page",
                         LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
                     });
                 }
             }
         }
-
+        model.VolunteerReferenceNumbers = string.Empty;
         return RedirectToAction("UpdateRecruited", model);
     }
 
