@@ -17,6 +17,8 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         }
         else if (activity == "SendPreviewEmail")
         {
+            // TODO: Make this an independent POST endpoint
+            // to keep the email address out of the URL.
             return SendPreviewEmail(model);
         }
 
