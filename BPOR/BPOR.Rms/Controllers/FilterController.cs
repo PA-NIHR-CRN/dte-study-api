@@ -50,6 +50,8 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             Body = $"All previously applied filters have been removed.",
         });
 
+        ModelState.Clear();
+
         return new VolunteerFilterViewModel { StudyId = model.StudyId };
     }
 
