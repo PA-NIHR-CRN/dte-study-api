@@ -8,7 +8,7 @@ namespace NIHR.Infrastructure.Paging
         public static Page<T> Page<T>(this IOrderedEnumerable<T> source, int pageSize, int currentPage)
         {
             var items = source.PageItems(pageSize, currentPage).ToList();
-            var totalCount = source.LongCount();
+            var totalCount = source.Count();
 
             return new Page<T>(items, pageSize, currentPage, totalCount);
         }

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using Microsoft.AspNetCore.Mvc;
@@ -9,13 +8,23 @@ using Newtonsoft.Json;
 using BPOR.Rms.Models;
 using BPOR.Rms.Services;
 using Microsoft.EntityFrameworkCore;
+using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context, IFilterService filterService) : Controller
+public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService) : Controller
 {
-    public IActionResult Index(VolunteerFilterViewModel model, int? studyId)
+    public async Task<IActionResult> Index(VolunteerFilterViewModel model, int? studyId, string? activity = null, CancellationToken cancellationToken = default)
     {
+        if (activity == "FilterVolunteers")
+        {
+            await FilterVolunteersAsync(model, cancellationToken);
+        }
+        else if (activity == "ClearFilters")
+        {
+            model = ClearFilters(model);
+        }
+
         SetSelectedStudy(model, studyId);
         SetStudyExclusionFilters(model);
         SetHealthConditionSelectList(model);
@@ -31,18 +40,8 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         return View(model);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Index(VolunteerFilterViewModel model, int? studyId, string action, CancellationToken cancellationToken = default)
-    {
-        return action switch
-        {
-            "FilterVolunteers" => await FilterVolunteersAsync(model, cancellationToken),
-            "ClearFilters" => ClearFilters(model),
-            _ => RedirectToAction("Index", new { studyId })
-        };
-    }
 
-    public IActionResult ClearFilters(VolunteerFilterViewModel model)
+    protected VolunteerFilterViewModel ClearFilters(VolunteerFilterViewModel model)
     {
         TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
         {
@@ -51,7 +50,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             Body = $"All previously applied filters have been removed.",
         });
 
-        return RedirectToAction("Index", "Filter", new { studyId = model.StudyId });
+        return new VolunteerFilterViewModel { StudyId = model.StudyId };
     }
 
     private void SetHealthConditionSelectList(VolunteerFilterViewModel model)
@@ -407,9 +406,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         return null;
     }
 
-    [HttpPost]
-    [RequestFormSizeLimit(valueCountLimit: 50000)]
-    public async Task<IActionResult> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
+    protected async Task FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
         ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
             model.RegistrationFromDateYear,
@@ -421,19 +418,30 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         {
             var query = await filterService.FilterVolunteersAsync(model, cancellationToken);
             model.VolunteerCount = await query.CountAsync(cancellationToken);
+
+            if (model.ShowResults)
+            {
+                model.VolunteerResults = await query.Select(x => new VolunteerResult
+                {
+                    Id = x.Id,
+                    Email = x.Email,
+                    Postcode = x.Address == null ? null : x.Address.Postcode,
+                    AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
+                    DateOfBirth = x.DateOfBirth,
+                    Age = x.DateOfBirth.YearsTo(DateTime.Today),
+                    Gender = x.Gender.Code,
+                    Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
+                    HasRegistered = x.RegistrationConsentAtUtc,
+                    EthnicGroup = x.EthnicGroup,
+                    GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
+                })
+                .OrderBy(x => x.Id)
+                .PageAsync(paginationService, cancellationToken);
+            }
         }
-
-        SetHealthConditionSelectList(model);
-
-        SetStudyExclusionFilters(model);
-
-        if (!string.IsNullOrEmpty(model.SelectedStudy))
-        {
-            SetSelectedStudy(model, model.StudyId);
-            model.ShowStudyFilters = true;
-        }
-
-        return View("Index", model);
     }
 
 

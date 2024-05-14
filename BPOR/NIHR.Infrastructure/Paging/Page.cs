@@ -11,7 +11,7 @@ namespace NIHR.Infrastructure.Paging
 
         private IEnumerable<T> _items;
 
-        public Page(IEnumerable<T> source, int pageSize, int currentPage, long totalCount) : base(source, pageSize, currentPage, totalCount)
+        public Page(IEnumerable<T> source, int pageSize, int currentPage, int totalCount) : base(source, pageSize, currentPage, totalCount)
         {
             _items = source;
         }
@@ -23,13 +23,13 @@ namespace NIHR.Infrastructure.Paging
 
     public abstract class Page : IPage
     {
-        protected long _totalCount;
+        protected int _totalCount;
         protected int _pageSize;
         protected int _currentPage;
 
         private IEnumerable _items;
 
-        public Page(IEnumerable source, int pageSize, int currentPage, long totalCount)
+        public Page(IEnumerable source, int pageSize, int currentPage, int totalCount)
         {
             _totalCount = totalCount;
             _items = source;
@@ -39,9 +39,9 @@ namespace NIHR.Infrastructure.Paging
 
         public int CurrentPage { get => _currentPage; }
         public int PageSize { get => _pageSize; }
-        public long TotalCount { get => _totalCount; }
+        public int TotalCount { get => _totalCount; }
 
-        public long TotalPages => (long)Math.Ceiling((double)TotalCount / PageSize);
+        public int TotalPages => TotalCount == 0 ? 0 : (int)Math.Ceiling((decimal)TotalCount / PageSize);
         public bool HasPreviousPage => CurrentPage > 1;
         public bool HasNextPage => CurrentPage < TotalPages;
 
@@ -55,8 +55,8 @@ namespace NIHR.Infrastructure.Paging
         public int CurrentPage { get; }
         public int CurrentCount();
         public int PageSize { get; }
-        public long TotalCount { get; }
-        public long TotalPages { get; }
+        public int TotalCount { get; }
+        public int TotalPages { get; }
         public bool HasPreviousPage { get; }
         public bool HasNextPage { get; }
     }

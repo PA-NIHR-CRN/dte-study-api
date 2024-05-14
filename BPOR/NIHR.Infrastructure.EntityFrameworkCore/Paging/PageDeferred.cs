@@ -5,11 +5,11 @@ namespace NIHR.Infrastructure.Paging
     public class PageDeferred<T>
     {
         private QueryFutureEnumerable<T> _items;
-        private QueryFutureValue<long> _totalCount;
+        private QueryFutureValue<int> _totalCount;
         private int _pageSize;
         private int _currentPage;
 
-        public PageDeferred(QueryFutureEnumerable<T> source, int pageSize, int currentPage, QueryFutureValue<long> totalCount)
+        public PageDeferred(QueryFutureEnumerable<T> source, int pageSize, int currentPage, QueryFutureValue<int> totalCount)
         {
 
             _items = source;

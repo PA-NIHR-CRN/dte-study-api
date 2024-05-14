@@ -1,0 +1,44 @@
+﻿@using NIHR.Infrastructure.Paging
+@using BPOR.Rms.Models.Filter
+@model Page<VolunteerResult>
+
+<div id="volunteer-results">
+    @if (Model.Any())
+    {
+        <table class="govuk-table" style="width: 100%;">
+            <thead class="govuk-table__head">
+                <tr class="govuk-table__row">
+                    <th scope="col" class="govuk-table__header">Id</th>
+                    <th scope="col" class="govuk-table__header">Email</th>
+                    <th scope="col" class="govuk-table__header">Areas of Research</th>
+                </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+                @foreach (var volunteer in Model.Items)
+                {
+                    <tr class="govuk-table__row">
+                        <td class="govuk-table__cell">
+                            @volunteer.Id
+                        </td>
+                        <td class="govuk-table__cell">
+                            @volunteer.Email
+                        </td>
+                        <td class="govuk-table__cell">
+                            @string.Join(", ", volunteer.AreasOfResearch);
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @await Html.PartialAsync("_Pagination", Model)
+    }
+    else
+    {
+        <div class="govuk-warning-text">
+            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+            <strong class="govuk-warning-text__text">
+                No Results
+            </strong>
+        </div>
+    }
+</div>

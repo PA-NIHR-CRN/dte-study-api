@@ -1,49 +1,56 @@
 ﻿@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
 
-<div class="sticky-container">
-    <div class="filter-count-container">
-        <div aria-live="assertive" role="status">
-            <h2 class="govuk-heading-l">
-                Volunteers matching criteria:
-            </h2>
+<div class="filter-count-container">
+    <div aria-live="assertive" role="status">
+        <h2 class="govuk-heading-l">
+            Volunteers matching criteria:
+        </h2>
 
-            <input type="hidden" asp-for="VolunteerCount" value="@Model.VolunteerCount" />
-            <h2 class="govuk-heading-l" id="volunteerCount">
-                @if (Model.VolunteerCount == 0 || Model.VolunteerCount == null)
-                {
-                    <span>-</span>
-                }
-                else
-                {
-                    <span>@Model.VolunteerCount</span>
-                }
-            </h2>
-        </div>
-
-        <div class="filter-buttons-container">
-
-            <button type="submit" value="FilterVolunteers" name="action" class="govuk-button">
-                Filter Volunteers
-            </button>
-
-            <button type="submit" class="govuk-button  govuk-button--secondary" data-module="govuk-button" value="ClearFilters" name="action">
-                Clear filters
-            </button>
-
-            <div class="divide-container"></div>
-
-            @{
-                bool disabled = Model.VolunteerCount == 0 || Model.VolunteerCount == null;
+        <input type="hidden" asp-for="VolunteerCount" value="@Model.VolunteerCount" />
+        <h2 class="govuk-heading-l" id="volunteerCount">
+            @if (Model.VolunteerCount == 0 || Model.VolunteerCount == null)
+            {
+                <span>-</span>
             }
+            else
+            {
+                <span>@Model.VolunteerCount</span>
+            }
+        </h2>
+    </div>
 
-            <div class="filer-setup-campaign-btn">
-                <button id="btnSetupEmailCampaign" role="button" draggable="false" class="govuk-button-submit" data-module="govuk-button" disabled="@disabled" asp-controller="Filter" asp-action="SetupEmailCampaign">
-                    Set up an email campaign
-                    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
-                        <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z" />
-                    </svg>
-                </button>
-            </div>
+    <div class="testing-only govuk-!-margin-bottom-5">
+        <strong>For testing purposes only</strong>
+        <div class="govuk-checkboxes__item govuk-checkboxes--small show-results">
+            @Html.CheckBoxFor(x => x.ShowResults, new { @class = "govuk-checkboxes__input", id = "show-results-checkbox" })
+            <label for="show-results-checkbox" class="govuk-label govuk-checkboxes__label">Show volunteer information</label>
+        </div>
+    </div>
+
+
+    <div class="filter-buttons-container">
+
+        <button type="submit" value="FilterVolunteers" name="activity" class="govuk-button">
+            Filter Volunteers
+        </button>
+
+        <button type="submit" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="ClearFilters" name="activity">
+            Clear filters
+        </button>
+
+        <div class="divide-container"></div>
+
+        @{
+            bool disabled = Model.VolunteerCount == 0 || Model.VolunteerCount == null;
+        }
+
+        <div class="filer-setup-campaign-btn">
+            <button id="btnSetupEmailCampaign" role="button" draggable="false" class="govuk-button-submit" data-module="govuk-button" disabled="@disabled" asp-controller="Filter" asp-action="SetupEmailCampaign">
+                Set up an email campaign
+                <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z" />
+                </svg>
+            </button>
         </div>
     </div>
 </div>
