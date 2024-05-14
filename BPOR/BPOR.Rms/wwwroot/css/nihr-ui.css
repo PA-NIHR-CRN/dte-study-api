@@ -23,7 +23,6 @@ body {
     border-bottom-width: 1px;
     flex-direction: row;
     display: flex;
-    
 }
 
 .govuk-header__container {
@@ -56,11 +55,11 @@ body {
     display: flex;
 }
 
-.header-content-right .govuk-header__logotype {
-    gap: 10px;
-    align-items: center;
-    display: flex;
-}
+    .header-content-right .govuk-header__logotype {
+        gap: 10px;
+        align-items: center;
+        display: flex;
+    }
 
 .button-container {
     display: flex;
@@ -82,15 +81,15 @@ body {
     position: relative; /* For the circle focus */
 }
 
-.icon-container:focus::before {
-    content: '';
-    position: absolute;
-    height: 3rem;
-    width: 3rem;
-    border-radius: 50%;
-    border: 2px solid white;
-    background-color: #305280;
-}
+    .icon-container:focus::before {
+        content: '';
+        position: absolute;
+        height: 3rem;
+        width: 3rem;
+        border-radius: 50%;
+        border: 2px solid white;
+        background-color: #305280;
+    }
 
 .line {
     width: 18px;
@@ -126,9 +125,9 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.nihr-button-primary:hover {
-    background-color: #305280;
-}
+    .nihr-button-primary:hover {
+        background-color: #305280;
+    }
 
 .nihr-button-secondary {
     background-color: white;
@@ -144,9 +143,9 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.nihr-button-secondary:hover {
-    background-color: #f2f2f2;
-}
+    .nihr-button-secondary:hover {
+        background-color: #f2f2f2;
+    }
 
 .nihr-flex-container {
     display: flex;
@@ -169,9 +168,9 @@ body {
     align-items: center;
 }
 
-.split-row > * {
-    align-self: center;
-}
+    .split-row > * {
+        align-self: center;
+    }
 
 .settings-cog {
     position: relative;
@@ -187,16 +186,16 @@ body {
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
 }
 
-.settings-dropdown a {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-}
+    .settings-dropdown a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
 
-.settings-dropdown a:hover {
-    background-color: #ddd;
-}
+        .settings-dropdown a:hover {
+            background-color: #ddd;
+        }
 
 /* pagination.css */
 .pagination-container {
@@ -252,28 +251,83 @@ body {
 }
 
 .govuk-link.sign-out-nav__link,
-.govuk-link.sign-out-nav__link:visited
-{
+.govuk-link.sign-out-nav__link:visited {
     color: #fff;
     text-decoration: none;
 }
 
-.govuk-link.sign-out-nav__link:hover {
-    text-decoration: underline;
-}
-
-    .govuk-link.sign-out-nav__link:hover:visited {
-        color: #fff;
+    .govuk-link.sign-out-nav__link:hover {
         text-decoration: underline;
     }
 
-.govuk-link.sign-out-nav__link:focus {
-    color: #193e72;
+        .govuk-link.sign-out-nav__link:hover:visited {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+    .govuk-link.sign-out-nav__link:focus {
+        color: #193e72;
+    }
+
+.govuk-header__logotype.nihr-logo {
+    /* Align with text base-line */
+    margin-top: 5px;
 }
 
-.govuk-header__logotype.nihr-logo{
-    /* Align with text base-line */
-    margin-top: 5px; 
+.post-code {
+    white-space: nowrap;
+}
+
+.pill-container {
+    gap: 10px;
+    padding-bottom: 10px;
+}
+
+.pill-container.pill-container-column {
+    flex-direction: column;
+}
+
+.pill {
+    padding-top: 1px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background: #EEF2F3;
+    border-radius: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    display: inline-flex;
+    color: #193E72;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 24px;
+    word-wrap: break-word;
+}
+
+@media screen and (max-width: 768px) {
+    .pill-container {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .pill {
+        flex-basis: calc(50% - 10px);
+        text-align: center;
+        margin-bottom: 10px;
+        justify-content: center;
+    }
+}
+
+@media screen and (min-width: 769px) {
+
+    .pill-container {
+        flex-direction: row;
+        display: inline-flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
 }
 
 @media screen and (min-width: 641px) {
