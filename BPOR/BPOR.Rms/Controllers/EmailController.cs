@@ -9,8 +9,17 @@ namespace BPOR.Rms.Controllers;
 
 public class EmailController(IEmailCampaignService emailCampaignService, ParticipantDbContext context) : Controller
 {
-    public IActionResult SetupCampaign(SetupCampaignViewModel model)
+    public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
+        if (activity == "SendEmail")
+        {
+            return await SendEmail(model, cancellationToken);
+        }
+        else if (activity == "SendPreviewEmail")
+        {
+            return SendPreviewEmail(model);
+        }
+
         ModelState.Clear();
         model.EmailTemplates = FetchEmailTemplates();
         return View(model);
@@ -27,20 +36,19 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
             model.Notification =
                 JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"].ToString());
         }
-        
+
         if (TempData.ContainsKey("SelectedTemplateId"))
         {
             model.SelectedTemplateId = TempData["SelectedTemplateId"].ToString();
             model.SelectedTemplateName = TempData["SelectedTemplateName"].ToString();
         }
-        
+
         model.EmailTemplates = FetchEmailTemplates();
 
         return View("SetupCampaign", model);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
+    protected async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         ModelState.Remove("PreviewEmails");
         model.EmailTemplates = FetchEmailTemplates();
@@ -59,7 +67,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         {
             return View("SetupCampaign", model);
         }
-        
+
         var selectedTemplateId = FetchEmailTemplates().FirstOrDefault(t => t.Id == model.SelectedTemplateId)?.Name;
 
         await emailCampaignService.SendCampaignAsync(new EmailCampaign
@@ -103,7 +111,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         ModelState.Remove("TotalVolunteers");
         ModelState.Remove("StudyName");
         ModelState.Remove("SelectedTemplate.Name");
-        
+
         // TODO can we cache this or is there a better way to do this?
         var emailTemplates = FetchEmailTemplates();
 
@@ -121,7 +129,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         {
             return RedirectToAction("Index", model);
         }
-        
+
         TempData["SelectedTemplateId"] = model.SelectedTemplateId;
         TempData["SelectedTemplateName"] = model.SelectedTemplateName;
         TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
@@ -133,19 +141,6 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         });
 
         return RedirectToAction("Index", model);
-    }
-
-
-    [HttpPost]
-    public async Task<IActionResult> HandleForms(SetupCampaignViewModel model, string action,
-        CancellationToken cancellationToken)
-    {
-        return action switch
-        {
-            "SetupCampaign" => await SendEmail(model, cancellationToken),
-            "SendPreviewEmail" => SendPreviewEmail(model),
-            _ => RedirectToAction("SetupCampaign")
-        };
     }
 
     private bool IsValidEmail(string email)

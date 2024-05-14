@@ -26,7 +26,7 @@
     @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
     @await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
-    <form method="post">
+    <form method="get">
         <input type="hidden" asp-for="StudyId" />
         <input type="hidden" asp-for="MaxNumbers" />
         <input type="hidden" asp-for="FilterCriteriaId" />

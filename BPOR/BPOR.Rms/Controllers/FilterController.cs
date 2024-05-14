@@ -443,7 +443,6 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         }
     }
 
-
     private void ValidatePostcodeDistricts(string? postcodeDistricts)
     {
         if (!string.IsNullOrEmpty(postcodeDistricts))
