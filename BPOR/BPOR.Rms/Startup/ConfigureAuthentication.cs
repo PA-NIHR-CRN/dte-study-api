@@ -11,7 +11,7 @@ namespace BPOR.Rms.Startup;
 public static class ConfigureAuthentication
 {
     //TODO can this be moved to NIHR Infrastructure?  the package did not work
-    public static IHostApplicationBuilder AddIdgAuthentication(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddIdgAuthentication(this IHostApplicationBuilder builder, Action<AuthorizationOptions>? configureAuthorization = null, Action<CookieAuthenticationOptions>? configureCookieAuthentication = null)
     {
         var hostEnvironment = builder.Environment;
         var configuration = builder.Configuration;
@@ -19,7 +19,7 @@ public static class ConfigureAuthentication
 
         var authenticationSettings = services.GetSectionAndValidate<AuthenticationSettings>(configuration).Value;
 
-        if(authenticationSettings.Bypass && !hostEnvironment.IsProduction())
+        if (authenticationSettings.Bypass && !hostEnvironment.IsProduction())
         {
             return builder;
         }
@@ -29,6 +29,11 @@ public static class ConfigureAuthentication
             options.FallbackPolicy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build();
+
+            if (configureAuthorization is not null)
+            {
+                configureAuthorization(options);
+            }
         });
 
         services.AddAuthentication(options =>
@@ -36,7 +41,15 @@ public static class ConfigureAuthentication
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
-            .AddCookie(options => options.ExpireTimeSpan = TimeSpan.FromMinutes(10))
+            .AddCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                
+                if (configureCookieAuthentication is not null)
+                {
+                    configureCookieAuthentication(options);
+                }
+            })
             .AddOpenIdConnect(options =>
             {
                 options.Authority = authenticationSettings.Authority.ToString();
@@ -79,7 +92,7 @@ public static class ConfigureAuthentication
         return builder;
     }
 
-        private static Task MakeHttps(RedirectContext context)
+    private static Task MakeHttps(RedirectContext context)
     {
         context.ProtocolMessage.RedirectUri = MakeHttps(context.ProtocolMessage.RedirectUri);
 

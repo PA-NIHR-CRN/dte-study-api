@@ -26,6 +26,9 @@ public static class ConfigureMiddleware
         app.UseRouting();
 
         app.UseAuthentication();
+
+        app.UseMiddleware<IdgAuthenticationMiddleware>();
+
         app.UseAuthorization();
 
         app.MapControllerRoute(
