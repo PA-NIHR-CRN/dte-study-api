@@ -163,8 +163,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         }
     }
 
-    [HttpPost]
-    public IActionResult SetupEmailCampaign(VolunteerFilterViewModel model)
+     public IActionResult SetupEmailCampaign(VolunteerFilterViewModel model)
     {
         DateTime? dateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
         DateTime? dateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;

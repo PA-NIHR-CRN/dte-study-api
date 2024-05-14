@@ -6,11 +6,6 @@
 }
 
 <style>
-    .volunteer-results-list {
-        border-top: 5px solid #EA5D4E;
-        border-bottom: 5px solid #EA5D4E;
-    }
-
     .volunter-count-panel {
         position: -webkit-sticky;
         position: sticky;
@@ -44,7 +39,9 @@
 
 @if (Model.ShowResults)
 {
-    <div class="govuk-grid-column-full volunteer-results-list">
+    <div class="govuk-grid-column-full volunteer-results-list testing-only">
+        <span class="govuk-caption-m">For testing purposes only</span>
+        <h2 class="govuk-heading-m">Volunteer Results</h2>
         @await Html.PartialAsync("Partials/_FilteredVolunteerList", Model.VolunteerResults)
     </div>
 }
