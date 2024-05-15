@@ -5,7 +5,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@if (!string.IsNullOrEmpty(Model.StudyName))
+@if (!string.IsNullOrWhiteSpace(Model.StudyName))
 {
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-one-half-from-desktop">
@@ -33,7 +33,7 @@ else
 
 
 <div class="govuk-button-group">
-    @if(Model.StudyId != 0)
+    @if(Model.StudyId is not null)
     {
         @Html.ActionLink("View Study", "Details", "Study", new { id = Model.StudyId }, new { @class = "govuk-button", data_module = "govuk-button" })
     }

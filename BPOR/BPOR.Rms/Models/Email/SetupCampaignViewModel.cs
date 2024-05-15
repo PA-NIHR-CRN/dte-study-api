@@ -6,6 +6,8 @@ namespace BPOR.Rms.Models.Email;
 
 public class SetupCampaignViewModel
 {
+    private static readonly char[] _emailListDelimiters = [',', ';'];
+
     public int? StudyId { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "Please enter a number greater than zero for Max Numbers.")]
@@ -18,7 +20,7 @@ public class SetupCampaignViewModel
 
     [DisplayName("Select email template")]
     public string? SelectedTemplateId { get; set; }
-    public IEnumerable<SelectListItem> EmailTemplates { get; set; } = new List<SelectListItem>();
+    public IEnumerable<SelectListItem> EmailTemplates { get; set; } = [];
 
 
     [DisplayName("How many volunteers do you want to send it to?")]
@@ -29,4 +31,7 @@ public class SetupCampaignViewModel
     [DisplayName("Preview email")]
     [EmailAddress(ErrorMessage = "Enter a valid email address.")]
     public string? PreviewEmails { get; set; }
+
+
+    public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries) ?? Enumerable.Empty<string>();
 }
