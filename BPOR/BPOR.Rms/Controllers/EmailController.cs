@@ -27,7 +27,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         return View(model);
     }
 
-    public IActionResult Index(SetupCampaignViewModel model)
+    public void ResetModel(SetupCampaignViewModel model)
     {
         ModelState.Remove("MaxNumbers");
         ModelState.Remove("TotalVolunteers");
@@ -46,8 +46,6 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         }
 
         model.EmailTemplates = FetchEmailTemplates();
-
-        return View("SetupCampaign", model);
     }
 
     protected async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
@@ -129,6 +127,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
 
         if (!ModelState.IsValid)
         {
+            ResetModel(model);
             return View(model);
         }
 
@@ -142,6 +141,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
                 $"Preview email using template {model.SelectedTemplateName} has been sent to  {model.PreviewEmails}"
         });
 
+        ResetModel(model);
         return View(model);
     }
 
