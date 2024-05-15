@@ -14,6 +14,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
     public async Task<IQueryable<Participant>> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
         _filters.Clear();
+        FilterVolunteersContacted(model.StudyId, model.SelectedVolunteersContacted);
         FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
         FilterByAreasOfResearch(model.SelectedHealthConditions);
         FilterByRegistrationDate(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
@@ -124,6 +125,25 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
                 (ethnicityMixed && p.EthnicGroup.ToLower() == "mixed") ||
                 (ethnicityOther && p.EthnicGroup.ToLower() == "other") ||
                 (ethnicityWhite && p.EthnicGroup.ToLower() == "white"));
+        }
+    }
+
+    private void FilterVolunteersContacted(int? studyId, string? selectedVolunteersContacted)
+    {
+        if (selectedVolunteersContacted == "1")
+        {
+            Expression<Func<Participant, bool>> filterExpression = participant =>
+                                    context.StudyParticipantEnrollment.Any(enrollment =>
+                                    enrollment.ParticipantId == participant.Id && enrollment.StudyId == studyId);
+            _filters.Add(filterExpression);
+        }
+
+        if (selectedVolunteersContacted == "2")
+        {
+            Expression<Func<Participant, bool>> filterExpression = participant =>
+                                    !context.StudyParticipantEnrollment.Any(enrollment =>
+                                    enrollment.ParticipantId == participant.Id && enrollment.StudyId == studyId);
+            _filters.Add(filterExpression);
         }
     }
 
