@@ -19,7 +19,7 @@
         </h4>
     </div>
 
-    @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
+    @await Html.PartialAsync("Partials/_NotificationBanner")
     @await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
     <form asp-action="SubmitVolunteerNumbers" asp-controller="Volunteer" method="post">

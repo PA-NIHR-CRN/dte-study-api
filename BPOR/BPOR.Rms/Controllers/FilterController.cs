@@ -29,12 +29,6 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         SetStudyExclusionFilters(model);
         SetHealthConditionSelectList(model);
 
-        if (TempData["Notification"] != null)
-        {
-            model.Notification =
-                JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
-        }
-
         model.ShowStudyFilters = model.StudyId is not null;
 
         return View(model);
@@ -43,12 +37,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
     protected VolunteerFilterViewModel ClearFilters(VolunteerFilterViewModel model)
     {
-        TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
-        {
-            IsSuccess = true,
-            Heading = "",
-            Body = $"All previously applied filters have been removed.",
-        });
+        TempData.AddSuccessNotification($"All previously applied filters have been removed.");
 
         ModelState.Clear();
 

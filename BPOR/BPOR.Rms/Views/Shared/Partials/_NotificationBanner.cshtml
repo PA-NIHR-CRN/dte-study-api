@@ -1,25 +1,27 @@
-@model BPOR.Rms.Models.NotificationBannerModel
-
-@if (Model != null)
+@using NIHR.Infrastructure.AspNetCore;
+@{
+    var notification = TempData.Get<NotificationBannerModel>("Notification");
+}
+@if (notification != null)
 {
-    <div class="govuk-notification-banner @(Model.IsSuccess ? "govuk-notification-banner--success" : "govuk-notification-banner--failure")" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner" id="notification-banner">
+    <div class="govuk-notification-banner @(notification.IsSuccess ? "govuk-notification-banner--success" : "govuk-notification-banner--failure")" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner" id="notification-banner">
         <div class="govuk-notification-banner__header">
             <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-                @Model.Heading
+                @notification.Heading
             </h2>
         </div>
         <div class="govuk-notification-banner__content">
-            @if (!string.IsNullOrWhiteSpace(Model.Body))
+            @if (!string.IsNullOrWhiteSpace(notification.Body))
             {
-                <h3 class="govuk-body">@Html.Raw(Model.Body)</h3>
+                <h3 class="govuk-body">@Html.Raw(notification.Body)</h3>
             }
-            @if (!string.IsNullOrWhiteSpace(Model.SubBodyText))
+            @if (!string.IsNullOrWhiteSpace(notification.SubBodyText))
             {
-                <p>@Html.Raw(Model.SubBodyText)</p>
+                <p>@Html.Raw(notification.SubBodyText)</p>
             }
-            @if (!string.IsNullOrWhiteSpace(Model.LinkText) && !string.IsNullOrWhiteSpace(Model.LinkUrl))
+            @if (!string.IsNullOrWhiteSpace(notification.LinkText) && !string.IsNullOrWhiteSpace(notification.LinkUrl))
             {
-                <a class="govuk-notification-banner__link" href="@Model.LinkUrl">@Model.LinkText</a>
+                <a class="govuk-notification-banner__link" href="@notification.LinkUrl">@notification.LinkText</a>
             }
         </div>
     </div>

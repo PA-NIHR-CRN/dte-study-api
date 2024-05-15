@@ -3,57 +3,29 @@ using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
 
 namespace BPOR.Rms.Controllers;
 
 public class EmailController(IEmailCampaignService emailCampaignService, ParticipantDbContext context) : Controller
 {
-    public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model, string? activity = null, CancellationToken cancellationToken = default)
+    public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
-        if (activity == "SendEmail")
-        {
-            return await SendEmail(model, cancellationToken);
-        }
-        else if (activity == "SendPreviewEmail")
-        {
-            // TODO: Make this an independent POST endpoint
-            // to keep the email address out of the URL.
-            return SendPreviewEmail(model);
-        }
-
-        ModelState.Clear();
         model.EmailTemplates = FetchEmailTemplates();
         return View(model);
     }
 
-    public void ResetModel(SetupCampaignViewModel model)
+    [HttpPost]
+    public async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
-        ModelState.Remove("MaxNumbers");
-        ModelState.Remove("TotalVolunteers");
-        ModelState.Remove("StudyName");
-        ModelState.Remove("SelectedTemplate");
-        if (TempData["Notification"] != null)
-        {
-            model.Notification =
-                JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"].ToString());
-        }
-
-        if (TempData.ContainsKey("SelectedTemplateId"))
-        {
-            model.SelectedTemplateId = TempData["SelectedTemplateId"].ToString();
-            model.SelectedTemplateName = TempData["SelectedTemplateName"].ToString();
-        }
-
-        model.EmailTemplates = FetchEmailTemplates();
-    }
-
-    protected async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
-    {
-        ModelState.Remove("PreviewEmails");
         model.EmailTemplates = FetchEmailTemplates();
 
-        if (model.TotalVolunteers > model.MaxNumbers)
+        if (model.TotalVolunteers is null)
+        {
+            ModelState.AddModelError(nameof(model.TotalVolunteers), "Enter the number of volunteers to be contacted.");
+        }
+        else if (model.TotalVolunteers > model.MaxNumbers)
         {
             ModelState.AddModelError("TotalVolunteers", "The number of volunteers to be contacted must be the same as, or less than, the 'total number of volunteer accounts matching the filter options'.");
         }
@@ -65,10 +37,10 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
 
         if (!ModelState.IsValid)
         {
-            return View(model);
+            return View(nameof(SetupCampaign), model);
         }
 
-        var selectedTemplateId = FetchEmailTemplates().FirstOrDefault(t => t.Id == model.SelectedTemplateId)?.Name;
+        var selectedTemplateId = FetchEmailTemplates().FirstOrDefault(t => t.Value == model.SelectedTemplateId)?.Text;
 
         await emailCampaignService.SendCampaignAsync(new EmailCampaign
         {
@@ -78,6 +50,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
             Name = selectedTemplateId
         }, cancellationToken);
 
+        // TODO make this a view?
         return RedirectToAction("EmailSuccess", model);
     }
 
@@ -92,57 +65,48 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         return Task.FromResult<IActionResult>(View(model));
     }
 
+    [HttpPost]
     public IActionResult SendPreviewEmail(SetupCampaignViewModel model)
     {
-        if (model.PreviewEmails != null)
+        model.EmailTemplates = FetchEmailTemplates();
+
+        if (string.IsNullOrEmpty(model.SelectedTemplateId))
+        {
+            ModelState.AddModelError("SelectedTemplate", "Select an email template.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.PreviewEmails))
+        {
+            ModelState.AddModelError(nameof(model.PreviewEmails), "Enter at least one address");
+        }
+        else
         {
             var emails = model.PreviewEmails.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var email in emails)
             {
                 if (!IsValidEmail(email))
                 {
-                    ModelState.AddModelError("PreviewEmails", "Please enter a valid email address.");
+                    ModelState.AddModelError(nameof(model.PreviewEmails), "Please enter a valid email address.");
                     break;
                 }
             }
         }
 
-        ModelState.Remove("MaxNumbers");
-        ModelState.Remove("TotalVolunteers");
-        ModelState.Remove("StudyName");
-        ModelState.Remove("SelectedTemplate.Name");
-
-        // TODO can we cache this or is there a better way to do this?
-        var emailTemplates = FetchEmailTemplates();
-
+        var selectedTemplateName = string.Empty;
         if (model.SelectedTemplateId != null)
         {
-            var selectedTemplateName = emailTemplates.FirstOrDefault(t => t.Id == model.SelectedTemplateId)?.Name;
-            if (selectedTemplateName != null)
-            {
-                model.SelectedTemplateName = selectedTemplateName;
-            }
+            selectedTemplateName = model.EmailTemplates.FirstOrDefault(t => t.Value == model.SelectedTemplateId)?.Text;
         }
 
 
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid)
         {
-            ResetModel(model);
-            return View(model);
+            TempData["SelectedTemplateId"] = model.SelectedTemplateId;
+            TempData["SelectedTemplateName"] = selectedTemplateName;
+            TempData.AddSuccessNotification($"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
         }
 
-        TempData["SelectedTemplateId"] = model.SelectedTemplateId;
-        TempData["SelectedTemplateName"] = model.SelectedTemplateName;
-        TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
-        {
-            IsSuccess = true,
-            Heading = "Success",
-            Body =
-                $"Preview email using template {model.SelectedTemplateName} has been sent to  {model.PreviewEmails}"
-        });
-
-        ResetModel(model);
-        return View(model);
+        return View(nameof(SetupCampaign), model);
     }
 
     private bool IsValidEmail(string email)
@@ -158,13 +122,13 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         }
     }
 
-    private IEnumerable<EmailTemplate> FetchEmailTemplates()
+    private IEnumerable<SelectListItem> FetchEmailTemplates()
     {
-        return new List<EmailTemplate>
-        {
-            new EmailTemplate { Id = "2bdd0916-d4b3-4fad-baa2-7f12890f3c08", Name = "Template 1" },
-            new EmailTemplate { Id = "7c3275d4-7a60-4d97-87ed-f91e8c870935", Name = "Template 2" },
-            new EmailTemplate { Id = "d825d25f-2f4a-48f5-9a7d-f34e5747ef61", Name = "Template 3" }
-        };
+        return
+        [
+            new SelectListItem("Template 1", "2bdd0916-d4b3-4fad-baa2-7f12890f3c08"),
+            new SelectListItem("Template 2", "7c3275d4-7a60-4d97-87ed-f91e8c870935"),
+            new SelectListItem("Template 3", "d825d25f-2f4a-48f5-9a7d-f34e5747ef61"),
+        ];
     }
 }

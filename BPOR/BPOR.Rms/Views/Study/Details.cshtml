@@ -14,7 +14,7 @@
 @await Html.PartialAsync("Partials/Details/_StudyDetailsHeader", Model)
 <div style="display:flex;gap: 40px; flex-direction: column; width: 100%">
 
-    @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
+    @await Html.PartialAsync("Partials/_NotificationBanner") @* TODO: Move notifications banner to master layout *@
     @await Html.PartialAsync("Partials/Details/_StudyStatistics", Model)
     @await Html.PartialAsync("Partials/Details/_EmailTable", Model)
     @await Html.PartialAsync("Partials/Details/_VolunteerTable", Model)

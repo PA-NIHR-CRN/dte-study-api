@@ -128,8 +128,6 @@ public class VolunteerFilterViewModel
     public int VolunteerCount { get; set; }
     public bool ShowStudyFilters { get; set; }
 
-    public NotificationBannerModel? Notification { get; set; }
-
     public Page<VolunteerResult> VolunteerResults { get; set; } = Page<VolunteerResult>.Empty();
 
     public bool ShowResults { get; set; }

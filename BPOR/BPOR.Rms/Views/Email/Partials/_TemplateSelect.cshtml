@@ -29,11 +29,11 @@
             <span class="govuk-visually-hidden">Error:</span>
             @Html.ValidationMessageFor(model => model.SelectedTemplateId)
         </span>
-        @Html.DropDownListFor(model => model.SelectedTemplateId, new SelectList(Model.EmailTemplates, "Id", "Name"), "Select a template", new { @class = "govuk-select govuk-select--error" })
+        @Html.DropDownListFor(model => model.SelectedTemplateId, Model.EmailTemplates, "Select a template", new { @class = "govuk-select govuk-select--error" })
     }
     else
     {
-        @Html.DropDownListFor(model => model.SelectedTemplateId, new SelectList(Model.EmailTemplates, "Id", "Name"), "Select a template", new { @class = "govuk-select" })
+        @Html.DropDownListFor(model => model.SelectedTemplateId, Model.EmailTemplates, "Select a template", new { @class = "govuk-select" })
     }
 </div>
 
