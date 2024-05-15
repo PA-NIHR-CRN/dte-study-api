@@ -8,7 +8,7 @@
 
         <input type="hidden" asp-for="VolunteerCount" value="@Model.VolunteerCount" />
         <h2 class="govuk-heading-l" id="volunteerCount">
-            @if (Model.VolunteerCount == 0 || Model.VolunteerCount == null)
+            @if (Model.VolunteerCount == null)
             {
                 <span>-</span>
             }

@@ -16,10 +16,13 @@
                     @Html.DropDownListFor(m => m.SelectedVolunteersRegisteredInterest, Model.VolunteersRegisteredInterest, new { @class = "govuk-select govuk-select-custom" })
                 </div>
 
-                <div class="govuk-input_select__wrapper">
-                    @Html.LabelFor(m => Model.SelectedVolunteersRecruited, new { @class = "govuk-label exclusion_label" })
-                    @Html.DropDownListFor(m => m.SelectedVolunteersRecruited, Model.VolunteersRecruited, new { @class = "govuk-select govuk-select-custom" })
-                </div>
+                @if (Model.ShowRecruitedFilter)
+                {
+                    <div class="govuk-input_select__wrapper">
+                        @Html.LabelFor(m => Model.SelectedVolunteersRecruited, new { @class = "govuk-label exclusion_label" })
+                        @Html.DropDownListFor(m => m.SelectedVolunteersRecruited, Model.VolunteersRecruited, new { @class = "govuk-select govuk-select-custom" })
+                    </div>
+                }            
             }       
 
             <div class="govuk-input_select__wrapper">

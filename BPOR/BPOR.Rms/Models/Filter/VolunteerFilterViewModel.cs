@@ -125,8 +125,9 @@ public class VolunteerFilterViewModel
     public bool Ethnicity_Other { get; set; }
     [Display(Name = "White")]
     public bool Ethnicity_White { get; set; }
-    public int VolunteerCount { get; set; }
+    public int? VolunteerCount { get; set; }
     public bool ShowStudyFilters { get; set; }
+    public bool ShowRecruitedFilter { get; set; }
 
     public Page<VolunteerResult> VolunteerResults { get; set; } = Page<VolunteerResult>.Empty();
 

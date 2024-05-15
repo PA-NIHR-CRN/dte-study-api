@@ -15,6 +15,8 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
     {
         _filters.Clear();
         FilterVolunteersContacted(model.StudyId, model.SelectedVolunteersContacted);
+        FilterVolunteersRegisteredInterest(model.StudyId, model.SelectedVolunteersRegisteredInterest);
+        FilterVolunteersRecruited(model.StudyId, model.SelectedVolunteersRecruited);
         FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
         FilterByAreasOfResearch(model.SelectedHealthConditions);
         FilterByRegistrationDate(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
@@ -133,16 +135,77 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         if (selectedVolunteersContacted == "1")
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
-                                    context.StudyParticipantEnrollment.Any(enrollment =>
-                                    enrollment.ParticipantId == participant.Id && enrollment.StudyId == studyId);
+            context.EmailCampaignParticipants
+                .Any(ecp => ecp.ParticipantId == participant.Id &&
+                       context.EmailCampaigns
+                              .Any(ec => ec.Id == ecp.EmailCampaignId &&
+                                         context.FilterCriterias
+                                                .Any(fc => fc.Id == ec.FilterCriteriaId &&
+                                                           fc.StudyId == studyId)));
             _filters.Add(filterExpression);
         }
 
         if (selectedVolunteersContacted == "2")
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
-                                    !context.StudyParticipantEnrollment.Any(enrollment =>
-                                    enrollment.ParticipantId == participant.Id && enrollment.StudyId == studyId);
+            !context.EmailCampaignParticipants
+                .Any(ecp => ecp.ParticipantId == participant.Id &&
+                       context.EmailCampaigns
+                              .Any(ec => ec.Id == ecp.EmailCampaignId &&
+                                         context.FilterCriterias
+                                                .Any(fc => fc.Id == ec.FilterCriteriaId &&
+                                                           fc.StudyId == studyId)));
+
+            _filters.Add(filterExpression);
+        }
+    }
+
+    private void FilterVolunteersRegisteredInterest(int? studyId, string? selectedVolunteersRegisteredInterest)
+    {
+        if (selectedVolunteersRegisteredInterest == "1")
+        {
+            Expression<Func<Participant, bool>> filterExpression = participant =>
+            context.EmailCampaignParticipants
+                .Any(ecp => ecp.ParticipantId == participant.Id &&
+                            ecp.RegisteredInterestAt != null &&
+                            context.EmailCampaigns
+                                   .Any(ec => ec.Id == ecp.EmailCampaignId &&
+                                              context.FilterCriterias
+                                                     .Any(fc => fc.Id == ec.FilterCriteriaId &&
+                                                                fc.StudyId == studyId)));
+            _filters.Add(filterExpression);
+        }
+
+        if (selectedVolunteersRegisteredInterest == "2")
+        {
+            Expression<Func<Participant, bool>> filterExpression = participant =>
+            !context.EmailCampaignParticipants
+                .Any(ecp => ecp.ParticipantId == participant.Id &&
+                    ecp.RegisteredInterestAt != null &&
+                       context.EmailCampaigns
+                              .Any(ec => ec.Id == ecp.EmailCampaignId &&
+                                         context.FilterCriterias
+                                                .Any(fc => fc.Id == ec.FilterCriteriaId &&
+                                                           fc.StudyId == studyId)));
+            _filters.Add(filterExpression);
+        }
+    }
+
+    private void FilterVolunteersRecruited(int? studyId, string? selectedVolunteersRecruited)
+    {
+        if (selectedVolunteersRecruited == "1")
+        {
+            Expression<Func<Participant, bool>> filterExpression = participant =>
+                        context.StudyParticipantEnrollment.Any(enrollment =>
+                            enrollment.ParticipantId == participant.Id && enrollment.StudyId == studyId && enrollment.EnrolledAt != null);
+            _filters.Add(filterExpression);
+        }
+
+        if (selectedVolunteersRecruited == "2")
+        {
+            Expression<Func<Participant, bool>> filterExpression = participant =>
+                        !context.StudyParticipantEnrollment.Any(enrollment =>
+                            enrollment.ParticipantId == participant.Id && enrollment.StudyId == studyId && enrollment.EnrolledAt != null);
             _filters.Add(filterExpression);
         }
     }
