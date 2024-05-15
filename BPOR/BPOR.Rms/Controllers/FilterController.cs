@@ -29,7 +29,12 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         SetStudyExclusionFilters(model);
         SetHealthConditionSelectList(model);
 
-        model.ShowStudyFilters = model.StudyId is not null;
+        if (model.StudyId is not null)
+        {
+            model.ShowStudyFilters = true;
+            model.ShowRecruitedFilter = context.Studies.Where(s => s.Id == model.StudyId).Select(s => s.IsRecruitingIdentifiableParticipants).FirstOrDefault();
+        }
+        
 
         return View(model);
     }
@@ -207,7 +212,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         {
             FilterCriteriaId = filterCriteria.Id,
             StudyId = model.StudyId,
-            MaxNumbers = model.VolunteerCount,
+            MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
             StudyName = model.SelectedStudy
         };
         return RedirectToAction("SetupCampaign", "Email", campaignDetails);
