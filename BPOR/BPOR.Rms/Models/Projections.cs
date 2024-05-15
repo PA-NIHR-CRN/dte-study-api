@@ -49,7 +49,10 @@ public static class Projections
             LatestRecruitmentTotal = s.ManualEnrollments
                 .OrderByDescending(e => e.CreatedAt)
                 .Select(e => e.TotalEnrollments)
-                .FirstOrDefault()
+                .FirstOrDefault(),
+            TotalRecruited = s.ManualEnrollments
+                .Where(m => m.StudyId == s.Id)
+                .Sum(e => e.TotalEnrollments)
         };
     }
 

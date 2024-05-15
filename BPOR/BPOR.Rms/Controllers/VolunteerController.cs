@@ -4,6 +4,7 @@ using BPOR.Rms.Models.Volunteer;
 using LuhnNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace BPOR.Rms.Controllers;
 
@@ -27,6 +28,12 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     [HttpPost]
     public async Task<IActionResult> SubmitVolunteerNumbers(UpdateRecruitedViewModel model)
     {
+        // do not allow non-numeric characters, allow spaces and line breaks
+        if (Regex.IsMatch(model.VolunteerReferenceNumbers, "[^0-9\\s\r\n]"))
+        {
+            ModelState.AddModelError("VolunteerReferenceNumbers", "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
+        }
+
         if (!ModelState.IsValid)
         {
             return View("UpdateRecruited", model);
@@ -100,7 +107,19 @@ public class VolunteerController(ParticipantDbContext context) : Controller
                         LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
                     });
                 }
+
+                if (totalEnrolled == 0 && totalPreviouslyEnrolled > 0)
+                {
+                    TempData.AddNotification(new NotificationBannerModel
+                    {
+                        IsSuccess = true,
+                        Heading = "Success",
+                        Body = subBodyText,
+                        LinkText = "Return to the study details page",
+                        LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
+                    });
             }
+        }
         }
         model.VolunteerReferenceNumbers = string.Empty;
         return RedirectToAction("UpdateRecruited", model);

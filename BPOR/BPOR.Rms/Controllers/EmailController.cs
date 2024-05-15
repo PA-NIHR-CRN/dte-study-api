@@ -32,7 +32,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
         {
-            ModelState.AddModelError("SelectedTemplate", "Select an email template.");
+            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Select an email template.");
         }
 
         if (!ModelState.IsValid)
@@ -96,6 +96,10 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         if (model.SelectedTemplateId != null)
         {
             selectedTemplateName = model.EmailTemplates.FirstOrDefault(t => t.Value == model.SelectedTemplateId)?.Text;
+        }
+        else
+        {
+            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Select an email template.");
         }
 
 
