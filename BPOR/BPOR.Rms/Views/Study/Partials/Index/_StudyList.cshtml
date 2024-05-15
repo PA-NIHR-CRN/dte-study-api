@@ -225,7 +225,14 @@
                     <div class="study-card-recruited-numbers">
                         <p class="govuk-body govuk-!-margin-0">Recruited:</p>
                         <p class="govuk-heading-m govuk-!-margin-0 govuk-!-padding-0">
-                            @Html.DisplayFor(modelItem => item.LatestRecruitmentTotal)
+                            @if (item.IsRecruitingIdentifiableParticipants)
+                            {
+                                @Html.DisplayFor(modelItem => item.TotalRecruited)
+                            }
+                            else
+                            {
+                                @Html.DisplayFor(modelItem => item.LatestRecruitmentTotal)
+                            }                       
                         </p>
                     </div>
                     @Html.ActionLink("View study", "Details", new { id = item.Id }, new { @class = "govuk-button" })

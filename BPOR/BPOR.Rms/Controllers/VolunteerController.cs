@@ -1,3 +1,4 @@
+using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Volunteer;
@@ -5,6 +6,7 @@ using LuhnNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace BPOR.Rms.Controllers;
 
@@ -35,6 +37,12 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     public async Task<IActionResult> SubmitVolunteerNumbers(UpdateRecruitedViewModel model)
     {
         ModelState.Remove("Notification");
+
+        // do not allow non-numeric characters, allow spaces and line breaks
+        if (Regex.IsMatch(model.VolunteerReferenceNumbers, "[^0-9\\s\r\n]"))
+        {
+            ModelState.AddModelError("VolunteerReferenceNumbers", "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
+        }
 
         if (!ModelState.IsValid)
         {
@@ -105,6 +113,18 @@ public class VolunteerController(ParticipantDbContext context) : Controller
                         Heading = "Success",
                         Body = bodyText,
                         SubBodyText = totalPreviouslyEnrolled > 0 ? subBodyText : null,
+                        LinkText = "Return to the study details page",
+                        LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
+                    });
+                }
+
+                if (totalEnrolled == 0 && totalPreviouslyEnrolled > 0)
+                {
+                    TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
+                    {
+                        IsSuccess = true,
+                        Heading = "Success",
+                        Body = subBodyText,
                         LinkText = "Return to the study details page",
                         LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
                     });
