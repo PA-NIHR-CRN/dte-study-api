@@ -18,12 +18,14 @@
       <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
       <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
       <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
+      <ProjectReference Include="..\NIHR.NotificationService\NIHR.NotificationService.csproj" />
     </ItemGroup>
 
     <ItemGroup>
 <!-- TODO  check this package issue-->
       <PackageReference Include="Amazon.AspNetCore.DataProtection.SSM" Version="3.2.1" />
       <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="8.0.1" />
+      <PackageReference Include="GovukNotify" Version="7.0.0" />
       <PackageReference Include="LuhnNet" Version="2.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.4" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.3" />

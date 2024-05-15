@@ -7,6 +7,7 @@ using LuhnNet;
 using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Models;
+using NIHR.NotificationService.Interfaces;
 
 namespace BPOR.Rms.Services;
 

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities;
+using Notify.Models.Responses;
 
 namespace BPOR.Rms.Models.Email;
 
@@ -29,11 +30,6 @@ public class SetupCampaignViewModel
 
     public NotificationBannerModel? Notification { get; set; }
     public int FilterCriteriaId { get; set; }
-    public IEnumerable<EmailTemplate> EmailTemplates { get; set; } = new List<EmailTemplate>();
+    public TemplateList EmailTemplates { get; set; } = new TemplateList();
 }
 
-public class EmailTemplate
-{
-    public string Id { get; set; }
-    public string Name { get; set; }
-}

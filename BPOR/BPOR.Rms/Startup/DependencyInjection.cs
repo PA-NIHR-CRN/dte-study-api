@@ -1,6 +1,5 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
-using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Clients;
 using BPOR.Rms.Services;
 using Dte.Common.Authentication;
@@ -9,10 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
-using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
-using Newtonsoft.Json;
+using NIHR.Infrastructure.Settings;
+using NIHR.NotificationService.Interfaces;
+using NIHR.NotificationService.Services;
+using Notify.Client;
 
 namespace BPOR.Rms.Startup;
 
@@ -36,7 +37,7 @@ public static class DependencyInjection
 
         // TODO: Temporary services
         services.AddTransient<IRandomiser>(p => new Randomiser(Random.Shared));
-        services.AddTransient<INotificationService, NullNotificationService>();
+        services.AddTransient<INotificationService, NotificationService>();
 
         services.AddDistributedMemoryCache();
         services.AddPaging();
@@ -64,8 +65,10 @@ public static class DependencyInjection
 
         services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
             logger);
-
         services.AddHealthChecks().AddMySql(connectionString).AddCheck<LocationHealthCheck>("Location", Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
+        
+        var govNotifySettings = services.GetSectionAndValidate<GovNotifySettings>(configuration);
+        services.AddSingleton(new NotificationClient(govNotifySettings.Value.ApiKey));
 
         if (hostEnvironment.IsDevelopment())
         {

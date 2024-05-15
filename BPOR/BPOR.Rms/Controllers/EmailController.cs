@@ -1,14 +1,24 @@
+using System.Text;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using NIHR.NotificationService.Interfaces;
+using Notify.Models.Responses;
 
 namespace BPOR.Rms.Controllers;
 
-public class EmailController(IEmailCampaignService emailCampaignService, ParticipantDbContext context) : Controller
+public class EmailController(IEmailCampaignService emailCampaignService, ParticipantDbContext context,
+    INotificationService notificationService,
+    IDistributedCache cache)
+    : Controller
 {
+    
+    private const string EmailCacheKey = "EmailTemplates";
     public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
         if (activity == "SendEmail")
@@ -23,11 +33,14 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         }
 
         ModelState.Clear();
-        model.EmailTemplates = FetchEmailTemplates();
+        var templates = await FetchEmailTemplates(cancellationToken);
+        model.EmailTemplates = templates;
+
+        await CacheEmailTemplates(templates, cancellationToken);
         return View(model);
     }
 
-    public IActionResult Index(SetupCampaignViewModel model)
+    public async Task<IActionResult> Index(SetupCampaignViewModel model)
     {
         ModelState.Remove("MaxNumbers");
         ModelState.Remove("TotalVolunteers");
@@ -38,14 +51,14 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
             model.Notification =
                 JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"].ToString());
         }
-
+        
         if (TempData.ContainsKey("SelectedTemplateId"))
         {
             model.SelectedTemplateId = TempData["SelectedTemplateId"].ToString();
             model.SelectedTemplateName = TempData["SelectedTemplateName"].ToString();
         }
 
-        model.EmailTemplates = FetchEmailTemplates();
+        model.EmailTemplates = await FetchEmailTemplates();
 
         return View("SetupCampaign", model);
     }
@@ -53,16 +66,15 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
     protected async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         ModelState.Remove("PreviewEmails");
-        model.EmailTemplates = FetchEmailTemplates();
 
         if (model.TotalVolunteers > model.MaxNumbers)
         {
-            ModelState.AddModelError("TotalVolunteers", "The number of volunteers to be contacted must be the same as, or less than, the 'total number of volunteer accounts matching the filter options'.");
+            ModelState.AddModelError("TotalVolunteers", "Total Volunteers must be less than or equal to Max Numbers.");
         }
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
         {
-            ModelState.AddModelError("SelectedTemplate", "Select an email template.");
+            ModelState.AddModelError("SelectedTemplate", "Please select an email template.");
         }
 
         if (!ModelState.IsValid)
@@ -70,7 +82,8 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
             return View("SetupCampaign", model);
         }
 
-        var selectedTemplateId = FetchEmailTemplates().FirstOrDefault(t => t.Id == model.SelectedTemplateId)?.Name;
+        var templates = await FetchEmailTemplates(cancellationToken);
+        var selectedTemplateId = templates.templates.FirstOrDefault(t => t.id == model.SelectedTemplateId)?.name;
 
         await emailCampaignService.SendCampaignAsync(new EmailCampaign
         {
@@ -94,7 +107,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         return Task.FromResult<IActionResult>(View(model));
     }
 
-    public IActionResult SendPreviewEmail(SetupCampaignViewModel model)
+    public async Task<IActionResult> SendPreviewEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         if (model.PreviewEmails != null)
         {
@@ -113,13 +126,14 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         ModelState.Remove("TotalVolunteers");
         ModelState.Remove("StudyName");
         ModelState.Remove("SelectedTemplate.Name");
-
+        
         // TODO can we cache this or is there a better way to do this?
-        var emailTemplates = FetchEmailTemplates();
+        var emailTemplates = FetchEmailTemplates(cancellationToken);
 
         if (model.SelectedTemplateId != null)
         {
-            var selectedTemplateName = emailTemplates.FirstOrDefault(t => t.Id == model.SelectedTemplateId)?.Name;
+            var selectedTemplateName =
+                emailTemplates.templates.FirstOrDefault(t => t.id == model.SelectedTemplateId)?.name;
             if (selectedTemplateName != null)
             {
                 model.SelectedTemplateName = selectedTemplateName;
@@ -131,7 +145,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         {
             return RedirectToAction("Index", model);
         }
-
+        
         TempData["SelectedTemplateId"] = model.SelectedTemplateId;
         TempData["SelectedTemplateName"] = model.SelectedTemplateName;
         TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
@@ -158,13 +172,25 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         }
     }
 
-    private IEnumerable<EmailTemplate> FetchEmailTemplates()
+    private async Task<TemplateList> FetchEmailTemplates(CancellationToken cancellationToken = default)
     {
-        return new List<EmailTemplate>
+        var cachedData = await cache.GetAsync(EmailCacheKey, cancellationToken);
+        if (cachedData != null)
         {
-            new EmailTemplate { Id = "2bdd0916-d4b3-4fad-baa2-7f12890f3c08", Name = "Template 1" },
-            new EmailTemplate { Id = "7c3275d4-7a60-4d97-87ed-f91e8c870935", Name = "Template 2" },
-            new EmailTemplate { Id = "d825d25f-2f4a-48f5-9a7d-f34e5747ef61", Name = "Template 3" }
-        };
+            var jsonData = Encoding.UTF8.GetString(cachedData);
+            return JsonConvert.DeserializeObject<TemplateList>(jsonData);
+        }
+
+        var templates = await notificationService.GetTemplatesAsync(cancellationToken);
+        await CacheEmailTemplates(templates, cancellationToken);
+        return templates;
+    }
+    
+    private async Task CacheEmailTemplates(TemplateList templates, CancellationToken cancellationToken = default)
+    {
+        var jsonData = JsonConvert.SerializeObject(templates);
+        var data = Encoding.UTF8.GetBytes(jsonData);
+
+        await cache.SetAsync(EmailCacheKey, data, cancellationToken);
     }
 }
