@@ -60,7 +60,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
         {
-            ModelState.AddModelError("SelectedTemplate", "Select an email template.");
+            ModelState.AddModelError("SelectedTemplateId", "Select an email template.");
         }
 
         if (!ModelState.IsValid)
