@@ -33,13 +33,14 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         ModelState.Remove("TotalVolunteers");
         ModelState.Remove("StudyName");
         ModelState.Remove("SelectedTemplate");
+
         if (TempData["Notification"] != null)
         {
             model.Notification =
                 JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"].ToString());
         }
 
-        if (TempData.ContainsKey("SelectedTemplateId"))
+        if (TempData["SelectedTemplateId"] != null)
         {
             model.SelectedTemplateId = TempData["SelectedTemplateId"].ToString();
             model.SelectedTemplateName = TempData["SelectedTemplateName"].ToString();
@@ -122,6 +123,10 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
             {
                 model.SelectedTemplateName = selectedTemplateName;
             }
+        }
+        else
+        {
+            ModelState.AddModelError("SelectedTemplateId", "Select an email template.");
         }
 
 
