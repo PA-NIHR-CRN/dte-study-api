@@ -67,7 +67,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
 
         if (!ModelState.IsValid)
         {
-            return View("SetupCampaign", model);
+            return View(model);
         }
 
         var selectedTemplateId = FetchEmailTemplates().FirstOrDefault(t => t.Id == model.SelectedTemplateId)?.Name;
@@ -129,7 +129,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
 
         if (!ModelState.IsValid)
         {
-            return RedirectToAction("Index", model);
+            return View(model);
         }
 
         TempData["SelectedTemplateId"] = model.SelectedTemplateId;
@@ -142,7 +142,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
                 $"Preview email using template {model.SelectedTemplateName} has been sent to  {model.PreviewEmails}"
         });
 
-        return RedirectToAction("Index", model);
+        return View(model);
     }
 
     private bool IsValidEmail(string email)
