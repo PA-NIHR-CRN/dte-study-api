@@ -1,12 +1,14 @@
 @using BPOR.Rms.Views.ViewComponents
 @model BPOR.Rms.Models.Volunteer.UpdateRecruitedViewModel
 
-@await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
-{
-    new("All Studies", "/Study/Index"),
-    new("Study", $"/Study/Details/{Model.StudyId}"),
-    new("Update newly recruited volunteers", "/Study/Edit")
-})
+@{
+    ViewData.AddBreadcrumbs(new Dictionary<string, string>
+            {
+                ["All Studies"] = "/Study/Index",
+                ["Study"] = $"/Study/Details/{Model.StudyId}",
+                ["Update newly recruited volunteers"] = "/Study/Edit",
+            });
+}
 
 <div style="display: flex;flex-direction: column;gap: 50px;width: 100% ;">
 
@@ -36,7 +38,7 @@
             <br>9670389703597499
             <br>6113453237761467
         </div>
-        
+
         <div class="govuk-form-group @(Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
             <div class="govuk-grid-column-one-quarter-from-desktop-no-padding">
                 @if (Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0)
@@ -51,7 +53,7 @@
                 {
                     <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea"></textarea>
                 }
-            </div>               
+            </div>
         </div>
 
         <button type="submit" class="govuk-button">Submit volunteer numbers</button>
