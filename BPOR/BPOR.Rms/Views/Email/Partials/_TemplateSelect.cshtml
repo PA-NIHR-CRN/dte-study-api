@@ -16,7 +16,7 @@
     }
 </style>
 
-<div class="govuk-form-group" @(Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "") asp-for="SelectedTemplateId">
+<div class="govuk-form-group @(Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")" asp-for="SelectedTemplateId">
     <label asp-for="SelectedTemplateId" class="govuk-label govuk-label--l" for="SelectedTemplateId">
         @Html.DisplayNameFor(model => model.SelectedTemplateId)
     </label>
