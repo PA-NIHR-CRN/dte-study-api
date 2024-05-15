@@ -3,39 +3,24 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewData.AddBreadcrumb("All Studies", "/Study/Index");
+
+    if (Model.StudyId is not null)
+    {
+        ViewData.AddBreadcrumb("Study Page", $"/Study/Details/" + Model.StudyId);
+    }
+
+    ViewData.AddBreadcrumb("Find Volunteers", "");
 }
 
 <style>
-    .volunter-count-panel {
+    .volunteer-count-panel {
         position: -webkit-sticky;
         position: sticky;
         top: 2em;
     }
 </style>
-
-<div class="govuk-grid-row">
-
-    @if (Model.StudyId != null)
-    {
-        @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
-    {
-    new("All Studies", "/Study/Index"),
-    new("Study Page", $"/Study/Details/" + Model.StudyId),
-    new("Find Volunteers", "")
-    })
-    }
-    else
-    {
-        @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
-    {
-    new("All Studies", "/Study/Index"),
-    new("Find Volunteers", "")
-    })
-    }
-
-
-</div>
-
 
 @if (Model.ShowResults)
 {
@@ -77,7 +62,7 @@
             @await Html.PartialAsync("Partials/_Demographics", Model)
 
         </div>
-        <div class="govuk-grid-column-one-third volunter-count-panel">
+        <div class="govuk-grid-column-one-third volunteer-count-panel">
             @await Html.PartialAsync("Partials/_FilterButtonsAndCount", Model)
         </div>
     </div>

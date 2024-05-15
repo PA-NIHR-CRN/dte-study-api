@@ -5,16 +5,14 @@
 @{
     ViewData["Title"] = "Edit";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData.AddBreadcrumbs(new Dictionary<string, string>
+    {
+            ["All Studies"] = "/Study/Index",
+            ["Study Page"] = $"/Study/Details/{Model.Id}",
+            ["Edit Study"] = "/Study/Edit",
+    });
 }
 
-<div class="govuk-grid-row">
-    @await Component.InvokeAsync("Breadcrumbs", new List<BreadcrumbItem>
-    {
-        new("All Studies", "/Study/Index"),
-        new("Study Page", $"/Study/Details/{Model.Id}"),
-        new("Edit Study", "/Study/Edit")
-    })
-</div>
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
 
