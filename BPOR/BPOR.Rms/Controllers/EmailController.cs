@@ -22,14 +22,14 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
     
     public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
-        PopulateReferenceData(model);
+        PopulateReferenceDataAsync(model, true);
         return View(model);
     }
 
     [HttpPost]
     public async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
-        PopulateReferenceData(model);
+        PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
 
         if (model.TotalVolunteers is null)
         {
@@ -63,9 +63,9 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         return View(nameof(SetupCampaign), model);
     }
 
-    private async void PopulateReferenceData(SetupCampaignViewModel model)
+    private async void PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false, CancellationToken cancellationToken = default)
     {
-        model.EmailTemplates = await FetchEmailTemplates();
+        model.EmailTemplates = await FetchEmailTemplates(forceRefresh, cancellationToken);
         if (model.StudyId is not null)
         {
             model.StudyName = context.Studies.Where(s => s.Id == model.StudyId).Select(s => s.StudyName).First();
@@ -75,7 +75,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
     [HttpPost]
     public async Task<IActionResult> SendPreviewEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
-        PopulateReferenceData(model);
+        PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
 
         var emailAddresses = model.GetPreviewEmailAddresses();
 
@@ -121,10 +121,10 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
 
     private bool IsValidEmail(string email) => System.Net.Mail.MailAddress.TryCreate(email, out var address) && email.Equals(address.Address, StringComparison.InvariantCultureIgnoreCase);
     
-    private async Task<TemplateList> FetchEmailTemplates(CancellationToken cancellationToken = default)
+    private async Task<TemplateList> FetchEmailTemplates(bool forceRefresh = false, CancellationToken cancellationToken = default)
     {
         var cachedData = await cache.GetAsync(EmailCacheKey, cancellationToken);
-        if (cachedData != null)
+        if (cachedData != null && !forceRefresh)
         {
             var jsonData = Encoding.UTF8.GetString(cachedData);
             return JsonConvert.DeserializeObject<TemplateList>(jsonData);
