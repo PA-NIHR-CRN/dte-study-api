@@ -84,7 +84,8 @@ public static class Projections
                             ContactEmail = p.ContactEmail,
                             SentAt = p.SentAt,
                             RegisteredInterestAt = p.RegisteredInterestAt,
-                            DeliveredAt = p.DeliveredAt
+                            DeliveredAt = p.DeliveredAt,
+                            DeliveryStatusId = p.DeliveryStatusId
                         })
                         .ToList(),
                 })

@@ -54,13 +54,22 @@
                     @emailCampaign.CreatedAt.ToString("dd/MM/yyyy, HH:mm")
                 </td>
                 <td class="govuk-table__cell">@emailCampaign.Name</td>
-                <td class="govuk-table__cell">@emailCampaign.EmailCampaignParticipants.Count() / @emailCampaign.TargetGroupSize</td>
-                <td class="govuk-table__cell">0</td>
+                <td class="govuk-table__cell">@emailCampaign.TotalCampaignEmailsSent / @emailCampaign.TargetGroupSize</td>
+                <td class="govuk-table__cell">@emailCampaign.TotalCampaignRegisteredInterest</td>
                 <td class="govuk-table__cell">0</td>
                 <td class="govuk-table__cell">
-                    <strong class="govuk-tag @(!emailCampaign.EmailCampaignParticipants.Any() ? "govuk-tag--green" : "govuk-tag--orange")">
-                        In progress
-                    </strong>
+                    @if(emailCampaign.TotalCampaignEmailsSent < emailCampaign.TargetGroupSize)
+                    {
+                        <strong class="govuk-tag govuk-tag--orange">
+                            In progress
+                        </strong>
+                    }
+                    else if (emailCampaign.TotalCampaignEmailsSent == emailCampaign.TargetGroupSize)
+                    {
+                        <strong class="govuk-tag govuk-tag--green">
+                            Sent
+                        </strong>
+                    }  
                 </td>
             </tr>
         }
