@@ -130,9 +130,9 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         }
     }
 
-    private void FilterVolunteersContacted(int? studyId, string? selectedVolunteersContacted)
+    private void FilterVolunteersContacted(int? studyId, bool? selectedVolunteersContacted)
     {
-        if (selectedVolunteersContacted == "1")
+        if (selectedVolunteersContacted == true)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
             context.EmailCampaignParticipants
@@ -145,7 +145,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
             _filters.Add(filterExpression);
         }
 
-        if (selectedVolunteersContacted == "2")
+        if (selectedVolunteersContacted == false)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
             !context.EmailCampaignParticipants
@@ -160,9 +160,9 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         }
     }
 
-    private void FilterVolunteersRegisteredInterest(int? studyId, string? selectedVolunteersRegisteredInterest)
+    private void FilterVolunteersRegisteredInterest(int? studyId, bool? selectedVolunteersRegisteredInterest)
     {
-        if (selectedVolunteersRegisteredInterest == "1")
+        if (selectedVolunteersRegisteredInterest == true)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
             context.EmailCampaignParticipants
@@ -176,7 +176,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
             _filters.Add(filterExpression);
         }
 
-        if (selectedVolunteersRegisteredInterest == "2")
+        if (selectedVolunteersRegisteredInterest == false)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
             !context.EmailCampaignParticipants
@@ -191,9 +191,9 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         }
     }
 
-    private void FilterVolunteersRecruited(int? studyId, string? selectedVolunteersRecruited)
+    private void FilterVolunteersRecruited(int? studyId, bool? selectedVolunteersRecruited)
     {
-        if (selectedVolunteersRecruited == "1")
+        if (selectedVolunteersRecruited == true)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
                         context.StudyParticipantEnrollment.Any(enrollment =>
@@ -201,7 +201,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
             _filters.Add(filterExpression);
         }
 
-        if (selectedVolunteersRecruited == "2")
+        if (selectedVolunteersRecruited == false)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
                         !context.StudyParticipantEnrollment.Any(enrollment =>
@@ -210,14 +210,14 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         }
     }
 
-    private void FilterVolunteersCompletedRegistration(string? selectedCompletedRegistration)
+    private void FilterVolunteersCompletedRegistration(bool? selectedCompletedRegistration)
     {
-        if (selectedCompletedRegistration == "1")
+        if (selectedCompletedRegistration == true)
         {
             _filters.Add(p => p.Stage2CompleteUtc != null);
         }
 
-        if (selectedCompletedRegistration == "2")
+        if (selectedCompletedRegistration == false)
         {
             _filters.Add(p => p.Stage2CompleteUtc == null);
         }

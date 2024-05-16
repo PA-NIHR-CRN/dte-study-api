@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.RegularExpressions;
 using BPOR.Rms.Models.Email;
-using Newtonsoft.Json;
 using BPOR.Rms.Models;
 using BPOR.Rms.Services;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +13,9 @@ namespace BPOR.Rms.Controllers;
 
 public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService) : Controller
 {
-    public async Task<IActionResult> Index(VolunteerFilterViewModel model, int? studyId, string? activity = null, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
+
         if (activity == "FilterVolunteers")
         {
             await FilterVolunteersAsync(model, cancellationToken);
@@ -25,16 +25,9 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             model = ClearFilters(model);
         }
 
-        SetSelectedStudy(model, studyId);
+        SetSelectedStudy(model);
         SetStudyExclusionFilters(model);
         SetHealthConditionSelectList(model);
-
-        if (model.StudyId is not null)
-        {
-            model.ShowStudyFilters = true;
-            model.ShowRecruitedFilter = context.Studies.Where(s => s.Id == model.StudyId).Select(s => s.IsRecruitingIdentifiableParticipants).FirstOrDefault();
-        }
-        
 
         return View(model);
     }
@@ -56,137 +49,52 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             .ToList();
     }
 
-    private void SetStudyExclusionFilters(VolunteerFilterViewModel model)
+    private static void SetStudyExclusionFilters(VolunteerFilterViewModel model)
     {
-        // Contacted Select
-        bool? includeContacted = null;
+        model.VolunteersContacted = GetTristateOptions();
 
-        if (model.ExcludeContacted)
-        {
-            includeContacted = false;
-        }
+        model.VolunteersCompletedRegistration = GetTristateOptions();
 
-        if (model.IncludeContacted)
-        {
-            includeContacted = true;
-        }
+        model.VolunteersRecruited = GetTristateOptions();
 
-        model.VolunteersContacted = new List<SelectListItem>
-        {
-            new SelectListItem
-                { Value = "3", Text = "No Preference", Selected = includeContacted == null ? true : false },
-            new SelectListItem { Value = "1", Text = "Include", Selected = includeContacted == true ? true : false },
-            new SelectListItem { Value = "2", Text = "Exclude", Selected = includeContacted == false ? true : false }
-        };
-
-        // Completed Registration Select
-        bool? includeCompletedRegistration = null;
-
-        if (model.ExcludeCompletedRegistration)
-        {
-            includeCompletedRegistration = false;
-        }
-
-        if (model.IncludeCompletedRegistration)
-        {
-            includeCompletedRegistration = true;
-        }
-
-        model.VolunteersCompletedRegistration = new List<SelectListItem>
-        {
-            new SelectListItem
-                { Value = "3", Text = "No Preference", Selected = includeCompletedRegistration == null ? true : false },
-            new SelectListItem
-                { Value = "1", Text = "Include", Selected = includeCompletedRegistration == true ? true : false },
-            new SelectListItem
-                { Value = "2", Text = "Exclude", Selected = includeCompletedRegistration == false ? true : false }
-        };
-
-        // Recruited Select
-        bool? includeRecruited = null;
-
-        if (model.ExcludeRecruited)
-        {
-            includeRecruited = false;
-        }
-
-        if (model.IncludeRecruited)
-        {
-            includeRecruited = true;
-        }
-
-        model.VolunteersRecruited = new List<SelectListItem>
-        {
-            new SelectListItem
-                { Value = "3", Text = "No Preference", Selected = includeRecruited == null ? true : false },
-            new SelectListItem { Value = "1", Text = "Include", Selected = includeRecruited == true ? true : false },
-            new SelectListItem { Value = "2", Text = "Exclude", Selected = includeRecruited == false ? true : false }
-        };
-
-        // Registered Interest Select
-        bool? includeRegisteredInterest = null;
-
-        if (model.ExcludeRegisteredInterest)
-        {
-            includeRegisteredInterest = false;
-        }
-
-        if (model.IncludeRegisteredInterest)
-        {
-            includeRegisteredInterest = true;
-        }
-
-        model.VolunteersRegisteredInterest = new List<SelectListItem>
-        {
-            new SelectListItem
-                { Value = "3", Text = "No Preference", Selected = includeRegisteredInterest == null ? true : false },
-            new SelectListItem
-                { Value = "1", Text = "Include", Selected = includeRegisteredInterest == true ? true : false },
-            new SelectListItem
-                { Value = "2", Text = "Exclude", Selected = includeRegisteredInterest == false ? true : false }
-        };
+        model.VolunteersRegisteredInterest = GetTristateOptions();
     }
 
-    private void SetSelectedStudy(VolunteerFilterViewModel model, int? studyId)
+    private static IEnumerable<SelectListItem> GetTristateOptions()
     {
-        if (studyId is not null)
-        {
-            Study selectedStudy = context.Studies.Where(x => x.Id == studyId).FirstOrDefault();
+        return [
+                new SelectListItem { Value = string.Empty, Text = "No Preference" },
+                new SelectListItem { Value = true.ToString(), Text = "Include" },
+                new SelectListItem { Value = false.ToString(), Text = "Exclude" }
+            ];
+    }
 
-            model.StudyId = selectedStudy?.Id;
-            model.SelectedStudy = selectedStudy?.StudyName ?? string.Empty;
-            model.SelectedStudyCPMSId = selectedStudy?.CpmsId;
+    private void SetSelectedStudy(VolunteerFilterViewModel model)
+    {
+        if (model.StudyId is not null)
+        {
+            model.ShowStudyFilters = true;
+
+            var selectedStudy = context.Studies.Where(x => x.Id == model.StudyId).Select(x => new { x.StudyName, x.CpmsId, x.IsRecruitingIdentifiableParticipants }).First();
+
+            model.SelectedStudy = selectedStudy!.StudyName;
+            model.SelectedStudyCPMSId = selectedStudy!.CpmsId;
+
+            model.ShowRecruitedFilter = selectedStudy!.IsRecruitingIdentifiableParticipants;
         }
     }
 
-     public IActionResult SetupEmailCampaign(VolunteerFilterViewModel model)
+    public IActionResult SetupEmailCampaign(VolunteerFilterViewModel model)
     {
         DateTime? dateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
         DateTime? dateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;
 
-        bool? volunteersContacted = null;
-        bool? volunteersRegisteredInterest = null;
-        bool? volunteersRecruited = null;
-        bool? volunteersCompletedRegistration = null;
-
-        if (model.SelectedVolunteersContacted == "1") { volunteersContacted = true; }
-        else if (model.SelectedVolunteersContacted == "2") { volunteersContacted = false; }
-
-        if (model.SelectedVolunteersRegisteredInterest == "1") { volunteersRegisteredInterest = true; }
-        else if (model.SelectedVolunteersRegisteredInterest == "2") { volunteersRegisteredInterest = false; }
-
-        if (model.SelectedVolunteersRecruited == "1") { volunteersRecruited = true; }
-        else if (model.SelectedVolunteersRecruited == "2") { volunteersRecruited = false; }
-
-        if (model.SelectedVolunteersCompletedRegistration == "1") { volunteersCompletedRegistration = true; }
-        else if (model.SelectedVolunteersCompletedRegistration == "2") { volunteersCompletedRegistration = false; }
-
         var filterCriteria = new FilterCriteria
         {
-            IncludeContacted = volunteersContacted,
-            IncludeRegisteredInterest = volunteersRegisteredInterest,
-            IncludeCompletedRegistration = volunteersCompletedRegistration,
-            IncludeRecruited = volunteersRecruited,
+            IncludeContacted = model.SelectedVolunteersContacted,
+            IncludeRegisteredInterest = model.SelectedVolunteersRegisteredInterest,
+            IncludeCompletedRegistration = model.SelectedVolunteersRegisteredInterest,
+            IncludeRecruited = model.SelectedVolunteersRecruited,
             RegistrationFromDate = ConstructDate(model.RegistrationFromDateYear, model.RegistrationFromDateMonth,
                 model.RegistrationFromDateDay),
             RegistrationToDate = ConstructDate(model.RegistrationToDateYear, model.RegistrationToDateMonth,

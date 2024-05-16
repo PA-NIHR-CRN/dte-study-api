@@ -10,14 +10,13 @@ public class FilterMapper
         var viewModel = new VolunteerFilterViewModel
         {
             StudyId = criteria.StudyId ?? 0,
-
-            IncludeContacted = criteria.IncludeContacted ?? false,
-            IncludeRegisteredInterest = criteria.IncludeRegisteredInterest ?? false,
-            IncludeRecruited = criteria.IncludeRecruited ?? false,
-
             FullPostcode = criteria.FullPostcode,
             SearchRadiusMiles = criteria.SearchRadiusMiles,
-
+            
+            SelectedVolunteersCompletedRegistration = criteria.IncludeCompletedRegistration,
+            SelectedVolunteersContacted = criteria.IncludeContacted,
+            SelectedVolunteersRecruited = criteria.IncludeRecruited,
+            SelectedVolunteersRegisteredInterest = criteria.IncludeRegisteredInterest,
 
             RegistrationFromDateDay = criteria.RegistrationFromDate?.Day,
             RegistrationFromDateMonth = criteria.RegistrationFromDate?.Month,
@@ -55,42 +54,6 @@ public class FilterMapper
 
 
         };
-
-        if (criteria.IncludeCompletedRegistration == true)
-        {
-            viewModel.SelectedVolunteersCompletedRegistration = "1";
-        }
-        else if (criteria.IncludeCompletedRegistration == false)
-        {
-            viewModel.SelectedVolunteersCompletedRegistration = "2";
-        }
-
-        if (criteria.IncludeContacted == true)
-        {
-            viewModel.SelectedVolunteersContacted = "1";
-        }
-        else if (criteria.IncludeContacted == false)
-        {
-            viewModel.SelectedVolunteersContacted = "2";
-        }
-
-        if (criteria.IncludeRecruited == true)
-        {
-            viewModel.SelectedVolunteersRecruited = "1";
-        }
-        else if (criteria.IncludeRecruited == false)
-        {
-            viewModel.SelectedVolunteersRecruited = "2";
-        }
-
-        if (criteria.IncludeRegisteredInterest == true)
-        {
-            viewModel.SelectedVolunteersRegisteredInterest = "1";
-        }
-        else if (criteria.IncludeRegisteredInterest == false)
-        {
-            viewModel.SelectedVolunteersRegisteredInterest = "2";
-        }
 
         return viewModel;
     }
