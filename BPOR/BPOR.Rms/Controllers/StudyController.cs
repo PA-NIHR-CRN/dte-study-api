@@ -3,7 +3,6 @@ using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Controllers;
@@ -58,13 +57,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         if (study == null)
         {
             return NotFound();
-        }
-
-
-        if (TempData["Notification"] != null)
-        {
-            study.Notification =
-                JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
         }
 
         study.HasEmailCampaigns = context.Studies.Any(s => s.FilterCriterias.Any(f => f.EmailCampaigns.Any()) && s.Id == study.Study.Id);
@@ -200,12 +192,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
                 }
             }
 
-            TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
-            {
-                IsSuccess = true,
-                Heading = "Study details updated",
-                Body = $"{model.StudyName} has been successfully updated",
-            });
+            TempData.AddSuccessNotification($"{model.StudyName} has been successfully updated");
 
             return RedirectToAction(nameof(Details), new { id });
         }

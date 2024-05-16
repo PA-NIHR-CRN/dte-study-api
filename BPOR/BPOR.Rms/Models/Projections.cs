@@ -49,7 +49,10 @@ public static class Projections
             LatestRecruitmentTotal = s.ManualEnrollments
                 .OrderByDescending(e => e.CreatedAt)
                 .Select(e => e.TotalEnrollments)
-                .FirstOrDefault()
+                .FirstOrDefault(),
+            TotalRecruited = s.ManualEnrollments
+                .Where(m => m.StudyId == s.Id)
+                .Sum(e => e.TotalEnrollments)
         };
     }
 
@@ -73,12 +76,16 @@ public static class Projections
                 .Select(ec => new EmailCampaign
                 {
                     TargetGroupSize = (int)ec.TargetGroupSize,
+                    CreatedAt = ec.CreatedAt,
+                    Name = ec.Name,
                     EmailCampaignParticipants = ec.Participants
                         .Select(p => new EmailCampaignParticipant
                         {
                             ContactEmail = p.ContactEmail,
                             SentAt = p.SentAt,
-                            DeliveredAt = p.DeliveredAt
+                            RegisteredInterestAt = p.RegisteredInterestAt,
+                            DeliveredAt = p.DeliveredAt,
+                            DeliveryStatusId = p.DeliveryStatusId
                         })
                         .ToList(),
                 })

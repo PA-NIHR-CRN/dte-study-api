@@ -13,48 +13,25 @@ public class VolunteerFilterViewModel
 
     public long? SelectedStudyCPMSId { get; set; }
 
-    public IEnumerable<SelectListItem>? Studies { get; set; }
-    public IEnumerable<SelectListItem>? VolunteersContacted { get; set; }
+    public IEnumerable<SelectListItem> VolunteersContacted { get; set; } = [];
+    public IEnumerable<SelectListItem> VolunteersRecruited { get; set; } = [];
+    public IEnumerable<SelectListItem> VolunteersRegisteredInterest { get; set; } = [];
+    public IEnumerable<SelectListItem> VolunteersCompletedRegistration { get; set; } = [];
+    public IEnumerable<SelectListItem> HealthConditions { get; set; } = [];
+
+
     [Display(Name = "Volunteers contacted")]
-    public string? SelectedVolunteersContacted { get; set; }
-    public IEnumerable<SelectListItem>? VolunteersRecruited { get; set; }
+    public bool? SelectedVolunteersContacted { get; set; }
     [Display(Name = "Volunteers recruited")]
-    public string? SelectedVolunteersRecruited { get; set; }
-    public IEnumerable<SelectListItem>? VolunteersRegisteredInterest { get; set; }
+    public bool? SelectedVolunteersRecruited { get; set; }
     [Display(Name = "Volunteers registered interest")]
-    public string? SelectedVolunteersRegisteredInterest { get; set; }
-    public IEnumerable<SelectListItem>? VolunteersCompletedRegistration { get; set; }
+    public bool? SelectedVolunteersRegisteredInterest { get; set; }
     [Display(Name = "Volunteers completed registration")]
-    public string? SelectedVolunteersCompletedRegistration { get; set; }
-    // Volunteer criteria
-    [Display(Name = "Exclude those contacted")]
-    public bool ExcludeContacted { get; set; }
-
-    [Display(Name = "Exclude registered interest")]
-    public bool ExcludeRegisteredInterest { get; set; }
-
-    [Display(Name = "Exclude those who have completed registration")]
-    public bool ExcludeCompletedRegistration { get; set; }
-
-    [Display(Name = "Exclude recruited")]
-    public bool ExcludeRecruited { get; set; }
-
-    [Display(Name = "Only include those contacted")]
-    public bool IncludeContacted { get; set; }
-
-    [Display(Name = "Only include registered interest")]
-    public bool IncludeRegisteredInterest { get; set; }
-
-    [Display(Name = "Only include those who have completed registration")]
-    public bool IncludeCompletedRegistration { get; set; }
-
-    [Display(Name = "Only include recruited")]
-    public bool IncludeRecruited { get; set; }
+    public bool? SelectedVolunteersCompletedRegistration { get; set; }
 
     // Areas of research volunteers are interested in
     [Display(Name = "Areas of research volunteers are interested in")]
     public List<string>? SelectedHealthConditions { get; set; }
-    public IEnumerable<SelectListItem> HealthConditions { get; set; } = [];
 
     // Date of volunteer registration
     // From Date
@@ -125,10 +102,10 @@ public class VolunteerFilterViewModel
     public bool Ethnicity_Other { get; set; }
     [Display(Name = "White")]
     public bool Ethnicity_White { get; set; }
-    public int VolunteerCount { get; set; }
+    public int? VolunteerCount { get; set; }
     public bool ShowStudyFilters { get; set; }
+    public bool ShowRecruitedFilter { get; set; }
 
-    public NotificationBannerModel? Notification { get; set; }
 
     public Page<VolunteerResult> VolunteerResults { get; set; } = Page<VolunteerResult>.Empty();
 

@@ -1,3 +1,4 @@
+using BPOR.Rms.Models.Volunteer;
 using System.ComponentModel.DataAnnotations;
 
 namespace BPOR.Rms.Models.Study;
@@ -23,6 +24,7 @@ public class StudyModel
 
     [Display(Name = "Is this study recruiting identifiable participants?")]
     public bool IsRecruitingIdentifiableParticipants { get; set; }
-     public int? LatestRecruitmentTotal { get; set; }
-    
+    public int? LatestRecruitmentTotal { get; set; }
+    public int? TotalRecruited { get; set; }
+
 }

@@ -1,32 +1,30 @@
+@using BPOR.Rms.Models.Email
 @using BPOR.Rms.Views.ViewComponents
 @model BPOR.Rms.Models.Email.SetupCampaignViewModel
 
-<div class="govuk-grid-column-two-thirds govuk-!-margin-bottom-6">
-    @{
-        var breadcrumbs = new List<BreadcrumbItem>
-        {
-            new("All Studies", "/Study/Index"),
-        };
+@{
+    ViewData.AddBreadcrumb("All Studies", "/Study/Index");
 
-        if (Model.StudyId != null)
-        {
-            breadcrumbs.Add(new BreadcrumbItem($"Study", $"/Study/Details/{Model.StudyId}"));
-            breadcrumbs.Add(new BreadcrumbItem("Find volunteers", "/Filter?studyId=" + Model.StudyId));
-        }
-        else
-        {
-            breadcrumbs.Add(new BreadcrumbItem("Find volunteers", "/Filter"));
-        }
-        breadcrumbs.Add(new BreadcrumbItem("Set up email campaign", "/Email/SetupCampaign"));
+    if (Model.StudyId is not null)
+    {
+        ViewData.AddBreadcrumb($"Study", $"/Study/Details/{Model.StudyId}");
+        ViewData.AddBreadcrumb("Find volunteers", "/Filter?studyId=" + Model.StudyId);
+    }
+    else
+    {
+        ViewData.AddBreadcrumb("Find volunteers", "/Filter");
     }
 
-    @await Component.InvokeAsync("Breadcrumbs", breadcrumbs)
+    ViewData.AddBreadcrumb("Set up email campaign", "/Email/SetupCampaign");
+}
+
+<div class="govuk-grid-column-two-thirds govuk-!-margin-bottom-6">
     <h1 class="govuk-heading-l govuk-!-margin-bottom-0">Set up an email campaign</h1>
     <p class="govuk-hint body-bold">@Html.DisplayFor(x => x.StudyName)</p>
-    @await Html.PartialAsync("Partials/_NotificationBanner", Model.Notification)
-    @await Html.PartialAsync("Partials/_ErrorSummary", Model)
+    @await Html.PartialAsync("Partials/_NotificationBanner")
+    @await Html.PartialAsync("Partials/_ErrorSummary")
 
-    <form method="get">
+    <form method="post">
         <input type="hidden" asp-for="StudyId" />
         <input type="hidden" asp-for="MaxNumbers" />
         <input type="hidden" asp-for="FilterCriteriaId" />

@@ -4,7 +4,7 @@ using BPOR.Rms.Models.Volunteer;
 using LuhnNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace BPOR.Rms.Controllers;
 
@@ -22,19 +22,17 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     {
         ModelState.Remove("VolunteerReferenceNumbers");
 
-        if (TempData["Notification"] != null)
-        {
-            model.Notification =
-                JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
-        }
-
         return View(model);
     }
 
     [HttpPost]
     public async Task<IActionResult> SubmitVolunteerNumbers(UpdateRecruitedViewModel model)
     {
-        ModelState.Remove("Notification");
+        // do not allow non-numeric characters, allow spaces and line breaks
+        if (Regex.IsMatch(model.VolunteerReferenceNumbers, "[^0-9\\s\r\n]"))
+        {
+            ModelState.AddModelError("VolunteerReferenceNumbers", "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
+        }
 
         if (!ModelState.IsValid)
         {
@@ -99,7 +97,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
                     context.ManualEnrollments.Add(manualEnrollment);
                     await context.SaveChangesAsync();
 
-                    TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
+                    TempData.AddNotification(new NotificationBannerModel
                     {
                         IsSuccess = true,
                         Heading = "Success",
@@ -109,7 +107,19 @@ public class VolunteerController(ParticipantDbContext context) : Controller
                         LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
                     });
                 }
+
+                if (totalEnrolled == 0 && totalPreviouslyEnrolled > 0)
+                {
+                    TempData.AddNotification(new NotificationBannerModel
+                    {
+                        IsSuccess = true,
+                        Heading = "Success",
+                        Body = subBodyText,
+                        LinkText = "Return to the study details page",
+                        LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
+                    });
             }
+        }
         }
         model.VolunteerReferenceNumbers = string.Empty;
         return RedirectToAction("UpdateRecruited", model);
@@ -123,12 +133,6 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         {
             var study = await GetStudyDetails(model.StudyId);
 
-            if (TempData["Notification"] != null)
-            {
-                study.Notification =
-                    JsonConvert.DeserializeObject<NotificationBannerModel>(TempData["Notification"]?.ToString());
-            }
-
             return View(study);
         }
 
@@ -140,7 +144,6 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     {
         ModelState.Remove("StudyName");
         ModelState.Remove("StudyId");
-        ModelState.Remove("Notification");
         ModelState.Remove("EnrollmentDetails");
 
         if (!ModelState.IsValid)
@@ -158,7 +161,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         context.ManualEnrollments.Add(manualEnrollment);
         await context.SaveChangesAsync();
 
-        TempData["Notification"] = JsonConvert.SerializeObject(new NotificationBannerModel
+        TempData.AddNotification(new NotificationBannerModel
         {
             IsSuccess = true,
             Heading = "Success",

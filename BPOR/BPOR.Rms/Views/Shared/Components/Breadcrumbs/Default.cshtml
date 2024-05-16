@@ -1,9 +1,12 @@
-@model IEnumerable<BPOR.Rms.Views.ViewComponents.BreadcrumbItem>
+@using BPOR.Rms.Views.ViewComponents
+@{
+    var breadcrumbs = ViewData["Breadcrumbs"] as IList<BreadcrumbItem>;
+}
 
 <style>
-.breadcrumb-link:visited,
+    .breadcrumb-link:visited,
     .breadcrumb-link {
-        color:  #1D70B8;
+        color: #1D70B8;
         font-feature-settings: 'clig' off, 'liga' off;
         font-size: 18px;
         font-style: normal;
@@ -12,12 +15,12 @@
         text-decoration-line: underline;
         font-feature-settings: 'clig' off, 'liga' off;
     }
-    
-    .breadcrumb-link:focus {
-    text-decoration: none;
-    background-color: rgb(254, 212, 122);
-    box-shadow: rgb(254, 212, 122) 0px -2px, rgb(33, 43, 50) 0px 4px;
-    }
+
+        .breadcrumb-link:focus {
+            text-decoration: none;
+            background-color: rgb(254, 212, 122);
+            box-shadow: rgb(254, 212, 122) 0px -2px, rgb(33, 43, 50) 0px 4px;
+        }
 
     .breadcrumb-current {
         color: #505A5F;
@@ -28,31 +31,35 @@
         line-height: 27px;
         text-decoration: none;
     }
-    
+
     .breadcrumb-container {
-    float: left;
-    width: 100%;
-   
+        float: left;
+        width: 100%;
     }
 </style>
 
-<div class="govuk-breadcrumbs govuk-breadcrumbs--collapse-on-mobile breadcrumb-container" style="text-align: left;">
-    <ol class="govuk-breadcrumbs__list">
-        @for (int i = 0; i < Model.Count(); i++)
-        {
-            var item = Model.ElementAt(i);
-            if (i < Model.Count() - 1)
-            {
-                <li class="govuk-breadcrumbs__list-item">
-                    <a class="govuk-breadcrumbs__link breadcrumb-link" href="@item.Url">@item.Text</a>
-                </li>
-            }
-            else
-            {
-                <li class="govuk-breadcrumbs__list-item">
-                    <span class="govuk-breadcrumbs__link breadcrumb-current">@item.Text</span>
-                </li>
-            }
-        }
-    </ol>
-</div>
+@if (breadcrumbs is not null && breadcrumbs.Any())
+{
+    <div class="govuk-grid-row">
+        <div class="govuk-breadcrumbs govuk-breadcrumbs--collapse-on-mobile breadcrumb-container" style="text-align: left;">
+            <ol class="govuk-breadcrumbs__list">
+                @for (int i = 0; i < breadcrumbs.Count(); i++)
+                {
+                    var item = breadcrumbs.ElementAt(i);
+                    if (i < breadcrumbs.Count() - 1)
+                    {
+                        <li class="govuk-breadcrumbs__list-item">
+                            <a class="govuk-breadcrumbs__link breadcrumb-link" href="@item.Url">@item.Text</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="govuk-breadcrumbs__list-item">
+                            <span class="govuk-breadcrumbs__link breadcrumb-current">@item.Text</span>
+                        </li>
+                    }
+                }
+            </ol>
+        </div>
+    </div>
+}
