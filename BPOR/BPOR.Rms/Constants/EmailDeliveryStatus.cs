@@ -6,4 +6,5 @@ public static class EmailDeliveryStatus
     public const string Sent = "Sent";
     public const string Delivered = "Delivered";
     public const string RegisteredInterest = "RegisteredInterest";
+    public const string Failed = "Failed";
 }

@@ -1,4 +1,4 @@
-using NIHR.Infrastructure.Models;
+using NIHR.NotificationService.Models;
 using Notify.Models.Responses;
 
 namespace NIHR.NotificationService.Interfaces;

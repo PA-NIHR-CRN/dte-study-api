@@ -1,6 +1,5 @@
-﻿using NIHR.Infrastructure.Interfaces;
-using NIHR.Infrastructure.Models;
-using NIHR.NotificationService.Interfaces;
+﻿using NIHR.NotificationService.Interfaces;
+using NIHR.NotificationService.Models;
 using Notify.Models.Responses;
 
 namespace BPOR.Rms.Startup

@@ -11,9 +11,9 @@ builder.AddNihrConfiguration();
 builder.AddIdgAuthentication(authOptions =>
     {
         authOptions.FallbackPolicy = new AuthorizationPolicyBuilder()
-                        .RequireAuthenticatedUser()
-                        .RequireRole(RoleConfiguration.GetRoles().Select(x => x.Code))
-                        .Build();
+            .RequireAuthenticatedUser()
+            .RequireRole(RoleConfiguration.GetRoles().Select(x => x.Code))
+            .Build();
     }
 );
 

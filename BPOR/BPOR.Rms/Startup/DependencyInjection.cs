@@ -10,9 +10,9 @@ using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
-using NIHR.Infrastructure.Settings;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
+using NIHR.NotificationService.Settings;
 using Notify.Client;
 
 namespace BPOR.Rms.Startup;
@@ -67,7 +67,7 @@ public static class DependencyInjection
             logger);
         services.AddHealthChecks().AddMySql(connectionString).AddCheck<LocationHealthCheck>("Location", Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
         
-        var govNotifySettings = services.GetSectionAndValidate<GovNotifySettings>(configuration);
+        var govNotifySettings = services.GetSectionAndValidate<NotificationServiceSettings>(configuration);
         services.AddSingleton(new NotificationClient(govNotifySettings.Value.ApiKey));
 
         if (hostEnvironment.IsDevelopment())

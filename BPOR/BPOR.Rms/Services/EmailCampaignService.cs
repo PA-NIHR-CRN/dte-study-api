@@ -2,12 +2,10 @@ using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Constants;
 using BPOR.Rms.Mappers;
-using BPOR.Rms.Models.Study;
 using LuhnNet;
 using Microsoft.EntityFrameworkCore;
-using NIHR.Infrastructure.Interfaces;
-using NIHR.Infrastructure.Models;
 using NIHR.NotificationService.Interfaces;
+using NIHR.NotificationService.Models;
 
 namespace BPOR.Rms.Services;
 
@@ -19,97 +17,91 @@ public class EmailCampaignService(
     IRandomiser randomiser)
     : IEmailCampaignService
 {
-    public async Task SendCampaignAsync(Domain.Entities.EmailCampaign campaign, CancellationToken cancellationToken = default)
+    public async Task SendCampaignAsync(Domain.Entities.EmailCampaign campaign,
+        CancellationToken cancellationToken = default)
     {
-        try
+        await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+        // Retrieve filter criteria and apply it
+        var dbFilter = context.FilterCriterias
+            .Include(fc => fc.FilterGender)
+            .Include(fc => fc.FilterAreaOfInterest)
+            .Include(fc => fc.FilterEthnicGroup)
+            .Include(fc => fc.FilterPostcode)
+            .Include(fc => fc.FilterSexSameAsRegisteredAtBirth)
+            .FirstOrDefault(fc => fc.Id == campaign.FilterCriteriaId);
+
+        if (dbFilter != null)
         {
-            await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
-            await context.SaveChangesAsync(cancellationToken);
-            // Retrieve filter criteria and apply it
-            var dbFilter = context.FilterCriterias
-                                            .Include(fc => fc.FilterGender)
-                                            .Include(fc => fc.FilterAreaOfInterest)
-                                            .Include(fc => fc.FilterEthnicGroup)
-                                            .Include(fc => fc.FilterPostcode)
-                                            .Include(fc => fc.FilterSexSameAsRegisteredAtBirth)
-                                            .Where(fc => fc.Id == campaign.FilterCriteriaId).FirstOrDefault();
-            if (dbFilter != null)
+            var filter = FilterMapper.MapToFilterModel(dbFilter);
+            var volunteers = await filterService.FilterVolunteersAsync(filter, cancellationToken);
+
+            List<Participant> finalVolunteers = new List<Participant>();
+
+            if (campaign.TargetGroupSize != null && volunteers.Any())
             {
-                var filter = FilterMapper.MapToFilterModel(dbFilter);
-                var volunteers = await filterService.FilterVolunteersAsync(filter, cancellationToken);
+                var volunteersToRandomise = volunteers.Where(v => !string.IsNullOrEmpty(v.Email));
+                var randomisedVolunteers =
+                    randomiser.GetRandomisedCollection(volunteersToRandomise, campaign.TargetGroupSize.Value);
+                finalVolunteers = randomisedVolunteers.ToList();
 
-                List<Participant> finalVolunteers = new List<Participant>();
+                var emailAddresses = finalVolunteers.Select(v => v.Email).ToList();
 
-                if (campaign.TargetGroupSize != null && volunteers.Count() > 0)
+                var studyId = context.FilterCriterias.Where(fc => fc.Id == campaign.FilterCriteriaId)
+                    .Select(fc => fc.StudyId).FirstOrDefault();
+                var isStudyRecruitingIdentifiable = context.Studies.Where(s => s.Id == studyId)
+                    .Select(s => s.IsRecruitingIdentifiableParticipants).FirstOrDefault();
+                var personalisationData = new Dictionary<string, Dictionary<string, dynamic>>();
+
+                foreach (var volunteer in finalVolunteers)
                 {
-                    List<string?> emailAddresses = new List<string?>();
-
-                    var volunteersToRandomise = volunteers.Where(v => !String.IsNullOrEmpty(v.Email));
-                    var randomisedVolunteers = randomiser.GetRandomisedCollection(volunteersToRandomise, campaign.TargetGroupSize.Value);
-                    emailAddresses = randomisedVolunteers.Select(v => v.Email).ToList();
-                    finalVolunteers = randomisedVolunteers.ToList();
-
-                    await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
+                    if (!string.IsNullOrEmpty(volunteer.Email))
                     {
-                        EmailAddresses = emailAddresses,
-                        EmailTemplateId = campaign.EmailTemplateId,
-                    }, cancellationToken);
-
-                    var studyId = context.FilterCriterias.Where(fc => fc.Id == campaign.FilterCriteriaId).Select(fc => fc.StudyId).FirstOrDefault();
-                    var isStudyRecruitingIdentifiable = context.Studies.Where(s => s.Id == studyId).Select(s => s.IsRecruitingIdentifiableParticipants).FirstOrDefault();
-
-                    if (!isStudyRecruitingIdentifiable || studyId == null)
-                    {
-                        foreach (var volunteer in finalVolunteers)
+                        var reference = GenerateVolunteerReference();
+                        var emailCampaignParticipant = new EmailCampaignParticipant
                         {
-                            if (!String.IsNullOrEmpty(volunteer.Email))
-                            {
-                                context.EmailCampaignParticipants.Add(new Domain.Entities.EmailCampaignParticipant
-                                {
-                                    EmailCampaignId = campaign.Id,
-                                    ParticipantId = volunteer.Id,
-                                    DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending),
-                                    SentAt = DateTime.UtcNow,
-                                    ContactEmail = volunteer.Email,
-                                });
-                            }
-                        }
-                    }
-                    else if (isStudyRecruitingIdentifiable && studyId != null)
-                    {
-                        foreach (var volunteer in finalVolunteers)
-                        {
-                            if (!String.IsNullOrEmpty(volunteer.Email))
-                            {
-                                context.EmailCampaignParticipants.Add(new Domain.Entities.EmailCampaignParticipant
-                                {
-                                    EmailCampaignId = campaign.Id,
-                                    ParticipantId = volunteer.Id,
-                                    DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending),
-                                    SentAt = DateTime.UtcNow,
-                                    ContactEmail = volunteer.Email,
-                                });
+                            EmailCampaignId = campaign.Id,
+                            ParticipantId = volunteer.Id,
+                            DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending),
+                            SentAt = DateTime.UtcNow,
+                            ContactEmail = volunteer.Email,
+                        };
+                        context.EmailCampaignParticipants.Add(emailCampaignParticipant);
 
-                                context.StudyParticipantEnrollment.Add(new StudyParticipantEnrollment
-                                {
-                                    StudyId = studyId.Value,
-                                    ParticipantId = volunteer.Id,
-                                    Reference = GenerateVolunteerReference()
-                                });
-                            }
+                        await context.SaveChangesAsync(cancellationToken);
+
+                        var personalisation = new Dictionary<string, dynamic>
+                        {
+                            { "email", volunteer.Email },
+                            { "reference", emailCampaignParticipant.Id },
+                            { "firstName", volunteer.FirstName },
+                            { "lastName", volunteer.LastName }
+                        };
+                        personalisationData.Add(volunteer.Email, personalisation);
+
+
+                        if (isStudyRecruitingIdentifiable && studyId != null)
+                        {
+                            context.StudyParticipantEnrollment.Add(new StudyParticipantEnrollment
+                            {
+                                StudyId = studyId.Value,
+                                ParticipantId = volunteer.Id,
+                                Reference = GenerateVolunteerReference()
+                            });
                         }
                     }
                 }
+
+                await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
+                {
+                    EmailAddresses = emailAddresses,
+                    PersonalisationData = personalisationData,
+                    EmailTemplateId = campaign.EmailTemplateId
+                }, cancellationToken);
             }
-
-
-            await context.SaveChangesAsync(cancellationToken);
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     private string GenerateVolunteerReference()

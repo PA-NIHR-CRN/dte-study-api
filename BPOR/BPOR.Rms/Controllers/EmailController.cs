@@ -5,9 +5,10 @@ using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using NIHR.Infrastructure.Models;
 using NIHR.NotificationService.Interfaces;
+using NIHR.NotificationService.Models;
 using Notify.Models.Responses;
 
 namespace BPOR.Rms.Controllers;
@@ -29,7 +30,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         {
             // TODO: Make this an independent POST endpoint
             // to keep the email address out of the URL.
-            return SendPreviewEmail(model);
+            return await SendPreviewEmail(model, cancellationToken);
         }
 
         ModelState.Clear();
@@ -109,9 +110,9 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
 
     public async Task<IActionResult> SendPreviewEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
+        var emails = model.PreviewEmails.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
         if (model.PreviewEmails != null)
         {
-            var emails = model.PreviewEmails.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var email in emails)
             {
                 if (!IsValidEmail(email))
@@ -128,7 +129,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         ModelState.Remove("SelectedTemplate.Name");
         
         // TODO can we cache this or is there a better way to do this?
-        var emailTemplates = FetchEmailTemplates(cancellationToken);
+        var emailTemplates = await FetchEmailTemplates(cancellationToken);
 
         if (model.SelectedTemplateId != null)
         {
@@ -145,6 +146,24 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         {
             return RedirectToAction("Index", model);
         }
+
+        var personalisationData = emails.ToDictionary(
+            email => email,
+            email => new Dictionary<string, dynamic>
+            {
+                {"firstName", "John"},
+                {"lastName", "Doe"},
+                {"uniqueLink", $"https://example.com/{email}"},
+                {"email", email},
+                {"reference", "PreviewEmailReference"}
+            });
+        
+        await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
+        {
+            EmailAddresses = emails,
+            EmailTemplateId = new Guid(model.SelectedTemplateId),
+            PersonalisationData = personalisationData
+        }, cancellationToken);
         
         TempData["SelectedTemplateId"] = model.SelectedTemplateId;
         TempData["SelectedTemplateName"] = model.SelectedTemplateName;
