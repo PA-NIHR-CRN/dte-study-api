@@ -54,7 +54,7 @@
                     @emailCampaign.CreatedAt.ToString("dd/MM/yyyy, HH:mm")
                 </td>
                 <td class="govuk-table__cell">@emailCampaign.Name</td>
-                <td class="govuk-table__cell">@emailCampaign.EmailCampaignParticipants.Count()</td>
+                <td class="govuk-table__cell">@emailCampaign.EmailCampaignParticipants.Count() / @emailCampaign.TargetGroupSize</td>
                 <td class="govuk-table__cell">0</td>
                 <td class="govuk-table__cell">0</td>
                 <td class="govuk-table__cell">

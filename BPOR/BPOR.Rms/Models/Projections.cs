@@ -76,11 +76,14 @@ public static class Projections
                 .Select(ec => new EmailCampaign
                 {
                     TargetGroupSize = (int)ec.TargetGroupSize,
+                    CreatedAt = ec.CreatedAt,
+                    Name = ec.Name,
                     EmailCampaignParticipants = ec.Participants
                         .Select(p => new EmailCampaignParticipant
                         {
                             ContactEmail = p.ContactEmail,
                             SentAt = p.SentAt,
+                            RegisteredInterestAt = p.RegisteredInterestAt,
                             DeliveredAt = p.DeliveredAt
                         })
                         .ToList(),

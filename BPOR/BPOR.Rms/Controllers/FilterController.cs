@@ -93,7 +93,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         {
             IncludeContacted = model.SelectedVolunteersContacted,
             IncludeRegisteredInterest = model.SelectedVolunteersRegisteredInterest,
-            IncludeCompletedRegistration = model.SelectedVolunteersRegisteredInterest,
+            IncludeCompletedRegistration = model.SelectedVolunteersCompletedRegistration,
             IncludeRecruited = model.SelectedVolunteersRecruited,
             RegistrationFromDate = ConstructDate(model.RegistrationFromDateYear, model.RegistrationFromDateMonth,
                 model.RegistrationFromDateDay),

@@ -43,14 +43,12 @@ public class EmailCampaignService(
                 {
                     List<string?> emailAddresses = new List<string?>();
 
-                    var volunteersToRandomise = volunteers.Where(v => !String.IsNullOrEmpty(v.Email));
-                    var randomisedVolunteers = randomiser.GetRandomisedCollection(volunteersToRandomise, campaign.TargetGroupSize.Value);
-                    emailAddresses = randomisedVolunteers.Select(v => v.Email).ToList();
-                    finalVolunteers = randomisedVolunteers.ToList();
+                    var randomisedVolunteers = randomiser.GetRandomisedCollection(volunteers, campaign.TargetGroupSize.Value);
+                    finalVolunteers = randomisedVolunteers.Where(v => !String.IsNullOrEmpty(v.Email)).ToList();
 
                     await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
                     {
-                        EmailAddresses = emailAddresses,
+                        EmailAddresses = finalVolunteers.Select(v => v.Email).ToList(),
                         EmailTemplateId = campaign.EmailTemplateId,
                     }, cancellationToken);
 
