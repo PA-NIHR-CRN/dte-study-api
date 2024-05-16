@@ -36,6 +36,13 @@ public class EmailDeliveryStatusConfiguration : IEntityTypeConfiguration<EmailDe
                 Code = "RegisteredInterest",
                 Description = "RegisteredInterest",
                 IsDeleted = false
+            },
+            new EmailDeliveryStatus
+            {
+                Id = 5,
+                Code = "Failed",
+                Description = "Failed",
+                IsDeleted = false
             }
         );
     }
