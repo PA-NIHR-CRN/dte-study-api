@@ -45,9 +45,9 @@ namespace NIHR.NotificationService.Services
                         throw new KeyNotFoundException($"Personalisation data not found for email: {email}");
                     }
 
-                    if (!personalisation.TryGetValue("reference", out var reference))
+                    if (!personalisation.TryGetValue("emailCampaignParticipantId", out var reference))
                     {
-                        throw new KeyNotFoundException($"Reference not found for email: {email}");
+                        throw new KeyNotFoundException($"EmailCampaignParticipantId not found for email: {email}");
                     }
 
                     await rateLimitPolicy.ExecuteAsync(() =>

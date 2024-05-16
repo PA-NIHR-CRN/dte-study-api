@@ -73,9 +73,10 @@ public class EmailCampaignService(
                         var personalisation = new Dictionary<string, dynamic>
                         {
                             { "email", volunteer.Email },
-                            { "reference", emailCampaignParticipant.Id },
+                            { "emailCampaignParticipantId", emailCampaignParticipant.Id },
                             { "firstName", volunteer.FirstName },
-                            { "lastName", volunteer.LastName }
+                            { "lastName", volunteer.LastName },
+                            { "uniqueLink", $"https://example.com/{reference}" }
                         };
                         personalisationData.Add(volunteer.Email, personalisation);
 
@@ -86,7 +87,7 @@ public class EmailCampaignService(
                             {
                                 StudyId = studyId.Value,
                                 ParticipantId = volunteer.Id,
-                                Reference = GenerateVolunteerReference()
+                                Reference = reference
                             });
                         }
                     }

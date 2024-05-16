@@ -28,11 +28,6 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     [HttpPost]
     public async Task<IActionResult> SubmitVolunteerNumbers(UpdateRecruitedViewModel model)
     {
-        if (String.IsNullOrEmpty(model.VolunteerReferenceNumbers))
-        {
-            ModelState.AddModelError("VolunteerReferenceNumbers", "Enter a Be Part of Research volunteer reference number");
-            return View("UpdateRecruited", model);
-        }
         // do not allow non-numeric characters, allow spaces and line breaks
         if (Regex.IsMatch(model.VolunteerReferenceNumbers, "[^0-9\\s\r\n]"))
         {
