@@ -161,9 +161,14 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
         [Bind("FullName,EmailAddress,StudyName,CpmsId, Step")]
-        StudyFormEditModel model)
+        StudyFormViewModel model)
     {
         ModelState.Remove("IsRecruitingIdentifiableParticipants");
+
+        if (model.StudyName.Length > 255)
+        {
+            ModelState.AddModelError("StudyName", "Study name must be less than 255 characters.");
+        }
 
         if (ModelState.IsValid)
         {
@@ -200,6 +205,9 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
 
             return RedirectToAction(nameof(Details), new { id });
         }
+
+        model.Id = id;
+        model.IsEditMode = true;
 
         return View(model);
     }
