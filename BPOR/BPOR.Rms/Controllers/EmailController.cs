@@ -12,14 +12,16 @@ using Notify.Models.Responses;
 
 namespace BPOR.Rms.Controllers;
 
-public class EmailController(IEmailCampaignService emailCampaignService, ParticipantDbContext context,
+public class EmailController(
+    ParticipantDbContext context,
     INotificationService notificationService,
-    IDistributedCache cache)
+    IDistributedCache cache,
+    ILogger<EmailController> logger,
+    IServiceScopeFactory serviceScopeFactory)
     : Controller
 {
-    
-    private const string EmailCacheKey = "EmailTemplates";
-    
+    private const string _emailCacheKey = "EmailTemplates";
+
     public IActionResult SetupCampaign(SetupCampaignViewModel model)
     {
         PopulateReferenceDataAsync(model, true);
@@ -27,7 +29,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
+    public IActionResult SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
 
@@ -37,7 +39,8 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         }
         else if (model.TotalVolunteers > model.MaxNumbers)
         {
-            ModelState.AddModelError(nameof(model.TotalVolunteers), "The number of volunteers to be contacted must be the same as, or less than, the 'total number of volunteer accounts matching the filter options'.");
+            ModelState.AddModelError(nameof(model.TotalVolunteers),
+                "The number of volunteers to be contacted must be the same as, or less than, the 'total number of volunteer accounts matching the filter options'.");
         }
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
@@ -49,21 +52,32 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         {
             var selectedTemplateName = model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
 
-            await emailCampaignService.SendCampaignAsync(new EmailCampaign
+            var emailCampaign = new EmailCampaign
             {
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
                 EmailTemplateId = new Guid(model.SelectedTemplateId!),
                 Name = selectedTemplateName
+            };
+
+            logger.LogInformation("Sending email campaign {CampaignName} to {TotalVolunteers} volunteers",
+                emailCampaign.Name, emailCampaign.TargetGroupSize);
+            Task.Run(() =>
+            {
+                using var scope = serviceScopeFactory.CreateScope();
+                var scopedService = scope.ServiceProvider.GetRequiredService<IEmailCampaignService>();
+                scopedService.SendCampaignAsync(emailCampaign, cancellationToken);
             }, cancellationToken);
 
-            return View("EmailSuccess", new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName});
+            return View("EmailSuccess",
+                new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });
         }
-        
+
         return View(nameof(SetupCampaign), model);
     }
 
-    private async void PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false, CancellationToken cancellationToken = default)
+    private async void PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false,
+        CancellationToken cancellationToken = default)
     {
         model.EmailTemplates = await FetchEmailTemplates(forceRefresh, cancellationToken);
         if (model.StudyId is not null)
@@ -71,7 +85,7 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
             model.StudyName = context.Studies.Where(s => s.Id == model.StudyId).Select(s => s.StudyName).First();
         }
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> SendPreviewEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
@@ -100,11 +114,11 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
                 email => email,
                 email => new Dictionary<string, dynamic>
                 {
-                    {"firstName", "John"},
-                    {"lastName", "Doe"},
-                    {"uniqueLink", $"https://example.com/{email}"},
-                    {"email", email},
-                    {"reference", "PreviewEmailReference"}
+                    { "firstName", "John" },
+                    { "lastName", "Doe" },
+                    { "uniqueLink", $"https://example.com/{email}" },
+                    { "email", email },
+                    { "reference", "PreviewEmailReference" }
                 });
 
             await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
@@ -113,17 +127,21 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
                 EmailTemplateId = new Guid(model.SelectedTemplateId),
                 PersonalisationData = personalisationData
             }, cancellationToken);
-            TempData.AddSuccessNotification($"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
+            TempData.AddSuccessNotification(
+                $"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
         }
-        
+
         return View(nameof(SetupCampaign), model);
     }
 
-    private bool IsValidEmail(string email) => System.Net.Mail.MailAddress.TryCreate(email, out var address) && email.Equals(address.Address, StringComparison.InvariantCultureIgnoreCase);
-    
-    private async Task<TemplateList> FetchEmailTemplates(bool forceRefresh = false, CancellationToken cancellationToken = default)
+    private bool IsValidEmail(string email) => System.Net.Mail.MailAddress.TryCreate(email, out var address) &&
+                                               email.Equals(address.Address,
+                                                   StringComparison.InvariantCultureIgnoreCase);
+
+    private async Task<TemplateList> FetchEmailTemplates(bool forceRefresh = false,
+        CancellationToken cancellationToken = default)
     {
-        var cachedData = await cache.GetAsync(EmailCacheKey, cancellationToken);
+        var cachedData = await cache.GetAsync(_emailCacheKey, cancellationToken);
         if (cachedData != null && !forceRefresh)
         {
             var jsonData = Encoding.UTF8.GetString(cachedData);
@@ -134,13 +152,12 @@ public class EmailController(IEmailCampaignService emailCampaignService, Partici
         await CacheEmailTemplates(templates, cancellationToken);
         return templates;
     }
-    
+
     private async Task CacheEmailTemplates(TemplateList templates, CancellationToken cancellationToken = default)
     {
         var jsonData = JsonConvert.SerializeObject(templates);
         var data = Encoding.UTF8.GetBytes(jsonData);
 
-        await cache.SetAsync(EmailCacheKey, data, cancellationToken);
+        await cache.SetAsync(_emailCacheKey, data, cancellationToken);
     }
 }
-

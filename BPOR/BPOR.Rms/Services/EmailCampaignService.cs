@@ -2,26 +2,33 @@ using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Constants;
 using BPOR.Rms.Mappers;
+using BPOR.Rms.Settings;
 using LuhnNet;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 
 namespace BPOR.Rms.Services;
 
 public class EmailCampaignService(
-    ParticipantDbContext context,
-    IFilterService filterService,
-    INotificationService notificationService,
-    IRefDataService refDataService,
-    IRandomiser randomiser)
+    ILogger<EmailCampaignService> logger,
+    IServiceScopeFactory serviceScopeFactory, IOptions<AppSettings> appSettings)
     : IEmailCampaignService
 {
-    public async Task SendCampaignAsync(Domain.Entities.EmailCampaign campaign,
+    public async Task SendCampaignAsync(EmailCampaign campaign,
         CancellationToken cancellationToken = default)
     {
+        using var scope = serviceScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ParticipantDbContext>();
+        var filterService = scope.ServiceProvider.GetRequiredService<IFilterService>();
+        var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+        var randomiser = scope.ServiceProvider.GetRequiredService<IRandomiser>();
+        var refDataService = scope.ServiceProvider.GetRequiredService<IRefDataService>();
+
         await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
+
         // Retrieve filter criteria and apply it
         var dbFilter = context.FilterCriterias
             .Include(fc => fc.FilterGender)
@@ -57,7 +64,7 @@ public class EmailCampaignService(
                 {
                     if (!string.IsNullOrEmpty(volunteer.Email))
                     {
-                        var reference = GenerateVolunteerReference();
+                        var reference = GenerateVolunteerReference(context);
                         var emailCampaignParticipant = new EmailCampaignParticipant
                         {
                             EmailCampaignId = campaign.Id,
@@ -76,7 +83,7 @@ public class EmailCampaignService(
                             { "emailCampaignParticipantId", emailCampaignParticipant.Id },
                             { "firstName", volunteer.FirstName },
                             { "lastName", volunteer.LastName },
-                            { "uniqueLink", $"https://example.com/{reference}" }
+                            { "uniqueLink", $"{appSettings.Value.BaseUrl}/NotifyCallback/registerinterest?reference={reference}" },
                         };
                         personalisationData.Add(volunteer.Email, personalisation);
 
@@ -105,7 +112,7 @@ public class EmailCampaignService(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private string GenerateVolunteerReference()
+    private string GenerateVolunteerReference(ParticipantDbContext context)
     {
         // Generate random 15 digit number
         Random rand = new Random();
@@ -128,7 +135,7 @@ public class EmailCampaignService(
 
         if (existingReference)
         {
-            GenerateVolunteerReference();
+            GenerateVolunteerReference(context);
         }
 
         return volunteerReference;

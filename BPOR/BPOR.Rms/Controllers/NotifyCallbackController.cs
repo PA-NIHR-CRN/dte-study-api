@@ -20,7 +20,8 @@ public class NotifyCallbackController(
 {
     [HttpPost]
     [Route("ReceiveCallback")]
-    public async Task<IActionResult> ReceiveCallback([FromBody] NotifyCallbackMessage message, CancellationToken cancellationToken)
+    public async Task<IActionResult> ReceiveCallback([FromBody] NotifyCallbackMessage message,
+        CancellationToken cancellationToken)
     {
         var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
         if (token != settings.Value.BearerToken)
@@ -33,8 +34,13 @@ public class NotifyCallbackController(
             return Ok();
         }
 
-        var participantEmail =
-            await context.EmailCampaignParticipants.FirstOrDefaultAsync(x => x.Id == int.Parse(message.Reference), cancellationToken);
+        if (!int.TryParse(message.Reference, out var participantEmailId))
+        {
+            return BadRequest("Invalid reference.");
+        }
+
+        var participantEmail = await context.EmailCampaignParticipants
+            .FindAsync(new object[] { participantEmailId }, cancellationToken);
 
         if (participantEmail == null)
         {
@@ -52,8 +58,31 @@ public class NotifyCallbackController(
             case "technical-failure":
                 participantEmail.DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Failed);
                 break;
+            default:
+                return BadRequest("Invalid status.");
         }
-        
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return Ok();
+    }
+
+    [HttpGet]
+    [Route("registerinterest")]
+    public async Task<IActionResult> RegisterInterest([FromQuery] string reference, CancellationToken cancellationToken)
+    {
+        var participant = await context.EmailCampaignParticipants
+            .Where(x => x.ParticipantId == context.StudyParticipantEnrollment
+                .Where(x => x.Reference == reference)
+                .Select(x => x.ParticipantId)
+                .FirstOrDefault()).FirstOrDefaultAsync(cancellationToken);
+
+        if (participant == null)
+        {
+            return NotFound();
+        }
+
+        participant.RegisteredInterestAt = DateTime.UtcNow;
         await context.SaveChangesAsync(cancellationToken);
 
         return Ok();

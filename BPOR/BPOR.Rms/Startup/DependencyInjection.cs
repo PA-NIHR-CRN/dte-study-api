@@ -10,6 +10,7 @@ using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
+using BPOR.Rms.Settings;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
 using NIHR.NotificationService.Settings;
@@ -41,6 +42,8 @@ public static class DependencyInjection
 
         services.AddDistributedMemoryCache();
         services.AddPaging();
+        
+        services.GetSectionAndValidate<AppSettings>(configuration);
 
         // TODO this could be reusable
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
