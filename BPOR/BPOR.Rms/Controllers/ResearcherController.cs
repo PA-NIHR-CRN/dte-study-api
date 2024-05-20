@@ -1,37 +1,39 @@
+using BPOR.Rms.Models.Email;
+using BPOR.Rms.Models.Researcher;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Controllers;
 
 public class ResearcherController: Controller
 {
-    // GET: Study/Create
     public IActionResult Create()
     {
         ViewData["ShowBackLink"] = true;
-        ViewData["ShowProgressBar"] = true;
-        ViewData["ProgressPercentage"] = 0;
-        return View();
+        return View(new ResearcherStudyFormViewModel());
     }
     
-    // POST: Study/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
     [HttpPost]
-    // [ValidateAntiForgeryToken]
-    public IActionResult Create(string action)
+    public IActionResult Create(ResearcherStudyFormViewModel model)
     {
-        if (action == "Next")
+        ViewData["ShowBackLink"] = true;
+
+        if (model.Password?.Length < 12)
         {
-            ViewData["ShowBackLink"] = true;
-            ViewData["ShowProgressBar"] = true;
-            ViewData["ProgressPercentage"] = 50;
-            return View();
+            ModelState.AddModelError("Password", "Enter a password that is at least 12 characters long and does not include any symbols");
         }
-        else if (action == "Save")
+
+        if (model.Password != model.ConfirmPassword)
         {
-            return RedirectToAction("Index", "Home");
+            ModelState.AddModelError("ConfirmPassword", "Password does not match confirmation");
         }
-        return View();
+
+        if (ModelState.IsValid)
+        {
+            return View("AddResearcherSuccess");
+        }
+
+        return View(model);
     }
     
 }
