@@ -23,11 +23,6 @@ public class ResearcherController: Controller
             ModelState.AddModelError("Password", "Enter a password that is at least 12 characters long and does not include any symbols");
         }
 
-        if (model.Password != model.ConfirmPassword)
-        {
-            ModelState.AddModelError("ConfirmPassword", "Password does not match confirmation");
-        }
-
         if (ModelState.IsValid)
         {
             return View("AddResearcherSuccess");

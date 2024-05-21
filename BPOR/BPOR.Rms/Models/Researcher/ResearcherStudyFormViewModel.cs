@@ -23,7 +23,4 @@ public class ResearcherStudyFormViewModel
     [RegularExpression("^[a-zA-Z0-9]*$", ErrorMessage = "Enter a password that is at least 12 characters long and does not include any symbols")]
     public string? Password { get; set; }
 
-    [Display(Name = "Confirm your password", Order = 5)]
-    [Required(ErrorMessage = "Confirm your password")]
-    public string? ConfirmPassword { get; set; }
 }
