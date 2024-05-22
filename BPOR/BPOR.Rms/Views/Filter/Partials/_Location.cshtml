@@ -15,20 +15,34 @@
 
 <h3 class="govuk-heading-m">OR</h3>
 
-<div class="govuk-form-group">
+<div class="govuk-form-group @(Html.ViewData.ModelState["FullPostcode"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <h3 class="govuk-label-wrapper">
         @Html.LabelFor(m => Model.FullPostcode, new { @class = "govuk-label govuk-label--l" })
     </h3>
+    @if (Html.ViewData.ModelState["FullPostcode"]?.Errors.Count > 0)
+    {
+        <span id="AgeTo-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.FullPostcode)
+        </span>
+    }
     <div id="event-name-hint" class="govuk-hint">
         For example: EC1A 1BB.
     </div>
     <input asp-for="FullPostcode" class="govuk-input govuk-input--width-10" type="text" />
 </div>
 
-<div class="govuk-form-group">
+<div class="govuk-form-group @(Html.ViewData.ModelState["SearchRadiusMiles"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <h3 class="govuk-label-wrapper">
         @Html.LabelFor(m => Model.SearchRadiusMiles, new { @class = "govuk-label govuk-label--l" })
     </h3>
+    @if (Html.ViewData.ModelState["SearchRadiusMiles"]?.Errors.Count > 0)
+    {
+        <span id="AgeTo-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.SearchRadiusMiles)
+        </span>
+    }
     <div id="event-name-hint" class="govuk-hint">
         Indicate the radius for searching volunteers based on the provided full postcode.
     </div>

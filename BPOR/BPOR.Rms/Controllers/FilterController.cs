@@ -315,6 +315,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             model.RegistrationFromDateYear,
             model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
         ValidatePostcodeDistricts(model.PostcodeDistricts);
+        ValidateFullPostcode(model.FullPostcode, model.SearchRadiusMiles);
         ValidateAge(model.AgeFrom, model.AgeTo);
 
         if (ModelState.IsValid)
@@ -344,6 +345,21 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 .OrderBy(x => x.Id)
                 .PageAsync(paginationService, cancellationToken);
             }
+        }
+    }
+
+    private void ValidateFullPostcode(string? fullPostcode, double? searchRadiusMiles)
+    {
+        if (!String.IsNullOrEmpty(fullPostcode) && searchRadiusMiles == null)
+        {
+            ModelState.AddModelError("SearchRadiusMiles",
+                        "Enter a radius");
+        }
+
+        if (String.IsNullOrEmpty(fullPostcode) && searchRadiusMiles != null)
+        {
+            ModelState.AddModelError("FullPostcode",
+                        "Enter a postcode");
         }
     }
 
