@@ -361,6 +361,12 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             ModelState.AddModelError("FullPostcode",
                         "Enter a postcode");
         }
+
+        if (!String.IsNullOrEmpty(fullPostcode) && searchRadiusMiles == 0)
+        {
+            ModelState.AddModelError("SearchRadiusMiles",
+                        "Search radius must be greater than 0");
+        }
     }
 
     private void ValidatePostcodeDistricts(string? postcodeDistricts)
