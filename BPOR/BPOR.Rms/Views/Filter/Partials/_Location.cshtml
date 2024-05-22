@@ -2,10 +2,17 @@
 
 <h2 class="govuk-heading-l">Location</h2>
 
-<div class="govuk-form-group">
+<div class="govuk-form-group @(Html.ViewData.ModelState["PostcodeDistricts"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <h3 class="govuk-label-wrapper">
         @Html.LabelFor(m => Model.PostcodeDistricts, new { @class = "govuk-label govuk-label--l" })
     </h3>
+    @if (Html.ViewData.ModelState["PostcodeDistricts"]?.Errors.Count > 0)
+    {
+        <span id="AgeTo-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.PostcodeDistricts)
+        </span>
+    }
     <div id="event-name-hint" class="govuk-hint">
         Enter one or more postcode districts separated by commas.
         For example: SW1A, WC2B, EC1V.

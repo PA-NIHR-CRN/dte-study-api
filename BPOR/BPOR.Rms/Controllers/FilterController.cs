@@ -314,7 +314,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
             model.RegistrationFromDateYear,
             model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
-        ValidatePostcodeDistricts(model.PostcodeDistricts);
+        ValidatePostcodeDistricts(model.PostcodeDistricts, model.FullPostcode);
         ValidateFullPostcode(model.FullPostcode, model.SearchRadiusMiles);
         ValidateAge(model.AgeFrom, model.AgeTo);
 
@@ -369,8 +369,14 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         }
     }
 
-    private void ValidatePostcodeDistricts(string? postcodeDistricts)
+    private void ValidatePostcodeDistricts(string? postcodeDistricts, string? fullPostcode)
     {
+        if (!String.IsNullOrEmpty(postcodeDistricts) && !String.IsNullOrEmpty(fullPostcode))
+        {
+            ModelState.AddModelError("PostcodeDistricts",
+                        "Postcode district search and Full postcode search cannot be applied at the same time");
+        }
+
         if (!string.IsNullOrEmpty(postcodeDistricts))
         {
             List<string> postcodeDistrictsList = postcodeDistricts.Split(",").ToList();
