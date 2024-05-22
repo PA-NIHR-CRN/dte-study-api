@@ -49,8 +49,11 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
     private Expression<Func<Participant, bool>> StartsWithAnyPostCodeDistrictExpression(string[] postCodeDistricts)
     {
         var expressions = postCodeDistricts
-            .Select(s => (Expression<Func<Participant, bool>>)(p => EF.Functions.Like(p.Address.Postcode, $@"{s}%")))
-            .ToList();
+        .Select(s => (Expression<Func<Participant, bool>>)(p =>
+            EF.Functions.Like(p.Address.Postcode, $"{s}%") &&
+            (p.Address.Postcode == s || p.Address.Postcode.StartsWith(s + " "))
+        ))
+        .ToList();
 
         if (expressions.Count == 1) return expressions[0];
 
