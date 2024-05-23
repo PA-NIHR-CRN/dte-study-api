@@ -51,10 +51,7 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Build
-        run: dotnet build /BPOR/BPOR.sln --no-restore
-
-      - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef
+        run: dotnet build /BPOR/BPOR.sln
 
       - name: Login to Amazon ECR
         id: login-ecr
