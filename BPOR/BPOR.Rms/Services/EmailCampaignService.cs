@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Text;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
@@ -72,14 +73,15 @@ public class EmailCampaignService(
             campaign.TargetGroupSize.Value
         );
 
-        // Process volunteers concurrently
-        var processingResults = await ProcessVolunteersConcurrently(finalVolunteers, campaign, dbFilter, cancellationToken);
-
-        // Save processed participants to database
-        await SaveParticipantsToDatabaseAsync(scopedContext, processingResults, cancellationToken);
-
-        // Queue background work item for sending emails
-        await QueueEmailSendingTaskAsync(processingResults.EmailAddresses, processingResults.PersonalisationData, campaign, cancellationToken);
+        // Process volunteers asynchronously
+        await foreach (var processingResult in ProcessVolunteersAsync(finalVolunteers, campaign, dbFilter, cancellationToken))
+        {
+            // Save processed participants to database
+            await SaveParticipantsToDatabaseAsync(scopedContext, processingResult, cancellationToken);
+            
+            // Queue background work item for sending emails
+            await QueueEmailSendingTaskAsync(processingResult, campaign, cancellationToken);
+        }
     }
 
     private async Task<FilterCriteria?> GetFilterCriteriaAsync(ParticipantDbContext scopedContext, EmailCampaign campaign, CancellationToken cancellationToken)
@@ -103,11 +105,11 @@ public class EmailCampaignService(
         return dbFilter;
     }
 
-    private async Task<ProcessingResults> ProcessVolunteersConcurrently(
+    private async IAsyncEnumerable<ProcessingResults> ProcessVolunteersAsync(
         IEnumerable<VolunteerProjection> volunteers,
         EmailCampaign campaign,
         FilterCriteria dbFilter,
-        CancellationToken cancellationToken)
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var emailAddresses = new ConcurrentBag<string>();
         var personalisationData = new ConcurrentDictionary<string, Dictionary<string, dynamic?>>();
@@ -125,16 +127,17 @@ public class EmailCampaignService(
 
         await Task.Run(() =>
         {
-            Parallel.ForEach(volunteers, parallelOptions, volunteer =>
+            Parallel.ForEach(volunteers, parallelOptions, async volunteer =>
             {
-                ProcessSingleVolunteer(volunteer, campaign, dbFilter, emailAddresses, personalisationData, emailCampaignParticipants, studyParticipantEnrollments, cancellationToken).Wait();
+                await ProcessSingleVolunteer(volunteer, campaign, dbFilter, emailAddresses, personalisationData,
+                    emailCampaignParticipants, studyParticipantEnrollments, cancellationToken);
             });
         }, cancellationToken);
 
         var endTime = DateTime.UtcNow;
         logger.LogInformation("Finished processing volunteers at {Time}, Duration: {Duration}ms", endTime, (endTime - startTime).TotalMilliseconds);
 
-        return new ProcessingResults
+        yield return new ProcessingResults
         {
             EmailAddresses = emailAddresses.ToList(),
             PersonalisationData = personalisationData,
@@ -204,11 +207,7 @@ public class EmailCampaignService(
         logger.LogInformation("Finished saving participants to database at {Time}, Duration: {Duration}ms", endTime, (endTime - startTime).TotalMilliseconds);
     }
 
-    private async Task QueueEmailSendingTaskAsync(
-        List<string> emailAddresses,
-        ConcurrentDictionary<string, Dictionary<string, dynamic?>> personalisationData,
-        EmailCampaign campaign,
-        CancellationToken cancellationToken)
+    private async Task QueueEmailSendingTaskAsync(ProcessingResults results, EmailCampaign campaign, CancellationToken cancellationToken)
     {
         var startTime = DateTime.UtcNow;
         logger.LogInformation("Started queuing background work item at {Time}", startTime);
@@ -217,8 +216,8 @@ public class EmailCampaignService(
         {
             await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
             {
-                EmailAddresses = emailAddresses,
-                PersonalisationData = personalisationData,
+                EmailAddresses = results.EmailAddresses,
+                PersonalisationData = results.PersonalisationData,
                 EmailTemplateId = campaign.EmailTemplateId
             }, token);
         });
@@ -269,7 +268,6 @@ public class ProcessingResults
     public ConcurrentBag<EmailCampaignParticipant> EmailCampaignParticipants { get; set; }
     public ConcurrentBag<StudyParticipantEnrollment> StudyParticipantEnrollments { get; set; }
 }
-
 
 public class VolunteerProjection
 {
