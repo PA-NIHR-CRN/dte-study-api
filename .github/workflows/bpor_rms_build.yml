@@ -46,7 +46,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
 
@@ -63,7 +63,7 @@ jobs:
           path: /tmp
 
       - name: Update Database
-        run: dotnet ef database update --connection ${{ secrets.DB_CONNECTION_STRING }}
+        run: dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}"
 
       - name: Pull, tag, and push image to Amazon ECR
         id: build-image
