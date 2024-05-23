@@ -65,6 +65,12 @@ jobs:
       - name: Install dotnet-ef tool
         run: dotnet tool install --global dotnet-ef
 
+      - name: Restore dependencies
+        run: dotnet restore BPOR/BPOR.sln
+
+      - name: Build solution
+        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
+
       - name: Update Database
         env:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
