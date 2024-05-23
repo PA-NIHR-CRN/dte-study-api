@@ -13,7 +13,6 @@ namespace BPOR.Domain.Entities.Configuration
     {
         public void Configure(EntityTypeBuilder<EthnicGroup> builder)
         {
-            // Seeding the Gender table
             builder.HasData(
                 new EthnicGroup
                 {

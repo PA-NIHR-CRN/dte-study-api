@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Entities.RefData;
 using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
@@ -14,9 +15,21 @@ public class Study : ISoftDelete, IAudit
 
     public long? CpmsId { get; set; }
     public bool IsRecruitingIdentifiableParticipants { get; set; }
+    public string? ChiefInvestigator { get; set; }
+    public string? Sponsors { get; set; }
+    public bool? AlreadyOpenToRecruitment { get; set; }
+    public int? ParticipantsRecruited { get; set; }
+    public DateTime? RecruitmentStartDate { get; set; }
+    public DateTime? RecruitmentEndDate { get; set; }
+    public int? RecruitmentTarget { get; set; }
+    public string? TargetPopulation { get; set; }
+    public bool? HasNihrFunding { get; set; }
+    public string? FundingCode { get; set; }
+    public Submitted? Submitted { get; set; }
+    public SubmissionOutcome? SubmissionOutcome { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; } 
+    public DateTime UpdatedAt { get; set; }
     public int CreatedById { get; set; }
     public int UpdatedById { get; set; }
     public ICollection<ManualEnrollment> ManualEnrollments { get; set; } = new List<ManualEnrollment>();
