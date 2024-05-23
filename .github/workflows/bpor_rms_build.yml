@@ -45,6 +45,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Build
+        run: dotnet build /BPOR/BPOR.sln --no-restore
+
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -56,6 +67,11 @@ jobs:
         with:
           name: bpor-rms
           path: /tmp
+
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
+      - name: Update Database
+        run: dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}"
 
       - name: Pull, tag, and push image to Amazon ECR
         id: build-image
