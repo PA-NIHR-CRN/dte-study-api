@@ -62,6 +62,9 @@ jobs:
           name: bpor-rms
           path: /tmp
 
+      - name: Add Nuget Source
+        run: dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+        
       - name: Install dotnet-ef tool
         run: dotnet tool install --global dotnet-ef
 
