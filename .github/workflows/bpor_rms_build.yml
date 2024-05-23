@@ -50,9 +50,6 @@ jobs:
         with:
           dotnet-version: '6.0.x'
 
-      - name: Build
-        run: dotnet build /BPOR/BPOR.sln
-
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -65,10 +62,13 @@ jobs:
           name: bpor-rms
           path: /tmp
 
-      - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef
-      - name: Update Database
-        run: dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}"
+      - name: Update database
+        run: |
+          dotnet tool install --global dotnet-ef
+          dotnet tool restore
+          dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}"
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
 
       - name: Pull, tag, and push image to Amazon ECR
         id: build-image
