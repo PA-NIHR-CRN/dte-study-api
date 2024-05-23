@@ -1,7 +1,20 @@
 @model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
 @using BPOR.Rms.Views.ViewComponents
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Find Volunteers";
+
+    if (Model.VolunteerCount is not null)
+    {
+        if (Model.VolunteerCount == 1)
+        {
+            ViewData["Title"] = (ViewData["Title"] as string) + $" - {Model.VolunteerCount} volunteer matches the filter options";
+        }
+        else
+        {
+            ViewData["Title"] = (ViewData["Title"] as string) + $" - {Model.VolunteerCount} volunteers match the filter options";
+        }       
+    }
+
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     ViewData.AddBreadcrumb("All Studies", "/Study/Index");
