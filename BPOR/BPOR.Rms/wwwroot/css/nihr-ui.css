@@ -1,3 +1,7 @@
+html {
+    scroll-padding-top: 4rem;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -335,4 +339,12 @@ body {
         display: flex;
         justify-content: flex-end;
     }
+}
+
+.govuk-skip-link.start-of-options {
+    margin-bottom: 5px !important;
+}
+
+.govuk-skip-link.end-of-options{
+    margin-top: 5px !important;
 }

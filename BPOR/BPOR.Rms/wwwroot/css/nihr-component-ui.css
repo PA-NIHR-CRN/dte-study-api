@@ -279,13 +279,17 @@
     .govuk-back-link:focus {
         text-decoration: none;
         background-color: rgb(254, 212, 122);
-        box-shadow: rgb(254, 212, 122) 0px -2px, rgb(33, 43, 50) 0px 4px;
+        box-shadow: unset;
         color: #193E72;
     }
 
-.govuk-grid-row-age-range .govuk-form-group {
-    display: flex;
-}
+    .govuk-skip-link:focus {
+        outline: none;
+    }
+
+    .govuk-grid-row-age-range .govuk-form-group {
+        display: flex;
+    }
 
     .govuk-grid-row-age-range .govuk-form-group label {
         flex: 0 0 auto;
