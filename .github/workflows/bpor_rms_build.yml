@@ -62,13 +62,15 @@ jobs:
           name: bpor-rms
           path: /tmp
 
-      - name: Update database
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Update Database
+        env:
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
         run: |
           cd BPOR/BPOR.Domain
-          dotnet tool install --global dotnet-ef
-          dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}"
-        env:
-          ASPNETCORE_ENVIRONMENT: Development
+          dotnet ef database update --connection "$DB_CONNECTION_STRING"
 
       - name: Pull, tag, and push image to Amazon ECR
         id: build-image
