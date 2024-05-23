@@ -76,10 +76,10 @@ jobs:
 
       - name: Update Database
         env:
-          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
         run: |
           cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
+          dotnet ef database update --connection "${{ env.ConnectionStrings__DefaultConnection }}"
 
       - name: Pull, tag, and push image to Amazon ECR
         id: build-image
