@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using BPOR.Domain.Entities;
@@ -21,37 +22,26 @@ public class EmailCampaignService(
     INotificationService notificationService,
     IFilterService filterService,
     IBackgroundTaskQueue taskQueue,
-    IServiceProvider serviceProvider)
+    ParticipantDbContext context)
     : IEmailCampaignService
 {
     private static readonly Random _rand = new();
-    private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public async Task SendCampaignAsync(EmailCampaign campaign, CancellationToken cancellationToken = default)
     {
-        using var scope = serviceProvider.CreateScope();
-        var scopedContext = scope.ServiceProvider.GetRequiredService<ParticipantDbContext>();
+        var emailDeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending) ??
+                                    throw new InvalidOperationException("Email delivery status not found");
 
-        // Log the start time
-        var startTime = DateTime.UtcNow;
-        logger.LogInformation("Started adding campaign to database at {Time}", startTime);
+        await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
 
-        // Add campaign to database
-        await scopedContext.EmailCampaigns.AddAsync(campaign, cancellationToken);
-        await scopedContext.SaveChangesAsync(cancellationToken);
-
-        var endTime = DateTime.UtcNow;
-        logger.LogInformation("Finished adding campaign to database at {Time}, Duration: {Duration}ms", endTime, (endTime - startTime).TotalMilliseconds);
-
-        // Fetch filter criteria
-        var dbFilter = await GetFilterCriteriaAsync(scopedContext, campaign, cancellationToken);
+        var dbFilter = await GetFilterCriteriaAsync(campaign, cancellationToken);
         if (dbFilter == null)
         {
             logger.LogWarning("No filter criteria found for campaign {CampaignId}", campaign.Id);
             return;
         }
 
-        // Filter volunteers
         var filter = FilterMapper.MapToFilterModel(dbFilter);
         var volunteerQuery = await filterService.FilterVolunteersAsync(filter, cancellationToken);
 
@@ -61,7 +51,6 @@ public class EmailCampaignService(
             return;
         }
 
-        // Randomize volunteers
         var finalVolunteers = randomiser.GetRandomisedCollection(
             volunteerQuery.Where(v => !string.IsNullOrEmpty(v.Email)).Select(v => new VolunteerProjection
             {
@@ -73,23 +62,46 @@ public class EmailCampaignService(
             campaign.TargetGroupSize.Value
         );
 
-        // Process volunteers asynchronously
-        await foreach (var processingResult in ProcessVolunteersAsync(finalVolunteers, campaign, dbFilter, cancellationToken))
+        int[] batchSizes = { 50, 100, 200, 500, 1000, 2000, 5000 };
+        var results = new Dictionary<int, double>();
+
+        foreach (var batchSize in batchSizes)
         {
-            // Save processed participants to database
-            await SaveParticipantsToDatabaseAsync(scopedContext, processingResult, cancellationToken);
-            
-            // Queue background work item for sending emails
+            var stopwatch = Stopwatch.StartNew();
+            await foreach (var processingResult in ProcessVolunteersAsync(finalVolunteers, campaign, dbFilter,
+                               emailDeliveryStatusId, batchSize, cancellationToken))
+            {
+                await AddParticipantsToContext(processingResult, cancellationToken);
+                await QueueEmailSendingTaskAsync(processingResult, campaign, cancellationToken);
+            }
+            stopwatch.Stop();
+            results[batchSize] = stopwatch.Elapsed.TotalMilliseconds;
+        }
+
+        var optimalBatchSize = results.MinBy(r => r.Value).Key;
+        logger.LogInformation("Optimal batch size determined: {BatchSize}", optimalBatchSize);
+
+        // Use the optimal batch size for actual processing
+        var startTime = DateTime.UtcNow;
+        logger.LogInformation("Started processing volunteers at {Time}", startTime);
+        await foreach (var processingResult in ProcessVolunteersAsync(finalVolunteers, campaign, dbFilter,
+                           emailDeliveryStatusId, optimalBatchSize, cancellationToken))
+        {
+            await AddParticipantsToContext(processingResult, cancellationToken);
             await QueueEmailSendingTaskAsync(processingResult, campaign, cancellationToken);
         }
+
+        var endTime = DateTime.UtcNow;
+        logger.LogInformation("Finished processing volunteers at {Time}, Duration: {Duration}ms", endTime,
+            (endTime - startTime).TotalMilliseconds);
+
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task<FilterCriteria?> GetFilterCriteriaAsync(ParticipantDbContext scopedContext, EmailCampaign campaign, CancellationToken cancellationToken)
+    private async Task<FilterCriteria?> GetFilterCriteriaAsync(EmailCampaign campaign,
+        CancellationToken cancellationToken)
     {
-        var startTime = DateTime.UtcNow;
-        logger.LogInformation("Started fetching filter criteria at {Time}", startTime);
-
-        var dbFilter = await scopedContext.FilterCriterias
+        var dbFilter = await context.FilterCriterias
             .AsNoTracking()
             .Include(fc => fc.FilterGender)
             .Include(fc => fc.FilterAreaOfInterest)
@@ -99,9 +111,6 @@ public class EmailCampaignService(
             .Include(fc => fc.Study)
             .FirstOrDefaultAsync(fc => fc.Id == campaign.FilterCriteriaId, cancellationToken);
 
-        var endTime = DateTime.UtcNow;
-        logger.LogInformation("Finished fetching filter criteria at {Time}, Duration: {Duration}ms", endTime, (endTime - startTime).TotalMilliseconds);
-
         return dbFilter;
     }
 
@@ -109,69 +118,115 @@ public class EmailCampaignService(
         IEnumerable<VolunteerProjection> volunteers,
         EmailCampaign campaign,
         FilterCriteria dbFilter,
+        int emailDeliveryStatusId,
+        int batchSize,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var emailAddresses = new ConcurrentBag<string>();
-        var personalisationData = new ConcurrentDictionary<string, Dictionary<string, dynamic?>>();
-        var emailCampaignParticipants = new ConcurrentBag<EmailCampaignParticipant>();
-        var studyParticipantEnrollments = new ConcurrentBag<StudyParticipantEnrollment>();
+        var volunteerChunks = volunteers.Chunk(batchSize);
 
-        var parallelOptions = new ParallelOptions
+        foreach (var volunteerChunk in volunteerChunks)
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount,
-            CancellationToken = cancellationToken
-        };
+            var processingResult = new ProcessingResults();
 
-        var startTime = DateTime.UtcNow;
-        logger.LogInformation("Started processing volunteers at {Time}", startTime);
+            var tentativeReferences = volunteerChunk.ToDictionary(
+                volunteer => volunteer,
+                volunteer => GenerateTentativeVolunteerReference());
 
-        await Task.Run(() =>
-        {
-            Parallel.ForEach(volunteers, parallelOptions, async volunteer =>
+            await EnsureUniqueVolunteerReferencesAsync(tentativeReferences, batchSize, cancellationToken);
+
+            var tasks = volunteerChunk.Select(volunteer => Task.Run(() =>
             {
-                await ProcessSingleVolunteer(volunteer, campaign, dbFilter, emailAddresses, personalisationData,
-                    emailCampaignParticipants, studyParticipantEnrollments, cancellationToken);
-            });
-        }, cancellationToken);
+                ProcessSingleVolunteer(volunteer, campaign, dbFilter, processingResult, emailDeliveryStatusId,
+                    tentativeReferences[volunteer]);
+            }, cancellationToken)).ToList();
 
-        var endTime = DateTime.UtcNow;
-        logger.LogInformation("Finished processing volunteers at {Time}, Duration: {Duration}ms", endTime, (endTime - startTime).TotalMilliseconds);
+            await Task.WhenAll(tasks);
 
-        yield return new ProcessingResults
-        {
-            EmailAddresses = emailAddresses.ToList(),
-            PersonalisationData = personalisationData,
-            EmailCampaignParticipants = emailCampaignParticipants,
-            StudyParticipantEnrollments = studyParticipantEnrollments
-        };
+            yield return processingResult;
+        }
     }
 
-    private async Task ProcessSingleVolunteer(
+    private string GenerateTentativeVolunteerReference()
+    {
+        var stringBuilder = new StringBuilder(15);
+        stringBuilder.Append(_rand.Next(1, 10));
+        for (int i = 0; i < 14; i++)
+        {
+            stringBuilder.Append(_rand.Next(0, 10));
+        }
+
+        var reference = stringBuilder.ToString();
+        var checkDigit = Luhn.CalculateCheckDigit(reference);
+        reference += checkDigit.ToString();
+
+        return reference;
+    }
+
+    private async Task EnsureUniqueVolunteerReferencesAsync(Dictionary<VolunteerProjection, string> tentativeReferences, int batchSize,
+        CancellationToken cancellationToken)
+    {
+        var references = new HashSet<string>(tentativeReferences.Values);
+
+        while (true)
+        {
+            var existingReferences = context.StudyParticipantEnrollment.AsNoTracking()
+                .Where(e => references.Contains(e.Reference))
+                .Select(e => e.Reference);
+
+            if (!existingReferences.Any())
+            {
+                break;
+            }
+
+            var existingReferencesSet = new HashSet<string>(existingReferences);
+
+            var tasks = tentativeReferences.Keys.ToList().Chunk(batchSize).Select(volunteerChunk =>
+                Task.Run(() =>
+                {
+                    foreach (var volunteer in volunteerChunk)
+                    {
+                        if (!existingReferencesSet.Contains(tentativeReferences[volunteer]))
+                        {
+                            continue;
+                        }
+
+                        var newReference = GenerateTentativeVolunteerReference();
+                        while (existingReferencesSet.Contains(newReference))
+                        {
+                            newReference = GenerateTentativeVolunteerReference();
+                        }
+
+                        tentativeReferences[volunteer] = newReference;
+                        lock (references)
+                        {
+                            references.Add(newReference);
+                        }
+                    }
+                }, cancellationToken)).ToArray();
+
+            await Task.WhenAll(tasks);
+        }
+    }
+
+    private void ProcessSingleVolunteer(
         VolunteerProjection volunteer,
         EmailCampaign campaign,
         FilterCriteria dbFilter,
-        ConcurrentBag<string> emailAddresses,
-        ConcurrentDictionary<string, Dictionary<string, dynamic?>> personalisationData,
-        ConcurrentBag<EmailCampaignParticipant> emailCampaignParticipants,
-        ConcurrentBag<StudyParticipantEnrollment> studyParticipantEnrollments,
-        CancellationToken cancellationToken)
+        ProcessingResults processingResult,
+        int emailDeliveryStatusId,
+        string reference)
     {
-        using var taskScope = serviceProvider.CreateScope();
-        var taskContext = taskScope.ServiceProvider.GetRequiredService<ParticipantDbContext>();
-
-        var reference = await GenerateVolunteerReference(taskContext, cancellationToken);
-
         var emailCampaignParticipant = new EmailCampaignParticipant
         {
             EmailCampaignId = campaign.Id,
             ParticipantId = volunteer.Id,
-            DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending),
+            DeliveryStatusId = emailDeliveryStatusId,
             SentAt = DateTime.UtcNow,
             ContactEmail = volunteer.Email,
         };
 
-        emailCampaignParticipants.Add(emailCampaignParticipant);
-        emailAddresses.Add(volunteer.Email);
+        processingResult.EmailCampaignParticipants.Add(emailCampaignParticipant);
+        processingResult.EmailAddresses.Add(volunteer.Email);
 
         var personalisation = new Dictionary<string, dynamic?>
         {
@@ -181,11 +236,11 @@ public class EmailCampaignService(
             { "lastName", volunteer.LastName },
             { "uniqueLink", $"{appSettings.Value.BaseUrl}/NotifyCallback/registerinterest?reference={reference}" },
         };
-        personalisationData[volunteer.Email] = personalisation;
+        processingResult.PersonalisationData[volunteer.Email] = personalisation;
 
         if (dbFilter is { Study.IsRecruitingIdentifiableParticipants: true, StudyId: not null })
         {
-            studyParticipantEnrollments.Add(new StudyParticipantEnrollment
+            processingResult.StudyParticipantEnrollments.Add(new StudyParticipantEnrollment
             {
                 StudyId = (int)dbFilter.StudyId,
                 ParticipantId = volunteer.Id,
@@ -194,82 +249,38 @@ public class EmailCampaignService(
         }
     }
 
-    private async Task SaveParticipantsToDatabaseAsync(ParticipantDbContext context, ProcessingResults results, CancellationToken cancellationToken)
+    private async Task AddParticipantsToContext(ProcessingResults results, CancellationToken cancellationToken)
     {
-        var startTime = DateTime.UtcNow;
-        logger.LogInformation("Started saving participants to database at {Time}", startTime);
-
         await context.EmailCampaignParticipants.AddRangeAsync(results.EmailCampaignParticipants, cancellationToken);
         await context.StudyParticipantEnrollment.AddRangeAsync(results.StudyParticipantEnrollments, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-
-        var endTime = DateTime.UtcNow;
-        logger.LogInformation("Finished saving participants to database at {Time}, Duration: {Duration}ms", endTime, (endTime - startTime).TotalMilliseconds);
     }
 
-    private async Task QueueEmailSendingTaskAsync(ProcessingResults results, EmailCampaign campaign, CancellationToken cancellationToken)
+    private async Task QueueEmailSendingTaskAsync(ProcessingResults results, EmailCampaign campaign,
+        CancellationToken cancellationToken)
     {
-        var startTime = DateTime.UtcNow;
-        logger.LogInformation("Started queuing background work item at {Time}", startTime);
-
         await taskQueue.QueueBackgroundWorkItemAsync(async token =>
         {
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
             await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
             {
                 EmailAddresses = results.EmailAddresses,
                 PersonalisationData = results.PersonalisationData,
                 EmailTemplateId = campaign.EmailTemplateId
-            }, token);
+            }, linkedCts.Token);
         });
-
-        var endTime = DateTime.UtcNow;
-        logger.LogInformation("Finished queuing background work item at {Time}, Duration: {Duration}ms", endTime, (endTime - startTime).TotalMilliseconds);
-    }
-
-    private static async Task<string> GenerateVolunteerReference(ParticipantDbContext context, CancellationToken cancellationToken)
-    {
-        string volunteerReference;
-        bool referenceExists;
-
-        do
-        {
-            var stringBuilder = new StringBuilder(15);
-            stringBuilder.Append(_rand.Next(1, 10));
-            for (int i = 0; i < 14; i++)
-            {
-                stringBuilder.Append(_rand.Next(0, 10));
-            }
-
-            volunteerReference = stringBuilder.ToString();
-            var checkDigit = Luhn.CalculateCheckDigit(volunteerReference);
-            volunteerReference += checkDigit.ToString();
-
-            await _semaphore.WaitAsync(cancellationToken);
-            try
-            {
-                referenceExists = await context.StudyParticipantEnrollment
-                    .AnyAsync(e => e.Reference == volunteerReference, cancellationToken);
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
-
-        } while (referenceExists);
-
-        return volunteerReference;
     }
 }
 
-public class ProcessingResults
+
+internal class ProcessingResults
 {
-    public List<string> EmailAddresses { get; set; }
-    public ConcurrentDictionary<string, Dictionary<string, dynamic?>> PersonalisationData { get; set; }
-    public ConcurrentBag<EmailCampaignParticipant> EmailCampaignParticipants { get; set; }
-    public ConcurrentBag<StudyParticipantEnrollment> StudyParticipantEnrollments { get; set; }
+    public ConcurrentBag<string> EmailAddresses { get; } = [];
+    public ConcurrentDictionary<string, Dictionary<string, dynamic?>> PersonalisationData { get; } = new();
+    public ConcurrentBag<EmailCampaignParticipant> EmailCampaignParticipants { get; } = [];
+    public ConcurrentBag<StudyParticipantEnrollment> StudyParticipantEnrollments { get; } = [];
 }
 
-public class VolunteerProjection
+internal class VolunteerProjection
 {
     public int Id { get; set; }
     public string? Email { get; set; }

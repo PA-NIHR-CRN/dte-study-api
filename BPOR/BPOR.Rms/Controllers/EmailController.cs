@@ -34,6 +34,21 @@ public class EmailController(
     public async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         await PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
+
+        if (model.TotalVolunteers is null)
+        {
+            ModelState.AddModelError(nameof(model.TotalVolunteers), "Enter the number of volunteers to be contacted.");
+        }
+        else if (model.TotalVolunteers > model.MaxNumbers)
+        {
+            ModelState.AddModelError(nameof(model.TotalVolunteers),
+                "The number of volunteers to be contacted must be the same as, or less than, the 'total number of volunteer accounts matching the filter options'.");
+        }
+
+        if (string.IsNullOrEmpty(model.SelectedTemplateId))
+        {
+            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Please select an email template.");
+        }
         
         if (ModelState.IsValid)
         {
@@ -52,21 +67,6 @@ public class EmailController(
 
             return View("EmailSuccess",
                 new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });
-        }
-
-        if (model.TotalVolunteers is null)
-        {
-            ModelState.AddModelError(nameof(model.TotalVolunteers), "Enter the number of volunteers to be contacted.");
-        }
-        else if (model.TotalVolunteers > model.MaxNumbers)
-        {
-            ModelState.AddModelError(nameof(model.TotalVolunteers),
-                "The number of volunteers to be contacted must be the same as, or less than, the 'total number of volunteer accounts matching the filter options'.");
-        }
-
-        if (string.IsNullOrEmpty(model.SelectedTemplateId))
-        {
-            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Please select an email template.");
         }
 
         return View(nameof(SetupCampaign), model);
