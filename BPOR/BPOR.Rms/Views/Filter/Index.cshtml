@@ -5,14 +5,9 @@
 
     if (Model.VolunteerCount is not null)
     {
-        if (Model.VolunteerCount == 1)
-        {
-            ViewData["Title"] = (ViewData["Title"] as string) + $" - {Model.VolunteerCount} volunteer matches the filter options";
-        }
-        else
-        {
-            ViewData["Title"] = (ViewData["Title"] as string) + $" - {Model.VolunteerCount} volunteers match the filter options";
-        }       
+        var volunteers = Model.VolunteerCount == 1 ? "volunteer" : "volunteers";
+
+        ViewData["Title"] = $"{ViewData["Title"] as string} - {Model.VolunteerCount} {volunteers} found";
     }
 
     Layout = "~/Views/Shared/_Layout.cshtml";
