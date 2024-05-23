@@ -11,6 +11,8 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Settings;
+using Microsoft.EntityFrameworkCore.Internal;
+using NIHR.NotificationService;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
 using NIHR.NotificationService.Settings;
@@ -24,20 +26,18 @@ public static class DependencyInjection
         IHostEnvironment hostEnvironment)
     {
         services.AddControllersWithViews().AddRazorRuntimeCompilation();
-
         services.AddScoped<IEmailCampaignService, EmailCampaignService>();
         services.AddScoped<IFilterService, FilterService>();
         services.AddScoped<IPostcodeMapper, LocationApiClient>();
+        services.AddScoped<IRefDataService, RefDataService>();
 
         services.AddScoped<ICurrentUserIdProvider<int>, SimpleCurrentUserIdProvider<int>>();
         services.AddScoped<ICurrentUserIdAccessor<int>, SimpleCurrentUserIdAccessor<int>>();
 
         services.AddScoped<ICurrentUserProvider<User>, CurrentUserProvider<User>>();
-
-        services.AddTransient<IRefDataService, RefDataService>();
-
+        
         // TODO: Temporary services
-        services.AddTransient<IRandomiser>(p => new Randomiser(Random.Shared));
+        services.AddTransient<IRandomiser, Randomiser>();
         services.AddTransient<INotificationService, NotificationService>();
 
         services.AddDistributedMemoryCache();
@@ -69,6 +69,14 @@ public static class DependencyInjection
         services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
             logger);
         services.AddHealthChecks().AddMySql(connectionString).AddCheck<LocationHealthCheck>("Location", Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
+        
+        services.AddSingleton<IBackgroundTaskQueue>(ctx =>
+        {
+            int queueCapacity = 100; 
+            return new BackgroundTaskQueue(queueCapacity, logger);
+        });
+
+        services.AddHostedService<QueuedHostedService>();
         
         var govNotifySettings = services.GetSectionAndValidate<NotificationServiceSettings>(configuration);
         services.AddSingleton(new NotificationClient(govNotifySettings.Value.ApiKey));
