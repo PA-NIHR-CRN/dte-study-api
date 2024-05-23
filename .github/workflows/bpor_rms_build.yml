@@ -48,7 +48,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '8.0.x'
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -64,8 +64,8 @@ jobs:
 
       - name: Update database
         run: |
+          cd BPOR/BPOR.Domain
           dotnet tool install --global dotnet-ef
-          dotnet tool restore
           dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}"
         env:
           ASPNETCORE_ENVIRONMENT: Development
