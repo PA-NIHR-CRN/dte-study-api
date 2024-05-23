@@ -17,7 +17,8 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
 
         var dbSettings = configuration.GetSection(DbSettings.SectionName).Get<DbSettings>();
 
-        var connectionString = dbSettings?.BuildConnectionString();
+        var connectionString = dbSettings?.BuildConnectionString() ?? configuration.GetConnectionString("DefaultConnection");
+
 
         if(connectionString is null)
         {
