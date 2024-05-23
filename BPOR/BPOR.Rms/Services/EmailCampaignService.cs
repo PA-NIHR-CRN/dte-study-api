@@ -62,30 +62,13 @@ public class EmailCampaignService(
             campaign.TargetGroupSize.Value
         );
 
-        int[] batchSizes = { 50, 100, 200, 500, 1000, 2000, 5000 };
-        var results = new Dictionary<int, double>();
-
-        foreach (var batchSize in batchSizes)
-        {
-            var stopwatch = Stopwatch.StartNew();
-            await foreach (var processingResult in ProcessVolunteersAsync(finalVolunteers, campaign, dbFilter,
-                               emailDeliveryStatusId, batchSize, cancellationToken))
-            {
-                await AddParticipantsToContext(processingResult, cancellationToken);
-                await QueueEmailSendingTaskAsync(processingResult, campaign, cancellationToken);
-            }
-            stopwatch.Stop();
-            results[batchSize] = stopwatch.Elapsed.TotalMilliseconds;
-        }
-
-        var optimalBatchSize = results.MinBy(r => r.Value).Key;
-        logger.LogInformation("Optimal batch size determined: {BatchSize}", optimalBatchSize);
+        int batchSize = 1000;
 
         // Use the optimal batch size for actual processing
         var startTime = DateTime.UtcNow;
         logger.LogInformation("Started processing volunteers at {Time}", startTime);
         await foreach (var processingResult in ProcessVolunteersAsync(finalVolunteers, campaign, dbFilter,
-                           emailDeliveryStatusId, optimalBatchSize, cancellationToken))
+                           emailDeliveryStatusId, batchSize, cancellationToken))
         {
             await AddParticipantsToContext(processingResult, cancellationToken);
             await QueueEmailSendingTaskAsync(processingResult, campaign, cancellationToken);
@@ -162,7 +145,8 @@ public class EmailCampaignService(
         return reference;
     }
 
-    private async Task EnsureUniqueVolunteerReferencesAsync(Dictionary<VolunteerProjection, string> tentativeReferences, int batchSize,
+    private async Task EnsureUniqueVolunteerReferencesAsync(Dictionary<VolunteerProjection, string> tentativeReferences,
+        int batchSize,
         CancellationToken cancellationToken)
     {
         var references = new HashSet<string>(tentativeReferences.Values);
