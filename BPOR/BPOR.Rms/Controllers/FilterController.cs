@@ -11,11 +11,12 @@ using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService) : Controller
+public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService, ILogger<HomeController> logger) : Controller
 {
+    private readonly ILogger<HomeController> _logger = logger;
+
     public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
-
         if (activity == "FilterVolunteers")
         {
             await FilterVolunteersAsync(model, cancellationToken);
@@ -320,31 +321,41 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
         if (ModelState.IsValid)
         {
-            var query = await filterService.FilterVolunteersAsync(model, cancellationToken);
-            model.VolunteerCount = await query.CountAsync(cancellationToken);
-
-            if (model.ShowResults)
+            try
             {
-                model.VolunteerResults = await query.Select(x => new VolunteerResult
+                var query = await filterService.FilterVolunteersAsync(model, cancellationToken);
+                model.VolunteerCount = await query.CountAsync(cancellationToken);
+
+                if (model.ShowResults)
                 {
-                    Id = x.Id,
-                    Email = x.Email,
-                    Postcode = x.Address == null ? null : x.Address.Postcode,
-                    AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
-                    DateOfBirth = x.DateOfBirth,
-                    Age = x.DateOfBirth.YearsTo(DateTime.Today),
-                    Gender = x.Gender.Code,
-                    Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
-                    FirstName = x.FirstName,
-                    LastName = x.LastName,
-                    HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
-                    HasRegistered = x.RegistrationConsentAtUtc,
-                    EthnicGroup = x.EthnicGroup,
-                    GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
-                })
-                .OrderBy(x => x.Id)
-                .PageAsync(paginationService, cancellationToken);
+                    model.VolunteerResults = await query.Select(x => new VolunteerResult
+                    {
+                        Id = x.Id,
+                        Email = x.Email,
+                        Postcode = x.Address == null ? null : x.Address.Postcode,
+                        AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
+                        DateOfBirth = x.DateOfBirth,
+                        Age = x.DateOfBirth.YearsTo(DateTime.Today),
+                        Gender = x.Gender.Code,
+                        Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
+                        FirstName = x.FirstName,
+                        LastName = x.LastName,
+                        HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
+                        HasRegistered = x.RegistrationConsentAtUtc,
+                        EthnicGroup = x.EthnicGroup,
+                        GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
+                    })
+                    .OrderBy(x => x.Id)
+                    .PageAsync(paginationService, cancellationToken);
+                }
             }
+            catch(Exception ex)
+            {
+                ModelState.AddModelError("","An error occurred while filtering volunteers.");
+                _logger.LogError(ex, "An error occurred while filtering volunteers.");
+            }
+
+            
         }
     }
 
