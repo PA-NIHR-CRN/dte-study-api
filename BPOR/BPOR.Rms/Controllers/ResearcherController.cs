@@ -9,12 +9,12 @@ public class ResearcherController: Controller
     public IActionResult Create()
     {
         ViewData["ShowBackLink"] = true;
-        return View(new ResearcherStudyFormViewModel());
+        return View(new ResearcherFormViewModel());
     }
     
 
     [HttpPost]
-    public IActionResult Create(ResearcherStudyFormViewModel model)
+    public IActionResult Create(ResearcherFormViewModel model)
     {
         ViewData["ShowBackLink"] = true;
 
@@ -30,5 +30,20 @@ public class ResearcherController: Controller
 
         return View(model);
     }
-    
+
+    public IActionResult CreateStudy()
+    {
+        return View(new ResearcherStudyFormViewModel());
+    }
+
+    [HttpPost]
+    public IActionResult CreateStudy(ResearcherStudyFormViewModel model)
+    {
+        if (!model.AgreedToTermsAndConditions)
+        {
+            ModelState.AddModelError("AgreedToTermsAndConditions", "Confirm that the terms and conditions have been read and agreed before applying");
+        }
+        return View(model);
+    }
+
 }
