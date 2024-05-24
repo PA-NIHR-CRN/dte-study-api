@@ -42,7 +42,7 @@ public class FilterMapper
             IsGenderSameAsSexRegisteredAtBirth_No = criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 2),
             IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay = criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 3),
 
-            SelectedHealthConditions = criteria.FilterAreaOfInterest.Select(f => f.HealthConditionId.ToString()).ToList(),
+            SelectedHealthConditions = criteria.FilterAreaOfInterest.Select(f => f.HealthConditionId).ToList(),
 
             PostcodeDistricts = string.Join(", ", criteria.FilterPostcode.Select(f => f.PostcodeFragment)),
 

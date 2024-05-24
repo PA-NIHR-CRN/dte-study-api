@@ -29,7 +29,7 @@
                 if (Model.SelectedHealthConditions != null)
                 {
                     <div class="govuk-checkboxes__item area-of-research-option" data-search-value="@option.item.Text.ToLowerInvariant()">
-                        <input type="checkbox" class="govuk-checkboxes__input" id="@option.item.Value" name="SelectedHealthConditions" value="@option.item.Value" @(Model.SelectedHealthConditions.Contains(option.item.Value) ? "checked" : "") />
+                        <input type="checkbox" class="govuk-checkboxes__input" id="@option.item.Value" name="SelectedHealthConditions" value="@option.item.Value" @(Model.SelectedHealthConditions.Select(x => x.ToString()).Contains(option.item.Value) ? "checked" : "") />
                         <label for="@option.item.Value" class="govuk-label govuk-checkboxes__label">@option.item.Text</label>
                     </div>
                 }
@@ -40,7 +40,7 @@
                         <label for="@option.item.Value" class="govuk-label govuk-checkboxes__label">@option.item.Text</label>
                     </div>
                 }
-                
+
             }
         </div>
         <a href="#@Model.HealthConditions.First().Value" class="govuk-skip-link end-of-options" data-module="govuk-skip-link">Skip to the start of the areas of research options list</a>

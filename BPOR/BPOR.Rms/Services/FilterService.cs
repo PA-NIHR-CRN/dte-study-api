@@ -19,9 +19,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         FilterVolunteersRecruited(model.StudyId, model.SelectedVolunteersRecruited);
         FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
         FilterByAreasOfResearch(model.SelectedHealthConditions);
-        FilterByRegistrationDate(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
-            model.RegistrationFromDateYear,
-            model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
+        FilterByRegistrationDate(model.GetRegistrationFromDate(), model.GetRegistrationToDate());
         FilterByAge(model.AgeFrom, model.AgeTo);
         FilterBySexRegisteredAtBirth(model.IsSexMale, model.IsSexFemale,
             model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No,
@@ -46,7 +44,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         return _filters.Aggregate(query, (current, filter) => current.Where(filter));
     }
 
-    private Expression<Func<Participant, bool>> StartsWithAnyPostCodeDistrictExpression(string[] postCodeDistricts)
+    private static Expression<Func<Participant, bool>> StartsWithAnyPostCodeDistrictExpression(string[] postCodeDistricts)
     {
         var expressions = postCodeDistricts
         .Select(s => (Expression<Func<Participant, bool>>)(p =>
@@ -226,54 +224,26 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         }
     }
 
-    private void FilterByAreasOfResearch(List<string>? selectedHealthConditions)
+    private void FilterByAreasOfResearch(List<int> selectedHealthConditions)
     {
-        if (selectedHealthConditions != null && selectedHealthConditions.Count > 0)
-        {
-            List<int> conditionIds = selectedHealthConditions.Select(s => int.Parse(s)).ToList();
-
-            _filters.Add(p => p.HealthConditions.Any(hc => conditionIds.Contains(hc.HealthConditionId)));
+        if (selectedHealthConditions.Count != 0)
+        { 
+            _filters.Add(p => p.HealthConditions.Any(hc => selectedHealthConditions.Contains(hc.HealthConditionId)));
         }
     }
 
-    private void FilterByRegistrationDate(int? registrationFromDateDay, int? registrationFromDateMonth,
-        int? registrationFromDateYear,
-        int? registrationToDateDay, int? registrationToDateMonth, int? registrationToDateYear)
+    private void FilterByRegistrationDate(DateTime? registrationFromDate, DateTime? registrationToDate)
     {
-        if ((registrationFromDateDay != null && registrationFromDateMonth != null &&
-             registrationFromDateYear != null) ||
-            (registrationToDateDay != null && registrationToDateMonth != null && registrationToDateYear != null))
+        if (registrationFromDate.HasValue || registrationToDate.HasValue)
         {
-            if (registrationToDateDay.HasValue)
+            if (registrationToDate.HasValue)
             {
-                registrationToDateDay++;
+                registrationToDate = registrationToDate.Value.AddDays(1);
             }
-
-            DateTime? registrationFromDate = ConstructDate(registrationFromDateYear, registrationFromDateMonth,
-                registrationFromDateDay);
-            DateTime? registrationToDate =
-                ConstructDate(registrationToDateYear, registrationToDateMonth, registrationToDateDay);
 
             _filters.Add(p =>
                 (!registrationFromDate.HasValue || p.RegistrationConsentAtUtc >= registrationFromDate) &&
                 (!registrationToDate.HasValue || p.RegistrationConsentAtUtc <= registrationToDate));
-        }
-    }
-
-
-    //TODO move to shared
-    private static DateTime? ConstructDate(int? year, int? month, int? day)
-    {
-        if (!year.HasValue || !month.HasValue || !day.HasValue)
-            return null;
-
-        try
-        {
-            return new DateTime(year.Value, month.Value, day.Value);
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            return null;
         }
     }
 }
