@@ -1,15 +1,14 @@
 using System.Threading.Channels;
-using Microsoft.Extensions.Logging;
-using NIHR.NotificationService.Interfaces;
+using NIHR.Infrastructure;
 
-namespace NIHR.NotificationService;
+namespace BPOR.Rms;
 
-public class BackgroundTaskQueue : IBackgroundTaskQueue
+public class RmsTaskQueue : IRmsTaskQueue
 {
     private readonly ILogger _logger;
     private readonly Channel<Func<CancellationToken, ValueTask>> _queue;
 
-    public BackgroundTaskQueue(int capacity, ILogger logger)
+    public RmsTaskQueue(int capacity, ILogger logger)
     {
         _logger = logger;
         var options = new BoundedChannelOptions(capacity)

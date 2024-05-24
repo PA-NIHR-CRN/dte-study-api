@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
+using NIHR.Infrastructure;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Notify.Models.Responses;
@@ -19,7 +20,8 @@ public class EmailController(
     INotificationService notificationService,
     IDistributedCache cache,
     ILogger<EmailController> logger,
-    IEmailCampaignService emailCampaignService)
+    IEmailCampaignService emailCampaignService,
+    IRmsTaskQueue taskQueue)
     : Controller
 {
     private const string _emailCacheKey = "EmailTemplates";
@@ -61,9 +63,14 @@ public class EmailController(
                 EmailTemplateId = new Guid(model.SelectedTemplateId!),
                 Name = selectedTemplateName
             };
-
-
-            await emailCampaignService.SendCampaignAsync(emailCampaign, cancellationToken);
+            
+            await AddCampaignToContextAsync(emailCampaign, cancellationToken);
+            
+            await taskQueue.QueueBackgroundWorkItemAsync(async token =>
+            {
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
+                await emailCampaignService.SendCampaignAsync(emailCampaign.Id, linkedCts.Token);
+            });
 
             return View("EmailSuccess",
                 new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });
@@ -123,7 +130,7 @@ public class EmailController(
             {
                 EmailAddresses = emailAddresses,
                 EmailTemplateId = new Guid(model.SelectedTemplateId),
-                PersonalisationData = new ConcurrentDictionary<string, Dictionary<string, dynamic>>(personalisationData)
+                PersonalisationData = new Dictionary<string, Dictionary<string, dynamic>>(personalisationData)
             }, cancellationToken);
             TempData.AddSuccessNotification(
                 $"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
@@ -157,5 +164,11 @@ public class EmailController(
         var data = Encoding.UTF8.GetBytes(jsonData);
 
         await cache.SetAsync(_emailCacheKey, data, cancellationToken);
+    }
+    
+    private async Task AddCampaignToContextAsync(EmailCampaign campaign, CancellationToken cancellationToken)
+    {
+        await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

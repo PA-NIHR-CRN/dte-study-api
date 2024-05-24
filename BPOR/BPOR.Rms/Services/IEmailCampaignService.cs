@@ -4,5 +4,5 @@ namespace BPOR.Rms.Services;
 
 public interface IEmailCampaignService
 {
-    Task SendCampaignAsync(EmailCampaign campaign, CancellationToken cancellationToken);
+    Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default);
 }

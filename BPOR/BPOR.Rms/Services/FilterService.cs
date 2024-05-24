@@ -11,6 +11,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
 {
     private readonly List<Expression<Func<Participant, bool>>> _filters = [];
 
+    // too tightly coupled to view
     public async Task<IQueryable<Participant>> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
         _filters.Clear();

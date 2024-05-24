@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NIHR.NotificationService.Interfaces;
+using NIHR.Infrastructure;
 
-public class QueuedHostedService : BackgroundService
+public class HostedNotificationQueueService : BackgroundService
 {
-    private readonly ILogger<QueuedHostedService> _logger;
-    private readonly IBackgroundTaskQueue _taskQueue;
+    private readonly ILogger<HostedNotificationQueueService> _logger;
+    private readonly INotificationTaskQueue _taskQueue;
 
-    public QueuedHostedService(IBackgroundTaskQueue taskQueue, ILogger<QueuedHostedService> logger)
+    public HostedNotificationQueueService(INotificationTaskQueue taskQueue, ILogger<HostedNotificationQueueService> logger)
     {
         _taskQueue = taskQueue;
         _logger = logger;

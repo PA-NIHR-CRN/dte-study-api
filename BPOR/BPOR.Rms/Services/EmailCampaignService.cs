@@ -1,104 +1,154 @@
-using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Constants;
 using BPOR.Rms.Mappers;
+using BPOR.Rms.Models;
+using BPOR.Rms.Models.Volunteer;
 using BPOR.Rms.Services;
 using BPOR.Rms.Settings;
-using LuhnNet;
+using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure;
+using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 
 public class EmailCampaignService(
     ILogger<EmailCampaignService> logger,
     IOptions<AppSettings> appSettings,
-    IRandomiser randomiser,
     IRefDataService refDataService,
     INotificationService notificationService,
     IFilterService filterService,
-    IBackgroundTaskQueue taskQueue,
-    ParticipantDbContext context)
+    INotificationTaskQueue taskQueue,
+    ParticipantDbContext context,
+    IReferenceGenerator referenceGenerator)
     : IEmailCampaignService
 {
-    private static readonly Random _rand = new();
-
-    public async Task SendCampaignAsync(EmailCampaign campaign, CancellationToken cancellationToken = default)
+    public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
     {
-        var emailDeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending) ??
-                                    throw new InvalidOperationException("Email delivery status not found");
-
-        await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+        var campaign = await context.EmailCampaigns
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == emailCampaignId, cancellationToken);
+        var emailDeliveryStatusId = GetEmailDeliveryStatusId();
 
         var dbFilter = await GetFilterCriteriaAsync(campaign, cancellationToken);
+
         if (dbFilter == null)
         {
             logger.LogWarning("No filter criteria found for campaign {CampaignId}", campaign.Id);
             return;
         }
 
-        var filter = FilterMapper.MapToFilterModel(dbFilter);
-        var volunteerQuery = await filterService.FilterVolunteersAsync(filter, cancellationToken);
-
-        if (campaign.TargetGroupSize == null || !volunteerQuery.Any())
+        var volunteers = await GetFilteredVolunteersAsync(dbFilter, campaign.TargetGroupSize, cancellationToken);
+        if (!volunteers.Any())
         {
             logger.LogWarning("No volunteers found for campaign {CampaignId}", campaign.Id);
             return;
         }
 
-        var finalVolunteers = randomiser.GetRandomisedCollection(
-            volunteerQuery.Where(v => !string.IsNullOrEmpty(v.Email)).Select(v => new VolunteerProjection
-            {
-                Id = v.Id,
-                Email = v.Email,
-                FirstName = v.FirstName,
-                LastName = v.LastName
-            }).AsQueryable(),
-            campaign.TargetGroupSize.Value
-        );
+        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, emailDeliveryStatusId, cancellationToken);
+    }
 
-        int batchSize = 1000;
+    private int GetEmailDeliveryStatusId()
+    {
+        return refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending) ??
+               throw new InvalidOperationException("Email delivery status not found");
+    }
 
-        // Use the optimal batch size for actual processing
+    private async Task<FilterCriteria?> GetFilterCriteriaAsync(EmailCampaign campaign,
+        CancellationToken cancellationToken)
+    {
+        return await context.FilterCriterias
+            .AsNoTracking()
+            .IncludeAllFilterProperties()
+            .FirstOrDefaultAsync(fc => fc.Id == campaign.FilterCriteriaId, cancellationToken);
+    }
+
+    private async Task<List<EmailParticipantDetails>> GetFilteredVolunteersAsync(FilterCriteria dbFilter,
+        int? targetGroupSize, CancellationToken cancellationToken)
+    {
+        var filter = FilterMapper.MapToFilterModel(dbFilter);
+        var volunteerQuery = await filterService.FilterVolunteersAsync(filter, cancellationToken);
+
+        return await volunteerQuery
+            .Where(v => !string.IsNullOrEmpty(v.Email))
+            .Randomise()
+            .Take(targetGroupSize ?? int.MaxValue)
+            .AsEmailCampaignParticipant()
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
+        FilterCriteria dbFilter, int emailDeliveryStatusId, CancellationToken cancellationToken)
+    {
+        const int batchSize = 1000;
+
         var startTime = DateTime.UtcNow;
         logger.LogInformation("Started processing volunteers at {Time}", startTime);
-        await foreach (var processingResult in ProcessVolunteersAsync(finalVolunteers, campaign, dbFilter,
+
+        var emailQueue = new List<ProcessingResults>();
+
+        await foreach (var processingResult in ProcessVolunteersAsync(volunteers, campaign, dbFilter,
                            emailDeliveryStatusId, batchSize, cancellationToken))
         {
-            await AddParticipantsToContext(processingResult, cancellationToken);
-            await QueueEmailSendingTaskAsync(processingResult, campaign, cancellationToken);
+            await AddParticipantsToContextAsync(processingResult, cancellationToken);
+            emailQueue.Add(processingResult);
         }
 
         var endTime = DateTime.UtcNow;
         logger.LogInformation("Finished processing volunteers at {Time}, Duration: {Duration}ms", endTime,
             (endTime - startTime).TotalMilliseconds);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await SaveChangesWithRetryAsync(emailQueue, cancellationToken);
+        await QueueEmailSendingTaskAsync(emailQueue, campaign, cancellationToken);
     }
 
-    private async Task<FilterCriteria?> GetFilterCriteriaAsync(EmailCampaign campaign,
+    private async Task SaveChangesWithRetryAsync(List<ProcessingResults> emailQueue,
         CancellationToken cancellationToken)
     {
-        var dbFilter = await context.FilterCriterias
-            .AsNoTracking()
-            .Include(fc => fc.FilterGender)
-            .Include(fc => fc.FilterAreaOfInterest)
-            .Include(fc => fc.FilterEthnicGroup)
-            .Include(fc => fc.FilterPostcode)
-            .Include(fc => fc.FilterSexSameAsRegisteredAtBirth)
-            .Include(fc => fc.Study)
-            .FirstOrDefaultAsync(fc => fc.Id == campaign.FilterCriteriaId, cancellationToken);
+        var retryCount = 0;
+        const int maxRetries = 3;
 
-        return dbFilter;
+        while (retryCount < maxRetries)
+        {
+            try
+            {
+                await context.SaveChangesAsync(cancellationToken);
+                break;
+            }
+            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+            {
+                logger.LogError(ex, "Error saving email campaign participants, attempt {Attempt}", retryCount + 1);
+                retryCount++;
+                UpdateUniqueConstraintViolations(emailQueue);
+            }
+        }
+    }
+
+    private void UpdateUniqueConstraintViolations(List<ProcessingResults> emailQueue)
+    {
+        foreach (var participant in context.ChangeTracker.Entries<StudyParticipantEnrollment>()
+                     .Where(e => e.State == EntityState.Added))
+        {
+            var newReference = referenceGenerator.GenerateReference();
+            participant.Entity.Reference = newReference;
+
+            foreach (var processingResult in emailQueue)
+            {
+                UpdateProcessingResultReferences(processingResult, participant.Entity.ParticipantId, newReference);
+            }
+        }
+    }
+
+    private static bool IsUniqueConstraintViolation(DbUpdateException ex)
+    {
+        return ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE constraint failed");
     }
 
     private async IAsyncEnumerable<ProcessingResults> ProcessVolunteersAsync(
-        IEnumerable<VolunteerProjection> volunteers,
+        List<EmailParticipantDetails> volunteers,
         EmailCampaign campaign,
         FilterCriteria dbFilter,
         int emailDeliveryStatusId,
@@ -109,91 +159,25 @@ public class EmailCampaignService(
 
         foreach (var volunteerChunk in volunteerChunks)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var processingResult = new ProcessingResults();
 
-            var tentativeReferences = volunteerChunk.ToDictionary(
+            var references = volunteerChunk.ToDictionary(
                 volunteer => volunteer,
-                volunteer => GenerateTentativeVolunteerReference());
+                volunteer => referenceGenerator.GenerateReference());
 
-            await EnsureUniqueVolunteerReferencesAsync(tentativeReferences, batchSize, cancellationToken);
-
-            var tasks = volunteerChunk.Select(volunteer => Task.Run(() =>
+            foreach (var volunteer in volunteerChunk)
             {
-                ProcessSingleVolunteer(volunteer, campaign, dbFilter, processingResult, emailDeliveryStatusId,
-                    tentativeReferences[volunteer]);
-            }, cancellationToken)).ToList();
-
-            await Task.WhenAll(tasks);
+                ProcessVolunteer(volunteer, campaign, dbFilter, processingResult, emailDeliveryStatusId,
+                    references[volunteer]);
+            }
 
             yield return processingResult;
         }
     }
 
-    private string GenerateTentativeVolunteerReference()
-    {
-        var stringBuilder = new StringBuilder(15);
-        stringBuilder.Append(_rand.Next(1, 10));
-        for (int i = 0; i < 14; i++)
-        {
-            stringBuilder.Append(_rand.Next(0, 10));
-        }
-
-        var reference = stringBuilder.ToString();
-        var checkDigit = Luhn.CalculateCheckDigit(reference);
-        reference += checkDigit.ToString();
-
-        return reference;
-    }
-
-    private async Task EnsureUniqueVolunteerReferencesAsync(Dictionary<VolunteerProjection, string> tentativeReferences,
-        int batchSize,
-        CancellationToken cancellationToken)
-    {
-        var references = new HashSet<string>(tentativeReferences.Values);
-
-        while (true)
-        {
-            var existingReferences = context.StudyParticipantEnrollment.AsNoTracking()
-                .Where(e => references.Contains(e.Reference))
-                .Select(e => e.Reference);
-
-            if (!existingReferences.Any())
-            {
-                break;
-            }
-
-            var existingReferencesSet = new HashSet<string>(existingReferences);
-
-            var tasks = tentativeReferences.Keys.ToList().Chunk(batchSize).Select(volunteerChunk =>
-                Task.Run(() =>
-                {
-                    foreach (var volunteer in volunteerChunk)
-                    {
-                        if (!existingReferencesSet.Contains(tentativeReferences[volunteer]))
-                        {
-                            continue;
-                        }
-
-                        var newReference = GenerateTentativeVolunteerReference();
-                        while (existingReferencesSet.Contains(newReference))
-                        {
-                            newReference = GenerateTentativeVolunteerReference();
-                        }
-
-                        tentativeReferences[volunteer] = newReference;
-                        lock (references)
-                        {
-                            references.Add(newReference);
-                        }
-                    }
-                }, cancellationToken)).ToArray();
-
-            await Task.WhenAll(tasks);
-        }
-    }
-
-    private void ProcessSingleVolunteer(
-        VolunteerProjection volunteer,
+    private void ProcessVolunteer(
+        EmailParticipantDetails volunteer,
         EmailCampaign campaign,
         FilterCriteria dbFilter,
         ProcessingResults processingResult,
@@ -233,41 +217,68 @@ public class EmailCampaignService(
         }
     }
 
-    private async Task AddParticipantsToContext(ProcessingResults results, CancellationToken cancellationToken)
+    private async Task AddParticipantsToContextAsync(ProcessingResults results, CancellationToken cancellationToken)
     {
         await context.EmailCampaignParticipants.AddRangeAsync(results.EmailCampaignParticipants, cancellationToken);
         await context.StudyParticipantEnrollment.AddRangeAsync(results.StudyParticipantEnrollments, cancellationToken);
     }
 
-    private async Task QueueEmailSendingTaskAsync(ProcessingResults results, EmailCampaign campaign,
+    private async Task QueueEmailSendingTaskAsync(List<ProcessingResults> emailQueue, EmailCampaign campaign,
         CancellationToken cancellationToken)
     {
-        await taskQueue.QueueBackgroundWorkItemAsync(async token =>
+        foreach (var results in emailQueue)
         {
-            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
-            await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
+            await taskQueue.QueueBackgroundWorkItemAsync(async token =>
             {
-                EmailAddresses = results.EmailAddresses,
-                PersonalisationData = results.PersonalisationData,
-                EmailTemplateId = campaign.EmailTemplateId
-            }, linkedCts.Token);
-        });
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
+                await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
+                {
+                    EmailAddresses = results.EmailAddresses,
+                    PersonalisationData = results.PersonalisationData,
+                    EmailTemplateId = campaign.EmailTemplateId
+                }, linkedCts.Token);
+            });
+        }
+    }
+
+    private void UpdateProcessingResultReferences(ProcessingResults processingResult, int participantId,
+        string newReference)
+    {
+        foreach (var personalisation in processingResult.PersonalisationData.Values.Where(personalisation =>
+                     personalisation.ContainsKey("emailCampaignParticipantId") &&
+                     (int)personalisation["emailCampaignParticipantId"] == participantId))
+        {
+            personalisation["uniqueLink"] =
+                $"{appSettings.Value.BaseUrl}/NotifyCallback/registerinterest?reference={newReference}";
+        }
+
+        var studyParticipant =
+            processingResult.StudyParticipantEnrollments.FirstOrDefault(e => e.ParticipantId == participantId);
+        if (studyParticipant != null)
+        {
+            studyParticipant.Reference = newReference;
+        }
     }
 }
 
+internal static class DbContextExtensions
+{
+    public static IQueryable<FilterCriteria> IncludeAllFilterProperties(this IQueryable<FilterCriteria> query)
+    {
+        return query
+            .Include(fc => fc.FilterGender)
+            .Include(fc => fc.FilterAreaOfInterest)
+            .Include(fc => fc.FilterEthnicGroup)
+            .Include(fc => fc.FilterPostcode)
+            .Include(fc => fc.FilterSexSameAsRegisteredAtBirth)
+            .Include(fc => fc.Study);
+    }
+}
 
 internal class ProcessingResults
 {
-    public ConcurrentBag<string> EmailAddresses { get; } = [];
-    public ConcurrentDictionary<string, Dictionary<string, dynamic?>> PersonalisationData { get; } = new();
-    public ConcurrentBag<EmailCampaignParticipant> EmailCampaignParticipants { get; } = [];
-    public ConcurrentBag<StudyParticipantEnrollment> StudyParticipantEnrollments { get; } = [];
-}
-
-internal class VolunteerProjection
-{
-    public int Id { get; set; }
-    public string? Email { get; set; }
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
+    public List<string> EmailAddresses { get; } = new();
+    public Dictionary<string, Dictionary<string, dynamic?>> PersonalisationData { get; } = new();
+    public List<EmailCampaignParticipant> EmailCampaignParticipants { get; } = new();
+    public List<StudyParticipantEnrollment> StudyParticipantEnrollments { get; } = new();
 }
