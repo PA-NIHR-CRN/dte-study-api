@@ -13,10 +13,6 @@ public class VolunteerFilterViewModel
 
     public long? SelectedStudyCPMSId { get; set; }
 
-    public IEnumerable<SelectListItem> VolunteersContacted { get; set; } = [];
-    public IEnumerable<SelectListItem> VolunteersRecruited { get; set; } = [];
-    public IEnumerable<SelectListItem> VolunteersRegisteredInterest { get; set; } = [];
-    public IEnumerable<SelectListItem> VolunteersCompletedRegistration { get; set; } = [];
     public IEnumerable<SelectListItem> HealthConditions { get; set; } = [];
 
     [Display(Name = "Volunteers contacted")]

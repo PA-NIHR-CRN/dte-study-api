@@ -6,29 +6,15 @@
 
             @if (Model.ShowStudyFilters)
             {
-                <div class="govuk-input_select__wrapper">
-                    @Html.LabelFor(m => Model.SelectedVolunteersContacted, new { @class = "govuk-label exclusion_label" })
-                    @Html.DropDownListFor(m => m.SelectedVolunteersContacted, Model.VolunteersContacted, new { @class = "govuk-select govuk-select-custom" })
-                </div>
-
-                <div class="govuk-input_select__wrapper">
-                    @Html.LabelFor(m => Model.SelectedVolunteersRegisteredInterest, new { @class = "govuk-label exclusion_label" })
-                    @Html.DropDownListFor(m => m.SelectedVolunteersRegisteredInterest, Model.VolunteersRegisteredInterest, new { @class = "govuk-select govuk-select-custom" })
-                </div>
-
+                <include-exclude-dropdown for="SelectedVolunteersContacted" />
+                <include-exclude-dropdown for="SelectedVolunteersRegisteredInterest" />
                 @if (Model.ShowRecruitedFilter)
                 {
-                    <div class="govuk-input_select__wrapper">
-                        @Html.LabelFor(m => Model.SelectedVolunteersRecruited, new { @class = "govuk-label exclusion_label" })
-                        @Html.DropDownListFor(m => m.SelectedVolunteersRecruited, Model.VolunteersRecruited, new { @class = "govuk-select govuk-select-custom" })
-                    </div>
-                }            
+                    <include-exclude-dropdown for="SelectedVolunteersRecruited" />
+                }           
             }       
 
-            <div class="govuk-input_select__wrapper">
-                @Html.LabelFor(m => Model.SelectedVolunteersCompletedRegistration, new { @class = "govuk-label exclusion_label" })
-                @Html.DropDownListFor(m => m.SelectedVolunteersCompletedRegistration, Model.VolunteersCompletedRegistration, new { @class = "govuk-select govuk-select-custom" })
-            </div>
+            <include-exclude-dropdown for="SelectedVolunteersCompletedRegistration" />
   
         </legend>      
     </fieldset>

@@ -27,11 +27,6 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             model = ClearFilters(model);
         }
 
-        model.VolunteersContacted = GetTristateOptions();
-        model.VolunteersCompletedRegistration = GetTristateOptions();
-        model.VolunteersRecruited = GetTristateOptions();
-        model.VolunteersRegisteredInterest = GetTristateOptions();
-
         model.HealthConditions = context.HealthConditions
                 .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Description })
                 .OrderBy(x => x.Text)
@@ -63,15 +58,6 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         ModelState.Clear();
 
         return new VolunteerFilterViewModel { StudyId = model.StudyId };
-    }
-
-    private static IEnumerable<SelectListItem> GetTristateOptions()
-    {
-        return [
-                new SelectListItem { Value = string.Empty, Text = "No Preference" },
-                new SelectListItem { Value = true.ToString(), Text = "Include" },
-                new SelectListItem { Value = false.ToString(), Text = "Exclude" }
-            ];
     }
 
     [HttpPost]
