@@ -6,12 +6,11 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="govuk-grid-row">
-    @await Html.PartialAsync("Partials/Index/_StudyListHeader", Model)
-    
+    <partial name="Partials/Index/_StudyListHeader" />
 </div>
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-        @await Html.PartialAsync("Partials/Index/_StudySearchForm", Model)
-        @await Html.PartialAsync("Partials/Index/_StudyList", Model)
+        <partial name="Partials/Index/_StudySearchForm" />
+        <partial name="Partials/Index/_StudyList" />
     </div>
 </div>

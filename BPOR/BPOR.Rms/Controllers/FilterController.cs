@@ -8,14 +8,16 @@ using BPOR.Rms.Models;
 using BPOR.Rms.Services;
 using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure.Paging;
+using Z.EntityFramework.Plus;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService) : Controller
+public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService, ILogger<HomeController> logger) : Controller
 {
+    private readonly ILogger<HomeController> _logger = logger;
+
     public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
-
         if (activity == "FilterVolunteers")
         {
             await FilterVolunteersAsync(model, cancellationToken);
@@ -25,39 +27,42 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             model = ClearFilters(model);
         }
 
-        SetSelectedStudy(model);
-        SetStudyExclusionFilters(model);
-        SetHealthConditionSelectList(model);
+        model.VolunteersContacted = GetTristateOptions();
+        model.VolunteersCompletedRegistration = GetTristateOptions();
+        model.VolunteersRecruited = GetTristateOptions();
+        model.VolunteersRegisteredInterest = GetTristateOptions();
+
+        model.HealthConditions = context.HealthConditions
+                .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Description })
+                .OrderBy(x => x.Text)
+                .Future();
+
+        if (model.StudyId is not null)
+        {
+            var selectedStudy = await context.Studies
+                .Where(x => x.Id == model.StudyId)
+                .Select(x => new { x.StudyName, x.CpmsId, x.IsRecruitingIdentifiableParticipants })
+                .DeferredFirst()
+                .ExecuteAsync(cancellationToken);
+
+            model.ShowStudyFilters = true;
+
+            model.SelectedStudy = selectedStudy.StudyName;
+            model.SelectedStudyCPMSId = selectedStudy.CpmsId;
+
+            model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
+        }
 
         return View(model);
     }
 
-
-    protected VolunteerFilterViewModel ClearFilters(VolunteerFilterViewModel model)
+    private VolunteerFilterViewModel ClearFilters(VolunteerFilterViewModel model)
     {
         TempData.AddSuccessNotification($"All previously applied filters have been removed.");
 
         ModelState.Clear();
 
         return new VolunteerFilterViewModel { StudyId = model.StudyId };
-    }
-
-    private void SetHealthConditionSelectList(VolunteerFilterViewModel model)
-    {
-        model.HealthConditions = context.HealthConditions
-            .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Description }).OrderBy(x => x.Text)
-            .ToList();
-    }
-
-    private static void SetStudyExclusionFilters(VolunteerFilterViewModel model)
-    {
-        model.VolunteersContacted = GetTristateOptions();
-
-        model.VolunteersCompletedRegistration = GetTristateOptions();
-
-        model.VolunteersRecruited = GetTristateOptions();
-
-        model.VolunteersRegisteredInterest = GetTristateOptions();
     }
 
     private static IEnumerable<SelectListItem> GetTristateOptions()
@@ -69,22 +74,8 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             ];
     }
 
-    private void SetSelectedStudy(VolunteerFilterViewModel model)
-    {
-        if (model.StudyId is not null)
-        {
-            model.ShowStudyFilters = true;
-
-            var selectedStudy = context.Studies.Where(x => x.Id == model.StudyId).Select(x => new { x.StudyName, x.CpmsId, x.IsRecruitingIdentifiableParticipants }).First();
-
-            model.SelectedStudy = selectedStudy!.StudyName;
-            model.SelectedStudyCPMSId = selectedStudy!.CpmsId;
-
-            model.ShowRecruitedFilter = selectedStudy!.IsRecruitingIdentifiableParticipants;
-        }
-    }
-
-    public IActionResult SetupEmailCampaign(VolunteerFilterViewModel model)
+    [HttpPost]
+    public async Task<IActionResult> SetupEmailCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
         DateTime? dateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
         DateTime? dateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;
@@ -95,6 +86,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             IncludeRegisteredInterest = model.SelectedVolunteersRegisteredInterest,
             IncludeCompletedRegistration = model.SelectedVolunteersCompletedRegistration,
             IncludeRecruited = model.SelectedVolunteersRecruited,
+            // TODO: custom model binding for broken up date.
             RegistrationFromDate = ConstructDate(model.RegistrationFromDateYear, model.RegistrationFromDateMonth,
                 model.RegistrationFromDateDay),
             RegistrationToDate = ConstructDate(model.RegistrationToDateYear, model.RegistrationToDateMonth,
@@ -103,17 +95,21 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             DateOfBirthTo = dateOfBirthTo,
             FullPostcode = model.FullPostcode,
             SearchRadiusMiles = model.SearchRadiusMiles,
-            StudyId = model.StudyId
+            StudyId = model.StudyId,
+            FilterAreaOfInterest = model.SelectedHealthConditions.Select(x => new FilterAreaOfInterest
+            {
+                HealthConditionId = x
+            }).ToList(),
+            // TODO bind this directly into the model as a collection
+            FilterPostcode = GetPostcodes(model),
+            FilterGender = GetGenders(model),
+            FilterSexSameAsRegisteredAtBirth = GetSexSameAsRegisteredAtBirths(model),
+            FilterEthnicGroup = GetEthnicGroups(model),
+            IncludeNoAreasOfInterest = model.IncludeNoHealthConditions
         };
 
         context.FilterCriterias.Add(filterCriteria);
-        context.SaveChanges();
-
-        SaveAreasOfResearchFilters(filterCriteria, model.SelectedHealthConditions);
-        SavePostcodeDistrictFilters(filterCriteria, model.PostcodeDistricts);
-        SaveGenderFilter(model, filterCriteria);
-        SaveSexSameAsRegisteredAtBirthFilters(model, filterCriteria);
-        SaveEthnicityFilters(model, filterCriteria);
+        await context.SaveChangesAsync(cancellationToken);
 
         // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
@@ -126,234 +122,116 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         return RedirectToAction("SetupCampaign", "Email", campaignDetails);
     }
 
-    private void SaveAreasOfResearchFilters(FilterCriteria filterCriteria, List<string>? selectedHealthConditions)
-    {
-        if (selectedHealthConditions?.Count > 0)
-        {
-            foreach (var item in selectedHealthConditions)
-            {
-                var areaOfInterest = new FilterAreaOfInterest
-                {
-                    FilterCriteriaId = filterCriteria.Id,
-                    HealthConditionId = Convert.ToInt32(item)
-                };
+    private static List<T> Map<T>(IEnumerable<bool> inputList, Func<int, T> getOutput) =>
+        inputList.Select((x, i) => x ? i + 1 : 0).Where(x => x > 0).Select(getOutput).ToList();
 
-                context.FilterAreaOfInterest.AddRange(areaOfInterest);
-            }
-            context.SaveChanges();
-        }
-    }
 
-    private void SavePostcodeDistrictFilters(FilterCriteria filterCriteria, string? postcodeDistricts = null)
-    {
-        if (!String.IsNullOrEmpty(postcodeDistricts))
-        {
-            var postcodeFragments = postcodeDistricts.Split(",").ToList();
-            var filterPostcodeFragments = new List<FilterPostcode>();
+    private static List<FilterEthnicGroup> GetEthnicGroups(VolunteerFilterViewModel model) => 
+        Map([model.Ethnicity_Asian, model.Ethnicity_Black, model.Ethnicity_Mixed, model.Ethnicity_White, model.Ethnicity_Other],
+            x => new FilterEthnicGroup { EthnicGroupId = x });
 
-            foreach (var frag in postcodeFragments)
-            {
-                var item = new FilterPostcode
-                {
-                    FilterCriteriaId = filterCriteria.Id,
-                    PostcodeFragment = frag
-                };
-                filterPostcodeFragments.Add(item);
-            }
-            context.FilterPostcode.AddRange(filterPostcodeFragments);
-            context.SaveChanges();
-        }
-    }
+    private static List<FilterSexSameAsRegisteredAtBirth> GetSexSameAsRegisteredAtBirths(VolunteerFilterViewModel model) => 
+        Map([model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No, model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay],
+            x => new FilterSexSameAsRegisteredAtBirth { YesNoPreferNotToSay = x });
 
-    private void SaveGenderFilter(VolunteerFilterViewModel model, FilterCriteria filterCriteria)
-    {
-        if (model.IsSexMale || model.IsSexFemale)
-        {
-            var genderList = new List<FilterGender>();
+    private static List<FilterGender> GetGenders(VolunteerFilterViewModel model) =>
+        Map([model.IsSexMale, model.IsSexFemale],
+            x => new FilterGender { GenderId = x });
 
-            if (model.IsSexMale)
-            {
-                var gender = new FilterGender
-                {
-                    FilterCriteriaId = filterCriteria.Id,
-                    GenderId = 1
-                };
-                genderList.Add(gender);
-            }
-
-            if (model.IsSexFemale)
-            {
-                var gender = new FilterGender
-                {
-                    FilterCriteriaId = filterCriteria.Id,
-                    GenderId = 2
-                };
-                genderList.Add(gender);
-            }
-
-            context.FilterGender.AddRange(genderList);
-            context.SaveChanges();
-        }
-    }
-
-    private void SaveSexSameAsRegisteredAtBirthFilters(VolunteerFilterViewModel model, FilterCriteria filterCriteria)
-    {
-        if (model.IsGenderSameAsSexRegisteredAtBirth_Yes || model.IsGenderSameAsSexRegisteredAtBirth_No || model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
-        {
-            var sexRegisteredAtBirthList = new List<FilterSexSameAsRegisteredAtBirth>();
-
-            if (model.IsGenderSameAsSexRegisteredAtBirth_Yes)
-            {
-                var item = new FilterSexSameAsRegisteredAtBirth
-                {
-                    FilterCriteriaId = filterCriteria.Id,
-                    YesNoPreferNotToSay = 1
-                };
-                sexRegisteredAtBirthList.Add(item);
-            }
-
-            if (model.IsGenderSameAsSexRegisteredAtBirth_No)
-            {
-                var item = new FilterSexSameAsRegisteredAtBirth
-                {
-                    FilterCriteriaId = filterCriteria.Id,
-                    YesNoPreferNotToSay = 2
-                };
-                sexRegisteredAtBirthList.Add(item);
-            }
-
-            if (model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
-            {
-                var item = new FilterSexSameAsRegisteredAtBirth
-                {
-                    FilterCriteriaId = filterCriteria.Id,
-                    YesNoPreferNotToSay = 3
-                };
-                sexRegisteredAtBirthList.Add(item);
-            }
-
-            context.FilterSexSameAsRegisteredAtBirth.AddRange(sexRegisteredAtBirthList);
-            context.SaveChanges();
-        }
-    }
-
-    private void SaveEthnicityFilters(VolunteerFilterViewModel model, FilterCriteria filterCriteria)
-    {
-        if (model.Ethnicity_Asian || model.Ethnicity_Black || model.Ethnicity_Mixed || model.Ethnicity_Other || model.Ethnicity_White)
-        {
-            var ethnicGroups = new List<FilterEthnicGroup>();
-
-            if (model.Ethnicity_Asian)
-            {
-                var ethnicity = new FilterEthnicGroup
-                {
-                    EthnicGroupId = 1,
-                    FilterCriteriaId = filterCriteria.Id
-                };
-                ethnicGroups.Add(ethnicity);
-            }
-
-            if (model.Ethnicity_Black)
-            {
-                var ethnicity = new FilterEthnicGroup
-                {
-                    EthnicGroupId = 2,
-                    FilterCriteriaId = filterCriteria.Id
-                };
-                ethnicGroups.Add(ethnicity);
-            }
-
-            if (model.Ethnicity_Mixed)
-            {
-                var ethnicity = new FilterEthnicGroup
-                {
-                    EthnicGroupId = 3,
-                    FilterCriteriaId = filterCriteria.Id
-                };
-                ethnicGroups.Add(ethnicity);
-            }
-
-            if (model.Ethnicity_White)
-            {
-                var ethnicity = new FilterEthnicGroup
-                {
-                    EthnicGroupId = 4,
-                    FilterCriteriaId = filterCriteria.Id
-                };
-                ethnicGroups.Add(ethnicity);
-            }
-
-            if (model.Ethnicity_Other)
-            {
-                var ethnicity = new FilterEthnicGroup
-                {
-                    EthnicGroupId = 5,
-                    FilterCriteriaId = filterCriteria.Id
-                };
-                ethnicGroups.Add(ethnicity);
-            }
-
-            context.FilterEthnicGroup.AddRange(ethnicGroups);
-            context.SaveChanges();
-        }
-    }
-
-    private static string? GetEthnicGroup(VolunteerFilterViewModel model)
-    {
-        if (model.Ethnicity_Asian) return "Asian";
-        if (model.Ethnicity_Black) return "Black";
-        if (model.Ethnicity_Mixed) return "Mixed";
-        if (model.Ethnicity_Other) return "Other";
-        if (model.Ethnicity_White) return "White";
-
-        return null;
-    }
+    private static List<FilterPostcode> GetPostcodes(VolunteerFilterViewModel model) =>
+        model.PostcodeDistricts?.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => new FilterPostcode { PostcodeFragment = x })?.ToList() ?? [];
 
     protected async Task FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
+        ValidateAreasOfResearch(model.SelectedHealthConditions, model.IncludeNoHealthConditions);
         ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
             model.RegistrationFromDateYear,
             model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
-        ValidatePostcodeDistricts(model.PostcodeDistricts);
+        ValidatePostcodeDistricts(model.PostcodeDistricts, model.FullPostcode);
+        ValidateFullPostcode(model.FullPostcode, model.SearchRadiusMiles);
         ValidateAge(model.AgeFrom, model.AgeTo);
 
         if (ModelState.IsValid)
         {
-            var query = await filterService.FilterVolunteersAsync(model, cancellationToken);
-            model.VolunteerCount = await query.CountAsync(cancellationToken);
-
-            if (model.ShowResults)
+            try
             {
-                model.VolunteerResults = await query.Select(x => new VolunteerResult
+                var query = await filterService.FilterVolunteersAsync(model, cancellationToken);
+                model.VolunteerCount = await query.CountAsync(cancellationToken);
+
+                if (model.ShowResults)
                 {
-                    Id = x.Id,
-                    Email = x.Email,
-                    Postcode = x.Address == null ? null : x.Address.Postcode,
-                    AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
-                    DateOfBirth = x.DateOfBirth,
-                    Age = x.DateOfBirth.YearsTo(DateTime.Today),
-                    Gender = x.Gender.Code,
-                    Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
-                    FirstName = x.FirstName,
-                    LastName = x.LastName,
-                    HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
-                    HasRegistered = x.RegistrationConsentAtUtc,
-                    EthnicGroup = x.EthnicGroup,
-                    GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
-                })
-                .OrderBy(x => x.Id)
-                .PageAsync(paginationService, cancellationToken);
+                    model.VolunteerResults = await query.Select(x => new VolunteerResult
+                    {
+                        Id = x.Id,
+                        Email = x.Email,
+                        Postcode = x.Address == null ? null : x.Address.Postcode,
+                        AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
+                        DateOfBirth = x.DateOfBirth,
+                        Age = x.DateOfBirth.YearsTo(DateTime.Today),
+                        Gender = x.Gender.Code,
+                        Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
+                        FirstName = x.FirstName,
+                        LastName = x.LastName,
+                        HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
+                        HasRegistered = x.RegistrationConsentAtUtc,
+                        EthnicGroup = x.EthnicGroup,
+                        GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
+                    })
+                    .OrderBy(x => x.Id)
+                    .PageAsync(paginationService, cancellationToken);
+                }
             }
+            catch(Exception ex)
+            {
+                ModelState.AddModelError("","An error occurred while filtering volunteers.");
+                _logger.LogError(ex, "An error occurred while filtering volunteers.");
+            }
+
+            
         }
     }
 
-    private void ValidatePostcodeDistricts(string? postcodeDistricts)
+    private void ValidateAreasOfResearch(List<int> selectedHealthConditions, bool includeNoHealthConditions)
     {
+        if (selectedHealthConditions.Any() && includeNoHealthConditions)
+        {
+            ModelState.AddModelError("IncludeNoHealthConditions", "Cannot select areas of research and include no areas of research at the same time");
+        }
+    }
+
+    private void ValidateFullPostcode(string? fullPostcode, double? searchRadiusMiles)
+    {
+        if (!String.IsNullOrEmpty(fullPostcode) && searchRadiusMiles == null)
+        {
+            ModelState.AddModelError("SearchRadiusMiles",
+                        "Enter a radius");
+        }
+
+        if (String.IsNullOrEmpty(fullPostcode) && searchRadiusMiles != null)
+        {
+            ModelState.AddModelError("FullPostcode",
+                        "Enter a postcode");
+        }
+
+        if (!String.IsNullOrEmpty(fullPostcode) && searchRadiusMiles == 0)
+        {
+            ModelState.AddModelError("SearchRadiusMiles",
+                        "Search radius must be greater than 0");
+        }
+    }
+
+    private void ValidatePostcodeDistricts(string? postcodeDistricts, string? fullPostcode)
+    {
+        if (!String.IsNullOrEmpty(postcodeDistricts) && !String.IsNullOrEmpty(fullPostcode))
+        {
+            ModelState.AddModelError("PostcodeDistricts",
+                        "Postcode district search and Full postcode search cannot be applied at the same time");
+        }
+
         if (!string.IsNullOrEmpty(postcodeDistricts))
         {
-            List<string> postcodeDistrictsList = postcodeDistricts.Split(",").ToList();
+            var postcodeDistrictsList = postcodeDistricts.Split(",");
             string pattern = @"^[A-Za-z]{1,2}[0-9]{1,2}[A-Za-z]?$";
-
 
             foreach (var item in postcodeDistrictsList)
             {
@@ -370,10 +248,10 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
     {
         if (ageFrom > ageTo)
         {
+            // TODO: I think this is too restrictive
             ModelState.AddModelError("AgeFrom", "The minimum age must be lower than the maximum age");
         }
     }
-
 
     private void ValidateRegistrationDates(int? registrationFromDateDay, int? registrationFromDateMonth,
         int? registrationFromDateYear,
@@ -421,8 +299,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         }
         else
         {
-            List<DateValues> fromDateValues = new List<DateValues>();
-            List<DateValues> toDateValues = new List<DateValues>();
+            var fromDateValues = new List<DateValues>();
 
             if (registrationFromDateDay != null || registrationFromDateMonth != null ||
                 registrationFromDateYear != null)
@@ -474,7 +351,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         {
             return new DateTime(year.Value, month.Value, day.Value);
         }
-        catch (ArgumentOutOfRangeException)
+        catch (ArgumentOutOfRangeException) // TODO: Don't like this
         {
             return null;
         }

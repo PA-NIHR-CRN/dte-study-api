@@ -4,6 +4,7 @@ using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
@@ -12,9 +13,11 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    partial class ParticipantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240528094002_FilterCriteria_IncludeNoAreasOfResearch")]
+    partial class FilterCriteria_IncludeNoAreasOfResearch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,7 +210,7 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<bool?>("IncludeContacted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("IncludeNoAreasOfInterest")
+                    b.Property<bool?>("IncludeNoAreasOfInterest")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool?>("IncludeRecruited")
@@ -737,13 +740,6 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 4,
                             Code = "RegisteredInterest",
                             Description = "RegisteredInterest",
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Code = "Failed",
-                            Description = "Failed",
                             IsDeleted = false
                         });
                 });

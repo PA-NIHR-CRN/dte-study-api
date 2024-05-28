@@ -102,7 +102,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         {
             if (model.StudyName.Length > 255)
             {
-                ModelState.AddModelError("StudyName", "Study name must be less than 255 characters.");
+                ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
             }
             if (ModelState.IsValid)
             {
@@ -167,7 +167,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
 
         if (model.StudyName.Length > 255)
         {
-            ModelState.AddModelError("StudyName", "Study name must be less than 255 characters.");
+            ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
         }
 
         if (ModelState.IsValid)

@@ -3,12 +3,8 @@
 @if (Model.ShowStudyFilters)
 {
     <div class="govuk-form-group">
-        @Html.LabelFor(m => m.SelectedStudy, new { @class = "govuk-label govuk-label--l" })
         @Html.HiddenFor(m => m.SelectedStudy)
-        @Html.HiddenFor(m => m.StudyId)
-        @Html.HiddenFor(m => m.SelectedStudyCPMSId)
-        <p class="govuk-studylabel" aria-label="Selected study name"><b>Study Name:</b> @Model.SelectedStudy</p>
-        <p class="govuk-studylabel" aria-label="Selected study ID"><b>Study ID:</b> @Model.StudyId</p>
-        <p class="govuk-studylabel" aria-label="Selected study CPMS ID"><b>CPMS ID:</b> @Model.SelectedStudyCPMSId</p>
+
+        <h2 class="govuk-heading-l" aria-label="Selected study name">@Model.SelectedStudy</h2>
     </div>
 }

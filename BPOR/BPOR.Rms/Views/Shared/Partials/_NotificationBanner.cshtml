@@ -13,7 +13,7 @@
         <div class="govuk-notification-banner__content">
             @if (!string.IsNullOrWhiteSpace(notification.Body))
             {
-                <h3 class="govuk-body">@Html.Raw(notification.Body)</h3>
+                <p class="govuk-notification-banner__heading">@Html.Raw(notification.Body)</p>
             }
             @if (!string.IsNullOrWhiteSpace(notification.SubBodyText))
             {

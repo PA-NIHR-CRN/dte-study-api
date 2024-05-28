@@ -19,7 +19,6 @@ public class VolunteerFilterViewModel
     public IEnumerable<SelectListItem> VolunteersCompletedRegistration { get; set; } = [];
     public IEnumerable<SelectListItem> HealthConditions { get; set; } = [];
 
-
     [Display(Name = "Volunteers contacted")]
     public bool? SelectedVolunteersContacted { get; set; }
     [Display(Name = "Volunteers recruited")]
@@ -31,7 +30,10 @@ public class VolunteerFilterViewModel
 
     // Areas of research volunteers are interested in
     [Display(Name = "Areas of research volunteers are interested in")]
-    public List<string>? SelectedHealthConditions { get; set; }
+    public List<int> SelectedHealthConditions { get; set; } = [];
+
+    [Display(Name = "Only include volunteers without registered areas of interest")]
+    public bool IncludeNoHealthConditions { get; set; }
 
     // Date of volunteer registration
     // From Date
@@ -110,4 +112,24 @@ public class VolunteerFilterViewModel
     public Page<VolunteerResult> VolunteerResults { get; set; } = Page<VolunteerResult>.Empty();
 
     public bool ShowResults { get; set; }
+
+    public DateTime? GetRegistrationFromDate() => ConstructDate(RegistrationFromDateYear, RegistrationFromDateMonth, RegistrationFromDateDay);
+
+    public DateTime? GetRegistrationToDate() =>
+            ConstructDate(RegistrationToDateYear, RegistrationToDateMonth, RegistrationToDateDay);
+
+    private static DateTime? ConstructDate(int? year, int? month, int? day)
+    {
+        if (!year.HasValue || !month.HasValue || !day.HasValue)
+            return null;
+
+        try
+        {
+            return new DateTime(year.Value, month.Value, day.Value);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return null;
+        }
+    }
 }

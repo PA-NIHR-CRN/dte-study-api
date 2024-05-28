@@ -16,10 +16,10 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
             .Build();
 
         var dbSettings = configuration.GetSection(DbSettings.SectionName).Get<DbSettings>();
+        var connectionString = dbSettings?.BuildConnectionString() ??
+                               Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
-        var connectionString = dbSettings?.BuildConnectionString();
-
-        if(connectionString is null)
+        if (connectionString is null)
         {
             throw new ArgumentNullException(nameof(connectionString), "Database connection string not configured.");
         }

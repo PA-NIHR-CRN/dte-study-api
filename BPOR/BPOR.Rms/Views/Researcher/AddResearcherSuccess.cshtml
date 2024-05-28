@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Account created - Be Part of Research volunteer registry - Be Part of Research";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half-from-desktop">
+        <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title">
+                Your NIHR account has been successfully created
+            </h1>
+            <p>You will now be able to sign in with the email address and password you specified, and submit your first study.</p>
+        </div>
+    </div>
+</div>
+
+<div class="govuk-button-group">
+    @Html.ActionLink("Sign in", "Index", "Study", null, new { @class = "govuk-button", data_module = "govuk-button" })
+</div>

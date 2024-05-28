@@ -1,35 +1,26 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace BPOR.Rms.Models.Researcher;
 
 public class ResearcherStudyFormViewModel
 {
-    public int Id { get; set; }
-    public int Step { get; set; } = 1;
-    public int TotalSteps { get; set; } = 10;
+    [Display(Name = "Email address", Order = 1)]
+    [Required(ErrorMessage = "Enter your email address")]
+    [RegularExpression(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", ErrorMessage = "Enter an email address in the correct format, like name@example.com")]
+    public string? EmailAddress { get; set; }
 
-    [Required(ErrorMessage = "Enter the name of the main contact for the study")]
-    [Display(Name = "Name of main contact for the study")]
-    public string FullName { get; set; }
+    [Display(Name = "First name", Order = 2)]
+    [Required(ErrorMessage = "Enter your first name")]
+    public string? FirstName { get; set; }
 
-    [Required(ErrorMessage = "Enter the email address of the main contact for the study")]
-    [EmailAddress(ErrorMessage = "Enter an email address in the correct format, like name@example.com")]
-    [Display(Name = "Email address of main contact for the study")]
-    public string EmailAddress { get; set; }
+    [Display(Name = "Last name", Order = 3)]
+    [Required(ErrorMessage = "Enter your last name")]
+    public string? LastName { get; set; }
 
-    [Required(ErrorMessage = "Enter the study name")]
-    [Display(Name = "Study name")]
-    public string StudyName { get; set; }
+    [Display(Name = "Create your password", Order = 4)]
+    [Required(ErrorMessage = "Enter a password")]
+    [RegularExpression("^[a-zA-Z0-9]*$", ErrorMessage = "Enter a password that is at least 12 characters long and does not include any symbols")]
+    public string? Password { get; set; }
 
-    [Display(Name = "CPMS ID")]
-    [RegularExpression(@"^\d+$", ErrorMessage = "Enter a CPMS ID in the correct format, like 12345")]
-    public long? CpmsId { get; set; }
-    
-    [Display(Name = "Is this study recruiting identifiable participants?")]
-    [Required(ErrorMessage = "Select whether the study is recruiting identifiable participants")]
-    public bool? IsRecruitingIdentifiableParticipants { get; set; }
-    
-    public bool IsEditMode { get; set; }
-    [Required(ErrorMessage = "Accept the terms and conditions")]
-    public bool? IsTermsAndConditionsAccepted { get; set; }
 }
