@@ -1,7 +1,6 @@
-
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace BPOR.Rms.Views.ViewComponents;
+namespace BPOR.Rms;
 
 public class BreadcrumbItem(string text, string url)
 {
@@ -18,7 +17,7 @@ public static class BreadcrumbExtensions
             breadcrumbs = new List<BreadcrumbItem>();
             viewData["Breadcrumbs"] = breadcrumbs;
         }
-        
+
         breadcrumbs.Add(new BreadcrumbItem(text, url));
     }
 

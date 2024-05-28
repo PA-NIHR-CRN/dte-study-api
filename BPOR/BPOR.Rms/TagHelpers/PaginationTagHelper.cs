@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.ViewFeatures.Buffers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace BPOR.Rms
+namespace BPOR.Rms.TagHelpers
 {
     public class PaginationTagHelper : PartialTagHelper
     {
