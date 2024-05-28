@@ -18,7 +18,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         FilterVolunteersRegisteredInterest(model.StudyId, model.SelectedVolunteersRegisteredInterest);
         FilterVolunteersRecruited(model.StudyId, model.SelectedVolunteersRecruited);
         FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
-        FilterByAreasOfResearch(model.SelectedHealthConditions);
+        FilterByAreasOfResearch(model.SelectedHealthConditions, model.IncludeNoHealthConditions);
         FilterByRegistrationDate(model.GetRegistrationFromDate(), model.GetRegistrationToDate());
         FilterByAge(model.AgeFrom, model.AgeTo);
         FilterBySexRegisteredAtBirth(model.IsSexMale, model.IsSexFemale,
@@ -224,11 +224,16 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         }
     }
 
-    private void FilterByAreasOfResearch(List<int> selectedHealthConditions)
+    private void FilterByAreasOfResearch(List<int> selectedHealthConditions, bool includeNoHealthConditions)
     {
         if (selectedHealthConditions.Count != 0)
         { 
             _filters.Add(p => p.HealthConditions.Any(hc => selectedHealthConditions.Contains(hc.HealthConditionId)));
+        }
+
+        if (includeNoHealthConditions)
+        {
+            _filters.Add(p => !p.HealthConditions.Any());
         }
     }
 

@@ -52,7 +52,7 @@ public class FilterMapper
             Ethnicity_White = criteria.FilterEthnicGroup.Any(f => f.EthnicGroupId == 4),
             Ethnicity_Other = criteria.FilterEthnicGroup.Any(f => f.EthnicGroupId == 5),
 
-
+            IncludeNoHealthConditions = criteria.IncludeNoAreasOfInterest
         };
 
         return viewModel;

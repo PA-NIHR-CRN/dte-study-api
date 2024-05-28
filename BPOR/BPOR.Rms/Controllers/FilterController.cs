@@ -105,6 +105,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             FilterGender = GetGenders(model),
             FilterSexSameAsRegisteredAtBirth = GetSexSameAsRegisteredAtBirths(model),
             FilterEthnicGroup = GetEthnicGroups(model),
+            IncludeNoAreasOfInterest = model.IncludeNoHealthConditions
         };
 
         context.FilterCriterias.Add(filterCriteria);
@@ -142,6 +143,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
     protected async Task FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
+        ValidateAreasOfResearch(model.SelectedHealthConditions, model.IncludeNoHealthConditions);
         ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
             model.RegistrationFromDateYear,
             model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
@@ -186,6 +188,14 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             }
 
             
+        }
+    }
+
+    private void ValidateAreasOfResearch(List<int> selectedHealthConditions, bool includeNoHealthConditions)
+    {
+        if (selectedHealthConditions.Any() && includeNoHealthConditions)
+        {
+            ModelState.AddModelError("IncludeNoHealthConditions", "Cannot select areas of research and include no areas of research at the same time");
         }
     }
 

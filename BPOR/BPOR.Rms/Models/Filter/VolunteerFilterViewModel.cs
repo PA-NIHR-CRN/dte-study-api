@@ -32,6 +32,9 @@ public class VolunteerFilterViewModel
     [Display(Name = "Areas of research volunteers are interested in")]
     public List<int> SelectedHealthConditions { get; set; } = [];
 
+    [Display(Name = "Only include volunteers without registered areas of interest")]
+    public bool IncludeNoHealthConditions { get; set; }
+
     // Date of volunteer registration
     // From Date
     [Display(Name = "Day")]
