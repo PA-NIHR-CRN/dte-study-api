@@ -348,3 +348,11 @@ body {
 .govuk-skip-link.end-of-options{
     margin-top: 5px !important;
 }
+
+.govuk-skip-link.options-list {
+    margin-bottom: 5px !important;
+}
+
+.govuk-checkboxes__item.skip-link{
+    margin-bottom: unset;
+}

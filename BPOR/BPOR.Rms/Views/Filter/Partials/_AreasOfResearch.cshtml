@@ -21,8 +21,8 @@
             {
                 @if (option.index > 0 && option.index % 10 == 0) // Add skip link every 10 options
                 {
-                    <div class="govuk-checkboxes__item govuk-!-margin-bottom-1">
-                        <a href="#@Model.HealthConditions.Last().Value" class="govuk-skip-link" data-module="govuk-skip-link">Skip to end</a>
+                    <div class="govuk-checkboxes__item skip-link">
+                        <a href="#@Model.HealthConditions.Last().Value" class="govuk-skip-link options-list" data-module="govuk-skip-link" aria-hidden="true">Skip to end</a>
                     </div>
                 }
 
