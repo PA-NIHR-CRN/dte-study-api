@@ -1,64 +1,64 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Registry Management System</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="~/css/govuk-frontend.min.css" asp-append-version="true">
-    <link rel="stylesheet" href="~/css/nihr-ui.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/css/nihr-typography.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/css/nihr-component-ui.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/nihr-ui.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/nihr-typography.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/nihr-component-ui.css" asp-append-version="true" />
 
     @* <link rel="stylesheet" href="~/{APP ASSEMBLY}.styles.css" /> *@
 
     <link rel="icon" href="~/images/NIHR-favicon.ico" type="image/x-icon">
 </head>
 <body>
-<script>
+    <script>
         document.body.className += 'js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
     </script>
-<a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
+    <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 
-@await Html.PartialAsync("_Header")
+    <partial name="_Header" />
 
-@if (ViewData["ShowProgressBar"] as bool? ?? false)
-{
-    @await RenderSectionAsync("ProgressBar", required: false)
-}
-
-<div class="govuk-width-container">
-    @if (ViewData["ShowBackLink"] as bool? ?? false)
+    @if (ViewData["ShowProgressBar"] as bool? ?? false)
     {
-        <div class="govuk-back-link-container">
-            @if (ViewData["ShowBackLink"] as bool? ?? false)
-            {
-                <a class="govuk-back-link" onclick="window.history.back()">Back</a>
-            }
-            @if (ViewData["ShowProgressBar"] as bool? ?? false)
-            {
-                <span class="govuk-progress-percentage">@ViewData["ProgressPercentage"]%</span>
-            }
-        </div>
+        @await RenderSectionAsync("ProgressBar", required: false)
     }
-    <main class="govuk-main-wrapper" id="main-content" role="main">
-        @await Component.InvokeAsync("Breadcrumbs")
-        @RenderBody()
-    </main>
-</div>
 
-<script type="module" src="~/js/govuk-frontend.min.js"></script>
-<script type="module">
+    <div class="govuk-width-container">
+        @if (ViewData["ShowBackLink"] as bool? ?? false)
+        {
+            <div class="govuk-back-link-container">
+                @if (ViewData["ShowBackLink"] as bool? ?? false)
+                {
+                    <a class="govuk-back-link" onclick="window.history.back()">Back</a>
+                }
+                @if (ViewData["ShowProgressBar"] as bool? ?? false)
+                {
+                    <span class="govuk-progress-percentage">@ViewData["ProgressPercentage"]%</span>
+                }
+            </div>
+        }
+        <main class="govuk-main-wrapper" id="main-content" role="main">
+            <partial name="Partials/_Breadcrumbs" />
+            @RenderBody()
+        </main>
+    </div>
+
+    <script type="module" src="~/js/govuk-frontend.min.js"></script>
+    <script type="module">
         import {
             initAll
         } from '/js/govuk-frontend.min.js'
         initAll()
     </script>
-<script src="~/js/nihr-ui.js" asp-append-version="true"></script>
-@await RenderSectionAsync("Scripts", required: false)
+    <script src="~/js/nihr-ui.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

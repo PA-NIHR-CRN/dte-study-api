@@ -21,16 +21,16 @@
 <div class="govuk-grid-column-two-thirds govuk-!-margin-bottom-6">
     <h1 class="govuk-heading-l govuk-!-margin-bottom-0">Set up an email campaign</h1>
     <p class="govuk-hint body-bold">@Html.DisplayFor(x => x.StudyName)</p>
-    @await Html.PartialAsync("Partials/_NotificationBanner")
-    @await Html.PartialAsync("Partials/_ErrorSummary")
+    <partial name="Partials/_NotificationBanner" />
+    <partial name="Partials/_ErrorSummary" />
 
     <form method="post">
         <input type="hidden" asp-for="StudyId" />
         <input type="hidden" asp-for="MaxNumbers" />
         <input type="hidden" asp-for="FilterCriteriaId" />
-        @await Html.PartialAsync("Partials/_TemplateSelect")
-        @await Html.PartialAsync("Partials/_Preview")
-        @await Html.PartialAsync("Partials/_TotalNumbers")
-        @await Html.PartialAsync("Partials/_Footer")
+        <partial name="Partials/_TemplateSelect" />
+        <partial name="Partials/_Preview" />
+        <partial name="Partials/_TotalNumbers" />
+        <partial name="Partials/_Footer" />
     </form>
 </div>

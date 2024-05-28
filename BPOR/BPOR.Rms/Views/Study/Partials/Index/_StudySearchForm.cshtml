@@ -1,47 +1,49 @@
 @model BPOR.Rms.Models.Study.StudiesViewModel
 
-<style>  
-.govuk-input__suffix{
-    border-radius: 0px 4.2px 4.2px 0px;
-    background: #193E72;
-    box-shadow: 0px -0.84px 0px 0px #003078 inset;
+<style>
+    .govuk-input__suffix {
+        border-radius: 0px 4.2px 4.2px 0px;
+        background: #193E72;
+        box-shadow: 0px -0.84px 0px 0px #003078 inset;
     }
+
     .govuk-input {
-    border-radius: 4.2px 0px 0px 4.2px;
-    flex-grow: 1; /* Allows the input to fill the available space */
+        border-radius: 4.2px 0px 0px 4.2px;
+        flex-grow: 1; /* Allows the input to fill the available space */
     }
+
     .govuk-input__wrapper {
         position: relative;
         display: flex;
         align-items: center;
     }
-    
-.govuk-input__clear {
-    position: absolute;
-    background: transparent;
-    border: none;
-    color: #666;
-    text-decoration: none; 
-    cursor: pointer;
-    font-size: 18px;
-}
 
-/* Add this if you're using a div as the clear button and not a button element */
-.govuk-input__clear:hover {
-    color: #999; /* Example hover effect */
-}
+    .govuk-input__clear {
+        position: absolute;
+        background: transparent;
+        border: none;
+        color: #666;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+        /* Add this if you're using a div as the clear button and not a button element */
+        .govuk-input__clear:hover {
+            color: #999; /* Example hover effect */
+        }
     /* Mobile */
     @@media screen and (max-width: 549px) {
         .govuk-input__clear {
             left: 85%;
         }
     }
-    
-        @@media screen and (min-width: 550px) and (max-width: 640px) {
-            .govuk-input__clear {
-                left: 86%;
-            }
+
+    @@media screen and (min-width: 550px) and (max-width: 640px) {
+        .govuk-input__clear {
+            left: 86%;
         }
+    }
 
     /* Tablet and interim sizes for smoother transition */
     @@media screen and (min-width: 641px) and (max-width: 768px) {
@@ -63,7 +65,7 @@
             left: 32%;
         }
     }
-    
+
     .input__suffix {
         cursor: pointer;
     }
@@ -80,7 +82,7 @@
         }
         <button class="govuk-input__suffix" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-search" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
             </svg>
         </button>
     </div>
