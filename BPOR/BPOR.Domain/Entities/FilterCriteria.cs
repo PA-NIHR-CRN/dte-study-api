@@ -21,5 +21,6 @@ public class FilterCriteria
     public ICollection<FilterSexSameAsRegisteredAtBirth> FilterSexSameAsRegisteredAtBirth { get; set; } = [];
     public ICollection<FilterEthnicGroup> FilterEthnicGroup { get; set; } = [];
     public bool IncludeNoAreasOfInterest { get; set; }
+    public Study Study { get; set; }
 }
 

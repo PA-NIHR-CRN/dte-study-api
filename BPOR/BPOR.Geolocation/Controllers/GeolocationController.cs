@@ -1,8 +1,9 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure;
 
@@ -10,44 +11,77 @@ namespace BPOR.Geolocation.Controllers;
 
 public class GeolocationController(ParticipantDbContext context, IPostcodeMapper locationApiClient) : Controller
 {
-    [HttpGet]
-    [Route("api/add-lat-lng-to-all-users")]
     public async Task<IActionResult> AddCoordinatesToUsersWithPostcodes(CancellationToken cancellationToken = default)
     {
-        var participants = await context.Participants
-            .Include(p => p.Address)
-            .Take(20)
-            .ToListAsync(cancellationToken);
+        var cache = new ConcurrentDictionary<string, (double Latitude, double Longitude)>();
+        var semaphore = new SemaphoreSlim(600, 600);
+        var tasks = new List<Task>();
 
-        // filter out participants with no address
-        participants = participants.Where(p => p.Address != null).ToList();
+        await foreach (var participant in GetParticipantsWithAddressesAsync(cancellationToken))
+        {
+            tasks.Add(ProcessParticipant(participant, cache, semaphore, cancellationToken));
+        }
 
-        // loop through participants and add lat/lng to each
-        foreach (var participant in participants)
+        await Task.WhenAll(tasks);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return Ok("Coordinates added to all participants.");
+    }
+
+    private async Task ProcessParticipant(Participant participant,
+        ConcurrentDictionary<string, (double Latitude, double Longitude)> cache, SemaphoreSlim semaphore,
+        CancellationToken cancellationToken)
+    {
+        var postcode = participant.Address.Postcode;
+        if (postcode != null)
+        {
+            if (!cache.TryGetValue(postcode, out var latLng))
+            {
+                await semaphore.WaitAsync(cancellationToken);
+                try
+                {
+                    // Recheck after acquiring the semaphore
+                    if (!cache.TryGetValue(postcode, out latLng))
+                    {
+                        var coordinates =
+                            await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
+                        if (coordinates != null)
+                        {
+                            latLng = (coordinates.Latitude, coordinates.Longitude);
+                            cache[postcode] = latLng;
+                        }
+                    }
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }
+
+            if (latLng != default)
+            {
+                participant.ParticipantLocation = new ParticipantLocation
+                {
+                    Location = new Point(latLng.Longitude, latLng.Latitude) { SRID = 4326 }
+                };
+            }
+        }
+    }
+
+
+    private async IAsyncEnumerable<Participant> GetParticipantsWithAddressesAsync(
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await foreach (var participant in context.Participants.Include(p => p.Address).AsAsyncEnumerable()
+                           .WithCancellation(cancellationToken))
         {
             if (participant.Address != null)
             {
-                var postcode = participant.Address.Postcode;
-                if (postcode != null)
-                {
-                    var coordinates =
-                        await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
-
-                    if (coordinates != null)
-                    {
-                        participant.ParticipantLocation = new ParticipantLocation
-                        {
-                            Location = new Point(coordinates.Latitude, coordinates.Longitude) { SRID = 4326 }
-                        };
-                    }
-                }
+                yield return participant;
             }
         }
-
-        await context.SaveChangesAsync(cancellationToken);
-
-        return Ok(participants);
     }
+
 
     [HttpGet]
     [Route("api/add-random-coordinates-to-all-users")]
@@ -119,14 +153,13 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
         var count = await context.ParticipantLocation
             .Where(x => x.Location.Within(boundingBox) && x.Location.IsWithinDistance(point, distanceInMeters))
             .CountAsync(cancellationToken);
-        
+
         stopwatch.Stop();
-        
-        
+
+
         var response = new
         {
             TimeTaken = stopwatch.ElapsedMilliseconds + " ms",
-
         };
 
 
