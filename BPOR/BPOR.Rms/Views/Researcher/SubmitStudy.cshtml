@@ -1,0 +1,55 @@
+﻿@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+
+
+@{
+    ViewData["Title"] = "Submit a study - Be Part of Research volunteer registry - Be Part of Research";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section ProgressBar {
+    @await Html.PartialAsync("Partials/_ProgressBar", Model)
+}
+
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
+
+        <form asp-action="SubmitStudy">
+            <input type="hidden" asp-for="Step" value="@Model.Step" />
+
+            <div style="@(Model.Step == 1 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step1FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 2 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step2FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 3 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step3FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 4 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step4FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 5 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step5FormFields", Model)
+            </div>
+
+            <div class="govuk-button-group">
+                @if (Model.Step != Model.TotalSteps)
+                {
+                    <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Next</button>
+                }
+                else
+                {
+                    <button type="submit" name="action" value="Apply" class="govuk-button" data_module="govuk-button">Apply</button>
+                }
+
+                <a href="">Cancel</a>
+            </div>
+        </form>
+
+    </div>
+</div>
