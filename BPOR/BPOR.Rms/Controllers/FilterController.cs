@@ -1,7 +1,6 @@
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.RegularExpressions;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Models;
@@ -27,11 +26,6 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             model = ClearFilters(model);
         }
 
-        model.HealthConditions = context.HealthConditions
-                .Select(x => new SelectListItem { Value = x.Id.ToString(), Text = x.Description })
-                .OrderBy(x => x.Text)
-                .Future();
-
         if (model.StudyId is not null)
         {
             var selectedStudy = await context.Studies
@@ -39,8 +33,6 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 .Select(x => new { x.StudyName, x.CpmsId, x.IsRecruitingIdentifiableParticipants })
                 .DeferredFirst()
                 .ExecuteAsync(cancellationToken);
-
-            model.ShowStudyFilters = true;
 
             model.SelectedStudy = selectedStudy.StudyName;
             model.SelectedStudyCPMSId = selectedStudy.CpmsId;

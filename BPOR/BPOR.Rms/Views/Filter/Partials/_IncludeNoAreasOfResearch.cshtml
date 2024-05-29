@@ -1,0 +1,12 @@
+﻿@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+
+<div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+            <div class="govuk-checkboxes__item">
+                <input asp-for="IncludeNoHealthConditions" class="govuk-checkboxes__input" id="IncludeNoHealthConditions" type="checkbox" />
+                @Html.LabelFor(m => Model.IncludeNoHealthConditions, new { @class = "govuk-label govuk-checkboxes__label" })
+            </div>
+        </div>
+    </fieldset>
+</div>

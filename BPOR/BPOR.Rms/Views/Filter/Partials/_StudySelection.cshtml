@@ -1,6 +1,6 @@
 @model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
 
-@if (Model.ShowStudyFilters)
+@if (Model.ShowStudyFilters())
 {
     <div class="govuk-form-group">
         @Html.HiddenFor(m => m.SelectedStudy)

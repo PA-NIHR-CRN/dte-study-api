@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Mvc.ViewFeatures.Buffers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace BPOR.Rms.TagHelpers
@@ -12,10 +10,10 @@ namespace BPOR.Rms.TagHelpers
 
         public ModelExpression For { get; set; }
 
-
         [HtmlAttributeNotBound]
         [ViewContext]
         public ViewContext ViewContext { get; set; }
+
         protected IHtmlGenerator Generator { get; set; }
 
         public IncludeExcludeDropdownTagHelper(IHtmlGenerator generator)

@@ -13,8 +13,6 @@ public class VolunteerFilterViewModel
 
     public long? SelectedStudyCPMSId { get; set; }
 
-    public IEnumerable<SelectListItem> HealthConditions { get; set; } = [];
-
     [Display(Name = "Volunteers contacted")]
     public bool? SelectedVolunteersContacted { get; set; }
     [Display(Name = "Volunteers recruited")]
@@ -101,7 +99,7 @@ public class VolunteerFilterViewModel
     [Display(Name = "White")]
     public bool Ethnicity_White { get; set; }
     public int? VolunteerCount { get; set; }
-    public bool ShowStudyFilters { get; set; }
+    public bool ShowStudyFilters() => StudyId is not null;
     public bool ShowRecruitedFilter { get; set; }
 
 
