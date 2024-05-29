@@ -34,8 +34,8 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 .DeferredFirst()
                 .ExecuteAsync(cancellationToken);
 
-            model.SelectedStudy = selectedStudy.StudyName;
-            model.SelectedStudyCPMSId = selectedStudy.CpmsId;
+            model.StudyName = selectedStudy.StudyName;
+            model.StudyCpmsId = selectedStudy.CpmsId;
 
             model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
         }
@@ -64,11 +64,8 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             IncludeRegisteredInterest = model.SelectedVolunteersRegisteredInterest,
             IncludeCompletedRegistration = model.SelectedVolunteersCompletedRegistration,
             IncludeRecruited = model.SelectedVolunteersRecruited,
-            // TODO: custom model binding for broken up date.
-            RegistrationFromDate = ConstructDate(model.RegistrationFromDateYear, model.RegistrationFromDateMonth,
-                model.RegistrationFromDateDay),
-            RegistrationToDate = ConstructDate(model.RegistrationToDateYear, model.RegistrationToDateMonth,
-                model.RegistrationToDateDay),
+            RegistrationFromDate = model.RegistrationFromDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
+            RegistrationToDate = model.RegistrationToDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
             DateOfBirthFrom = dateOfBirthFrom,
             DateOfBirthTo = dateOfBirthTo,
             FullPostcode = model.FullPostcode,
@@ -95,7 +92,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             FilterCriteriaId = filterCriteria.Id,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
-            StudyName = model.SelectedStudy
+            StudyName = model.StudyName
         };
         return RedirectToAction("SetupCampaign", "Email", campaignDetails);
     }
@@ -122,9 +119,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
     protected async Task FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
         ValidateAreasOfResearch(model.SelectedHealthConditions, model.IncludeNoHealthConditions);
-        ValidateRegistrationDates(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
-            model.RegistrationFromDateYear,
-            model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
+        ValidateRegistrationDates(model.RegistrationFromDate, model.RegistrationToDate);
         ValidatePostcodeDistricts(model.PostcodeDistricts, model.FullPostcode);
         ValidateFullPostcode(model.FullPostcode, model.SearchRadiusMiles);
         ValidateAge(model.AgeFrom, model.AgeTo);
@@ -136,9 +131,9 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 var query = await filterService.FilterVolunteersAsync(model, cancellationToken);
                 model.VolunteerCount = await query.CountAsync(cancellationToken);
 
-                if (model.ShowResults)
+                if (model.Testing.ShowResults)
                 {
-                    model.VolunteerResults = await query.Select(x => new VolunteerResult
+                    model.Testing.VolunteerResults = await query.Select(x => new VolunteerResult
                     {
                         Id = x.Id,
                         Email = x.Email,
@@ -173,6 +168,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
     {
         if (selectedHealthConditions.Any() && includeNoHealthConditions)
         {
+            //TODO: not sure this is valid. I think this should be an OR condition.
             ModelState.AddModelError("IncludeNoHealthConditions", "Cannot select areas of research and include no areas of research at the same time");
         }
     }
@@ -231,47 +227,41 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         }
     }
 
-    private void ValidateRegistrationDates(int? registrationFromDateDay, int? registrationFromDateMonth,
-        int? registrationFromDateYear,
-        int? registrationToDateDay, int? registrationToDateMonth, int? registrationToDateYear)
+    private void ValidateRegistrationDates(GovUkDate registrationFromDate, GovUkDate registrationToDate)
     {
-        if ((registrationFromDateDay != null && registrationFromDateMonth != null &&
-             registrationFromDateYear != null) ||
-            (registrationToDateDay != null && registrationToDateMonth != null && registrationToDateYear != null))
+        if ((registrationFromDate.Day != null && registrationFromDate.Month != null &&
+             registrationFromDate.Year != null) ||
+            (registrationToDate.Day != null && registrationToDate.Month != null && registrationToDate.Year != null))
         {
-            DateTime? registrationFromDate = ConstructDate(registrationFromDateYear, registrationFromDateMonth,
-                registrationFromDateDay);
-            DateTime? registrationToDate =
-                ConstructDate(registrationToDateYear, registrationToDateMonth, registrationToDateDay);
 
-            if (registrationFromDate.HasValue && registrationFromDate.Value.Date >= DateTime.Today)
+            if (registrationFromDate.ToDateOnly() > DateOnly.FromDateTime(DateTime.Today))
             {
                 ModelState.AddModelError("RegistrationFromDateDay",
-                    "The date of volunteer registration must be before today");
+                    "The date of volunteer registration must be on or before today");
             }
 
-            if (registrationToDate.HasValue && registrationToDate.Value.Date >= DateTime.Today)
+            if (registrationToDate.ToDateOnly() > DateOnly.FromDateTime(DateTime.Today))
             {
                 ModelState.AddModelError("RegistrationToDateDay",
-                    "The date of volunteer registration must be before today");
+                    "The date of volunteer registration must be on or before today");
             }
 
-            if (registrationFromDateYear.HasValue && registrationFromDateYear < 2022)
+            if (registrationFromDate.Year.HasValue && registrationFromDate.Year < 2022)
             {
                 ModelState.AddModelError("RegistrationFromDateYear", "Year must be a number that is 2022 or later");
             }
 
-            if (registrationToDateYear.HasValue && registrationToDateYear < 2022)
+            if (registrationToDate.Year.HasValue && registrationToDate.Year < 2022)
             {
                 ModelState.AddModelError("RegistrationToDateYear", "Year must be a number that is 2022 or later");
             }
 
-            if (registrationFromDate.HasValue && registrationToDate.HasValue)
+            if (registrationFromDate.ToDateOnly().HasValue && registrationToDate.ToDateOnly().HasValue)
             {
-                if (registrationFromDate > registrationToDate)
+                if (registrationFromDate.ToDateOnly() > registrationToDate.ToDateOnly())
                 {
                     ModelState.AddModelError("RegistrationFromDateDay",
-                        "Registration 'From' date must be before 'To' date");
+                        "Registration 'From' date must be on or before 'To' date");
                 }
             }
         }
@@ -279,15 +269,15 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         {
             var fromDateValues = new List<DateValues>();
 
-            if (registrationFromDateDay != null || registrationFromDateMonth != null ||
-                registrationFromDateYear != null)
+            if (registrationFromDate.Day != null || registrationFromDate.Month != null ||
+                registrationFromDate.Year != null)
             {
                 fromDateValues.Add(new DateValues
-                { Key = "RegistrationFromDateDay", Unit = "day", Value = registrationFromDateDay });
+                { Key = "RegistrationFromDate.Day", Unit = "day", Value = registrationFromDate.Day });
                 fromDateValues.Add(new DateValues
-                { Key = "RegistrationFromDateMonth", Unit = "month", Value = registrationFromDateMonth });
+                { Key = "RegistrationFromDate.Month", Unit = "month", Value = registrationFromDate.Month });
                 fromDateValues.Add(new DateValues
-                { Key = "RegistrationFromDateYear", Unit = "year", Value = registrationFromDateYear });
+                { Key = "RegistrationFromDate.Year", Unit = "year", Value = registrationFromDate.Year });
 
                 foreach (var val in fromDateValues)
                 {
@@ -299,14 +289,14 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 }
             }
 
-            if (registrationToDateDay != null || registrationToDateMonth != null || registrationToDateYear != null)
+            if (registrationToDate.Day != null || registrationToDate.Month != null || registrationToDate.Year != null)
             {
                 fromDateValues.Add(new DateValues
-                { Key = "RegistrationToDateDay", Unit = "day", Value = registrationToDateDay });
+                { Key = "RegistrationToDate.Day", Unit = "day", Value = registrationToDate.Day });
                 fromDateValues.Add(new DateValues
-                { Key = "RegistrationToDateMonth", Unit = "month", Value = registrationToDateMonth });
+                { Key = "RegistrationToDate.Month", Unit = "month", Value = registrationToDate.Month });
                 fromDateValues.Add(new DateValues
-                { Key = "RegistrationToDateYear", Unit = "year", Value = registrationToDateYear });
+                { Key = "RegistrationToDate.Year", Unit = "year", Value = registrationToDate.Year });
 
                 foreach (var val in fromDateValues)
                 {
@@ -317,21 +307,6 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                     }
                 }
             }
-        }
-    }
-
-    private static DateTime? ConstructDate(int? year, int? month, int? day)
-    {
-        if (!year.HasValue || !month.HasValue || !day.HasValue)
-            return null;
-
-        try
-        {
-            return new DateTime(year.Value, month.Value, day.Value);
-        }
-        catch (ArgumentOutOfRangeException) // TODO: Don't like this
-        {
-            return null;
         }
     }
 

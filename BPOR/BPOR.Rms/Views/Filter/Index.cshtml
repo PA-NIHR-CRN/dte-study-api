@@ -30,12 +30,12 @@
     }
 </style>
 
-@if (Model.ShowResults)
+@if (Model.Testing.ShowResults)
 {
     <div id="volunteer-results-list" class="govuk-grid-column-full testing-only">
         <span class="govuk-caption-m">For testing purposes only</span>
         <h2 class="govuk-heading-m">Volunteer Results</h2>
-        <partial name="Partials/_FilteredVolunteerList" for="VolunteerResults" />
+        <partial name="Partials/_FilteredVolunteerList" for="Testing.VolunteerResults" />
     </div>
 }
 

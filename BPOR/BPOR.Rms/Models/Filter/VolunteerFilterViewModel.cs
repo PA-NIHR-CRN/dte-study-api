@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc.Rendering;
 using NIHR.Infrastructure.Paging;
 using System.ComponentModel.DataAnnotations;
 
@@ -9,9 +8,13 @@ public class VolunteerFilterViewModel
     public int? StudyId { get; set; }
     // Study selection
     [Display(Name = "Selected Study")]
-    public string? SelectedStudy { get; set; }
+    public string? StudyName { get; set; }
 
-    public long? SelectedStudyCPMSId { get; set; }
+    public long? StudyCpmsId { get; set; }
+
+    public bool HasStudy() => StudyId is not null;
+    public bool ShowRecruitedFilter { get; set; }
+
 
     [Display(Name = "Volunteers contacted")]
     public bool? SelectedVolunteersContacted { get; set; }
@@ -29,32 +32,9 @@ public class VolunteerFilterViewModel
     [Display(Name = "Only include volunteers without registered areas of interest")]
     public bool IncludeNoHealthConditions { get; set; }
 
-    // Date of volunteer registration
-    // From Date
-    [Display(Name = "Day")]
-    [Range(1, 31, ErrorMessage = "Day must be between 1 and 31")]
-    public int? RegistrationFromDateDay { get; set; }
+    public GovUkDate RegistrationFromDate { get; set; } = new();
 
-    [Display(Name = "Month")]
-    [Range(1, 12, ErrorMessage = "Month must be between 1 and 12")]
-    public int? RegistrationFromDateMonth { get; set; }
-
-    [Display(Name = "Year")]
-    [Range(1970, 2100, ErrorMessage = "Year must be a reasonable value")]
-    public int? RegistrationFromDateYear { get; set; }
-
-    // To Date
-    [Display(Name = "Day")]
-    [Range(1, 31, ErrorMessage = "Day must be between 1 and 31")]
-    public int? RegistrationToDateDay { get; set; }
-
-    [Display(Name = "Month")]
-    [Range(1, 12, ErrorMessage = "Month must be between 1 and 12")]
-    public int? RegistrationToDateMonth { get; set; }
-
-    [Display(Name = "Year")]
-    [Range(1970, 2100, ErrorMessage = "Year must be a reasonable value")]
-    public int? RegistrationToDateYear { get; set; }
+    public GovUkDate RegistrationToDate { get; set; } = new();
 
     // Postcode districts and Full postcode
     [Display(Name = "Postcode districts")]
@@ -99,31 +79,49 @@ public class VolunteerFilterViewModel
     [Display(Name = "White")]
     public bool Ethnicity_White { get; set; }
     public int? VolunteerCount { get; set; }
-    public bool ShowStudyFilters() => StudyId is not null;
-    public bool ShowRecruitedFilter { get; set; }
 
+    public VolunteerFilterViewTestingModel Testing { get; set; } = new ();
 
-    public Page<VolunteerResult> VolunteerResults { get; set; } = Page<VolunteerResult>.Empty();
+}
 
-    public bool ShowResults { get; set; }
+public class GovUkDate
+{
 
-    public DateTime? GetRegistrationFromDate() => ConstructDate(RegistrationFromDateYear, RegistrationFromDateMonth, RegistrationFromDateDay);
+    [Display(Name = "Day")]
+    [Range(1, 31, ErrorMessage = "Day must be between 1 and 31")]
+    public int? Day { get; set; }
 
-    public DateTime? GetRegistrationToDate() =>
-            ConstructDate(RegistrationToDateYear, RegistrationToDateMonth, RegistrationToDateDay);
+    [Display(Name = "Month")]
+    [Range(1, 12, ErrorMessage = "Month must be between 1 and 12")]
+    public int? Month { get; set; }
 
-    private static DateTime? ConstructDate(int? year, int? month, int? day)
+    [Display(Name = "Year")]
+    [Range(1970, 2100, ErrorMessage = "Year must be a reasonable value")]
+    public int? Year { get; set; }
+
+    private static DateOnly? ConstructDate(int? year, int? month, int? day)
     {
         if (!year.HasValue || !month.HasValue || !day.HasValue)
             return null;
 
         try
         {
-            return new DateTime(year.Value, month.Value, day.Value);
+            return new DateOnly(year.Value, month.Value, day.Value);
         }
         catch (ArgumentOutOfRangeException)
         {
             return null;
         }
     }
+
+    public DateOnly? ToDateOnly() => ConstructDate(Year, Month, Day);
+
+    public static GovUkDate FromDateTime(DateTime? date) => new GovUkDate { Day = date?.Day, Month = date?.Month, Year = date?.Year };
+}
+
+public class VolunteerFilterViewTestingModel
+{
+    public Page<VolunteerResult> VolunteerResults { get; set; } = Page<VolunteerResult>.Empty();
+
+    public bool ShowResults { get; set; }
 }

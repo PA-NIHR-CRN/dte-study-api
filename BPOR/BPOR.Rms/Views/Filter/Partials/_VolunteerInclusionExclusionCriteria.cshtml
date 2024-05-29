@@ -3,7 +3,7 @@
 <div class="govuk-form-group">
     <fieldset class="govuk-fieldset" aria-label="Select which options to filter volunteers by">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            @if (Model.ShowStudyFilters())
+            @if (Model.HasStudy())
             {
                 <include-exclude-dropdown for="SelectedVolunteersContacted" />
                 <include-exclude-dropdown for="SelectedVolunteersRegisteredInterest" />
