@@ -20,7 +20,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         FilterVolunteersRecruited(model.StudyId, model.SelectedVolunteersRecruited);
         FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
         FilterByAreasOfResearch(model.SelectedHealthConditions, model.IncludeNoHealthConditions);
-        FilterByRegistrationDate(model.GetRegistrationFromDate(), model.GetRegistrationToDate());
+        FilterByRegistrationDate(model.RegistrationFromDate.ToDateOnly(), model.RegistrationToDate.ToDateOnly());
         FilterByAge(model.AgeFrom, model.AgeTo);
         FilterBySexRegisteredAtBirth(model.IsSexMale, model.IsSexFemale,
             model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No,
@@ -228,7 +228,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
     private void FilterByAreasOfResearch(List<int> selectedHealthConditions, bool includeNoHealthConditions)
     {
         if (selectedHealthConditions.Count != 0)
-        { 
+        {
             _filters.Add(p => p.HealthConditions.Any(hc => selectedHealthConditions.Contains(hc.HealthConditionId)));
         }
 
@@ -238,18 +238,13 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         }
     }
 
-    private void FilterByRegistrationDate(DateTime? registrationFromDate, DateTime? registrationToDate)
+    private void FilterByRegistrationDate(DateOnly? registrationFromDate, DateOnly? registrationToDate)
     {
         if (registrationFromDate.HasValue || registrationToDate.HasValue)
         {
-            if (registrationToDate.HasValue)
-            {
-                registrationToDate = registrationToDate.Value.AddDays(1);
-            }
-
             _filters.Add(p =>
-                (!registrationFromDate.HasValue || p.RegistrationConsentAtUtc >= registrationFromDate) &&
-                (!registrationToDate.HasValue || p.RegistrationConsentAtUtc <= registrationToDate));
+                (!registrationFromDate.HasValue || p.RegistrationConsentAtUtc >= registrationFromDate.Value.ToDateTime(TimeOnly.MinValue)) &&
+                (!registrationToDate.HasValue || p.RegistrationConsentAtUtc <= registrationToDate.Value.ToDateTime(TimeOnly.MaxValue)));
         }
     }
 }

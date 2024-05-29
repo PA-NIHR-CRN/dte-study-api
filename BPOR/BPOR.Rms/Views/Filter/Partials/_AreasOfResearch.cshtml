@@ -1,9 +1,14 @@
-@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+@* TODO: Make this control more reusable. Have a strongly typed model *@
+@{
+    var displayName = (ViewData["__AreasOfResearch_DisplayName"] as string);
+    var areasOfResearch = (ViewData["__AreasOfResearch"] as IEnumerable<SelectListItem>) ?? [];
+    var currentValues = (ViewData["__AreasOfResearch_CurrentValues"] as IEnumerable<string>) ?? [];
+}
 
 <div class="govuk-form-group">
     <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <h3 class="govuk-label govuk-label--l">@Html.DisplayNameFor(m => Model.SelectedHealthConditions)</h3>
+            <h3 class="govuk-label govuk-label--l">@displayName</h3>
         </legend>
         <div id="location-hint" class="govuk-hint">
             Leave blank to include all volunteers and those who have not specified any areas of research. Enter one or more areas of research to refine by interests.
@@ -14,46 +19,24 @@
             @* TODO: add selected item count *@
         </div>
         <span id="areas-of-interest-announcement" class="govuk-visually-hidden" data-single="option found" data-multiple="options found" data-selected="selected" aria-live="polite"></span>
-        <a href="#@Model.HealthConditions.Last().Value" class="govuk-skip-link start-of-options" data-module="govuk-skip-link">Skip to the end of the areas of research options list</a>
+        <a href="#@areasOfResearch.Last().Value" class="govuk-skip-link start-of-options" data-module="govuk-skip-link">Skip to the end of the areas of research options list</a>
 
         <div class="govuk-checkboxes research-areas-list" id="areas-of-research-container" data-module="govuk-checkboxes">
-            @foreach (var option in Model.HealthConditions.Select((item, index) => (item, index)))
+            @foreach (var option in areasOfResearch.Select((item, index) => (item, index)))
             {
                 @if (option.index > 0 && option.index % 10 == 0) // Add skip link every 10 options
                 {
                     <div class="govuk-checkboxes__item skip-link">
-                        <a href="#@Model.HealthConditions.Last().Value" class="govuk-skip-link options-list" data-module="govuk-skip-link" aria-hidden="true">Skip to end</a>
+                        <a href="#@areasOfResearch.Last().Value" class="govuk-skip-link options-list" data-module="govuk-skip-link" aria-hidden="true">Skip to end</a>
                     </div>
                 }
 
-                if (Model.SelectedHealthConditions != null)
-                {
-                    <div class="govuk-checkboxes__item area-of-research-option" data-search-value="@option.item.Text.ToLowerInvariant()">
-                        <input type="checkbox" class="govuk-checkboxes__input" id="@option.item.Value" name="SelectedHealthConditions" value="@option.item.Value" @(Model.SelectedHealthConditions.Select(x => x.ToString()).Contains(option.item.Value) ? "checked" : "") />
-                        <label for="@option.item.Value" class="govuk-label govuk-checkboxes__label">@option.item.Text</label>
-                    </div>
-                }
-                else
-                {
-                    <div class="govuk-checkboxes__item area-of-research-option" data-search-value="@option.item.Text.ToLowerInvariant()">
-                        <input type="checkbox" class="govuk-checkboxes__input" id="@option.item.Value" name="SelectedHealthConditions" value="@option.item.Value" />
-                        <label for="@option.item.Value" class="govuk-label govuk-checkboxes__label">@option.item.Text</label>
-                    </div>
-                }
-
+                <div class="govuk-checkboxes__item area-of-research-option" data-search-value="@option.item.Text.ToLowerInvariant()">
+                    <input type="checkbox" class="govuk-checkboxes__input" id="@option.item.Value" name="SelectedHealthConditions" value="@option.item.Value" @(currentValues.Contains(option.item.Value) ? "checked" : "") />
+                    <label for="@option.item.Value" class="govuk-label govuk-checkboxes__label">@option.item.Text</label>
+                </div>
             }
         </div>
-        <a href="#@Model.HealthConditions.First().Value" class="govuk-skip-link end-of-options" data-module="govuk-skip-link">Skip to the start of the areas of research options list</a>
-    </fieldset>
-</div>
-
-<div class="govuk-form-group">
-    <fieldset class="govuk-fieldset">
-        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-            <div class="govuk-checkboxes__item">
-                <input asp-for="IncludeNoHealthConditions" class="govuk-checkboxes__input" id="IncludeNoHealthConditions" type="checkbox" />
-                @Html.LabelFor(m => Model.IncludeNoHealthConditions, new { @class = "govuk-label govuk-checkboxes__label" })
-            </div>
-        </div>
+        <a href="#@areasOfResearch.First().Value" class="govuk-skip-link end-of-options" data-module="govuk-skip-link">Skip to the start of the areas of research options list</a>
     </fieldset>
 </div>

@@ -17,15 +17,10 @@ public class FilterMapper
             SelectedVolunteersContacted = criteria.IncludeContacted,
             SelectedVolunteersRecruited = criteria.IncludeRecruited,
             SelectedVolunteersRegisteredInterest = criteria.IncludeRegisteredInterest,
+            RegistrationFromDate = GovUkDate.FromDateTime(criteria.RegistrationFromDate),
+            RegistrationToDate = GovUkDate.FromDateTime(criteria.RegistrationToDate),
 
-            RegistrationFromDateDay = criteria.RegistrationFromDate?.Day,
-            RegistrationFromDateMonth = criteria.RegistrationFromDate?.Month,
-            RegistrationFromDateYear = criteria.RegistrationFromDate?.Year,
-
-            RegistrationToDateDay = criteria.RegistrationToDate?.Day,
-            RegistrationToDateMonth = criteria.RegistrationToDate?.Month,
-            RegistrationToDateYear = criteria.RegistrationToDate?.Year,
-
+            // TODO: ShowRecruitedFilter, StudyCpmsId, StudyName need to be initialised. Might be a job of a component / tag helper.
             AgeFrom = criteria.DateOfBirthTo.HasValue
                 ? DateTime.Today.Year - criteria.DateOfBirthTo.Value.Year -
                   (DateTime.Today.DayOfYear < criteria.DateOfBirthTo.Value.DayOfYear ? 1 : 0)
