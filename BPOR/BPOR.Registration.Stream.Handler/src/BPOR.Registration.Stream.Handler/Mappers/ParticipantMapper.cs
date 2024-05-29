@@ -142,7 +142,7 @@ public class ParticipantMapper : IParticipantMapper
         if (coordinates != null)
         {
             destination.ParticipantLocation ??= new ParticipantLocation();
-            destination.ParticipantLocation.Location = new Point(coordinates.Latitude, coordinates.Longitude)
+            destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
                 { SRID = 4326 };
         }
 
