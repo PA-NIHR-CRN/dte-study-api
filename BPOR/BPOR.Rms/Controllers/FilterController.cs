@@ -71,7 +71,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             FullPostcode = model.FullPostcode,
             SearchRadiusMiles = model.SearchRadiusMiles,
             StudyId = model.StudyId,
-            FilterAreaOfInterest = model.SelectedHealthConditions.Select(x => new FilterAreaOfInterest
+            FilterAreaOfInterest = model.SelectedAreasOfInterest.Select(x => new FilterAreaOfInterest
             {
                 HealthConditionId = x
             }).ToList(),
@@ -80,7 +80,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             FilterGender = GetGenders(model),
             FilterSexSameAsRegisteredAtBirth = GetSexSameAsRegisteredAtBirths(model),
             FilterEthnicGroup = GetEthnicGroups(model),
-            IncludeNoAreasOfInterest = model.IncludeNoHealthConditions
+            IncludeNoAreasOfInterest = model.IncludeNoAreasOfInterest
         };
 
         context.FilterCriterias.Add(filterCriteria);
@@ -101,11 +101,11 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         inputList.Select((x, i) => x ? i + 1 : 0).Where(x => x > 0).Select(getOutput).ToList();
 
 
-    private static List<FilterEthnicGroup> GetEthnicGroups(VolunteerFilterViewModel model) => 
+    private static List<FilterEthnicGroup> GetEthnicGroups(VolunteerFilterViewModel model) =>
         Map([model.Ethnicity_Asian, model.Ethnicity_Black, model.Ethnicity_Mixed, model.Ethnicity_White, model.Ethnicity_Other],
             x => new FilterEthnicGroup { EthnicGroupId = x });
 
-    private static List<FilterSexSameAsRegisteredAtBirth> GetSexSameAsRegisteredAtBirths(VolunteerFilterViewModel model) => 
+    private static List<FilterSexSameAsRegisteredAtBirth> GetSexSameAsRegisteredAtBirths(VolunteerFilterViewModel model) =>
         Map([model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No, model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay],
             x => new FilterSexSameAsRegisteredAtBirth { YesNoPreferNotToSay = x });
 
@@ -118,7 +118,6 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
     protected async Task FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
-        ValidateAreasOfResearch(model.SelectedHealthConditions, model.IncludeNoHealthConditions);
         ValidateRegistrationDates(model.RegistrationFromDate, model.RegistrationToDate);
         ValidatePostcodeDistricts(model.PostcodeDistricts, model.FullPostcode);
         ValidateFullPostcode(model.FullPostcode, model.SearchRadiusMiles);
@@ -154,22 +153,13 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                     .PageAsync(paginationService, cancellationToken);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                ModelState.AddModelError("","An error occurred while filtering volunteers.");
+                ModelState.AddModelError("", "An error occurred while filtering volunteers.");
                 _logger.LogError(ex, "An error occurred while filtering volunteers.");
             }
 
-            
-        }
-    }
 
-    private void ValidateAreasOfResearch(List<int> selectedHealthConditions, bool includeNoHealthConditions)
-    {
-        if (selectedHealthConditions.Any() && includeNoHealthConditions)
-        {
-            //TODO: not sure this is valid. I think this should be an OR condition.
-            ModelState.AddModelError("IncludeNoHealthConditions", "Cannot select areas of research and include no areas of research at the same time");
         }
     }
 

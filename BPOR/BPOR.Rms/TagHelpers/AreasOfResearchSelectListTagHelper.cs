@@ -14,6 +14,8 @@ namespace BPOR.Rms.TagHelpers
         private readonly IHtmlGenerator _generator;
         private IEnumerable<SelectListItem> _healthConditions;
 
+        public ModelExpression? ForNone { get; set; }
+
         public AreasOfResearchSelectListTagHelper(ParticipantDbContext dbContext, ICompositeViewEngine viewEngine, IViewBufferScope viewBufferScope, IHtmlGenerator generator) : base(viewEngine, viewBufferScope)
         {
             _healthConditions = dbContext.HealthConditions
@@ -33,7 +35,24 @@ namespace BPOR.Rms.TagHelpers
 
             ViewContext.ViewData["__AreasOfResearch_CurrentValues"] = _generator.GetCurrentValues(ViewContext, For.ModelExplorer, For.Name, allowMultiple: true);
 
+            ViewContext.ViewData["__AreasOfResearch_Name"] = GetModelName(For);
+
+            if (ForNone is not null)
+            {
+                ViewContext.ViewData["__AreasOfResearch_None_Name"] = GetModelName(ForNone);
+                ViewContext.ViewData["__AreasOfResearch_None_CurrentValue"] = _generator.GetCurrentValues(ViewContext, ForNone.ModelExplorer, ForNone.Name, allowMultiple: false)?.FirstOrDefault();
+            }
+
             return base.ProcessAsync(context, output);
+        }
+
+        private string? GetModelName(ModelExpression forExpression)
+        {
+            // Generate a dummy text box to extract the model name from the expression
+            var textBox = _generator.GenerateTextBox(ViewContext, forExpression.ModelExplorer, forExpression.Name, null, null, null);
+
+            var name = textBox.Attributes["name"];
+            return name;
         }
     }
 }

@@ -27,10 +27,9 @@ public class VolunteerFilterViewModel
 
     // Areas of research volunteers are interested in
     [Display(Name = "Areas of research volunteers are interested in")]
-    public List<int> SelectedHealthConditions { get; set; } = [];
+    public List<int> SelectedAreasOfInterest { get; set; } = [];
 
-    [Display(Name = "Only include volunteers without registered areas of interest")]
-    public bool IncludeNoHealthConditions { get; set; }
+    public bool IncludeNoAreasOfInterest { get; set; }
 
     public GovUkDate RegistrationFromDate { get; set; } = new();
 

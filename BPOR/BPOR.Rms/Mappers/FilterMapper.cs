@@ -12,7 +12,7 @@ public class FilterMapper
             StudyId = criteria.StudyId ?? 0,
             FullPostcode = criteria.FullPostcode,
             SearchRadiusMiles = criteria.SearchRadiusMiles,
-            
+
             SelectedVolunteersCompletedRegistration = criteria.IncludeCompletedRegistration,
             SelectedVolunteersContacted = criteria.IncludeContacted,
             SelectedVolunteersRecruited = criteria.IncludeRecruited,
@@ -37,7 +37,7 @@ public class FilterMapper
             IsGenderSameAsSexRegisteredAtBirth_No = criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 2),
             IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay = criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 3),
 
-            SelectedHealthConditions = criteria.FilterAreaOfInterest.Select(f => f.HealthConditionId).ToList(),
+            SelectedAreasOfInterest = criteria.FilterAreaOfInterest.Select(f => f.HealthConditionId).ToList(),
 
             PostcodeDistricts = string.Join(", ", criteria.FilterPostcode.Select(f => f.PostcodeFragment)),
 
@@ -47,7 +47,7 @@ public class FilterMapper
             Ethnicity_White = criteria.FilterEthnicGroup.Any(f => f.EthnicGroupId == 4),
             Ethnicity_Other = criteria.FilterEthnicGroup.Any(f => f.EthnicGroupId == 5),
 
-            IncludeNoHealthConditions = criteria.IncludeNoAreasOfInterest
+            IncludeNoAreasOfInterest = criteria.IncludeNoAreasOfInterest
         };
 
         return viewModel;

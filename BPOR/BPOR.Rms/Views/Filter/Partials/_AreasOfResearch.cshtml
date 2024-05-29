@@ -3,6 +3,10 @@
     var displayName = (ViewData["__AreasOfResearch_DisplayName"] as string);
     var areasOfResearch = (ViewData["__AreasOfResearch"] as IEnumerable<SelectListItem>) ?? [];
     var currentValues = (ViewData["__AreasOfResearch_CurrentValues"] as IEnumerable<string>) ?? [];
+    var name = (ViewData["__AreasOfResearch_Name"] as string);
+    var noneName = (ViewData["__AreasOfResearch_None_Name"] as string);
+    var noneCurrentValue = (ViewData["__AreasOfResearch_None_CurrentValue"] as string) ?? string.Empty;
+    int itemOffset = 0;
 }
 
 <div class="govuk-form-group">
@@ -22,7 +26,16 @@
         <a href="#@areasOfResearch.Last().Value" class="govuk-skip-link start-of-options" data-module="govuk-skip-link">Skip to the end of the areas of research options list</a>
 
         <div class="govuk-checkboxes research-areas-list" id="areas-of-research-container" data-module="govuk-checkboxes">
-            @foreach (var option in areasOfResearch.Select((item, index) => (item, index)))
+
+            @if (!string.IsNullOrWhiteSpace(noneName))
+            {
+                itemOffset++;
+                <div class="govuk-checkboxes__item area-of-research-option" data-search-value="none specified">
+                    <input type="checkbox" class="govuk-checkboxes__input" id="option-none" name="@noneName" value="@Json.Serialize(true)" @(bool.Parse(noneCurrentValue) ? "checked" : "") />
+                    <label for="option-none" class="govuk-label govuk-checkboxes__label"><i class="muted">None specified</i></label>
+                </div>
+            }
+            @foreach (var option in areasOfResearch.Select((item, index) => (item, index: index + itemOffset)))
             {
                 @if (option.index > 0 && option.index % 10 == 0) // Add skip link every 10 options
                 {
@@ -32,7 +45,7 @@
                 }
 
                 <div class="govuk-checkboxes__item area-of-research-option" data-search-value="@option.item.Text.ToLowerInvariant()">
-                    <input type="checkbox" class="govuk-checkboxes__input" id="@option.item.Value" name="SelectedHealthConditions" value="@option.item.Value" @(currentValues.Contains(option.item.Value) ? "checked" : "") />
+                    <input type="checkbox" class="govuk-checkboxes__input" id="@option.item.Value" name="@name" value="@option.item.Value" @(currentValues.Contains(option.item.Value) ? "checked" : "") />
                     <label for="@option.item.Value" class="govuk-label govuk-checkboxes__label">@option.item.Text</label>
                 </div>
             }

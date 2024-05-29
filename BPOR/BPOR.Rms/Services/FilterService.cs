@@ -18,7 +18,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         FilterVolunteersRegisteredInterest(model.StudyId, model.SelectedVolunteersRegisteredInterest);
         FilterVolunteersRecruited(model.StudyId, model.SelectedVolunteersRecruited);
         FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
-        FilterByAreasOfResearch(model.SelectedHealthConditions, model.IncludeNoHealthConditions);
+        FilterByAreasOfResearch(model.SelectedAreasOfInterest, model.IncludeNoAreasOfInterest);
         FilterByRegistrationDate(model.RegistrationFromDate.ToDateOnly(), model.RegistrationToDate.ToDateOnly());
         FilterByAge(model.AgeFrom, model.AgeTo);
         FilterBySexRegisteredAtBirth(model.IsSexMale, model.IsSexFemale,
@@ -224,16 +224,11 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         }
     }
 
-    private void FilterByAreasOfResearch(List<int> selectedHealthConditions, bool includeNoHealthConditions)
+    private void FilterByAreasOfResearch(List<int> selectedAreasOfInterest, bool includeNoAreasOfInterest)
     {
-        if (selectedHealthConditions.Count != 0)
+        if (selectedAreasOfInterest.Count != 0 || includeNoAreasOfInterest)
         {
-            _filters.Add(p => p.HealthConditions.Any(hc => selectedHealthConditions.Contains(hc.HealthConditionId)));
-        }
-
-        if (includeNoHealthConditions)
-        {
-            _filters.Add(p => !p.HealthConditions.Any());
+            _filters.Add(p => p.HealthConditions.Any(hc => selectedAreasOfInterest.Contains(hc.HealthConditionId)) || (includeNoAreasOfInterest && !p.HealthConditions.Any()));
         }
     }
 

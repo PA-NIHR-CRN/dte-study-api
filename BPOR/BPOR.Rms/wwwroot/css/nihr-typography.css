@@ -134,3 +134,7 @@ a:focus {
     font-weight: 400;
     line-height: 27px; 
 }
+
+.muted {
+    color: #505A5F;
+}
