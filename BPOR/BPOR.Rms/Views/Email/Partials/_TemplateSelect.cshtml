@@ -16,7 +16,7 @@
     }
 </style>
 
-<div class="govuk-form-group @(Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")" asp-for="SelectedTemplateId">
+<div class="govuk-form-group" @(Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "") asp-for="SelectedTemplateId">
     <label asp-for="SelectedTemplateId" class="govuk-label govuk-label--l" for="SelectedTemplateId">
         @Html.DisplayNameFor(model => model.SelectedTemplateId)
     </label>
@@ -29,11 +29,20 @@
             <span class="govuk-visually-hidden">Error:</span>
             @Html.ValidationMessageFor(model => model.SelectedTemplateId)
         </span>
-        @Html.DropDownListFor(model => model.SelectedTemplateId, Model.EmailTemplates, "Select a template", new { @class = "govuk-select govuk-select--error" })
+    }
+    @if (Model.EmailTemplates?.templates != null && Model.EmailTemplates.templates.Any())
+    {
+        var selectListItems = Model.EmailTemplates.templates.Select(t => new SelectListItem
+        {
+            Value = t.id,
+            Text = t.name
+        }).ToList();
+
+        @Html.DropDownListFor(model => model.SelectedTemplateId, selectListItems, "Select a template", new { @class = Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0 ? "govuk-select govuk-select--error" : "govuk-select" })
     }
     else
     {
-        @Html.DropDownListFor(model => model.SelectedTemplateId, Model.EmailTemplates, "Select a template", new { @class = "govuk-select" })
+        <p>No templates available.</p>
     }
 </div>
 

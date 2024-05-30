@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Notify.Models.Responses;
 
 namespace BPOR.Rms.Models.Email;
 
@@ -20,7 +20,7 @@ public class SetupCampaignViewModel
 
     [DisplayName("Select email template")]
     public string? SelectedTemplateId { get; set; }
-    public IEnumerable<SelectListItem> EmailTemplates { get; set; } = [];
+    public TemplateList EmailTemplates { get; set; } = new ();
 
 
     [DisplayName("How many volunteers do you want to send it to?")]
@@ -31,7 +31,6 @@ public class SetupCampaignViewModel
     [DisplayName("Preview email")]
     [EmailAddress(ErrorMessage = "Enter a valid email address.")]
     public string? PreviewEmails { get; set; }
-
-
+    
     public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries) ?? Enumerable.Empty<string>();
 }

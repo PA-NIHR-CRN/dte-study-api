@@ -4,6 +4,7 @@ using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
@@ -12,9 +13,11 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    partial class ParticipantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240516141723_FailedDeliveryStatusAdded")]
+    partial class FailedDeliveryStatusAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -205,9 +208,6 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool?>("IncludeContacted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IncludeNoAreasOfInterest")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool?>("IncludeRecruited")
@@ -9912,9 +9912,11 @@ namespace Dynamo.Stream.Handler.Migrations
 
             modelBuilder.Entity("BPOR.Domain.Entities.FilterCriteria", b =>
                 {
-                    b.HasOne("BPOR.Domain.Entities.Study", null)
+                    b.HasOne("BPOR.Domain.Entities.Study", "Study")
                         .WithMany("FilterCriterias")
                         .HasForeignKey("StudyId");
+
+                    b.Navigation("Study");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.FilterEthnicGroup", b =>
