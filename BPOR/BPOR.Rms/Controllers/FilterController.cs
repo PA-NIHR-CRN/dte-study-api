@@ -12,7 +12,7 @@ using Rbec.Postcodes;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService, ILogger<HomeController> logger) : Controller
+public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService, ILogger<HomeController> logger, IHostEnvironment hostEnvironment) : Controller
 {
     private readonly ILogger<HomeController> _logger = logger;
 
@@ -143,6 +143,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                         Age = x.DateOfBirth.YearsTo(DateTime.Today),
                         Gender = x.Gender.Code,
                         Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
+                        // TODO: add distance from radius search
                         FirstName = x.FirstName,
                         LastName = x.LastName,
                         HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
@@ -152,6 +153,22 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                     })
                     .OrderBy(x => x.Id)
                     .PageAsync(paginationService, cancellationToken);
+
+                    if (hostEnvironment.IsProduction())
+                    {
+                        foreach (var x in model.Testing.VolunteerResults)
+                        {
+                            if (Postcode.TryParse(x.Postcode, out var postcode))
+                            {
+                                x.Postcode = postcode.ToString().Split(' ').First();
+                            }
+
+                            x.FirstName = string.Empty;
+                            x.LastName = string.Empty;
+                            x.Email = string.Empty;
+                            x.DateOfBirth = null;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
