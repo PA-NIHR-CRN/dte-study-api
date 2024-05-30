@@ -99,6 +99,7 @@ namespace NIHR.NotificationService.Services
                 throw new KeyNotFoundException($"Personalisation data not found for email: {email}");
             }
 
+            // TODO update the reference key to be more generic
             if (!personalisation.TryGetValue("emailCampaignParticipantId", out var reference))
             {
                 throw new KeyNotFoundException($"EmailCampaignParticipantId not found for email: {email}");

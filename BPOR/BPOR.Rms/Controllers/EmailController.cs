@@ -4,9 +4,12 @@ using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
+using BPOR.Rms.Settings;
+using HandlebarsDotNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using NIHR.Infrastructure;
 using NIHR.NotificationService.Interfaces;
@@ -21,7 +24,8 @@ public class EmailController(
     IDistributedCache cache,
     ILogger<EmailController> logger,
     IEmailCampaignService emailCampaignService,
-    IRmsTaskQueue taskQueue)
+    IRmsTaskQueue taskQueue,
+    IOptions<AppSettings> appSettings)
     : Controller
 {
     private const string _emailCacheKey = "EmailTemplates";
@@ -51,7 +55,7 @@ public class EmailController(
         {
             ModelState.AddModelError(nameof(model.SelectedTemplateId), "Please select an email template.");
         }
-        
+
         if (ModelState.IsValid)
         {
             var selectedTemplateName = model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
@@ -63,9 +67,9 @@ public class EmailController(
                 EmailTemplateId = new Guid(model.SelectedTemplateId!),
                 Name = selectedTemplateName
             };
-            
+
             await AddCampaignToContextAsync(emailCampaign, cancellationToken);
-            
+
             await taskQueue.QueueBackgroundWorkItemAsync(async token =>
             {
                 using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
@@ -121,9 +125,14 @@ public class EmailController(
                 email => email,
                 email => new Dictionary<string, dynamic>
                 {
-                    { "link", "https://www.example.com" },
+                    { "email", email },
+                    { "emailCampaignParticipantId", "PreviewEmailReference" },
                     { "firstName", "John" },
-                    { "code", "123456" }
+                    { "lastName", "Doe" },
+                    {
+                        "uniqueLink",
+                        $"{appSettings.Value.BaseUrl}/NotifyCallback/registerinterest?reference=0123456789101112"
+                    },
                 });
 
             await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
@@ -165,7 +174,7 @@ public class EmailController(
 
         await cache.SetAsync(_emailCacheKey, data, cancellationToken);
     }
-    
+
     private async Task AddCampaignToContextAsync(EmailCampaign campaign, CancellationToken cancellationToken)
     {
         await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
