@@ -8,6 +8,7 @@ using BPOR.Rms.Services;
 using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure.Paging;
 using Z.EntityFramework.Plus;
+using Rbec.Postcodes;
 
 namespace BPOR.Rms.Controllers;
 
@@ -165,6 +166,16 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
     private void ValidateFullPostcode(string? fullPostcode, double? searchRadiusMiles)
     {
+
+        if (!String.IsNullOrEmpty(fullPostcode))
+        {
+            if (!Postcode.TryParse(fullPostcode, out Postcode postcode))
+            {
+                ModelState.AddModelError("FullPostcode",
+                        "Enter a full UK postcode");
+            }
+        }
+
         if (!String.IsNullOrEmpty(fullPostcode) && searchRadiusMiles == null)
         {
             ModelState.AddModelError("SearchRadiusMiles",

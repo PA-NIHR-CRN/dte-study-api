@@ -512,6 +512,7 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_OAT }}
             AwsSecretsManagerSettings__Enabled=true
+            ASPNETCORE_ENVIRONMENT=Staging
 
       - name: Remove Github Actions IP from RDS security group (Dev)
         run: |
@@ -636,6 +637,7 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_PROD }}
             AwsSecretsManagerSettings__Enabled=true
+            ASPNETCORE_ENVIRONMENT=Production
 
       - name: Remove Github Actions IP from RDS security group (Dev)
         run: |

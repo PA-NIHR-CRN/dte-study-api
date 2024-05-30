@@ -40,7 +40,6 @@ public class VolunteerFilterViewModel
     public string? PostcodeDistricts { get; set; }
 
     [Display(Name = "Full postcode")]
-    [UKPostcode(ErrorMessage = "Enter a full UK postcode")]
     public string? FullPostcode { get; set; }
 
     [Display(Name = "Radius")]
