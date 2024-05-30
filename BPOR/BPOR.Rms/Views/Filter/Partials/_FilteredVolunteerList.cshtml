@@ -34,7 +34,10 @@
                             @volunteer.HasCompletedRegistration
                         </td>
                         <td class="govuk-table__cell">
-                            @volunteer.HasRegistered
+                            @if (volunteer.HasRegistered.HasValue)
+                            {
+                                @volunteer.HasRegistered.Value.ToString("dd/MM/yyyy");
+                            }          
                         </td>
                         <td class="govuk-table__cell">
                             @volunteer.Age
