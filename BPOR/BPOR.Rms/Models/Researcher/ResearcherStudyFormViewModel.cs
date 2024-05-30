@@ -35,5 +35,32 @@ namespace BPOR.Rms.Models.Researcher
 
         [Display(Name = "NIHR funding stream or grant code")]
         public string? FundingCode { get; set; }
+
+        [Display(Name = "What is the UK recruitment target for the study?")]
+        public string? UKRecruitmentTarget { get; set; }
+
+        [Display(Name = "What is the target population for the study?")]
+        public string? TargetPopulation { get; set; }
+
+        [Display(Name = "Day")]
+        public int? RecruitmentStartDateDay { get; set; }
+
+        [Display(Name = "Month")]
+        public int? RecruitmentStartDateMonth { get; set; }
+
+        [Display(Name = "Year")]
+        public int? RecruitmentStartDateYear { get; set; }
+
+        [Display(Name = "Day")]
+        public int? RecruitmentEndDateDay { get; set; }
+
+        [Display(Name = "Month")]
+        public int? RecruitmentEndDateMonth { get; set; }
+
+        [Display(Name = "Year")]
+        public int? RecruitmentEndDateYear { get; set; }
+
+        [Display(Name = "Will participants in the study be recruited as named individual volunteers?")]
+        public bool? RecruitingIdentifiableVolunteers { get; set; }
     }
 }

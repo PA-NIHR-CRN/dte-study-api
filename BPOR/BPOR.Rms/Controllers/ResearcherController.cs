@@ -172,8 +172,205 @@ public class ResearcherController(ParticipantDbContext context) : Controller
                 return View(model);
             }
         }
+        else if (action == "Next" && model.Step == 6)
+        {
+            if (String.IsNullOrEmpty(model.UKRecruitmentTarget))
+            {
+                ModelState.AddModelError("UKRecruitmentTarget", "Enter the UK recruitment target for the study");
+            }
+
+            if (String.IsNullOrEmpty(model.TargetPopulation))
+            {
+                ModelState.AddModelError("TargetPopulation", "Enter the target population for the study");
+            }
+
+            if (ModelState.IsValid)
+            {
+                model.Step = 7;
+                ViewData["ProgressPercentage"] = (model.Step - 1) * 50;
+                return View(model);
+            }
+        }
+        else if (action == "Next" && model.Step == 7)
+        {
+            ValidateRecruitmentDates(model);
+
+            if (model.RecruitingIdentifiableVolunteers == null)
+            {
+                ModelState.AddModelError("RecruitingIdentifiableVolunteers", "Select whether participants in the study will be recruited as named individual volunteers");
+            }
+
+            if (ModelState.IsValid)
+            {
+                model.Step = 8;
+                ViewData["ProgressPercentage"] = (model.Step - 1) * 50;
+                return View(model);
+            }
+        }
 
         return View(model);
     }
 
+    public void ValidateRecruitmentDates(ResearcherStudyFormViewModel model)
+    {
+        // Recruitment Start Date
+
+        if (model.RecruitmentStartDateDay == null)
+        {
+            ModelState.AddModelError("RecruitmentStartDateDay", "Recruitment start date (UK) must include a day");
+        }
+
+        if (model.RecruitmentStartDateMonth == null)
+        {
+            ModelState.AddModelError("RecruitmentStartDateMonth", "Recruitment start date (UK) must include a month");
+        }
+
+        if (model.RecruitmentStartDateYear == null)
+        {
+            ModelState.AddModelError("RecruitmentStartDateYear", "Recruitment start date (UK) must include a year");
+        }
+
+        if (model.RecruitmentStartDateDay == null && model.RecruitmentStartDateMonth == null && model.RecruitmentStartDateYear == null)
+        {
+            ClearRecruitmentStartDateStates();
+            ModelState.AddModelError("RecruitmentStartDateDay", "Enter the recruitment start date (UK)");
+        }
+
+        if (model.RecruitmentStartDateDay != null && model.RecruitmentStartDateMonth == null && model.RecruitmentStartDateYear == null)
+        {
+            ClearRecruitmentStartDateStates();
+            ModelState.AddModelError("RecruitmentStartDateDay", "Recruitment start date (UK) must include a month and year");
+        }
+
+        if (model.RecruitmentStartDateDay == null && model.RecruitmentStartDateMonth != null && model.RecruitmentStartDateYear == null)
+        {
+            ClearRecruitmentStartDateStates();
+            ModelState.AddModelError("RecruitmentStartDateDay", "Recruitment start date (UK) must include a day and year");
+        }
+
+        if (model.RecruitmentStartDateDay == null && model.RecruitmentStartDateMonth == null && model.RecruitmentStartDateYear != null)
+        {
+            ClearRecruitmentStartDateStates();
+            ModelState.AddModelError("RecruitmentStartDateDay", "Recruitment start date (UK) must include a day and month");
+        }
+
+        int startDateErrorCount = 0;
+
+        if (model.RecruitmentStartDateDay > 31)
+        {
+            startDateErrorCount++;
+            ModelState.AddModelError("RecruitmentStartDateDay", "Recruitment start date (UK) Day must be a real date");
+        }
+
+        if (model.RecruitmentStartDateMonth > 12)
+        {
+            startDateErrorCount++;
+            ModelState.AddModelError("RecruitmentStartDateMonth", "Recruitment start date (UK) Month must be a real date");
+        }
+
+        if (model.RecruitmentStartDateYear.ToString().Length != 4)
+        {
+            startDateErrorCount++;
+            ModelState.AddModelError("RecruitmentStartDateYear", "Recruitment start date (UK) Year must be 4 numbers");
+        }
+
+        if (model.RecruitmentStartDateYear < 1900)
+        {
+            startDateErrorCount++;
+            ModelState.AddModelError("RecruitmentStartDateYear", "Recruitment start date (UK) Year must be later than 1900");
+        }
+
+        if (startDateErrorCount > 1)
+        {
+            ClearRecruitmentStartDateStates();
+            ModelState.AddModelError("RecruitmentStartDateDay", "Recruitment start date (UK) must be a real date");
+        }
+
+        // Recruitment End Date
+
+        if (model.RecruitmentEndDateDay == null)
+        {
+            ModelState.AddModelError("RecruitmentEndDateDay", "Recruitment end date (UK) must include a day");
+        }
+
+        if (model.RecruitmentEndDateMonth == null)
+        {
+            ModelState.AddModelError("RecruitmentEndDateMonth", "Recruitment end date (UK) must include a month");
+        }
+
+        if (model.RecruitmentEndDateYear == null)
+        {
+            ModelState.AddModelError("RecruitmentEndDateYear", "Recruitment end date (UK) must include a year");
+        }
+
+        if (model.RecruitmentEndDateDay == null && model.RecruitmentEndDateMonth == null && model.RecruitmentEndDateYear == null)
+        {
+            ClearRecruitmentEndDateStates();
+            ModelState.AddModelError("RecruitmentEndDateDay", "Enter the recruitment end date (UK)");
+        }
+
+        if (model.RecruitmentEndDateDay != null && model.RecruitmentEndDateMonth == null && model.RecruitmentEndDateYear == null)
+        {
+            ClearRecruitmentEndDateStates();
+            ModelState.AddModelError("RecruitmentEndDateDay", "Recruitment end date (UK) must include a month and year");
+        }
+
+        if (model.RecruitmentEndDateDay == null && model.RecruitmentEndDateMonth != null && model.RecruitmentEndDateYear == null)
+        {
+            ClearRecruitmentEndDateStates();
+            ModelState.AddModelError("RecruitmentEndDateDay", "Recruitment end date (UK) must include a day and year");
+        }
+
+        if (model.RecruitmentEndDateDay == null && model.RecruitmentEndDateMonth == null && model.RecruitmentEndDateYear != null)
+        {
+            ClearRecruitmentEndDateStates();
+            ModelState.AddModelError("RecruitmentEndDateDay", "Recruitment end date (UK) must include a day and month");
+        }
+
+        int endDateErrorCount = 0;
+
+        if (model.RecruitmentEndDateDay > 31)
+        {
+            endDateErrorCount++;
+            ModelState.AddModelError("RecruitmentEndDateDay", "Recruitment end date (UK) Day must be a real date");
+        }
+
+        if (model.RecruitmentEndDateMonth > 12)
+        {
+            endDateErrorCount++;
+            ModelState.AddModelError("RecruitmentEndDateMonth", "Recruitment end date (UK) Month must be a real date");
+        }
+
+        if (model.RecruitmentEndDateYear.ToString().Length != 4)
+        {
+            endDateErrorCount++;
+            ModelState.AddModelError("RecruitmentEndDateYear", "Recruitment end date (UK) Year must be 4 numbers");
+        }
+
+        if (model.RecruitmentEndDateYear < 1900)
+        {
+            endDateErrorCount++;
+            ModelState.AddModelError("RecruitmentEndDateYear", "Recruitment end date (UK) Year must be later than 1900");
+        }
+
+        if (endDateErrorCount > 1)
+        {
+            ClearRecruitmentEndDateStates();
+            ModelState.AddModelError("RecruitmentEndDateDay", "Recruitment end date (UK) must be a real date");
+        }
+    }
+
+    public void ClearRecruitmentStartDateStates()
+    {
+        ModelState["RecruitmentStartDateDay"].Errors.Clear();
+        ModelState["RecruitmentStartDateMonth"].Errors.Clear();
+        ModelState["RecruitmentStartDateYear"].Errors.Clear();
+    }
+
+    public void ClearRecruitmentEndDateStates()
+    {
+        ModelState["RecruitmentEndDateDay"].Errors.Clear();
+        ModelState["RecruitmentEndDateMonth"].Errors.Clear();
+        ModelState["RecruitmentEndDateYear"].Errors.Clear();
+    }
 }

@@ -37,6 +37,14 @@
                 @await Html.PartialAsync("Partials/_Step5FormFields", Model)
             </div>
 
+            <div style="@(Model.Step == 6 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step6FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 7 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step7FormFields", Model)
+            </div>
+
             <div class="govuk-button-group">
                 @if (Model.Step != Model.TotalSteps)
                 {
