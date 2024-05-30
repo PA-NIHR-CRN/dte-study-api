@@ -36,6 +36,8 @@ public static class ConfigureMiddleware
             pattern: "{controller=Home}/{action=Index}/{id?}");
 
         app.MapHealthChecks(HealthCheckPath).AllowAnonymous();
+        
+        app.MapControllers(); 
 
         return app;
     }
