@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Text;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
@@ -25,10 +24,11 @@ public class EmailController(
     ILogger<EmailController> logger,
     IEmailCampaignService emailCampaignService,
     IRmsTaskQueue taskQueue,
-    IOptions<AppSettings> appSettings)
+    IOptions<AppSettings> appSettings, IHostEnvironment hostEnvironment)
     : Controller
 {
     private const string _emailCacheKey = "EmailTemplates";
+    private readonly IHostEnvironment _hostEnvironment = hostEnvironment;
 
     public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model)
     {
@@ -58,23 +58,30 @@ public class EmailController(
 
         if (ModelState.IsValid)
         {
-            var selectedTemplateName = model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
-
-            var emailCampaign = new EmailCampaign
+            if (_hostEnvironment.IsProduction()) // TODO: remove for final release
             {
-                FilterCriteriaId = model.FilterCriteriaId,
-                TargetGroupSize = model.TotalVolunteers,
-                EmailTemplateId = new Guid(model.SelectedTemplateId!),
-                Name = selectedTemplateName
-            };
-
-            await AddCampaignToContextAsync(emailCampaign, cancellationToken);
-
-            await taskQueue.QueueBackgroundWorkItemAsync(async token =>
+                TempData.AddNotification(new NotificationBannerModel { Heading = "For testing purposes only", Body = "Production email sending not enabled, campaign not sent.", IsSuccess = false });
+            }
+            else
             {
-                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
-                await emailCampaignService.SendCampaignAsync(emailCampaign.Id, linkedCts.Token);
-            });
+                var selectedTemplateName = model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
+
+                var emailCampaign = new EmailCampaign
+                {
+                    FilterCriteriaId = model.FilterCriteriaId,
+                    TargetGroupSize = model.TotalVolunteers,
+                    EmailTemplateId = new Guid(model.SelectedTemplateId!),
+                    Name = selectedTemplateName
+                };
+
+                await AddCampaignToContextAsync(emailCampaign, cancellationToken);
+
+                await taskQueue.QueueBackgroundWorkItemAsync(async token =>
+                {
+                    using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
+                    await emailCampaignService.SendCampaignAsync(emailCampaign.Id, linkedCts.Token);
+                });
+            }
 
             return View("EmailSuccess",
                 new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });

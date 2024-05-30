@@ -13,7 +13,6 @@ using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Settings;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
-using Microsoft.EntityFrameworkCore.Internal;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
