@@ -76,6 +76,7 @@ public class NotifyCallbackController(
     {
         var decryptedReference = encryptionService.Decrypt(reference);
         
+        if (!Luhn.IsValid(decryptedReference))
         {
             return BadRequest("Invalid reference.");
         }
