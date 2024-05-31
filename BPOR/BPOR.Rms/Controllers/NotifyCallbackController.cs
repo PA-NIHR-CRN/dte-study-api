@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService.Settings;
+using LuhnNet;
 
 namespace BPOR.Rms.Controllers;
 
@@ -15,7 +17,8 @@ namespace BPOR.Rms.Controllers;
 public class NotifyCallbackController(
     ParticipantDbContext context,
     IOptions<NotificationServiceSettings> settings,
-    IRefDataService refDataService
+    IRefDataService refDataService,
+    IEncryptionService encryptionService
 ) : ControllerBase
 {
     [HttpPost]
@@ -71,9 +74,14 @@ public class NotifyCallbackController(
     [Route("registerinterest")]
     public async Task<IActionResult> RegisterInterest([FromQuery] string reference, CancellationToken cancellationToken)
     {
+        var decryptedReference = encryptionService.Decrypt(reference);
+        
+        {
+            return BadRequest("Invalid reference.");
+        }
         var participant = await context.EmailCampaignParticipants
             .Where(x => x.ParticipantId == context.StudyParticipantEnrollment
-                .Where(x => x.Reference == reference)
+                .Where(x => x.Reference == decryptedReference)
                 .Select(x => x.ParticipantId)
                 .FirstOrDefault()).FirstOrDefaultAsync(cancellationToken);
 

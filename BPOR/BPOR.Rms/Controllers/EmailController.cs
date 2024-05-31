@@ -1,16 +1,15 @@
 using System.Text;
 using BPOR.Domain.Entities;
+using BPOR.Rms.Helpers;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
-using BPOR.Rms.Settings;
-using HandlebarsDotNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using NIHR.Infrastructure;
+using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Notify.Models.Responses;
@@ -24,7 +23,9 @@ public class EmailController(
     ILogger<EmailController> logger,
     IEmailCampaignService emailCampaignService,
     IRmsTaskQueue taskQueue,
-    IOptions<AppSettings> appSettings, IHostEnvironment hostEnvironment)
+    IHostEnvironment hostEnvironment,
+    IEncryptionService encryptionService,
+    UrlGenerationHelper urlGenerationHelper)
     : Controller
 {
     private const string _emailCacheKey = "EmailTemplates";
@@ -60,11 +61,16 @@ public class EmailController(
         {
             if (_hostEnvironment.IsProduction()) // TODO: remove for final release
             {
-                TempData.AddNotification(new NotificationBannerModel { Heading = "For testing purposes only", Body = "Production email sending not enabled, campaign not sent.", IsSuccess = false });
+                TempData.AddNotification(new NotificationBannerModel
+                {
+                    Heading = "For testing purposes only",
+                    Body = "Production email sending not enabled, campaign not sent.", IsSuccess = false
+                });
             }
             else
             {
-                var selectedTemplateName = model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
+                var selectedTemplateName =
+                    model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
 
                 var emailCampaign = new EmailCampaign
                 {
@@ -138,7 +144,7 @@ public class EmailController(
                     { "lastName", "Doe" },
                     {
                         "uniqueLink",
-                        $"{appSettings.Value.BaseUrl}/NotifyCallback/registerinterest?reference=0123456789101112"
+                        urlGenerationHelper.GenerateRegisterInterestUrl(encryptionService.Encrypt("0123456789101112"))
                     },
                 });
 

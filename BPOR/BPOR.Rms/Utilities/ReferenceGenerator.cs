@@ -10,15 +10,15 @@ public class ReferenceGenerator : IReferenceGenerator
     
     public string GenerateReference()
     {
-        var reference = new StringBuilder(16);
-        Span<int> span = stackalloc int[15];
-        for (var i = 0; i < span.Length; i++)
+        var reference = new StringBuilder();
+        for (var i = 0; i < 15; i++)
         {
-            span[i] = _random.Next(0, 10);
-            reference.Append(span[i]);
+            reference.Append(_random.Next(0, 10));
         }
 
-        reference.Append(Luhn.CalculateCheckDigit(reference.ToString()));
+        var checkDigit = Luhn.CalculateCheckDigit(reference.ToString());
+        reference.Append(checkDigit);
+
         return reference.ToString();
     }
 }
