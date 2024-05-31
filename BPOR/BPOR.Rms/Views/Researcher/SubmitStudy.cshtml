@@ -6,9 +6,13 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@section ProgressBar {
+@if (ViewData["ShowProgressBar"] != null && (bool)ViewData["ShowProgressBar"])
+{
+    @section ProgressBar {
     @await Html.PartialAsync("Partials/_ProgressBar", Model)
+    }
 }
+
 
 
 <div class="govuk-grid-row">
@@ -43,6 +47,10 @@
 
             <div style="@(Model.Step == 7 ? "" : "display:none;")">
                 @await Html.PartialAsync("Partials/_Step7FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 8 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step8FormFields", Model)
             </div>
 
             <div class="govuk-button-group">

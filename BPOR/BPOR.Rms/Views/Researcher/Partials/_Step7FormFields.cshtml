@@ -6,101 +6,101 @@
 
 @await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
-<div class="govuk-form-group  @(Html.ViewData.ModelState["RecruitmentStartDateDay"]?.Errors.Count > 0 || Html.ViewData.ModelState["RecruitmentStartDateMonth"]?.Errors.Count > 0 || Html.ViewData.ModelState["RecruitmentStartDateYear"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+<div class="govuk-form-group  @(Html.ViewData.ModelState["RecruitmentStartDate.Day"]?.Errors.Count > 0 || Html.ViewData.ModelState["RecruitmentStartDate.Month"]?.Errors.Count > 0 || Html.ViewData.ModelState["RecruitmentStartDate.Year"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="UKRecruitmentTarget" class="govuk-label" for="UKRecruitmentTarget">
         Recruitment start date (UK)?
     </label>
     <div id="event-name-hint" class="govuk-hint">
         If you are unsure, provide an estimate.
     </div>
-    @if (Html.ViewData.ModelState["RecruitmentStartDateDay"]?.Errors.Count > 0)
+    @if (Html.ViewData.ModelState["RecruitmentStartDate.Day"]?.Errors.Count > 0)
     {
         <span id="RecruitmentStartDateDay-error" class="govuk-error-message">
             <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.RecruitmentStartDateDay)
+            @Html.ValidationMessageFor(model => model.RecruitmentStartDate.Day)
         </span>
     }
-    @if (Html.ViewData.ModelState["RecruitmentStartDateMonth"]?.Errors.Count > 0)
+    @if (Html.ViewData.ModelState["RecruitmentStartDate.Month"]?.Errors.Count > 0)
     {
         <span id="RecruitmentStartDateMonth-error" class="govuk-error-message">
             <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.RecruitmentStartDateMonth)
+            @Html.ValidationMessageFor(model => model.RecruitmentStartDate.Month)
         </span>
     }
-    @if (Html.ViewData.ModelState["RecruitmentStartDateYear"]?.Errors.Count > 0)
+    @if (Html.ViewData.ModelState["RecruitmentStartDate.Year"]?.Errors.Count > 0)
     {
         <span id="RecruitmentStartDateYear-error" class="govuk-error-message">
             <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.RecruitmentStartDateYear)
+            @Html.ValidationMessageFor(model => model.RecruitmentStartDate.Year)
         </span>
     }
     <div class="govuk-date-input" id="registration-date-from">
         <!-- Day -->
         <div class="govuk-date-input__item">
-            <label class="govuk-label govuk-label--n" asp-for="RecruitmentStartDateDay">@Html.DisplayNameFor(model => model.RecruitmentStartDateDay)</label>
-            <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RecruitmentStartDateDay" autocomplete="off" type="text" inputmode="numeric">
+            <label class="govuk-label govuk-label--n" asp-for="RecruitmentStartDate.Day">@Html.DisplayNameFor(model => model.RecruitmentStartDate.Day)</label>
+            <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RecruitmentStartDate.Day" autocomplete="off" type="text" inputmode="numeric">
 
         </div>
         <!-- Month -->
         <div class="govuk-date-input__item">
-            <label class="govuk-label govuk-label--n" asp-for="RecruitmentStartDateMonth">@Html.DisplayNameFor(model => model.RecruitmentStartDateMonth)</label>
-            <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RecruitmentStartDateMonth" autocomplete="off" type="text" inputmode="numeric">
+            <label class="govuk-label govuk-label--n" asp-for="RecruitmentStartDate.Month">@Html.DisplayNameFor(model => model.RecruitmentStartDate.Month)</label>
+            <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RecruitmentStartDate.Month" autocomplete="off" type="text" inputmode="numeric">
 
         </div>
         <!-- Year -->
         <div class="govuk-date-input__item">
-            <label class="govuk-label govuk-label--n" asp-for="RecruitmentStartDateYear">@Html.DisplayNameFor(model => model.RecruitmentStartDateYear)</label>
-            <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="RecruitmentStartDateYear" autocomplete="off" type="text" inputmode="numeric">
+            <label class="govuk-label govuk-label--n" asp-for="RecruitmentStartDate.Year">@Html.DisplayNameFor(model => model.RecruitmentStartDate.Year)</label>
+            <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="RecruitmentStartDate.Year" autocomplete="off" type="text" inputmode="numeric">
 
         </div>
     </div>
 </div>
 
-<div class="govuk-form-group  @(Html.ViewData.ModelState["RecruitmentEndDateDay"]?.Errors.Count > 0 || Html.ViewData.ModelState["RecruitmentEndDateMonth"]?.Errors.Count > 0 || Html.ViewData.ModelState["RecruitmentEndDateYear"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+<div class="govuk-form-group  @(Html.ViewData.ModelState["RecruitmentEndDate.Day"]?.Errors.Count > 0 || Html.ViewData.ModelState["RecruitmentEndDate.Month"]?.Errors.Count > 0 || Html.ViewData.ModelState["RecruitmentEndDate.Year"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="UKRecruitmentTarget" class="govuk-label" for="UKRecruitmentTarget">
         Recruitment end date (UK)?
     </label>
     <div id="event-name-hint" class="govuk-hint">
         If you are unsure, provide an estimate.
     </div>
-    @if (Html.ViewData.ModelState["RecruitmentEndDateDay"]?.Errors.Count > 0)
+    @if (Html.ViewData.ModelState["RecruitmentEndDate.Day"]?.Errors.Count > 0)
     {
         <span id="RecruitmentEndDateDay-error" class="govuk-error-message">
             <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.RecruitmentEndDateDay)
+            @Html.ValidationMessageFor(model => model.RecruitmentEndDate.Day)
         </span>
     }
-    @if (Html.ViewData.ModelState["RecruitmentEndDateMonth"]?.Errors.Count > 0)
+    @if (Html.ViewData.ModelState["RecruitmentEndDate.Month"]?.Errors.Count > 0)
     {
         <span id="RecruitmentEndDateMonth-error" class="govuk-error-message">
             <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.RecruitmentEndDateMonth)
+            @Html.ValidationMessageFor(model => model.RecruitmentEndDate.Month)
         </span>
     }
-    @if (Html.ViewData.ModelState["RecruitmentEndDateYear"]?.Errors.Count > 0)
+    @if (Html.ViewData.ModelState["RecruitmentEndDate.Year"]?.Errors.Count > 0)
     {
         <span id="RecruitmentEndDateYear-error" class="govuk-error-message">
             <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.RecruitmentEndDateYear)
+            @Html.ValidationMessageFor(model => model.RecruitmentEndDate.Year)
         </span>
     }
     <div class="govuk-date-input" id="registration-date-from">
         <!-- Day -->
         <div class="govuk-date-input__item">
-            <label class="govuk-label govuk-label--n" asp-for="RecruitmentEndDateDay">@Html.DisplayNameFor(model => model.RecruitmentEndDateDay)</label>
-            <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RecruitmentEndDateDay" autocomplete="off" type="text" inputmode="numeric">
+            <label class="govuk-label govuk-label--n" asp-for="RecruitmentEndDate.Day">@Html.DisplayNameFor(model => model.RecruitmentEndDate.Day)</label>
+            <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RecruitmentEndDate.Day" autocomplete="off" type="text" inputmode="numeric">
 
         </div>
         <!-- Month -->
         <div class="govuk-date-input__item">
-            <label class="govuk-label govuk-label--n" asp-for="RecruitmentEndDateMonth">@Html.DisplayNameFor(model => model.RecruitmentEndDateMonth)</label>
-            <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RecruitmentEndDateMonth" autocomplete="off" type="text" inputmode="numeric">
+            <label class="govuk-label govuk-label--n" asp-for="RecruitmentEndDate.Month">@Html.DisplayNameFor(model => model.RecruitmentEndDate.Month)</label>
+            <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RecruitmentEndDate.Month" autocomplete="off" type="text" inputmode="numeric">
 
         </div>
         <!-- Year -->
         <div class="govuk-date-input__item">
-            <label class="govuk-label govuk-label--n" asp-for="RecruitmentEndDateYear">@Html.DisplayNameFor(model => model.RecruitmentEndDateYear)</label>
-            <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="RecruitmentEndDateYear" autocomplete="off" type="text" inputmode="numeric">
+            <label class="govuk-label govuk-label--n" asp-for="RecruitmentEndDate.Year">@Html.DisplayNameFor(model => model.RecruitmentEndDate.Year)</label>
+            <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="RecruitmentEndDate.Year" autocomplete="off" type="text" inputmode="numeric">
 
         </div>
     </div>
