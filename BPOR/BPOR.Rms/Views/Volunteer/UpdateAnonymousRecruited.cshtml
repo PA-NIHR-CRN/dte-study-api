@@ -1,4 +1,3 @@
-@using BPOR.Rms.Views.ViewComponents
 @model BPOR.Rms.Models.Volunteer.UpdateAnonymousRecruitedViewModel
 
 @{
@@ -18,15 +17,15 @@
         </h4>
     </div>
 
-    @await Html.PartialAsync("Partials/_NotificationBanner")
-    @await Html.PartialAsync("Partials/_ErrorSummary", Model)
+    <partial name="Partials/_NotificationBanner" />
+    <partial name="Partials/_ErrorSummary" />
 
     <h4 class="govuk-heading-m govuk-!-margin-bottom-4 govuk-!-margin-top-0">
         Recruited (@Model.LatestRecruitmentTotal)
     </h4>
 
 
-    @await Html.PartialAsync("Partials/_RecruitedTable", Model.EnrollmentDetails)
+    <partial name="Partials/_RecruitedTable", for="EnrollmentDetails" />
     <form asp-action="UpdateRecruitmentTotal" asp-controller="Volunteer" method="post">
 
         <div class="govuk-form-group @(Html.ViewData.ModelState["RecruitmentTotal"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">

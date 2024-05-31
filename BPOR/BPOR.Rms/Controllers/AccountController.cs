@@ -16,5 +16,11 @@ namespace BPOR.Rms.Controllers
         {
             return View();
         }
+
+        [AllowAnonymous]
+        public IActionResult SignedOut()
+        {
+            return View();
+        }
     }
 }

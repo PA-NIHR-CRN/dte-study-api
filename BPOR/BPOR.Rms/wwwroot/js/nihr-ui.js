@@ -35,6 +35,10 @@ function initialiseOptionSearch() {
                 }
             });
 
+            document.querySelectorAll('.govuk-checkboxes__item.skip-link').forEach(function (item) {
+                item.style.display = searchText ? 'none' : 'flex';
+            });
+
             var foundLabel = foundCount == 1 ? announcementElement.dataset.single : announcementElement.dataset.multiple;
 
             announcementElement.innerText = `${foundCount} ${foundLabel}, ${selectedCount} ${announcementElement.dataset.selected}`;

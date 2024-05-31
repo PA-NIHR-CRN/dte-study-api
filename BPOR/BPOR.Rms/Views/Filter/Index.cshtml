@@ -1,5 +1,5 @@
 @model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
-@using BPOR.Rms.Views.ViewComponents
+
 @{
     ViewData["Title"] = "Find Volunteers";
 
@@ -7,7 +7,7 @@
     {
         var volunteers = Model.VolunteerCount == 1 ? "volunteer" : "volunteers";
 
-        ViewData["Title"] = $"{ViewData["Title"] as string} - {Model.VolunteerCount} {volunteers} found";
+        ViewData["Title"] = $"{ViewData["Title"] as string} - {Model.VolunteerCount:n0} {volunteers} found";
     }
 
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -30,12 +30,12 @@
     }
 </style>
 
-@if (Model.ShowResults)
+@if (Model.Testing.ShowResults)
 {
     <div id="volunteer-results-list" class="govuk-grid-column-full testing-only">
         <span class="govuk-caption-m">For testing purposes only</span>
         <h2 class="govuk-heading-m">Volunteer Results</h2>
-        @await Html.PartialAsync("Partials/_FilteredVolunteerList", Model.VolunteerResults)
+        <partial name="Partials/_FilteredVolunteerList" for="Testing.VolunteerResults" />
     </div>
 }
 
@@ -51,23 +51,21 @@
 {
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
-
             <input type="hidden" asp-for="StudyId" value="@Model.StudyId" />
+            <partial name="Partials/_NotificationBanner" />
 
-            @await Html.PartialAsync("Partials/_NotificationBanner")
+            <partial name="Partials/_ErrorSummary" />
 
-            @await Html.PartialAsync("Partials/_ErrorSummary", Model)
-
-            @await Html.PartialAsync("Partials/_StudySelection", Model)
-            @await Html.PartialAsync("Partials/_VolunteerInclusionExclusionCriteria", Model)
-            @await Html.PartialAsync("Partials/_AreasOfResearch", Model)
-            @await Html.PartialAsync("Partials/_RegistrationDate", Model)
-            @await Html.PartialAsync("Partials/_Location", Model)
-            @await Html.PartialAsync("Partials/_Demographics", Model)
+            <partial name="Partials/_StudySelection" />
+            <partial name="Partials/_VolunteerInclusionExclusionCriteria" />
+            <areas-of-research-select-list for="SelectedAreasOfInterest" for-none="IncludeNoAreasOfInterest" />
+            <partial name="Partials/_RegistrationDate" />
+            <partial name="Partials/_Location" />
+            <partial name="Partials/_Demographics" />
 
         </div>
         <div class="govuk-grid-column-one-third volunteer-count-panel">
-            @await Html.PartialAsync("Partials/_FilterButtonsAndCount", Model)
+            <partial name="Partials/_FilterButtonsAndCount" />
         </div>
     </div>
 }

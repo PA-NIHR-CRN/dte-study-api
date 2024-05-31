@@ -48,13 +48,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x'
-
-      - name: Build
-        run: dotnet build /BPOR/BPOR.sln --no-restore
-
-      - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef
+          dotnet-version: '8.0.x'
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -68,10 +62,34 @@ jobs:
           name: bpor-rms
           path: /tmp
 
+      - name: Add Nuget Source
+        run: dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+
       - name: Install dotnet-ef tool
         run: dotnet tool install --global dotnet-ef
+
+      - name: Restore dependencies
+        run: dotnet restore BPOR/BPOR.sln
+
+      - name: Build solution
+        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
+
+      - name: Get GitHub Actions Runner Public IP
+        id: publicip
+        run: |
+          response=$(curl -s icanhazip.com)
+          echo "ip=$response" >> "$GITHUB_OUTPUT"
+
+      - name: Add Github Actions IP to RDS security group (Dev)
+        run: |
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
+ 
       - name: Update Database
-        run: dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}"
+        env:
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+        run: |
+          cd BPOR/BPOR.Domain
+          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
 
       - name: Pull, tag, and push image to Amazon ECR
         id: build-image
@@ -121,6 +139,10 @@ jobs:
             AwsSecretsManagerSettings__Enabled=true
             ASPNETCORE_ENVIRONMENT=Development
 
+      - name: Remove Github Actions IP from RDS security group (Dev)
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
+
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccd-ecs-dev-bpor-rms-service
@@ -148,6 +170,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -159,6 +186,35 @@ jobs:
         with:
           name: bpor-rms
           path: /tmp
+
+      - name: Add Nuget Source
+        run: dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Restore dependencies
+        run: dotnet restore BPOR/BPOR.sln
+
+      - name: Build solution
+        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
+
+      - name: Get GitHub Actions Runner Public IP
+        id: publicip
+        run: |
+          response=$(curl -s icanhazip.com)
+          echo "ip=$response" >> "$GITHUB_OUTPUT"
+
+      - name: Add Github Actions IP to RDS security group (Dev)
+        run: |
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
+ 
+      - name: Update Database
+        env:
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+        run: |
+          cd BPOR/BPOR.Domain
+          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
 
       - name: Load, tag, and push image to Amazon ECR
         id: build-image
@@ -208,6 +264,10 @@ jobs:
             AwsSecretsManagerSettings__Enabled=true
             ASPNETCORE_ENVIRONMENT=Development
 
+      - name: Remove Github Actions IP from RDS security group (Dev)
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
+
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccd-ecs-test-bpor-rms-service
@@ -235,6 +295,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -246,6 +311,35 @@ jobs:
         with:
           name: bpor-rms
           path: /tmp
+
+      - name: Add Nuget Source
+        run: dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Restore dependencies
+        run: dotnet restore BPOR/BPOR.sln
+
+      - name: Build solution
+        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
+
+      - name: Get GitHub Actions Runner Public IP
+        id: publicip
+        run: |
+          response=$(curl -s icanhazip.com)
+          echo "ip=$response" >> "$GITHUB_OUTPUT"
+
+      - name: Add Github Actions IP to RDS security group (Dev)
+        run: |
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
+ 
+      - name: Update Database
+        env:
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+        run: |
+          cd BPOR/BPOR.Domain
+          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
 
       - name: Load, tag, and push image to Amazon ECR
         id: build-image
@@ -295,6 +389,10 @@ jobs:
             AwsSecretsManagerSettings__Enabled=true
             ASPNETCORE_ENVIRONMENT=Development
 
+      - name: Remove Github Actions IP from RDS security group (Dev)
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
+
       - name: Deploy Amazon ECS task definition
         env:
           ECS_SERVICE: crnccs-ecs-uat-bpor-rms-service
@@ -322,6 +420,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -333,6 +436,35 @@ jobs:
         with:
           name: bpor-rms
           path: /tmp
+
+      - name: Add Nuget Source
+        run: dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Restore dependencies
+        run: dotnet restore BPOR/BPOR.sln
+
+      - name: Build solution
+        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
+
+      - name: Get GitHub Actions Runner Public IP
+        id: publicip
+        run: |
+          response=$(curl -s icanhazip.com)
+          echo "ip=$response" >> "$GITHUB_OUTPUT"
+
+      - name: Add Github Actions IP to RDS security group (Dev)
+        run: |
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
+ 
+      - name: Update Database
+        env:
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+        run: |
+          cd BPOR/BPOR.Domain
+          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
 
       - name: Load, tag, and push image to Amazon ECR
         id: build-image
@@ -380,6 +512,11 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_OAT }}
             AwsSecretsManagerSettings__Enabled=true
+            ASPNETCORE_ENVIRONMENT=Staging
+
+      - name: Remove Github Actions IP from RDS security group (Dev)
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
 
       - name: Deploy Amazon ECS task definition
         env:
@@ -408,6 +545,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -419,6 +561,35 @@ jobs:
         with:
           name: bpor-rms
           path: /tmp
+
+      - name: Add Nuget Source
+        run: dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Restore dependencies
+        run: dotnet restore BPOR/BPOR.sln
+
+      - name: Build solution
+        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
+
+      - name: Get GitHub Actions Runner Public IP
+        id: publicip
+        run: |
+          response=$(curl -s icanhazip.com)
+          echo "ip=$response" >> "$GITHUB_OUTPUT"
+
+      - name: Add Github Actions IP to RDS security group (Dev)
+        run: |
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
+ 
+      - name: Update Database
+        env:
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+        run: |
+          cd BPOR/BPOR.Domain
+          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
 
       - name: Load, tag, and push image to Amazon ECR
         id: build-image
@@ -466,6 +637,11 @@ jobs:
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_PROD }}
             AwsSecretsManagerSettings__Enabled=true
+            ASPNETCORE_ENVIRONMENT=Production
+
+      - name: Remove Github Actions IP from RDS security group (Dev)
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
 
       - name: Deploy Amazon ECS task definition
         env:

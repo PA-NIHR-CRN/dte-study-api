@@ -1,4 +1,3 @@
-@using BPOR.Rms.Views.ViewComponents
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 
 @{
@@ -11,12 +10,12 @@
     );
 }
 
-@await Html.PartialAsync("Partials/Details/_StudyDetailsHeader", Model)
+<partial name="Partials/Details/_StudyDetailsHeader" />
 <div style="display:flex;gap: 40px; flex-direction: column; width: 100%">
 
-    @await Html.PartialAsync("Partials/_NotificationBanner") @* TODO: Move notifications banner to master layout *@
-    @await Html.PartialAsync("Partials/Details/_StudyStatistics", Model)
-    @await Html.PartialAsync("Partials/Details/_EmailTable", Model)
-    @await Html.PartialAsync("Partials/Details/_VolunteerTable", Model)
-    @await Html.PartialAsync("Partials/Details/_StudyDetails", Model)
+    <partial name="Partials/_NotificationBanner" /> @* TODO: Move notifications banner to master layout *@
+    <partial name="Partials/Details/_StudyStatistics" />
+    <partial name="Partials/Details/_EmailTable" />
+    <partial name="Partials/Details/_VolunteerTable" />
+    <partial name="Partials/Details/_StudyDetails" />
 </div>

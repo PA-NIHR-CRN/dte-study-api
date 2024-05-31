@@ -1,34 +1,32 @@
-@using BPOR.Rms.Views.ViewComponents
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model BPOR.Rms.Models.Study.StudyFormViewModel
 
 @{
     ViewData["Title"] = "Edit";
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData.AddBreadcrumbs(new Dictionary<string, string>
-    {
-            ["All Studies"] = "/Study/Index",
-            ["Study Page"] = $"/Study/Details/{Model.Id}",
-            ["Edit Study"] = "/Study/Edit",
-    });
+            {
+                ["All Studies"] = "/Study/Index",
+                ["Study Page"] = $"/Study/Details/{Model.Id}",
+                ["Edit Study"] = "/Study/Edit",
+            });
 }
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
 
         <h1 class="govuk-heading-xl">Edit study details</h1>
-        @await Html.PartialAsync("Partials/_ErrorSummary", Model)
+        <partial name="Partials/_ErrorSummary" />
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id"/>
-            <input type="hidden" asp-for="Step" value="@Model.Step"/>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Step" value="@Model.Step" />
 
             <div style="@(Model.Step == 1 ? "" : "display:none;")">
-                @await Html.PartialAsync("Partials/Shared/_Step1FormFields", Model)
+                <partial name="Partials/Shared/_Step1FormFields" />
             </div>
 
             <div style="@(Model.Step == 2 ? "" : "display:none;")">
-                @await Html.PartialAsync("Partials/Shared/_Step2FormFields", Model)
+                <partial name="Partials/Shared/_Step2FormFields" />
             </div>
             <div class="govuk-button-group">
                 <button type="submit" class="govuk-button" data_module="govuk-button">Update</button>

@@ -3,33 +3,26 @@
 <div class="govuk-form-group">
     <fieldset class="govuk-fieldset" aria-label="Select which options to filter volunteers by">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-
-            @if (Model.ShowStudyFilters)
+            @if (Model.HasStudy())
             {
-                <div class="govuk-input_select__wrapper">
-                    @Html.LabelFor(m => Model.SelectedVolunteersContacted, new { @class = "govuk-label exclusion_label" })
-                    @Html.DropDownListFor(m => m.SelectedVolunteersContacted, Model.VolunteersContacted, new { @class = "govuk-select govuk-select-custom" })
-                </div>
-
-                <div class="govuk-input_select__wrapper">
-                    @Html.LabelFor(m => Model.SelectedVolunteersRegisteredInterest, new { @class = "govuk-label exclusion_label" })
-                    @Html.DropDownListFor(m => m.SelectedVolunteersRegisteredInterest, Model.VolunteersRegisteredInterest, new { @class = "govuk-select govuk-select-custom" })
-                </div>
-
+                <include-exclude-dropdown for="SelectedVolunteersContacted" />
+                <include-exclude-dropdown for="SelectedVolunteersRegisteredInterest" />
                 @if (Model.ShowRecruitedFilter)
                 {
+                    <include-exclude-dropdown for="SelectedVolunteersRecruited" />
+                }
+                else
+                {
                     <div class="govuk-input_select__wrapper">
-                        @Html.LabelFor(m => Model.SelectedVolunteersRecruited, new { @class = "govuk-label exclusion_label" })
-                        @Html.DropDownListFor(m => m.SelectedVolunteersRecruited, Model.VolunteersRecruited, new { @class = "govuk-select govuk-select-custom" })
-                    </div>
-                }            
-            }       
+                        <div class="govuk-label exclusion_label" for="SelectedVolunteersContacted">Volunteers recruited</div>
+                        <div class="govuk-hint govuk-!-margin-top-4" style="margin-bottom: 12px;">
+                            Study uses anonymous recruitment
+                        </div>
+                    </div>            
+                }
+            }
 
-            <div class="govuk-input_select__wrapper">
-                @Html.LabelFor(m => Model.SelectedVolunteersCompletedRegistration, new { @class = "govuk-label exclusion_label" })
-                @Html.DropDownListFor(m => m.SelectedVolunteersCompletedRegistration, Model.VolunteersCompletedRegistration, new { @class = "govuk-select govuk-select-custom" })
-            </div>
-  
-        </legend>      
+            <include-exclude-dropdown for="SelectedVolunteersCompletedRegistration" />
+        </legend>
     </fieldset>
 </div>

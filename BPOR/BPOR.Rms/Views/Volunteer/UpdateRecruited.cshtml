@@ -1,4 +1,3 @@
-@using BPOR.Rms.Views.ViewComponents
 @model BPOR.Rms.Models.Volunteer.UpdateRecruitedViewModel
 
 @{
@@ -19,8 +18,8 @@
         </h4>
     </div>
 
-    @await Html.PartialAsync("Partials/_NotificationBanner")
-    @await Html.PartialAsync("Partials/_ErrorSummary", Model)
+    <partial name="Partials/_NotificationBanner" />
+    <partial name="Partials/_ErrorSummary" />
 
     <form asp-action="SubmitVolunteerNumbers" asp-controller="Volunteer" method="post">
         <input asp-for="StudyId" type="hidden" />

@@ -207,6 +207,9 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<bool?>("IncludeContacted")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<bool>("IncludeNoAreasOfInterest")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool?>("IncludeRecruited")
                         .HasColumnType("tinyint(1)");
 
@@ -734,6 +737,13 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 4,
                             Code = "RegisteredInterest",
                             Description = "RegisteredInterest",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Code = "Failed",
+                            Description = "Failed",
                             IsDeleted = false
                         });
                 });
@@ -10038,11 +10048,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
             modelBuilder.Entity("BPOR.Domain.Entities.FilterCriteria", b =>
                 {
-                    b.HasOne("BPOR.Domain.Entities.Study", "Study")
+                    b.HasOne("BPOR.Domain.Entities.Study", null)
                         .WithMany("FilterCriterias")
                         .HasForeignKey("StudyId");
-
-                    b.Navigation("Study");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.FilterEthnicGroup", b =>

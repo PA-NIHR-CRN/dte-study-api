@@ -14,7 +14,7 @@
             }
             else
             {
-                <span>@Model.VolunteerCount</span>
+                <span>@($"{Model.VolunteerCount:n0}")</span>
             }
         </h2>
     </div>
@@ -22,12 +22,10 @@
     <div class="testing-only govuk-!-margin-bottom-5">
         <span class="govuk-caption-m govuk-!-display-inline">For testing purposes only</span>
         <div class="govuk-checkboxes__item govuk-checkboxes--small show-results">
-            @Html.CheckBoxFor(x => x.ShowResults, new { @class = "govuk-checkboxes__input", id = "show-results-checkbox" })
+            @Html.CheckBoxFor(x => x.Testing.ShowResults, new { @class = "govuk-checkboxes__input", id = "show-results-checkbox" })
             <label for="show-results-checkbox" class="govuk-label govuk-checkboxes__label">Show volunteer information</label>
         </div>
     </div>
-
-
 
     <div class="filter-buttons-container">
 

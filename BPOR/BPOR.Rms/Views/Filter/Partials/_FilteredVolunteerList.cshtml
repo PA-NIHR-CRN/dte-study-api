@@ -1,6 +1,11 @@
 ﻿@using NIHR.Infrastructure.Paging
 @using BPOR.Rms.Models.Filter
+@using System.Globalization
 @model Page<VolunteerResult>
+
+@{
+    var ci = new CultureInfo("en-GB");
+}
 
 <div id="volunteer-results">
     @if (Model.Any())
@@ -9,7 +14,6 @@
             <thead class="govuk-table__head">
                 <tr class="govuk-table__row">
                     <th scope="col" class="govuk-table__header">Id</th>
-                    <th scope="col" class="govuk-table__header">Email</th>
                     <th scope="col" class="govuk-table__header">Completed Registration</th>
                     <th scope="col" class="govuk-table__header">Registration Date</th>
                     <th scope="col" class="govuk-table__header">Age</th>
@@ -28,13 +32,13 @@
                             @volunteer.Id
                         </td>
                         <td class="govuk-table__cell">
-                            @volunteer.Email
-                        </td>
-                        <td class="govuk-table__cell">
                             @volunteer.HasCompletedRegistration
                         </td>
                         <td class="govuk-table__cell">
-                            @volunteer.HasRegistered
+                            @if (volunteer.HasRegistered.HasValue)
+                            {
+                                @volunteer.HasRegistered.Value.ToString("d", ci);
+                            }          
                         </td>
                         <td class="govuk-table__cell">
                             @volunteer.Age
@@ -63,7 +67,8 @@
                 }
             </tbody>
         </table>
-        @await Html.PartialAsync("_Pagination", Model, new ViewDataDictionary(ViewData) { { "AnchorId", "volunteer-results-list" } })
+
+        <pagination anchor-id="volunteer-results-list" />
     }
     else
     {

@@ -17,40 +17,40 @@
             {
                 <span id="RegistrationFromDateDay-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
-                    @Html.ValidationMessageFor(model => model.RegistrationFromDateDay)
+                    @Html.ValidationMessageFor(model => model.RegistrationFromDate.Day)
                 </span>
             }
             @if (Html.ViewData.ModelState["RegistrationFromDateMonth"]?.Errors.Count > 0)
             {
                 <span id="RegistrationFromDateMonth-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
-                    @Html.ValidationMessageFor(model => model.RegistrationFromDateMonth)
+                    @Html.ValidationMessageFor(model => model.RegistrationFromDate.Month)
                 </span>
             }
             @if (Html.ViewData.ModelState["RegistrationFromDateYear"]?.Errors.Count > 0)
             {
                 <span id="RegistrationFromDateYear-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
-                    @Html.ValidationMessageFor(model => model.RegistrationFromDateYear)
+                    @Html.ValidationMessageFor(model => model.RegistrationFromDate.Year)
                 </span>
             }
             <div class="govuk-date-input" id="registration-date-from">
                 <!-- Day -->
                 <div class="govuk-date-input__item">
-                    <label class="govuk-label govuk-label--n" asp-for="RegistrationFromDateDay">@Html.DisplayNameFor(model => model.RegistrationFromDateDay)</label>
-                    <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RegistrationFromDateDay" autocomplete="off" type="text" inputmode="numeric">
+                    <label class="govuk-label govuk-label--n" asp-for="RegistrationFromDate.Day">@Html.DisplayNameFor(model => model.RegistrationFromDate.Day)</label>
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RegistrationFromDate.Day" autocomplete="off" type="text" inputmode="numeric">
 
                 </div>
                 <!-- Month -->
                 <div class="govuk-date-input__item">
-                    <label class="govuk-label govuk-label--n" asp-for="RegistrationFromDateMonth">@Html.DisplayNameFor(model => model.RegistrationFromDateMonth)</label>
-                    <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RegistrationFromDateMonth" autocomplete="off" type="text" inputmode="numeric">
+                    <label class="govuk-label govuk-label--n" asp-for="RegistrationFromDate.Month">@Html.DisplayNameFor(model => model.RegistrationFromDate.Month)</label>
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RegistrationFromDate.Month" autocomplete="off" type="text" inputmode="numeric">
 
                 </div>
                 <!-- Year -->
                 <div class="govuk-date-input__item">
-                    <label class="govuk-label govuk-label--n" asp-for="RegistrationFromDateYear">@Html.DisplayNameFor(model => model.RegistrationFromDateYear)</label>
-                    <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="RegistrationFromDateYear" autocomplete="off" type="text" inputmode="numeric">
+                    <label class="govuk-label govuk-label--n" asp-for="RegistrationFromDate.Year">@Html.DisplayNameFor(model => model.RegistrationFromDate.Year)</label>
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="RegistrationFromDate.Year" autocomplete="off" type="text" inputmode="numeric">
 
                 </div>
             </div>
@@ -62,40 +62,40 @@
             {
                 <span id="RegistrationFromDateDay-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
-                    @Html.ValidationMessageFor(model => model.RegistrationToDateDay)
+                    @Html.ValidationMessageFor(model => model.RegistrationToDate.Day)
                 </span>
             }
             @if (Html.ViewData.ModelState["RegistrationToDateMonth"]?.Errors.Count > 0)
             {
                 <span id="RegistrationFromDateMonth-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
-                    @Html.ValidationMessageFor(model => model.RegistrationToDateMonth)
+                    @Html.ValidationMessageFor(model => model.RegistrationToDate.Month)
                 </span>
             }
             @if (Html.ViewData.ModelState["RegistrationToDateYear"]?.Errors.Count > 0)
             {
                 <span id="RegistrationFromDateYear-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
-                    @Html.ValidationMessageFor(model => model.RegistrationToDateYear)
+                    @Html.ValidationMessageFor(model => model.RegistrationToDate.Year)
                 </span>
             }
             <div class="govuk-date-input" id="registration-date-to">
                 <!-- Day -->
                 <div class="govuk-date-input__item">
-                    <label class="govuk-label govuk-label--n" asp-for="RegistrationToDateDay">@Html.DisplayNameFor(model => model.RegistrationToDateDay)</label>
-                    <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RegistrationToDateDay" autocomplete="off" type="text" inputmode="numeric">
+                    <label class="govuk-label govuk-label--n" asp-for="RegistrationToDate.Day">@Html.DisplayNameFor(model => model.RegistrationToDate.Day)</label>
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RegistrationToDate.Day" autocomplete="off" type="text" inputmode="numeric">
 
                 </div>
                 <!-- Month -->
                 <div class="govuk-date-input__item">
-                    <label class="govuk-label govuk-label--n" asp-for="RegistrationToDateMonth">@Html.DisplayNameFor(model => model.RegistrationToDateMonth)</label>
-                    <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RegistrationToDateMonth" autocomplete="off" type="text" inputmode="numeric">
+                    <label class="govuk-label govuk-label--n" asp-for="RegistrationToDate.Month">@Html.DisplayNameFor(model => model.RegistrationToDate.Month)</label>
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="RegistrationToDate.Month" autocomplete="off" type="text" inputmode="numeric">
 
                 </div>
                 <!-- Year -->
                 <div class="govuk-date-input__item">
-                    <label class="govuk-label govuk-label--n" asp-for="RegistrationToDateYear">@Html.DisplayNameFor(model => model.RegistrationToDateYear)</label>
-                    <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="RegistrationToDateYear" autocomplete="off" type="text" inputmode="numeric">
+                    <label class="govuk-label govuk-label--n" asp-for="RegistrationToDate.Year">@Html.DisplayNameFor(model => model.RegistrationToDate.Year)</label>
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="RegistrationToDate.Year" autocomplete="off" type="text" inputmode="numeric">
 
                 </div>
             </div>

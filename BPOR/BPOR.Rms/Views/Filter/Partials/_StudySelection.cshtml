@@ -1,10 +1,10 @@
 @model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
 
-@if (Model.ShowStudyFilters)
+@if (Model.HasStudy())
 {
     <div class="govuk-form-group">
-        @Html.HiddenFor(m => m.SelectedStudy)
+        @Html.HiddenFor(m => m.StudyName)
 
-        <h2 class="govuk-heading-l" aria-label="Selected study name">@Model.SelectedStudy</h2>
+        <h2 class="govuk-heading-l" aria-label="Selected study name">@Model.StudyName</h2>
     </div>
 }

@@ -11,6 +11,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
 {
     private readonly List<Expression<Func<Participant, bool>>> _filters = [];
 
+    // too tightly coupled to view
     public async Task<IQueryable<Participant>> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
         _filters.Clear();
@@ -18,10 +19,8 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         FilterVolunteersRegisteredInterest(model.StudyId, model.SelectedVolunteersRegisteredInterest);
         FilterVolunteersRecruited(model.StudyId, model.SelectedVolunteersRecruited);
         FilterVolunteersCompletedRegistration(model.SelectedVolunteersCompletedRegistration);
-        FilterByAreasOfResearch(model.SelectedHealthConditions);
-        FilterByRegistrationDate(model.RegistrationFromDateDay, model.RegistrationFromDateMonth,
-            model.RegistrationFromDateYear,
-            model.RegistrationToDateDay, model.RegistrationToDateMonth, model.RegistrationToDateYear);
+        FilterByAreasOfResearch(model.SelectedAreasOfInterest, model.IncludeNoAreasOfInterest);
+        FilterByRegistrationDate(model.RegistrationFromDate.ToDateOnly(), model.RegistrationToDate.ToDateOnly());
         FilterByAge(model.AgeFrom, model.AgeTo);
         FilterBySexRegisteredAtBirth(model.IsSexMale, model.IsSexFemale,
             model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No,
@@ -46,7 +45,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         return _filters.Aggregate(query, (current, filter) => current.Where(filter));
     }
 
-    private Expression<Func<Participant, bool>> StartsWithAnyPostCodeDistrictExpression(string[] postCodeDistricts)
+    private static Expression<Func<Participant, bool>> StartsWithAnyPostCodeDistrictExpression(string[] postCodeDistricts)
     {
         var expressions = postCodeDistricts
         .Select(s => (Expression<Func<Participant, bool>>)(p =>
@@ -80,9 +79,9 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
 
     private void FilterByAge(int? ageFrom, int? ageTo)
     {
-        if (ageFrom != null || ageTo != null)
+        if (ageFrom.HasValue || ageTo.HasValue)
         {
-            DateTime fromDate = ageTo.HasValue ? DateTime.Today.AddYears(-ageTo.Value) : DateTime.MinValue;
+            DateTime fromDate = ageTo.HasValue ? DateTime.Today.AddYears(-ageTo.Value - 1).AddDays(1) : DateTime.MinValue;
             DateTime toDate = ageFrom.HasValue ? DateTime.Today.AddYears(-ageFrom.Value) : DateTime.MaxValue;
 
             _filters.Add(p => p.DateOfBirth >= fromDate && p.DateOfBirth <= toDate);
@@ -226,54 +225,21 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         }
     }
 
-    private void FilterByAreasOfResearch(List<string>? selectedHealthConditions)
+    private void FilterByAreasOfResearch(List<int> selectedAreasOfInterest, bool includeNoAreasOfInterest)
     {
-        if (selectedHealthConditions != null && selectedHealthConditions.Count > 0)
+        if (selectedAreasOfInterest.Count != 0 || includeNoAreasOfInterest)
         {
-            List<int> conditionIds = selectedHealthConditions.Select(s => int.Parse(s)).ToList();
-
-            _filters.Add(p => p.HealthConditions.Any(hc => conditionIds.Contains(hc.HealthConditionId)));
+            _filters.Add(p => p.HealthConditions.Any(hc => selectedAreasOfInterest.Contains(hc.HealthConditionId)) || (includeNoAreasOfInterest && !p.HealthConditions.Any()));
         }
     }
 
-    private void FilterByRegistrationDate(int? registrationFromDateDay, int? registrationFromDateMonth,
-        int? registrationFromDateYear,
-        int? registrationToDateDay, int? registrationToDateMonth, int? registrationToDateYear)
+    private void FilterByRegistrationDate(DateOnly? registrationFromDate, DateOnly? registrationToDate)
     {
-        if ((registrationFromDateDay != null && registrationFromDateMonth != null &&
-             registrationFromDateYear != null) ||
-            (registrationToDateDay != null && registrationToDateMonth != null && registrationToDateYear != null))
+        if (registrationFromDate.HasValue || registrationToDate.HasValue)
         {
-            if (registrationToDateDay.HasValue)
-            {
-                registrationToDateDay++;
-            }
-
-            DateTime? registrationFromDate = ConstructDate(registrationFromDateYear, registrationFromDateMonth,
-                registrationFromDateDay);
-            DateTime? registrationToDate =
-                ConstructDate(registrationToDateYear, registrationToDateMonth, registrationToDateDay);
-
             _filters.Add(p =>
-                (!registrationFromDate.HasValue || p.RegistrationConsentAtUtc >= registrationFromDate) &&
-                (!registrationToDate.HasValue || p.RegistrationConsentAtUtc <= registrationToDate));
-        }
-    }
-
-
-    //TODO move to shared
-    private static DateTime? ConstructDate(int? year, int? month, int? day)
-    {
-        if (!year.HasValue || !month.HasValue || !day.HasValue)
-            return null;
-
-        try
-        {
-            return new DateTime(year.Value, month.Value, day.Value);
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            return null;
+                (!registrationFromDate.HasValue || p.RegistrationConsentAtUtc >= registrationFromDate.Value.ToDateTime(TimeOnly.MinValue)) &&
+                (!registrationToDate.HasValue || p.RegistrationConsentAtUtc <= registrationToDate.Value.ToDateTime(TimeOnly.MaxValue)));
         }
     }
 }
