@@ -19,7 +19,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
     public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
-        if (!User.IsInRole("Tester"))
+        if (!(User.IsInRole("Tester") && User.IsInRole("Admin")))
         {
             model.Testing = new();
         }

@@ -19,7 +19,7 @@
         </h2>
     </div>
 
-    @if (User.IsInRole("Tester"))
+    @if (User.IsInRole("Tester") && User.IsInRole("Admin"))
     {
         <div class="testing-only govuk-!-margin-bottom-5">
             <span class="govuk-caption-m govuk-!-display-inline">For testing purposes only</span>
