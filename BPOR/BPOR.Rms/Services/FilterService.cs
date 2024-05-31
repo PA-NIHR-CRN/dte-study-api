@@ -7,9 +7,10 @@ using NIHR.Infrastructure;
 
 namespace BPOR.Rms.Services;
 
-public class FilterService(ParticipantDbContext context, IPostcodeMapper locationApiClient) : IFilterService
+public class FilterService(ParticipantDbContext context, IPostcodeMapper locationApiClient, TimeProvider timeProvider) : IFilterService
 {
     private readonly List<Expression<Func<Participant, bool>>> _filters = [];
+    private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
     // too tightly coupled to view
     public async Task<IQueryable<Participant>> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
@@ -77,14 +78,16 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
             .Select(pl => pl.Participant);
     }
 
-    private void FilterByAge(int? ageFrom, int? ageTo)
+    private void FilterByAge(int? youngestAge, int? oldestAge)
     {
-        if (ageFrom.HasValue || ageTo.HasValue)
+        if (youngestAge.HasValue || oldestAge.HasValue)
         {
-            DateTime fromDate = ageTo.HasValue ? DateTime.Today.AddYears(-ageTo.Value - 1).AddDays(1) : DateTime.MinValue;
-            DateTime toDate = ageFrom.HasValue ? DateTime.Today.AddYears(-ageFrom.Value) : DateTime.MaxValue;
+            var dobRange = _today.GetDatesWithinYearRange(youngestAge, oldestAge);
 
-            _filters.Add(p => p.DateOfBirth >= fromDate && p.DateOfBirth <= toDate);
+            _filters.Add(p =>
+               (!dobRange.From.HasValue || dobRange.From.Value.ToDateTime(TimeOnly.MinValue) <= p.DateOfBirth) 
+            && (!dobRange.To.HasValue || p.DateOfBirth <= dobRange.To.Value.ToDateTime(TimeOnly.MaxValue))
+            );
         }
     }
 

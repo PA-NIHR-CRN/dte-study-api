@@ -12,9 +12,10 @@ using Rbec.Postcodes;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService, ILogger<HomeController> logger, IHostEnvironment hostEnvironment) : Controller
+public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService, ILogger<HomeController> logger, IHostEnvironment hostEnvironment, TimeProvider timeProvider) : Controller
 {
     private readonly ILogger<HomeController> _logger = logger;
+    private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
     public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
@@ -56,9 +57,8 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
     [HttpPost]
     public async Task<IActionResult> SetupEmailCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
-        DateTime? dateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
-        DateTime? dateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;
-
+        var dobRange = _today.GetDatesWithinYearRange(model.AgeFrom, model.AgeTo);
+        
         var filterCriteria = new FilterCriteria
         {
             IncludeContacted = model.SelectedVolunteersContacted,
@@ -67,8 +67,8 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             IncludeRecruited = model.SelectedVolunteersRecruited,
             RegistrationFromDate = model.RegistrationFromDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
             RegistrationToDate = model.RegistrationToDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
-            DateOfBirthFrom = dateOfBirthFrom,
-            DateOfBirthTo = dateOfBirthTo,
+            DateOfBirthFrom = dobRange.From?.ToDateTime(TimeOnly.MinValue),
+            DateOfBirthTo = dobRange.To?.ToDateTime(TimeOnly.MaxValue),
             FullPostcode = model.FullPostcode,
             SearchRadiusMiles = model.SearchRadiusMiles,
             StudyId = model.StudyId,
@@ -140,7 +140,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                         Postcode = x.Address == null ? null : x.Address.Postcode,
                         AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
                         DateOfBirth = x.DateOfBirth,
-                        Age = x.DateOfBirth.YearsTo(DateTime.Today),
+                        Age = x.DateOfBirth.YearsTo(_today),
                         Gender = x.Gender.Code,
                         Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
                         // TODO: add distance from radius search
@@ -251,14 +251,13 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
              registrationFromDate.Year != null) ||
             (registrationToDate.Day != null && registrationToDate.Month != null && registrationToDate.Year != null))
         {
-
-            if (registrationFromDate.ToDateOnly() > DateOnly.FromDateTime(DateTime.Today))
+            if (registrationFromDate.ToDateOnly() > _today)
             {
                 ModelState.AddModelError("RegistrationFromDateDay",
                     "The date of volunteer registration must be on or before today");
             }
 
-            if (registrationToDate.ToDateOnly() > DateOnly.FromDateTime(DateTime.Today))
+            if (registrationToDate.ToDateOnly() > _today)
             {
                 ModelState.AddModelError("RegistrationToDateDay",
                     "The date of volunteer registration must be on or before today");
