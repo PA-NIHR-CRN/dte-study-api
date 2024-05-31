@@ -79,9 +79,9 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
 
     private void FilterByAge(int? ageFrom, int? ageTo)
     {
-        if (ageFrom != null || ageTo != null)
+        if (ageFrom.HasValue || ageTo.HasValue)
         {
-            DateTime fromDate = ageTo.HasValue ? DateTime.Today.AddYears(-ageTo.Value) : DateTime.MinValue;
+            DateTime fromDate = ageTo.HasValue ? DateTime.Today.AddYears(-ageTo.Value - 1).AddDays(1) : DateTime.MinValue;
             DateTime toDate = ageFrom.HasValue ? DateTime.Today.AddYears(-ageFrom.Value) : DateTime.MaxValue;
 
             _filters.Add(p => p.DateOfBirth >= fromDate && p.DateOfBirth <= toDate);
