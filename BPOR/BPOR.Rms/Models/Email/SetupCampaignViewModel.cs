@@ -29,8 +29,7 @@ public class SetupCampaignViewModel
 
 
     [DisplayName("Preview email")]
-    [EmailAddress(ErrorMessage = "Enter a valid email address.")]
     public string? PreviewEmails { get; set; }
     
-    public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries) ?? Enumerable.Empty<string>();
+    public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries)?.Select(x=>x.Trim()) ?? Enumerable.Empty<string>();
 }
