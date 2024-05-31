@@ -23,6 +23,13 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
                 Code = "Researcher",
                 Description = "Researcher",
                 IsDeleted = false
+            },
+            new Role
+            {
+                Id = 3,
+                Code = "Tester",
+                Description = "Tester",
+                IsDeleted = false
             }
         };
 

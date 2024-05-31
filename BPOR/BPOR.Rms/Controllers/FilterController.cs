@@ -19,6 +19,11 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
 
     public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
+        if (!User.IsInRole("Tester"))
+        {
+            model.Testing = new();
+        }
+
         if (activity == "FilterVolunteers")
         {
             await FilterVolunteersAsync(model, cancellationToken);
@@ -176,8 +181,6 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 ModelState.AddModelError("", "An error occurred while filtering volunteers.");
                 _logger.LogError(ex, "An error occurred while filtering volunteers.");
             }
-
-
         }
     }
 

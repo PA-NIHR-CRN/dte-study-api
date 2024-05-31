@@ -30,7 +30,7 @@
     }
 </style>
 
-@if (Model.Testing.ShowResults)
+@if (User.IsInRole("Tester") && Model.Testing.ShowResults)
 {
     <div id="volunteer-results-list" class="govuk-grid-column-full testing-only">
         <span class="govuk-caption-m">For testing purposes only</span>
