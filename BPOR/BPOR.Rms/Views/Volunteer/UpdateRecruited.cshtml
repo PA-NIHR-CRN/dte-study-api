@@ -10,16 +10,12 @@
 }
 
 <div style="display: flex;flex-direction: column;gap: 50px;width: 100% ;">
-
     <div>
         <h1 class="govuk-heading-xl govuk-!-margin-bottom-0">Update recruited volunteers</h1>
         <h4 class="text-secondary govuk-!-margin-0">
             @Html.DisplayFor(model => model.StudyName)
         </h4>
     </div>
-
-    <partial name="Partials/_NotificationBanner" />
-    <partial name="Partials/_ErrorSummary" />
 
     <form asp-action="SubmitVolunteerNumbers" asp-controller="Volunteer" method="post">
         <input asp-for="StudyId" type="hidden" />

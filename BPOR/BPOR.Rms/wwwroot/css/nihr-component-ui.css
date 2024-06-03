@@ -463,3 +463,10 @@
     clip: rect(0, 0, 0, 0);
     border: 0;
 }
+
+.govuk-select:focus,
+.govuk-select--error:focus {
+    border: 4px solid rgb(25, 62, 114);
+    box-shadow: none;
+    outline: rgb(254, 212, 122) solid 4px;
+}
