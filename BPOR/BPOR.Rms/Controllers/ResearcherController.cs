@@ -1,6 +1,8 @@
 using BPOR.Domain.Entities;
+using BPOR.Domain.Entities.RefData;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Models.Researcher;
+using BPOR.Rms.Models.Study;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -64,7 +66,7 @@ public class ResearcherController(ParticipantDbContext context) : Controller
     }
 
     [HttpPost]
-    public IActionResult SubmitStudy(ResearcherStudyFormViewModel model, string action)
+    public async Task<IActionResult> SubmitStudy(ResearcherStudyFormViewModel model, string action)
     {
         ViewData["ShowBackLink"] = true;
         ViewData["ShowProgressBar"] = true;
@@ -73,7 +75,14 @@ public class ResearcherController(ParticipantDbContext context) : Controller
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
 
-        if (action == "Next" && model.Step == 1)
+        if (action == "RedirectStep1")
+        {
+            model.Step = 1;
+            ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
+            return View(model);
+        }
+
+        if ((action == "Next" && model.Step == 1) || action == "RedirectStep2")
         {
             if (String.IsNullOrEmpty(model.ShortName))
             {
@@ -97,7 +106,7 @@ public class ResearcherController(ParticipantDbContext context) : Controller
                 return View(model);
             }
         }
-        else if (action == "Next" && model.Step == 2)
+        else if ((action == "Next" && model.Step == 2) || action == "RedirectStep3")
         {
             if (model.PortfolioSubmissionStatus == null)
             {
@@ -112,20 +121,22 @@ public class ResearcherController(ParticipantDbContext context) : Controller
                 }
                 else
                 {
+                    model.OutcomeOfSubmission = null;
+                    model.CPMSId = null;
                     model.Step = 4;
                 }
                 ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
                 return View(model);
             }
         }
-        else if (action == "Next" && model.Step == 3)
+        else if ((action == "Next" && model.Step == 3) || action == "RedirectStep4")
         {
-            if (model.OutcomeOfSubmission == null)
+            if (model.OutcomeOfSubmission == null && model.PortfolioSubmissionStatus == 1)
             {
                 ModelState.AddModelError("OutcomeOfSubmission", "Select the outcome of the submission for inclusion on the NIHR CRN portfolio");
             }
 
-            if (model.CPMSId == null)
+            if (model.CPMSId == null && model.PortfolioSubmissionStatus == 1)
             {
                 ModelState.AddModelError("CPMSId", "Enter the CPMS ID for the study");
             }
@@ -137,7 +148,7 @@ public class ResearcherController(ParticipantDbContext context) : Controller
                 return View(model);
             }
         }
-        else if (action == "Next" && model.Step == 4)
+        else if ((action == "Next" && model.Step == 4) || action == "RedirectStep5")
         {
             if (model.HasFunding == null)
             {
@@ -152,15 +163,16 @@ public class ResearcherController(ParticipantDbContext context) : Controller
                 }
                 else
                 {
+                    model.FundingCode = null;
                     model.Step = 6;
                 }
                 ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
                 return View(model);
             }
         }
-        else if (action == "Next" && model.Step == 5)
+        else if ((action == "Next" && model.Step == 5) || action == "RedirectStep6")
         {
-            if (String.IsNullOrEmpty(model.FundingCode))
+            if (String.IsNullOrEmpty(model.FundingCode) && model.HasFunding == true)
             {
                 ModelState.AddModelError("FundingCode", "Enter the NIHR funding stream or grant code");
             }
@@ -172,9 +184,9 @@ public class ResearcherController(ParticipantDbContext context) : Controller
                 return View(model);
             }
         }
-        else if (action == "Next" && model.Step == 6)
+        else if ((action == "Next" && model.Step == 6) || action == "RedirectStep7")
         {
-            if (String.IsNullOrEmpty(model.UKRecruitmentTarget))
+            if (model.UKRecruitmentTarget == null)
             {
                 ModelState.AddModelError("UKRecruitmentTarget", "Enter the UK recruitment target for the study");
             }
@@ -226,12 +238,56 @@ public class ResearcherController(ParticipantDbContext context) : Controller
                 return View(model);
             }
         }
-        else if (action == "Next" && model.Step == 8)
+        else if (action == "Apply")
         {
+            if (ModelState.IsValid)
+            {
+                var study = new Study
+                {
+                    FullName = "", // TODO - take from IDG details
+                    EmailAddress = "", // TODO - take from IDG details
+                    StudyName = model.ShortName,
+                    ChiefInvestigator = model.ChiefInvestigator,
+                    Sponsors = model.StudySponsors,
+                    Submitted = context.Submitted.Where(s => s.Id == model.PortfolioSubmissionStatus).FirstOrDefault(),
+                    HasNihrFunding = model.HasFunding,
+                    RecruitmentTarget = model.UKRecruitmentTarget,
+                    TargetPopulation = model.TargetPopulation,
+                    RecruitmentStartDate = model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
+                    RecruitmentEndDate = model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
+                    IsRecruitingIdentifiableParticipants = model.RecruitingIdentifiableVolunteers.Value,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                };
 
+                if (model.PortfolioSubmissionStatus == 1)
+                {
+                    study.SubmissionOutcome = context.SubmissionOutcome.Where(o => o.Id == model.OutcomeOfSubmission).FirstOrDefault();
+                    study.CpmsId = model.CPMSId;
+                }
+
+                if (model.HasFunding == true)
+                {
+                    study.FundingCode = model.FundingCode;
+                }
+
+                context.Add(study);
+                await context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(AddStudySuccess), new AddStudySuccessViewModel
+                {
+                    Id = study.Id,
+                    StudyName = study.StudyName,
+                });
+            }
         }
 
         return View(model);
+    }
+
+    public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
+    {
+        return View(viewModel);
     }
 
     public void ValidateRecruitmentDates(ResearcherStudyFormViewModel model)

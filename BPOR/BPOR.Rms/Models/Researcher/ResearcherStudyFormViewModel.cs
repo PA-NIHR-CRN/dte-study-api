@@ -28,7 +28,7 @@ namespace BPOR.Rms.Models.Researcher
         public int? OutcomeOfSubmission { get; set; }
 
         [Display(Name = "CPMS ID")]
-        public string? CPMSId { get; set; }
+        public long? CPMSId { get; set; }
 
         [Display(Name = "Does the study have NIHR funding?")]
         public bool? HasFunding { get; set; }

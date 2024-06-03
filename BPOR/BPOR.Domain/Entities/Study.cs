@@ -21,7 +21,7 @@ public class Study : ISoftDelete, IAudit
     public int? ParticipantsRecruited { get; set; }
     public DateTime? RecruitmentStartDate { get; set; }
     public DateTime? RecruitmentEndDate { get; set; }
-    public int? RecruitmentTarget { get; set; }
+    public string? RecruitmentTarget { get; set; }
     public string? TargetPopulation { get; set; }
     public bool? HasNihrFunding { get; set; }
     public string? FundingCode { get; set; }
