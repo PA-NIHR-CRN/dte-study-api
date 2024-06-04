@@ -6,5 +6,5 @@ namespace BPOR.Rms.Services;
 public interface IFilterService
 {
     Task<IQueryable<Participant>> FilterVolunteersAsync(VolunteerFilterViewModel model,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default, ParticipantDbContext? scopedContext = null);
 }

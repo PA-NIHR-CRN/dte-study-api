@@ -7,13 +7,15 @@ using NIHR.Infrastructure;
 
 namespace BPOR.Rms.Services;
 
-public class FilterService(ParticipantDbContext context, IPostcodeMapper locationApiClient, TimeProvider timeProvider) : IFilterService
+public class FilterService(ParticipantDbContext context, IPostcodeMapper locationApiClient, TimeProvider timeProvider)
+    : IFilterService
 {
     private readonly List<Expression<Func<Participant, bool>>> _filters = [];
     private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
     // too tightly coupled to view
-    public async Task<IQueryable<Participant>> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
+    public async Task<IQueryable<Participant>> FilterVolunteersAsync(VolunteerFilterViewModel model,
+        CancellationToken cancellationToken = default, ParticipantDbContext? scopedContext = null)
     {
         _filters.Clear();
         FilterVolunteersContacted(model.StudyId, model.SelectedVolunteersContacted);
@@ -33,7 +35,8 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
 
         if (!string.IsNullOrWhiteSpace(model.PostcodeDistricts))
         {
-            var postcodeList = model.PostcodeDistricts.Split(',', StringSplitOptions.RemoveEmptyEntries).Where(p => p is not null).Select(p => p.Trim()).ToArray();
+            var postcodeList = model.PostcodeDistricts.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Where(p => p is not null).Select(p => p.Trim()).ToArray();
 
             query = query.Where(StartsWithAnyPostCodeDistrictExpression(postcodeList));
         }
@@ -46,14 +49,15 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         return _filters.Aggregate(query, (current, filter) => current.Where(filter));
     }
 
-    private static Expression<Func<Participant, bool>> StartsWithAnyPostCodeDistrictExpression(string[] postCodeDistricts)
+    private static Expression<Func<Participant, bool>> StartsWithAnyPostCodeDistrictExpression(
+        string[] postCodeDistricts)
     {
         var expressions = postCodeDistricts
-        .Select(s => (Expression<Func<Participant, bool>>)(p =>
-            EF.Functions.Like(p.Address.Postcode, $"{s}%") &&
-            (p.Address.Postcode == s || p.Address.Postcode.StartsWith(s + " "))
-        ))
-        .ToList();
+            .Select(s => (Expression<Func<Participant, bool>>)(p =>
+                    EF.Functions.Like(p.Address.Postcode, $"{s}%") &&
+                    (p.Address.Postcode == s || p.Address.Postcode.StartsWith(s + " "))
+                ))
+            .ToList();
 
         if (expressions.Count == 1) return expressions[0];
 
@@ -64,7 +68,8 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         return Expression.Lambda<Func<Participant, bool>>(orExpression, expressions[0].Parameters);
     }
 
-    private async Task<IQueryable<Participant>> FilterByRadius(string postcode, double radiusInMiles, CancellationToken cancellationToken = default)
+    private async Task<IQueryable<Participant>> FilterByRadius(string postcode, double radiusInMiles,
+        CancellationToken cancellationToken = default)
     {
         var coordinates = await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
 
@@ -85,8 +90,8 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
             var dobRange = _today.GetDatesWithinYearRange(youngestAge, oldestAge);
 
             _filters.Add(p =>
-               (!dobRange.From.HasValue || dobRange.From.Value.ToDateTime(TimeOnly.MinValue) <= p.DateOfBirth) 
-            && (!dobRange.To.HasValue || p.DateOfBirth <= dobRange.To.Value.ToDateTime(TimeOnly.MaxValue))
+                (!dobRange.From.HasValue || dobRange.From.Value.ToDateTime(TimeOnly.MinValue) <= p.DateOfBirth)
+                && (!dobRange.To.HasValue || p.DateOfBirth <= dobRange.To.Value.ToDateTime(TimeOnly.MaxValue))
             );
         }
     }
@@ -140,26 +145,26 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         if (selectedVolunteersContacted == true)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
-            context.EmailCampaignParticipants
-                .Any(ecp => ecp.ParticipantId == participant.Id &&
-                       context.EmailCampaigns
-                              .Any(ec => ec.Id == ecp.EmailCampaignId &&
-                                         context.FilterCriterias
-                                                .Any(fc => fc.Id == ec.FilterCriteriaId &&
-                                                           fc.StudyId == studyId)));
+                context.EmailCampaignParticipants
+                    .Any(ecp => ecp.ParticipantId == participant.Id &&
+                                context.EmailCampaigns
+                                    .Any(ec => ec.Id == ecp.EmailCampaignId &&
+                                               context.FilterCriterias
+                                                   .Any(fc => fc.Id == ec.FilterCriteriaId &&
+                                                              fc.StudyId == studyId)));
             _filters.Add(filterExpression);
         }
 
         if (selectedVolunteersContacted == false)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
-            !context.EmailCampaignParticipants
-                .Any(ecp => ecp.ParticipantId == participant.Id &&
-                       context.EmailCampaigns
-                              .Any(ec => ec.Id == ecp.EmailCampaignId &&
-                                         context.FilterCriterias
-                                                .Any(fc => fc.Id == ec.FilterCriteriaId &&
-                                                           fc.StudyId == studyId)));
+                !context.EmailCampaignParticipants
+                    .Any(ecp => ecp.ParticipantId == participant.Id &&
+                                context.EmailCampaigns
+                                    .Any(ec => ec.Id == ecp.EmailCampaignId &&
+                                               context.FilterCriterias
+                                                   .Any(fc => fc.Id == ec.FilterCriteriaId &&
+                                                              fc.StudyId == studyId)));
 
             _filters.Add(filterExpression);
         }
@@ -170,28 +175,28 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         if (selectedVolunteersRegisteredInterest == true)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
-            context.EmailCampaignParticipants
-                .Any(ecp => ecp.ParticipantId == participant.Id &&
-                            ecp.RegisteredInterestAt != null &&
-                            context.EmailCampaigns
-                                   .Any(ec => ec.Id == ecp.EmailCampaignId &&
-                                              context.FilterCriterias
-                                                     .Any(fc => fc.Id == ec.FilterCriteriaId &&
-                                                                fc.StudyId == studyId)));
+                context.EmailCampaignParticipants
+                    .Any(ecp => ecp.ParticipantId == participant.Id &&
+                                ecp.RegisteredInterestAt != null &&
+                                context.EmailCampaigns
+                                    .Any(ec => ec.Id == ecp.EmailCampaignId &&
+                                               context.FilterCriterias
+                                                   .Any(fc => fc.Id == ec.FilterCriteriaId &&
+                                                              fc.StudyId == studyId)));
             _filters.Add(filterExpression);
         }
 
         if (selectedVolunteersRegisteredInterest == false)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
-            !context.EmailCampaignParticipants
-                .Any(ecp => ecp.ParticipantId == participant.Id &&
-                    ecp.RegisteredInterestAt != null &&
-                       context.EmailCampaigns
-                              .Any(ec => ec.Id == ecp.EmailCampaignId &&
-                                         context.FilterCriterias
-                                                .Any(fc => fc.Id == ec.FilterCriteriaId &&
-                                                           fc.StudyId == studyId)));
+                !context.EmailCampaignParticipants
+                    .Any(ecp => ecp.ParticipantId == participant.Id &&
+                                ecp.RegisteredInterestAt != null &&
+                                context.EmailCampaigns
+                                    .Any(ec => ec.Id == ecp.EmailCampaignId &&
+                                               context.FilterCriterias
+                                                   .Any(fc => fc.Id == ec.FilterCriteriaId &&
+                                                              fc.StudyId == studyId)));
             _filters.Add(filterExpression);
         }
     }
@@ -201,16 +206,18 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         if (selectedVolunteersRecruited == true)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
-                        context.StudyParticipantEnrollment.Any(enrollment =>
-                            enrollment.ParticipantId == participant.Id && enrollment.StudyId == studyId && enrollment.EnrolledAt != null);
+                context.StudyParticipantEnrollment.Any(enrollment =>
+                    enrollment.ParticipantId == participant.Id && enrollment.StudyId == studyId &&
+                    enrollment.EnrolledAt != null);
             _filters.Add(filterExpression);
         }
 
         if (selectedVolunteersRecruited == false)
         {
             Expression<Func<Participant, bool>> filterExpression = participant =>
-                        !context.StudyParticipantEnrollment.Any(enrollment =>
-                            enrollment.ParticipantId == participant.Id && enrollment.StudyId == studyId && enrollment.EnrolledAt != null);
+                !context.StudyParticipantEnrollment.Any(enrollment =>
+                    enrollment.ParticipantId == participant.Id && enrollment.StudyId == studyId &&
+                    enrollment.EnrolledAt != null);
             _filters.Add(filterExpression);
         }
     }
@@ -232,7 +239,9 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
     {
         if (selectedAreasOfInterest.Count != 0 || includeNoAreasOfInterest)
         {
-            _filters.Add(p => p.HealthConditions.Any(hc => selectedAreasOfInterest.Contains(hc.HealthConditionId)) || (includeNoAreasOfInterest && !p.HealthConditions.Any()));
+            _filters.Add(p =>
+                p.HealthConditions.Any(hc => selectedAreasOfInterest.Contains(hc.HealthConditionId)) ||
+                (includeNoAreasOfInterest && !p.HealthConditions.Any()));
         }
     }
 
@@ -241,8 +250,10 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         if (registrationFromDate.HasValue || registrationToDate.HasValue)
         {
             _filters.Add(p =>
-                (!registrationFromDate.HasValue || p.RegistrationConsentAtUtc >= registrationFromDate.Value.ToDateTime(TimeOnly.MinValue)) &&
-                (!registrationToDate.HasValue || p.RegistrationConsentAtUtc <= registrationToDate.Value.ToDateTime(TimeOnly.MaxValue)));
+                (!registrationFromDate.HasValue || p.RegistrationConsentAtUtc >=
+                    registrationFromDate.Value.ToDateTime(TimeOnly.MinValue)) &&
+                (!registrationToDate.HasValue || p.RegistrationConsentAtUtc <=
+                    registrationToDate.Value.ToDateTime(TimeOnly.MaxValue)));
         }
     }
 }

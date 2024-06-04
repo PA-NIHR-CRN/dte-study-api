@@ -2,7 +2,7 @@ using NIHR.Infrastructure;
 
 namespace BPOR.Rms.Services;
 
-public class HostedEmailQueueService(INotificationTaskQueue taskQueue, ILogger<HostedEmailQueueService> logger)
+public class HostedEmailQueueService(IRmsTaskQueue taskQueue, ILogger<HostedEmailQueueService> logger)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

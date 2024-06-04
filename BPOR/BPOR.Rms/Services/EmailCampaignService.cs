@@ -22,18 +22,21 @@ public class EmailCampaignService(
     INotificationService notificationService,
     IFilterService filterService,
     INotificationTaskQueue taskQueue,
-    ParticipantDbContext context,
-    IReferenceGenerator referenceGenerator)
+    IReferenceGenerator referenceGenerator,
+    IServiceScopeFactory serviceScopeFactory)
     : IEmailCampaignService
 {
+    
     public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
     {
+        await using var scope = serviceScopeFactory.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<ParticipantDbContext>();
+        
         var campaign = await context.EmailCampaigns
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == emailCampaignId, cancellationToken);
-        var emailDeliveryStatusId = GetEmailDeliveryStatusId();
 
-        var dbFilter = await GetFilterCriteriaAsync(campaign, cancellationToken);
+        var dbFilter = await GetFilterCriteriaAsync(campaign, context, cancellationToken);
 
         if (dbFilter == null)
         {
@@ -48,8 +51,10 @@ public class EmailCampaignService(
             return;
         }
 
-        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, emailDeliveryStatusId, cancellationToken);
+        var emailDeliveryStatusId = GetEmailDeliveryStatusId();
+        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, emailDeliveryStatusId, context, cancellationToken);
     }
+
 
     private int GetEmailDeliveryStatusId()
     {
@@ -57,7 +62,7 @@ public class EmailCampaignService(
                throw new InvalidOperationException("Email delivery status not found");
     }
 
-    private async Task<FilterCriteria?> GetFilterCriteriaAsync(EmailCampaign campaign,
+    private async Task<FilterCriteria?> GetFilterCriteriaAsync(EmailCampaign campaign, ParticipantDbContext context,
         CancellationToken cancellationToken)
     {
         return await context.FilterCriterias
@@ -81,7 +86,8 @@ public class EmailCampaignService(
     }
 
     private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
-        FilterCriteria dbFilter, int emailDeliveryStatusId, CancellationToken cancellationToken)
+        FilterCriteria dbFilter, int emailDeliveryStatusId, ParticipantDbContext context,
+        CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
 
@@ -93,7 +99,7 @@ public class EmailCampaignService(
         await foreach (var processingResult in ProcessVolunteersAsync(volunteers, campaign, dbFilter,
                            emailDeliveryStatusId, batchSize, cancellationToken))
         {
-            await AddParticipantsToContextAsync(processingResult, cancellationToken);
+            await AddParticipantsToContextAsync(processingResult, context, cancellationToken);
             emailQueue.Add(processingResult);
         }
 
@@ -101,11 +107,11 @@ public class EmailCampaignService(
         logger.LogInformation("Finished processing volunteers at {Time}, Duration: {Duration}ms", endTime,
             (endTime - startTime).TotalMilliseconds);
 
-        await SaveChangesWithRetryAsync(emailQueue, cancellationToken);
+        await SaveChangesWithRetryAsync(emailQueue, context, cancellationToken);
         await QueueEmailSendingTaskAsync(emailQueue, campaign, cancellationToken);
     }
 
-    private async Task SaveChangesWithRetryAsync(List<ProcessingResults> emailQueue,
+    private async Task SaveChangesWithRetryAsync(List<ProcessingResults> emailQueue, ParticipantDbContext context,
         CancellationToken cancellationToken)
     {
         var retryCount = 0;
@@ -122,12 +128,12 @@ public class EmailCampaignService(
             {
                 logger.LogError(ex, "Error saving email campaign participants, attempt {Attempt}", retryCount + 1);
                 retryCount++;
-                UpdateUniqueConstraintViolations(emailQueue);
+                UpdateUniqueConstraintViolations(emailQueue, context);
             }
         }
     }
 
-    private void UpdateUniqueConstraintViolations(List<ProcessingResults> emailQueue)
+    private void UpdateUniqueConstraintViolations(List<ProcessingResults> emailQueue, ParticipantDbContext context)
     {
         foreach (var participant in context.ChangeTracker.Entries<StudyParticipantEnrollment>()
                      .Where(e => e.State == EntityState.Added))
@@ -217,7 +223,8 @@ public class EmailCampaignService(
         }
     }
 
-    private async Task AddParticipantsToContextAsync(ProcessingResults results, CancellationToken cancellationToken)
+    private async Task AddParticipantsToContextAsync(ProcessingResults results, ParticipantDbContext context,
+        CancellationToken cancellationToken)
     {
         await context.EmailCampaignParticipants.AddRangeAsync(results.EmailCampaignParticipants, cancellationToken);
         await context.StudyParticipantEnrollment.AddRangeAsync(results.StudyParticipantEnrollments, cancellationToken);
