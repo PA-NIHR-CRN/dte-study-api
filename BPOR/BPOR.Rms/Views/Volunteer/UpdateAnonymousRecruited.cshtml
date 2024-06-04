@@ -1,7 +1,8 @@
 @model BPOR.Rms.Models.Volunteer.UpdateAnonymousRecruitedViewModel
 
 @{
-    ViewData.AddBreadcrumbs(new Dictionary<string, string> { 
+    ViewData.AddBreadcrumbs(new Dictionary<string, string>
+    {
         ["All Studies"] = "/Study/Index",
         ["Study"] = $"/Study/Details/{Model.StudyId}",
         ["Update newly recruited volunteers"] = "/Study/Edit",
@@ -17,18 +18,17 @@
     </div>
 
 
-
     <h4 class="govuk-heading-m govuk-!-margin-bottom-4 govuk-!-margin-top-0">
         Recruited (@Model.LatestRecruitmentTotal)
     </h4>
 
 
-    <partial name="Partials/_RecruitedTable", for="EnrollmentDetails" />
+    <partial name="Partials/_RecruitedTable", for="EnrollmentDetails"/>
     <form asp-action="UpdateRecruitmentTotal" asp-controller="Volunteer" method="post">
 
         <div class="govuk-form-group @(Html.ViewData.ModelState["RecruitmentTotal"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <input asp-for="StudyId" type="hidden" />
-            <input asp-for="StudyName" type="hidden" />
+            <input asp-for="StudyId" type="hidden"/>
+            <input asp-for="StudyName" type="hidden"/>
             <label asp-for="RecruitmentTotal" class="govuk-label" for="RecruitmentTotal">
                 @Html.DisplayNameFor(model => model.RecruitmentTotal)
             </label>
@@ -43,11 +43,11 @@
                             <span class="govuk-visually-hidden">Error:</span>
                             @Html.ValidationMessageFor(model => model.RecruitmentTotal)
                         </span>
-                        <input asp-for="RecruitmentTotal" class="govuk-input  govuk-input govuk-input--error" id="RecruitmentTotal" aria-describedby="RecruitmentTotal-error" value="@(Model.RecruitmentTotal)" />
+                        <input asp-for="RecruitmentTotal" class="govuk-input  govuk-input govuk-input--error" id="RecruitmentTotal" aria-describedby="RecruitmentTotal-error" value="@(Model.RecruitmentTotal)" type="text"/>
                     }
                     else
                     {
-                        <input asp-for="RecruitmentTotal" class="govuk-input" id="RecruitmentTotal" value="@(Model.RecruitmentTotal)" />
+                        <input asp-for="RecruitmentTotal" class="govuk-input" id="RecruitmentTotal" value="@(Model.RecruitmentTotal)" type="text"/>
                     }
                 </div>
             </div>
