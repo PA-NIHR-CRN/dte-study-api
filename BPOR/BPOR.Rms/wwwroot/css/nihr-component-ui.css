@@ -155,8 +155,8 @@
 
     /* Handling hover, focus, active, and disabled states */
     .govuk-button--submit:hover {
-        background-color: #004324;
-        border: 0.25rem solid #004324;
+        background-color: #47658E;
+        border: 0.25rem solid #47658E;
         color: rgb(255, 255, 255);
         box-shadow: none;
         padding-left: 1em;
