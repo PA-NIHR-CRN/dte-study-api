@@ -8,6 +8,7 @@ using Z.EntityFramework.Plus;
 using Rbec.Postcodes;
 using NIHR.Infrastructure.Models;
 using NIHR.Infrastructure;
+using NetTopologySuite.Geometries;
 
 namespace BPOR.Rms.Controllers;
 
@@ -96,16 +97,16 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
             FullPostcode = model.FullPostcode,
             SearchRadiusMiles = model.SearchRadiusMiles,
             StudyId = model.StudyId,
+            IncludeNoAreasOfInterest = model.IncludeNoAreasOfInterest,
             FilterAreaOfInterest = model.SelectedAreasOfInterest.Select(x => new FilterAreaOfInterest
             {
                 HealthConditionId = x
             }).ToList(),
             // TODO bind this directly into the model as a collection
-            FilterPostcode = GetPostcodes(model),
-            FilterGender = GetGenders(model),
+            FilterPostcode = model.GetPostcodeDistricts().Select(x => new FilterPostcode { PostcodeFragment = x }).ToList(),
+            FilterGender = model.GetGenderOptions().Select(x => new FilterGender { GenderId = (int)x }).ToList(), // TODO: support null gender
             FilterSexSameAsRegisteredAtBirth = GetSexSameAsRegisteredAtBirths(model),
             FilterEthnicGroup = GetEthnicGroups(model),
-            IncludeNoAreasOfInterest = model.IncludeNoAreasOfInterest
         };
 
         context.FilterCriterias.Add(filterCriteria);
@@ -134,13 +135,6 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
         Map([model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No, model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay],
             x => new FilterSexSameAsRegisteredAtBirth { YesNoPreferNotToSay = x });
 
-    private static List<FilterGender> GetGenders(VolunteerFilterViewModel model) =>
-        Map([model.IsSexMale, model.IsSexFemale],
-            x => new FilterGender { GenderId = x });
-
-    private static List<FilterPostcode> GetPostcodes(VolunteerFilterViewModel model) =>
-        model.PostcodeDistricts?.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => new FilterPostcode { PostcodeFragment = x })?.ToList() ?? [];
-
     protected async Task<FilterResults> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken token = default)
     {
         FilterResults results = new();
@@ -153,6 +147,11 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
             if (model.FullPostcode is not null && model.SearchRadiusMiles is not null && model.SearchRadiusMiles > 0)
             {
                 location = await locationApiClient.GetCoordinatesFromPostcodeAsync(model.FullPostcode, token);
+
+                if (location is null)
+                {
+                    ModelState.AddModelError(nameof(model.FullPostcode), $"Unable to determine the location of the postcode '{model.FullPostcode}'.");
+                }
             }
 
             var query = context.Participants.FilterVolunteers(timeProvider, model, location);
@@ -161,6 +160,8 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
 
             if (model.Testing.ShowResults)
             {
+                var point = location is not null ? new Point(location.Longitude, location.Latitude) { SRID = 4326 } : null;
+
                 results.Items = query.Select(x => new VolunteerResult
                 {
                     Id = x.Id,
@@ -171,7 +172,7 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
                     Age = x.DateOfBirth.YearsTo(_today),
                     Gender = x.Gender.Code,
                     Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
-                    // TODO: add distance from radius search
+                    DistanceInMiles = point != null && x.ParticipantLocation != null ? x.ParticipantLocation.Location.Distance(point) / 1609.344 : null,
                     FirstName = x.FirstName,
                     LastName = x.LastName,
                     HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
