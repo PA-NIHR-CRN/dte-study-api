@@ -54,6 +54,10 @@
             </div>
 
             <div class="govuk-button-group">
+                @if(Model.Step != 1 && Model.Step != Model.TotalSteps)
+                {
+                    <button type="submit" name="action" value="Back" class="govuk-button" data_module="govuk-button">Back</button>
+                }
                 @if (Model.Step != Model.TotalSteps)
                 {
                     <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Next</button>

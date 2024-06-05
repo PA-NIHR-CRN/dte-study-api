@@ -463,3 +463,23 @@
     clip: rect(0, 0, 0, 0);
     border: 0;
 }
+
+.link-button {
+    background: none;
+    border: none;
+    color: rgb(29, 112, 184);
+    text-decoration: none;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    padding: 0;
+}
+
+    .link-button:hover,
+    .link-button:focus {
+        color: #003078;
+    }
+
+    .link-button:active {
+        color: #002060;
+    }

@@ -58,7 +58,6 @@ public class ResearcherController(ParticipantDbContext context) : Controller
 
     public IActionResult SubmitStudy(ResearcherStudyFormViewModel model)
     {
-        ViewData["ShowBackLink"] = true;
         ViewData["ShowProgressBar"] = true;
         ViewData["ProgressPercentage"] = 0;
 
@@ -68,12 +67,28 @@ public class ResearcherController(ParticipantDbContext context) : Controller
     [HttpPost]
     public async Task<IActionResult> SubmitStudy(ResearcherStudyFormViewModel model, string action)
     {
-        ViewData["ShowBackLink"] = true;
         ViewData["ShowProgressBar"] = true;
         ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
 
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
+
+        if (action == "Back")
+        {
+            // Go back two steps if dependency questions are not required
+            if ((model.Step == 4 && model.PortfolioSubmissionStatus != 1)
+                || (model.Step == 6 && (model.HasFunding == false || model.HasFunding == null)))
+            {
+                model.Step = model.Step - 2;
+            }
+            else
+            {
+                model.Step = model.Step - 1;
+            }
+
+            ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
+            return View(model);
+        }
 
         if (action == "RedirectStep1")
         {
