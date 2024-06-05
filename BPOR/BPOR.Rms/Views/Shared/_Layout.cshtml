@@ -34,11 +34,14 @@
         @await RenderSectionAsync("ProgressBar", required: false)
     }
 
+    @{
+        bool showBackLink = ViewData["ShowBackLink"] as bool? ?? false;
+    }
+
     <div class="govuk-width-container">
-        @if (ViewData["ShowBackLink"] as bool? ?? false)
-        {
-            <div class="govuk-back-link-container">
-                @if (ViewData["ShowBackLink"] as bool? ?? false)
+
+        <div class="govuk-back-link-container @(showBackLink ? "" : "float-content-right")">
+                @if (showBackLink)
                 {
                     <a class="govuk-back-link" onclick="window.history.back()">Back</a>
                 }
@@ -46,8 +49,8 @@
                 {
                     <span class="govuk-progress-percentage">@ViewData["ProgressPercentage"]%</span>
                 }
-            </div>
-        }
+        </div>
+
         <main class="govuk-main-wrapper" id="main-content" role="main">
             <breadcrumbs />
             @RenderBody()
