@@ -6,7 +6,7 @@ namespace BPOR.Rms;
 
 public static class VolunteerFilterExtensions
 {
-    // too tightly coupled to view
+    // TODO: too tightly coupled to view
     public static IQueryable<Participant> FilterVolunteers(this IQueryable<Participant> query, TimeProvider timeProvider, VolunteerFilterViewModel model, CoordinatesModel? location)
     {
         query = query.WhereVolunteersContacted(model.StudyId, model.SelectedVolunteersContacted);
