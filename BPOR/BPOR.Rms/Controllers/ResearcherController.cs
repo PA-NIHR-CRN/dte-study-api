@@ -156,6 +156,7 @@ public class ResearcherController(ParticipantDbContext context) : Controller
                 else
                 {
                     model.OutcomeOfSubmission = null;
+                    ModelState.Remove(nameof(model.OutcomeOfSubmission));
                     model.CPMSId = null;
                     if (model.RedirectToCheckYourAnswers)
                     {
