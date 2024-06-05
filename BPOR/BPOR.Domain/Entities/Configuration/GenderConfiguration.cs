@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 namespace BPOR.Domain.Entities.Configuration;
 
-public enum GenderId
+public enum GenderId // TODO: this is sex rather than gender
 {
     Male = 1,
     Female = 2,

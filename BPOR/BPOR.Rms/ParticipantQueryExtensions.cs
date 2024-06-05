@@ -9,61 +9,41 @@ namespace BPOR.Rms;
 
 public static class ParticipantQueryExtensions
 {
-    public static IQueryable<Participant> WhereVolunteersContacted(this IQueryable<Participant> query, int? studyId, bool? selectedVolunteersContacted)
+    public static IQueryable<Participant> WhereContacted(this IQueryable<Participant> query, int? studyId, bool? selectedVolunteersContacted)
     {
-        if (selectedVolunteersContacted == true)
+        if (selectedVolunteersContacted.HasValue)
         {
-            return query.Where(x => x.EmailCampaignParticipants.Any(e => e.EmailCampaign.FilterCriteria.StudyId == studyId));
-        }
-
-        if (selectedVolunteersContacted == false)
-        {
-            return query.Where(x => !x.EmailCampaignParticipants.Any(e => e.EmailCampaign.FilterCriteria.StudyId == studyId));
+            return query.Where(x => x.EmailCampaignParticipants.Any(e => e.EmailCampaign.FilterCriteria.StudyId == studyId) == selectedVolunteersContacted.Value);
         }
 
         return query;
     }
 
-    public static IQueryable<Participant> WhereVolunteersRegisteredInterest(this IQueryable<Participant> query, int? studyId, bool? selectedVolunteersRegisteredInterest)
+    public static IQueryable<Participant> WhereRegisteredInterest(this IQueryable<Participant> query, int? studyId, bool? selectedVolunteersRegisteredInterest)
     {
-        if (selectedVolunteersRegisteredInterest == true)
+        if (selectedVolunteersRegisteredInterest.HasValue)
         {
-            return query.Where(x => x.EmailCampaignParticipants.Any(e => e.RegisteredInterestAt != null && e.EmailCampaign.FilterCriteria.StudyId == studyId));
-        }
-
-        if (selectedVolunteersRegisteredInterest == false)
-        {
-            return query.Where(x => x.EmailCampaignParticipants.Any(e => e.RegisteredInterestAt == null && e.EmailCampaign.FilterCriteria.StudyId == studyId));
+            return query.Where(x => x.EmailCampaignParticipants.Any(e => (e.RegisteredInterestAt != null) == selectedVolunteersRegisteredInterest.Value && e.EmailCampaign.FilterCriteria.StudyId == studyId));
         }
 
         return query;
     }
 
-    public static IQueryable<Participant> WhereVolunteersRecruited(this IQueryable<Participant> query, int? studyId, bool? selectedVolunteersRecruited)
+    public static IQueryable<Participant> WhereRecruited(this IQueryable<Participant> query, int? studyId, bool? selectedVolunteersRecruited)
     {
-        if (selectedVolunteersRecruited == true)
+        if (selectedVolunteersRecruited.HasValue)
         {
-            return query.Where(x => x.StudyParticipantEnrollments.Any(e => e.StudyId == studyId && e.EnrolledAt != null));
-        }
-
-        if (selectedVolunteersRecruited == false)
-        {
-            return query.Where(x => x.StudyParticipantEnrollments.Any(e => e.StudyId == studyId && e.EnrolledAt == null));
+            return query.Where(x => x.StudyParticipantEnrollments.Any(e => e.StudyId == studyId && (e.EnrolledAt != null) == selectedVolunteersRecruited.Value));
         }
 
         return query;
     }
 
-    public static IQueryable<Participant> WhereVolunteersCompletedRegistration(this IQueryable<Participant> query, bool? selectedCompletedRegistration)
+    public static IQueryable<Participant> WhereCompletedRegistration(this IQueryable<Participant> query, bool? selectedCompletedRegistration)
     {
-        if (selectedCompletedRegistration == true)
+        if (selectedCompletedRegistration.HasValue)
         {
-            return query.Where(x => x.Stage2CompleteUtc != null);
-        }
-
-        if (selectedCompletedRegistration == false)
-        {
-            return query.Where(x => x.Stage2CompleteUtc == null);
+            return query.Where(x => (x.Stage2CompleteUtc != null) == selectedCompletedRegistration.Value);
         }
 
         return query;
@@ -108,43 +88,32 @@ public static class ParticipantQueryExtensions
         return query;
     }
 
-    public static IQueryable<Participant> WhereHasSexRegisteredAtBirth(this IQueryable<Participant> query, bool isSexMale, bool isSexFemale)
+    public static IQueryable<Participant> WhereHasSexRegisteredAtBirth(this IQueryable<Participant> query, ISet<GenderId?> options)
     {
-        if (isSexMale || isSexFemale)
+        if (options.Any())
         {
-            return query.Where(p => isSexMale && p.GenderId == (int)GenderId.Male || isSexFemale && p.GenderId == (int)GenderId.Female);
+            var intOptions = options.Select(x => (int?)x);
+            return query.Where(p => intOptions.Contains(p.GenderId));
         }
 
         return query;
     }
 
-    public static IQueryable<Participant> WhereHasGenderSameAsSexRegisteredAtBirth(this IQueryable<Participant> query,
-            bool isGenderSameAsSexRegisteredAtBirthYes, bool isGenderSameAsSexRegisteredAtBirthNo,
-            bool isGenderSameAsSexRegisteredAtBirthPreferNotToSay)
+    public static IQueryable<Participant> WhereHasGenderSameAsSexRegisteredAtBirth(this IQueryable<Participant> query, ISet<bool?> options)
     {
-        if (isGenderSameAsSexRegisteredAtBirthYes || isGenderSameAsSexRegisteredAtBirthNo ||
-            isGenderSameAsSexRegisteredAtBirthPreferNotToSay)
+        if (options.Any())
         {
-            return query.Where(p =>
-                isGenderSameAsSexRegisteredAtBirthYes && p.GenderIsSameAsSexRegisteredAtBirth == true ||
-                isGenderSameAsSexRegisteredAtBirthNo && p.GenderIsSameAsSexRegisteredAtBirth == false ||
-                isGenderSameAsSexRegisteredAtBirthPreferNotToSay && p.GenderIsSameAsSexRegisteredAtBirth == null);
+            return query.Where(p => options.Contains(p.GenderIsSameAsSexRegisteredAtBirth));
         }
 
         return query;
     }
 
-    public static IQueryable<Participant> WhereHasEthnicity(this IQueryable<Participant> query, bool ethnicityAsian, bool ethnicityBlack, bool ethnicityMixed,
-    bool ethnicityOther, bool ethnicityWhite)
+    public static IQueryable<Participant> WhereHasEthnicity(this IQueryable<Participant> query, ISet<string?> ethnicgroups)
     {
-        if (ethnicityAsian || ethnicityBlack || ethnicityMixed || ethnicityOther || ethnicityWhite)
+        if (ethnicgroups.Any())
         {
-            return query.Where(p =>
-                ethnicityAsian && p.EthnicGroup == "asian" ||
-                ethnicityBlack && p.EthnicGroup ==  "black" ||
-                ethnicityMixed && p.EthnicGroup ==  "mixed" ||
-                ethnicityOther && p.EthnicGroup ==  "other" ||
-                ethnicityWhite && p.EthnicGroup ==  "white");
+            return query.Where(p => ethnicgroups.Contains(p.EthnicGroup));
         }
 
         return query;
@@ -167,7 +136,7 @@ public static class ParticipantQueryExtensions
         return query;
     }
 
-    public static IQueryable<Participant> WhereStartsWithAnyPostcodeDistrict(this IQueryable<Participant> query, IEnumerable<string> postCodeDistricts)
+    public static IQueryable<Participant> WhereHasAnyPostcodeDistrict(this IQueryable<Participant> query, ISet<string> postCodeDistricts)
     {
         if (postCodeDistricts.Any())
         {

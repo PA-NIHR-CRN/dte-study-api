@@ -1,3 +1,4 @@
+using BPOR.Domain.Entities.Configuration;
 using NIHR.Infrastructure.Paging;
 using Rbec.Postcodes;
 using System.ComponentModel.DataAnnotations;
@@ -84,6 +85,47 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     public VolunteerFilterViewTestingModel Testing { get; set; } = new();
 
+    public ISet<string> GetPostcodeDistricts() => PostcodeDistricts?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet() ?? [];
+
+    public ISet<GenderId?> GetGenderOptions()
+    {   
+        var retval = new HashSet<GenderId?>();
+        if (IsSexFemale)
+        {
+            retval.Add(GenderId.Female);
+        }
+
+        if (IsSexMale)
+        {
+            retval.Add(GenderId.Male);
+        }
+
+        // TODO: prefer not to say
+
+        return retval;
+    }
+
+    public ISet<bool?> GetGenderSameAsSexRegisteredAtBirthOptions()
+    {
+        var retval = new HashSet<bool?>();
+
+        if(IsGenderSameAsSexRegisteredAtBirth_Yes)
+        {
+            retval.Add(true);
+        }
+
+        if (IsGenderSameAsSexRegisteredAtBirth_No)
+        {
+            retval.Add(false);
+        }
+
+        if (IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
+        {
+            retval.Add(null);
+        }
+
+        return retval;
+    }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -198,6 +240,38 @@ public class VolunteerFilterViewModel : IValidatableObject
         {
             yield return new ValidationResult($"Age {validationContext.GetMemberDisplayName(nameof(AgeFrom))} must be less than or equal to the Age {validationContext.GetMemberDisplayName(nameof(AgeTo))}", [nameof(AgeFrom)]);
         }
+    }
+
+    public ISet<string?> GetEthnicityOptions()
+    {
+       var retval = new HashSet<string?>();
+
+        if (Ethnicity_Asian)
+        {
+            retval.Add("asian");
+        }
+
+        if (Ethnicity_Black)
+        {
+            retval.Add("black");
+        }
+
+        if (Ethnicity_Mixed)
+        {
+            retval.Add("mixed");
+        }
+
+        if (Ethnicity_Other)
+        {
+            retval.Add("other");
+        }
+
+        if (Ethnicity_White)
+        {
+            retval.Add("white");
+        }
+
+        return retval;
     }
 }
 
