@@ -20,6 +20,7 @@
 
         <form asp-action="SubmitStudy">
             <input type="hidden" asp-for="Step" value="@Model.Step" />
+            <input type="hidden" asp-for="RedirectToCheckYourAnswers" value="@Model.RedirectToCheckYourAnswers" />
 
             <div style="@(Model.Step == 1 ? "" : "display:none;")">
                 @await Html.PartialAsync("Partials/_Step1FormFields", Model)
@@ -54,20 +55,26 @@
             </div>
 
             <div class="govuk-button-group">
-                @if(Model.Step != 1 && Model.Step != Model.TotalSteps)
+                @if (!Model.RedirectToCheckYourAnswers)
                 {
-                    <button type="submit" name="action" value="Back" class="govuk-button" data_module="govuk-button">Back</button>
-                }
-                @if (Model.Step != Model.TotalSteps)
-                {
-                    <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Next</button>
+                    @if (Model.Step != 1 && Model.Step != Model.TotalSteps)
+                    {
+                        <button type="submit" name="action" value="Back" class="govuk-button" data_module="govuk-button">Back</button>
+                    }
+                    @if (Model.Step != Model.TotalSteps)
+                    {
+                        <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Next</button>
+                    }
+                    else
+                    {
+                        <button type="submit" name="action" value="Apply" class="govuk-button" data_module="govuk-button">Apply</button>
+                    }
+                    @Html.ActionLink("Cancel", "TermsAndConditions", "Researcher", null)
                 }
                 else
                 {
-                    <button type="submit" name="action" value="Apply" class="govuk-button" data_module="govuk-button">Apply</button>
+                    <button type="submit" name="action" value="RedirectToCheckAnswers" class="govuk-button" data_module="govuk-button">Confirm</button>
                 }
-
-                @Html.ActionLink("Cancel", "TermsAndConditions", "Researcher", null)
             </div>
         </form>
 

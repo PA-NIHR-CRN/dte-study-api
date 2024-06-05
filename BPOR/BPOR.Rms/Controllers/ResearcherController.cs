@@ -73,6 +73,25 @@ public class ResearcherController(ParticipantDbContext context) : Controller
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
 
+        if (action == "RedirectToCheckAnswers")
+        {
+            model.Step = 8;
+            ViewData["ShowProgressBar"] = false;
+            model.RedirectToCheckYourAnswers = false;
+            return View(model);
+        }
+
+        if (action.Contains("RedirectStep")
+            && action != "RedirectStep2"
+            && action != "RedirectStep4")
+        {
+            model.RedirectToCheckYourAnswers = true;
+        }
+        else
+        {
+            model.RedirectToCheckYourAnswers = false;
+        }
+
         if (action == "Back")
         {
             // Go back two steps if dependency questions are not required
@@ -138,7 +157,14 @@ public class ResearcherController(ParticipantDbContext context) : Controller
                 {
                     model.OutcomeOfSubmission = null;
                     model.CPMSId = null;
-                    model.Step = 4;
+                    if (model.RedirectToCheckYourAnswers)
+                    {
+                        model.Step = 8;
+                    }
+                    else
+                    {
+                        model.Step = 4;
+                    }
                 }
                 ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
                 return View(model);
@@ -179,7 +205,14 @@ public class ResearcherController(ParticipantDbContext context) : Controller
                 else
                 {
                     model.FundingCode = null;
-                    model.Step = 6;
+                    if (model.RedirectToCheckYourAnswers)
+                    {
+                        model.Step = 8;
+                    }
+                    else
+                    {
+                        model.Step = 6;
+                    }
                 }
                 ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
                 return View(model);
