@@ -3,17 +3,17 @@ using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
-using NIHR.Infrastructure;
+using NIHR.Infrastructure.Models;
 
 namespace BPOR.Rms.Services;
 
-public class FilterService(ParticipantDbContext context, IPostcodeMapper locationApiClient, TimeProvider timeProvider) : IFilterService
+public class FilterService(ParticipantDbContext context, TimeProvider timeProvider) : IFilterService
 {
     private readonly List<Expression<Func<Participant, bool>>> _filters = [];
     private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
     // too tightly coupled to view
-    public async Task<IQueryable<Participant>> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
+    public IQueryable<Participant> FilterVolunteers(VolunteerFilterViewModel model, CoordinatesModel? location)
     {
         _filters.Clear();
         FilterVolunteersContacted(model.StudyId, model.SelectedVolunteersContacted);
@@ -38,9 +38,9 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
             query = query.Where(StartsWithAnyPostCodeDistrictExpression(postcodeList));
         }
 
-        if (model.FullPostcode != null && model.SearchRadiusMiles > 0)
+        if (model.FullPostcode != null && model.SearchRadiusMiles is not null && model.SearchRadiusMiles > 0 && location is not null)
         {
-            query = await FilterByRadius(model.FullPostcode, (double)model.SearchRadiusMiles, cancellationToken);
+            query = FilterByRadius(location, model.SearchRadiusMiles.Value);
         }
 
         return _filters.Aggregate(query, (current, filter) => current.Where(filter));
@@ -64,11 +64,10 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
         return Expression.Lambda<Func<Participant, bool>>(orExpression, expressions[0].Parameters);
     }
 
-    private async Task<IQueryable<Participant>> FilterByRadius(string postcode, double radiusInMiles, CancellationToken cancellationToken = default)
+    private IQueryable<Participant> FilterByRadius(CoordinatesModel location, double radiusInMiles)
     {
-        var coordinates = await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
 
-        var point = new Point(coordinates.Longitude, coordinates.Latitude) { SRID = 4326 };
+        var point = new Point(location.Longitude, location.Latitude) { SRID = 4326 };
 
         var distanceInMeters = radiusInMiles * 1609.344;
         var boundingBox = point.Buffer(distanceInMeters / 111320).Envelope;

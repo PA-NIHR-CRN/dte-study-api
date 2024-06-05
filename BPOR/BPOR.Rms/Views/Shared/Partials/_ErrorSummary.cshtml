@@ -23,7 +23,7 @@
             @foreach (var error in ViewData.ModelState.Where(ms => ms.Value.Errors.Count > 0))
             {
             <li>
-                <a href="#@error.Key">@error.Value.Errors[0].ErrorMessage</a>
+                <a href="#@error.Key.Replace(".", "_")">@error.Value.Errors[0].ErrorMessage</a>
             </li>
             }
         </ul>

@@ -10,7 +10,9 @@ using BPOR.Rms.Settings;
 using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
+using NIHR.Infrastructure.Models;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 
@@ -22,7 +24,9 @@ public class EmailCampaignService(
     IFilterService filterService,
     INotificationTaskQueue taskQueue,
     ParticipantDbContext context,
-    IReferenceGenerator referenceGenerator)
+    IReferenceGenerator referenceGenerator,
+    IPostcodeMapper locationApiClient
+    )
     : IEmailCampaignService
 {
     public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
@@ -69,7 +73,15 @@ public class EmailCampaignService(
         int? targetGroupSize, CancellationToken cancellationToken)
     {
         var filter = FilterMapper.MapToFilterModel(dbFilter);
-        var volunteerQuery = await filterService.FilterVolunteersAsync(filter, cancellationToken);
+
+        // TODO: save the original search location co-ordinates in the FilterCriteria
+        CoordinatesModel? location = null;
+        if (dbFilter.FullPostcode is not null && dbFilter.SearchRadiusMiles is not null && dbFilter.SearchRadiusMiles > 0)
+        {
+            location = await locationApiClient.GetCoordinatesFromPostcodeAsync(dbFilter.FullPostcode, cancellationToken);
+        }
+
+        var volunteerQuery = filterService.FilterVolunteers(filter, location);
 
         return await volunteerQuery
             .Where(v => !string.IsNullOrEmpty(v.Email))
