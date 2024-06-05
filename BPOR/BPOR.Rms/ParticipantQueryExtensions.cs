@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using BPOR.Domain.Entities;
+using BPOR.Domain.Entities.Configuration;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure.Models;
@@ -68,9 +69,9 @@ public static class ParticipantQueryExtensions
         return query;
     }
 
-    public static IQueryable<Participant> WhereHasAnyAreaOfResearch(this IQueryable<Participant> query, List<int> selectedAreasOfInterest, bool includeNoAreasOfInterest)
+    public static IQueryable<Participant> WhereHasAnyAreaOfResearch(this IQueryable<Participant> query, IEnumerable<int> selectedAreasOfInterest, bool includeNoAreasOfInterest)
     {
-        if (selectedAreasOfInterest.Count != 0 || includeNoAreasOfInterest)
+        if (selectedAreasOfInterest.Any() || includeNoAreasOfInterest)
         {
             return query.Where(p => p.HealthConditions.Any(hc => selectedAreasOfInterest.Contains(hc.HealthConditionId)) || includeNoAreasOfInterest && !p.HealthConditions.Any());
         }
@@ -111,18 +112,7 @@ public static class ParticipantQueryExtensions
     {
         if (isSexMale || isSexFemale)
         {
-            if (!isSexMale)
-            {
-                return query.Where(p => p.GenderId == 2);
-            }
-            else if (!isSexFemale)
-            {
-                return query.Where(p => p.GenderId == 1);
-            }
-            else
-            {
-                return query.Where(p => p.GenderId == 1 || p.GenderId == 2);
-            }
+            return query.Where(p => isSexMale && p.GenderId == (int)GenderId.Male || isSexFemale && p.GenderId == (int)GenderId.Female);
         }
 
         return query;
@@ -150,11 +140,11 @@ public static class ParticipantQueryExtensions
         if (ethnicityAsian || ethnicityBlack || ethnicityMixed || ethnicityOther || ethnicityWhite)
         {
             return query.Where(p =>
-                ethnicityAsian && p.EthnicGroup.ToLower() == "asian" ||
-                ethnicityBlack && p.EthnicGroup.ToLower() == "black" ||
-                ethnicityMixed && p.EthnicGroup.ToLower() == "mixed" ||
-                ethnicityOther && p.EthnicGroup.ToLower() == "other" ||
-                ethnicityWhite && p.EthnicGroup.ToLower() == "white");
+                ethnicityAsian && p.EthnicGroup == "asian" ||
+                ethnicityBlack && p.EthnicGroup ==  "black" ||
+                ethnicityMixed && p.EthnicGroup ==  "mixed" ||
+                ethnicityOther && p.EthnicGroup ==  "other" ||
+                ethnicityWhite && p.EthnicGroup ==  "white");
         }
 
         return query;
