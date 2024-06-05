@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
+using BPOR.Rms;
 using BPOR.Rms.Constants;
 using BPOR.Rms.Mappers;
 using BPOR.Rms.Models;
@@ -21,11 +22,11 @@ public class EmailCampaignService(
     IOptions<AppSettings> appSettings,
     IRefDataService refDataService,
     INotificationService notificationService,
-    IFilterService filterService,
     INotificationTaskQueue taskQueue,
     ParticipantDbContext context,
     IReferenceGenerator referenceGenerator,
-    IPostcodeMapper locationApiClient
+    IPostcodeMapper locationApiClient,
+    TimeProvider timeProvider
     )
     : IEmailCampaignService
 {
@@ -81,7 +82,7 @@ public class EmailCampaignService(
             location = await locationApiClient.GetCoordinatesFromPostcodeAsync(dbFilter.FullPostcode, cancellationToken);
         }
 
-        var volunteerQuery = filterService.FilterVolunteers(filter, location);
+        var volunteerQuery = context.Participants.FilterVolunteers(timeProvider, filter, location);
 
         return await volunteerQuery
             .Where(v => !string.IsNullOrEmpty(v.Email))

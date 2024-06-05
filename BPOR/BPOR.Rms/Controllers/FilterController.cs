@@ -3,7 +3,6 @@ using BPOR.Rms.Models.Filter;
 using Microsoft.AspNetCore.Mvc;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Models;
-using BPOR.Rms.Services;
 using NIHR.Infrastructure.Paging;
 using Z.EntityFramework.Plus;
 using Rbec.Postcodes;
@@ -12,7 +11,7 @@ using NIHR.Infrastructure;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService, IHostEnvironment hostEnvironment, TimeProvider timeProvider, IPostcodeMapper locationApiClient) : Controller
+public class FilterController(ParticipantDbContext context, IPaginationService paginationService, IHostEnvironment hostEnvironment, TimeProvider timeProvider, IPostcodeMapper locationApiClient) : Controller
 {
     private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
@@ -156,7 +155,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
                 location = await locationApiClient.GetCoordinatesFromPostcodeAsync(model.FullPostcode, token);
             }
 
-            var query = filterService.FilterVolunteers(model, location);
+            var query = context.Participants.FilterVolunteers(timeProvider, model, location);
 
             results.Count = query.DeferredCount().FutureValue();
 

@@ -28,7 +28,6 @@ public static class DependencyInjection
 
         services.AddControllersWithViews().AddRazorRuntimeCompilation();
         services.AddScoped<IEmailCampaignService, EmailCampaignService>();
-        services.AddScoped<IFilterService, FilterService>();
         services.AddScoped<IPostcodeMapper, LocationApiClient>();
         services.AddScoped<IRefDataService, RefDataService>();
         services.AddScoped<ICurrentUserIdProvider<int>, SimpleCurrentUserIdProvider<int>>();
