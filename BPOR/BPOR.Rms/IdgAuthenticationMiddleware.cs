@@ -1,6 +1,5 @@
 ﻿using BPOR.Domain.Entities;
 using BPOR.Rms.Startup;
-using HandlebarsDotNet;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +7,7 @@ using Microsoft.Extensions.Options;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.Settings;
 using System.Security.Claims;
+
 public class IdgAuthenticationMiddleware
 {
     private const string AccountNotRegisteredPath = "/Account/NotRegistered";
