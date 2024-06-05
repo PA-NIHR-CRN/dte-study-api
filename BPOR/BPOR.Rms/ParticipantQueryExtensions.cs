@@ -183,9 +183,8 @@ public static class ParticipantQueryExtensions
         {
             var expression = postCodeDistricts
             .Select(s => (Expression<Func<Participant, bool>>)(p =>
-                EF.Functions.Like(p.Address.Postcode, $"{s}%") &&
-                (p.Address.Postcode == s || p.Address.Postcode.StartsWith(s + " "))
-            ))
+                EF.Functions.Like(p.Address.Postcode, $"{s}%"))
+            )
             .Aggregate((x, y) => x.OrElse(y));
 
             return query.Where(expression);
