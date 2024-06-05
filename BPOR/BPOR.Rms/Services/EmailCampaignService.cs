@@ -10,7 +10,6 @@ using BPOR.Rms.Settings;
 using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using NIHR.Infrastructure;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
@@ -228,16 +227,12 @@ public class EmailCampaignService(
     {
         foreach (var results in emailQueue)
         {
-            await taskQueue.QueueBackgroundWorkItemAsync(async token =>
+            await taskQueue.QueueBackgroundWorkItemAsync(new SendBatchEmailRequest
             {
-                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
-                await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
-                {
-                    EmailAddresses = results.EmailAddresses,
-                    PersonalisationData = results.PersonalisationData,
-                    EmailTemplateId = campaign.EmailTemplateId
-                }, linkedCts.Token);
-            });
+                EmailAddresses = results.EmailAddresses,
+                PersonalisationData = results.PersonalisationData,
+                EmailTemplateId = campaign.EmailTemplateId
+            }, cancellationToken);
         }
     }
 

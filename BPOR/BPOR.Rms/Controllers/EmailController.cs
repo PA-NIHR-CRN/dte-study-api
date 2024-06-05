@@ -76,11 +76,7 @@ public class EmailController(
 
                 await AddCampaignToContextAsync(emailCampaign, cancellationToken);
 
-                await taskQueue.QueueBackgroundWorkItemAsync(async token =>
-                {
-                    using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
-                    await emailCampaignService.SendCampaignAsync(emailCampaign.Id, linkedCts.Token);
-                });
+                await taskQueue.QueueBackgroundWorkItemAsync(emailCampaign.Id, cancellationToken);
             }
 
             return View("EmailSuccess",
