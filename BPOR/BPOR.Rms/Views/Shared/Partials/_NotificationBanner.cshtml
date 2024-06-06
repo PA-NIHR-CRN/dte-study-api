@@ -1,4 +1,9 @@
 @using NIHR.Infrastructure.AspNetCore;
+<style>
+    .govuk-notification-banner:focus {
+        outline: 3px solid #FED47A
+    }
+</style>
 @{
     var notification = TempData.Get<NotificationBannerModel>("Notification");
 }

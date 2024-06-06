@@ -28,6 +28,8 @@ public static class DependencyInjection
     public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration,
         IHostEnvironment hostEnvironment)
     {
+        services.AddSingleton(TimeProvider.System);
+
         services.AddControllersWithViews().AddRazorRuntimeCompilation();
         services.AddHttpContextAccessor();
         services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();

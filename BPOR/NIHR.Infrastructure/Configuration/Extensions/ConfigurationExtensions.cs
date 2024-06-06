@@ -1,6 +1,8 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Amazon;
 using Amazon.SecretsManager;
 using Microsoft.Extensions.Configuration;
@@ -8,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using NIHR.Infrastructure.Settings;
 
 namespace NIHR.Infrastructure.Configuration
@@ -128,10 +129,22 @@ namespace NIHR.Infrastructure.Configuration
                 settings = BindFlatConfigurationKeys<T>(configuration, sectionName);
             }
 
+            if (settings is IValidatableObject validatable)
+            {
+                var validationContext = new ValidationContext(settings);
+                var validationResult = validatable.Validate(validationContext);
+
+                if (validationResult.Any())
+                {
+                    throw new OptionsValidationException(string.Empty, typeof(T), validationResult.Select(x => x.ErrorMessage));
+                }
+            }
+
             services.AddOptions<T>()
                 .BindConfiguration(sectionName)
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
+
 
             return Options.Create(settings);
         }

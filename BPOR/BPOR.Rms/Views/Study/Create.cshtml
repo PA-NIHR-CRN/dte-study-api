@@ -18,20 +18,18 @@
     <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
         <h1 class="govuk-heading-xl">Add a study to use the Be Part of Research registry</h1>
 
-        <partial name="Partials/_ErrorSummary" />
-
         <form asp-action="Create">
             <input type="hidden" asp-for="Step" value="@Model.Step"/>
 
             <div style="@(Model.Step == 1 ? "" : "display:none;")">
-                <partial name="Partials/Shared/_Step1FormFields" />
+                <partial name="Partials/Shared/_Step1FormFields"/>
             </div>
 
             <div style="@(Model.Step == 2 ? "" : "display:none;")">
-                <partial name="Partials/Shared/_Step2FormFields" />
+                <partial name="Partials/Shared/_Step2FormFields"/>
             </div>
 
-            <partial name="Partials/_CreateButtonGroup" />
+            <partial name="Partials/_CreateButtonGroup"/>
         </form>
 
     </div>

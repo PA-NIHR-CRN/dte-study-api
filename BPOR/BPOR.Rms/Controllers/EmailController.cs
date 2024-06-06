@@ -4,6 +4,7 @@ using BPOR.Rms.Helpers;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
+using BPOR.Rms.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -12,6 +13,7 @@ using NIHR.Infrastructure;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
+using Notify.Exceptions;
 using Notify.Models.Responses;
 
 namespace BPOR.Rms.Controllers;
@@ -82,11 +84,7 @@ public class EmailController(
 
                 await AddCampaignToContextAsync(emailCampaign, cancellationToken);
 
-                await taskQueue.QueueBackgroundWorkItemAsync(async token =>
-                {
-                    using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
-                    await emailCampaignService.SendCampaignAsync(emailCampaign.Id, linkedCts.Token);
-                });
+                await taskQueue.QueueBackgroundWorkItemAsync(emailCampaign.Id, cancellationToken);
             }
 
             return View("EmailSuccess",
@@ -148,12 +146,22 @@ public class EmailController(
                     },
                 });
 
-            await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
+            try
             {
-                EmailAddresses = emailAddresses,
-                EmailTemplateId = new Guid(model.SelectedTemplateId),
-                PersonalisationData = new Dictionary<string, Dictionary<string, dynamic>>(personalisationData)
-            }, cancellationToken);
+                await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
+                {
+                    EmailAddresses = emailAddresses,
+                    EmailTemplateId = new Guid(model.SelectedTemplateId),
+                    PersonalisationData = new Dictionary<string, Dictionary<string, dynamic>>(personalisationData)
+                }, cancellationToken);
+            }
+            catch (NotifyClientException e)
+            {
+                logger.LogError(e, "Error sending preview email");
+                ModelState.AddModelError(nameof(model.PreviewEmails), "Gov Notify does not accept the email address(es) provided.");
+                return View(nameof(SetupCampaign), model);
+            }
+            
             TempData.AddSuccessNotification(
                 $"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
         }

@@ -10,7 +10,7 @@ public class EmailCampaignParticipant : IAudit, ISoftDelete
     public int EmailCampaignId { get; set; }
     public int ParticipantId { get; set; }
     public int? DeliveryStatusId { get; set; }
-    [MaxLength(255)] public string? ContactEmail { get; set; } = string.Empty;
+    [MaxLength(255)] public string ContactEmail { get; set; } = null!;
     public DateTime? SentAt { get; set; }
     public DateTime? DeliveredAt { get; set; }
     public DateTime? RegisteredInterestAt { get; set; }
