@@ -10,9 +10,11 @@ using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
-using BPOR.Rms.Settings;
+using BPOR.Rms.Helpers;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
@@ -20,13 +22,19 @@ using NIHR.NotificationService.Settings;
 using Notify.Client;
 
 namespace BPOR.Rms.Startup;
+
 public static class DependencyInjection
 {
-    public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration, IHostEnvironment hostEnvironment)
+    public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration,
+        IHostEnvironment hostEnvironment)
     {
         services.AddSingleton(TimeProvider.System);
 
         services.AddControllersWithViews().AddRazorRuntimeCompilation();
+        services.AddHttpContextAccessor();
+        services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+        services.AddSingleton(TimeProvider.System);
+        
         services.AddScoped<IEmailCampaignService, EmailCampaignService>();
         services.AddScoped<IFilterService, FilterService>();
         services.AddScoped<IPostcodeMapper, LocationApiClient>();
@@ -36,13 +44,13 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserProvider<User>, CurrentUserProvider<User>>();
         services.AddScoped<IReferenceGenerator, ReferenceGenerator>();
 
-        // Temporary services
         services.AddTransient<INotificationService, NotificationService>();
+        services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
+        services.AddTransient<UrlGenerationHelper>();
 
         services.AddDistributedMemoryCache();
         services.AddPaging();
-
-        services.GetSectionAndValidate<AppSettings>(configuration);
+        services.AddDataProtection();
 
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
@@ -62,8 +70,10 @@ public static class DependencyInjection
             throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
         }
 
-        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2, logger);
-        services.AddHealthChecks().AddMySql(connectionString).AddCheck<LocationHealthCheck>("Location", Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
+            logger);
+        services.AddHealthChecks().AddMySql(connectionString).AddCheck<LocationHealthCheck>("Location",
+            Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
 
         // Register NotificationTaskQueue and RmsTaskQueue with distinct interfaces
         services.AddSingleton<INotificationTaskQueue, NotificationTaskQueue>(provider =>
@@ -92,7 +102,8 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection RegisterDevelopmentServices(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection RegisterDevelopmentServices(this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddSwaggerGen(c =>
         {

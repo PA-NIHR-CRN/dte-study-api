@@ -29,7 +29,7 @@ public class EmailCampaign
 
 public class EmailCampaignParticipant
 {
-    public string? ContactEmail { get; set; }
+    public string ContactEmail { get; set; }
     public DateTime? SentAt { get; set; }
     public DateTime? DeliveredAt { get; set; }
     public DateTime? RegisteredInterestAt { get; set; }

@@ -2,27 +2,31 @@ using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Constants;
+using BPOR.Rms.Helpers;
 using BPOR.Rms.Mappers;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Volunteer;
 using BPOR.Rms.Services;
-using BPOR.Rms.Settings;
 using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using NIHR.Infrastructure;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
+using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
+using Polly;
 
 public class EmailCampaignService(
     ILogger<EmailCampaignService> logger,
-    IOptions<AppSettings> appSettings,
     IRefDataService refDataService,
     INotificationService notificationService,
     IFilterService filterService,
     INotificationTaskQueue taskQueue,
     ParticipantDbContext context,
-    IReferenceGenerator referenceGenerator)
+    IReferenceGenerator referenceGenerator,
+    IEncryptionService encryptionService,
+    UrlGenerationHelper urlGenerationHelper)
     : IEmailCampaignService
 {
     public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
@@ -107,23 +111,15 @@ public class EmailCampaignService(
     private async Task SaveChangesWithRetryAsync(List<ProcessingResults> emailQueue,
         CancellationToken cancellationToken)
     {
-        var retryCount = 0;
-        const int maxRetries = 3;
-
-        while (retryCount < maxRetries)
-        {
-            try
+        var retryPolicy = Policy
+            .Handle<DbUpdateException>(IsUniqueConstraintViolation)
+            .RetryAsync(3, onRetry: (exception, retryCount) =>
             {
-                await context.SaveChangesAsync(cancellationToken);
-                break;
-            }
-            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
-            {
-                logger.LogError(ex, "Error saving email campaign participants, attempt {Attempt}", retryCount + 1);
-                retryCount++;
+                logger.LogError(exception, "Error saving email campaign participants, attempt {Attempt}", retryCount);
                 UpdateUniqueConstraintViolations(emailQueue);
-            }
-        }
+            });
+
+        await retryPolicy.ExecuteAsync(async () => await context.SaveChangesAsync(cancellationToken));
     }
 
     private void UpdateUniqueConstraintViolations(List<ProcessingResults> emailQueue)
@@ -201,7 +197,10 @@ public class EmailCampaignService(
             { "emailCampaignParticipantId", emailCampaignParticipant.Id },
             { "firstName", volunteer.FirstName },
             { "lastName", volunteer.LastName },
-            { "uniqueLink", $"{appSettings.Value.BaseUrl}/NotifyCallback/registerinterest?reference={reference}" },
+            {
+                "uniqueLink",
+                urlGenerationHelper.GenerateRegisterInterestUrl(encryptionService.Encrypt(reference))
+            }
         };
         processingResult.PersonalisationData[volunteer.Email] = personalisation;
 
@@ -244,7 +243,7 @@ public class EmailCampaignService(
                      (int)personalisation["emailCampaignParticipantId"] == participantId))
         {
             personalisation["uniqueLink"] =
-                $"{appSettings.Value.BaseUrl}/NotifyCallback/registerinterest?reference={newReference}";
+                urlGenerationHelper.GenerateRegisterInterestUrl(encryptionService.Encrypt(newReference));
         }
 
         var studyParticipant =

@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure;
+using Polly;
+using Polly.RateLimit;
 
 namespace BPOR.Geolocation.Controllers;
 
@@ -14,51 +16,45 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
     public async Task<IActionResult> AddCoordinatesToUsersWithPostcodes(CancellationToken cancellationToken = default)
     {
         var cache = new ConcurrentDictionary<string, (double Latitude, double Longitude)>();
-        var semaphore = new SemaphoreSlim(600, 600);
+
+        var existingCoordinates = await context.Participants
+            .Where(p => p.ParticipantLocation != null)
+            .Select(p => new
+            {
+                p.Address.Postcode,
+                p.ParticipantLocation.Location.Coordinate.Y,
+                p.ParticipantLocation.Location.Coordinate.X
+            })
+            .ToListAsync(cancellationToken);
+
+        foreach (var coordinate in existingCoordinates)
+        {
+            if (!string.IsNullOrEmpty(coordinate.Postcode))
+            {
+                cache.TryAdd(coordinate.Postcode, (coordinate.Y, coordinate.X));
+            }
+        }
+
+        var rateLimitPolicy = Policy.RateLimitAsync(600, TimeSpan.FromMinutes(1));
+        var retryPolicy = Policy.Handle<RateLimitRejectedException>()
+            .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(2));
+
+        var participants = new List<Participant>();
+
         var tasks = new List<Task>();
 
-        await foreach (var participant in GetParticipantsWithAddressesAsync(cancellationToken))
+        await foreach (var participant in GetParticipantsWithAddressesAndWithoutLocationsAsync(cancellationToken))
         {
-            tasks.Add(ProcessParticipant(participant, cache, semaphore, cancellationToken));
+            tasks.Add(AddCoordinateToCache(participant, cache, rateLimitPolicy, retryPolicy, cancellationToken));
+            participants.Add(participant);
         }
 
         await Task.WhenAll(tasks);
-        await context.SaveChangesAsync(cancellationToken);
 
-        return Ok("Coordinates added to all participants.");
-    }
-
-    private async Task ProcessParticipant(Participant participant,
-        ConcurrentDictionary<string, (double Latitude, double Longitude)> cache, SemaphoreSlim semaphore,
-        CancellationToken cancellationToken)
-    {
-        var postcode = participant.Address.Postcode;
-        if (postcode != null)
+        // Update participant records sequentially
+        foreach (var participant in participants)
         {
-            if (!cache.TryGetValue(postcode, out var latLng))
-            {
-                await semaphore.WaitAsync(cancellationToken);
-                try
-                {
-                    // Recheck after acquiring the semaphore
-                    if (!cache.TryGetValue(postcode, out latLng))
-                    {
-                        var coordinates =
-                            await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
-                        if (coordinates != null)
-                        {
-                            latLng = (coordinates.Latitude, coordinates.Longitude);
-                            cache[postcode] = latLng;
-                        }
-                    }
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            }
-
-            if (latLng != default)
+            if (cache.TryGetValue(participant.Address.Postcode, out var latLng))
             {
                 participant.ParticipantLocation = new ParticipantLocation
                 {
@@ -66,19 +62,53 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
                 };
             }
         }
+
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return Ok("Coordinates added to all participants.");
     }
 
+    private async Task AddCoordinateToCache(Participant participant,
+        ConcurrentDictionary<string, (double Latitude, double Longitude)> cache,
+        IAsyncPolicy rateLimitPolicy, IAsyncPolicy retryPolicy,
+        CancellationToken cancellationToken)
+    {
+        var postcode = participant.Address.Postcode;
+        if (postcode != null)
+        {
+            if (!cache.TryGetValue(postcode, out var latLng))
+            {
+                await rateLimitPolicy.ExecuteAsync(async () =>
+                {
+                    await retryPolicy.ExecuteAsync(async () =>
+                    {
+                        if (!cache.TryGetValue(postcode, out latLng))
+                        {
+                            var coordinates =
+                                await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
+                            if (coordinates != null)
+                            {
+                                latLng = (coordinates.Latitude, coordinates.Longitude);
+                                cache[postcode] = latLng;
+                            }
+                        }
+                    });
+                });
+            }
+        }
+    }
 
-    private async IAsyncEnumerable<Participant> GetParticipantsWithAddressesAsync(
+    private async IAsyncEnumerable<Participant> GetParticipantsWithAddressesAndWithoutLocationsAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var participant in context.Participants.Include(p => p.Address).AsAsyncEnumerable()
+        await foreach (var participant in context.Participants
+                           .Include(p => p.Address)
+                           .Where(p => p.ParticipantLocation == null)
+                           .AsAsyncEnumerable()
                            .WithCancellation(cancellationToken))
         {
-            if (participant.Address != null)
-            {
-                yield return participant;
-            }
+            yield return participant;
         }
     }
 
