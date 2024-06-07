@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GeolocationDataImport
+﻿namespace GeolocationDataImport
 {
     public class GeoData
     {
@@ -14,7 +7,5 @@ namespace GeolocationDataImport
         public string Latitude { get; set; }
         public string Longitude { get; set; }
         public string CountryCode { get; set; }
-        [NotMapped]
-        public string CountryName { get; set; }
     }
 }
