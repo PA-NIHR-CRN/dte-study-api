@@ -9,24 +9,22 @@ using BPOR.Rms.Models.Volunteer;
 using BPOR.Rms.Services;
 using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using NIHR.Infrastructure;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 using NIHR.Infrastructure.Interfaces;
-using NIHR.NotificationService.Interfaces;
-using NIHR.NotificationService.Models;
+using NIHR.Infrastructure.Settings;
 using Polly;
+using NIHR.NotificationService.Context;
 
 public class EmailCampaignService(
     ILogger<EmailCampaignService> logger,
     IRefDataService refDataService,
-    INotificationService notificationService,
     IFilterService filterService,
-    INotificationTaskQueue taskQueue,
     ParticipantDbContext context,
-    IReferenceGenerator referenceGenerator,
     IEncryptionService encryptionService,
-    UrlGenerationHelper urlGenerationHelper)
+    IOptions<AppSettings> appSettings,
+    IReferenceGenerator referenceGenerator,
+    NotificationDbContext notificationContext)
     : IEmailCampaignService
 {
     public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
@@ -105,7 +103,27 @@ public class EmailCampaignService(
             (endTime - startTime).TotalMilliseconds);
 
         await SaveChangesWithRetryAsync(emailQueue, cancellationToken);
-        await QueueEmailSendingTaskAsync(emailQueue, campaign, cancellationToken);
+
+
+        var notifications = emailQueue.SelectMany(e => e.EmailAddresses)
+            .Select(email => new Notification
+            {
+                PrimaryIdentifier = email,
+                NotificationDatas = emailQueue.SelectMany(e => e.PersonalisationData)
+                    .Where(p => p.Key == email)
+                    .SelectMany(p => p.Value)
+                    .Select(kv => new NotificationData
+                    {
+                        Key = kv.Key,
+                        Value = kv.Value?.ToString(),
+                    })
+                    .ToList(),
+            })
+            .ToList();
+
+        await notificationContext.Notifications.AddRangeAsync(notifications, cancellationToken);
+
+        await notificationContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task SaveChangesWithRetryAsync(List<ProcessingResults> emailQueue,
@@ -199,8 +217,9 @@ public class EmailCampaignService(
             { "lastName", volunteer.LastName },
             {
                 "uniqueLink",
-                urlGenerationHelper.GenerateRegisterInterestUrl(encryptionService.Encrypt(reference))
-            }
+                $"{appSettings.Value.WebAppBaseUrl}/NotifyCallback/registerinterest?reference={encryptionService.Encrypt(reference)}"
+            },
+            { "emailTemplateId", campaign.EmailTemplateId }
         };
         processingResult.PersonalisationData[volunteer.Email] = personalisation;
 
@@ -221,20 +240,6 @@ public class EmailCampaignService(
         await context.StudyParticipantEnrollment.AddRangeAsync(results.StudyParticipantEnrollments, cancellationToken);
     }
 
-    private async Task QueueEmailSendingTaskAsync(List<ProcessingResults> emailQueue, EmailCampaign campaign,
-        CancellationToken cancellationToken)
-    {
-        foreach (var results in emailQueue)
-        {
-            await taskQueue.QueueBackgroundWorkItemAsync(new SendBatchEmailRequest
-            {
-                EmailAddresses = results.EmailAddresses,
-                PersonalisationData = results.PersonalisationData,
-                EmailTemplateId = campaign.EmailTemplateId
-            }, cancellationToken);
-        }
-    }
-
     private void UpdateProcessingResultReferences(ProcessingResults processingResult, int participantId,
         string newReference)
     {
@@ -243,7 +248,7 @@ public class EmailCampaignService(
                      (int)personalisation["emailCampaignParticipantId"] == participantId))
         {
             personalisation["uniqueLink"] =
-                urlGenerationHelper.GenerateRegisterInterestUrl(encryptionService.Encrypt(newReference));
+                $"{appSettings.Value.WebAppBaseUrl}/NotifyCallback/registerinterest?reference={encryptionService.Encrypt(newReference)}";
         }
 
         var studyParticipant =

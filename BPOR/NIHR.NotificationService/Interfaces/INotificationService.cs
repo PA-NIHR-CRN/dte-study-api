@@ -1,3 +1,6 @@
+
+
+using NIHR.NotificationService.Context;
 using NIHR.NotificationService.Models;
 using Notify.Models.Responses;
 
@@ -5,9 +8,9 @@ namespace NIHR.NotificationService.Interfaces;
 
 public interface INotificationService
 {
-    Task SendEmailAsync(SendEmailRequest request, CancellationToken cancellationToken);
+    Task SendPreviewEmailAsync(SendEmailRequest request, CancellationToken cancellationToken);
 
-    Task<EmailNotificationResponse> SendBatchEmailAsync(SendBatchEmailRequest request,
+    Task<EmailNotificationResponse> SendBatchEmailAsync(List<Notification> notifications,
         CancellationToken cancellationToken);
 
     Task<TemplateList> GetTemplatesAsync(CancellationToken cancellationToken);
