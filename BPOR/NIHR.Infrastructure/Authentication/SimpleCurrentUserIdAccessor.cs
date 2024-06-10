@@ -8,6 +8,8 @@ namespace NIHR.Infrastructure
 
         public T? UserId => _userId;
 
+        public bool SuppressUnknownUserIdWarning => false;
+
         public void SetCurrentUserId(T id)
         {
             _userId = id;

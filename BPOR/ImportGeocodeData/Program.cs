@@ -5,6 +5,8 @@ using Microsoft.Extensions.Hosting;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Configuration;
 using ImportGeocodeData;
+using NIHR.Infrastructure;
+using NIHR.Infrastructure.Authentication;
 
 internal class Program
 {
@@ -28,16 +30,17 @@ internal class Program
 
                 services.AddScoped<GeoCoder>();
                 services.AddSingleton<IPostcodeProvider, StaticFilePostcodeMapper>();
+
+                services.AddTransient<ICurrentUserIdProvider<int>, SimpleCurrentUserIdProvider<int>>();
+                services.AddTransient<ICurrentUserIdAccessor<int>, SystemCurrentUserIdAccessor<int>>();
             })
             .Build();
 
         var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
-        using (var scope = scopeFactory.CreateScope())
-        {
-            var geoCoder = scope.ServiceProvider.GetRequiredService<GeoCoder>();
+        using var scope = scopeFactory.CreateScope();
+        var geoCoder = scope.ServiceProvider.GetRequiredService<GeoCoder>();
 
-            await geoCoder.ProcessAsync();
-        }
+        await geoCoder.ProcessAsync();
     }
 
 }

@@ -10,5 +10,7 @@
         }
 
         public T? UserId => _currentUserIdAccessor.UserId;
-    }
+
+        public virtual bool SuppressUnknownUserIdWarning => _currentUserIdAccessor.SuppressUnknownUserIdWarning;
+    };
 }
