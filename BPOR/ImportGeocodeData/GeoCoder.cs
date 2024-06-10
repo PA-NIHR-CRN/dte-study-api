@@ -22,95 +22,123 @@ namespace ImportGeocodeData
                 .Concat(Enumerable.Range(0, 25).Select(x => UkNation.NorthernIreland))
                 .ToList();
 
-            ReadCsvFile(geocodingSettings.Value.AddressFilePath);
+            ReadAddressFile(geocodingSettings.Value.AddressFilePath);
 
             await UpdateDatabaseWithAddresses();
         }
 
-        void ReadCsvFile(string filePath)
+        void ReadAddressFile(string filePath)
         {
-            int limit = 1000000;
-
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = false,
             };
 
-            using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, config))
+            using var reader = new StreamReader(filePath);
+            using var csv = new CsvReader(reader, config);
+            csv.Context.RegisterClassMap<AddressMap>();
+
+            int count = 0;
+            while (csv.Read())
             {
-                csv.Context.RegisterClassMap<AddressMap>();
+                var record = csv.GetRecord<Address>();
 
-                int count = 0;
-                while (csv.Read() && count < limit)
+                if (Postcode.TryParse(record.Postcode, out var postcode))
                 {
-                    var record = csv.GetRecord<Address>();
-
-                    if (Postcode.TryParse(record.Postcode, out var postcode)){
-                        record.Postcode = postcode.ToString();
-                    }
-                    else
-                    {
-                        continue;
-                    }
-
-
-                    _addresses.Add(record);
-                    count++;
+                    record.Postcode = postcode.ToString();
                 }
+                else
+                {
+                    continue;
+                }
+
+                _addresses.Add(record);
+                count++;
             }
         }
 
         public async Task SetRandomAddressFromFile(ParticipantAddress participantAddress, UkNation nation)
         {
-            var i = Random.Shared.Next(0, _addresses.Count);
+            do
+            {
+                var i = Random.Shared.Next(0, _addresses.Count);
 
-            var address = _addresses[i];
+                var address = _addresses[i];
 
-            participantAddress.AddressLine1 = address.HouseNumber;
-            participantAddress.AddressLine2 = address.Street;
-            participantAddress.Town = address.TownCity;
-            participantAddress.Postcode = address.Postcode;
-
-            await UpdateLocation(participantAddress);
+                participantAddress.AddressLine1 = address.HouseNumber;
+                participantAddress.AddressLine2 = address.Street;
+                participantAddress.Town = address.TownCity;
+                participantAddress.Postcode = address.Postcode;
+            } while (!await UpdateLocation(participantAddress));
         }
 
         public async Task SetRandomNationalPostcode(ParticipantAddress address, UkNation nation)
         {
-            address.Postcode = postcodeProvider.GetRandomNationalPostcode(nation);
-            await UpdateLocation(address);
+            do
+            {
+                address.Postcode = postcodeProvider.GetRandomNationalPostcode(nation);
+            } while (!await UpdateLocation(address));
         }
 
-        private async Task UpdateLocation(ParticipantAddress address)
+        private async Task<bool> UpdateLocation(ParticipantAddress address)
         {
             var location = await postcodeProvider.GetCoordinatesFromPostcodeAsync(address.Postcode, CancellationToken.None);
 
-            if (address?.Participant?.ParticipantLocation is null)
+            if (location is not null)
             {
-                address.Participant.ParticipantLocation = new ParticipantLocation();
-            }
+                if (address?.Participant?.ParticipantLocation is null)
+                {
+                    address.Participant.ParticipantLocation = new ParticipantLocation();
+                }
 
-            address.Participant.ParticipantLocation.Location = new NetTopologySuite.Geometries.Point(location.Longitude, location.Latitude) { SRID = 4326 };
+                address.Participant.ParticipantLocation.Location = new NetTopologySuite.Geometries.Point(location.Longitude, location.Latitude) { SRID = 4326 };
+                return true;
+            }
+            else
+            {
+                //Console.WriteLine($"Location not found for postcode '{address.Postcode}'.");
+                return false;
+            }
         }
 
         async Task UpdateDatabaseWithAddresses()
         {
-            foreach (var participant in context.ParticipantAddress.Include(x=>x.Participant).ThenInclude(x=>x.ParticipantLocation))
+            var totalAddresses = context.ParticipantAddress.Count();
+            var i = 0;
+
+            int offset = 0;
+            int batchSize = 1000;
+            var query = context.ParticipantAddress.Include(x => x.Participant).ThenInclude(x => x.ParticipantLocation).OrderBy(x => x.Id);
+
+            var batch = query.Skip(offset).Take(batchSize).ToList();
+            while (batch.Any())
             {
-                var nationIndex = Random.Shared.Next(0, _ukNationDistribution.Count);
-
-                var nation = _ukNationDistribution[nationIndex];
-
-                Func<ParticipantAddress, UkNation, Task> action = nation switch
+                foreach (var participant in batch)
                 {
-                    UkNation.England or UkNation.Wales => SetRandomAddressFromFile,
-                    UkNation.Scotland or UkNation.NorthernIreland => SetRandomNationalPostcode,
-                    _ => (p, n) => Task.CompletedTask
-                };
+                    var nationIndex = Random.Shared.Next(0, _ukNationDistribution.Count);
 
-                await action(participant, nation);
-                await context.SaveChangesAsync();
+                    var nation = _ukNationDistribution[nationIndex];
+
+                    Func<ParticipantAddress, UkNation, Task> action = nation switch
+                    {
+                        UkNation.England or UkNation.Wales => SetRandomAddressFromFile,
+                        UkNation.Scotland or UkNation.NorthernIreland => SetRandomNationalPostcode,
+                        _ => (p, n) => Task.CompletedTask
+                    };
+
+                    await action(participant, nation);
+                    i++;
+                    
+                }
+
+                offset += batchSize;
+                batch = query.Skip(offset).Take(batchSize).ToList();
+                var percentageCompleted = (i / (double)totalAddresses) * 100d;
+
+                Console.WriteLine($"{percentageCompleted}%");
             }
+
+            await context.SaveChangesAsync();
         }
     }
 }
