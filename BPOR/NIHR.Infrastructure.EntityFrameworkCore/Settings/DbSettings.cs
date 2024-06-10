@@ -8,7 +8,7 @@ namespace NIHR.Infrastructure.EntityFrameworkCore
         public string Username { get; set; } = null!;
         public string Password { get; set; } = null!;
         public string Host { get; set; } = null!;
-        public int Port { get; set; }
+        public uint? Port { get; set; }
         public string Database { get; set; } = null!;
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -28,9 +28,9 @@ namespace NIHR.Infrastructure.EntityFrameworkCore
                 yield return new ValidationResult("Host is required", new[] { nameof(Host) });
             }
 
-            if (Port == 0)
+            if (Port < 0 || Port > 65535)
             {
-                yield return new ValidationResult("Port is required", new[] { nameof(Port) });
+                yield return new ValidationResult("Port is out of range", new[] { nameof(Port) });
             }
 
             if (string.IsNullOrWhiteSpace(Database))
