@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
+using BPOR.Rms;
 using BPOR.Rms.Constants;
 using BPOR.Rms.Helpers;
 using BPOR.Rms.Mappers;
@@ -11,8 +12,10 @@ using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 using NIHR.Infrastructure.Interfaces;
+using NIHR.Infrastructure.Models;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Polly;
@@ -21,12 +24,14 @@ public class EmailCampaignService(
     ILogger<EmailCampaignService> logger,
     IRefDataService refDataService,
     INotificationService notificationService,
-    IFilterService filterService,
     INotificationTaskQueue taskQueue,
     ParticipantDbContext context,
     IReferenceGenerator referenceGenerator,
     IEncryptionService encryptionService,
-    UrlGenerationHelper urlGenerationHelper)
+    UrlGenerationHelper urlGenerationHelper,
+    IPostcodeMapper locationApiClient,
+    TimeProvider timeProvider
+    )
     : IEmailCampaignService
 {
     public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
@@ -73,7 +78,15 @@ public class EmailCampaignService(
         int? targetGroupSize, CancellationToken cancellationToken)
     {
         var filter = FilterMapper.MapToFilterModel(dbFilter);
-        var volunteerQuery = await filterService.FilterVolunteersAsync(filter, cancellationToken);
+
+        // TODO: save the original search location co-ordinates in the FilterCriteria
+        CoordinatesModel? location = null;
+        if (dbFilter.FullPostcode is not null && dbFilter.SearchRadiusMiles is not null && dbFilter.SearchRadiusMiles > 0)
+        {
+            location = await locationApiClient.GetCoordinatesFromPostcodeAsync(dbFilter.FullPostcode, cancellationToken);
+        }
+
+        var volunteerQuery = context.Participants.FilterVolunteers(timeProvider, filter, location);
 
         return await volunteerQuery
             .Where(v => !string.IsNullOrEmpty(v.Email))
@@ -114,13 +127,13 @@ public class EmailCampaignService(
         var retryPolicy = Policy
             .Handle<DbUpdateException>(IsUniqueConstraintViolation)
             .RetryAsync(3, onRetry: (exception, retryCount) =>
-            {
+        {
                 logger.LogError(exception, "Error saving email campaign participants, attempt {Attempt}", retryCount);
                 UpdateUniqueConstraintViolations(emailQueue);
             });
 
         await retryPolicy.ExecuteAsync(async () => await context.SaveChangesAsync(cancellationToken));
-    }
+            }
 
     private void UpdateUniqueConstraintViolations(List<ProcessingResults> emailQueue)
     {
