@@ -4,6 +4,8 @@
     { 
         public T? UserId => default;
 
+        public bool SuppressUnknownUserIdWarning => false;
+
         public void SetCurrentUserId(T id)
         {
         }

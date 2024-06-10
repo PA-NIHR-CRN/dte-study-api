@@ -9,6 +9,7 @@ using Rbec.Postcodes;
 using NIHR.Infrastructure.Models;
 using NIHR.Infrastructure;
 using NetTopologySuite.Geometries;
+using BPOR.Domain.Entities.Configuration;
 
 namespace BPOR.Rms.Controllers;
 
@@ -162,7 +163,7 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
 
             if (model.Testing.ShowResults)
             {
-                var point = location is not null ? new Point(location.Longitude, location.Latitude) { SRID = 4326 } : null;
+                var point = location is not null ? new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid } : null;
 
                 results.Items = query.Select(x => new VolunteerResult
                 {

@@ -124,7 +124,7 @@ public static class ParticipantQueryExtensions
         if (location is not null && radiusInMiles is not null && radiusInMiles > 0)
         {
             {
-                var point = new Point(location.Longitude, location.Latitude) { SRID = 4326 };
+                var point = new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
 
                 double distanceInMeters = radiusInMiles.Value * 1609.344;
                 var boundingBox = point.Buffer(distanceInMeters / 111320).Envelope;

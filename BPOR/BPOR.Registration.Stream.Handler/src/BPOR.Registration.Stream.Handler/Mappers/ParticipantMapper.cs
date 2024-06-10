@@ -2,6 +2,7 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
+using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
 using BPOR.Registration.Stream.Handler.Services;
@@ -143,7 +144,7 @@ public class ParticipantMapper : IParticipantMapper
         {
             destination.ParticipantLocation ??= new ParticipantLocation();
             destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
-                { SRID = 4326 };
+                { SRID = ParticipantLocationConfiguration.LocationSrid };
         }
 
         MapHealthConditions(source, destination);
