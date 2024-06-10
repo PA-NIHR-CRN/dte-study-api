@@ -151,6 +151,8 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
                 if (location is null)
                 {
                     ModelState.AddModelError(nameof(model.FullPostcode), $"Unable to determine the location of the postcode '{model.FullPostcode}'.");
+
+                    return results;
                 }
             }
 

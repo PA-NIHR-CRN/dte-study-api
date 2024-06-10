@@ -213,6 +213,10 @@ public class VolunteerFilterViewModel : IValidatableObject
                 yield return new ValidationResult(
                         "Enter a full UK postcode", [nameof(FullPostcode)]);
             }
+            else
+            {
+                FullPostcode = postcode.ToString();
+            }
         }
 
         if (!string.IsNullOrEmpty(FullPostcode) && SearchRadiusMiles == null)
