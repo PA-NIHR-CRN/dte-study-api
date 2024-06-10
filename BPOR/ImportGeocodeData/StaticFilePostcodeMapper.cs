@@ -6,6 +6,7 @@ using NIHR.Infrastructure;
 using NIHR.Infrastructure.Models;
 using System.Globalization;
 using Rbec.Postcodes;
+using Microsoft.Extensions.Logging;
 
 namespace ImportGeocodeData
 {
@@ -17,15 +18,15 @@ namespace ImportGeocodeData
     public class StaticFilePostcodeMapper : IPostcodeProvider
     {
         private readonly IOptions<GeocodingSettings> _geocodingSettings;
-
+        private readonly ILogger<StaticFilePostcodeMapper> _logger;
         private readonly Dictionary<string, GeoData> _postCodeLocationMap = [];
 
         private readonly Dictionary<UkNation, List<string>> _nationPostCodeMap = [];
 
-        public StaticFilePostcodeMapper(IOptions<GeocodingSettings> geocodingSettings)
+        public StaticFilePostcodeMapper(IOptions<GeocodingSettings> geocodingSettings, ILogger<StaticFilePostcodeMapper> logger)
         {
             _geocodingSettings = geocodingSettings;
-
+            _logger = logger;
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = true,
@@ -38,7 +39,8 @@ namespace ImportGeocodeData
             {
                 var record = csv.GetRecord<GeoData>();
 
-                if (Postcode.TryParse(record.Postcode, out var postcode)){
+                if (Postcode.TryParse(record.Postcode, out var postcode))
+                {
                     record.Postcode = postcode.ToString();
                 }
                 else
@@ -74,7 +76,14 @@ namespace ImportGeocodeData
         {
             if (_postCodeLocationMap.TryGetValue(postcode, out var coordinates))
             {
-                return Task.FromResult(new CoordinatesModel { Latitude = double.Parse(coordinates.Latitude), Longitude = double.Parse(coordinates.Longitude) });
+                if (coordinates.Latitude != "99.999999" && coordinates.Longitude != "0.000000")
+                { // Filter out of range values for Channel island and Isle of Man
+                    return Task.FromResult(new CoordinatesModel { Latitude = double.Parse(coordinates.Latitude), Longitude = double.Parse(coordinates.Longitude) });
+                }
+                else
+                {
+                    _logger.LogWarning($"Out of range value (lat, long) ({coordinates.Latitude}, {coordinates.Longitude}) for postcode '{postcode}'.");
+                }
             }
 
             return Task.FromResult((CoordinatesModel)null);

@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using BPOR.Domain.Entities;
+using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Filter;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
@@ -68,7 +69,7 @@ public class FilterService(ParticipantDbContext context, IPostcodeMapper locatio
     {
         var coordinates = await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
 
-        var point = new Point(coordinates.Longitude, coordinates.Latitude) { SRID = 4326 };
+        var point = new Point(coordinates.Longitude, coordinates.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
 
         var distanceInMeters = radiusInMiles * 1609.344;
         var boundingBox = point.Buffer(distanceInMeters / 111320).Envelope;
