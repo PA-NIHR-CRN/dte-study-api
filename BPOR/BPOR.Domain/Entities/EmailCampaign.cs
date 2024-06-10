@@ -17,4 +17,6 @@ public class EmailCampaign : IAudit, ISoftDelete
     public int UpdatedById { get; set; }
     public bool IsDeleted { get; set; }
     public ICollection<EmailCampaignParticipant> Participants { get; set; } = new List<EmailCampaignParticipant>();
+
+    public FilterCriteria FilterCriteria { get; set; } = null!;
 }
