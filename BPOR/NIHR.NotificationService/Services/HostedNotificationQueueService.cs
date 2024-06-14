@@ -47,7 +47,7 @@ namespace NIHR.NotificationService.Services
             var notifications = await context.Notifications
                 .Where(n => !n.IsProcessed)
                 .OrderBy(n => n.Id)
-                .Take(100).Include(n => n.NotificationDatas)
+                .Take(1000).Include(n => n.NotificationDatas)
                 .ToListAsync(stoppingToken);
 
             if (notifications.Count > 0)

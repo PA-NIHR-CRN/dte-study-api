@@ -21,6 +21,7 @@ using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
 using NIHR.NotificationService.Settings;
 using Notify.Client;
+using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
 
 namespace BPOR.Rms.Startup;
 

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using MySqlConnector;
 
-namespace NIHR.NotificationService.Setings;
+namespace NIHR.NotificationService.Settings;
 
 public class DbSettings : IValidatableObject
 {

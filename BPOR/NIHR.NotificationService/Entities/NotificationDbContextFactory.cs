@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using NIHR.NotificationService.Setings;
+using NIHR.NotificationService.Settings;
 
 namespace NIHR.NotificationService.Context;
 
