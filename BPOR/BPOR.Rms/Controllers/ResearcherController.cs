@@ -3,12 +3,13 @@ using BPOR.Domain.Entities.RefData;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Models.Researcher;
 using BPOR.Rms.Models.Study;
+using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BPOR.Rms.Controllers;
 
-public class ResearcherController(ParticipantDbContext context) : Controller
+public class ResearcherController(ParticipantDbContext context, ICurrentUserProvider<User> currentUserProvider) : Controller
 {
     public IActionResult Create()
     {
@@ -291,10 +292,13 @@ public class ResearcherController(ParticipantDbContext context) : Controller
         {
             if (ModelState.IsValid)
             {
+                var user = currentUserProvider?.User?.ContactFullName;
+                var email = currentUserProvider?.User?.ContactEmail;
+
                 var study = new Study
                 {
-                    FullName = "", // TODO - take from IDG details
-                    EmailAddress = "", // TODO - take from IDG details
+                    FullName = user == null ? "" : user,
+                    EmailAddress = email == null ? "" : email,
                     StudyName = model.ShortName,
                     ChiefInvestigator = model.ChiefInvestigator,
                     Sponsors = model.StudySponsors,

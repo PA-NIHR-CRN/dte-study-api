@@ -1,18 +1,27 @@
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
+using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Controllers;
 
-public class StudyController(ParticipantDbContext context, IPaginationService paginationService) : Controller
+public class StudyController(ParticipantDbContext context, IPaginationService paginationService, ICurrentUserProvider<User> currentUserProvider) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false, CancellationToken token = default)
     {
+        bool userHasResearcherRole = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
+
         var studiesQuery = context.Studies.AsQueryable();
+
+        if (userHasResearcherRole)
+        {
+            string userEmail = currentUserProvider?.User?.ContactEmail ?? string.Empty;
+            studiesQuery = studiesQuery.Where(s => s.EmailAddress == userEmail);
+        }
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
@@ -27,7 +36,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         var deferredStudiesPage = studiesQuery
             .AsStudyListModel()
             .OrderByDescending(s => s.Id)
-            .DeferredPage(paginationService);
+            .DeferredPage(paginationService); 
 
         var viewModel = new StudiesViewModel
         {
@@ -35,6 +44,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
             HasSearched = Request.Query.ContainsKey(nameof(searchTerm)),
             SearchTerm = searchTerm ?? string.Empty,
             HasBeenReset = hasBeenReset,
+            IsResearcher = userHasResearcherRole
         };
 
         return View(viewModel);
@@ -60,6 +70,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         }
 
         study.HasEmailCampaigns = context.Studies.Any(s => s.FilterCriterias.Any(f => f.EmailCampaigns.Any()) && s.Id == study.Study.Id);
+        study.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
 
         return View(study);
     }
