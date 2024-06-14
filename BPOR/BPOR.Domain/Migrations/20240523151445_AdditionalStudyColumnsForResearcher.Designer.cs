@@ -4,6 +4,7 @@ using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
@@ -12,9 +13,11 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    partial class ParticipantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240523151445_AdditionalStudyColumnsForResearcher")]
+    partial class AdditionalStudyColumnsForResearcher
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -205,9 +208,6 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool?>("IncludeContacted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IncludeNoAreasOfInterest")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool?>("IncludeRecruited")
@@ -574,8 +574,7 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<Point>("Location")
                         .IsRequired()
-                        .HasColumnType("point")
-                        .HasAnnotation("MySql:SpatialReferenceSystemId", 4326);
+                        .HasColumnType("point");
 
                     b.Property<int>("ParticipantId")
                         .HasColumnType("int");
@@ -584,9 +583,6 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Location")
-                        .HasAnnotation("MySql:SpatialIndex", true);
 
                     b.HasIndex("ParticipantId")
                         .IsUnique();
@@ -741,13 +737,6 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 4,
                             Code = "RegisteredInterest",
                             Description = "RegisteredInterest",
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Code = "Failed",
-                            Description = "Failed",
                             IsDeleted = false
                         });
                 });
@@ -9592,13 +9581,6 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Researcher",
                             Description = "Researcher",
                             IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "Tester",
-                            Description = "Tester",
-                            IsDeleted = false
                         });
                 });
 
@@ -9775,8 +9757,8 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<DateTime?>("RecruitmentStartDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("RecruitmentTarget")
-                        .HasColumnType("longtext");
+                    b.Property<int?>("RecruitmentTarget")
+                        .HasColumnType("int");
 
                     b.Property<string>("Sponsors")
                         .HasColumnType("longtext");

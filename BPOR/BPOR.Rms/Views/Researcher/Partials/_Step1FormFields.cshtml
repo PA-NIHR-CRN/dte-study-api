@@ -1,24 +1,65 @@
 @model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
 
-@* <h1 class="govuk-heading-l">Add a study to use the Be Part of Research registry</h1>
+<h1 class="govuk-heading-xl">
+    Study information
+</h1>
 
-<p class="govuk-body">Use this form to provide information about a study so that we can confirm eligibility for the Be Part of Research registry.</p>
-<p class="govuk-body">We will ask for your contact details, and for some basic information about the study. This will include the names of any study sponsors and funders.</p>
-<p class="govuk-body">We will also ask you whether the study has been included on the NIHR portfolio.</p>
-<p class="govuk-body">All questions are mandatory unless labelled as optional.</p>
-<p class="govuk-body">When you are ready to begin, click the "Next" button below.</p>
+@await Html.PartialAsync("Partials/_ErrorSummary", Model)
 
-<h1 class="govuk-heading-l">Add a study to use the Be Part of Research registry</h1>
-<p class="govuk-body">For a study to use the Be Part of Research registry, it must be on the NIHR CRN portfolio and/or in receipt of NIHR funding.</p>
-<p class="govuk-body">If the study does not have NIHR funding and is awaiting confirmation of inclusion on the NIHR CRN portfolio, or is yet to be submitted, you can continue to complete this form and we can discuss this further with you at a later date.</p>
-<p class="govuk-body">If you have any questions about this requirement, please contact us directly at <a>bepartofresearch-volunteerservice@nihr.ac.uk</a></p>
-<div class="govuk-checkboxes" data-module="govuk-checkboxes">
-    <div class="govuk-checkboxes__item">
-        <input asp-for="IsTermsAndConditionsAccepted" class="govuk-checkboxes__input" id="IsSexMale" type="checkbox" />
-        <span class="govuk-govuk-label govuk-checkboxes__label">
-            I confirm I have read and agree to the <a>terms and conditions.</a>
+<div class="govuk-form-group @(Html.ViewData.ModelState["ShortName"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="ShortName" class="govuk-label" for="ShortName">
+        @Html.DisplayNameFor(model => model.ShortName)
+    </label>
+    @if (Html.ViewData.ModelState["ShortName"]?.Errors.Count > 0)
+    {
+        <span id="ShortName-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.ShortName)
         </span>
-    </div>
-</div> *@
+        <input asp-for="ShortName" class="govuk-input  govuk-input govuk-input--error" id="ShortName" aria-describedby="ShortName-error" value="@(Model.ShortName)" />
+    }
+    else
+    {
+        <input asp-for="ShortName" class=" govuk-input" id="ShortName" value="@(Model.ShortName)" />
+    }
+</div>
 
+<div class="govuk-form-group @(Html.ViewData.ModelState["ChiefInvestigator"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="ChiefInvestigator" class="govuk-label" for="ChiefInvestigator">
+        @Html.DisplayNameFor(model => model.ChiefInvestigator)
+    </label>
+    @if (Html.ViewData.ModelState["ChiefInvestigator"]?.Errors.Count > 0)
+    {
+        <span id="ChiefInvestigator-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.ChiefInvestigator)
+        </span>
+        <input asp-for="ChiefInvestigator" class="govuk-input  govuk-input govuk-input--error" id="ChiefInvestigator" aria-describedby="ChiefInvestigator-error" value="@(Model.ChiefInvestigator)" />
+    }
+    else
+    {
+        <input asp-for="ChiefInvestigator" class=" govuk-input" id="ChiefInvestigator" value="@(Model.ChiefInvestigator)" />
+    }
+</div>
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["StudySponsors"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="StudySponsors" class="govuk-label" for="StudySponsors">
+        @Html.DisplayNameFor(model => model.StudySponsors)
+    </label>
+    <div id="event-name-hint" class="govuk-hint">
+        For example, John Smith, Astra Pharma, BLP Pharma Ltd
+    </div>
+    @if (Html.ViewData.ModelState["StudySponsors"]?.Errors.Count > 0)
+    {
+        <span id="StudySponsors-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.StudySponsors)
+        </span>
+        <input asp-for="StudySponsors" class="govuk-input  govuk-input govuk-input--error" id="StudySponsors" aria-describedby="StudySponsors-error" value="@(Model.StudySponsors)" />
+    }
+    else
+    {
+        <input asp-for="StudySponsors" class=" govuk-input" id="StudySponsors" value="@(Model.StudySponsors)" />
+    }
+</div>
 

@@ -1,0 +1,25 @@
+﻿@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+
+<h1 class="govuk-heading-xl">
+    NIHR Funding
+</h1>
+
+@await Html.PartialAsync("Partials/_ErrorSummary", Model)
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["FundingCode"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="FundingCode" class="govuk-label" for="FundingCode">
+        @Html.DisplayNameFor(model => model.FundingCode)
+    </label>
+    @if (Html.ViewData.ModelState["FundingCode"]?.Errors.Count > 0)
+    {
+        <span id="FundingCode-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.FundingCode)
+        </span>
+        <input asp-for="FundingCode" class="govuk-input  govuk-input govuk-input--error" id="FundingCode" aria-describedby="FundingCode-error" value="@(Model.FundingCode)" />
+    }
+    else
+    {
+        <input asp-for="FundingCode" class=" govuk-input" id="FundingCode" value="@(Model.FundingCode)" />
+    }
+</div>
