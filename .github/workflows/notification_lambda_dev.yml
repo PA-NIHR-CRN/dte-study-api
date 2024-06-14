@@ -32,14 +32,14 @@ jobs:
       - name: Add Nuget Source
         run: dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
-      - name: Install dependencies
-        run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore BPOR/BPOR.sln
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
+      - name: Build solution
+        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test --no-restore --verbosity normal
+        run: dotnet test BPOR/BPOR.sln --no-restore --verbosity normal
 
       - name: Deploy
         run: |
