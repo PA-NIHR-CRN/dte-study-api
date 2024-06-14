@@ -1,8 +1,9 @@
-using NIHR.Infrastructure;
-
 namespace BPOR.Rms.Services;
 
-public class HostedEmailQueueService(INotificationTaskQueue taskQueue, ILogger<HostedEmailQueueService> logger)
+public class HostedEmailQueueService(
+    IRmsTaskQueue taskQueue,
+    ILogger<HostedEmailQueueService> logger,
+    IServiceProvider serviceProvider)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -16,15 +17,17 @@ public class HostedEmailQueueService(INotificationTaskQueue taskQueue, ILogger<H
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var workItem = await taskQueue.DequeueAsync(stoppingToken);
+            var id = await taskQueue.DequeueAsync(stoppingToken);
 
             try
             {
-                await workItem(stoppingToken);
+                using var scope = serviceProvider.CreateScope();
+                var emailCampaignService = scope.ServiceProvider.GetRequiredService<IEmailCampaignService>();
+                await emailCampaignService.SendCampaignAsync(id, stoppingToken);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error occurred executing {WorkItem}", nameof(workItem));
+                logger.LogError(ex, "Error occurred executing {WorkItem}", nameof(id));
             }
         }
     }

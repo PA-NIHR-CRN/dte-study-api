@@ -574,7 +574,8 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<Point>("Location")
                         .IsRequired()
-                        .HasColumnType("point");
+                        .HasColumnType("point")
+                        .HasAnnotation("MySql:SpatialReferenceSystemId", 4326);
 
                     b.Property<int>("ParticipantId")
                         .HasColumnType("int");
@@ -583,6 +584,9 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Location")
+                        .HasAnnotation("MySql:SpatialIndex", true);
 
                     b.HasIndex("ParticipantId")
                         .IsUnique();
@@ -9587,6 +9591,13 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 2,
                             Code = "Researcher",
                             Description = "Researcher",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "Tester",
+                            Description = "Tester",
                             IsDeleted = false
                         });
                 });

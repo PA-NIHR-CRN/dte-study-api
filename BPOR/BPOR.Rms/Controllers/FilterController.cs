@@ -1,26 +1,34 @@
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.RegularExpressions;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Models;
-using BPOR.Rms.Services;
-using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure.Paging;
 using Z.EntityFramework.Plus;
 using Rbec.Postcodes;
+using NIHR.Infrastructure.Models;
+using NIHR.Infrastructure;
+using NetTopologySuite.Geometries;
+using BPOR.Domain.Entities.Configuration;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context, IFilterService filterService, IPaginationService paginationService, ILogger<HomeController> logger, IHostEnvironment hostEnvironment) : Controller
+public class FilterController(ParticipantDbContext context, IPaginationService paginationService, IHostEnvironment hostEnvironment, TimeProvider timeProvider, IPostcodeMapper locationApiClient) : Controller
 {
-    private readonly ILogger<HomeController> _logger = logger;
+    private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
     public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
+        FilterResults results = new();
+
+        if (!(User.IsInRole("Tester") && User.IsInRole("Admin")))
+        {
+            model.Testing = new();
+        }
+
         if (activity == "FilterVolunteers")
         {
-            await FilterVolunteersAsync(model, cancellationToken);
+            results = await FilterVolunteersAsync(model, cancellationToken);
         }
         else if (activity == "ClearFilters")
         {
@@ -41,6 +49,25 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
         }
 
+        model.VolunteerCount = results.Count?.Value;
+        model.Testing.VolunteerResults = results.Items?.Value ?? Page<VolunteerResult>.Empty();
+
+        if (hostEnvironment.IsProduction())
+        {
+            foreach (var x in model.Testing.VolunteerResults)
+            {
+                if (Postcode.TryParse(x.Postcode, out var postcode))
+                {
+                    x.Postcode = postcode.ToString().Split(' ').First();
+                }
+
+                x.FirstName = string.Empty;
+                x.LastName = string.Empty;
+                x.Email = string.Empty;
+                x.DateOfBirth = null;
+            }
+        }
+
         return View(model);
     }
 
@@ -56,8 +83,7 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
     [HttpPost]
     public async Task<IActionResult> SetupEmailCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
-        DateTime? dateOfBirthFrom = model.AgeTo.HasValue ? DateTime.Today.AddYears(-model.AgeTo.Value) : null;
-        DateTime? dateOfBirthTo = model.AgeFrom.HasValue ? DateTime.Today.AddYears(-model.AgeFrom.Value) : null;
+        var dobRange = _today.GetDatesWithinYearRange(model.AgeFrom, model.AgeTo);
 
         var filterCriteria = new FilterCriteria
         {
@@ -67,21 +93,21 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
             IncludeRecruited = model.SelectedVolunteersRecruited,
             RegistrationFromDate = model.RegistrationFromDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
             RegistrationToDate = model.RegistrationToDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
-            DateOfBirthFrom = dateOfBirthFrom,
-            DateOfBirthTo = dateOfBirthTo,
+            DateOfBirthFrom = dobRange.From?.ToDateTime(TimeOnly.MinValue),
+            DateOfBirthTo = dobRange.To?.ToDateTime(TimeOnly.MaxValue),
             FullPostcode = model.FullPostcode,
             SearchRadiusMiles = model.SearchRadiusMiles,
             StudyId = model.StudyId,
+            IncludeNoAreasOfInterest = model.IncludeNoAreasOfInterest,
             FilterAreaOfInterest = model.SelectedAreasOfInterest.Select(x => new FilterAreaOfInterest
             {
                 HealthConditionId = x
             }).ToList(),
             // TODO bind this directly into the model as a collection
-            FilterPostcode = GetPostcodes(model),
-            FilterGender = GetGenders(model),
+            FilterPostcode = model.GetPostcodeDistricts().Select(x => new FilterPostcode { PostcodeFragment = x }).ToList(),
+            FilterGender = model.GetGenderOptions().Select(x => new FilterGender { GenderId = (int)x }).ToList(), // TODO: support null gender
             FilterSexSameAsRegisteredAtBirth = GetSexSameAsRegisteredAtBirths(model),
             FilterEthnicGroup = GetEthnicGroups(model),
-            IncludeNoAreasOfInterest = model.IncludeNoAreasOfInterest
         };
 
         context.FilterCriterias.Add(filterCriteria);
@@ -110,228 +136,64 @@ public class FilterController(ParticipantDbContext context, IFilterService filte
         Map([model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No, model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay],
             x => new FilterSexSameAsRegisteredAtBirth { YesNoPreferNotToSay = x });
 
-    private static List<FilterGender> GetGenders(VolunteerFilterViewModel model) =>
-        Map([model.IsSexMale, model.IsSexFemale],
-            x => new FilterGender { GenderId = x });
-
-    private static List<FilterPostcode> GetPostcodes(VolunteerFilterViewModel model) =>
-        model.PostcodeDistricts?.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => new FilterPostcode { PostcodeFragment = x })?.ToList() ?? [];
-
-    protected async Task FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
+    protected async Task<FilterResults> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken token = default)
     {
-        ValidateRegistrationDates(model.RegistrationFromDate, model.RegistrationToDate);
-        ValidatePostcodeDistricts(model.PostcodeDistricts, model.FullPostcode);
-        ValidateFullPostcode(model.FullPostcode, model.SearchRadiusMiles);
-        ValidateAge(model.AgeFrom, model.AgeTo);
+        FilterResults results = new();
 
         if (ModelState.IsValid)
         {
-            try
+            // TODO: provide more consistent location lookup
+            // possibly in middleware.
+            CoordinatesModel? location = null;
+            if (model.FullPostcode is not null && model.SearchRadiusMiles is not null && model.SearchRadiusMiles > 0)
             {
-                var query = await filterService.FilterVolunteersAsync(model, cancellationToken);
-                model.VolunteerCount = await query.CountAsync(cancellationToken);
+                location = await locationApiClient.GetCoordinatesFromPostcodeAsync(model.FullPostcode, token);
 
-                if (model.Testing.ShowResults)
+                if (location is null)
                 {
-                    model.Testing.VolunteerResults = await query.Select(x => new VolunteerResult
-                    {
-                        Id = x.Id,
-                        Email = x.Email,
-                        Postcode = x.Address == null ? null : x.Address.Postcode,
-                        AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
-                        DateOfBirth = x.DateOfBirth,
-                        Age = x.DateOfBirth.YearsTo(DateTime.Today),
-                        Gender = x.Gender.Code,
-                        Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
-                        // TODO: add distance from radius search
-                        FirstName = x.FirstName,
-                        LastName = x.LastName,
-                        HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
-                        HasRegistered = x.RegistrationConsentAtUtc,
-                        EthnicGroup = x.EthnicGroup,
-                        GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
-                    })
-                    .OrderBy(x => x.Id)
-                    .PageAsync(paginationService, cancellationToken);
+                    ModelState.AddModelError(nameof(model.FullPostcode), $"Unable to determine the location of the postcode '{model.FullPostcode}'.");
 
-                    if (hostEnvironment.IsProduction())
-                    {
-                        foreach (var x in model.Testing.VolunteerResults)
-                        {
-                            if (Postcode.TryParse(x.Postcode, out var postcode))
-                            {
-                                x.Postcode = postcode.ToString().Split(' ').First();
-                            }
-
-                            x.FirstName = string.Empty;
-                            x.LastName = string.Empty;
-                            x.Email = string.Empty;
-                            x.DateOfBirth = null;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "An error occurred while filtering volunteers.");
-                _logger.LogError(ex, "An error occurred while filtering volunteers.");
-            }
-
-
-        }
-    }
-
-    private void ValidateFullPostcode(string? fullPostcode, double? searchRadiusMiles)
-    {
-
-        if (!String.IsNullOrEmpty(fullPostcode))
-        {
-            if (!Postcode.TryParse(fullPostcode, out Postcode postcode))
-            {
-                ModelState.AddModelError("FullPostcode",
-                        "Enter a full UK postcode");
-            }
-        }
-
-        if (!String.IsNullOrEmpty(fullPostcode) && searchRadiusMiles == null)
-        {
-            ModelState.AddModelError("SearchRadiusMiles",
-                        "Enter a radius");
-        }
-
-        if (String.IsNullOrEmpty(fullPostcode) && searchRadiusMiles != null)
-        {
-            ModelState.AddModelError("FullPostcode",
-                        "Enter a postcode");
-        }
-
-        if (!String.IsNullOrEmpty(fullPostcode) && searchRadiusMiles == 0)
-        {
-            ModelState.AddModelError("SearchRadiusMiles",
-                        "Search radius must be greater than 0");
-        }
-    }
-
-    private void ValidatePostcodeDistricts(string? postcodeDistricts, string? fullPostcode)
-    {
-        if (!String.IsNullOrEmpty(postcodeDistricts) && !String.IsNullOrEmpty(fullPostcode))
-        {
-            ModelState.AddModelError("PostcodeDistricts",
-                        "Postcode district search and Full postcode search cannot be applied at the same time");
-        }
-
-        if (!string.IsNullOrEmpty(postcodeDistricts))
-        {
-            var postcodeDistrictsList = postcodeDistricts.Split(",");
-            string pattern = @"^[A-Za-z]{1,2}[0-9]{1,2}[A-Za-z]?$";
-
-            foreach (var item in postcodeDistrictsList)
-            {
-                if (!Regex.IsMatch(item.Trim(), pattern))
-                {
-                    ModelState.AddModelError("PostcodeDistricts",
-                        "Enter a UK postcode district in the correct format, like PO15 or LS1");
-                }
-            }
-        }
-    }
-
-    private void ValidateAge(int? ageFrom, int? ageTo)
-    {
-        if (ageFrom > ageTo)
-        {
-            // TODO: I think this is too restrictive
-            ModelState.AddModelError("AgeFrom", "The minimum age must be lower than the maximum age");
-        }
-    }
-
-    private void ValidateRegistrationDates(GovUkDate registrationFromDate, GovUkDate registrationToDate)
-    {
-        if ((registrationFromDate.Day != null && registrationFromDate.Month != null &&
-             registrationFromDate.Year != null) ||
-            (registrationToDate.Day != null && registrationToDate.Month != null && registrationToDate.Year != null))
-        {
-
-            if (registrationFromDate.ToDateOnly() > DateOnly.FromDateTime(DateTime.Today))
-            {
-                ModelState.AddModelError("RegistrationFromDateDay",
-                    "The date of volunteer registration must be on or before today");
-            }
-
-            if (registrationToDate.ToDateOnly() > DateOnly.FromDateTime(DateTime.Today))
-            {
-                ModelState.AddModelError("RegistrationToDateDay",
-                    "The date of volunteer registration must be on or before today");
-            }
-
-            if (registrationFromDate.Year.HasValue && registrationFromDate.Year < 2022)
-            {
-                ModelState.AddModelError("RegistrationFromDateYear", "Year must be a number that is 2022 or later");
-            }
-
-            if (registrationToDate.Year.HasValue && registrationToDate.Year < 2022)
-            {
-                ModelState.AddModelError("RegistrationToDateYear", "Year must be a number that is 2022 or later");
-            }
-
-            if (registrationFromDate.ToDateOnly().HasValue && registrationToDate.ToDateOnly().HasValue)
-            {
-                if (registrationFromDate.ToDateOnly() > registrationToDate.ToDateOnly())
-                {
-                    ModelState.AddModelError("RegistrationFromDateDay",
-                        "Registration 'From' date must be on or before 'To' date");
-                }
-            }
-        }
-        else
-        {
-            var fromDateValues = new List<DateValues>();
-
-            if (registrationFromDate.Day != null || registrationFromDate.Month != null ||
-                registrationFromDate.Year != null)
-            {
-                fromDateValues.Add(new DateValues
-                { Key = "RegistrationFromDate.Day", Unit = "day", Value = registrationFromDate.Day });
-                fromDateValues.Add(new DateValues
-                { Key = "RegistrationFromDate.Month", Unit = "month", Value = registrationFromDate.Month });
-                fromDateValues.Add(new DateValues
-                { Key = "RegistrationFromDate.Year", Unit = "year", Value = registrationFromDate.Year });
-
-                foreach (var val in fromDateValues)
-                {
-                    if (val.Value == null)
-                    {
-                        ModelState.AddModelError(val.Key,
-                            "The date of volunteer registration must include a " + val.Unit);
-                    }
+                    return results;
                 }
             }
 
-            if (registrationToDate.Day != null || registrationToDate.Month != null || registrationToDate.Year != null)
-            {
-                fromDateValues.Add(new DateValues
-                { Key = "RegistrationToDate.Day", Unit = "day", Value = registrationToDate.Day });
-                fromDateValues.Add(new DateValues
-                { Key = "RegistrationToDate.Month", Unit = "month", Value = registrationToDate.Month });
-                fromDateValues.Add(new DateValues
-                { Key = "RegistrationToDate.Year", Unit = "year", Value = registrationToDate.Year });
+            var query = context.Participants.FilterVolunteers(timeProvider, model, location);
 
-                foreach (var val in fromDateValues)
+            results.Count = query.DeferredCount().FutureValue();
+
+            if (model.Testing.ShowResults)
+            {
+                var point = location is not null ? new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid } : null;
+
+                results.Items = query.Select(x => new VolunteerResult
                 {
-                    if (val.Value == null)
-                    {
-                        ModelState.AddModelError(val.Key,
-                            "The date of volunteer registration must include a " + val.Unit);
-                    }
-                }
+                    Id = x.Id,
+                    Email = x.Email,
+                    Postcode = x.Address == null ? null : x.Address.Postcode,
+                    AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
+                    DateOfBirth = x.DateOfBirth,
+                    Age = x.DateOfBirth.YearsTo(_today),
+                    Gender = x.Gender.Code,
+                    Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
+                    DistanceInMiles = point != null && x.ParticipantLocation != null ? x.ParticipantLocation.Location.Distance(point) / 1609.344 : null,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
+                    HasRegistered = x.RegistrationConsentAtUtc,
+                    EthnicGroup = x.EthnicGroup,
+                    GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
+                })
+                .OrderBy(x => x.Id)
+                .DeferredPage(paginationService);
             }
         }
-    }
 
-    public class DateValues
-    {
-        public string Key { get; set; }
-        public string Unit { get; set; }
-        public int? Value { get; set; }
+        return results;
     }
+}
+
+public class FilterResults
+{
+    public PageDeferred<VolunteerResult>? Items { get; internal set; }
+    public QueryFutureValue<int>? Count { get; internal set; }
 }

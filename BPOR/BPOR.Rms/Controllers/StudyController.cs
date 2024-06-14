@@ -111,10 +111,15 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         }
         else if (action == "Save" && model.Step == 2)
         {
-            if (model.StudyName.Length > 255)
+            if (string.IsNullOrEmpty(model.StudyName))
+            {
+                ModelState.AddModelError("StudyName", "Enter the study name");
+            }
+            else if (model.StudyName.Length > 255)
             {
                 ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
             }
+            
             if (ModelState.IsValid)
             {
                 var study = new Study

@@ -1,16 +1,20 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NIHR.Infrastructure;
+using NIHR.NotificationService.Interfaces;
+
+namespace NIHR.NotificationService.Services;
 
 public class HostedNotificationQueueService : BackgroundService
 {
     private readonly ILogger<HostedNotificationQueueService> _logger;
+    private readonly INotificationService _notificationService;
     private readonly INotificationTaskQueue _taskQueue;
 
-    public HostedNotificationQueueService(INotificationTaskQueue taskQueue, ILogger<HostedNotificationQueueService> logger)
+    public HostedNotificationQueueService(INotificationTaskQueue taskQueue, ILogger<HostedNotificationQueueService> logger, INotificationService notificationService)
     {
         _taskQueue = taskQueue;
         _logger = logger;
+        _notificationService = notificationService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,7 +33,7 @@ public class HostedNotificationQueueService : BackgroundService
 
             try
             {
-                await workItem(stoppingToken);
+                await _notificationService.SendBatchEmailAsync(workItem, stoppingToken);
             }
             catch (Exception ex)
             {

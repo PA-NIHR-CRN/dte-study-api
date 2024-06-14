@@ -20,5 +20,6 @@ namespace BPOR.Rms.Models.Filter
         public DateTime? HasRegistered { get; internal set; }
         public string? EthnicGroup { get; internal set; }
         public bool? GenderIsSameAsSexRegisteredAtBirth { get; internal set; }
+        public double? DistanceInMiles { get; internal set; }
     }
 }

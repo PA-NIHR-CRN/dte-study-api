@@ -1,29 +1,37 @@
 using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
+using BPOR.Rms;
 using BPOR.Rms.Constants;
+using BPOR.Rms.Helpers;
 using BPOR.Rms.Mappers;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Volunteer;
 using BPOR.Rms.Services;
-using BPOR.Rms.Settings;
 using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using NIHR.Infrastructure;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
+using NIHR.Infrastructure.Interfaces;
+using NIHR.Infrastructure.Models;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
+using Polly;
 
 public class EmailCampaignService(
     ILogger<EmailCampaignService> logger,
-    IOptions<AppSettings> appSettings,
     IRefDataService refDataService,
     INotificationService notificationService,
-    IFilterService filterService,
     INotificationTaskQueue taskQueue,
     ParticipantDbContext context,
-    IReferenceGenerator referenceGenerator)
+    IReferenceGenerator referenceGenerator,
+    IEncryptionService encryptionService,
+    UrlGenerationHelper urlGenerationHelper,
+    IPostcodeMapper locationApiClient,
+    TimeProvider timeProvider
+    )
     : IEmailCampaignService
 {
     public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
@@ -70,7 +78,15 @@ public class EmailCampaignService(
         int? targetGroupSize, CancellationToken cancellationToken)
     {
         var filter = FilterMapper.MapToFilterModel(dbFilter);
-        var volunteerQuery = await filterService.FilterVolunteersAsync(filter, cancellationToken);
+
+        // TODO: save the original search location co-ordinates in the FilterCriteria
+        CoordinatesModel? location = null;
+        if (dbFilter.FullPostcode is not null && dbFilter.SearchRadiusMiles is not null && dbFilter.SearchRadiusMiles > 0)
+        {
+            location = await locationApiClient.GetCoordinatesFromPostcodeAsync(dbFilter.FullPostcode, cancellationToken);
+        }
+
+        var volunteerQuery = context.Participants.FilterVolunteers(timeProvider, filter, location);
 
         return await volunteerQuery
             .Where(v => !string.IsNullOrEmpty(v.Email))
@@ -108,24 +124,16 @@ public class EmailCampaignService(
     private async Task SaveChangesWithRetryAsync(List<ProcessingResults> emailQueue,
         CancellationToken cancellationToken)
     {
-        var retryCount = 0;
-        const int maxRetries = 3;
-
-        while (retryCount < maxRetries)
+        var retryPolicy = Policy
+            .Handle<DbUpdateException>(IsUniqueConstraintViolation)
+            .RetryAsync(3, onRetry: (exception, retryCount) =>
         {
-            try
-            {
-                await context.SaveChangesAsync(cancellationToken);
-                break;
-            }
-            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
-            {
-                logger.LogError(ex, "Error saving email campaign participants, attempt {Attempt}", retryCount + 1);
-                retryCount++;
+                logger.LogError(exception, "Error saving email campaign participants, attempt {Attempt}", retryCount);
                 UpdateUniqueConstraintViolations(emailQueue);
+            });
+
+        await retryPolicy.ExecuteAsync(async () => await context.SaveChangesAsync(cancellationToken));
             }
-        }
-    }
 
     private void UpdateUniqueConstraintViolations(List<ProcessingResults> emailQueue)
     {
@@ -202,7 +210,10 @@ public class EmailCampaignService(
             { "emailCampaignParticipantId", emailCampaignParticipant.Id },
             { "firstName", volunteer.FirstName },
             { "lastName", volunteer.LastName },
-            { "uniqueLink", $"{appSettings.Value.BaseUrl}/NotifyCallback/registerinterest?reference={reference}" },
+            {
+                "uniqueLink",
+                urlGenerationHelper.GenerateRegisterInterestUrl(encryptionService.Encrypt(reference))
+            }
         };
         processingResult.PersonalisationData[volunteer.Email] = personalisation;
 
@@ -228,16 +239,12 @@ public class EmailCampaignService(
     {
         foreach (var results in emailQueue)
         {
-            await taskQueue.QueueBackgroundWorkItemAsync(async token =>
+            await taskQueue.QueueBackgroundWorkItemAsync(new SendBatchEmailRequest
             {
-                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, token);
-                await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
-                {
-                    EmailAddresses = results.EmailAddresses,
-                    PersonalisationData = results.PersonalisationData,
-                    EmailTemplateId = campaign.EmailTemplateId
-                }, linkedCts.Token);
-            });
+                EmailAddresses = results.EmailAddresses,
+                PersonalisationData = results.PersonalisationData,
+                EmailTemplateId = campaign.EmailTemplateId
+            }, cancellationToken);
         }
     }
 
@@ -249,7 +256,7 @@ public class EmailCampaignService(
                      (int)personalisation["emailCampaignParticipantId"] == participantId))
         {
             personalisation["uniqueLink"] =
-                $"{appSettings.Value.BaseUrl}/NotifyCallback/registerinterest?reference={newReference}";
+                urlGenerationHelper.GenerateRegisterInterestUrl(encryptionService.Encrypt(newReference));
         }
 
         var studyParticipant =

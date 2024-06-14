@@ -3,8 +3,11 @@ using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NIHR.Infrastructure;
+using NIHR.Infrastructure.Settings;
 using System.Security.Claims;
+
 public class IdgAuthenticationMiddleware
 {
     private const string AccountNotRegisteredPath = "/Account/NotRegistered";
@@ -16,7 +19,7 @@ public class IdgAuthenticationMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context, ParticipantDbContext dbContext, ICurrentUserIdAccessor<int> currentUserIdAccessor, ICurrentUserProvider<User> userProvider)
+    public async Task InvokeAsync(HttpContext context, ParticipantDbContext dbContext, ICurrentUserIdAccessor<int> currentUserIdAccessor, ICurrentUserProvider<User> userProvider, IOptions<AuthenticationSettings> authenticationOptions)
     {
         ArgumentNullException.ThrowIfNull(context);
 
@@ -34,6 +37,13 @@ public class IdgAuthenticationMiddleware
         }
 
         var token = context.RequestAborted;
+
+
+        if (authenticationOptions.Value.Bypass)
+        {
+            var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, authenticationOptions.Value.BypassUserId)], "Bypass");
+            context.User = new ClaimsPrincipal(identity);
+        }
 
         var userId = context.User.GetId();
         var isAuthenticated = context.User.Identity?.IsAuthenticated ?? false;

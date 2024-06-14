@@ -1,12 +1,12 @@
 using System.Threading.Channels;
-using NIHR.Infrastructure;
+using BPOR.Rms.Services;
 
 namespace BPOR.Rms;
 
 public class RmsTaskQueue : IRmsTaskQueue
 {
     private readonly ILogger _logger;
-    private readonly Channel<Func<CancellationToken, ValueTask>> _queue;
+    private readonly Channel<int> _queue;
 
     public RmsTaskQueue(int capacity, ILogger logger)
     {
@@ -16,17 +16,18 @@ public class RmsTaskQueue : IRmsTaskQueue
             FullMode = BoundedChannelFullMode.Wait
         };
 
-        _queue = Channel.CreateBounded<Func<CancellationToken, ValueTask>>(options);
+        _queue = Channel.CreateBounded<int>(options);
     }
+    
 
-    public async ValueTask QueueBackgroundWorkItemAsync(Func<CancellationToken, ValueTask> workItem)
+    public async ValueTask QueueBackgroundWorkItemAsync(int id, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Queueing background work item");
-        ArgumentNullException.ThrowIfNull(workItem);
-        await _queue.Writer.WriteAsync(workItem);
+        ArgumentNullException.ThrowIfNull(id);
+        await _queue.Writer.WriteAsync(id, cancellationToken);
     }
 
-    public async ValueTask<Func<CancellationToken, ValueTask>> DequeueAsync(CancellationToken cancellationToken)
+    async ValueTask<int> IRmsTaskQueue.DequeueAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Dequeuing background work item");
         return await _queue.Reader.ReadAsync(cancellationToken);

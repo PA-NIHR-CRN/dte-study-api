@@ -11,8 +11,8 @@ namespace NIHR.Infrastructure.Settings
         [Required] public string ClientId { get; set; } = string.Empty;
         [Required] public string ClientSecret { get; set; } = string.Empty;
 
-        public bool Bypass { get; set; } = true; // TODO: switch to false when environments are configured.
-
+        public bool Bypass { get; set; }
+        public string BypassUserId { get; set; } = string.Empty;
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
