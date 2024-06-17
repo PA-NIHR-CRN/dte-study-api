@@ -4,8 +4,6 @@
     NIHR Funding
 </h1>
 
-@await Html.PartialAsync("Partials/_ErrorSummary", Model)
-
 <div class="govuk-form-group @(Html.ViewData.ModelState["FundingCode"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="FundingCode" class="govuk-label" for="FundingCode">
         @Html.DisplayNameFor(model => model.FundingCode)

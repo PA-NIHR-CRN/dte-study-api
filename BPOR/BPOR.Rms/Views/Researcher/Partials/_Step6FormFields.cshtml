@@ -4,8 +4,6 @@
     Target population
 </h1>
 
-@await Html.PartialAsync("Partials/_ErrorSummary", Model)
-
 <div class="govuk-form-group @(Html.ViewData.ModelState["UKRecruitmentTarget"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="UKRecruitmentTarget" class="govuk-label" for="UKRecruitmentTarget">
         @Html.DisplayNameFor(model => model.UKRecruitmentTarget)

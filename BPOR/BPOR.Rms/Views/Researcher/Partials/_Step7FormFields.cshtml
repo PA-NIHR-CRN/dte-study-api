@@ -4,8 +4,6 @@
     Study recruitment
 </h1>
 
-@await Html.PartialAsync("Partials/_ErrorSummary", Model)
-
 <div class="govuk-form-group  @(Html.ViewData.ModelState["RecruitmentStartDate.Day"]?.Errors.Count > 0 || Html.ViewData.ModelState["RecruitmentStartDate.Month"]?.Errors.Count > 0 || Html.ViewData.ModelState["RecruitmentStartDate.Year"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="UKRecruitmentTarget" class="govuk-label" for="UKRecruitmentTarget">
         Recruitment start date (UK)?

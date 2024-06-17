@@ -4,8 +4,6 @@
     NIHR Clinical Research Network (CRN) portfolio status
 </h1>
 
-@await Html.PartialAsync("Partials/_ErrorSummary", Model)
-
 <div class="govuk-form-group @(Html.ViewData.ModelState["PortfolioSubmissionStatus"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="PortfolioSubmissionStatus" class="govuk-label" for="PortfolioSubmissionStatus">
         @Html.DisplayNameFor(model => model.PortfolioSubmissionStatus)

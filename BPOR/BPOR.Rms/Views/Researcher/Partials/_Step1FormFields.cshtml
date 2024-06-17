@@ -4,8 +4,6 @@
     Study information
 </h1>
 
-@await Html.PartialAsync("Partials/_ErrorSummary", Model)
-
 <div class="govuk-form-group @(Html.ViewData.ModelState["ShortName"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="ShortName" class="govuk-label" for="ShortName">
         @Html.DisplayNameFor(model => model.ShortName)
