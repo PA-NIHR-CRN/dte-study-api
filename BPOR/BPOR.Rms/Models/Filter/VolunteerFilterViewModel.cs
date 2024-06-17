@@ -48,7 +48,7 @@ public class VolunteerFilterViewModel : IValidatableObject
     public string? FullPostcode { get; set; }
 
     [Display(Name = "Radius")]
-    [IntegerOrDecimal(ErrorMessage = "Enter a whole number or a number with one decimal place, like 8 or 1.3")]
+    [IntegerOrDecimal(ErrorMessage = "Enter a whole number or a number with one decimal place, like 8 or 1.3", RequiredIfNotNull = nameof(FullPostcode))]
     public double? SearchRadiusMiles { get; set; }
 
     // Demographic information
@@ -221,8 +221,14 @@ public class VolunteerFilterViewModel : IValidatableObject
 
         if (!string.IsNullOrEmpty(FullPostcode) && SearchRadiusMiles == null)
         {
-            yield return new ValidationResult(
-                        "Enter a radius", [nameof(SearchRadiusMiles)]);
+            var results = new List<ValidationResult>();
+            if (!Validator.TryValidateProperty(SearchRadiusMiles, validationContext, results))
+            {
+                foreach (var item in results)
+                {
+                    yield return new ValidationResult(item.ErrorMessage, [nameof(SearchRadiusMiles)]);
+                }
+            }
         }
 
         if (string.IsNullOrEmpty(FullPostcode) && SearchRadiusMiles != null)
@@ -323,17 +329,17 @@ public class GovUkDate : IValidatableObject
 
         if (!Day.HasValue)
         {
-            yield return new ValidationResult($"{validationContext.GetMemberDisplayName(nameof(Day))} must include a day.", [nameof(Day)]);
+            yield return new ValidationResult($"{validationContext.DisplayName} must include a day.", [nameof(Day)]);
         }
 
         if (!Month.HasValue)
         {
-            yield return new ValidationResult($"{validationContext.GetMemberDisplayName(nameof(Month))} must include a month.", [nameof(Month)]);
+            yield return new ValidationResult($"{validationContext.DisplayName} must include a month.", [nameof(Month)]);
         }
 
         if (!Year.HasValue)
         {
-            yield return new ValidationResult($"{validationContext.GetMemberDisplayName(nameof(Year))} must include a year.", [nameof(Year)]);
+            yield return new ValidationResult($"{validationContext.DisplayName} must include a year.", [nameof(Year)]);
         }
     }
 }
