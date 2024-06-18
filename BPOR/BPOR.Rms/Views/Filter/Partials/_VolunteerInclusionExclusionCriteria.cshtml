@@ -5,11 +5,37 @@
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             @if (Model.HasStudy())
             {
-                <include-exclude-dropdown for="SelectedVolunteersContacted" />
-                <include-exclude-dropdown for="SelectedVolunteersRegisteredInterest" />
+                @Html.LabelFor(m => m.SelectedVolunteersContacted, new { @class = "govuk-label exclusion_label" })
+                <div class="govuk-hint">
+                    Do you want to find volunteers who have already been contacted about this study?
+                </div>
+                @Html.DropDownListFor(
+                         m => m.SelectedVolunteersContacted,
+                         Model.VolunteersContactedItems,
+                         new { @class = "govuk-select govuk-select-custom" }
+                         )
+
+                @Html.LabelFor(m => m.SelectedVolunteersRegisteredInterest, new { @class = "govuk-label exclusion_label" })
+                <div class="govuk-hint">
+                    Do you want to find volunteers who have registered an interest in participating in this study?
+                </div>
+                @Html.DropDownListFor(
+                         m => m.SelectedVolunteersRegisteredInterest,
+                         Model.VolunteersRegisteredInterestItems,
+                         new { @class = "govuk-select govuk-select-custom" }
+                         )
+
                 @if (Model.ShowRecruitedFilter)
                 {
-                    <include-exclude-dropdown for="SelectedVolunteersRecruited" />
+                    @Html.LabelFor(m => m.SelectedVolunteersRecruited, new { @class = "govuk-label exclusion_label" })
+                    <div class="govuk-hint">
+                        Do you want to find volunteers who have been recruited to this study?
+                    </div>
+                    @Html.DropDownListFor(
+                             m => m.SelectedVolunteersRecruited,
+                             Model.VolunteersRecruitedItems,
+                             new { @class = "govuk-select govuk-select-custom" }
+                             )
                 }
                 else
                 {
@@ -22,7 +48,15 @@
                 }
             }
 
-            <include-exclude-dropdown for="SelectedVolunteersCompletedRegistration" />
+            @Html.LabelFor(m => m.SelectedVolunteersCompletedRegistration, new { @class = "govuk-label exclusion_label" })
+            <div class="govuk-hint">
+                Do you want to find volunteers who have completed the volunteer registration process?
+            </div>
+            @Html.DropDownListFor(
+                     m => m.SelectedVolunteersCompletedRegistration,
+                     Model.VolunteersCompletedRegistrationItems,
+                     new { @class = "govuk-select govuk-select-custom" }
+                     )
         </legend>
     </fieldset>
 </div>

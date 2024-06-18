@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities.Configuration;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using NIHR.Infrastructure.Paging;
 using Rbec.Postcodes;
 using System.ComponentModel.DataAnnotations;
@@ -21,12 +22,67 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     [Display(Name = "Volunteers contacted")]
     public bool? SelectedVolunteersContacted { get; set; }
+    public IEnumerable<SelectListItem> VolunteersContactedItems { get; set; } = SetVolunteersContactedItems();
+
+    private static IEnumerable<SelectListItem> SetVolunteersContactedItems()
+    {
+        var items = new List<SelectListItem>
+        {
+            new SelectListItem { Value = string.Empty, Text = "No preference" },
+            new SelectListItem { Value = true.ToString(), Text = "Contacted" },
+            new SelectListItem { Value = false.ToString(), Text = "Not contacted" }
+        }; 
+           
+        return items;
+    }
+
     [Display(Name = "Volunteers recruited")]
     public bool? SelectedVolunteersRecruited { get; set; }
+    public IEnumerable<SelectListItem> VolunteersRecruitedItems { get; set; } = SetVolunteersRecruitedItems();
+
+    private static IEnumerable<SelectListItem> SetVolunteersRecruitedItems()
+    {
+        var items = new List<SelectListItem>
+        {
+            new SelectListItem { Value = string.Empty, Text = "No preference" },
+            new SelectListItem { Value = true.ToString(), Text = "Recruited" },
+            new SelectListItem { Value = false.ToString(), Text = "Not recruited" }
+        };
+
+        return items;
+    }
+
     [Display(Name = "Volunteers registered interest")]
     public bool? SelectedVolunteersRegisteredInterest { get; set; }
+    public IEnumerable<SelectListItem> VolunteersRegisteredInterestItems { get; set; } = SetVolunteersRegisteredInterestItems();
+
+    private static IEnumerable<SelectListItem> SetVolunteersRegisteredInterestItems()
+    {
+        var items = new List<SelectListItem>
+        {
+            new SelectListItem { Value = string.Empty, Text = "No preference" },
+            new SelectListItem { Value = true.ToString(), Text = "Registered interest" },
+            new SelectListItem { Value = false.ToString(), Text = "Not registered interest" }
+        };
+
+        return items;
+    }
+
     [Display(Name = "Volunteers completed registration")]
     public bool? SelectedVolunteersCompletedRegistration { get; set; }
+    public IEnumerable<SelectListItem> VolunteersCompletedRegistrationItems { get; set; } = SetVolunteersCompletedRegistrationItems();
+
+    private static IEnumerable<SelectListItem> SetVolunteersCompletedRegistrationItems()
+    {
+        var items = new List<SelectListItem>
+        {
+            new SelectListItem { Value = string.Empty, Text = "No preference" },
+            new SelectListItem { Value = true.ToString(), Text = "Completed registration" },
+            new SelectListItem { Value = false.ToString(), Text = "Not completed registration" }
+        };
+
+        return items;
+    }
 
     // Areas of research volunteers are interested in
     [Display(Name = "Areas of research volunteers are interested in")]
