@@ -11,10 +11,15 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Helpers;
+using BPOR.Rms.Settings;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
+using Dte.Common;
+using Dte.Common.Contracts;
+using Dte.Common.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using NIHR.Infrastructure.Interfaces;
+using NIHR.Infrastructure.Services;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
@@ -33,7 +38,6 @@ public static class DependencyInjection
         services.AddControllersWithViews().AddRazorRuntimeCompilation();
         services.AddHttpContextAccessor();
         services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-        services.AddSingleton(TimeProvider.System);
         
         services.AddScoped<IEmailCampaignService, EmailCampaignService>();
         services.AddScoped<IPostcodeMapper, LocationApiClient>();
@@ -42,14 +46,23 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserIdAccessor<int>, SimpleCurrentUserIdAccessor<int>>();
         services.AddScoped<ICurrentUserProvider<User>, CurrentUserProvider<User>>();
         services.AddScoped<IReferenceGenerator, ReferenceGenerator>();
+        services.AddScoped<IContentProvider, ContentfulService>();
 
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
         services.AddTransient<UrlGenerationHelper>();
+        services.AddTransient<IRichTextToHtmlService, RichTextToHtmlService>();
 
         services.AddDistributedMemoryCache();
         services.AddPaging();
         services.AddDataProtection();
+        
+        services.GetSectionAndValidate<AppSettings>(configuration);
+        services.GetSectionAndValidate<ContentSettings>(configuration);
+        var contentful = services.GetSectionAndValidate<ContentfulSettings>(configuration);
+        services.AddSingleton<ContentfulSettings>(contentful.Value);
+        // TODO make AddContentfulServices use IOptions
+        services.AddContentfulServices(configuration);
 
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();

@@ -1,4 +1,5 @@
-﻿@{
+﻿@model BPOR.Rms.Models.Home.HomeViewModel
+@{
     ViewData["Title"] = "Welcome to the Be Part of Research volunteer registry - Be Part of Research";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var signedOut = !(User?.Identity?.IsAuthenticated ?? false) && Context.Request.Query.ContainsKey("signed-out");
@@ -26,12 +27,7 @@
 
 <div class="govuk-grid-row govuk-!-margin-bottom-5">
     <div class="govuk-grid-column-one-half">
-        <h1 class="govuk-heading-xl">Welcome to the Be Part of Research volunteer registry</h1>
-        
-        <p class="govuk-body">This service gives researchers and sponsors free access to our UK wide registry of research-engaged volunteers.</p>
-        <p class="govuk-body">Our service supports all types of health and care research studies and all specialties and conditions.</p>
-        <p class="govuk-body">Our system enables you to identify volunteers for your study through a wide range of data including age, ethnic group, sex, location and condition.</p>
-        <p class="govuk-body">To gain access to our registry of volunteers, you need to create an NIHR account and provide a few details about you and your study. You may already have an NIHR account if you have previously used another NIHR service (for example, Sponsor Engagement, NIHR Learn, or CPMS).</p>
+        @Html.Raw(Model.Content)
     </div>
 </div>
 
