@@ -251,6 +251,13 @@ else if (!Model.HasSearched)
         <p class="govuk-body">
             @(Model.IsResearcher ? "You haven’t added any studies yet, please apply to add a study now" : "You haven’t added any studies yet, please add a study now")
         </p>
-        @Html.ActionLink($"{(Model.IsResearcher ? "Apply to add study" : "Add study")}", "Create", "Study", null, new { @class = "govuk-button" })
+        @if (Model.IsResearcher)
+        {
+            @Html.ActionLink(" Apply to add a study", "TermsAndConditions", "Researcher", null, new { @class = "govuk-button" })
+        }
+        else
+        {
+            @Html.ActionLink(" Add study", "Create", "Study", null, new { @class = "govuk-button" })
+        }
     </div>
 }

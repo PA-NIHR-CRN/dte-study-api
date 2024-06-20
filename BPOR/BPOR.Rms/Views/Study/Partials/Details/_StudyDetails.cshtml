@@ -32,7 +32,10 @@
                 @Html.DisplayFor(model => model.Study.StudyName)
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="2">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.StudyName)</span></a>
+                @if (!Model.IsResearcher)
+                {
+                    <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="2">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.StudyName)</span></a>
+                }               
             </dd>
         </div>
         <div class="govuk-summary-list__row">
@@ -43,7 +46,10 @@
                 @Html.DisplayFor(model => model.Study.CpmsId)
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="2">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.CpmsId)</span></a>
+                @if (!Model.IsResearcher)
+                {
+                    <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="2">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.CpmsId)</span></a>
+                }                
             </dd>
         </div>
         <div class="govuk-summary-list__row">
@@ -54,7 +60,10 @@
                 @Html.DisplayFor(model => model.Study.FullName)
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.FullName)</span></a>
+                @if (!Model.IsResearcher)
+                {
+                    <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.FullName)</span></a>
+                }         
             </dd>
         </div>
         <div class="govuk-summary-list__row">
@@ -65,7 +74,10 @@
                 @Html.DisplayFor(model => model.Study.EmailAddress)
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.EmailAddress)</span></a>
+                @if (!Model.IsResearcher)
+                {
+                    <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.EmailAddress)</span></a>
+                }         
             </dd>
         </div>
     </dl>

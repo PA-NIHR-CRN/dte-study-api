@@ -1,0 +1,82 @@
+﻿@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+
+
+@{
+    ViewData["Title"] = "Submit a study - Be Part of Research volunteer registry - Be Part of Research";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (ViewData["ShowProgressBar"] != null && (bool)ViewData["ShowProgressBar"])
+{
+    @section ProgressBar {
+    @await Html.PartialAsync("Partials/_ProgressBar", Model)
+    }
+}
+
+
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
+
+        <form asp-action="SubmitStudy">
+            <input type="hidden" asp-for="Step" value="@Model.Step" />
+            <input type="hidden" asp-for="RedirectToCheckYourAnswers" value="@Model.RedirectToCheckYourAnswers" />
+
+            <div style="@(Model.Step == 1 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step1FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 2 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step2FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 3 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step3FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 4 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step4FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 5 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step5FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 6 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step6FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 7 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step7FormFields", Model)
+            </div>
+
+            <div style="@(Model.Step == 8 ? "" : "display:none;")">
+                @await Html.PartialAsync("Partials/_Step8FormFields", Model)
+            </div>
+
+            <div class="govuk-button-group">
+                @if (!Model.RedirectToCheckYourAnswers)
+                {
+                    @if (Model.Step != 1 && Model.Step != Model.TotalSteps)
+                    {
+                        <button type="submit" name="action" value="Back" class="govuk-button" data_module="govuk-button">Back</button>
+                    }
+                    @if (Model.Step != Model.TotalSteps)
+                    {
+                        <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Next</button>
+                    }
+                    else
+                    {
+                        <button type="submit" name="action" value="Apply" class="govuk-button" data_module="govuk-button">Apply</button>
+                    }
+                    @Html.ActionLink("Cancel", "TermsAndConditions", "Researcher", null)
+                }
+                else
+                {
+                    <button type="submit" name="action" value="RedirectToCheckAnswers" class="govuk-button" data_module="govuk-button">Confirm</button>
+                }
+            </div>
+        </form>
+
+    </div>
+</div>

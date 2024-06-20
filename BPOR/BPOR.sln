@@ -25,11 +25,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Geolocation", "BPOR.Ge
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{7D035B4F-4ECD-4D3F-B31E-0908D729085E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.NotificationService", "NIHR.NotificationService\NIHR.NotificationService.csproj", "{A8F63B96-9F20-4FFE-84C4-02EC62D2581F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.NotificationService", "NIHR.NotificationService\NIHR.NotificationService.csproj", "{A8F63B96-9F20-4FFE-84C4-02EC62D2581F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{94C3A807-9598-40BE-8D1A-D6C6B79100F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Rms.Tests", "BPOR.Rms.Tests\BPOR.Rms.Tests.csproj", "{DB8E1DBE-FBB1-4A1F-B2D6-D75F02898EFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms.Tests", "BPOR.Rms.Tests\BPOR.Rms.Tests.csproj", "{DB8E1DBE-FBB1-4A1F-B2D6-D75F02898EFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImportGeocodeData", "ImportGeocodeData\ImportGeocodeData.csproj", "{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,6 +87,10 @@ Global
 		{DB8E1DBE-FBB1-4A1F-B2D6-D75F02898EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB8E1DBE-FBB1-4A1F-B2D6-D75F02898EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB8E1DBE-FBB1-4A1F-B2D6-D75F02898EFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

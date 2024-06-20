@@ -1,22 +1,26 @@
 @model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
 
-@* <p class="govuk-body">All fields are mandatory unless specified otherwise.</p>
-<p class="govuk-body">We will ask for your contact details, and for some basic information about the study. This will include the names of any study sponsors and funders.</p>
-<p class="govuk-body">We will also ask you whether the study has been included on the NIHR portfolio.</p>
-<p class="govuk-body">All questions are mandatory unless labelled as optional.</p>
-<p class="govuk-body">When you are ready to begin, click the "Next" button below.</p>
+<h1 class="govuk-heading-xl">
+    NIHR Clinical Research Network (CRN) portfolio status
+</h1>
 
-<h1 class="govuk-heading-l">Add a study to use the Be Part of Research registry</h1>
-<p class="govuk-body">For a study to use the Be Part of Research registry, it must be on the NIHR CRN portfolio and/or in receipt of NIHR funding.</p>
-<p class="govuk-body">If the study does not have NIHR funding and is awaiting confirmation of inclusion on the NIHR CRN portfolio, or is yet to be submitted, you can continue to complete this form and we can discuss this further with you at a later date.</p>
-<p class="govuk-body">If you have any questions about this requirement, please contact us directly at <a>bepartofresearch-volunteerservice@nihr.ac.uk</a></p>
-<div class="govuk-checkboxes" data-module="govuk-checkboxes">
-    <div class="govuk-checkboxes__item">
-        <input asp-for="IsTermsAndConditionsAccepted" class="govuk-checkboxes__input" id="IsSexMale" type="checkbox" />
-        <span class="govuk-govuk-label govuk-checkboxes__label">
-            I confirm I have read and agree to the <a>terms and conditions.</a>
-        </span>
+<div class="govuk-form-group @(Html.ViewData.ModelState["PortfolioSubmissionStatus"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="PortfolioSubmissionStatus" class="govuk-label" for="PortfolioSubmissionStatus">
+        @Html.DisplayNameFor(model => model.PortfolioSubmissionStatus)
+    </label>
+
+    <div class="govuk-radios" data-module="govuk-radios">
+        @if (Model.PortfolioSubmissionStatusOptions != null)
+        {
+            foreach (var option in Model.PortfolioSubmissionStatusOptions)
+            {
+                <div class="govuk-radios__item">
+                    @Html.RadioButtonFor(m => m.PortfolioSubmissionStatus, option.Id, new { @class = "govuk-radios__input" })
+                    @Html.Label(option.Description, option.Description, new { @class = "govuk-label govuk-radios__label" })
+                </div>
+            }
+        }
     </div>
-</div> *@
+</div>
 
 

@@ -64,15 +64,25 @@ namespace NIHR.Infrastructure.Configuration
             var executionEnv = Environment.GetEnvironmentVariable("AWS_EXECUTION_ENV");
             return !string.IsNullOrEmpty(executionEnv) && executionEnv.StartsWith("AWS_Lambda_");
         }
-
-        public static IConfigurationManager AddNihrConfiguration(this IConfigurationManager configuration, IServiceCollection services,
-    IHostEnvironment hostEnvironment)
+        public static IConfigurationBuilder AddNihrConfiguration(this IConfigurationBuilder configuration,
+IHostEnvironment hostEnvironment)
         {
             if (hostEnvironment.IsDevelopment())
             {
                 configuration.SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
             }
+
+            return configuration;
+        }
+
+
+
+            public static IConfigurationManager AddNihrConfiguration(this IConfigurationManager configuration, IServiceCollection services,
+    IHostEnvironment hostEnvironment)
+        {
+            
+            AddNihrConfiguration(configuration, hostEnvironment);
 
             var secretsManagerSettings = services.GetSectionAndValidate<AwsSecretsManagerSettings>(configuration).Value;
             if (secretsManagerSettings.Enabled)

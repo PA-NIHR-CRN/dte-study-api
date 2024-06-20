@@ -574,7 +574,8 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<Point>("Location")
                         .IsRequired()
-                        .HasColumnType("point");
+                        .HasColumnType("point")
+                        .HasAnnotation("MySql:SpatialReferenceSystemId", 4326);
 
                     b.Property<int>("ParticipantId")
                         .HasColumnType("int");
@@ -583,6 +584,9 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Location")
+                        .HasAnnotation("MySql:SpatialIndex", true);
 
                     b.HasIndex("ParticipantId")
                         .IsUnique();
@@ -9598,6 +9602,102 @@ namespace Dynamo.Stream.Handler.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BPOR.Domain.Entities.RefData.SubmissionOutcome", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SysRefSubmissionOutcome");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "Eligible for inclusion",
+                            Description = "Eligible for inclusion",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "Awaiting outcome",
+                            Description = "Awaiting outcome",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "Ineligible for inclusion",
+                            Description = "Ineligible for inclusion",
+                            IsDeleted = false
+                        });
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.RefData.Submitted", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SysRefSubmitted");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "Yes",
+                            Description = "Yes",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "No",
+                            Description = "No",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "Not yet, but will be submitted",
+                            Description = "Not yet, but will be submitted",
+                            IsDeleted = false
+                        });
+                });
+
             modelBuilder.Entity("BPOR.Domain.Entities.SourceReference", b =>
                 {
                     b.Property<int>("Id")
@@ -9629,6 +9729,12 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool?>("AlreadyOpenToRecruitment")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ChiefInvestigator")
+                        .HasColumnType("longtext");
+
                     b.Property<long?>("CpmsId")
                         .HasColumnType("bigint");
 
@@ -9648,16 +9754,46 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("FundingCode")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool?>("HasNihrFunding")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsRecruitingIdentifiableParticipants")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<int?>("ParticipantsRecruited")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("RecruitmentEndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("RecruitmentStartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("RecruitmentTarget")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Sponsors")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("StudyName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
+
+                    b.Property<int?>("SubmissionOutcomeId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SubmittedId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TargetPopulation")
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
@@ -9666,6 +9802,10 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SubmissionOutcomeId");
+
+                    b.HasIndex("SubmittedId");
 
                     b.ToTable("Studies");
                 });
@@ -10079,6 +10219,21 @@ namespace Dynamo.Stream.Handler.Migrations
                         .IsRequired();
 
                     b.Navigation("Participant");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.Study", b =>
+                {
+                    b.HasOne("BPOR.Domain.Entities.RefData.SubmissionOutcome", "SubmissionOutcome")
+                        .WithMany()
+                        .HasForeignKey("SubmissionOutcomeId");
+
+                    b.HasOne("BPOR.Domain.Entities.RefData.Submitted", "Submitted")
+                        .WithMany()
+                        .HasForeignKey("SubmittedId");
+
+                    b.Navigation("SubmissionOutcome");
+
+                    b.Navigation("Submitted");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.StudyParticipantEnrollment", b =>

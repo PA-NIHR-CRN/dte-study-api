@@ -26,7 +26,7 @@ public class AuditInterceptor : SaveChangesInterceptor
 
         var _ = eventData.Context.TryGetService(out ILogger<AuditInterceptor>? logger);
 
-        if (!eventData.Context.TryGetService(out ICurrentUserIdProvider<int>? currentUserIdProvider) || currentUserIdProvider?.UserId is null)
+        if (!eventData.Context.TryGetService(out ICurrentUserIdProvider<int>? currentUserIdProvider) || (currentUserIdProvider?.SuppressUnknownUserIdWarning == false && currentUserIdProvider?.UserId is null))
         {
             logger?.LogWarning("Unable to determine user id. Ensure that an instance of {providerName} is configured and returns the id of the current user.", nameof(ICurrentUserIdProvider<int>));
 

@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
+using BPOR.Domain.Entities.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
@@ -58,7 +59,7 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
             {
                 participant.ParticipantLocation = new ParticipantLocation
                 {
-                    Location = new Point(latLng.Longitude, latLng.Latitude) { SRID = 4326 }
+                    Location = new Point(latLng.Longitude, latLng.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid }
                 };
             }
         }
@@ -132,7 +133,7 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
                 var randomCoordinates = GenerateRandomCoordinatesForUK();
                 participant.ParticipantLocation = new ParticipantLocation
                 {
-                    Location = new Point(randomCoordinates.longitude, randomCoordinates.latitude) { SRID = 4326 }
+                    Location = new Point(randomCoordinates.longitude, randomCoordinates.latitude) { SRID = ParticipantLocationConfiguration.LocationSrid }
                 };
             }
 
@@ -174,7 +175,7 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
     {
         var coordinates = await locationApiClient.GetCoordinatesFromPostcodeAsync(postcode, cancellationToken);
 
-        var point = new Point(coordinates.Longitude, coordinates.Latitude) { SRID = 4326 };
+        var point = new Point(coordinates.Longitude, coordinates.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
 
         var distanceInMeters = radiusInMiles * 1609.344;
         var boundingBox = point.Buffer(distanceInMeters / 111320).Envelope;

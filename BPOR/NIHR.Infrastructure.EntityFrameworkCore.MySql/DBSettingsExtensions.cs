@@ -9,7 +9,7 @@ namespace NIHR.Infrastructure.EntityFrameworkCore
             var connectionStringBuilder = new MySqlConnectionStringBuilder
             {
                 Server = source.Host,
-                Port = (uint)source.Port,
+                Port = source.Port ?? 3306,
                 UserID = source.Username,
                 Password = source.Password,
                 Database = source.Database,

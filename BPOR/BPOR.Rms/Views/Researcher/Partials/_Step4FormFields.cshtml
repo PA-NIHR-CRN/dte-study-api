@@ -1,0 +1,22 @@
+﻿@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+
+<h1 class="govuk-heading-xl">
+    NIHR Funding
+</h1>
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["HasFunding"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="HasFunding" class="govuk-label" for="HasFunding">
+        @Html.DisplayNameFor(model => model.HasFunding)
+    </label>
+
+    <div class="govuk-radios" data-module="govuk-radios">
+        <div class="govuk-radios__item">
+            @Html.RadioButtonFor(m => m.HasFunding, true, new { @class = "govuk-radios__input", id = "hasFundingYes" })
+            @Html.Label("Yes", "Yes", new { @class = "govuk-label govuk-radios__label" })
+        </div>
+        <div class="govuk-radios__item">
+            @Html.RadioButtonFor(m => m.HasFunding, false, new { @class = "govuk-radios__input", id = "hasFundingNo" })
+            @Html.Label("No", "No", new { @class = "govuk-label govuk-radios__label" })
+        </div>
+    </div>
+</div>

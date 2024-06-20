@@ -1,0 +1,47 @@
+﻿@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+
+<h1 class="govuk-heading-xl">
+    Target population
+</h1>
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["UKRecruitmentTarget"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="UKRecruitmentTarget" class="govuk-label" for="UKRecruitmentTarget">
+        @Html.DisplayNameFor(model => model.UKRecruitmentTarget)
+    </label>
+    <div id="event-name-hint" class="govuk-hint">
+        If any participants have already been recruited, exclude these from the target.
+    </div>
+    @if (Html.ViewData.ModelState["UKRecruitmentTarget"]?.Errors.Count > 0)
+    {
+        <span id="UKRecruitmentTarget-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.UKRecruitmentTarget)
+        </span>
+        <input asp-for="UKRecruitmentTarget" class="govuk-input  govuk-input govuk-input--error" id="UKRecruitmentTarget" aria-describedby="UKRecruitmentTarget-error" value="@(Model.UKRecruitmentTarget)" />
+    }
+    else
+    {
+        <input asp-for="UKRecruitmentTarget" class=" govuk-input" id="UKRecruitmentTarget" value="@(Model.UKRecruitmentTarget)" />
+    }
+</div>
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["TargetPopulation"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="TargetPopulation" class="govuk-label" for="TargetPopulation">
+        @Html.DisplayNameFor(model => model.TargetPopulation)
+    </label>
+    <div id="event-name-hint" class="govuk-hint">
+        Provide a brief summary, for example women aged 50+ with asthma, or healthy volunteers aged 18 to 35.
+    </div>
+    @if (Html.ViewData.ModelState["TargetPopulation"]?.Errors.Count > 0)
+    {
+        <span id="TargetPopulation-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.TargetPopulation)
+        </span>
+        <textarea asp-for="TargetPopulation" class="govuk-textarea govuk-textarea--error" id="TargetPopulation" aria-describedby="TargetPopulation-error" value="@(Model.TargetPopulation)"></textarea>
+    }
+    else
+    {
+        <textarea asp-for="TargetPopulation" class=" govuk-textarea" id="TargetPopulation" value="@(Model.TargetPopulation)"></textarea>
+    }
+</div>

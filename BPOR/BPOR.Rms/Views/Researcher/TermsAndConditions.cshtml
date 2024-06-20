@@ -1,0 +1,54 @@
+﻿@model BPOR.Rms.Models.Researcher.ResearcherTermsAndConditionsViewModel
+
+@{
+    ViewData["Title"] = "Submit a study - Be Part of Research volunteer registry - Be Part of Research";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
+        <h1 class="govuk-heading-xl">Submit a study to use the Be Part of Research volunteer registry</h1>
+
+        <p class="govuk-body">Use this form to submit a study to use the Be Part of Research volunteer registry.</p>
+
+        <p class="govuk-body">We will ask for some information about the study so that we can confirm its eligibility to use the registry. This will include information relating to the study sponsors and funders, recruitment targets, and whether the study has been included on the NIHR Clinical Research Network (CRN) portfolio.</p>
+
+        <p class="govuk-body">All questions are mandatory unless labelled as optional.</p>
+
+        <h1 class="govuk-heading-l">Before you start</h1>
+
+        <p class="govuk-body">For a study to use the Be Part of Research volunteer registry, it must be on the NIHR Clinical Research Network (CRN) portfolio and/or in receipt of NIHR funding.</p>
+
+        <p class="govuk-body">If the study does not have NIHR funding and is awaiting confirmation of inclusion on the NIHR CRN portfolio, or is yet to be submitted, you can continue to complete this form and we can discuss this with you at a later date.</p>
+
+        <p class="govuk-body">If you have any questions about this requirement, please contact us directly at <a href="mailto:bepartofresearch-volunteerservice@nihr.ac.uk">bepartofresearch-volunteerservice@nihr.ac.uk</a>.</p>
+    </div>
+</div>
+
+@using (Html.BeginForm(FormMethod.Post))
+{
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <div class="govuk-form-group @(Html.ViewData.ModelState["AgreedToTermsAndConditions"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset">
+                    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                        <div class="govuk-checkboxes__item">
+                            <input asp-for="AgreedToTermsAndConditions" class="govuk-checkboxes__input" id="AgreedToTermsAndConditions" type="checkbox" />
+                            <label class="govuk-label govuk-checkboxes__label" for="AgreedToTermsAndConditions">
+                                I confirm I have read and agree to the <a href="https://bepartofresearch.nihr.ac.uk/site-policies/terms-and-conditions/" target="_blank">terms and conditions</a>
+                            </label>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-one-half">
+            <button type="submit" class="govuk-button">
+                Apply now
+            </button>
+        </div>
+    </div>
+}
