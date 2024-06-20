@@ -1,4 +1,5 @@
-﻿using NIHR.NotificationService.Interfaces;
+﻿using NIHR.NotificationService.Context;
+using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Notify.Models.Responses;
 
@@ -11,9 +12,14 @@ namespace BPOR.Rms.Startup
             return Task.CompletedTask;
         }
 
-        public Task<EmailNotificationResponse> SendBatchEmailAsync(SendBatchEmailRequest request, CancellationToken cancellationToken)
+        public async Task SendPreviewEmailAsync(SendEmailRequest request, CancellationToken cancellationToken)
         {
-            return Task.FromResult(new EmailNotificationResponse());
+            await Task.CompletedTask;
+        }
+
+        public async Task<EmailNotificationResponse> SendBatchEmailAsync(List<Notification> notifications, CancellationToken cancellationToken)
+        {
+            return new EmailNotificationResponse();
         }
 
         public Task<TemplateList> GetTemplatesAsync(CancellationToken cancellationToken)

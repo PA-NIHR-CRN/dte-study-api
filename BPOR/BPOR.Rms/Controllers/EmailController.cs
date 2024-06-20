@@ -3,7 +3,6 @@ using BPOR.Domain.Entities;
 using BPOR.Rms.Helpers;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
-using BPOR.Rms.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -21,16 +20,13 @@ public class EmailController(
     INotificationService notificationService,
     IDistributedCache cache,
     ILogger<EmailController> logger,
-    IEmailCampaignService emailCampaignService,
     IRmsTaskQueue taskQueue,
-    IHostEnvironment hostEnvironment,
     IEncryptionService encryptionService,
-    UrlGenerationHelper urlGenerationHelper)
+    UrlGenerationHelper urlGenerationHelper,
+    IHostEnvironment hostEnvironment)
     : Controller
 {
     private const string _emailCacheKey = "EmailTemplates";
-    private readonly IHostEnvironment _hostEnvironment = hostEnvironment;
-
     public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model)
     {
         await PopulateReferenceDataAsync(model, true);
@@ -59,7 +55,7 @@ public class EmailController(
 
         if (ModelState.IsValid)
         {
-            if (_hostEnvironment.IsProduction()) // TODO: remove for final release
+            if (hostEnvironment.IsProduction()) // TODO: remove for final release
             {
                 TempData.AddNotification(new NotificationBannerModel
                 {
@@ -132,7 +128,7 @@ public class EmailController(
             var selectedTemplateName = model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
             var personalisationData = emailAddresses.ToDictionary(
                 email => email,
-                email => new Dictionary<string, dynamic>
+                email => new Dictionary<string, string>
                 {
                     { "email", email },
                     { "emailCampaignParticipantId", "PreviewEmailReference" },
@@ -144,22 +140,28 @@ public class EmailController(
                     },
                 });
 
-            try
+            foreach (var email in emailAddresses)
             {
-                await notificationService.SendBatchEmailAsync(new SendBatchEmailRequest
+                try
                 {
-                    EmailAddresses = emailAddresses,
-                    EmailTemplateId = new Guid(model.SelectedTemplateId),
-                    PersonalisationData = new Dictionary<string, Dictionary<string, dynamic>>(personalisationData)
-                }, cancellationToken);
+                    await notificationService.SendPreviewEmailAsync(new SendEmailRequest
+                    {
+                        EmailAddress = email,
+                        EmailTemplateId = model.SelectedTemplateId,
+                        Personalisation = personalisationData[email],
+                        Reference = "PreviewEmailReference"
+                    }, cancellationToken);
+                }
+                catch (NotifyClientException e)
+                {
+                    logger.LogError(e, "Error sending preview email");
+                    ModelState.AddModelError(nameof(model.PreviewEmails),
+                        "Gov Notify does not accept the email address(es) provided.");
+                    return View(nameof(SetupCampaign), model);
+                }
             }
-            catch (NotifyClientException e)
-            {
-                logger.LogError(e, "Error sending preview email");
-                ModelState.AddModelError(nameof(model.PreviewEmails), "Gov Notify does not accept the email address(es) provided.");
-                return View(nameof(SetupCampaign), model);
-            }
-            
+
+
             TempData.AddSuccessNotification(
                 $"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
         }

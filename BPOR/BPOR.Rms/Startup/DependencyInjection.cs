@@ -15,11 +15,13 @@ using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using NIHR.Infrastructure.Interfaces;
-using NIHR.NotificationService;
+using NIHR.Infrastructure.Settings;
+using NIHR.NotificationService.Context;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
 using NIHR.NotificationService.Settings;
 using Notify.Client;
+using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
 
 namespace BPOR.Rms.Startup;
 
@@ -51,6 +53,8 @@ public static class DependencyInjection
         services.AddPaging();
         services.AddDataProtection();
 
+        services.GetSectionAndValidate<AppSettings>(configuration);
+
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
 
@@ -58,6 +62,13 @@ public static class DependencyInjection
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), builder =>
             {
                 builder.UseNetTopologySuite();
+                builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            }));
+        
+        var notificationDbConnectionString = configuration.GetConnectionString("NotificationDb");
+        services.AddDbContext<NotificationDbContext>(options =>
+            options.UseMySql(notificationDbConnectionString, ServerVersion.AutoDetect(notificationDbConnectionString), builder =>
+            {
                 builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             }));
 
@@ -73,13 +84,6 @@ public static class DependencyInjection
             logger);
         services.AddHealthChecks().AddMySql(connectionString).AddCheck<LocationHealthCheck>("Location",
             Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
-
-        // Register NotificationTaskQueue and RmsTaskQueue with distinct interfaces
-        services.AddSingleton<INotificationTaskQueue, NotificationTaskQueue>(provider =>
-        {
-            var notificationTaskQueueLogger = provider.GetRequiredService<ILogger<NotificationTaskQueue>>();
-            return new NotificationTaskQueue(100, notificationTaskQueueLogger);
-        });
 
         services.AddSingleton<IRmsTaskQueue, RmsTaskQueue>(provider =>
         {

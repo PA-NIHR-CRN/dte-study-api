@@ -1,50 +1,84 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NIHR.NotificationService.Context;
 using NIHR.NotificationService.Interfaces;
 
-namespace NIHR.NotificationService.Services;
-
-public class HostedNotificationQueueService : BackgroundService
+namespace NIHR.NotificationService.Services
 {
-    private readonly ILogger<HostedNotificationQueueService> _logger;
-    private readonly INotificationService _notificationService;
-    private readonly INotificationTaskQueue _taskQueue;
-
-    public HostedNotificationQueueService(INotificationTaskQueue taskQueue, ILogger<HostedNotificationQueueService> logger, INotificationService notificationService)
+    public class HostedNotificationQueueService : BackgroundService
     {
-        _taskQueue = taskQueue;
-        _logger = logger;
-        _notificationService = notificationService;
-    }
+        private readonly ILogger<HostedNotificationQueueService> _logger;
+        private readonly IServiceProvider _serviceProvider;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation("Queued Hosted Service is running");
-
-        await BackgroundProcessing(stoppingToken);
-    }
-
-    private async Task BackgroundProcessing(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
+        public HostedNotificationQueueService(ILogger<HostedNotificationQueueService> logger,
+            IServiceProvider serviceProvider)
         {
-            _logger.LogInformation("Queued Hosted Service is working");
-            var workItem = await _taskQueue.DequeueAsync(stoppingToken);
+            _logger = logger;
+            _serviceProvider = serviceProvider;
+        }
 
-            try
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            _logger.LogInformation("Hosted Notification Queue Service is running");
+
+            while (!stoppingToken.IsCancellationRequested)
             {
-                await _notificationService.SendBatchEmailAsync(workItem, stoppingToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred executing {WorkItem}", nameof(workItem));
+                try
+                {
+                    await ProcessNotificationsAsync(stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while processing notifications");
+                }
+
+                // Wait for a certain period before polling again
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
-    }
 
-    public override async Task StopAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation("Queued Hosted Service is stopping");
-        await base.StopAsync(stoppingToken);
+        private async Task ProcessNotificationsAsync(CancellationToken stoppingToken)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
+
+            var notifications = await context.Notifications
+                .Where(n => !n.IsProcessed)
+                .OrderBy(n => n.Id)
+                .Take(1000).Include(n => n.NotificationDatas)
+                .ToListAsync(stoppingToken);
+
+            if (notifications.Count > 0)
+            {
+                _logger.LogInformation("Processing {NotificationsCount} notifications", notifications.Count);
+
+                var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                try
+                {
+                    await notificationService.SendBatchEmailAsync(notifications, stoppingToken);
+
+                    foreach (var notification in notifications)
+                    {
+                        // TODO are we marking as processed or deleting the notification?
+                        notification.IsProcessed = true; 
+                    }
+
+                    await context.SaveChangesAsync(stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while sending notification emails");
+                }
+            }
+        }
+
+        public override async Task StopAsync(CancellationToken stoppingToken)
+        {
+            _logger.LogInformation("Hosted Notification Queue Service is stopping");
+            await base.StopAsync(stoppingToken);
+        }
     }
 }

@@ -37,13 +37,14 @@ public class NotifyCallbackController(
             return Ok();
         }
 
-        if (!int.TryParse(message.Reference, out var participantEmailId))
+        if (!int.TryParse(message.Reference, out var emailCampaignParticipantId))
         {
             return BadRequest("Invalid reference.");
         }
 
         var participantEmail = await context.EmailCampaignParticipants
-            .FindAsync(new object[] { participantEmailId }, cancellationToken);
+            .Where(x => x.Id == emailCampaignParticipantId)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (participantEmail == null)
         {
