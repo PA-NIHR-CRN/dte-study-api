@@ -15,26 +15,19 @@ using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Settings;
 using NIHR.Infrastructure.Models;
-using NIHR.NotificationService.Interfaces;
-using NIHR.NotificationService.Models;
 using Polly;
 using NIHR.NotificationService.Context;
 
 public class EmailCampaignService(
     ILogger<EmailCampaignService> logger,
     IRefDataService refDataService,
-    IFilterService filterService,
-    INotificationService notificationService,
-    INotificationTaskQueue taskQueue,
     ParticipantDbContext context,
     IEncryptionService encryptionService,
     IOptions<AppSettings> appSettings,
     IReferenceGenerator referenceGenerator,
     NotificationDbContext notificationContext,
-    UrlGenerationHelper urlGenerationHelper,
     IPostcodeMapper locationApiClient,
     TimeProvider timeProvider)
-    )
     : IEmailCampaignService
 {
     public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
