@@ -10,15 +10,22 @@ using NIHR.Infrastructure.Models;
 using NIHR.Infrastructure;
 using NetTopologySuite.Geometries;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Rms.Startup;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context, IPaginationService paginationService, IHostEnvironment hostEnvironment, TimeProvider timeProvider, IPostcodeMapper locationApiClient) : Controller
+public class FilterController(ParticipantDbContext context, IPaginationService paginationService, IHostEnvironment hostEnvironment, TimeProvider timeProvider, IPostcodeMapper locationApiClient, ICurrentUserProvider<User> currentUserProvider) : Controller
 {
     private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
     public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
+        bool isResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
+        if (isResearcher)
+        {
+            ViewData["ShowBackLink"] = true;
+            return View("~/Views/Shared/Unauthorised.cshtml");
+        }
         FilterResults results = new();
 
         if (!(User.IsInRole("Tester") && User.IsInRole("Admin")))
