@@ -162,6 +162,11 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
 
                     return results;
                 }
+                else
+                {
+                    model.Testing.LocationOrigin = location;
+                    model.Testing.RadiusInMetres = model.SearchRadiusMiles * 1609.344;
+                }
             }
 
             var query = context.Participants.FilterVolunteers(timeProvider, model, location);
@@ -182,7 +187,7 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
                     Age = x.DateOfBirth.YearsTo(_today),
                     Gender = x.Gender.Code,
                     Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
-                    DistanceInMiles = point != null && x.ParticipantLocation != null ? x.ParticipantLocation.Location.Distance(point) / 1609.344 : null,
+                    DistanceInMiles = point == null || x.ParticipantLocation == null ? null : x.ParticipantLocation.Location.Distance(point) / 1609.344,
                     FirstName = x.FirstName,
                     LastName = x.LastName,
                     HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,

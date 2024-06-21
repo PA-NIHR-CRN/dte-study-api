@@ -1,0 +1,75 @@
+﻿@using NIHR.Infrastructure.Paging
+@using BPOR.Rms.Models.Filter
+@using System.Globalization
+@model VolunteerFilterViewModel
+
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin="" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+
+<div id="map"></div>
+
+<style>
+    #map {
+        height: 75vh;
+    }
+</style>
+
+<script>
+
+    const locationData = @Html.Raw(Json.Serialize(Model.Testing.VolunteerResults.Select(x => new {x.Id, Longitude = x.Location.X, Latitude = x.Location.Y, x.Postcode, DistanceInMiles = x.DistanceInMiles?.ToString("0.#") })));
+    const locationOrigin = @Html.Raw(Json.Serialize(Model.Testing.LocationOrigin));
+    const radiusInMetres = @Html.Raw(Json.Serialize(Model.Testing.RadiusInMetres));
+    const originLabel = @Html.Raw(Json.Serialize(Model.FullPostcode));
+
+    document.addEventListener('DOMContentLoaded', () => {
+        var map = L.map('map', { attributionControl: false, center: [locationOrigin.latitude, locationOrigin.longitude], zoom: 13});
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        var markers = locationData.map((x) => L.marker([x.latitude, x.longitude], {alt: x.postcode}).bindTooltip(`Id: ${x.id}<br/>${x.postcode}` + (x.distanceInMiles ? `<br/>${x.distanceInMiles}mi` : '')));
+
+        markers.forEach((x) => {
+            x.addTo(map);
+        });
+
+        var group = new L.featureGroup([...markers]);
+
+        if (locationOrigin && radiusInMetres) {
+            var circle = L.circle([locationOrigin.latitude, locationOrigin.longitude], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.2,
+                radius: radiusInMetres
+            }).addTo(map);
+
+            group.addLayer(circle);
+
+            var origin = L.circleMarker([locationOrigin.latitude, locationOrigin.longitude], {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.9,
+                radius: 5
+            }).addTo(map);
+
+            group.addLayer(origin);
+
+            var originMarker = L.marker([locationOrigin.latitude, locationOrigin.longitude], { alt: originLabel }).bindTooltip(originLabel + '<br/>Search location').addTo(map);
+            group.addLayer(originMarker);
+
+        }
+
+        map.fitBounds(group.getBounds().pad(0.1));
+
+        L.control.scale({ imperial: true, metric: false }).addTo(map);
+    });
+</script>

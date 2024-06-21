@@ -1,5 +1,6 @@
 using BPOR.Domain.Entities.Configuration;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using NIHR.Infrastructure.Models;
 using NIHR.Infrastructure.Paging;
 using Rbec.Postcodes;
 using System.ComponentModel.DataAnnotations;
@@ -405,4 +406,6 @@ public class VolunteerFilterViewTestingModel
     public Page<VolunteerResult> VolunteerResults { get; set; } = Page<VolunteerResult>.Empty();
 
     public bool ShowResults { get; set; }
+    public CoordinatesModel? LocationOrigin { get; set; }
+    public double? RadiusInMetres { get; set; }
 }
