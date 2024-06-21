@@ -253,7 +253,8 @@ public class EmailCampaignService(
                         Value =
                             $"{appSettings.Value.WebAppBaseUrl}/NotifyCallback/registerinterest?reference={encryptionService.Encrypt(reference)}"
                     },
-                    new() { Key = "emailTemplateId", Value = campaign.EmailTemplateId.ToString() }
+                    new() { Key = "emailTemplateId", Value = campaign.EmailTemplateId.ToString() },
+                    new() { Key = "uniqueReference", Value = reference }
                 }
             };
 
