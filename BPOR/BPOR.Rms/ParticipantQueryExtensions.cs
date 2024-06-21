@@ -33,7 +33,7 @@ public static class ParticipantQueryExtensions
     {
         if (selectedVolunteersRecruited.HasValue)
         {
-            return query.Where(x => x.StudyParticipantEnrollments.Any(e => e.StudyId == studyId && (e.EnrolledAt != null) == selectedVolunteersRecruited.Value));
+            return query.Where(x => x.StudyParticipantEnrollments.Any(e => e.EnrolledAt.HasValue && e.StudyId == studyId) == selectedVolunteersRecruited.Value);
         }
 
         return query;
