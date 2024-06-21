@@ -15,8 +15,7 @@
         else
         {
             @Html.ActionLink(" Add study", "Create", "Study", null, new { @id = "addStudyBtn", @class = "govuk-button govuk-button--secondary", data_module = "govuk-button--secondary" })
+            @Html.ActionLink(" Find volunteers", "Index", "Filter", null, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
         }
-       
-        @Html.ActionLink(" Find volunteers", "Index", "Filter", null, new { @id = "findVolunteerBtn",  @class = "govuk-button", data_module = "govuk-button" })
     </div>
 </div>

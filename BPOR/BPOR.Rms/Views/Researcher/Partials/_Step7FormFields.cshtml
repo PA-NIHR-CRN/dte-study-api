@@ -108,7 +108,9 @@
     <label asp-for="RecruitingIdentifiableVolunteers" class="govuk-label" for="RecruitingIdentifiableVolunteers">
         @Html.DisplayNameFor(model => model.RecruitingIdentifiableVolunteers)
     </label>
-
+    <div id="event-name-hint" class="govuk-hint">
+        If you plan to recruit named individual volunteers to this study, select yes. If the study is recruiting an anonymous sample (for example, through a survey), select no.
+    </div>
     <div class="govuk-radios" data-module="govuk-radios">
         <div class="govuk-radios__item">
             @Html.RadioButtonFor(m => m.RecruitingIdentifiableVolunteers, true, new { @class = "govuk-radios__input", id = "recruitingIdentifiableYes" })
