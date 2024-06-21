@@ -24,7 +24,7 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
         if (isResearcher)
         {
             ViewData["ShowBackLink"] = true;
-            return View("~/Views/Shared/Unauthorised.cshtml");
+            return View("Unauthorised");
         }
         FilterResults results = new();
 
