@@ -23,6 +23,7 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
         bool isResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
         if (isResearcher)
         {
+            ViewData["BackLinkURL"] = HttpContext.Request.Headers["Referer"].ToString();
             ViewData["ShowBackLink"] = true;
             return View("Unauthorised");
         }

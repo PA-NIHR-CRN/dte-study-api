@@ -2,6 +2,7 @@ using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Startup;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure.Paging;
@@ -78,6 +79,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
     // GET: Study/Create
     public IActionResult Create()
     {
+        ViewData["BackLinkURL"] = "/Study";
         ViewData["ShowBackLink"] = true;
         ViewData["ShowProgressBar"] = true;
         ViewData["ProgressPercentage"] = 0;
@@ -94,6 +96,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         StudyFormViewModel model, string action)
     {
         ViewData["ShowBackLink"] = true;
+        ViewData["BackLinkURL"] = "/Study";
         ViewData["ShowProgressBar"] = true;
         ViewData["ProgressPercentage"] = (model.Step - 1) * 50;
         if (action == "Next" && model.Step == 1)
@@ -106,6 +109,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
             {
                 model.Step = 2;
                 ViewData["ProgressPercentage"] = (model.Step - 1) * 50;
+                ViewData["BackLinkURL"] = HttpContext.Request.Headers["Referer"].ToString();
                 return View(model);
             }
         }
@@ -142,6 +146,8 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
                     StudyName = study.StudyName,
                 });
             }
+
+            ViewData["BackLinkURL"] = HttpContext.Request.Headers["Referer"].ToString();
 
             return View(model);
         }

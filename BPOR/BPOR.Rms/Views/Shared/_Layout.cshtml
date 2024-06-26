@@ -36,6 +36,7 @@
 
     @{
         bool showBackLink = ViewData["ShowBackLink"] as bool? ?? false;
+        string backLink = ViewData["BackLinkURL"] as string ?? "";
     }
 
     <div class="govuk-width-container">
@@ -43,7 +44,14 @@
         <div class="govuk-back-link-container @(showBackLink ? "" : "float-content-right")">
                 @if (showBackLink)
                 {
-                    <a class="govuk-back-link" onclick="window.history.back()">Back</a>
+                    if (!String.IsNullOrEmpty(backLink))
+                    {
+                        <a class="govuk-back-link" href="@backLink">Back</a>
+                    }
+                    else
+                    {
+                        <a class="govuk-back-link" onclick="window.history.back()">Back</a>
+                    }          
                 }
                 @if (ViewData["ShowProgressBar"] as bool? ?? false)
                 {

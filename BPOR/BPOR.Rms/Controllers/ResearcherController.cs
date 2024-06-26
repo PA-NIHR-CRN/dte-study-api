@@ -13,6 +13,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 {
     public IActionResult Create()
     {
+        ViewData["BackLinkURL"] = HttpContext.Request.Headers["Referer"].ToString();
         ViewData["ShowBackLink"] = true;
         return View(new ResearcherFormViewModel());
     }
@@ -21,6 +22,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     [HttpPost]
     public IActionResult Create(ResearcherFormViewModel model)
     {
+        ViewData["BackLinkURL"] = HttpContext.Request.Headers["Referer"].ToString();
         ViewData["ShowBackLink"] = true;
 
         if (model.Password?.Length < 12)
