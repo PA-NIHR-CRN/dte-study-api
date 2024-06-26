@@ -2,6 +2,7 @@
 @model BPOR.Rms.Models.Email.SetupCampaignViewModel
 
 @{
+    ViewData["Title"] = "Set up an email campaign";
     ViewData.AddBreadcrumb("All Studies", "/Study/Index");
 
     if (Model.StudyId is not null)
