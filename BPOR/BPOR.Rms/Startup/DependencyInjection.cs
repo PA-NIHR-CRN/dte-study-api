@@ -11,15 +11,15 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Helpers;
-using BPOR.Rms.Settings;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
-using Dte.Common;
 using Dte.Common.Contracts;
-using Dte.Common.Http;
+using Ganss.Xss;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using NIHR.Infrastructure.Extensions;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Services;
+using NIHR.Infrastructure.Settings;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
@@ -56,13 +56,12 @@ public static class DependencyInjection
         services.AddDistributedMemoryCache();
         services.AddPaging();
         services.AddDataProtection();
+        services.AddSingleton<HtmlSanitizer>();
         
         services.GetSectionAndValidate<AppSettings>(configuration);
-        services.GetSectionAndValidate<ContentSettings>(configuration);
-        var contentful = services.GetSectionAndValidate<ContentfulSettings>(configuration);
-        services.AddSingleton<ContentfulSettings>(contentful.Value);
-        // TODO make AddContentfulServices use IOptions
-        services.AddContentfulServices(configuration);
+        var contentfulSettings = services.GetSectionAndValidate<ContentfulSettings>(configuration);
+
+        services.AddContentfulServices(contentfulSettings.Value);
 
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
