@@ -32,7 +32,7 @@ jobs:
           IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
         run: |
           echo "Build and Output Docker image"
-          docker build -f BPOR/BPOR.Rms/Dockerfile --build-arg NUGET_PACKAGE_USERNAME=${{ secrets.NUGET_PACKAGE_USERNAME }} --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.NUGET_PACKAGE_TOKEN }} -t $IMAGE_NAME_TAG .
+          docker build -f BPOR/BPOR.Rms/Dockerfile --build-arg NUGET_PACKAGE_USERNAME=USERNAME --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} -t $IMAGE_NAME_TAG .
           docker save $IMAGE_NAME_TAG > /tmp/bpor-rms.tar
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -129,7 +129,7 @@ jobs:
           path: /tmp
 
       - name: Add Nuget Source
-        run: dotnet nuget add source --username ${{ secrets.NUGET_PACKAGE_USERNAME }} --password ${{ secrets.NUGET_PACKAGE_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
       - name: Install dotnet-ef tool
         run: dotnet tool install --global dotnet-ef
