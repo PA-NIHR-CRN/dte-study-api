@@ -56,7 +56,6 @@ public static class DependencyInjection
         services.AddDataProtection();
         services.AddSingleton<HtmlSanitizer>();
         
-        services.GetSectionAndValidate<AppSettings>(configuration);
         var contentfulSettings = services.GetSectionAndValidate<ContentfulSettings>(configuration);
 
         services.AddContentfulServices(contentfulSettings.Value);
