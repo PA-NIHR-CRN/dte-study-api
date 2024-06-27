@@ -35,7 +35,6 @@ public static class DependencyInjection
         services.AddControllersWithViews().AddRazorRuntimeCompilation();
         services.AddHttpContextAccessor();
         services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-        services.AddSingleton(TimeProvider.System);
         
         services.AddScoped<IEmailCampaignService, EmailCampaignService>();
         services.AddScoped<IPostcodeMapper, LocationApiClient>();

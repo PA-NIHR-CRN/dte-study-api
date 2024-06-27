@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService.Settings;
 using LuhnNet;
+using static System.Int32;
 
 namespace BPOR.Rms.Controllers;
 
@@ -18,7 +19,8 @@ public class NotifyCallbackController(
     ParticipantDbContext context,
     IOptions<NotificationServiceSettings> settings,
     IRefDataService refDataService,
-    IEncryptionService encryptionService
+    IEncryptionService encryptionService,
+    TimeProvider timeProvider
 ) : ControllerBase
 {
     [HttpPost]
@@ -37,7 +39,7 @@ public class NotifyCallbackController(
             return Ok();
         }
 
-        if (!int.TryParse(message.Reference, out var emailCampaignParticipantId))
+        if (!TryParse(message.Reference, out var emailCampaignParticipantId))
         {
             return BadRequest("Invalid reference.");
         }
@@ -76,23 +78,23 @@ public class NotifyCallbackController(
     public async Task<IActionResult> RegisterInterest([FromQuery] string reference, CancellationToken cancellationToken)
     {
         var decryptedReference = encryptionService.Decrypt(reference);
-        
-        if (!Luhn.IsValid(decryptedReference))
+
+        if (!TryParse(decryptedReference, out var emailCampaignParticipantId) ||
+            emailCampaignParticipantId == 0)
         {
             return BadRequest("Invalid reference.");
         }
+
         var participant = await context.EmailCampaignParticipants
-            .Where(x => x.ParticipantId == context.StudyParticipantEnrollment
-                .Where(x => x.Reference == decryptedReference)
-                .Select(x => x.ParticipantId)
-                .FirstOrDefault()).FirstOrDefaultAsync(cancellationToken);
+            .Where(p => p.Id == emailCampaignParticipantId && p.RegisteredInterestAt == null)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (participant == null)
         {
             return NotFound();
         }
 
-        participant.RegisteredInterestAt = DateTime.UtcNow;
+        participant.RegisteredInterestAt = timeProvider.GetLocalNow().DateTime;
         await context.SaveChangesAsync(cancellationToken);
 
         return Ok();

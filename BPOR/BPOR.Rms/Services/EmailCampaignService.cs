@@ -251,7 +251,7 @@ public class EmailCampaignService(
                     {
                         Key = "uniqueLink",
                         Value =
-                            $"{appSettings.Value.WebAppBaseUrl}/NotifyCallback/registerinterest?reference={encryptionService.Encrypt(reference)}"
+                            $"{appSettings.Value.WebAppBaseUrl}/NotifyCallback/registerinterest?reference={encryptionService.Encrypt(emailCampaignParticipant.Id.ToString())}"
                     },
                     new() { Key = "emailTemplateId", Value = campaign.EmailTemplateId.ToString() },
                     new() { Key = "uniqueReference", Value = reference }
