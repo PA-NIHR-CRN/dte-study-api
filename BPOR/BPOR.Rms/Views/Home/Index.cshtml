@@ -1,5 +1,4 @@
-﻿@model BPOR.Rms.Models.Home.HomeViewModel
-@{
+﻿@{
     ViewData["Title"] = "Welcome to the Be Part of Research volunteer registry - Be Part of Research";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var signedOut = !(User?.Identity?.IsAuthenticated ?? false) && Context.Request.Query.ContainsKey("signed-out");
