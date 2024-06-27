@@ -13,7 +13,6 @@ using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Helpers;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
-using Dte.Common.Contracts;
 using Ganss.Xss;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using NIHR.Infrastructure.Extensions;
@@ -51,7 +50,6 @@ public static class DependencyInjection
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
         services.AddTransient<UrlGenerationHelper>();
-        services.AddTransient<IRichTextToHtmlService, RichTextToHtmlService>();
 
         services.AddDistributedMemoryCache();
         services.AddPaging();
