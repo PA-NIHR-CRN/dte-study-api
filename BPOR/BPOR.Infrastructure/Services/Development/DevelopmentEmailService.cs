@@ -2,6 +2,7 @@ using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.Interfaces;
 
 namespace BPOR.Infrastructure.Services.Development;
 

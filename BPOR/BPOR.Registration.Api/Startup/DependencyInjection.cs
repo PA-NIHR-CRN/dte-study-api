@@ -19,6 +19,11 @@ using Dte.Common.Http;
 using Dte.Common.Services;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.Configuration;
+using NIHR.Infrastructure.Interfaces;
+using NIHR.Infrastructure.Services;
+using NIHR.Infrastructure.Settings;
+using ContentfulService = Dte.Common.Services.ContentfulService;
+using ContentfulSettings = Dte.Common.ContentfulSettings;
 
 namespace BPOR.Registration.Api.Startup;
 
@@ -32,7 +37,7 @@ public static class DependencyInjection
 
         // Settings
         services.GetSectionAndValidate<ContentfulSettings>(configuration);
-        services.GetSectionAndValidate<AppSettings>(configuration);
+        services.GetSectionAndValidate<NIHR.Infrastructure.Settings.AppSettings>(configuration);
         services.GetSectionAndValidate<EmailSettings>(configuration);
 
         // Rate limiting
