@@ -1,4 +1,6 @@
 using System.Reflection;
+using Amazon;
+using Amazon.SimpleEmail;
 using BPOR.Domain.Entities;
 using BPOR.Infrastructure.Clients;
 using BPOR.Rms.Services;
@@ -13,17 +15,21 @@ using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Helpers;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
+using Dte.Common;
+using Dte.Common.Contracts;
+using Dte.Common.Services;
 using Ganss.Xss;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using NIHR.Infrastructure.Extensions;
 using NIHR.Infrastructure.Interfaces;
-using NIHR.Infrastructure.Services;
 using NIHR.Infrastructure.Settings;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
 using NIHR.NotificationService.Settings;
 using Notify.Client;
+using ContentfulService = NIHR.Infrastructure.Services.ContentfulService;
+using ContentfulSettings = NIHR.Infrastructure.Settings.ContentfulSettings;
 
 namespace BPOR.Rms.Startup;
 
@@ -46,6 +52,8 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserProvider<User>, CurrentUserProvider<User>>();
         services.AddScoped<IReferenceGenerator, ReferenceGenerator>();
         services.AddScoped<IContentProvider, ContentfulService>();
+        services.AddScoped<IContentfulService, Dte.Common.Services.ContentfulService>();
+        services.AddScoped<IRichTextToHtmlService, RichTextToHtmlService>();
 
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
@@ -56,9 +64,18 @@ public static class DependencyInjection
         services.AddDataProtection();
         services.AddSingleton<HtmlSanitizer>();
         
+        var appSettings = services.GetSectionAndValidate<AppSettings>(configuration);
+        services.AddSingleton(appSettings.Value);
         var contentfulSettings = services.GetSectionAndValidate<ContentfulSettings>(configuration);
-
         services.AddContentfulServices(contentfulSettings.Value);
+        
+        var awsSettings = services.GetSectionAndValidate<AwsSecretsManagerSettings>(configuration).Value;
+
+        var sesConfig = new AmazonSimpleEmailServiceConfig
+        {
+            RegionEndpoint = RegionEndpoint.GetBySystemName(awsSettings.Region)
+        };
+        services.AddSingleton<IAmazonSimpleEmailService>(new AmazonSimpleEmailServiceClient(sesConfig));
 
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
