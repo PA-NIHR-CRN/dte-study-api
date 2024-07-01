@@ -1,7 +1,7 @@
 @model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
 
 @{
-    ViewData["Title"] = "Find Volunteers";
+    ViewData["Title"] = "Find volunteers";
 
     if (Model.VolunteerCount is not null)
     {
@@ -12,14 +12,14 @@
 
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    ViewData.AddBreadcrumb("All Studies", "/Study/Index");
+    ViewData.AddBreadcrumb("All studies", "/Study/Index");
 
     if (Model.StudyId is not null)
     {
-        ViewData.AddBreadcrumb("Study Page", $"/Study/Details/" + Model.StudyId);
+        ViewData.AddBreadcrumb("Study page", $"/Study/Details/" + Model.StudyId);
     }
 
-    ViewData.AddBreadcrumb("Find Volunteers", "");
+    ViewData.AddBreadcrumb("Find volunteers", "");
 }
 
 <style>

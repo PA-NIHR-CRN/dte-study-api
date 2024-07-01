@@ -26,7 +26,6 @@
         font-size: 18px;
         font-style: normal;
         font-weight: 700;
-        line-height: 0px;
         order: -1;
         padding-bottom: 10px;
     }
@@ -45,7 +44,6 @@
 .study-name-container {
         font-size: 24px;
         font-weight: 700;
-        line-height: 36px;
         }
     .study-card {
         flex-direction: row;
@@ -144,7 +142,7 @@
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
-    line-height: 24px; /* 171.429% */
+        word-break: break-word;
     }   
 
 </style>
@@ -232,7 +230,7 @@
                             else
                             {
                                 @Html.DisplayFor(modelItem => item.LatestRecruitmentTotal)
-                            }                       
+                            }
                         </p>
                     </div>
                     @Html.ActionLink("View study", "Details", new { id = item.Id }, new { @class = "govuk-button" })
@@ -242,7 +240,7 @@
 
     </div>
 
-    <pagination for="Studies" />
+    <pagination for="Studies"/>
 }
 else if (!Model.HasSearched)
 {
