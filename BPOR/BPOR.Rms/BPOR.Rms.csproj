@@ -69,7 +69,4 @@
     <ItemGroup>
       <None Include="Views\Shared\Unauthorised.cshtml" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Helpers\" />
-    </ItemGroup>
 </Project>
