@@ -1,40 +1,22 @@
 @model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
 
-<h2 class="govuk-heading-l">Demographic</h2>
-<div class="govuk-form-group @(Html.ViewData.ModelState["AgeFrom"]?.Errors.Count > 0 || Html.ViewData.ModelState["AgeTo"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-    <h3 class="govuk-label govuk-label--l">
-        Age range
-    </h3>
-    <div id="event-name-hint" class="govuk-hint">
-        Please specify the age range you wish to filter. The minimum starting age is 18.
-    </div>
-    @if (Html.ViewData.ModelState["AgeFrom"]?.Errors.Count > 0)
-    {
-        <span id="AgeFrom-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.AgeFrom)
-        </span>
-    }
-    @if (Html.ViewData.ModelState["AgeTo"]?.Errors.Count > 0)
-    {
-        <span id="AgeTo-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.AgeTo)
-        </span>
-    }
+<h2 class="govuk-heading-l">Demographics</h2>
+
+<form-group for="AgeRange" include-child-errors="true">
     <div class="govuk-grid-row-age-range">
         <div class="govuk-form-group">
             <div class="govuk-age-input__item">
-                @Html.LabelFor(m => Model.AgeFrom, new { @class = "govuk-label" })
-                <input asp-for="AgeFrom" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" inputmode="numeric" />
+                @Html.LabelFor(m => Model.AgeRange.From, new { @class = "govuk-label" })
+                <input asp-for="AgeRange.From" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" inputmode="numeric" />
             </div>
             <div class="govuk-age-input__item">
-                @Html.LabelFor(m => Model.AgeTo, new { @class = "govuk-label" })
-                <input asp-for="AgeTo" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" inputmode="numeric" />
+                @Html.LabelFor(m => Model.AgeRange.To, new { @class = "govuk-label" })
+                <input asp-for="AgeRange.To" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" inputmode="numeric" />
             </div>
         </div>
     </div>
-</div>
+</form-group>
+
 <div class="govuk-form-group">
     <fieldset class="govuk-fieldset">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">

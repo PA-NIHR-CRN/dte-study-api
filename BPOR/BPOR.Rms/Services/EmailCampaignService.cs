@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 using NIHR.Infrastructure.Interfaces;
-using NIHR.Infrastructure.Models;
 using Polly;
 using NIHR.NotificationService.Context;
 using BPOR.Rms.Controllers;
@@ -79,14 +78,14 @@ public class EmailCampaignService(
     {
         var filter = FilterMapper.MapToFilterModel(dbFilter);
 
-        // TODO: save the original search location co-ordinates in the FilterCriteria
-        CoordinatesModel? location = null;
-        if (dbFilter.FullPostcode is not null && dbFilter.SearchRadiusMiles is not null && dbFilter.SearchRadiusMiles > 0)
-        {
-            location = await locationApiClient.GetCoordinatesFromPostcodeAsync(dbFilter.FullPostcode, cancellationToken);
-        }
+        //// TODO: save the original search location co-ordinates in the FilterCriteria
+        //CoordinatesModel? location = null;
+        //if (dbFilter.FullPostcode is not null && dbFilter.SearchRadiusMiles is not null && dbFilter.SearchRadiusMiles > 0)
+        //{
+        //    location = await locationApiClient.GetCoordinatesFromPostcodeAsync(dbFilter.FullPostcode, cancellationToken);
+        //}
 
-        var volunteerQuery = context.Participants.FilterVolunteers(timeProvider, filter, location);
+        var volunteerQuery = context.Participants.FilterVolunteers(timeProvider, filter);
 
         return await volunteerQuery
             .Where(v => !string.IsNullOrEmpty(v.Email))

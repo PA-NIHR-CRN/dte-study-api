@@ -1,9 +1,8 @@
 ﻿using System.Linq.Expressions;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Rms.Models.Filter;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Geometries;
-using NIHR.Infrastructure.Models;
 
 namespace BPOR.Rms;
 
@@ -119,18 +118,21 @@ public static class ParticipantQueryExtensions
         return query;
     }
 
-    public static IQueryable<Participant> WhereWithinRadiusOfLocation(this IQueryable<Participant> query, CoordinatesModel? location, double? radiusInMiles)
+    public static IQueryable<Participant> WhereHasLocation(this IQueryable<Participant> query, PostcodeSearchModel location)
     {
-        if (location is not null && radiusInMiles is not null && radiusInMiles > 0)
+        query = query.WhereHasAnyPostcodeDistrict(location.GetPostcodeDistricts());
+        query = query.WhereWithinRadiusOfLocation(location.PostcodeRadiusSearch);
+
+        return query;
+    }
+
+    public static IQueryable<Participant> WhereWithinRadiusOfLocation(this IQueryable<Participant> query, PostcodeRadiusSearchModel postcodeSearch)
+    {
+        if (postcodeSearch is not null && postcodeSearch.SearchRadiusMiles is not null && postcodeSearch.SearchRadiusMiles >= 0)
         {
-            {
-                var point = new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
-
-                double distanceInMeters = radiusInMiles.Value * 1609.344;
-                var boundingBox = point.Buffer(distanceInMeters / 111320).Envelope;
-
-                return query.Where(x => x.ParticipantLocation.Location.Within(boundingBox) && x.ParticipantLocation.Location.IsWithinDistance(point, distanceInMeters));
-            }
+            var boundingBox = postcodeSearch.GetBoundingBox();
+            var radius = postcodeSearch.GetRadiusInMetres() ?? 0;
+            return query.Where(x => x.ParticipantLocation.Location.Within(boundingBox) && x.ParticipantLocation.Location.IsWithinDistance(postcodeSearch.Location, radius));
         }
 
         return query;

@@ -1,61 +1,21 @@
-@model BPOR.Rms.Models.Filter.VolunteerFilterViewModel
+@model BPOR.Rms.Models.Filter.PostcodeSearchModel
 
 <h2 class="govuk-heading-l">Location</h2>
 
-<div class="govuk-form-group @(Html.ViewData.ModelState["PostcodeDistricts"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-    <h3 class="govuk-label-wrapper">
-        @Html.LabelFor(m => Model.PostcodeDistricts, new { @class = "govuk-label govuk-label--l" })
-    </h3>
-    @if (Html.ViewData.ModelState["PostcodeDistricts"]?.Errors.Count > 0)
-    {
-        <span id="AgeTo-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.PostcodeDistricts)
-        </span>
-    }
-    <div id="event-name-hint" class="govuk-hint">
-        Enter one or more postcode districts separated by commas.
-        For example: SW1A, WC2B, EC1V.
-    </div>
+<form-group for="PostcodeDistricts">
     <input asp-for="PostcodeDistricts" class="govuk-input" type="text" />
-</div>
+</form-group>
 
 <h3 class="govuk-heading-m">OR</h3>
 
-<div class="govuk-form-group @(Html.ViewData.ModelState["FullPostcode"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-    <h3 class="govuk-label-wrapper">
-        @Html.LabelFor(m => Model.FullPostcode, new { @class = "govuk-label govuk-label--l" })
-    </h3>
-    @if (Html.ViewData.ModelState["FullPostcode"]?.Errors.Count > 0)
-    {
-        <span id="AgeTo-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.FullPostcode)
-        </span>
-    }
-    <div id="event-name-hint" class="govuk-hint">
-        For example: EC1A 1BB.
-    </div>
-    <input asp-for="FullPostcode" class="govuk-input govuk-input--width-10" type="text" />
-</div>
+<form-group for="PostcodeRadiusSearch.FullPostcode">
+    <input asp-for="PostcodeRadiusSearch.FullPostcode" class="govuk-input govuk-input--width-10" type="text" />
+</form-group>
 
-<div class="govuk-form-group @(Html.ViewData.ModelState["SearchRadiusMiles"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-    <h3 class="govuk-label-wrapper">
-        @Html.LabelFor(m => Model.SearchRadiusMiles, new { @class = "govuk-label govuk-label--l" })
-    </h3>
-    @if (Html.ViewData.ModelState["SearchRadiusMiles"]?.Errors.Count > 0)
-    {
-        <span id="AgeTo-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.SearchRadiusMiles)
-        </span>
-    }
-    <div id="event-name-hint" class="govuk-hint">
-        Indicate the radius for searching volunteers based on the provided full postcode.
-    </div>
+<form-group for="PostcodeRadiusSearch.SearchRadiusMiles">
     <div class="govuk-input__wrapper">
-        <input asp-for="SearchRadiusMiles" class="govuk-input govuk-input--width-5" type="text" inputmode="numeric" />
+        <input asp-for="PostcodeRadiusSearch.SearchRadiusMiles" class="govuk-input govuk-input--width-5" type="text" inputmode="numeric" />
         <div class="govuk-input__suffix" aria-hidden="true">Miles</div>
     </div>
-</div>
+</form-group>
 

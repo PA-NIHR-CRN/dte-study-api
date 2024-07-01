@@ -25,7 +25,7 @@ namespace BPOR.Rms.Models.Filter
                 }
             }
 
-            return new ValidationResult("Enter a whole number or a positive number with one decimal place, like 8 or 1.3");
+            return new ValidationResult(ErrorMessage);
         }
 
         private bool IsNullPermitted(ValidationContext validationContext)
