@@ -26,7 +26,7 @@ namespace NIHR.Infrastructure.Authentication.IDG
                 var stream = (MemoryStream)await response.Content.ReadAsStreamAsync();
                 stream.Seek(0, SeekOrigin.Begin);
 
-                using var sr = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: 0, leaveOpen: true);
+                using var sr = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
                 var errorContent = await sr.ReadToEndAsync();
                 stream.Seek(0, SeekOrigin.Begin);
 
