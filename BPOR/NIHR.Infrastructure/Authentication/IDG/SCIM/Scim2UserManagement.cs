@@ -85,7 +85,7 @@ namespace NIHR.Infrastructure.Authentication.IDG.SCIM
 
             var user = await CreateUserAsync(newUser, token);
 
-            return user.Id;
+            return user.Username;
         }
 
         public async Task<bool> UserWithEmailExistsAsync(string email, CancellationToken token)

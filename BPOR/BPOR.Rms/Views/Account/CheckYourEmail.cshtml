@@ -1,4 +1,5 @@
-﻿@model string
+﻿@model BPOR.Rms.Controllers.CreateAccountModel
+
 @using Microsoft.Extensions.Hosting
 @inject IHostEnvironment hostEnvironment
 
@@ -14,7 +15,7 @@
     <div class="govuk-grid-column-one-half">
         <h1 class="govuk-heading-l">Check your email</h1>
 
-        <p class="govuk-body">We've sent an email to <span class="email-address">@Model</span></p>
+        <p class="govuk-body">We've sent an email to <span class="email-address">@Model.Email</span></p>
 
         <p class="govuk-body">
             You'll need to click on the link in the email to confirm your email address within 24 hours.

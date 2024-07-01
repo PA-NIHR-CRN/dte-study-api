@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -15,6 +16,9 @@ namespace BPOR.Rms.TagHelpers
         public ModelExpression? For { get; set; }
 
         public bool IncludeChildErrors { get; set; }
+
+        public string? Label { get; set; } = null;
+        public string LabelLevel { get; set; } = "h3";
 
         private readonly IHtmlGenerator _generator;
 
@@ -38,7 +42,7 @@ namespace BPOR.Rms.TagHelpers
             output.TagName = "div";
             output.AddClass("govuk-form-group", HtmlEncoder.Default);
 
-            var label = _generator.GenerateLabel(ViewContext, For.ModelExplorer, For.Name, null, new { @class = "govuk-label govuk-label--l" });
+            var label = _generator.GenerateLabel(ViewContext, For.ModelExplorer, For.Name, Label, new { @class = "govuk-label govuk-label--l" });
 
 
             var modelName = label.Attributes["for"]?.Replace('_', '.') ?? string.Empty;
@@ -61,11 +65,11 @@ namespace BPOR.Rms.TagHelpers
                 output.AddClass("govuk-form-group--error", HtmlEncoder.Default);
             }
 
-            output.PreContent.AppendHtml("""<h3 class="govuk-label-wrapper">""");
+            var labelWrapper = new TagBuilder(LabelLevel);
+            labelWrapper.AddCssClass("govuk-label-wrapper");
+            labelWrapper.InnerHtml.SetHtmlContent(label);
 
-            output.PreContent.AppendHtml(label);
-
-            output.PreContent.AppendHtml("""</h3>""");
+            output.PreContent.AppendHtml(labelWrapper);
 
             if (!string.IsNullOrEmpty(For.Metadata.Description))
             {

@@ -54,6 +54,7 @@ namespace BPOR.Rms.Controllers
         }
 
         [AllowAnonymous]
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
@@ -61,29 +62,47 @@ namespace BPOR.Rms.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> CheckYourEmailAsync(string email, CancellationToken token = default)
+        public async Task<IActionResult> CreateAsync(CreateAccountModel createAccountModel, CancellationToken token = default)
         {
-            var code = _dataProtector.Protect(email, TimeSpan.FromHours(24));
-
-            var link = _linkGenerator.GetUriByName(HttpContext, nameof(VerifyEmailAsync), new { code });
-
-            var emailKey = await HasAccount(email, token)
-                ? "email-rms-registration-attempt"
-                : "email-rms-new-registration";
-
-            var emailContent = await GetEmailContent(emailKey, new { recipientEmail = email, link }, token);
-
-            await _emailService.SendEmailAsync(email, emailContent.EmailSubject, emailContent.EmailBody, token);
-
-            if (_hostEnvironment.IsDevelopment())
+            if (ModelState.IsValid)
             {
-                ViewData["email-to"] = email;
-                ViewData["email-subject"] = emailContent.EmailSubject;
-                ViewData["email-body"] = emailContent.EmailBody;
-                ViewData["email-link"] = link;
+                return await CheckYourEmailAsync(createAccountModel, token);
             }
+            else
+            {
+                return View(createAccountModel);
+            }
+        }
+        private async Task<IActionResult> CheckYourEmailAsync(CreateAccountModel createAccountModel, CancellationToken token = default)
+        {
+            if (ModelState.IsValid)
+            {
+                var code = _dataProtector.Protect(createAccountModel.Email, TimeSpan.FromHours(24));
 
-            return View(model: email);
+                var link = _linkGenerator.GetUriByName(HttpContext, nameof(VerifyEmailAsync), new { code });
+
+                var emailKey = await HasAccount(createAccountModel.Email, token)
+                    ? "email-rms-registration-attempt"
+                    : "email-rms-new-registration";
+
+                var emailContent = await GetEmailContent(emailKey, new { recipientEmail = createAccountModel.Email, link }, token);
+
+                await _emailService.SendEmailAsync(createAccountModel.Email, emailContent.EmailSubject, emailContent.EmailBody, token);
+
+                if (_hostEnvironment.IsDevelopment())
+                {
+                    ViewData["email-to"] = createAccountModel.Email;
+                    ViewData["email-subject"] = emailContent.EmailSubject;
+                    ViewData["email-body"] = emailContent.EmailBody;
+                    ViewData["email-link"] = link;
+                }
+
+                return View("CheckYourEmail", createAccountModel);
+            }
+            else
+            {
+                return View(nameof(Create), createAccountModel);
+            }
         }
 
         private async Task<EmailTemplate> GetEmailContent<TData>(string templateName, TData data, CancellationToken token)

@@ -19,17 +19,17 @@
                 <input asp-for="Code" type="hidden" />
             </div>
 
-            <div class="govuk-form-group">
+            <form-group for="FirstName">
                 <label class="govuk-label" asp-for="FirstName"></label>
                 <input class="govuk-input" asp-for="FirstName" type="text" spellcheck="false" autocomplete="given-name">
-            </div>
+            </form-group>
 
-            <div class="govuk-form-group">
+            <form-group for="LastName">
                 <label class="govuk-label" asp-for="LastName"></label>
                 <input class="govuk-input" asp-for="LastName" type="text" spellcheck="false" autocomplete="family-name">
-            </div>
+            </form-group>
 
-            <div class="govuk-form-group govuk-password-input" data-module="govuk-password-input">
+            <form-group for="Password" class="govuk-password-input" data-module="govuk-password-input">
                 <label class="govuk-label" asp-for="Password"></label>
                 <div id="password-hint" class="govuk-hint">
                     Your password must be a minimum of 12 characters
@@ -40,7 +40,7 @@
                         Show
                     </button>
                 </div>
-            </div>
+            </form-group>
 
             <button type="submit" class="govuk-button" name="submitted" value="true" data-module="govuk-button">
                 Create an account
