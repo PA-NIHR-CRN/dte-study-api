@@ -361,3 +361,7 @@ body {
 .govuk-checkboxes__item.skip-link{
     margin-bottom: unset;
 }
+
+.email-address{
+    font-weight: bold;
+}
