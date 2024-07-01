@@ -1,7 +1,9 @@
 ﻿@model BPOR.Rms.Controllers.CreateAccountModel
 
 @using Microsoft.Extensions.Hosting
+@using Microsoft.Extensions.Options
 @inject IHostEnvironment hostEnvironment
+@inject IOptions<DevelopmentSettings> developmentSettings
 
 @{
     ViewData["Title"] = "Check your email";
@@ -42,7 +44,7 @@
     </div>
 </div>
 
-@if (hostEnvironment.IsDevelopment() && !string.IsNullOrWhiteSpace(emailTo))
+@if (!hostEnvironment.IsProduction() && developmentSettings.Value.EnableUnauthenticatedTestFeatures && !string.IsNullOrWhiteSpace(emailTo))
 {
     <div class="govuk-grid-row testing-only govuk-!-margin-top-9">
         <div class="govuk-grid-column-two-thirds">

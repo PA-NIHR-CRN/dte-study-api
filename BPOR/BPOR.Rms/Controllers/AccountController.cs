@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Authentication.IDG.SCIM;
 using NIHR.Infrastructure.Interfaces;
 using System.Security.Cryptography;
@@ -22,8 +23,9 @@ namespace BPOR.Rms.Controllers
         private readonly IContentProvider _contentProvider;
         private readonly LinkGenerator _linkGenerator;
         private readonly IUserAccountStore _userAccountStore;
+        private readonly DevelopmentSettings _developmentSettings;
 
-        public AccountController(ParticipantDbContext dbContext, IDataProtectionProvider dataProtectionProvider, ILogger<AccountController> logger, IEmailService emailService, IHostEnvironment hostEnvironment, IContentProvider contentProvider, LinkGenerator linkGenerator, IUserAccountStore userAccountStore)
+        public AccountController(ParticipantDbContext dbContext, IDataProtectionProvider dataProtectionProvider, ILogger<AccountController> logger, IEmailService emailService, IHostEnvironment hostEnvironment, IContentProvider contentProvider, LinkGenerator linkGenerator, IUserAccountStore userAccountStore, IOptions<DevelopmentSettings> developmentSettings)
         {
             _dataProtector = dataProtectionProvider.CreateProtector("CreateAccountEmailLink").ToTimeLimitedDataProtector();
             _dbContext = dbContext;
@@ -33,6 +35,7 @@ namespace BPOR.Rms.Controllers
             _contentProvider = contentProvider;
             _linkGenerator = linkGenerator;
             _userAccountStore = userAccountStore;
+            _developmentSettings = developmentSettings.Value;
         }
 
         [AllowAnonymous]
@@ -89,7 +92,7 @@ namespace BPOR.Rms.Controllers
 
                 await _emailService.SendEmailAsync(createAccountModel.Email, emailContent.EmailSubject, emailContent.EmailBody, token);
 
-                if (_hostEnvironment.IsDevelopment())
+                if (!_hostEnvironment.IsProduction() && _developmentSettings.EnableUnauthenticatedTestFeatures)
                 {
                     ViewData["email-to"] = createAccountModel.Email;
                     ViewData["email-subject"] = emailContent.EmailSubject;
