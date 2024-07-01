@@ -232,7 +232,8 @@ public class VolunteerFilterViewModel : IValidatableObject
         {
             if (RegistrationFromDate.ToDateOnly() > RegistrationToDate.ToDateOnly())
             {
-                yield return new ValidationResult($"{validationContext.GetMemberDisplayName(nameof(RegistrationFromDate))} date must be on or before {validationContext.GetMemberDisplayName(nameof(RegistrationToDate))}");
+                yield return new ValidationResult($"{validationContext.GetMemberDisplayName(nameof(RegistrationFromDate))} date must be on or before {validationContext.GetMemberDisplayName(nameof(RegistrationToDate))}",
+                    new[] { $"{nameof(RegistrationFromDate)}.{nameof(RegistrationFromDate.Day)}" ,$"{nameof(RegistrationToDate)}.{nameof(RegistrationToDate.Day)}"});
             }
         }
     }

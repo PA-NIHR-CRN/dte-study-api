@@ -111,7 +111,7 @@ public class EmailController(
 
         if (!emailAddresses.Any())
         {
-            ModelState.AddModelError(nameof(model.PreviewEmails), "Enter at least one address");
+            ModelState.AddModelError(nameof(model.PreviewEmails), "Enter at least one email address");
         }
         else if (!emailAddresses.All(IsValidEmail))
         {
@@ -138,6 +138,7 @@ public class EmailController(
                         "uniqueLink",
                         urlGenerationHelper.GenerateRegisterInterestUrl(encryptionService.Encrypt("0123456789101112"))
                     },
+                    {"uniqueReference", "0123456789101112" }
                 });
 
             foreach (var email in emailAddresses)

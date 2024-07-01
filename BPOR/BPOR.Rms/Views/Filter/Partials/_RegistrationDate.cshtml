@@ -16,21 +16,21 @@
             <h4 class="govuk-label govuk-label--m">From</h4>
             @if (Html.ViewData.ModelState["RegistrationFromDate.Day"]?.Errors.Count > 0)
             {
-                <span id="RegistrationFromDateDay-error" class="govuk-error-message">
+                <span id="RegistrationFromDate_Day-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
                     @Html.ValidationMessageFor(model => model.RegistrationFromDate.Day)
                 </span>
             }
             @if (Html.ViewData.ModelState["RegistrationFromDate.Month"]?.Errors.Count > 0)
             {
-                <span id="RegistrationFromDateMonth-error" class="govuk-error-message">
+                <span id="RegistrationFromDate_Month-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
                     @Html.ValidationMessageFor(model => model.RegistrationFromDate.Month)
                 </span>
             }
             @if (Html.ViewData.ModelState["RegistrationFromDate.Year"]?.Errors.Count > 0)
             {
-                <span id="RegistrationFromDateYear-error" class="govuk-error-message">
+                <span id="RegistrationFromDate_Year-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
                     @Html.ValidationMessageFor(model => model.RegistrationFromDate.Year)
                 </span>
@@ -61,21 +61,21 @@
             <h4 class="govuk-label govuk-label--m">To</h4>
             @if (Html.ViewData.ModelState["RegistrationToDate.Day"]?.Errors.Count > 0)
             {
-                <span id="RegistrationFromDateDay-error" class="govuk-error-message">
+                <span id="RegistrationToDate_Day-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
                     @Html.ValidationMessageFor(model => model.RegistrationToDate.Day)
                 </span>
             }
             @if (Html.ViewData.ModelState["RegistrationToDate.Month"]?.Errors.Count > 0)
             {
-                <span id="RegistrationFromDateMonth-error" class="govuk-error-message">
+                <span id="RegistrationToDate_Month-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
                     @Html.ValidationMessageFor(model => model.RegistrationToDate.Month)
                 </span>
             }
             @if (Html.ViewData.ModelState["RegistrationToDate.Year"]?.Errors.Count > 0)
             {
-                <span id="RegistrationFromDateYear-error" class="govuk-error-message">
+                <span id="RegistrationToDate_Year-error" class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
                     @Html.ValidationMessageFor(model => model.RegistrationToDate.Year)
                 </span>
