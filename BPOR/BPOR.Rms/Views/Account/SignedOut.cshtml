@@ -1,9 +1,14 @@
-﻿@{
+﻿@using Microsoft.Extensions.Hosting
+@using Microsoft.Extensions.Options
+@inject IHostEnvironment hostEnvironment
+@inject IOptions<DevelopmentSettings> developmentSettings
+
+@{
     ViewData["Title"] = "Signed out";
 }
 
-<div class="govuk-grid-row govuk-!-margin-bottom-5">
-    <div class="govuk-grid-column-one-half">
+<div class="govuk-grid-row govuk-!-margin-bottom-5" >
+    <div class="govuk-grid-column-one-half" with-content="signed-out">
         <h1 class="govuk-heading-l">You are now signed out of the Be Part of Research Registry Management System</h1>
 
         <p class="govuk-body muted">TBC</p>
@@ -20,3 +25,18 @@
         </a>
     </div>
 </div>
+
+
+@if (!hostEnvironment.IsProduction() && developmentSettings.Value.EnableUnauthenticatedTestFeatures)
+{
+    <div class="govuk-grid-row testing-only govuk-!-margin-top-9">
+        <div class="govuk-grid-column-one-half">
+            <a href="/?idg-sign-out" role="button" draggable="false" class="govuk-button govuk-button--secondary govuk-button--start" data-module="govuk-button">
+                Sign out of IDG
+                <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z" />
+                </svg>
+            </a>
+        </div>
+    </div>
+}

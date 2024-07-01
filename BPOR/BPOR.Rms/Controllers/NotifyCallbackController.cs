@@ -74,7 +74,7 @@ public class NotifyCallbackController(
     }
 
     [HttpGet]
-    [Route("registerinterest")]
+    [Route("registerinterest", Name = nameof(RegisterInterest))]
     public async Task<IActionResult> RegisterInterest([FromQuery] string reference, CancellationToken cancellationToken)
     {
         var decryptedReference = encryptionService.Decrypt(reference);

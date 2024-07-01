@@ -223,7 +223,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
                 }
             }
 
-            TempData.AddSuccessNotification($"{model.StudyName} has been successfully updated");
+            ViewData.AddSuccessNotification($"{model.StudyName} has been successfully updated");
 
             return RedirectToAction(nameof(Details), new { id });
         }

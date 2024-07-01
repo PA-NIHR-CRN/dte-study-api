@@ -102,7 +102,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
                     context.ManualEnrollments.Add(manualEnrollment);
                     await context.SaveChangesAsync();
 
-                    TempData.AddNotification(new NotificationBannerModel
+                    ViewData.AddNotification(new NotificationBannerModel
                     {
                         IsSuccess = true,
                         Heading = "Success",
@@ -115,7 +115,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
                 if (totalEnrolled == 0 && totalPreviouslyEnrolled > 0)
                 {
-                    TempData.AddNotification(new NotificationBannerModel
+                    ViewData.AddNotification(new NotificationBannerModel
                     {
                         IsSuccess = true,
                         Heading = "Success",
@@ -166,7 +166,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         context.ManualEnrollments.Add(manualEnrollment);
         await context.SaveChangesAsync();
 
-        TempData.AddNotification(new NotificationBannerModel
+        ViewData.AddNotification(new NotificationBannerModel
         {
             IsSuccess = true,
             Heading = "Success",

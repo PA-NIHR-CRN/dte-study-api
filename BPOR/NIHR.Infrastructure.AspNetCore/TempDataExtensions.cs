@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace NIHR.Infrastructure.AspNetCore
 {
-
     public static class TempDataHelper
     {
         public static void Put<T>(this ITempDataDictionary tempData, string key, T value) where T : class

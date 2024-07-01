@@ -1,5 +1,6 @@
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
+using Rbec.Postcodes;
 
 namespace BPOR.Rms.Mappers;
 
@@ -10,9 +11,15 @@ public class FilterMapper
         var viewModel = new VolunteerFilterViewModel
         {
             StudyId = criteria.StudyId ?? 0,
-            FullPostcode = criteria.FullPostcode,
-            SearchRadiusMiles = criteria.SearchRadiusMiles,
-
+            PostcodeSearch = new PostcodeSearchModel
+            {
+                PostcodeRadiusSearch = new PostcodeRadiusSearchModel
+                {
+                    FullPostcode = Postcode.Parse(criteria.FullPostcode),
+                    SearchRadiusMiles = criteria.SearchRadiusMiles,
+                },
+                PostcodeDistricts = string.Join(", ", criteria.FilterPostcode.Select(f => f.PostcodeFragment))
+            },
             SelectedVolunteersCompletedRegistration = criteria.IncludeCompletedRegistration,
             SelectedVolunteersContacted = criteria.IncludeContacted,
             SelectedVolunteersRecruited = criteria.IncludeRecruited,
@@ -21,15 +28,17 @@ public class FilterMapper
             RegistrationToDate = GovUkDate.FromDateTime(criteria.RegistrationToDate),
 
             // TODO: ShowRecruitedFilter, StudyCpmsId, StudyName need to be initialised. Might be a job of a component / tag helper.
-            AgeFrom = criteria.DateOfBirthTo.HasValue
+            AgeRange = new AgeRange
+            {
+                From = criteria.DateOfBirthTo.HasValue
                 ? DateTime.Today.Year - criteria.DateOfBirthTo.Value.Year -
                   (DateTime.Today.DayOfYear < criteria.DateOfBirthTo.Value.DayOfYear ? 1 : 0)
                 : null,
-            AgeTo = criteria.DateOfBirthFrom.HasValue
+                To = criteria.DateOfBirthFrom.HasValue
                 ? DateTime.Today.Year - criteria.DateOfBirthFrom.Value.Year -
                   (DateTime.Today.DayOfYear < criteria.DateOfBirthFrom.Value.DayOfYear ? 1 : 0)
                 : null,
-
+            },
             IsSexMale = criteria.FilterGender.Any(fg => fg.GenderId == 1),
             IsSexFemale = criteria.FilterGender.Any(fg => fg.GenderId == 2),
 
@@ -38,8 +47,6 @@ public class FilterMapper
             IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay = criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 3),
 
             SelectedAreasOfInterest = criteria.FilterAreaOfInterest.Select(f => f.HealthConditionId).ToList(),
-
-            PostcodeDistricts = string.Join(", ", criteria.FilterPostcode.Select(f => f.PostcodeFragment)),
 
             Ethnicity_Asian = criteria.FilterEthnicGroup.Any(f => f.EthnicGroupId == 1),
             Ethnicity_Black = criteria.FilterEthnicGroup.Any(f => f.EthnicGroupId == 2),

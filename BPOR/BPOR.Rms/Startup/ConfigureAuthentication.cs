@@ -5,6 +5,8 @@ using NIHR.Infrastructure.Settings;
 using NIHR.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using System.Diagnostics;
+using NIHR.Infrastructure.Authentication.IDG;
+using NIHR.Infrastructure.Authentication.IDG.SCIM;
 
 namespace BPOR.Rms.Startup;
 
@@ -23,6 +25,22 @@ public static class ConfigureAuthentication
         {
             return builder;
         }
+
+        services.AddTransient<ClientCredentialsHandler>();
+        services.AddHttpClient<ClientCredentialsHandler>(client =>
+        {
+            client.BaseAddress = authenticationSettings.BaseUrl;
+        });
+
+        builder.Services.AddHttpClient<IUserAccountStore, Scim2UserManagement>(client =>
+        {
+            if (Uri.TryCreate(authenticationSettings.BaseUrl, authenticationSettings.Scim2Path, out var baseAddress))
+            {
+                client.BaseAddress = baseAddress;
+            }
+        })
+        .AddHttpMessageHandler<ClientCredentialsHandler>();
+
 
         services.AddAuthorization(options =>
         {
@@ -44,7 +62,7 @@ public static class ConfigureAuthentication
             .AddCookie(options =>
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                
+
                 if (configureCookieAuthentication is not null)
                 {
                     configureCookieAuthentication(options);
@@ -52,7 +70,7 @@ public static class ConfigureAuthentication
             })
             .AddOpenIdConnect(options =>
             {
-                options.Authority = authenticationSettings.Authority.ToString();
+                options.Authority = (new Uri(authenticationSettings.BaseUrl, authenticationSettings.AuthorityPath)).ToString();
                 options.ClientId = authenticationSettings.ClientId;
                 options.ClientSecret = authenticationSettings.ClientSecret;
                 options.ResponseType = OpenIdConnectResponseType.Code;

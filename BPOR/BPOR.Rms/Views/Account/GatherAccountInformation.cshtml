@@ -1,0 +1,50 @@
+﻿@model BPOR.Rms.Controllers.GatherAccountInformationModel
+
+@{
+    ViewData["Title"] = "Create an account";
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+        <h1>Create an account to access the Be Part of Research volunteer registry</h1>
+
+        <form method="post">
+            <div class="govuk-form-group">
+                <span class="govuk-label">
+                    Email address
+                </span>
+                <span class="govuk-body">
+                    @ViewData["email"]
+                </span>
+                <input asp-for="Code" type="hidden" />
+            </div>
+
+            <form-group for="FirstName">
+                <label class="govuk-label" asp-for="FirstName"></label>
+                <input class="govuk-input" asp-for="FirstName" type="text" spellcheck="false" autocomplete="given-name">
+            </form-group>
+
+            <form-group for="LastName">
+                <label class="govuk-label" asp-for="LastName"></label>
+                <input class="govuk-input" asp-for="LastName" type="text" spellcheck="false" autocomplete="family-name">
+            </form-group>
+
+            <form-group for="Password" class="govuk-password-input" data-module="govuk-password-input">
+                <label class="govuk-label" asp-for="Password"></label>
+                <div id="password-hint" class="govuk-hint">
+                    Your password must be a minimum of 12 characters
+                </div>
+                <div class="govuk-input__wrapper govuk-password-input__wrapper">
+                    <input class="govuk-input govuk-password-input__input govuk-js-password-input-input" asp-for="Password" type="password" spellcheck="false" autocomplete="current-password" autocapitalize="none" aria-describedby="password-hint">
+                    <button type="button" class="js-only govuk-button govuk-button--secondary govuk-password-input__toggle govuk-js-password-input-toggle" data-module="govuk-button" aria-controls="@Html.Id(Model.Password)" aria-label="Show password" hidden>
+                        Show
+                    </button>
+                </div>
+            </form-group>
+
+            <button type="submit" class="govuk-button" name="submitted" value="true" data-module="govuk-button">
+                Create an account
+            </button>
+        </form>
+    </div>
+</div>

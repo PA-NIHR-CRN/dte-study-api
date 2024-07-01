@@ -1,0 +1,24 @@
+﻿@model BPOR.Rms.Controllers.CreateAccountModel
+
+@{
+    ViewData["Title"] = "What is your email address?";
+}
+
+<a href="~/" class="govuk-back-link">Back</a>
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+        <form method="post">
+            <form-group for="Email" label="What is your email address?" label-level="h1">
+                <div id="email-hint" class="govuk-hint">
+                    We will send you a confirmation email to set up your account. Once your account is created, you will need to use your email address to sign in.
+                </div>
+                <input class="govuk-input" asp-for="Email" type="email" spellcheck="false" aria-describedby="email-hint" autocomplete="email">
+
+            </form-group>
+            <button type="submit" class="govuk-button" data-module="govuk-button">
+                Continue
+            </button>
+        </form>
+    </div>
+</div>

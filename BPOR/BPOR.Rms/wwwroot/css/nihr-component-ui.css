@@ -433,7 +433,7 @@
     box-sizing: border-box;
 }
 
-.nihr-option-search {
+.js-only {
     /* js-only component, will be shown in script if enabled */
     display: none;
 }
@@ -492,4 +492,9 @@
     .link-button:active {
         color: #002060;
     }
+
+.govuk-button.govuk-password-input__toggle{
+    line-height:19px;
+    margin-left:5px;
+}
 

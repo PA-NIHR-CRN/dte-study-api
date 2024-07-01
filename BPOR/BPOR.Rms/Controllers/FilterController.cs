@@ -6,15 +6,15 @@ using BPOR.Rms.Models;
 using NIHR.Infrastructure.Paging;
 using Z.EntityFramework.Plus;
 using Rbec.Postcodes;
-using NIHR.Infrastructure.Models;
-using NIHR.Infrastructure;
-using NetTopologySuite.Geometries;
-using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Startup;
 
 namespace BPOR.Rms.Controllers;
 
-public class FilterController(ParticipantDbContext context, IPaginationService paginationService, IHostEnvironment hostEnvironment, TimeProvider timeProvider, IPostcodeMapper locationApiClient, ICurrentUserProvider<User> currentUserProvider) : Controller
+public class FilterController(ParticipantDbContext context,
+                              IPaginationService paginationService,
+                              IHostEnvironment hostEnvironment,
+                              TimeProvider timeProvider,
+                              ICurrentUserProvider<User> currentUserProvider) : Controller
 {
     private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
@@ -81,7 +81,7 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
 
     private VolunteerFilterViewModel ClearFilters(VolunteerFilterViewModel model)
     {
-        TempData.AddSuccessNotification($"All previously applied filters have been removed.");
+        ViewData.AddSuccessNotification($"All previously applied filters have been removed.");
 
         ModelState.Clear();
 
@@ -91,7 +91,7 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
     [HttpPost]
     public async Task<IActionResult> SetupEmailCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
-        var dobRange = _today.GetDatesWithinYearRange(model.AgeFrom, model.AgeTo);
+        var dobRange = _today.GetDatesWithinYearRange(model.AgeRange.From, model.AgeRange.To);
 
         var filterCriteria = new FilterCriteria
         {
@@ -103,8 +103,8 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
             RegistrationToDate = model.RegistrationToDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
             DateOfBirthFrom = dobRange.From?.ToDateTime(TimeOnly.MinValue),
             DateOfBirthTo = dobRange.To?.ToDateTime(TimeOnly.MaxValue),
-            FullPostcode = model.FullPostcode,
-            SearchRadiusMiles = model.SearchRadiusMiles,
+            FullPostcode = model.PostcodeSearch.PostcodeRadiusSearch.FullPostcode?.ToString(),
+            SearchRadiusMiles = model.PostcodeSearch.PostcodeRadiusSearch.SearchRadiusMiles,
             StudyId = model.StudyId,
             IncludeNoAreasOfInterest = model.IncludeNoAreasOfInterest,
             FilterAreaOfInterest = model.SelectedAreasOfInterest.Select(x => new FilterAreaOfInterest
@@ -112,7 +112,7 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
                 HealthConditionId = x
             }).ToList(),
             // TODO bind this directly into the model as a collection
-            FilterPostcode = model.GetPostcodeDistricts().Select(x => new FilterPostcode { PostcodeFragment = x }).ToList(),
+            FilterPostcode = model.PostcodeSearch.GetPostcodeDistricts().Select(x => new FilterPostcode { PostcodeFragment = x }).ToList(),
             FilterGender = model.GetGenderOptions().Select(x => new FilterGender { GenderId = (int)x }).ToList(), // TODO: support null gender
             FilterSexSameAsRegisteredAtBirth = GetSexSameAsRegisteredAtBirths(model),
             FilterEthnicGroup = GetEthnicGroups(model),
@@ -150,29 +150,13 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
 
         if (ModelState.IsValid)
         {
-            // TODO: provide more consistent location lookup
-            // possibly in middleware.
-            CoordinatesModel? location = null;
-            if (model.FullPostcode is not null && model.SearchRadiusMiles is not null && model.SearchRadiusMiles > 0)
-            {
-                location = await locationApiClient.GetCoordinatesFromPostcodeAsync(model.FullPostcode, token);
-
-                if (location is null)
-                {
-                    ModelState.AddModelError(nameof(model.FullPostcode), $"Unable to determine the location of the postcode '{model.FullPostcode}'.");
-
-                    return results;
-                }
-            }
-
-            var query = context.Participants.FilterVolunteers(timeProvider, model, location);
+            var query = context.Participants.FilterVolunteers(timeProvider, model);
 
             results.Count = query.DeferredCount().FutureValue();
 
             if (model.Testing.ShowResults)
             {
-                var point = location is not null ? new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid } : null;
-
+                var location = model.PostcodeSearch.PostcodeRadiusSearch.Location;
                 results.Items = query.Select(x => new VolunteerResult
                 {
                     Id = x.Id,
@@ -183,7 +167,7 @@ public class FilterController(ParticipantDbContext context, IPaginationService p
                     Age = x.DateOfBirth.YearsTo(_today),
                     Gender = x.Gender.Code,
                     Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
-                    DistanceInMiles = point != null && x.ParticipantLocation != null ? x.ParticipantLocation.Location.Distance(point) / 1609.344 : null,
+                    DistanceInMiles = location != null && x.ParticipantLocation != null ? x.ParticipantLocation.Location.Distance(location) / 1609.344 : null,
                     FirstName = x.FirstName,
                     LastName = x.LastName,
                     HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,

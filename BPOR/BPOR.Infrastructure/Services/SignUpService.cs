@@ -11,6 +11,7 @@ using Dte.Common.Models;
 using Dte.Common.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.Interfaces;
 using SignUpResponse = BPOR.Infrastructure.Responses.V1.Users.SignUpResponse;
 
 namespace BPOR.Infrastructure.Services;
