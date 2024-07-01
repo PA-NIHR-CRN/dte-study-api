@@ -1,14 +1,19 @@
 ﻿document.onreadystatechange = function () {
     if (document.readyState == "interactive") {
+        javascriptIsEnabled();
         initialiseOptionSearch();
     }
 }
 
+function javascriptIsEnabled() {
+    // Enable javascript only elements
+    Array.from(document.getElementsByClassName('js-only')).forEach(function (item) {
+        item.classList.remove('js-only');
+    });
+}
+
 function initialiseOptionSearch() {
     Array.from(document.getElementsByClassName('nihr-option-search')).forEach(function (search) {
-        search.classList.remove("js-only");
-        search.style.display = 'unset';
-
         search.addEventListener('input', function () {
             var searchText = this.value.toLowerCase();
             var optionClass = this.dataset.optionClass;

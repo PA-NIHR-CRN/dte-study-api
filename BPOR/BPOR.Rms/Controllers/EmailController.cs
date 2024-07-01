@@ -1,6 +1,5 @@
 using System.Text;
 using BPOR.Domain.Entities;
-using BPOR.Rms.Helpers;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.Mvc;
@@ -22,11 +21,14 @@ public class EmailController(
     ILogger<EmailController> logger,
     IRmsTaskQueue taskQueue,
     IEncryptionService encryptionService,
-    UrlGenerationHelper urlGenerationHelper,
-    IHostEnvironment hostEnvironment)
+    IHostEnvironment hostEnvironment,
+    LinkGenerator linkGenerator
+    )
     : Controller
 {
     private const string _emailCacheKey = "EmailTemplates";
+    private readonly LinkGenerator _linkGenerator = linkGenerator;
+
     public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model)
     {
         await PopulateReferenceDataAsync(model, true);
@@ -57,7 +59,7 @@ public class EmailController(
         {
             if (hostEnvironment.IsProduction()) // TODO: remove for final release
             {
-                TempData.AddNotification(new NotificationBannerModel
+                ViewData.AddNotification(new NotificationBannerModel
                 {
                     Heading = "For testing purposes only",
                     Body = "Production email sending not enabled, campaign not sent.", IsSuccess = false
@@ -136,7 +138,7 @@ public class EmailController(
                     { "lastName", "Doe" },
                     {
                         "uniqueLink",
-                        urlGenerationHelper.GenerateRegisterInterestUrl(encryptionService.Encrypt("0123456789101112"))
+                        _linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest), new {reference = encryptionService.Encrypt("0123456789101112") }) ?? string.Empty
                     },
                 });
 
@@ -162,7 +164,7 @@ public class EmailController(
             }
 
 
-            TempData.AddSuccessNotification(
+            ViewData.AddSuccessNotification(
                 $"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
         }
 

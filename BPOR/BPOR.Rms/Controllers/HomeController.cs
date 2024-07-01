@@ -10,11 +10,23 @@ public class HomeController(ILogger<HomeController> logger) : Controller
 {
     private readonly ILogger<HomeController> _logger = logger;
 
+    [HttpGet]
     public IActionResult Index()
     {
-        if (Request.Query.ContainsKey("sign-in") || (User?.Identity?.IsAuthenticated ?? false))
+        if (User?.Identity?.IsAuthenticated ?? false)
         {
             return RedirectToAction("Index", "Study");
+        }
+        else
+        {
+            if (Request.Query.ContainsKey("sign-in"))
+            {
+                return RedirectToAction("Index", "Study");
+            }
+            else if (Request.Query.ContainsKey("start"))
+            {
+                return RedirectToAction("Create", "Account");
+            }
         }
 
         return View();

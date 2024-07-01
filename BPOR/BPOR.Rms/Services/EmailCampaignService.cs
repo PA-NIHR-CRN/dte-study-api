@@ -9,27 +9,31 @@ using BPOR.Rms.Models.Volunteer;
 using BPOR.Rms.Services;
 using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 using NIHR.Infrastructure.Interfaces;
-using NIHR.Infrastructure.Settings;
 using NIHR.Infrastructure.Models;
 using Polly;
 using NIHR.NotificationService.Context;
+using BPOR.Rms.Controllers;
 
 public class EmailCampaignService(
     ILogger<EmailCampaignService> logger,
     IRefDataService refDataService,
     ParticipantDbContext context,
     IEncryptionService encryptionService,
-    IOptions<AppSettings> appSettings,
     IReferenceGenerator referenceGenerator,
     NotificationDbContext notificationContext,
     IPostcodeMapper locationApiClient,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    LinkGenerator linkGenerator,
+    IHttpContextAccessor httpContextAccessor
+    )
     : IEmailCampaignService
 {
+    private readonly LinkGenerator _linkGenerator = linkGenerator;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
     public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
     {
         var campaign = await context.EmailCampaigns
@@ -128,12 +132,12 @@ public class EmailCampaignService(
             .Handle<DbUpdateException>(IsUniqueConstraintViolation)
             .RetryAsync(3, onRetry: (exception, retryCount) =>
         {
-                logger.LogError(exception, "Error saving email campaign participants, attempt {Attempt}", retryCount);
-                UpdateUniqueConstraintViolations(emailQueue);
-            });
+            logger.LogError(exception, "Error saving email campaign participants, attempt {Attempt}", retryCount);
+            UpdateUniqueConstraintViolations(emailQueue);
+        });
 
         await retryPolicy.ExecuteAsync(async () => await context.SaveChangesAsync(cancellationToken));
-            }
+    }
 
     private void UpdateUniqueConstraintViolations(List<ProcessingResults> emailQueue)
     {
@@ -238,6 +242,8 @@ public class EmailCampaignService(
                 continue;
             }
 
+            var link = _linkGenerator.GetUriByName(_httpContextAccessor.HttpContext, nameof(NotifyCallbackController.RegisterInterest), new { reference = encryptionService.Encrypt(emailCampaignParticipant.Id.ToString()) });
+
             var notification = new Notification
             {
                 PrimaryIdentifier = volunteer.Email,
@@ -250,8 +256,7 @@ public class EmailCampaignService(
                     new()
                     {
                         Key = "uniqueLink",
-                        Value =
-                            $"{appSettings.Value.WebAppBaseUrl}/NotifyCallback/registerinterest?reference={encryptionService.Encrypt(emailCampaignParticipant.Id.ToString())}"
+                        Value = link
                     },
                     new() { Key = "emailTemplateId", Value = campaign.EmailTemplateId.ToString() },
                     new() { Key = "uniqueReference", Value = reference }

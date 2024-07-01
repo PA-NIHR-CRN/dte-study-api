@@ -29,8 +29,12 @@
 <!-- TODO  check this package issue-->
       <PackageReference Include="Amazon.AspNetCore.DataProtection.SSM" Version="3.2.1" />
       <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="8.0.1" />
+      <PackageReference Include="AWSSDK.SSO" Version="3.7.300.111" />
+      <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.302.22" />
+      <PackageReference Include="contentful.aspnetcore" Version="7.5.3" />
       <PackageReference Include="contentful.csharp" Version="7.5.3" />
       <PackageReference Include="GovukNotify" Version="7.0.0" />
+      <PackageReference Include="Handlebars.Net" Version="2.1.6" />
       <PackageReference Include="HtmlSanitizer" Version="8.0.865" />
       <PackageReference Include="LuhnNet" Version="2.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.4" />
@@ -64,5 +68,8 @@
     </ItemGroup>
     <ItemGroup>
       <None Include="Views\Shared\Unauthorised.cshtml" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Helpers\" />
     </ItemGroup>
 </Project>

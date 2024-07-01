@@ -7,6 +7,11 @@ namespace BPOR.Domain.Entities.Configuration;
 
 public class RoleConfiguration : IEntityTypeConfiguration<Role>
 {
+    public static int RoleId(string code)
+    {
+        return GetRoles().Where(x => x.Code == code).Select(x => x.Id).Single();
+    }
+    
     public static ImmutableList<Role> GetRoles()
     {
         var roleBuilder = new List<Role> {

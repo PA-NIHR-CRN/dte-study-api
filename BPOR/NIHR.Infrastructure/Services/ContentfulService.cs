@@ -2,62 +2,85 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Contentful.Core;
+using Contentful.Core.Configuration;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
-using Ganss.Xss;
-using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NIHR.Infrastructure.Interfaces;
-using NIHR.Infrastructure.Settings;
 
 namespace NIHR.Infrastructure.Services
 {
     public class ContentfulService : IContentProvider
     {
         private readonly IContentfulClient _contentfulClient;
-        private readonly IOptions<ContentfulSettings> _contentfulSettings;
-        private readonly HtmlSanitizer _htmlSanitizer;
+        private readonly HtmlRenderer _htmlRenderer;
 
-        public ContentfulService(IContentfulClient contentfulClient, IOptions<ContentfulSettings> contentfulSettings, HtmlSanitizer htmlSanitizer)
+        public ContentfulService(IContentfulClient contentfulClient, HtmlRenderer htmlRenderer)
         {
             _contentfulClient = contentfulClient;
-            _contentfulSettings = contentfulSettings;
-            _htmlSanitizer = htmlSanitizer;
+            _htmlRenderer = htmlRenderer;
         }
 
-        private async Task<ContentfulEntry> GetContentByKeyAsync(string contentKey)
+        public async Task<TContent> GetContentAsync<TContent>(string contentId, CancellationToken cancellationToken) where TContent : new() => await GetContentAsync<TContent>(contentId, ToCamelCase(typeof(TContent).Name), cancellationToken);
+
+        private string ToCamelCase(string name) => char.ToLowerInvariant(name[0]) + name.Substring(1);
+
+
+        public async Task<TContent> GetContentAsync<TContent>(string contentId, string contentType, CancellationToken cancellationToken) where TContent : new()
         {
-            var queryBuilder = new QueryBuilder<ContentfulEntry>().FieldExists("fields.key")
-                .FieldEquals("fields.key", contentKey).ContentTypeIs(_contentfulSettings.Value.ContentType);
-            var entries = await _contentfulClient.GetEntries(queryBuilder);
+            var content = await GetContentByKeyAsync(contentId, contentType, cancellationToken) ?? await _contentfulClient.GetEntry<dynamic>(contentId, cancellationToken: cancellationToken);
 
-            var entry = entries.FirstOrDefault();
+            var resultType = typeof(TContent);
+            TContent retval = new TContent();
+            var properties = resultType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 
-            return entry;
+            var token = (JObject)content;
+
+            var serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.All };
+
+            serializer.Converters.Add(new AssetJsonConverter());
+            serializer.Converters.Add(new ContentJsonConverter());
+
+            foreach (var property in properties)
+            {
+                var source = token.Property(property.Name, System.StringComparison.InvariantCultureIgnoreCase);
+
+                // TODO: support more target property types.
+                // TODO: support more Contentful source types.
+
+                if (property.PropertyType == typeof(string))
+                {
+                    if (source.HasValues)
+                    {
+                        if (source.Value.GetType() == typeof(JValue))
+                        {
+                            property.SetValue(retval, source.Value.ToString());
+                        }
+                        else if (source.Value.GetType() == typeof(JObject))
+                        {
+                            if (source.Value["nodeType"].ToString() == "document")
+                            {
+                                var richTextDocument = source.Value.ToObject<Document>(serializer);
+                                property.SetValue(retval, await _htmlRenderer.ToHtml(richTextDocument));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return retval;
         }
 
-        private async Task<ContentfulEntry> GetContentByEntryIdAsync(string entryId)
+        private async Task<dynamic> GetContentByKeyAsync(string contentKey, string contentType, CancellationToken cancellationToken)
         {
-            var content = await _contentfulClient.GetEntry<ContentfulEntry>(entryId);
+            var queryBuilder = new QueryBuilder<dynamic>().FieldExists("fields.key")
+                .FieldEquals("fields.key", contentKey)
+                .ContentTypeIs(contentType);
 
-            return content;
-        }
+            var entries = await _contentfulClient.GetEntries(queryBuilder, cancellationToken);
 
-
-        public async Task<string> GetContentAsync(string contentId, CancellationToken cancellationToken)
-        {
-            var content = await GetContentByKeyAsync(contentId) ?? await GetContentByEntryIdAsync(contentId);
-
-            var htmlRenderer = new HtmlRenderer();
-            var html = await htmlRenderer.ToHtml(content.Content);
-            
-            var sanitizedHtml = _htmlSanitizer.Sanitize(html);
-
-            return sanitizedHtml;
+            return entries.SingleOrDefault();
         }
     }
-}
-
-public class ContentfulEntry
-{
-    public Document Content { get; set; }
 }

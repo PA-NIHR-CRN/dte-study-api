@@ -5,6 +5,8 @@ namespace NIHR.Infrastructure.Interfaces
 {
     public interface IContentProvider
     {
-        Task<string> GetContentAsync(string contentId, CancellationToken cancellationToken = default);
+        Task<TContent> GetContentAsync<TContent>(string contentId, CancellationToken cancellationToken = default) where TContent : new();
+
+        Task<TContent> GetContentAsync<TContent>(string contentId, string contentType, CancellationToken cancellationToken = default) where TContent : new();
     }
 }
