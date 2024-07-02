@@ -35,8 +35,8 @@
 
             <h2 class="govuk-heading-s">Still unable to find the email?</h2>
             <form method="post">
-                <input class="govuk-input" id="email" name="email" type="hidden" spellcheck="false" aria-describedby="email-hint" autocomplete="email" value="@Model">
-                <button type="submit" class="govuk-button govuk-button--secondary" data-module="govuk-button" asp-action="CheckYourEmail">
+                <input class="govuk-input" asp-for="Email" type="hidden" />
+                <button type="submit" class="govuk-button govuk-button--secondary" data-module="govuk-button">
                     Resend email
                 </button>
             </form>
