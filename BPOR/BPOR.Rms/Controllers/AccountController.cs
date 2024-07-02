@@ -80,6 +80,7 @@ namespace BPOR.Rms.Controllers
         {
             if (ModelState.IsValid)
             {
+                await Task.Delay(1000); // TODO: Rate limit email sending to avoid abuse.
                 var code = _dataProtector.Protect(createAccountModel.Email, TimeSpan.FromHours(24));
 
                 var link = _linkGenerator.GetUriByName(HttpContext, nameof(VerifyEmailAsync), new { code });
