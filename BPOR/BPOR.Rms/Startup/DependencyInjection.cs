@@ -73,6 +73,7 @@ public static class DependencyInjection
         services.AddPaging();
         services.AddDataProtection();
         services.AddSingleton<HtmlSanitizer>();
+        services.AddSingleton<BaseAddressAccessor>();
 
         services.AddContentful(configuration);
 

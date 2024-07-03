@@ -15,6 +15,8 @@ using NIHR.Infrastructure.Interfaces;
 using Polly;
 using NIHR.NotificationService.Context;
 using BPOR.Rms.Controllers;
+using BPOR.Domain.Entities.Configuration;
+using NetTopologySuite.Geometries;
 
 public class EmailCampaignService(
     ILogger<EmailCampaignService> logger,
@@ -26,13 +28,10 @@ public class EmailCampaignService(
     IPostcodeMapper locationApiClient,
     TimeProvider timeProvider,
     LinkGenerator linkGenerator,
-    IHttpContextAccessor httpContextAccessor
+    BaseAddressAccessor baseAddressAccessor
     )
     : IEmailCampaignService
 {
-    private readonly LinkGenerator _linkGenerator = linkGenerator;
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-
     public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
     {
         var campaign = await context.EmailCampaigns
@@ -78,12 +77,12 @@ public class EmailCampaignService(
     {
         var filter = FilterMapper.MapToFilterModel(dbFilter);
 
-        //// TODO: save the original search location co-ordinates in the FilterCriteria
-        //CoordinatesModel? location = null;
-        //if (dbFilter.FullPostcode is not null && dbFilter.SearchRadiusMiles is not null && dbFilter.SearchRadiusMiles > 0)
-        //{
-        //    location = await locationApiClient.GetCoordinatesFromPostcodeAsync(dbFilter.FullPostcode, cancellationToken);
-        //}
+        // TODO: save the original search location co-ordinates in the FilterCriteria
+        if (dbFilter.FullPostcode is not null && dbFilter.SearchRadiusMiles is not null && dbFilter.SearchRadiusMiles > 0)
+        {
+            var location = await locationApiClient.GetCoordinatesFromPostcodeAsync(dbFilter.FullPostcode, cancellationToken);
+            filter.PostcodeSearch.PostcodeRadiusSearch.Location = new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
+        }
 
         var volunteerQuery = context.Participants.FilterVolunteers(timeProvider, filter);
 
@@ -241,7 +240,7 @@ public class EmailCampaignService(
                 continue;
             }
 
-            var link = _linkGenerator.GetUriByName(_httpContextAccessor.HttpContext, nameof(NotifyCallbackController.RegisterInterest), new { reference = encryptionService.Encrypt(emailCampaignParticipant.Id.ToString()) });
+            var link = linkGenerator.GetUriByName(nameof(NotifyCallbackController.RegisterInterest), new { reference = encryptionService.Encrypt(emailCampaignParticipant.Id.ToString()) }, baseAddressAccessor.Scheme, baseAddressAccessor.Host, baseAddressAccessor.PathBase);
 
             var notification = new Notification
             {

@@ -9,6 +9,25 @@ using NIHR.Infrastructure;
 using NIHR.Infrastructure.Settings;
 using System.Security.Claims;
 
+public class BaseAddressAccessor
+{
+    private bool isSet = false;
+
+    public string Scheme { get; private set; }
+    public HostString Host { get; private set; }
+    public PathString PathBase { get; private set; }
+
+    public void SetBaseAddress(string scheme, HostString host, PathString pathBase)
+    {
+        if(!isSet)
+        {
+            Scheme = scheme;
+            Host = host;
+            PathBase = pathBase;
+            isSet = true;
+        }
+    }
+}
 public class IdgAuthenticationMiddleware
 {
     private const string AccountNotRegisteredPath = "/Account/NotRegistered";
@@ -20,13 +39,15 @@ public class IdgAuthenticationMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context, ParticipantDbContext dbContext, ICurrentUserIdAccessor<int> currentUserIdAccessor, ICurrentUserProvider<User> userProvider, IOptions<AuthenticationSettings> authenticationOptions)
+    public async Task InvokeAsync(HttpContext context, ParticipantDbContext dbContext, ICurrentUserIdAccessor<int> currentUserIdAccessor, ICurrentUserProvider<User> userProvider, IOptions<AuthenticationSettings> authenticationOptions, BaseAddressAccessor baseAddressAccessor)
     {
         ArgumentNullException.ThrowIfNull(context);
 
         ArgumentNullException.ThrowIfNull(dbContext);
 
         ArgumentNullException.ThrowIfNull(currentUserIdAccessor);
+
+        baseAddressAccessor.SetBaseAddress(context.Request.Scheme, context.Request.Host, context.Request.PathBase);
 
         if (context.Request.Query.ContainsKey("sign-out"))
         {
