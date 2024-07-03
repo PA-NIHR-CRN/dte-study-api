@@ -5,6 +5,7 @@ namespace BPOR.Rms.Models.Researcher
 {
     public class ResearcherStudyFormViewModel
     {
+        [Display(Name = "Study ID")] public int Id { get; set; }
         public int Step { get; set; } = 1;
         public int TotalSteps { get; set; } = 8;
 
@@ -62,6 +63,7 @@ namespace BPOR.Rms.Models.Researcher
 
         [Display(Name = "Year")]
         public int? Year { get; set; }
+        public bool IsEditMode { get; set; }
 
         private static DateOnly? ConstructDate(int? year, int? month, int? day)
         {

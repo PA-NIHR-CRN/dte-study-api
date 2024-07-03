@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using BPOR.Domain.Entities;
+using BPOR.Rms.Models.Researcher;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Models.Volunteer;
 using EmailCampaign = BPOR.Rms.Models.Study.EmailCampaign;
@@ -23,6 +24,20 @@ public static class Projections
 
     public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source,
         int step, bool isEditMode) => source.Select(StudyAsStudyFormViewModel(step, isEditMode));
+    
+    public static IQueryable<ResearcherStudyFormViewModel> AsResearcherFormViewModel(
+        this IQueryable<Domain.Entities.Study> source, int step, bool isEditMode) =>
+        source.Select(StudyAsResearcherFormViewModel(step, isEditMode));
+    
+    public static Expression<Func<Domain.Entities.Study, ResearcherStudyFormViewModel>> StudyAsResearcherFormViewModel(
+        int step, bool isEditMode)
+    {
+        return r => new ResearcherStudyFormViewModel
+        {
+            Id = r.Id,
+            Step = step,
+        };
+    }
 
     public static Expression<Func<Domain.Entities.Study, StudyFormViewModel>> StudyAsStudyFormViewModel(int step,
         bool isEditMode)
@@ -71,6 +86,16 @@ public static class Projections
                 StudyName = s.StudyName,
                 CpmsId = s.CpmsId,
                 IsRecruitingIdentifiableParticipants = s.IsRecruitingIdentifiableParticipants,
+                ChiefInvestigator = s.ChiefInvestigator,
+                StudySponsors = s.Sponsors,
+                HasFunding = s.HasNihrFunding.Value,
+                OutcomeOfSubmission = s.SubmissionOutcome != null ? s.SubmissionOutcome.Code : null,
+                PortfolioSubmissionStatus = s.Submitted != null ? s.Submitted.Code : null,
+                FundingCode = s.FundingCode,
+                UKRecruitmentTarget = s.RecruitmentTarget,
+                TargetPopulation = s.TargetPopulation,
+                RecruitmentStartDate =  GovUkDate.FromDateTime(s.RecruitmentStartDate).ToDateOnly(),
+                RecruitmentEndDate =  GovUkDate.FromDateTime(s.RecruitmentEndDate).ToDateOnly(),
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 
@@ -91,7 +116,8 @@ public static class Projections
                             DeliveryStatusId = p.DeliveryStatusId
                         })
                         .ToList(),
-                })
+                }),
+            HasEmailCampaigns = s.FilterCriterias.Any(fc => fc.EmailCampaigns.Any())
         };
     }
 

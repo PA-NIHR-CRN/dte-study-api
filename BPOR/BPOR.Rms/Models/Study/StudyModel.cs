@@ -1,5 +1,7 @@
 using BPOR.Rms.Models.Volunteer;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Entities.RefData;
+using BPOR.Rms.Models.Researcher;
 
 namespace BPOR.Rms.Models.Study;
 
@@ -26,5 +28,34 @@ public class StudyModel
     public bool IsRecruitingIdentifiableParticipants { get; set; }
     public int? LatestRecruitmentTotal { get; set; }
     public int? TotalRecruited { get; set; }
+    
+    [Display(Name = "Who is the Chief Investigator for the study?")]
+    public string? ChiefInvestigator { get; set; }
+
+    [Display(Name = "Provide the name(s) of the study sponsor(s), funder(s) and CRO (if applicable)")]
+    public string? StudySponsors { get; set; }
+
+    [Display(Name = "Has the study been submitted for inclusion on the NIHR CRN portfolio?")]
+    public string? PortfolioSubmissionStatus { get; set; }
+    [Display(Name = "Outcome of submission")]
+    public string? OutcomeOfSubmission { get; set; }
+
+    [Display(Name = "CPMS ID")]
+    public long? CPMSId { get; set; }
+
+    [Display(Name = "Does the study have NIHR funding?")]
+    public bool? HasFunding { get; set; }
+
+    [Display(Name = "NIHR funding stream or grant code")]
+    public string? FundingCode { get; set; }
+
+    [Display(Name = "What is the UK recruitment target for the study?")]
+    public string? UKRecruitmentTarget { get; set; }
+
+    [Display(Name = "What is the target population for the study?")]
+    public string? TargetPopulation { get; set; }
+    // TODO 2 GovUkDates, need to amalgamate
+    public DateOnly? RecruitmentStartDate { get; set; } = new();
+    public DateOnly? RecruitmentEndDate { get; set; } = new();
 
 }

@@ -1,0 +1,56 @@
+@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData.AddBreadcrumbs(new Dictionary<string, string>
+            {
+                ["All studies"] = "/Study/Index",
+                ["Study page"] = $"/Study/Details/{Model.Id}",
+                ["Edit study"] = "/Study/Edit",
+            });
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+        <h1 class="govuk-heading-xl">Edit study details</h1>
+        
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Step" value="@Model.Step" />
+
+            <div style="@(Model.Step == 1 ? "" : "display:none;")">
+                <partial name="Partials/_Step1FormFields" />
+            </div>
+
+            <div style="@(Model.Step == 2 ? "" : "display:none;")">
+                <partial name="Partials/_Step2FormFields" />
+            </div>
+            
+            <div style="@(Model.Step == 3 ? "" : "display:none;")">
+                <partial name="Partials/_Step3FormFields" />
+            </div>
+            
+            <div style="@(Model.Step == 4 ? "" : "display:none;")">
+                <partial name="Partials/_Step4FormFields" />
+            </div>
+            
+            <div style="@(Model.Step == 5 ? "" : "display:none;")">
+                <partial name="Partials/_Step5FormFields" />
+            </div>
+            
+            <div style="@(Model.Step == 6 ? "" : "display:none;")">
+                <partial name="Partials/_Step6FormFields" />
+            </div>
+            
+            <div style="@(Model.Step == 7 ? "" : "display:none;")">
+                <partial name="Partials/_Step7FormFields" />
+            </div>
+            <div class="govuk-button-group">
+                <button type="submit" class="govuk-button" data_module="govuk-button">Update</button>
+                @Html.ActionLink("Cancel", "Details", "Study", new { id = Model.Id }, new { data_module = "govuk-button" })
+            </div>
+        </form>
+    </div>
+</div>

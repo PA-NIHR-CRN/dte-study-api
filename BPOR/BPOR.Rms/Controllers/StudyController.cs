@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities;
+using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Startup;
@@ -9,7 +10,8 @@ using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Controllers;
 
-public class StudyController(ParticipantDbContext context, IPaginationService paginationService, ICurrentUserProvider<User> currentUserProvider) : Controller
+public class StudyController(ParticipantDbContext context, IPaginationService paginationService, ICurrentUserProvider<User> currentUserProvider
+) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false, CancellationToken token = default)
@@ -62,15 +64,14 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
 
         var study = await context.Studies
             .Where(s => s.Id == id)
-            .Select(Projections.StudyAsStudyDetailsViewModel())
+            .AsStudyDetailsViewModel()
             .FirstOrDefaultAsync();
 
         if (study == null)
         {
             return NotFound();
         }
-
-        study.HasEmailCampaigns = context.Studies.Any(s => s.FilterCriterias.Any(f => f.EmailCampaigns.Any()) && s.Id == study.Study.Id);
+        
         study.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
 
         return View(study);

@@ -25,6 +25,8 @@ public class Study : ISoftDelete, IAudit
     public string? TargetPopulation { get; set; }
     public bool? HasNihrFunding { get; set; }
     public string? FundingCode { get; set; }
+    public int? SubmissionOutcomeId { get; set; }
+    public int? SubmittedId { get; set; }
     public Submitted? Submitted { get; set; }
     public SubmissionOutcome? SubmissionOutcome { get; set; }
     public bool IsDeleted { get; set; }

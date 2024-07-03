@@ -76,7 +76,8 @@ public static class DependencyInjection
 
         services.AddContentful(configuration);
 
-        services.AddTransient((c) => {
+        services.AddTransient((c) =>
+        {
             var renderer = new HtmlRenderer();
             renderer.AddRenderer(new GovUkHeadingRenderer(renderer.Renderers) { Order = 10 });
             renderer.AddRenderer(new GovUkParagraphRenderer(renderer.Renderers) { Order = 10 });
@@ -92,23 +93,23 @@ public static class DependencyInjection
         services.AddSingleton<IAmazonSimpleEmailService>(new AmazonSimpleEmailServiceClient(sesConfig));
 
 
-
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
-        var connectionString = dbSettings.Value.BuildConnectionString();
+        var participantConnectionString = dbSettings.Value.BuildConnectionString();
 
         services.AddDbContext<ParticipantDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), builder =>
-            {
-                builder.UseNetTopologySuite();
-                builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            }));
-        
-        var notificationDbConnectionString = configuration.GetConnectionString("NotificationDb");
+            options.UseMySql(participantConnectionString, ServerVersion.AutoDetect(participantConnectionString),
+                builder =>
+                {
+                    builder.UseNetTopologySuite();
+                    builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                }));
+
+        var notificationConnectionString =
+            dbSettings.Value.BuildConnectionString(dbSettings.Value.NotificationDatabase);
+
         services.AddDbContext<NotificationDbContext>(options =>
-            options.UseMySql(notificationDbConnectionString, ServerVersion.AutoDetect(notificationDbConnectionString), builder =>
-            {
-                builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            }));
+            options.UseMySql(notificationConnectionString, ServerVersion.AutoDetect(notificationConnectionString),
+                builder => { builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery); }));
 
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("BPOR.Rms");
 
@@ -120,7 +121,7 @@ public static class DependencyInjection
 
         services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
             logger);
-        services.AddHealthChecks().AddMySql(connectionString).AddCheck<LocationHealthCheck>("Location",
+        services.AddHealthChecks().AddMySql(participantConnectionString).AddCheck<LocationHealthCheck>("Location",
             Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
 
         services.AddSingleton<IRmsTaskQueue, RmsTaskQueue>(provider =>

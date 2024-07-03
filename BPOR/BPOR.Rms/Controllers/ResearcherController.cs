@@ -1,10 +1,12 @@
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.RefData;
+using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Models.Researcher;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BPOR.Rms.Controllers;
@@ -246,7 +248,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                     StudyName = model.ShortName,
                     ChiefInvestigator = model.ChiefInvestigator,
                     Sponsors = model.StudySponsors,
-                    Submitted = context.Submitted.Where(s => s.Id == model.PortfolioSubmissionStatus).FirstOrDefault(),
+                    Submitted = context.Submitted.FirstOrDefault(s => s.Id == model.PortfolioSubmissionStatus),
                     HasNihrFunding = model.HasFunding,
                     RecruitmentTarget = model.UKRecruitmentTarget,
                     TargetPopulation = model.TargetPopulation,
@@ -259,7 +261,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
                 if (model.PortfolioSubmissionStatus == 1)
                 {
-                    study.SubmissionOutcome = context.SubmissionOutcome.Where(o => o.Id == model.OutcomeOfSubmission).FirstOrDefault();
+                    study.SubmissionOutcome = context.SubmissionOutcome.FirstOrDefault(o => o.Id == model.OutcomeOfSubmission);
                     study.CpmsId = model.CPMSId;
                 }
 
@@ -548,5 +550,19 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         ModelState["RecruitmentEndDate.Day"].Errors.Clear();
         ModelState["RecruitmentEndDate.Month"].Errors.Clear();
         ModelState["RecruitmentEndDate.Year"].Errors.Clear();
+    }
+    
+    public async Task<IActionResult> Edit(int id, int field)
+    {
+        var studyModel = await context.Studies
+            .AsResearcherFormViewModel(step: field, isEditMode: true)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (studyModel == null)
+        {
+            return NotFound();
+        }
+
+        return View(studyModel);
     }
 }
