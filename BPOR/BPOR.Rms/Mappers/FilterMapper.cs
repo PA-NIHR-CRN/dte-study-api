@@ -15,7 +15,9 @@ public class FilterMapper
             {
                 PostcodeRadiusSearch = new PostcodeRadiusSearchModel
                 {
-                    FullPostcode = Postcode.Parse(criteria.FullPostcode),
+                    FullPostcode = string.IsNullOrEmpty(criteria.FullPostcode)
+                        ? null
+                        : Postcode.Parse(criteria.FullPostcode),
                     SearchRadiusMiles = criteria.SearchRadiusMiles,
                 },
                 PostcodeDistricts = string.Join(", ", criteria.FilterPostcode.Select(f => f.PostcodeFragment))
@@ -31,20 +33,23 @@ public class FilterMapper
             AgeRange = new AgeRange
             {
                 From = criteria.DateOfBirthTo.HasValue
-                ? DateTime.Today.Year - criteria.DateOfBirthTo.Value.Year -
-                  (DateTime.Today.DayOfYear < criteria.DateOfBirthTo.Value.DayOfYear ? 1 : 0)
-                : null,
+                    ? DateTime.Today.Year - criteria.DateOfBirthTo.Value.Year -
+                      (DateTime.Today.DayOfYear < criteria.DateOfBirthTo.Value.DayOfYear ? 1 : 0)
+                    : null,
                 To = criteria.DateOfBirthFrom.HasValue
-                ? DateTime.Today.Year - criteria.DateOfBirthFrom.Value.Year -
-                  (DateTime.Today.DayOfYear < criteria.DateOfBirthFrom.Value.DayOfYear ? 1 : 0)
-                : null,
+                    ? DateTime.Today.Year - criteria.DateOfBirthFrom.Value.Year -
+                      (DateTime.Today.DayOfYear < criteria.DateOfBirthFrom.Value.DayOfYear ? 1 : 0)
+                    : null,
             },
             IsSexMale = criteria.FilterGender.Any(fg => fg.GenderId == 1),
             IsSexFemale = criteria.FilterGender.Any(fg => fg.GenderId == 2),
 
-            IsGenderSameAsSexRegisteredAtBirth_Yes = criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 1),
-            IsGenderSameAsSexRegisteredAtBirth_No = criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 2),
-            IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay = criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 3),
+            IsGenderSameAsSexRegisteredAtBirth_Yes =
+                criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 1),
+            IsGenderSameAsSexRegisteredAtBirth_No =
+                criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 2),
+            IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay =
+                criteria.FilterSexSameAsRegisteredAtBirth.Any(f => f.YesNoPreferNotToSay == 3),
 
             SelectedAreasOfInterest = criteria.FilterAreaOfInterest.Select(f => f.HealthConditionId).ToList(),
 
