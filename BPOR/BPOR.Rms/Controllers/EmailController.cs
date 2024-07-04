@@ -59,7 +59,7 @@ public class EmailController(
         {
             if (hostEnvironment.IsProduction()) // TODO: remove for final release
             {
-                ViewData.AddNotification(new NotificationBannerModel
+                this.AddNotification(new NotificationBannerModel
                 {
                     Heading = "For testing purposes only",
                     Body = "Production email sending not enabled, campaign not sent.", IsSuccess = false
@@ -165,7 +165,7 @@ public class EmailController(
             }
 
 
-            ViewData.AddSuccessNotification(
+            this.AddSuccessNotification(
                 $"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
         }
 

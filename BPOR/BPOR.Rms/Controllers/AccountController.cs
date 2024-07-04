@@ -157,7 +157,7 @@ namespace BPOR.Rms.Controllers
                 _logger.LogWarning(ex, ex?.Message);
             }
 
-            ViewData.AddNotification(new NotificationBannerModel
+            this.AddNotification(new NotificationBannerModel
             {
                 Heading = "Email verification error",
                 Body = "There was a problem with your email verification code.",
@@ -196,7 +196,7 @@ namespace BPOR.Rms.Controllers
                 _logger.LogWarning(ex, ex?.Message);
             }
 
-            ViewData.AddNotification(new NotificationBannerModel
+            this.AddNotification(new NotificationBannerModel
             {
                 Heading = "Email verification error",
                 Body = "There was a problem with your email verification code.",
@@ -220,7 +220,7 @@ namespace BPOR.Rms.Controllers
                 {
                     if (await HasAccount(email, token))
                     {
-                        ViewData.AddNotification(new NotificationBannerModel
+                        this.AddNotification(new NotificationBannerModel
                         {
                             Heading = "Account already exists",
                             Body = "An account already exists for your email address",
@@ -249,7 +249,7 @@ namespace BPOR.Rms.Controllers
                     }
                     else
                     {
-                        ViewData.AddNotification(new NotificationBannerModel
+                        this.AddNotification(new NotificationBannerModel
                         {
                             Heading = "Unable to create user account",
                             Body = "Unable to create user account",
@@ -266,7 +266,7 @@ namespace BPOR.Rms.Controllers
                 _logger.LogWarning(ex, ex?.Message);
             }
 
-            ViewData.AddNotification(new NotificationBannerModel
+            this.AddNotification(new NotificationBannerModel
             {
                 Heading = "Email verification error",
                 Body = "There was a problem with your email verification code.",

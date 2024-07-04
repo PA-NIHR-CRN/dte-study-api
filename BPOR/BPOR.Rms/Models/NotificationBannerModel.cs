@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Models;
 
@@ -14,9 +14,9 @@ public class NotificationBannerModel
 
 public static class NotificationBannerExtensions
 {
-    public static void AddSuccessNotification(this ViewDataDictionary viewData, string body)
+    public static void AddSuccessNotification(this Controller controller, string body)
     {
-        viewData.AddNotification(new NotificationBannerModel
+        controller.AddNotification(new NotificationBannerModel
         {
             IsSuccess = true,
             Heading = "Success",
@@ -24,8 +24,8 @@ public static class NotificationBannerExtensions
         });
     }
 
-    public static void AddNotification(this ViewDataDictionary viewData, NotificationBannerModel notification)
+    public static void AddNotification(this Controller controller, NotificationBannerModel notification)
     {
-        viewData["Notification"] = notification;
+        controller.TempData["Notification"] = notification;
     }
 }

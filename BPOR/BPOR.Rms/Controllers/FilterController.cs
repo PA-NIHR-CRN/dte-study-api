@@ -81,7 +81,7 @@ public class FilterController(ParticipantDbContext context,
 
     private VolunteerFilterViewModel ClearFilters(VolunteerFilterViewModel model)
     {
-        ViewData.AddSuccessNotification($"All previously applied filters have been removed.");
+        this.AddSuccessNotification($"All previously applied filters have been removed.");
 
         ModelState.Clear();
 
