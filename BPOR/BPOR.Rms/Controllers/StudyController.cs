@@ -39,7 +39,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         var deferredStudiesPage = studiesQuery
             .AsStudyListModel()
             .OrderByDescending(s => s.Id)
-            .DeferredPage(paginationService); 
+            .DeferredPage(paginationService);
 
         var viewModel = new StudiesViewModel
         {
@@ -71,7 +71,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         {
             return NotFound();
         }
-        
+
         study.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
 
         return View(study);
@@ -80,9 +80,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
     // GET: Study/Create
     public IActionResult Create()
     {
-        ViewData["BackLinkURL"] = "/Study";
-        ViewData["ShowBackLink"] = true;
-        ViewData["ShowProgressBar"] = true;
         ViewData["ProgressPercentage"] = 0;
         return View(new StudyFormViewModel());
     }
@@ -96,64 +93,71 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,IsRecruitingIdentifiableParticipants,Step")]
         StudyFormViewModel model, string action)
     {
-        ViewData["ShowBackLink"] = true;
-        ViewData["BackLinkURL"] = "/Study";
-        ViewData["ShowProgressBar"] = true;
-        ViewData["ProgressPercentage"] = (model.Step - 1) * 50;
-        if (action == "Next" && model.Step == 1)
+        if (action == "Next" || action == "Save")
         {
-            ModelState.Remove("StudyName");
-            ModelState.Remove("IsRecruitingIdentifiableParticipants");
-            ModelState.Remove("CpmsId");
-
-            if (ModelState.IsValid)
+            if (model.Step == 1)
             {
-                model.Step = 2;
-                ViewData["ProgressPercentage"] = (model.Step - 1) * 50;
-                ViewData["BackLinkURL"] = HttpContext.Request.Headers["Referer"].ToString();
-                return View(model);
+                ModelState.Remove("StudyName");
+                ModelState.Remove("IsRecruitingIdentifiableParticipants");
+                ModelState.Remove("CpmsId");
+
+                if (ModelState.IsValid)
+                {
+                    model.Step = 2;
+                }
+            }
+            else if (model.Step == 2)
+            {
+                if (string.IsNullOrEmpty(model.StudyName))
+                {
+                    ModelState.AddModelError("StudyName", "Enter the study name");
+                }
+                else if (model.StudyName.Length > 255)
+                {
+                    ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var study = new Study
+                    {
+                        FullName = model.FullName,
+                        EmailAddress = model.EmailAddress,
+                        StudyName = model.StudyName,
+                        CpmsId = model.CpmsId,
+                        IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false
+                    };
+
+                    context.Add(study);
+                    await context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(AddStudySuccess), new AddStudySuccessViewModel
+                    {
+                        Id = study.Id,
+                        StudyName = study.StudyName,
+                    });
+                }
             }
         }
-        else if (action == "Save" && model.Step == 2)
+        else
         {
-            if (string.IsNullOrEmpty(model.StudyName))
+            // Clear validation when clicking back link
+            // TODO: Needs to be more robust when there are other action names
+            ModelState.Clear();
+
+            if (model.Step < 1)
             {
-                ModelState.AddModelError("StudyName", "Enter the study name");
+                // Back link is exiting the process.
+                // Return to a known entry point.
+                // TODO: add referer as a query parameter
+                // at the start of the journey so we can start
+                // from any location and the back link
+                // will exit correctly.
+                return RedirectToAction("Index");
             }
-            else if (model.StudyName.Length > 255)
-            {
-                ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
-            }
-            
-            if (ModelState.IsValid)
-            {
-                var study = new Study
-                {
-                    FullName = model.FullName,
-                    EmailAddress = model.EmailAddress,
-                    StudyName = model.StudyName,
-                    CpmsId = model.CpmsId,
-                    IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                };
-
-                context.Add(study);
-                await context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(AddStudySuccess), new AddStudySuccessViewModel
-                {
-                    Id = study.Id,
-                    StudyName = study.StudyName,
-                });
-            }
-
-            ViewData["BackLinkURL"] = HttpContext.Request.Headers["Referer"].ToString();
-
-            return View(model);
         }
 
-        // For "Back" action or if validation fails, just return to the current view
+        ViewData["ProgressPercentage"] = (model.Step/ (double)model.TotalSteps) * 100d;
         return View(model);
     }
 

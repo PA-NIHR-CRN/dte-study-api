@@ -34,31 +34,14 @@
         @await RenderSectionAsync("ProgressBar", required: false)
     }
 
-    @{
-        bool showBackLink = ViewData["ShowBackLink"] as bool? ?? false;
-        string backLink = ViewData["BackLinkURL"] as string ?? "";
-    }
-
     <div class="govuk-width-container">
-
-        <div class="govuk-back-link-container @(showBackLink ? "" : "float-content-right")">
-                @if (showBackLink)
-                {
-                    if (!String.IsNullOrEmpty(backLink))
-                    {
-                        <a class="govuk-back-link" href="@backLink">Back</a>
-                    }
-                    else
-                    {
-                        <a href="#" class="govuk-back-link" onclick="window.history.back()">Back</a>
-                    }          
-                }
+        <div class="govuk-back-link-container float-content-right">
                 @if (ViewData["ShowProgressBar"] as bool? ?? false)
                 {
                     <span class="govuk-progress-percentage">@ViewData["ProgressPercentage"]%</span>
                 }
         </div>
-
+        <back-link />
         <main class="govuk-main-wrapper" id="main-content" role="main">
             <breadcrumbs />
             <partial name="Partials/_NotificationBanner" />

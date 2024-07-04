@@ -13,5 +13,5 @@
 </style>
 
 <div class="progress-bar-container" aria-labelledby="form-progress">
-    <div id="form-progress" class="progress-bar" style="width: @((Model.Step - 1) / (double)Model.TotalSteps * 100)%;"></div>
+    <div id="form-progress" class="progress-bar" style="width: @(ViewData["ProgressPercentage"])%;"></div>
 </div>

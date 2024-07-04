@@ -292,9 +292,9 @@ body {
     padding-bottom: 10px;
 }
 
-.pill-container.pill-container-column {
-    flex-direction: column;
-}
+    .pill-container.pill-container-column {
+        flex-direction: column;
+    }
 
 .pill {
     padding-top: 1px;
@@ -350,7 +350,7 @@ body {
     margin-bottom: 5px !important;
 }
 
-.govuk-skip-link.end-of-options{
+.govuk-skip-link.end-of-options {
     margin-top: 5px !important;
 }
 
@@ -358,10 +358,15 @@ body {
     margin-bottom: 5px !important;
 }
 
-.govuk-checkboxes__item.skip-link{
+.govuk-checkboxes__item.skip-link {
     margin-bottom: unset;
 }
 
-.email-address{
+.email-address {
     font-weight: bold;
+}
+
+button.govuk-back-link {
+    border: none;
+    background: none;
 }
