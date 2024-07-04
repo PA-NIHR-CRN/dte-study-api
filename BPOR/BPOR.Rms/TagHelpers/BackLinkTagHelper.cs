@@ -33,7 +33,7 @@ namespace BPOR.Rms.TagHelpers
                 output.Attributes.SetAttribute("form", formId);
                 output.Attributes.SetAttribute("type", "submit");
                 output.Attributes.SetAttribute("name", hiddenElement.Attributes["name"]);
-                output.Attributes.SetAttribute("value", hiddenElement.Attributes["value"]);
+                output.Attributes.SetAttribute("value", backValue);
                 output.Content.SetContent("Back");
             }
             else if (referer != null && showBackLink == true)

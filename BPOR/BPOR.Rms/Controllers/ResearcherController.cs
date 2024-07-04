@@ -33,7 +33,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
     public IActionResult SubmitStudy(ResearcherStudyFormViewModel model)
     {
-        ViewData["ShowProgressBar"] = true;
         ViewData["ProgressPercentage"] = 0;
 
         return View(model);
@@ -42,7 +41,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     [HttpPost]
     public async Task<IActionResult> SubmitStudy(ResearcherStudyFormViewModel model, string action)
     {
-        ViewData["ShowProgressBar"] = true;
         ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
 
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
@@ -54,7 +52,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             if (ModelState.IsValid)
             {
                 model.Step = 8;
-                ViewData["ShowProgressBar"] = false;
+                ViewData["ProgressPercentage"] = null;
                 model.RedirectToCheckYourAnswers = false;
             }
             return View(model);
@@ -200,7 +198,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             if (ModelState.IsValid)
             {
                 model.Step = 8;
-                ViewData["ShowProgressBar"] = false;
+                ViewData["ProgressPercentage"] = null;
                 return View(model);
             }
         }

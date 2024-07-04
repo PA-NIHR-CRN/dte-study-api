@@ -29,14 +29,14 @@
 
     <partial name="_Header" />
 
-    @if (ViewData["ShowProgressBar"] as bool? ?? false)
+    @if (ViewData["ProgressPercentage"] is not null)
     {
-        @await RenderSectionAsync("ProgressBar", required: false)
+        <partial name="Partials/_ProgressBar" />
     }
 
     <div class="govuk-width-container">
         <div class="govuk-back-link-container float-content-right">
-                @if (ViewData["ShowProgressBar"] as bool? ?? false)
+            @if (ViewData["ProgressPercentage"] is not null)
                 {
                     <span class="govuk-progress-percentage">@ViewData["ProgressPercentage"]%</span>
                 }
