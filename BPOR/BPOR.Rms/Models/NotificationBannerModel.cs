@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.Models;
 
@@ -26,6 +27,6 @@ public static class NotificationBannerExtensions
 
     public static void AddNotification(this Controller controller, NotificationBannerModel notification)
     {
-        controller.TempData["Notification"] = notification;
+        controller.TempData.Put("Notification", notification);
     }
 }

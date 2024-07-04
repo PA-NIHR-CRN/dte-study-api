@@ -5,7 +5,7 @@
     }
 </style>
 @{
-    var notification = ViewData["Notification"] as NotificationBannerModel;
+    var notification = TempData.Get<NotificationBannerModel>("Notification");
 }
 @if (notification != null)
 {

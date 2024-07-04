@@ -1,8 +1,9 @@
 using BPOR.Domain.Entities;
+using BPOR.Rms.Models.Email;
 
 namespace BPOR.Rms.Services;
 
 public interface IEmailCampaignService
 {
-    Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default);
+    Task SendCampaignAsync(EmailServiceQueueItem item, CancellationToken cancellationToken = default);
 }

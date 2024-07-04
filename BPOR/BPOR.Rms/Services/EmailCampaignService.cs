@@ -14,8 +14,9 @@ using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 using NIHR.Infrastructure.Interfaces;
 using Polly;
 using NIHR.NotificationService.Context;
-using BPOR.Rms.Controllers;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Rms.Models.Email;
+using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
 
 public class EmailCampaignService(
@@ -26,17 +27,15 @@ public class EmailCampaignService(
     IReferenceGenerator referenceGenerator,
     NotificationDbContext notificationContext,
     IPostcodeMapper locationApiClient,
-    TimeProvider timeProvider,
-    LinkGenerator linkGenerator,
-    BaseAddressAccessor baseAddressAccessor
+    TimeProvider timeProvider
     )
     : IEmailCampaignService
 {
-    public async Task SendCampaignAsync(int emailCampaignId, CancellationToken cancellationToken = default)
+    public async Task SendCampaignAsync(EmailServiceQueueItem item, CancellationToken cancellationToken = default)
     {
         var campaign = await context.EmailCampaigns
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == emailCampaignId, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Id == item.Id, cancellationToken);
         var emailDeliveryStatusId = GetEmailDeliveryStatusId();
 
         var dbFilter = await GetFilterCriteriaAsync(campaign, cancellationToken);
@@ -54,7 +53,7 @@ public class EmailCampaignService(
             return;
         }
 
-        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, emailDeliveryStatusId, cancellationToken);
+        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, emailDeliveryStatusId, item.Callback, cancellationToken);
     }
 
     private int GetEmailDeliveryStatusId()
@@ -95,7 +94,7 @@ public class EmailCampaignService(
     }
 
     private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
-        FilterCriteria dbFilter, int emailDeliveryStatusId, CancellationToken cancellationToken)
+        FilterCriteria dbFilter, int emailDeliveryStatusId, string callback, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
 
@@ -120,7 +119,7 @@ public class EmailCampaignService(
 
         await SaveChangesWithRetryAsync(emailQueue, cancellationToken);
 
-        await QueueNotificationsAsync(volunteers, campaign, emailQueue, cancellationToken);
+        await QueueNotificationsAsync(volunteers, campaign, emailQueue, callback, cancellationToken);
     }
 
     private async Task SaveChangesWithRetryAsync(List<ProcessingResults> emailQueue,
@@ -218,7 +217,7 @@ public class EmailCampaignService(
     }
 
     private async Task QueueNotificationsAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
-        List<ProcessingResults> emailQueue, CancellationToken cancellationToken)
+        List<ProcessingResults> emailQueue, string callback, CancellationToken cancellationToken)
     {
         foreach (var volunteer in volunteers)
         {
@@ -240,8 +239,14 @@ public class EmailCampaignService(
                 continue;
             }
 
-            var link = linkGenerator.GetUriByName(nameof(NotifyCallbackController.RegisterInterest), new { reference = encryptionService.Encrypt(emailCampaignParticipant.Id.ToString()) }, baseAddressAccessor.Scheme, baseAddressAccessor.Host, baseAddressAccessor.PathBase);
+            var baseUri = new Uri(callback);
+            var queryParams = new Dictionary<string, string>
+            {
+                { "reference", encryptionService.Encrypt(emailCampaignParticipant.Id.ToString()) }
+            };
 
+            var uriWithQuery = new Uri(QueryHelpers.AddQueryString(baseUri.ToString(), queryParams));
+            var link = uriWithQuery.ToString();
             var notification = new Notification
             {
                 PrimaryIdentifier = volunteer.Email,

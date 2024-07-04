@@ -23,11 +23,10 @@ public class EmailController(
     IEncryptionService encryptionService,
     IHostEnvironment hostEnvironment,
     LinkGenerator linkGenerator
-    )
+)
     : Controller
 {
     private const string _emailCacheKey = "EmailTemplates";
-    private readonly LinkGenerator _linkGenerator = linkGenerator;
 
     public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model)
     {
@@ -80,7 +79,11 @@ public class EmailController(
 
                 await AddCampaignToContextAsync(emailCampaign, cancellationToken);
 
-                await taskQueue.QueueBackgroundWorkItemAsync(emailCampaign.Id, cancellationToken);
+                var callback =
+                    linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest)) ??
+                    throw new InvalidOperationException("Callback URL not found");
+                
+                await taskQueue.QueueBackgroundWorkItemAsync(emailCampaign.Id, callback, cancellationToken);
             }
 
             return View("EmailSuccess",
@@ -138,9 +141,10 @@ public class EmailController(
                     { "lastName", "Doe" },
                     {
                         "uniqueLink",
-                        _linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest), new {reference = encryptionService.Encrypt("0123456789101112") }) ?? string.Empty
+                        linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest),
+                            new { reference = encryptionService.Encrypt("0123456789101112") }) ?? string.Empty
                     },
-                    {"uniqueReference", "0123456789101112" }
+                    { "uniqueReference", "0123456789101112" }
                 });
 
             foreach (var email in emailAddresses)

@@ -30,13 +30,16 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     {
         if (String.IsNullOrEmpty(model.VolunteerReferenceNumbers))
         {
-            ModelState.AddModelError("VolunteerReferenceNumbers", "Enter a Be Part of Research volunteer reference number");
+            ModelState.AddModelError("VolunteerReferenceNumbers",
+                "Enter a Be Part of Research volunteer reference number");
             return View("UpdateRecruited", model);
         }
+
         // do not allow non-numeric characters, allow spaces and line breaks
         if (Regex.IsMatch(model.VolunteerReferenceNumbers, "[^0-9\\s\r\n]"))
         {
-            ModelState.AddModelError("VolunteerReferenceNumbers", "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
+            ModelState.AddModelError("VolunteerReferenceNumbers",
+                "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
         }
 
         if (!ModelState.IsValid)
@@ -62,16 +65,19 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
                     if (!isValid)
                     {
-                        ModelState.AddModelError("VolunteerReferenceNumbers", "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
+                        ModelState.AddModelError("VolunteerReferenceNumbers",
+                            "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
                         return View("UpdateRecruited", model);
                     }
                 }
 
-                var studyParticipants = context.StudyParticipantEnrollment.Where(p => volunteerRefs.Contains(p.Reference) && p.StudyId == model.StudyId).ToList();
+                var studyParticipants = context.StudyParticipantEnrollment
+                    .Where(p => volunteerRefs.Contains(p.Reference) && p.StudyId == model.StudyId).ToList();
 
                 if (studyParticipants.Count < volunteerRefs.Length)
                 {
-                    ModelState.AddModelError("VolunteerReferenceNumbers", "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
+                    ModelState.AddModelError("VolunteerReferenceNumbers",
+                        "Enter a valid volunteer reference number. Check that all volunteer reference numbers are in the valid format, for example 9703876601877339.");
                     return View("UpdateRecruited", model);
                 }
 
@@ -123,9 +129,10 @@ public class VolunteerController(ParticipantDbContext context) : Controller
                         LinkText = "Return to the study details page",
                         LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
                     });
+                }
             }
         }
-        }
+
         model.VolunteerReferenceNumbers = string.Empty;
         return RedirectToAction("UpdateRecruited", model);
     }
