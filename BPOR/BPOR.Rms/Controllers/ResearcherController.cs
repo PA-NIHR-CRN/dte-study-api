@@ -1,45 +1,15 @@
 using BPOR.Domain.Entities;
-using BPOR.Domain.Entities.RefData;
 using BPOR.Rms.Models;
-using BPOR.Rms.Models.Email;
 using BPOR.Rms.Models.Researcher;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace BPOR.Rms.Controllers;
 
 public class ResearcherController(ParticipantDbContext context, ICurrentUserProvider<User> currentUserProvider) : Controller
 {
-    public IActionResult Create()
-    {
-        ViewData["BackLinkURL"] = HttpContext.Request.Headers["Referer"].ToString();
-        ViewData["ShowBackLink"] = true;
-        return View(new ResearcherFormViewModel());
-    }
-    
-
-    [HttpPost]
-    public IActionResult Create(ResearcherFormViewModel model)
-    {
-        ViewData["BackLinkURL"] = HttpContext.Request.Headers["Referer"].ToString();
-        ViewData["ShowBackLink"] = true;
-
-        if (model.Password?.Length < 12)
-        {
-            ModelState.AddModelError("Password", "Enter a password that is at least 12 characters long and does not include any symbols");
-        }
-
-        if (ModelState.IsValid)
-        {
-            return View("AddResearcherSuccess");
-        }
-
-        return View(model);
-    }
-
     public IActionResult TermsAndConditions()
     {
         return View(new ResearcherTermsAndConditionsViewModel());
@@ -63,7 +33,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
     public IActionResult SubmitStudy(ResearcherStudyFormViewModel model)
     {
-        ViewData["ShowProgressBar"] = true;
         ViewData["ProgressPercentage"] = 0;
 
         return View(model);
@@ -72,7 +41,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     [HttpPost]
     public async Task<IActionResult> SubmitStudy(ResearcherStudyFormViewModel model, string action)
     {
-        ViewData["ShowProgressBar"] = true;
         ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
 
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
@@ -84,7 +52,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             if (ModelState.IsValid)
             {
                 model.Step = 8;
-                ViewData["ShowProgressBar"] = false;
+                ViewData["ProgressPercentage"] = null;
                 model.RedirectToCheckYourAnswers = false;
             }
             return View(model);
@@ -230,7 +198,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             if (ModelState.IsValid)
             {
                 model.Step = 8;
-                ViewData["ShowProgressBar"] = false;
+                ViewData["ProgressPercentage"] = null;
                 return View(model);
             }
         }
