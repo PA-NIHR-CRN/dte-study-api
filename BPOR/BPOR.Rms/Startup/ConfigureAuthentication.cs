@@ -101,7 +101,7 @@ public static class ConfigureAuthentication
 
         if (builder.Environment.IsProduction() ||
             !(developmentSettings.Value.DisableSsmDataProtection ||
-                (Debugger.IsAttached && builder.Environment.IsDevelopment())
+                builder.Environment.IsDevelopment()
              ))
         {
             dataprotection.PersistKeysToAWSSystemsManager(parameterNamePrefix);

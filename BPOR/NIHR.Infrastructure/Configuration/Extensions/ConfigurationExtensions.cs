@@ -76,12 +76,10 @@ IHostEnvironment hostEnvironment)
             return configuration;
         }
 
-
-
-            public static IConfigurationManager AddNihrConfiguration(this IConfigurationManager configuration, IServiceCollection services,
-    IHostEnvironment hostEnvironment)
+        public static IConfigurationManager AddNihrConfiguration(this IConfigurationManager configuration, IServiceCollection services,
+IHostEnvironment hostEnvironment)
         {
-            
+
             AddNihrConfiguration(configuration, hostEnvironment);
 
             var secretsManagerSettings = services.GetSectionAndValidate<AwsSecretsManagerSettings>(configuration).Value;
