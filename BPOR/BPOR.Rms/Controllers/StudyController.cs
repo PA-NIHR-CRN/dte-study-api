@@ -80,8 +80,10 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
     // GET: Study/Create
     public IActionResult Create()
     {
-        ViewData["ProgressPercentage"] = 0;
-        return View(new StudyFormViewModel());
+        var model = new StudyFormViewModel();
+        ViewData["Step"] = model.Step;
+        ViewData["TotalSteps"] = model.TotalSteps;
+        return View(model);
     }
 
     // POST: Study/Create
@@ -157,7 +159,9 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
             }
         }
 
-        ViewData["ProgressPercentage"] = (model.Step/ (double)model.TotalSteps) * 100d;
+        ViewData["Step"] = model.Step;
+        ViewData["TotalSteps"] = model.TotalSteps;
+        
         return View(model);
     }
 

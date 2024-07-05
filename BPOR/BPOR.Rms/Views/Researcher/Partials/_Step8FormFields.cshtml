@@ -13,7 +13,7 @@
             @(Model.ShortName)
         </dd>
         <dd class="govuk-summary-list__actions">
-            <button type="submit" name="action" value="RedirectStep1" class="link-button">Change</button>
+            <button type="submit" name="Step" value="1" class="link-button">Change</button>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -24,7 +24,7 @@
             @(Model.ChiefInvestigator)
         </dd>
         <dd class="govuk-summary-list__actions">
-            <button type="submit" name="action" value="RedirectStep1" class="link-button">Change</button>
+            <button type="submit" name="Step" value="1" class="link-button">Change</button>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -35,7 +35,7 @@
             @(Model.StudySponsors)
         </dd>
         <dd class="govuk-summary-list__actions">
-            <button type="submit" name="action" value="RedirectStep1" class="link-button">Change</button>
+            <button type="submit" name="Step" value="1" class="link-button">Change</button>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -46,7 +46,7 @@
             @(Model.PortfolioSubmissionStatusOptions?.Where(o => o.Id == Model.PortfolioSubmissionStatus).Select(o => o.Description).FirstOrDefault())
         </dd>
         <dd class="govuk-summary-list__actions">
-            <button type="submit" name="action" value="RedirectStep2" class="link-button">Change</button>
+            <button type="submit" name="Step" value="2" class="link-button">Change</button>
         </dd>
     </div>
     @if (Model.PortfolioSubmissionStatus.HasValue)
@@ -61,7 +61,7 @@
                     @(Model.OutcomeOfSubmissionOptions?.Where(o => o.Id == Model.OutcomeOfSubmission).Select(o => o.Description).FirstOrDefault())
                 </dd>
                 <dd class="govuk-summary-list__actions">
-                    <button type="submit" name="action" value="RedirectStep3" class="link-button">Change</button>
+                    <button type="submit" name="Step" value="3" class="link-button">Change</button>
                 </dd>
             </div>
             <div class="govuk-summary-list__row">
@@ -72,7 +72,7 @@
                     @(Model.CPMSId)
                 </dd>
                 <dd class="govuk-summary-list__actions">
-                    <button type="submit" name="action" value="RedirectStep3" class="link-button">Change</button>
+                    <button type="submit" name="Step" value="3" class="link-button">Change</button>
                 </dd>
             </div>
         }
@@ -85,7 +85,7 @@
             @(Model.HasFunding.HasValue ? (Model.HasFunding.Value ? "Yes" : "No") : "No")
         </dd>
         <dd class="govuk-summary-list__actions">
-            <button type="submit" name="action" value="RedirectStep4" class="link-button">Change</button>
+            <button type="submit" name="Step" value="4" class="link-button">Change</button>
         </dd>
     </div>
     @if (Model.HasFunding.HasValue)
@@ -100,7 +100,7 @@
                     @(Model.FundingCode)
                 </dd>
                 <dd class="govuk-summary-list__actions">
-                    <button type="submit" name="action" value="RedirectStep5" class="link-button">Change</button>
+                    <button type="submit" name="Step" value="5" class="link-button">Change</button>
                 </dd>
             </div>
         }
@@ -113,7 +113,7 @@
             @(Model.UKRecruitmentTarget)
         </dd>
         <dd class="govuk-summary-list__actions">
-            <button type="submit" name="action" value="RedirectStep6" class="link-button">Change</button>
+            <button type="submit" name="Step" value="6" class="link-button">Change</button>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -124,7 +124,7 @@
             @(Model.TargetPopulation)
         </dd>
         <dd class="govuk-summary-list__actions">
-            <button type="submit" name="action" value="RedirectStep6" class="link-button">Change</button>
+            <button type="submit" name="Step" value="6" class="link-button">Change</button>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -135,7 +135,7 @@
             @(Model.RecruitmentStartDate.ToDateOnly())
         </dd>
         <dd class="govuk-summary-list__actions">
-            <button type="submit" name="action" value="RedirectStep7" class="link-button">Change</button>
+            <button type="submit" name="Step" value="7" class="link-button">Change</button>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -146,7 +146,7 @@
             @(Model.RecruitmentEndDate.ToDateOnly())
         </dd>
         <dd class="govuk-summary-list__actions">
-            <button type="submit" name="action" value="RedirectStep7" class="link-button">Change</button>
+            <button type="submit" name="Step" value="7" class="link-button">Change</button>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -157,7 +157,7 @@
             @(Model.RecruitingIdentifiableVolunteers.HasValue ? (Model.RecruitingIdentifiableVolunteers.Value ? "Yes" : "No") : "No")
         </dd>
         <dd class="govuk-summary-list__actions">
-            <button type="submit" name="action" value="RedirectStep7" class="link-button">Change</button>
+            <button type="submit" name="Step" value="7" class="link-button">Change</button>
         </dd>
     </div>
 </dl>

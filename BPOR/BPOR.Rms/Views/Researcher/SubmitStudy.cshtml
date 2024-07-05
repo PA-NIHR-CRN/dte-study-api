@@ -9,9 +9,7 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
 
-        <form asp-action="SubmitStudy">
-            <input type="hidden" asp-for="Step" value="@Model.Step" />
-            <input type="hidden" asp-for="RedirectToCheckYourAnswers" value="@Model.RedirectToCheckYourAnswers" />
+        <form asp-action="SubmitStudy" back-link-for="Step" back-link-for-value="@(Model.Step-1)">
 
             <div style="@(Model.Step == 1 ? "" : "display:none;")">
                 @await Html.PartialAsync("Partials/_Step1FormFields", Model)
@@ -46,12 +44,8 @@
             </div>
 
             <div class="govuk-button-group">
-                @if (!Model.RedirectToCheckYourAnswers)
+                @if (!Model.Completed)
                 {
-                    @if (Model.Step != 1 && Model.Step != Model.TotalSteps)
-                    {
-                        <button type="submit" name="action" value="Back" class="govuk-button" data_module="govuk-button">Back</button>
-                    }
                     @if (Model.Step != Model.TotalSteps)
                     {
                         <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Next</button>
@@ -64,9 +58,12 @@
                 }
                 else
                 {
-                    <button type="submit" name="action" value="RedirectToCheckAnswers" class="govuk-button" data_module="govuk-button">Confirm</button>
+                    <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Confirm</button>
                 }
             </div>
+
+            <input type="hidden" asp-for="Step" value="@Model.Step"/>
+            <input type="hidden" asp-for="Completed" value="@Model.Completed"/>
         </form>
 
     </div>

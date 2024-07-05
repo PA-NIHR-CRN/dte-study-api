@@ -28,18 +28,16 @@
     <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 
     <partial name="_Header" />
-
-    @if (ViewData["ProgressPercentage"] is not null)
-    {
-        <partial name="Partials/_ProgressBar" />
-    }
+    <partial name="Partials/_ProgressBar" />
 
     <div class="govuk-width-container">
         <div class="govuk-back-link-container float-content-right">
-            @if (ViewData["ProgressPercentage"] is not null)
-                {
-                    <span class="govuk-progress-percentage">@ViewData["ProgressPercentage"]%</span>
-                }
+            @if (ViewData["Step"] is not null && ViewData["TotalSteps"] is not null)
+            {
+                var step = ViewData["Step"] as int?;
+                var totalSteps = ViewData["TotalSteps"] as int?;
+                <span class="govuk-progress-percentage">Step @step of @totalSteps</span>
+            }
         </div>
         <back-link />
         <main class="govuk-main-wrapper" id="main-content" role="main">

@@ -33,222 +33,131 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
     public IActionResult SubmitStudy(ResearcherStudyFormViewModel model)
     {
-        ViewData["ProgressPercentage"] = 0;
-
+        ViewData["Step"] = model.Step;
+        ViewData["TotalSteps"] = model.TotalSteps;
         return View(model);
     }
 
     [HttpPost]
     public async Task<IActionResult> SubmitStudy(ResearcherStudyFormViewModel model, string action)
     {
-        ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
+        if (action == "Next")
+        {
+            ValidateMandatoryFields(model);
+            if (ModelState.IsValid)
+            {
+                if (model.Step == model.TotalSteps) {
+                    var user = currentUserProvider?.User?.ContactFullName;
+                    var email = currentUserProvider?.User?.ContactEmail;
+
+                    var study = new Study
+                    {
+                        FullName = user == null ? "" : user,
+                        EmailAddress = email == null ? "" : email,
+                        StudyName = model.ShortName,
+                        ChiefInvestigator = model.ChiefInvestigator,
+                        Sponsors = model.StudySponsors,
+                        Submitted = context.Submitted.FirstOrDefault(s => s.Id == model.PortfolioSubmissionStatus),
+                        HasNihrFunding = model.HasFunding,
+                        RecruitmentTarget = model.UKRecruitmentTarget,
+                        TargetPopulation = model.TargetPopulation,
+                        RecruitmentStartDate = model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
+                        RecruitmentEndDate = model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
+                        IsRecruitingIdentifiableParticipants = model.RecruitingIdentifiableVolunteers.Value,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                    };
+
+                    if (model.PortfolioSubmissionStatus == 1)
+                    {
+                        study.SubmissionOutcome = context.SubmissionOutcome.FirstOrDefault(o => o.Id == model.OutcomeOfSubmission);
+                        study.CpmsId = model.CPMSId;
+                    }
+
+                    if (model.HasFunding == true)
+                    {
+                        study.FundingCode = model.FundingCode;
+                    }
+
+                    context.Add(study);
+                    await context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(AddStudySuccess), new AddStudySuccessViewModel
+                    {
+                        Id = study.Id,
+                        StudyName = study.StudyName,
+                    });
+                }
+                else
+                {
+                    switch (model.Step)
+                    {
+                        case 2:
+                            if (model.PortfolioSubmissionStatus != 1)
+                            {
+                                model.OutcomeOfSubmission = null;
+                                ModelState.Remove(nameof(model.OutcomeOfSubmission));
+                                model.CPMSId = null;
+                                model.GotoNextStep(4);
+                            }
+                            else
+                            {
+                                model.Step = 3;
+                            }
+                            break;
+                        case 4:
+                            if (model.HasFunding != true)
+                            {
+                                model.FundingCode = null;
+                                model.GotoNextStep(6);
+                            }
+                            else
+                            {
+                                model.Step = 5;
+                            }
+                            break;
+                        default:
+                            model.GotoNextStep();
+                            break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Clear validation when clicking back link
+            // TODO: Needs to be more robust when there are other action names
+            ModelState.Clear();
+
+            if (model.Step < 1)
+            {
+                // Back link is exiting the process.
+                // Return to a known entry point.
+                // TODO: add referer as a query parameter
+                // at the start of the journey so we can start
+                // from any location and the back link
+                // will exit correctly.
+                return RedirectToAction(nameof(TermsAndConditions));
+            }
+
+            // Skip step if dependency questions are not required
+
+            if (model.Step == 3 && model.PortfolioSubmissionStatus != 1)
+            {
+                model.Step = 2;
+            }
+            else if (model.Step == 5 && model.HasFunding != true)
+            {
+                model.Step = 4;
+            }
+        }
+
 
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
 
-        if (action == "RedirectToCheckAnswers")
-        {
-            ValidateMandatoryFields(model);
-            if (ModelState.IsValid)
-            {
-                model.Step = 8;
-                ViewData["ProgressPercentage"] = null;
-                model.RedirectToCheckYourAnswers = false;
-            }
-            return View(model);
-        }
-
-        if (action.Contains("RedirectStep")
-            && action != "RedirectStep2"
-            && action != "RedirectStep4")
-        {
-            model.RedirectToCheckYourAnswers = true;
-        }
-        else
-        {
-            model.RedirectToCheckYourAnswers = false;
-        }
-
-        if (action == "Back")
-        {
-            // Go back two steps if dependency questions are not required
-            if ((model.Step == 4 && model.PortfolioSubmissionStatus != 1)
-                || (model.Step == 6 && (model.HasFunding == false || model.HasFunding == null)))
-            {
-                model.Step = model.Step - 2;
-            }
-            else
-            {
-                model.Step = model.Step - 1;
-            }
-
-            ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
-            return View(model);
-        }
-
-        if (action == "RedirectStep1")
-        {
-            model.Step = 1;
-            ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
-            return View(model);
-        }
-
-        if ((action == "Next" && model.Step == 1) || action == "RedirectStep2")
-        {
-            ValidateMandatoryFields(model);
-
-            if (ModelState.IsValid)
-            {
-                model.Step = 2;
-                ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
-                return View(model);
-            }
-        }
-        else if ((action == "Next" && model.Step == 2) || action == "RedirectStep3")
-        {
-            ValidateMandatoryFields(model);
-
-            if (ModelState.IsValid)
-            {
-                if (model.PortfolioSubmissionStatus == 1)
-                {
-                    model.Step = 3;
-                }
-                else
-                {
-                    model.OutcomeOfSubmission = null;
-                    ModelState.Remove(nameof(model.OutcomeOfSubmission));
-                    model.CPMSId = null;
-                    if (model.RedirectToCheckYourAnswers)
-                    {
-                        model.Step = 8;
-                    }
-                    else
-                    {
-                        model.Step = 4;
-                    }
-                }
-                ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
-                return View(model);
-            }
-        }
-        else if ((action == "Next" && model.Step == 3) || action == "RedirectStep4")
-        {
-            ValidateMandatoryFields(model);
-
-            if (ModelState.IsValid)
-            {
-                model.Step = 4;
-                ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
-                return View(model);
-            }
-        }
-        else if ((action == "Next" && model.Step == 4) || action == "RedirectStep5")
-        {
-            ValidateMandatoryFields(model);
-
-            if (ModelState.IsValid)
-            {
-                if (model.HasFunding == true)
-                {
-                    model.Step = 5;
-                }
-                else
-                {
-                    model.FundingCode = null;
-                    if (model.RedirectToCheckYourAnswers)
-                    {
-                        model.Step = 8;
-                    }
-                    else
-                    {
-                        model.Step = 6;
-                    }
-                }
-                ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
-                return View(model);
-            }
-        }
-        else if ((action == "Next" && model.Step == 5) || action == "RedirectStep6")
-        {
-            ValidateMandatoryFields(model);
-
-            if (ModelState.IsValid)
-            {
-                model.Step = 6;
-                ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
-                return View(model);
-            }
-        }
-        else if ((action == "Next" && model.Step == 6) || action == "RedirectStep7")
-        {
-            ValidateMandatoryFields(model);
-
-            if (ModelState.IsValid)
-            {
-                model.Step = 7;
-                ViewData["ProgressPercentage"] = (model.Step - 1) * 15;
-                return View(model);
-            }
-        }
-        else if (action == "Next" && model.Step == 7)
-        {
-            ValidateMandatoryFields(model);
-
-            if (ModelState.IsValid)
-            {
-                model.Step = 8;
-                ViewData["ProgressPercentage"] = null;
-                return View(model);
-            }
-        }
-        else if (action == "Apply")
-        {
-            if (ModelState.IsValid)
-            {
-                var user = currentUserProvider?.User?.ContactFullName;
-                var email = currentUserProvider?.User?.ContactEmail;
-
-                var study = new Study
-                {
-                    FullName = user == null ? "" : user,
-                    EmailAddress = email == null ? "" : email,
-                    StudyName = model.ShortName,
-                    ChiefInvestigator = model.ChiefInvestigator,
-                    Sponsors = model.StudySponsors,
-                    Submitted = context.Submitted.FirstOrDefault(s => s.Id == model.PortfolioSubmissionStatus),
-                    HasNihrFunding = model.HasFunding,
-                    RecruitmentTarget = model.UKRecruitmentTarget,
-                    TargetPopulation = model.TargetPopulation,
-                    RecruitmentStartDate = model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
-                    RecruitmentEndDate = model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
-                    IsRecruitingIdentifiableParticipants = model.RecruitingIdentifiableVolunteers.Value,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                };
-
-                if (model.PortfolioSubmissionStatus == 1)
-                {
-                    study.SubmissionOutcome = context.SubmissionOutcome.FirstOrDefault(o => o.Id == model.OutcomeOfSubmission);
-                    study.CpmsId = model.CPMSId;
-                }
-
-                if (model.HasFunding == true)
-                {
-                    study.FundingCode = model.FundingCode;
-                }
-
-                context.Add(study);
-                await context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(AddStudySuccess), new AddStudySuccessViewModel
-                {
-                    Id = study.Id,
-                    StudyName = study.StudyName,
-                });
-            }
-        }
-
+        ViewData["Step"] = model.Step;
+        ViewData["TotalSteps"] = model.TotalSteps;
         return View(model);
     }
 
@@ -519,7 +428,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         ModelState["RecruitmentEndDate.Month"].Errors.Clear();
         ModelState["RecruitmentEndDate.Year"].Errors.Clear();
     }
-    
+
     public async Task<IActionResult> Edit(int id, int field)
     {
         var studyModel = await context.Studies
