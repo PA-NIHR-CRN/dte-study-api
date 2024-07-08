@@ -7,14 +7,13 @@
 <div>
     <h2 class="govuk-heading-l govuk-!-margin-bottom-3">Study details</h2>
     <dl class="govuk-summary-list">
-        <summary-list-item asp-for="@Model.Study.Id"
-                           asp-action-url="@(Model.IsResearcher ? null : Url.Action("Edit", "Study", new { id = Model.Study.Id, field = 2 }))">
+        <summary-list-item asp-for="@Model.Study.Id">
         </summary-list-item>
 
         <summary-list-item asp-for="@Model.IsRecruitingIdentifiableParticipantsDisplay"></summary-list-item>
 
         <summary-list-item asp-for="@Model.Study.StudyName"
-                           asp-action-url="@(Model.IsResearcher ? (isResearcherCompleted ? Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 1 }) : null) : Url.Action("Edit", "Study", new { id = Model.Study.Id, field = 1 }))">
+                           asp-action-url="@(Model.IsResearcher ? (isResearcherCompleted ? Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 1 }) : null) : Url.Action("Edit", "Study", new { id = Model.Study.Id, field = 2 }))">
         </summary-list-item>
 
         <summary-list-item asp-for="@Model.Study.CpmsId"
@@ -31,7 +30,9 @@
 
         @if (isResearcherCompleted)
         {
-            <summary-list-item asp-for="@Model.Study.ChiefInvestigator"></summary-list-item>
+            <summary-list-item asp-for="@Model.Study.ChiefInvestigator"
+                               asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 1 })">
+            </summary-list-item>
             <summary-list-item asp-for="@Model.Study.StudySponsors"
                                asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 1 })">
             </summary-list-item>
