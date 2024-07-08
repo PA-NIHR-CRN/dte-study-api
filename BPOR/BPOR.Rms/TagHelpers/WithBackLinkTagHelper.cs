@@ -13,8 +13,6 @@ namespace BPOR.Rms.TagHelpers
 
         public ModelExpression BackLinkFor { get; set; }
 
-        public object BackLinkForValue { get; set; }
-
         public override int Order => 50;
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
@@ -28,10 +26,11 @@ namespace BPOR.Rms.TagHelpers
                 output.Attributes.Add("id", formId);
             }
 
+            var value = (BackLinkFor.Model as int?) ?? 1;
             ViewContext.ViewData.ShowBackLink();
             ViewContext.ViewData["_BackLinkForm"] = formId;
             ViewContext.ViewData["_BackLinkFor"] = BackLinkFor;
-            ViewContext.ViewData["_BackLinkForValue"] = BackLinkForValue;
+            ViewContext.ViewData["_BackLinkForValue"] = (value - 1).ToString();
         }
     }
 }

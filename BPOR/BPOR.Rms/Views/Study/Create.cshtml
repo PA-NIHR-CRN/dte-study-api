@@ -9,7 +9,7 @@
     <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
         <h1 class="govuk-heading-xl">Add a study to use the Be Part of Research registry</h1>
 
-        <form asp-action="Create" back-link-for="Step" back-link-for-value="@(Model.Step-1)">
+        <form asp-action="Create" back-link-for="Step">
             <input type="hidden" asp-for="Step" value="@Model.Step" />
 
             <div style="@(Model.Step == 1 ? "" : "display:none;")">

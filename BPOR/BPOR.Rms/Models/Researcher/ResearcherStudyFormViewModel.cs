@@ -74,7 +74,7 @@ namespace BPOR.Rms.Models.Researcher
         }
 
         public bool IsEditMode { get; set; }
-
+        public bool IsResearcher { get; set; }
     }
 
     public class GovUkDate

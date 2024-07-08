@@ -66,8 +66,10 @@ public class StudyModel
     public string? TargetPopulation { get; set; }
 
     // TODO 2 GovUkDates, need to amalgamate
+    [Display(Name = "Recruitment start date")]
     [ResearcherEdit(7)]
     public DateOnly? RecruitmentStartDate { get; set; } = new();
+    [Display(Name = "Recruitment end date")]
 
     [ResearcherEdit(7)]
     public DateOnly? RecruitmentEndDate { get; set; } = new();

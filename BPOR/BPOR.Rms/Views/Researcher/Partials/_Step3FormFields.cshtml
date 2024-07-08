@@ -23,23 +23,27 @@
     </div>
 </div>
 
-<div class="govuk-form-group @(Html.ViewData.ModelState["CPMSId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-    <label asp-for="CPMSId" class="govuk-label" for="CPMSId">
-        @Html.DisplayNameFor(model => model.CPMSId)
-    </label>
-    <div id="event-name-hint" class="govuk-hint">
-        Enter the study CPMS ID, for example 12345
+@if (!Model.IsResearcher || !Model.IsEditMode)
+{
+    <div class="govuk-form-group @(Html.ViewData.ModelState["CPMSId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+        <label asp-for="CPMSId" class="govuk-label" for="CPMSId">
+            @Html.DisplayNameFor(model => model.CPMSId)
+        </label>
+        <div id="event-name-hint" class="govuk-hint">
+            Enter the study CPMS ID, for example 12345
+        </div>
+        @if (Html.ViewData.ModelState["CPMSId"]?.Errors.Count > 0)
+        {
+            <span id="CPMSId-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span>
+                @Html.ValidationMessageFor(model => model.CPMSId)
+            </span>
+            <input asp-for="CPMSId" class="govuk-input  govuk-input govuk-input--error" id="CPMSId" aria-describedby="CPMSId-error" value="@(Model.CPMSId)" />
+        }
+        else
+        {
+            <input asp-for="CPMSId" class=" govuk-input" id="CPMSId" value="@(Model.CPMSId)" />
+        }
     </div>
-    @if (Html.ViewData.ModelState["CPMSId"]?.Errors.Count > 0)
-    {
-        <span id="CPMSId-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.CPMSId)
-        </span>
-        <input asp-for="CPMSId" class="govuk-input  govuk-input govuk-input--error" id="CPMSId" aria-describedby="CPMSId-error" value="@(Model.CPMSId)" />
-    }
-    else
-    {
-        <input asp-for="CPMSId" class=" govuk-input" id="CPMSId" value="@(Model.CPMSId)" />
-    }
-</div>
+}
+

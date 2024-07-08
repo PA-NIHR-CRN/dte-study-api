@@ -22,26 +22,25 @@
     }
 </div>
 
-@if (!Model.IsEditMode)
-{
-    <div class="govuk-form-group @(Html.ViewData.ModelState["ChiefInvestigator"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-        <label asp-for="ChiefInvestigator" class="govuk-label" for="ChiefInvestigator">
-            @Html.DisplayNameFor(model => model.ChiefInvestigator)
-        </label>
-        @if (Html.ViewData.ModelState["ChiefInvestigator"]?.Errors.Count > 0)
-        {
-            <span id="ChiefInvestigator-error" class="govuk-error-message">
-                <span class="govuk-visually-hidden">Error:</span>
-                @Html.ValidationMessageFor(model => model.ChiefInvestigator)
-            </span>
-            <input asp-for="ChiefInvestigator" class="govuk-input  govuk-input govuk-input--error" id="ChiefInvestigator" aria-describedby="ChiefInvestigator-error" value="@(Model.ChiefInvestigator)" />
-        }
-        else
-        {
-            <input asp-for="ChiefInvestigator" class=" govuk-input" id="ChiefInvestigator" value="@(Model.ChiefInvestigator)" />
-        }
-    </div>
-}
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["ChiefInvestigator"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <label asp-for="ChiefInvestigator" class="govuk-label" for="ChiefInvestigator">
+        @Html.DisplayNameFor(model => model.ChiefInvestigator)
+    </label>
+    @if (Html.ViewData.ModelState["ChiefInvestigator"]?.Errors.Count > 0)
+    {
+        <span id="ChiefInvestigator-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.ChiefInvestigator)
+        </span>
+        <input asp-for="ChiefInvestigator" class="govuk-input  govuk-input govuk-input--error" id="ChiefInvestigator" aria-describedby="ChiefInvestigator-error" value="@(Model.ChiefInvestigator)" />
+    }
+    else
+    {
+        <input asp-for="ChiefInvestigator" class=" govuk-input" id="ChiefInvestigator" value="@(Model.ChiefInvestigator)" />
+    }
+</div>
+
 
 <div class="govuk-form-group @(Html.ViewData.ModelState["StudySponsors"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="StudySponsors" class="govuk-label" for="StudySponsors">
