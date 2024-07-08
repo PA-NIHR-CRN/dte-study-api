@@ -51,7 +51,6 @@ public class StudyModel
     [ResearcherEdit(3)]
     public string? OutcomeOfSubmission { get; set; }
 
-    [Display(Name = "Does the study have NIHR funding?")]
     public bool? HasFunding { get; set; }
 
     [Display(Name = "NIHR funding stream or grant code")]

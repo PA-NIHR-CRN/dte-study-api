@@ -65,20 +65,10 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                         RecruitmentStartDate = model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
                         RecruitmentEndDate = model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
                         IsRecruitingIdentifiableParticipants = model.RecruitingIdentifiableVolunteers.Value,
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow,
+                        SubmissionOutcomeId = model.PortfolioSubmissionStatus == 1 ? model.OutcomeOfSubmission : null,
+                        CpmsId = model.PortfolioSubmissionStatus == 1 ? model.CPMSId : null,
+                        FundingCode = model.HasFunding == true ? model.FundingCode : null,
                     };
-
-                    if (model.PortfolioSubmissionStatus == 1)
-                    {
-                        study.SubmissionOutcome = context.SubmissionOutcome.FirstOrDefault(o => o.Id == model.OutcomeOfSubmission);
-                        study.CpmsId = model.CPMSId;
-                    }
-
-                    if (model.HasFunding == true)
-                    {
-                        study.FundingCode = model.FundingCode;
-                    }
 
                     context.Add(study);
                     await context.SaveChangesAsync();
@@ -152,7 +142,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 model.Step = 4;
             }
         }
-
 
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
@@ -430,7 +419,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         ModelState["RecruitmentEndDate.Year"].Errors.Clear();
     }
 
-    public async Task<IActionResult> Edit(int id, int field, bool? hasFunding, int? portfolioSubmissionStatus)
+    public async Task<IActionResult> Edit(int id, int field)
     {
         var studyModel = await context.Studies
         .AsResearcherFormViewModel(step: field, isEditMode: true)
@@ -441,14 +430,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             return NotFound();
         }
 
-        if (hasFunding.HasValue)
-        {
-            studyModel.HasFunding = hasFunding;
-        }
-        if (portfolioSubmissionStatus.HasValue)
-        {
-            studyModel.PortfolioSubmissionStatus = portfolioSubmissionStatus;
-        }
         studyModel.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         studyModel.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
         studyModel.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
@@ -479,14 +460,16 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 if (model.PortfolioSubmissionStatus == 1)
                 {
                     model.OutcomeOfSubmission = null;
-                    return RedirectToAction(nameof(Edit), new { id, field = 3, model.HasFunding, model.PortfolioSubmissionStatus });
+                    model.Step = 3;
+                    return View(model);
                 }
                 break;
             case 4:
                 if (model.HasFunding == true)
                 {
                     model.FundingCode = string.Empty;
-                    return RedirectToAction(nameof(Edit), new { id, field = 5, model.HasFunding, model.PortfolioSubmissionStatus });
+                    model.Step = 5;
+                    return View(model);
                 }
             break;
         }
@@ -541,7 +524,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 studyToUpdate.TargetPopulation = model.TargetPopulation;
                 studyToUpdate.RecruitmentStartDate = model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
                 studyToUpdate.RecruitmentEndDate = model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
-                studyToUpdate.UpdatedAt = DateTime.UtcNow;
 
                 await context.SaveChangesAsync();
             }
