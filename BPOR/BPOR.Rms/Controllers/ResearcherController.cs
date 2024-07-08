@@ -5,7 +5,6 @@ using BPOR.Rms.Models.Study;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 
 namespace BPOR.Rms.Controllers;
 
@@ -47,7 +46,8 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             ValidateMandatoryFields(model);
             if (ModelState.IsValid)
             {
-                if (model.Step == model.TotalSteps) {
+                if (model.Step == model.TotalSteps)
+                {
                     var user = currentUserProvider?.User?.ContactFullName;
                     var email = currentUserProvider?.User?.ContactEmail;
 
@@ -521,7 +521,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
             this.AddSuccessNotification($"{model.ShortName} has been successfully updated");
 
-            return RedirectToAction(nameof(Details),nameof(Study), new { id });
+            return RedirectToAction(nameof(StudyController.Details), "Study", new { id });
         }
 
         model.Id = id;
