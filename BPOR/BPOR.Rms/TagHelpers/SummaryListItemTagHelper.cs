@@ -49,18 +49,19 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
         var field = studyEdit?.FieldId;
         var controller = nameof(StudyController);
 
-        if (isResearcher)
+        var viewModel = For.ModelExplorer.Container.Model as StudyDetailsViewModel;
+        var isResearcherCompleted = !string.IsNullOrWhiteSpace(viewModel?.Study.ChiefInvestigator);
+
+        if (isResearcherCompleted)
         {
             var researcherEdit = For.Metadata.ContainerType?.GetProperty(studyRelativeName)?.GetCustomAttribute<ResearcherEditAttribute>();
-                       
-            if(researcherEdit is not null)
+
+            if (researcherEdit is not null)
             {
                 field = researcherEdit.FieldId;
                 controller = nameof(ResearcherController);
             }
         }
-
-        var viewModel = For.ModelExplorer.Container.Model as StudyDetailsViewModel;
 
         if (field is not null && viewModel is not null) {
             var url = linkGenerator.GetUriByAction(ViewContext.HttpContext, "Edit", controller.Replace("Controller", ""), new { id = viewModel.Study.Id, field });

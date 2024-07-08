@@ -4,7 +4,6 @@ namespace BPOR.Rms.Models.Study;
 
 public class StudyModel
 {
-    [StudyEdit(2)]
     [Display(Name = "Study ID")] public int Id { get; set; }
 
     [Required]
@@ -24,7 +23,11 @@ public class StudyModel
     [ResearcherEdit(1)]
     public string StudyName { get; set; }
 
-    [Display(Name = "CPMS ID")] public long? CpmsId { get; set; }
+    [Display(Name = "CPMS ID")]
+    [StudyEdit(2)]
+    [ResearcherEdit(3)] 
+    public long? CpmsId { get; set; }
+
     [Display(Name = "Is this study recruiting identifiable participants?")]
     [StudyEdit(2)]
     [ResearcherEdit(3)]
@@ -33,6 +36,7 @@ public class StudyModel
     public int? TotalRecruited { get; set; }
     
     [Display(Name = "Who is the Chief Investigator for the study?")]
+    [ResearcherEdit(1)]
     public string? ChiefInvestigator { get; set; }
 
     [Display(Name = "Provide the name(s) of the study sponsor(s), funder(s) and CRO (if applicable)")]
@@ -46,9 +50,6 @@ public class StudyModel
     [Display(Name = "Outcome of submission")]
     [ResearcherEdit(3)]
     public string? OutcomeOfSubmission { get; set; }
-
-    [Display(Name = "CPMS ID")]
-    public long? CPMSId { get; set; }
 
     [Display(Name = "Does the study have NIHR funding?")]
     public bool? HasFunding { get; set; }

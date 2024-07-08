@@ -4,28 +4,30 @@
     NIHR Clinical Research Network (CRN) portfolio status
 </h1>
 
-<div class="govuk-form-group @(Html.ViewData.ModelState["OutcomeOfSubmission"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-    <label asp-for="OutcomeOfSubmission" class="govuk-label" for="OutcomeOfSubmission">
-        @Html.DisplayNameFor(model => model.OutcomeOfSubmission)
-    </label>
-
-    <div class="govuk-radios" data-module="govuk-radios">
-        @if (Model.OutcomeOfSubmissionOptions != null)
-        {
-            foreach (var option in Model.OutcomeOfSubmissionOptions)
-            {
-                <div class="govuk-radios__item">
-                    @Html.RadioButtonFor(m => m.OutcomeOfSubmission, option.Id, new { @class = "govuk-radios__input" })
-                    @Html.Label(option.Description, option.Description, new { @class = "govuk-label govuk-radios__label" })
-                </div>
-            }
-        }
-    </div>
-</div>
-
-@if (!Model.IsResearcher || !Model.IsEditMode)
+@if(Model.PortfolioSubmissionStatus == 1)
 {
-    <div class="govuk-form-group @(Html.ViewData.ModelState["CPMSId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+    <div class="govuk-form-group @(Html.ViewData.ModelState["OutcomeOfSubmission"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+        <label asp-for="OutcomeOfSubmission" class="govuk-label" for="OutcomeOfSubmission">
+            @Html.DisplayNameFor(model => model.OutcomeOfSubmission)
+        </label>
+
+        <div class="govuk-radios" data-module="govuk-radios">
+            @if (Model.OutcomeOfSubmissionOptions != null)
+            {
+                foreach (var option in Model.OutcomeOfSubmissionOptions)
+                {
+                    <div class="govuk-radios__item">
+                        @Html.RadioButtonFor(m => m.OutcomeOfSubmission, option.Id, new { @class = "govuk-radios__input" })
+                        @Html.Label(option.Description, option.Description, new { @class = "govuk-label govuk-radios__label" })
+                    </div>
+                }
+            }
+        </div>
+    </div>
+}
+
+
+ <div class="govuk-form-group @(Html.ViewData.ModelState["CPMSId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
         <label asp-for="CPMSId" class="govuk-label" for="CPMSId">
             @Html.DisplayNameFor(model => model.CPMSId)
         </label>
@@ -44,6 +46,6 @@
         {
             <input asp-for="CPMSId" class=" govuk-input" id="CPMSId" value="@(Model.CPMSId)" />
         }
-    </div>
-}
+ </div>
+
 

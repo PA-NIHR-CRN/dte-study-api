@@ -17,15 +17,22 @@
         @if (isResearcherCompleted)
         {
             <summary-list-item for="Study.ChiefInvestigator" />
-            <summary-list-item for="Study.StudySponsors" /> 
-            <summary-list-item for="Study.PortfolioSubmissionStatus" /> 
-            <summary-list-item for="Study.OutcomeOfSubmission" /> 
-            <summary-list-item for="Study.HasFundingDisplay" /> 
-            <summary-list-item for="Study.FundingCode" /> 
-            <summary-list-item for="Study.UKRecruitmentTarget" /> 
-            <summary-list-item for="Study.TargetPopulation" /> 
-            <summary-list-item for="Study.RecruitmentStartDate" /> 
-            <summary-list-item for="Study.RecruitmentEndDate" /> 
+            <summary-list-item for="Study.StudySponsors" />
+            <summary-list-item for="Study.PortfolioSubmissionStatus" />
+            @if (Model.Study.PortfolioSubmissionStatus == "Yes")
+            {
+                <summary-list-item for="Study.OutcomeOfSubmission" />
+            }
+            <summary-list-item for="Study.HasFundingDisplay" />
+            @if (Model.Study.HasFunding == true)
+            {
+                <summary-list-item for="Study.FundingCode" />
+            }
+            <summary-list-item for="Study.UKRecruitmentTarget" />
+            <summary-list-item for="Study.TargetPopulation" />
+            <summary-list-item for="Study.RecruitmentStartDate" />
+            <summary-list-item for="Study.RecruitmentEndDate" />
+
         }
     </dl>
 </div>

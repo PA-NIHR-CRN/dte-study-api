@@ -48,7 +48,7 @@ public static class Projections
             CPMSId = r.CpmsId,
             RecruitingIdentifiableVolunteers = r.IsRecruitingIdentifiableParticipants,
             OutcomeOfSubmission = r.SubmissionOutcomeId,
-            PortfolioSubmissionStatus = r.SubmissionOutcomeId,
+            PortfolioSubmissionStatus = r.SubmittedId,
             IsEditMode = isEditMode
         };
     }

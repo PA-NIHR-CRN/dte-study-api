@@ -430,17 +430,25 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         ModelState["RecruitmentEndDate.Year"].Errors.Clear();
     }
 
-    public async Task<IActionResult> Edit(int id, int field)
+    public async Task<IActionResult> Edit(int id, int field, bool? hasFunding, int? portfolioSubmissionStatus)
     {
         var studyModel = await context.Studies
-            .AsResearcherFormViewModel(step: field, isEditMode: true)
-            .FirstOrDefaultAsync(s => s.Id == id);
+        .AsResearcherFormViewModel(step: field, isEditMode: true)
+        .FirstOrDefaultAsync(s => s.Id == id);
 
         if (studyModel == null)
         {
             return NotFound();
         }
 
+        if (hasFunding.HasValue)
+        {
+            studyModel.HasFunding = hasFunding;
+        }
+        if (portfolioSubmissionStatus.HasValue)
+        {
+            studyModel.PortfolioSubmissionStatus = portfolioSubmissionStatus;
+        }
         studyModel.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         studyModel.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
         studyModel.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
@@ -458,10 +466,30 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,Step")]
         ResearcherStudyFormViewModel model)
     {
+        model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
+        model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
         model.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
         ModelState.Remove("IsRecruitingIdentifiableParticipants");
 
         ValidateMandatoryFields(model);
+
+        switch (model.Step)
+        {
+            case 2:
+                if (model.PortfolioSubmissionStatus == 1)
+                {
+                    model.OutcomeOfSubmission = null;
+                    return RedirectToAction(nameof(Edit), new { id, field = 3, model.HasFunding, model.PortfolioSubmissionStatus });
+                }
+                break;
+            case 4:
+                if (model.HasFunding == true)
+                {
+                    model.FundingCode = string.Empty;
+                    return RedirectToAction(nameof(Edit), new { id, field = 5, model.HasFunding, model.PortfolioSubmissionStatus });
+                }
+            break;
+        }
 
         if (model.ShortName?.Length > 255)
         {
@@ -489,6 +517,16 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 if (studyToUpdate == null)
                 {
                     return NotFound();
+                }
+
+                if (model.HasFunding == false || model.HasFunding == null)
+                {
+                    model.FundingCode = null;
+                }
+
+                if (model.PortfolioSubmissionStatus != 1)
+                {
+                    model.OutcomeOfSubmission = null;
                 }
 
                 studyToUpdate.StudyName = model.ShortName;
