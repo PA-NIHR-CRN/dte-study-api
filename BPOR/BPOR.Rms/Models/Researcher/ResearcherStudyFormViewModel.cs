@@ -47,7 +47,7 @@ namespace BPOR.Rms.Models.Researcher
 
         [Display(Name = "Will participants in the study be recruited as named individual volunteers?")]
         public bool? RecruitingIdentifiableVolunteers { get; set; }
-<<<<<<< Updated upstream
+
         public bool Completed { get; set; }
 
         public void GotoNextStep()
@@ -72,10 +72,9 @@ namespace BPOR.Rms.Models.Researcher
                 Completed = true;
             }
         }
-=======
-        public bool RedirectToCheckYourAnswers { get; set; }
+
         public bool IsEditMode { get; set; }
->>>>>>> Stashed changes
+
     }
 
     public class GovUkDate
