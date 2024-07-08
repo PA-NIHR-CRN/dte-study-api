@@ -5,6 +5,7 @@ using BPOR.Rms.Models.Study;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 
 namespace BPOR.Rms.Controllers;
 
@@ -440,6 +441,97 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             return NotFound();
         }
 
+        studyModel.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
+        studyModel.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
+        studyModel.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
+
         return View(studyModel);
+    }
+
+    // POST: Researcher/Edit/5
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id,
+        [Bind("ShortName,ChiefInvestigator,StudySponsors,CPMSId,PortfolioSubmissionStatus,OutcomeOfSubmission," +
+        "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,Step")]
+        ResearcherStudyFormViewModel model)
+    {
+        model.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
+        ModelState.Remove("IsRecruitingIdentifiableParticipants");
+
+        ValidateMandatoryFields(model);
+
+        if (model.ShortName?.Length > 255)
+        {
+            ModelState.AddModelError("ShortName", "Study short name must be less than 255 characters");
+        }
+
+        ValidateRecruitmentDates(model);
+        DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+        if (model.RecruitmentEndDate.ToDateOnly() < today)
+        {
+            ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must be in the future");
+        }
+
+        if (model.RecruitmentStartDate.ToDateOnly() > model.RecruitmentEndDate.ToDateOnly())
+        {
+            ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must be the same as or after Recruitment start date (UK)");
+        }
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                var studyToUpdate = await context.Studies.FirstOrDefaultAsync(s => s.Id == id);
+
+                if (studyToUpdate == null)
+                {
+                    return NotFound();
+                }
+
+                studyToUpdate.StudyName = model.ShortName;
+                studyToUpdate.CpmsId = model.CPMSId;
+                studyToUpdate.ChiefInvestigator = model.ChiefInvestigator;
+                studyToUpdate.Sponsors = model.StudySponsors;
+                studyToUpdate.SubmittedId = model.PortfolioSubmissionStatus;
+                studyToUpdate.SubmissionOutcomeId = model.OutcomeOfSubmission;
+                studyToUpdate.HasNihrFunding = model.HasFunding;
+                studyToUpdate.FundingCode = model.FundingCode;
+                studyToUpdate.RecruitmentTarget = model.UKRecruitmentTarget;
+                studyToUpdate.TargetPopulation = model.TargetPopulation;
+                studyToUpdate.RecruitmentStartDate = model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
+                studyToUpdate.RecruitmentEndDate = model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
+                studyToUpdate.UpdatedAt = DateTime.UtcNow;
+
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!StudyExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            this.AddSuccessNotification($"{model.ShortName} has been successfully updated");
+
+            return RedirectToAction(nameof(Details),nameof(Study), new { id });
+        }
+
+        model.Id = id;
+        model.IsEditMode = true;
+
+        return View(model);
+    }
+
+    private bool StudyExists(int id)
+    {
+        return context.Studies.Any(e => e.Id == id);
     }
 }
