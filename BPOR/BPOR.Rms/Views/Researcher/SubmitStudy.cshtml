@@ -9,7 +9,7 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
 
-        <form asp-action="SubmitStudy" back-link-for="Step" back-link-for-value="@(Model.Step-1)">
+        <form asp-action="SubmitStudy" back-link-for="Step">
 
             <div style="@(Model.Step == 1 ? "" : "display:none;")">
                 @await Html.PartialAsync("Partials/_Step1FormFields", Model)
@@ -62,8 +62,8 @@
                 }
             </div>
 
-            <input type="hidden" asp-for="Step" value="@Model.Step"/>
-            <input type="hidden" asp-for="Completed" value="@Model.Completed"/>
+            <input type="hidden" asp-for="Step" value="@Model.Step" />
+            <input type="hidden" asp-for="Completed" value="@Model.Completed" />
         </form>
 
     </div>
