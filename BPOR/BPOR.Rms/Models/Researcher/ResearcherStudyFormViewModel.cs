@@ -72,11 +72,9 @@ namespace BPOR.Rms.Models.Researcher
                 Completed = true;
             }
         }
-=======
-        public bool RedirectToCheckYourAnswers { get; set; }
+
         public bool IsEditMode { get; set; }
         public bool IsResearcher { get; set; }
-
     }
 
     public class GovUkDate
