@@ -26,7 +26,7 @@ namespace BPOR.Rms.Models.Researcher
         public List<SubmissionOutcome>? OutcomeOfSubmissionOptions { get; set; }
 
         [Display(Name = "Outcome of submission")]
-        public int? OutcomeOfSubmission { get; set; }
+        public int? OutcomeOfSubmission { get; set; }        
 
         [Display(Name = "CPMS ID")]
         public long? CPMSId { get; set; }
@@ -47,6 +47,7 @@ namespace BPOR.Rms.Models.Researcher
 
         [Display(Name = "Will participants in the study be recruited as named individual volunteers?")]
         public bool? RecruitingIdentifiableVolunteers { get; set; }
+<<<<<<< Updated upstream
         public bool Completed { get; set; }
 
         public void GotoNextStep()
@@ -71,6 +72,10 @@ namespace BPOR.Rms.Models.Researcher
                 Completed = true;
             }
         }
+=======
+        public bool RedirectToCheckYourAnswers { get; set; }
+        public bool IsEditMode { get; set; }
+>>>>>>> Stashed changes
     }
 
     public class GovUkDate
@@ -86,7 +91,7 @@ namespace BPOR.Rms.Models.Researcher
 
         [Display(Name = "Year")]
         public int? Year { get; set; }
-        public bool IsEditMode { get; set; }
+
 
         private static DateOnly? ConstructDate(int? year, int? month, int? day)
         {

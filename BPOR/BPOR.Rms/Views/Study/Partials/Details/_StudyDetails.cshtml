@@ -1,207 +1,64 @@
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 
+@{
+    var isResearcherCompleted = !string.IsNullOrWhiteSpace(Model.Study.ChiefInvestigator);
+}
 
 <div>
-    <h2 class="govuk-heading-l  govuk-!-margin-bottom-3">Study details</h2>
+    <h2 class="govuk-heading-l govuk-!-margin-bottom-3">Study details</h2>
     <dl class="govuk-summary-list">
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key">
-                @Html.DisplayNameFor(model => model.Study.Id)
-            </dt>
-            <dd class="govuk-summary-list__value">
-                @Html.DisplayFor(model => model.Study.Id)
-            </dd>
-            <dd class="govuk-summary-list__actions">
-            </dd>
-        </div>
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key">
-                @Html.DisplayNameFor(model => model.Study.IsRecruitingIdentifiableParticipants)
-            </dt>
-            <dd class="govuk-summary-list__value">
-                @Html.DisplayFor(model => model.IsRecruitingIdentifiableParticipantsDisplay)
-            </dd>
-            <dd class="govuk-summary-list__actions">
-            </dd>
-        </div>
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key">
-                @Html.DisplayNameFor(model => model.Study.StudyName)
-            </dt>
-            <dd class="govuk-summary-list__value">
-                @Html.DisplayFor(model => model.Study.StudyName)
-            </dd>
-            <dd class="govuk-summary-list__actions">
-                @if (!Model.IsResearcher)
-                {
-                    <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="2">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.StudyName)</span></a>
-                }
-            </dd>
-        </div>
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key">
-                @Html.DisplayNameFor(model => model.Study.CpmsId)
-            </dt>
-            <dd class="govuk-summary-list__value">
-                @Html.DisplayFor(model => model.Study.CpmsId)
-            </dd>
-            <dd class="govuk-summary-list__actions">
-                @if (!Model.IsResearcher)
-                {
-                    <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="2">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.CpmsId)</span></a>
-                }
-            </dd>
-        </div>
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key">
-                @Html.DisplayNameFor(model => model.Study.FullName)
-            </dt>
-            <dd class="govuk-summary-list__value">
-                @Html.DisplayFor(model => model.Study.FullName)
-            </dd>
-            <dd class="govuk-summary-list__actions">
-                @if (!Model.IsResearcher)
-                {
-                    <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.FullName)</span></a>
-                }
-            </dd>
-        </div>
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key">
-                @Html.DisplayNameFor(model => model.Study.EmailAddress)
-            </dt>
-            <dd class="govuk-summary-list__value">
-                @Html.DisplayFor(model => model.Study.EmailAddress)
-            </dd>
-            <dd class="govuk-summary-list__actions">
-                @if (!Model.IsResearcher)
-                {
-                    <a class="govuk-link" asp-controller="Study" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.EmailAddress)</span></a>
-                }
-            </dd>
-        </div>
-        
-        @if (!string.IsNullOrWhiteSpace(Model.Study.ChiefInvestigator))
+        <summary-list-item asp-for="@Model.Study.Id"
+                           asp-action-url="@(Model.IsResearcher ? null : Url.Action("Edit", "Study", new { id = Model.Study.Id, field = 2 }))">
+        </summary-list-item>
+
+        <summary-list-item asp-for="@Model.IsRecruitingIdentifiableParticipantsDisplay"></summary-list-item>
+
+        <summary-list-item asp-for="@Model.Study.StudyName"
+                           asp-action-url="@(Model.IsResearcher ? (isResearcherCompleted ? Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 1 }) : null) : Url.Action("Edit", "Study", new { id = Model.Study.Id, field = 1 }))">
+        </summary-list-item>
+
+        <summary-list-item asp-for="@Model.Study.CpmsId"
+                           asp-action-url="@(Model.IsResearcher ? null : (isResearcherCompleted ? Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 3 }) : Url.Action("Edit", "Study", new { id = Model.Study.Id, field = 2 })))">
+        </summary-list-item>
+
+        <summary-list-item asp-for="@Model.Study.FullName"
+                           asp-action-url="@(Model.IsResearcher ? null : Url.Action("Edit", "Study", new { id = Model.Study.Id, field = 1 }))">
+        </summary-list-item>
+
+        <summary-list-item asp-for="@Model.Study.EmailAddress"
+                           asp-action-url="@(Model.IsResearcher ? null : Url.Action("Edit", "Study", new { id = Model.Study.Id, field = 1 }))">
+        </summary-list-item>
+
+        @if (isResearcherCompleted)
         {
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    @Html.DisplayNameFor(model => model.Study.ChiefInvestigator)
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Html.DisplayFor(model => model.Study.ChiefInvestigator)
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                </dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    @Html.DisplayNameFor(model => model.Study.StudySponsors)
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Html.DisplayFor(model => model.Study.StudySponsors)
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" asp-controller="Researcher" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.StudySponsors)</span></a>
-                </dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    @Html.DisplayNameFor(model => model.Study.PortfolioSubmissionStatus)
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Html.DisplayFor(model => model.Study.PortfolioSubmissionStatus)
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" asp-controller="Researcher" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="2">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.PortfolioSubmissionStatus)</span></a>
-                </dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    @Html.DisplayNameFor(model => model.Study.OutcomeOfSubmission)
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Html.DisplayFor(model => model.Study.OutcomeOfSubmission)
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" asp-controller="Researcher" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="3">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.OutcomeOfSubmission)</span></a>
-                </dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    @Html.DisplayNameFor(model => model.Study.HasFunding)
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Html.DisplayFor(model => model.HasFundingDisplay)
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" asp-controller="Researcher" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.HasFunding)</span></a>
-                </dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    @Html.DisplayNameFor(model => model.Study.FundingCode)
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Html.DisplayFor(model => model.Study.FundingCode)
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" asp-controller="Researcher" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="4">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.FundingCode)</span></a>
-                </dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    @Html.DisplayNameFor(model => model.Study.UKRecruitmentTarget)
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Html.DisplayFor(model => model.Study.UKRecruitmentTarget)
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" asp-controller="Researcher" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="1">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.UKRecruitmentTarget)</span></a>
-                </dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    @Html.DisplayNameFor(model => model.Study.TargetPopulation)
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Html.DisplayFor(model => model.Study.TargetPopulation)
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" asp-controller="Researcher" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="5">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.TargetPopulation)</span></a>
-                </dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    @Html.DisplayNameFor(model => model.Study.RecruitmentStartDate)
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Html.DisplayFor(model => model.Study.RecruitmentStartDate)
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" asp-controller="Researcher" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="6">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.RecruitmentStartDate)</span></a>
-                </dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    @Html.DisplayNameFor(model => model.Study.RecruitmentEndDate)
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Html.DisplayFor(model => model.Study.RecruitmentEndDate)
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" asp-controller="Researcher" asp-action="Edit" asp-route-id="@Model.Study.Id" asp-route-field="7">Change<span class="govuk-visually-hidden">@Html.DisplayNameFor(model => model.Study.RecruitmentEndDate)</span></a>
-                </dd>
-            </div>
+            <summary-list-item asp-for="@Model.Study.ChiefInvestigator"></summary-list-item>
+            <summary-list-item asp-for="@Model.Study.StudySponsors"
+                               asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 1 })">
+            </summary-list-item>
+            <summary-list-item asp-for="@Model.Study.PortfolioSubmissionStatus"
+                               asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 2 })">
+            </summary-list-item>
+            <summary-list-item asp-for="@Model.Study.OutcomeOfSubmission"
+                               asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 3 })">
+            </summary-list-item>
+            <summary-list-item asp-for="@Model.HasFundingDisplay"
+                               asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 4 })">
+            </summary-list-item>
+            <summary-list-item asp-for="@Model.Study.FundingCode"
+                               asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 5 })">
+            </summary-list-item>
+            <summary-list-item asp-for="@Model.Study.UKRecruitmentTarget"
+                               asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 6 })">
+            </summary-list-item>
+            <summary-list-item asp-for="@Model.Study.TargetPopulation"
+                               asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 6 })">
+            </summary-list-item>
+            <summary-list-item asp-for="@Model.Study.RecruitmentStartDate"
+                               asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 7 })">
+            </summary-list-item>
+            <summary-list-item asp-for="@Model.Study.RecruitmentEndDate"
+                               asp-action-url="@Url.Action("Edit", "Researcher", new { id = Model.Study.Id, field = 7 })">
+            </summary-list-item>
         }
     </dl>
 </div>

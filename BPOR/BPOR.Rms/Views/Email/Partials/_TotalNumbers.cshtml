@@ -30,7 +30,7 @@
 </style>
 
 <div class="govuk-form-group @(Html.ViewData.ModelState["TotalVolunteers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-    <label asp-for="TotalVolunteers" class="govuk-label govuk-label--ll" for="TotalVolunteers">
+    <label asp-for="TotalVolunteers" class="govuk-label govuk-label--l" for="TotalVolunteers">
         @Html.DisplayNameFor(model => model.TotalVolunteers)
     </label>
     <div id="TotalVolunteers-hint" class="govuk-hint">

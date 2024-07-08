@@ -36,6 +36,20 @@ public static class Projections
         {
             Id = r.Id,
             Step = step,
+            ChiefInvestigator = r.ChiefInvestigator,
+            StudySponsors = r.Sponsors,
+            HasFunding = r.HasNihrFunding.Value,
+            FundingCode = r.FundingCode,
+            UKRecruitmentTarget = r.RecruitmentTarget,
+            TargetPopulation = r.TargetPopulation,
+            RecruitmentStartDate =  GovUkDate.FromDateTime(r.RecruitmentStartDate),
+            RecruitmentEndDate =  GovUkDate.FromDateTime(r.RecruitmentEndDate),
+            ShortName = r.StudyName,
+            CPMSId = r.CpmsId,
+            RecruitingIdentifiableVolunteers = r.IsRecruitingIdentifiableParticipants,
+            OutcomeOfSubmission = r.SubmissionOutcomeId,
+            PortfolioSubmissionStatus = r.SubmissionOutcomeId,
+            IsEditMode = isEditMode
         };
     }
 

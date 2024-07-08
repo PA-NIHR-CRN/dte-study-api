@@ -1,7 +1,4 @@
-using BPOR.Rms.Models.Volunteer;
 using System.ComponentModel.DataAnnotations;
-using BPOR.Domain.Entities.RefData;
-using BPOR.Rms.Models.Researcher;
 
 namespace BPOR.Rms.Models.Study;
 

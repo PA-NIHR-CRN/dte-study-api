@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using BPOR.Rms.Models.Volunteer;
 
 namespace BPOR.Rms.Models.Study;
@@ -5,7 +6,9 @@ namespace BPOR.Rms.Models.Study;
 public class StudyDetailsViewModel
 {
     public StudyModel Study { get; set; }
+    [Display(Name = "Is this study recruiting identifiable participants?\t")]
     public string IsRecruitingIdentifiableParticipantsDisplay => Study.IsRecruitingIdentifiableParticipants ? "Yes" : "No";
+    [Display(Name = "Does the study have NIHR funding?")]
     public string HasFundingDisplay => Study.HasFunding.Value ? "Yes" : "No";
     public IEnumerable<EnrollmentDetails> EnrollmentDetails { get; set; }
     public int TotalRecruited => EnrollmentDetails.Sum(e => e.RecruitmentTotal);
