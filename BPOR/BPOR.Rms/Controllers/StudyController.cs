@@ -103,7 +103,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
 
                 if (ModelState.IsValid)
                 {
-                    model.Step = 2;
+                    model.GotoNextStep();
                 }
             }
             else if (model.Step == 2)
@@ -172,14 +172,18 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
     public async Task<IActionResult> Edit(int id, int field)
     {
         var studyModel = await context.Studies
-            .AsStudyFormViewModel(step: field, isEditMode: true)
+            .AsStudyFormViewModel()
             .FirstOrDefaultAsync(s => s.Id == id);
+
+
 
         if (studyModel == null)
         {
             return NotFound();
         }
 
+        ViewData["IsEditMode"] = true;
+        studyModel.Step = field;
         return View(studyModel);
     }
 
@@ -236,7 +240,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         }
 
         model.Id = id;
-        model.IsEditMode = true;
+        ViewData["IsEditMode"] = true;
 
         return View(model);
     }

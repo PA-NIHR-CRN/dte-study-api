@@ -1,4 +1,7 @@
 ﻿@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+@{
+    var isEditMode = ViewData["IsEditMode"] as bool? ?? false;
+}
 
 <h1 class="govuk-heading-xl">
     Study recruitment
@@ -104,7 +107,7 @@
     </div>
 </div>
 
-@if (!Model.IsEditMode)
+@if (!isEditMode)
 {
     <div class="govuk-form-group @(Html.ViewData.ModelState["RecruitingIdentifiableVolunteers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
         <label asp-for="RecruitingIdentifiableVolunteers" class="govuk-label" for="RecruitingIdentifiableVolunteers">

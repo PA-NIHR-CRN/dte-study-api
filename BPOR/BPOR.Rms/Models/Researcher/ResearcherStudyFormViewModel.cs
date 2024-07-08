@@ -3,11 +3,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BPOR.Rms.Models.Researcher
 {
-    public class ResearcherStudyFormViewModel
+    public class ResearcherStudyFormViewModel : FormWithSteps
     {
-        [Display(Name = "Study ID")] public int Id { get; set; }
-        public int Step { get; set; } = 1;
-        public int TotalSteps { get; set; } = 8;
+        public override int TotalSteps => 8;
+
+        [Display(Name = "Study ID")]
+        public int Id { get; set; }
 
         [Display(Name = "What is the study short name?")]
         public string? ShortName { get; set; }
@@ -48,33 +49,8 @@ namespace BPOR.Rms.Models.Researcher
         [Display(Name = "Will participants in the study be recruited as named individual volunteers?")]
         public bool? RecruitingIdentifiableVolunteers { get; set; }
 
-        public bool Completed { get; set; }
-
-        public void GotoNextStep()
-        {
-            GotoNextStep(Step + 1);
-        }
-
-        public void GotoNextStep(int step)
-        {
-            if (Completed)
-            {
-                Step = TotalSteps;
-            }
-            else
-            {
-                Step = step;
-            }
-
-
-            if (Step >= TotalSteps)
-            {
-                Completed = true;
-            }
-        }
-
-        public bool IsEditMode { get; set; }
         public bool IsResearcher { get; set; }
+
     }
 
     public class GovUkDate

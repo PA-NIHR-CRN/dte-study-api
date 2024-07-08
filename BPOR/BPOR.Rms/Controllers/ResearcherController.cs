@@ -422,7 +422,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     public async Task<IActionResult> Edit(int id, int field)
     {
         var studyModel = await context.Studies
-        .AsResearcherFormViewModel(step: field, isEditMode: true)
+        .AsResearcherFormViewModel()
         .FirstOrDefaultAsync(s => s.Id == id);
 
         if (studyModel == null)
@@ -430,10 +430,12 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             return NotFound();
         }
 
+        studyModel.Step = field;
         studyModel.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         studyModel.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
         studyModel.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
 
+        ViewData["EditMode"] = true;
         return View(studyModel);
     }
 
@@ -545,7 +547,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         }
 
         model.Id = id;
-        model.IsEditMode = true;
+        ViewData["IsEditMode"] = true;
 
         return View(model);
     }

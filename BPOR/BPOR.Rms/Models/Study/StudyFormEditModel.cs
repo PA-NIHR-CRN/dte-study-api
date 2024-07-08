@@ -1,11 +1,11 @@
+using BPOR.Rms.Models.Researcher;
 using System.ComponentModel.DataAnnotations;
 
 namespace BPOR.Rms.Models.Study;
 
-public class StudyFormEditModel
+public class StudyFormEditModel : FormWithSteps
 {
-    public int Step { get; set; } = 1;
-    public int TotalSteps { get; set; } = 2;
+    public override int TotalSteps => 2;
 
     [Required(ErrorMessage = "Enter the name of the main contact for the study")]
     [Display(Name = "Name of main contact for the study")]
@@ -28,6 +28,4 @@ public class StudyFormEditModel
     [Display(Name = "Is this study recruiting identifiable participants?")]
     [Required(ErrorMessage = "Select whether the study is recruiting identifiable participants")]
     public bool? IsRecruitingIdentifiableParticipants { get; set; }
-    
-    public bool IsEditMode { get; set; }
 }

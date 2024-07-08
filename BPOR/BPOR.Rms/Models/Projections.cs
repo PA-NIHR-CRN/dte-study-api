@@ -22,20 +22,17 @@ public static class Projections
     public static IQueryable<EmailParticipantDetails> AsEmailCampaignParticipant(this IQueryable<Participant> source) =>
         source.Select(VolunteerToEmailParticipantDetails());
 
-    public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source,
-        int step, bool isEditMode) => source.Select(StudyAsStudyFormViewModel(step, isEditMode));
+    public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyFormViewModel());
     
     public static IQueryable<ResearcherStudyFormViewModel> AsResearcherFormViewModel(
-        this IQueryable<Domain.Entities.Study> source, int step, bool isEditMode) =>
-        source.Select(StudyAsResearcherFormViewModel(step, isEditMode));
+        this IQueryable<Domain.Entities.Study> source) =>
+        source.Select(StudyAsResearcherFormViewModel());
     
-    public static Expression<Func<Domain.Entities.Study, ResearcherStudyFormViewModel>> StudyAsResearcherFormViewModel(
-        int step, bool isEditMode)
+    public static Expression<Func<Domain.Entities.Study, ResearcherStudyFormViewModel>> StudyAsResearcherFormViewModel()
     {
         return r => new ResearcherStudyFormViewModel
         {
             Id = r.Id,
-            Step = step,
             ChiefInvestigator = r.ChiefInvestigator,
             StudySponsors = r.Sponsors,
             HasFunding = r.HasNihrFunding.Value,
@@ -49,12 +46,10 @@ public static class Projections
             RecruitingIdentifiableVolunteers = r.IsRecruitingIdentifiableParticipants,
             OutcomeOfSubmission = r.SubmissionOutcomeId,
             PortfolioSubmissionStatus = r.SubmittedId,
-            IsEditMode = isEditMode
         };
     }
 
-    public static Expression<Func<Domain.Entities.Study, StudyFormViewModel>> StudyAsStudyFormViewModel(int step,
-        bool isEditMode)
+    public static Expression<Func<Domain.Entities.Study, StudyFormViewModel>> StudyAsStudyFormViewModel()
     {
         return s => new StudyFormViewModel
         {
@@ -62,9 +57,7 @@ public static class Projections
             FullName = s.FullName,
             EmailAddress = s.EmailAddress,
             StudyName = s.StudyName,
-            CpmsId = s.CpmsId,
-            Step = step,
-            IsEditMode = isEditMode
+            CpmsId = s.CpmsId
         };
     }
 

@@ -19,7 +19,7 @@ public class StudyModel
 
     [Required]
     [Display(Name = "Study name")]
-    [StudyEdit(1)]
+    [StudyEdit(2)]
     [ResearcherEdit(1)]
     public string StudyName { get; set; }
 
