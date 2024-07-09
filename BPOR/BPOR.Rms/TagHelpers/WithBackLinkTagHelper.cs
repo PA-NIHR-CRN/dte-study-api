@@ -26,11 +26,8 @@ namespace BPOR.Rms.TagHelpers
                 output.Attributes.Add("id", formId);
             }
 
-            var value = (BackLinkFor.Model as int?) ?? 1;
             ViewContext.ViewData.ShowBackLink();
             ViewContext.ViewData["_BackLinkForm"] = formId;
-            ViewContext.ViewData["_BackLinkFor"] = BackLinkFor;
-            ViewContext.ViewData["_BackLinkForValue"] = (value - 1).ToString();
         }
     }
 }

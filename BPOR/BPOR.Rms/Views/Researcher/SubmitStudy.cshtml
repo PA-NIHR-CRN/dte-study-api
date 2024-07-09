@@ -2,7 +2,7 @@
 
 
 @{
-    ViewData["Title"] = "Submit a study - Be Part of Research volunteer registry - Be Part of Research";
+    ViewData["Title"] = "Submit a study";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -10,7 +10,15 @@
     <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
 
         <form asp-action="SubmitStudy" back-link-for="Step">
-
+            @if (ViewData["Step"] is not null && ViewData["TotalSteps"] is not null)
+            {
+                var step = ViewData["Step"] as int?;
+                var totalSteps = ViewData["TotalSteps"] as int?;
+                if (step < totalSteps)
+                {
+                    <span class="govuk-caption-xl">Question @step of @(totalSteps - 1)</span>
+                }
+            }
             <div style="@(Model.Step == 1 ? "" : "display:none;")">
                 @await Html.PartialAsync("Partials/_Step1FormFields", Model)
             </div>
@@ -39,9 +47,12 @@
                 @await Html.PartialAsync("Partials/_Step7FormFields", Model)
             </div>
 
-            <div style="@(Model.Step == 8 ? "" : "display:none;")">
-                @await Html.PartialAsync("Partials/_Step8FormFields", Model)
-            </div>
+            @if (Model.Step == 8)
+            {
+                <div style="@(Model.Step == 8 ? "" : "display:none;")">
+                    @await Html.PartialAsync("Partials/_Step8FormFields", Model)
+                </div>
+            }
 
             <div class="govuk-button-group">
                 @if (!Model.Completed)
@@ -58,7 +69,14 @@
                 }
                 else
                 {
-                    <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Confirm</button>
+                    @if (Model.Step != Model.TotalSteps)
+                    {
+                        <button type="submit" name="action" value="Next" class="govuk-button" data_module="govuk-button">Confirm</button>
+                    }
+                    else
+                    {
+                        <button type="submit" name="action" value="Apply" class="govuk-button" data_module="govuk-button">Apply</button>
+                    }
                 }
             </div>
 

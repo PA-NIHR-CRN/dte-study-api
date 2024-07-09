@@ -13,6 +13,12 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
     [HttpGet]
     public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false, CancellationToken token = default)
     {
+        if (hasBeenReset)
+        {
+            TempData["HasBeenReset"] = true;
+            return RedirectToAction(nameof(Index));
+        }
+
         bool userHasResearcherRole = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
 
         var studiesQuery = context.Studies.AsQueryable();
@@ -43,7 +49,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
             Studies = await deferredStudiesPage.ValueAsync(token),
             HasSearched = Request.Query.ContainsKey(nameof(searchTerm)),
             SearchTerm = searchTerm ?? string.Empty,
-            HasBeenReset = hasBeenReset,
         };
 
         return View(viewModel);
@@ -135,11 +140,12 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
                 }
             }
         }
-        else
+        else if (action == "Back")
         {
             // Clear validation when clicking back link
             // TODO: Needs to be more robust when there are other action names
             ModelState.Clear();
+            model.Step--;
 
             if (model.Step < 1)
             {
@@ -155,7 +161,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
 
         ViewData["Step"] = model.Step;
         ViewData["TotalSteps"] = model.TotalSteps;
-        
+
         return View(model);
     }
 

@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Welcome to the Be Part of Research volunteer registry - Be Part of Research";
+    ViewData["Title"] = "Welcome";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var signedOut = !(User?.Identity?.IsAuthenticated ?? false) && Context.Request.Query.ContainsKey("signed-out");
 }
@@ -45,6 +45,18 @@
     <div class="govuk-grid-column-one-half">
         <p class="govuk-body">
         If you already have an account, you can <a href="?sign-in" role="button" draggable="false" class="govuk-link">sign in</a>.
+        </p>
+    </div>
+</div>
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half govuk-inset-text">
+        <p class="govuk-body-l">
+        This page is for researchers and sponsors.
+        </p>
+
+        <p class="govuk-body">
+            If you are a member of the public, you can <a class="govuk-link" href="https://volunteer.bepartofresearch.nihr.ac.uk/Participants/introduction">create or sign in to your Be Part of Research volunteer account</a>.
         </p>
     </div>
 </div>

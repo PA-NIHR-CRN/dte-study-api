@@ -51,7 +51,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         {
             // get each id from the string splitting by new line
             var volunteerRefs =
-                model.VolunteerReferenceNumbers.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
+                model.VolunteerReferenceNumbers.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct().ToArray();
 
             var totalVolunteers = volunteerRefs.Length;
             var totalEnrolled = 0;

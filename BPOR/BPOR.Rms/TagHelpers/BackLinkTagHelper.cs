@@ -21,10 +21,8 @@ namespace BPOR.Rms.TagHelpers
             if (ViewContext.ViewData["_BackLinkForm"] is not null)
             {
                 var formId = ViewContext.ViewData["_BackLinkForm"] as string;
-                var modelExpression = ViewContext.ViewData["_BackLinkFor"] as ModelExpression;
-                var backValue = ViewContext.ViewData["_BackLinkForValue"];
 
-                var hiddenElement = generator.GenerateHidden(ViewContext, modelExpression.ModelExplorer, modelExpression.Name, backValue, false, null);
+
 
                 output.TagName = "button";
                 output.TagMode = TagMode.StartTagAndEndTag;
@@ -32,8 +30,8 @@ namespace BPOR.Rms.TagHelpers
                 output.AddClass("govuk-back-link", HtmlEncoder.Default);
                 output.Attributes.SetAttribute("form", formId);
                 output.Attributes.SetAttribute("type", "submit");
-                output.Attributes.SetAttribute("name", hiddenElement.Attributes["name"]);
-                output.Attributes.SetAttribute("value", backValue);
+                output.Attributes.SetAttribute("name", "action");
+                output.Attributes.SetAttribute("value", "Back");
                 output.Content.SetContent("Back");
             }
             else if (referer != null && showBackLink == true)

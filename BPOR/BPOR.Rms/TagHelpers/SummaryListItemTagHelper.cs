@@ -31,7 +31,7 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
         var viewModel = For.ModelExplorer.Container.Model as StudyDetailsViewModel;
         var isResearcherCompleted = !string.IsNullOrWhiteSpace(viewModel?.Study.ChiefInvestigator);
 
-        if (Show && (studyEdit is not null || isResearcherCompleted && researcherEdit is not null))
+        if (Show)
         {
             output.TagName = "div";
             output.TagMode = TagMode.StartTagAndEndTag;
@@ -65,7 +65,7 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
                 }
             }
 
-            if (field is not null && viewModel is not null)
+            if (field is not null && viewModel is not null && (currentUserProvider?.User?.HasRole("Admin") ?? false))
             {
                 var url = linkGenerator.GetUriByAction(ViewContext.HttpContext, "Edit", controller.Replace("Controller", ""), new { id = viewModel.Study.Id, field });
 

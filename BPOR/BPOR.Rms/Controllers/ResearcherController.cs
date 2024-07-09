@@ -20,7 +20,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     {
         if (!model.AgreedToTermsAndConditions)
         {
-            ModelState.AddModelError("AgreedToTermsAndConditions", "Confirm that the terms and conditions have been read and agreed before applying");
+            ModelState.AddModelError("AgreedToTermsAndConditions", "Confirm that you have read and agree to the terms and conditions before applying");
         }
 
         if (ModelState.IsValid)
@@ -41,7 +41,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     [HttpPost]
     public async Task<IActionResult> SubmitStudy(ResearcherStudyFormViewModel model, string action)
     {
-        if (action == "Next")
+        if (action == "Next" || action == "Apply")
         {
             ValidateMandatoryFields(model);
             if (ModelState.IsValid)
@@ -114,13 +114,42 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 }
             }
         }
-        else
+        else if (action == "Back")
         {
             // Clear validation when clicking back link
             // TODO: Needs to be more robust when there are other action names
             ModelState.Clear();
 
-            if (model.Step < 1)
+            // Skip step if dependency questions are not required
+            if (model.Step == 4 && model.PortfolioSubmissionStatus != 1)
+            {
+                model.GotoNextStep(2);
+            }
+            else if (model.Step == 3)
+            {
+                ValidateMandatoryFields(model);
+                if (ModelState.IsValid)
+                {
+                    model.Step = 2;
+                }
+            }
+            else if (model.Step == 6 && model.HasFunding != true)
+            {
+                model.GotoNextStep(4);
+            }
+            else if (model.Step == 5)
+            {
+                ValidateMandatoryFields(model);
+                if (ModelState.IsValid)
+                {
+                    model.Step = 4;
+                }
+            }
+            else if (model.Completed && model.Step < model.TotalSteps)
+            {
+                model.Step = model.TotalSteps;
+            }
+            else if (model.Step == 1)
             {
                 // Back link is exiting the process.
                 // Return to a known entry point.
@@ -130,18 +159,12 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 // will exit correctly.
                 return RedirectToAction(nameof(TermsAndConditions));
             }
-
-            // Skip step if dependency questions are not required
-
-            if (model.Step == 3 && model.PortfolioSubmissionStatus != 1)
+            else
             {
-                model.Step = 2;
-            }
-            else if (model.Step == 5 && model.HasFunding != true)
-            {
-                model.Step = 4;
+                model.Step--;
             }
         }
+
 
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
@@ -472,7 +495,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                     model.Step = 5;
                     return View(model);
                 }
-            break;
+                break;
         }
 
         if (model.ShortName?.Length > 255)

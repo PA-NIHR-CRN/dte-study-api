@@ -68,7 +68,9 @@ namespace BPOR.Rms.Models.Researcher
         private static DateOnly? ConstructDate(int? year, int? month, int? day)
         {
             if (!year.HasValue || !month.HasValue || !day.HasValue)
+            {
                 return null;
+            }
 
             try
             {
