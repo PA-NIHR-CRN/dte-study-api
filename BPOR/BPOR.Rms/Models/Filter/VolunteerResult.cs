@@ -1,6 +1,4 @@
-﻿
-
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
 
 namespace BPOR.Rms.Models.Filter
 {

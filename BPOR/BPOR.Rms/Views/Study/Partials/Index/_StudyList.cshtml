@@ -247,15 +247,10 @@ else if (!Model.HasSearched)
     <div class="no-studies-card">
         <h1 class="govuk-heading-l">No studies added</h1>
         <p class="govuk-body">
-            @(Model.IsResearcher ? "You haven’t added any studies yet, please apply to add a study now" : "You haven’t added any studies yet, please add a study now")
+            <role include="Researcher">You haven&apos;t added any studies yet, please apply to add a study now</role>
+            <role exclude="Researcher">You haven&apos;t added any studies yet, please add a study now</role>
         </p>
-        @if (Model.IsResearcher)
-        {
-            @Html.ActionLink(" Apply to add a study", "TermsAndConditions", "Researcher", null, new { @class = "govuk-button" })
-        }
-        else
-        {
-            @Html.ActionLink(" Add study", "Create", "Study", null, new { @class = "govuk-button" })
-        }
+            <a role-include="Researcher" asp-action="TermsAndConditions" asp-controller="Researcher" class="govuk-button">Apply to add a study</a>
+            <a role-exclude="Researcher" asp-action="Create" asp-controller="Study" class="govuk-button">Add study</a>
     </div>
 }

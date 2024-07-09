@@ -2,20 +2,20 @@
 
 <div class="govuk-grid-column-one-half">
     <h1 class="govuk-heading-l govuk-!-margin-bottom-0 govuk-!-margin-top-0">
-        @(Model.IsResearcher ? "My Studies" : "All studies")
+        <role include="Researcher">
+            My studies
+        </role>
+        <role exclude="Researcher">
+            All Studies
+        </role>
     </h1>
 </div>
 
 <div class="govuk-grid-column-one-half right-align-buttons-desktop">
     <div class="govuk-button-group govuk-!-margin-bottom-0">
-        @if (Model.IsResearcher)
-        {
-            @Html.ActionLink(" Apply to add a study", "TermsAndConditions", "Researcher", null, new { @id = "addStudyBtn", @class = "govuk-button govuk-button--secondary", data_module = "govuk-button--secondary" })
-        }
-        else
-        {
-            @Html.ActionLink(" Add study", "Create", "Study", null, new { @id = "addStudyBtn", @class = "govuk-button govuk-button--secondary", data_module = "govuk-button--secondary" })
-            @Html.ActionLink(" Find volunteers", "Index", "Filter", null, new { @id = "findVolunteerBtn", @class = "govuk-button", data_module = "govuk-button" })
-        }
+            <a role-include="Researcher" asp-action="TermsAndConditions" asp-controller="Researcher" id="addStudyBtn" class="govuk-button govuk-button--secondary" data_module="govuk-button--secondary">Apply to add a study</a>
+
+            <a role-exclude="Researcher" asp-action="Create" asp-controller="Study" id="addStudyBtn" class="govuk-button govuk-button--secondary" data_module="govuk-button--secondary">Add study</a>
+            <a role-exclude="Researcher" asp-action="Index" asp-controller="Filter" id="findVolunteerBtn" class="govuk-button" data_module="govuk-button">Find volunteers</a>
     </div>
 </div>

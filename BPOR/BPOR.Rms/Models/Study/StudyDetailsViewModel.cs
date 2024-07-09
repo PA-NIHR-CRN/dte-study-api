@@ -16,8 +16,6 @@ public class StudyDetailsViewModel
     public IEnumerable<EmailCampaign> EmailCampaigns { get; set; }
     public int TotalEmailsSent => EmailCampaigns.Sum(e => e.TotalCampaignEmailsSent);
     public int TotalRegisteredInterest => EmailCampaigns.Sum(e => e.TotalCampaignRegisteredInterest);
-    public bool IsResearcher { get; set; } = false;
-
 }
 
 public class EmailCampaign

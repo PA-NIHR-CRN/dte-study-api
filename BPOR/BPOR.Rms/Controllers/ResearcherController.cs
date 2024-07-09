@@ -433,7 +433,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         studyModel.Step = field;
         studyModel.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         studyModel.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
-        studyModel.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
 
         ViewData["EditMode"] = true;
         return View(studyModel);
@@ -451,7 +450,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     {
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
-        model.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
+
         ModelState.Remove("IsRecruitingIdentifiableParticipants");
 
         ValidateMandatoryFields(model);

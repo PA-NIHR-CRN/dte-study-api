@@ -7,14 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Controllers;
-
 public class StudyController(ParticipantDbContext context, IPaginationService paginationService, ICurrentUserProvider<User> currentUserProvider
 ) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false, CancellationToken token = default)
     {
-        bool userHasResearcherRole = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
+        bool userHasResearcherRole = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
 
         var studiesQuery = context.Studies.AsQueryable();
 
@@ -45,7 +44,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
             HasSearched = Request.Query.ContainsKey(nameof(searchTerm)),
             SearchTerm = searchTerm ?? string.Empty,
             HasBeenReset = hasBeenReset,
-            IsResearcher = userHasResearcherRole
         };
 
         return View(viewModel);
@@ -69,8 +67,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         {
             return NotFound();
         }
-
-        study.IsResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
 
         return View(study);
     }

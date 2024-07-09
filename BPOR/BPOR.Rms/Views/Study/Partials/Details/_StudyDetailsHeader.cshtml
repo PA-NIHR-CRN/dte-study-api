@@ -6,13 +6,11 @@
             @Html.DisplayFor(model => model.Study.StudyName)
         </h1>
     </div>
-
-    @if (!Model.IsResearcher)
-    {
+    <role exclude="Researcher">
         <div class="govuk-grid-column-one-half right-align-buttons-desktop">
             <div class="govuk-button-group govuk-!-margin-bottom-0">
                 @Html.ActionLink("Find volunteers", "Index", "Filter", new { studyId = Model.Study.Id }, new { @class = "govuk-button", data_module = "govuk-button" })
             </div>
         </div>
-    }
+    </role>
 </div>

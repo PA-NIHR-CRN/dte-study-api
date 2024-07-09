@@ -2,7 +2,6 @@
 
 @using Microsoft.Extensions.Hosting
 @using Microsoft.Extensions.Options
-@inject IHostEnvironment hostEnvironment
 @inject IOptions<DevelopmentSettings> developmentSettings
 
 @{
@@ -44,47 +43,49 @@
     </div>
 </div>
 
-@if (!hostEnvironment.IsProduction() && developmentSettings.Value.EnableUnauthenticatedTestFeatures && !string.IsNullOrWhiteSpace(emailTo))
-{
-    <div class="govuk-grid-row testing-only govuk-!-margin-top-9">
-        <div class="govuk-grid-column-two-thirds">
-            <span class="govuk-caption-m">For testing purposes only</span>
-            <h2 class="govuk-heading-m">Account verification email</h2>
+<environment exclude="Production">
+    @if (developmentSettings.Value.EnableUnauthenticatedTestFeatures && !string.IsNullOrWhiteSpace(emailTo))
+    {
+        <div class="govuk-grid-row testing-only govuk-!-margin-top-9">
+            <div class="govuk-grid-column-two-thirds">
+                <span class="govuk-caption-m">For testing purposes only</span>
+                <h2 class="govuk-heading-m">Account verification email</h2>
 
-            <dl class="govuk-summary-list">
-                <div class="govuk-summary-list__row">
-                    <dt class="govuk-summary-list__key">
-                        To
-                    </dt>
-                    <dd class="govuk-summary-list__value">
-                        @emailTo
-                    </dd>
-                </div>
-                <div class="govuk-summary-list__row">
-                    <dt class="govuk-summary-list__key">
-                        Subject
-                    </dt>
-                    <dd class="govuk-summary-list__value">
-                        @emailSubject
-                    </dd>
-                </div>
-                <div class="govuk-summary-list__row">
-                    <dt class="govuk-summary-list__key">
-                        Body
-                    </dt>
-                    <dd class="govuk-summary-list__value">
-                        <iframe style="width:100%; height:25vh;" src="@($"data:text/html;base64,{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(emailBody))}")"></iframe>
-                    </dd>
-                </div>
-                <div class="govuk-summary-list__row">
-                    <dt class="govuk-summary-list__key">
-                        Link
-                    </dt>
-                    <dd class="govuk-summary-list__value">
-                        <a href="@Html.Raw(emailLink)">@emailLink</a>
-                    </dd>
-                </div>
-            </dl>
+                <dl class="govuk-summary-list">
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            To
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            @emailTo
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Subject
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            @emailSubject
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Body
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            <iframe style="width:100%; height:25vh;" src="@($"data:text/html;base64,{Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(emailBody))}")"></iframe>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Link
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            <a href="@Html.Raw(emailLink)">@emailLink</a>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
         </div>
-    </div>
-}
+    }
+</environment>

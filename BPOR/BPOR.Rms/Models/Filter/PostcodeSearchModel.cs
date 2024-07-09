@@ -40,7 +40,6 @@ namespace BPOR.Rms.Models.Filter
                     }
                 }
             }
-
         }
     }
 

@@ -20,7 +20,8 @@ public class FilterController(ParticipantDbContext context,
 
     public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
-        bool isResearcher = currentUserProvider?.User?.UserRoles.Any(r => r.RoleId == (int)Domain.Enums.UserRole.Researcher) ?? false;
+        bool isResearcher = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
+
         if (isResearcher)
         {
             return View("Unauthorised");
