@@ -10,8 +10,6 @@ namespace BPOR.Rms.TagHelpers;
 [HtmlTargetElement(Attributes = "with-content")]
 public class WithContentTagHelper(IContentProvider contentProvider, ILogger<WithContentTagHelper> logger) : TagHelper
 {
-    private readonly ILogger<WithContentTagHelper> _logger = logger;
-
     public string? WithContent { get; set; }
 
     public ContentMode ContentMode { get; set; } = ContentMode.Replace;
@@ -50,7 +48,7 @@ public class WithContentTagHelper(IContentProvider contentProvider, ILogger<With
             if (UseFallbackContentOnError)
             {
                 output.AddClass("has-fallback-content", HtmlEncoder.Default);
-                _logger.LogError(ex.Message, ex);
+                logger.LogError(ex.Message, ex);
             }
             else
             {
