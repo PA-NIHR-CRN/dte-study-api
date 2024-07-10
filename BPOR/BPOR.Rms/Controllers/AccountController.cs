@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.Authentication;
 using NIHR.Infrastructure.Authentication.IDG.SCIM;
 using NIHR.Infrastructure.Interfaces;
 using System.Security.Cryptography;
@@ -80,6 +81,8 @@ namespace BPOR.Rms.Controllers
         {
             if (ModelState.IsValid)
             {
+                createAccountModel.Email = createAccountModel.Email.Trim().ToLowerInvariant();
+
                 await Task.Delay(1000); // TODO: Rate limit email sending to avoid abuse.
                 var code = _dataProtector.Protect(createAccountModel.Email, TimeSpan.FromHours(24));
 
@@ -172,7 +175,7 @@ namespace BPOR.Rms.Controllers
         {
             var hasAccount = await _dbContext.User
                                 .IgnoreQueryFilters() // check for active and deleted accounts.
-                                .AnyAsync(x => x.ContactEmail == email.Trim().ToLowerInvariant(), token);
+                                .AnyAsync(x => x.ContactEmail == email, token);
 
             hasAccount = hasAccount || await _userAccountStore.UserWithEmailExistsAsync(email, token);
             return hasAccount;
@@ -242,7 +245,15 @@ namespace BPOR.Rms.Controllers
                             ContactFullName = $"{model.FirstName} {model.LastName}"
                         });
 
-                        _dbContext.UserRole.Add(new UserRole { User = user.Entity, RoleId = RoleConfiguration.RoleId("Researcher") });
+                        if (email.EndsWith("@nihr.ac.uk", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            // NIHR accounts are not automatically granted the researcher role.
+                        }
+                        else
+                        {
+                            _dbContext.UserRole.Add(new UserRole { User = user.Entity, RoleId = RoleConfiguration.RoleId("Researcher") });
+                        }
+
                         await _dbContext.SaveChangesAsync(token);
 
                         return View("New");
@@ -257,24 +268,28 @@ namespace BPOR.Rms.Controllers
                         });
                     }
                 }
-
-                return View(model);
             }
             catch (CryptographicException ex)
             {
                 // Code is invalid or has expired.
                 _logger.LogWarning(ex, ex?.Message);
+
+                this.AddNotification(new NotificationBannerModel
+                {
+                    Heading = "Email verification error",
+                    Body = "There was a problem with your email verification code.",
+                    IsSuccess = false,
+                    SubBodyText = "You can try to resend the email below."
+                });
+
+                return RedirectToAction(nameof(Create));
+            }
+            catch(PasswordPolicyException ex)
+            {
+                ModelState.AddModelError(nameof(GatherAccountInformationModel.Password), ex.Message);
             }
 
-            this.AddNotification(new NotificationBannerModel
-            {
-                Heading = "Email verification error",
-                Body = "There was a problem with your email verification code.",
-                IsSuccess = false,
-                SubBodyText = "You can try to resend the email below."
-            });
-
-            return RedirectToAction(nameof(Create));
+            return View(model);
         }
     }
 }
