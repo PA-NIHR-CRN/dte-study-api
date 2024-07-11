@@ -1,0 +1,50 @@
+﻿.govuk-header {
+    background-color: unset;
+    flex-direction: column;
+    margin-top: 0.5em;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.govuk-header__container {
+    height: unset;
+}
+
+.govuk-phase-banner {
+    border-bottom: unset;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+#NHSLogo {
+    height: 45px;
+    margin: 30px;
+    position: relative;
+    width: 112.5px;
+}
+
+.govuk-phase-banner__content__tag {
+    display: inline-block;
+    outline: transparent solid 2px;
+    outline-offset: -2px;
+    color: rgb(255, 255, 255);
+    background-color: rgb(29, 112, 184);
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-family: "GDS Transport", arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-weight: 700;
+    line-height: 1;
+    padding: 5px 8px 4px;
+    margin-right: 10px;
+}
+
+.header-user-info {
+    color: #193E72;
+}
+
+.header-user-info .govuk-link.sign-out-nav__link,
+.header-user-info .govuk-link.sign-out-nav__link:visited {
+    color: #193E72;
+}

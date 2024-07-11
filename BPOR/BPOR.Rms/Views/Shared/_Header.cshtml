@@ -6,9 +6,31 @@
     <div class="govuk-header__container">
         <div class="header-content-container">
             <div class="header-content-left">
-                <h1 class="govuk-heading-m govuk-!-margin-bottom-0 heading-white">Registry Management System</h1>
+                <a target="_blank" href="https://bepartofresearch.nihr.ac.uk/" rel="noreferrer" id="bpor-header-link" aria-label="Be Part of Research, Opens in a new tab">
+                    <img src="~/images/BPoR_NIHR_colour-RGB.svg" alt="Be Part of Research Logo" id="bpor-header-logo" width="441" />
+                </a>
             </div>
             <div class="header-content-right">
+                <a rel="noreferrer" id="nhs-header-link" target="_blank" aria-label="NHS, opens in a new tab" href=" https://nhs.uk/">
+                    <img id="NHSLogo" src="~/images/NHS_logo.svg" alt="NHS Logo" height="36" width="100%" class="nhs-header-logo">
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="govuk-header__container">
+        <div class="header-content-container">
+            <div class="header-content-left">
+
+                <div class="govuk-phase-banner">
+                    <p class="govuk-phase-banner__content">
+                        <strong class="govuk-tag govuk-phase-banner__content__tag">
+                            BETA
+                        </strong>
+                        <span class="govuk-phase-banner__text">This is a new service &ndash; your <a href="https://bepartofresearch.nihr.ac.uk/get-in-touch/" class="govuk-link" target="_blank" aria-label="feedback, opens in a new tab">feedback</a>  will help us to improve it.</span>
+                    </p>
+                </div>
+            </div>
+            <div class="header-content-right header-user-info">
                 @if (UserProvider.User is not null)
                 {
                     <span id="logged-in-username">@UserProvider?.User?.ContactFullName</span>
@@ -18,12 +40,8 @@
                         </a>
                     </nav>
                 }
-                <a href="https://www.nihr.ac.uk/" class="govuk-header__link govuk-!-margin-left-4" target="_blank" aria-label="Go to nihr.ac.uk (opens in new window)">
-                    <span class="govuk-header__logotype nihr-logo">
-                        <img alt="National Institute for Health and Care Research logo" loading="lazy" height="25" decoding="async" data-nimg="1" style="color:transparent" src="/images/nihr.svg">
-                    </span>
-                </a>
             </div>
         </div>
     </div>
 </header>
+
