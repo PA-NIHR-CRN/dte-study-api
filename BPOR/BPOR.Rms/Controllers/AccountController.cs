@@ -238,24 +238,6 @@ namespace BPOR.Rms.Controllers
 
                     if (!string.IsNullOrWhiteSpace(userId))
                     {
-                        var user = _dbContext.User.Add(new User
-                        {
-                            AuthenticationId = userId,
-                            ContactEmail = email,
-                            ContactFullName = $"{model.FirstName} {model.LastName}"
-                        });
-
-                        if (email.EndsWith("@nihr.ac.uk", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            // NIHR accounts are not automatically granted the researcher role.
-                        }
-                        else
-                        {
-                            _dbContext.UserRole.Add(new UserRole { User = user.Entity, RoleId = RoleConfiguration.RoleId("Researcher") });
-                        }
-
-                        await _dbContext.SaveChangesAsync(token);
-
                         return View("New");
                     }
                     else

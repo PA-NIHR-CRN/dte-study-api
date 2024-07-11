@@ -1,4 +1,5 @@
 ﻿using BPOR.Domain.Entities;
+using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -19,7 +20,7 @@ public class BaseAddressAccessor
 
     public void SetBaseAddress(string scheme, HostString host, PathString pathBase)
     {
-        if(!isSet)
+        if (!isSet)
         {
             Scheme = scheme;
             Host = host;
@@ -90,12 +91,26 @@ public class IdgAuthenticationMiddleware
                 {
                     AuthenticationId = userId,
                     ContactEmail = context.User.GetEmail(),
-                    ContactFullName = context.User.GetName() ?? context.User.GetEmail(),
+                    ContactFullName = string.IsNullOrWhiteSpace(context.User.GetName()) ? context.User.GetEmail() : context.User.GetName(),
                 };
 
-                dbContext.User.Add(user);
+                if (user.ContactEmail.EndsWith("@nihr.ac.uk", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    // NIHR accounts are not automatically granted the researcher role.
+                }
+                else
+                {
+                    user.UserRoles.Add(new UserRole { RoleId = RoleConfiguration.RoleId("Researcher") });
+                }
 
+                dbContext.User.Add(user);
                 await dbContext.SaveChangesAsync(token);
+
+                user = await dbContext
+                .User
+                .Include(x => x.UserRoles)
+                    .ThenInclude(x => x.Role)
+                .SingleOrDefaultAsync(x => x.AuthenticationId == userId, token);
             }
 
             currentUserIdAccessor.SetCurrentUserId(user?.Id ?? 0);
@@ -104,6 +119,7 @@ public class IdgAuthenticationMiddleware
             var identity = context.User.Identity as ClaimsIdentity;
             if (identity != null && user != null)
             {
+
                 // Add role claims to the user identity for use during authorization
                 // throughout the application.
                 foreach (var userRole in user.UserRoles)
