@@ -12,7 +12,7 @@ namespace NIHR.Infrastructure.Authentication.IDG.SCIM
 {
     public class Scim2UserManagement : IUserAccountStore
     {
-        private const string PASSWORD_POLICY_ERROR_PREFIX = "'Password pattern policy violated. ";
+        private const string PASSWORD_POLICY_ERROR = "Password pattern policy violated.";
         private readonly MediaTypeHeaderValue scimjson = new MediaTypeHeaderValue("application/scim+json");
         private readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions() { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull };
         private readonly HttpClient _httpClient;
@@ -59,9 +59,9 @@ namespace NIHR.Infrastructure.Authentication.IDG.SCIM
 
                 if (error != null)
                 {
-                    if (error.Detail.StartsWith(PASSWORD_POLICY_ERROR_PREFIX))
+                    if (error.Detail.Contains(PASSWORD_POLICY_ERROR))
                     {
-                        throw new PasswordPolicyException(error.Detail.Replace(PASSWORD_POLICY_ERROR_PREFIX, string.Empty));
+                        throw new PasswordPolicyException(error.Detail[(error.Detail.LastIndexOf(PASSWORD_POLICY_ERROR) + PASSWORD_POLICY_ERROR.Length)..].Trim());
                     }
                     else
                     {
