@@ -1,6 +1,5 @@
 name: Stream Handler Staged Deploy
 on:
-  push:
   workflow_dispatch:
 
 jobs:
