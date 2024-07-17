@@ -14,6 +14,7 @@ public class SetupCampaignViewModel
     public int MaxNumbers { get; set; }
 
     public string? StudyName { get; set; }
+    public string? EmailAddress { get; set; }
 
     public int FilterCriteriaId { get; set; }
 

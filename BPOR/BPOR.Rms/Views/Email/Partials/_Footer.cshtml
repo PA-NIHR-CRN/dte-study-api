@@ -1,7 +1,26 @@
+@using BPOR.Rms.Startup
+@using BPOR.Domain.Entities
+@model BPOR.Rms.Models.Email.SetupCampaignViewModel
+@inject ICurrentUserProvider<User> UserProvider
+
 <div class="govuk-inset-text">
-    <strong>Please note:</strong> GOV UK Notify has an email allowance of 250,000 per day. This includes all email campaigns sent by our team. Your email may exceed this limit which means it may be sent out over multiple days.
+    <strong>Please note:</strong> GOV UK Notify has an email allowance of 250,000 per day. This includes all email
+    campaigns sent by our team. Your email may exceed this limit which means it may be sent out over multiple days.
 </div>
 
 <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
-<p class="govuk-body text-secondary">Both current.user@email.com and roger.leigh@studies.ac.uk will be notified by email that the email campaign has started sending and to how many recipients. </p>
-<button type="submit" asp-action="SendEmail" class="govuk-button" data_module="govuk-button" >Send email</button>
+
+<p class="govuk-body text-secondary">
+    @if (!string.IsNullOrEmpty(Model.EmailAddress))
+    {
+        <span>Both</span>
+    }
+    @UserProvider?.User?.ContactEmail
+    @if (!string.IsNullOrEmpty(Model.EmailAddress))
+    {
+        <span> and @Model.EmailAddress</span>
+    }
+    will be notified by email that the email campaign has started sending and to how many recipients.
+</p>
+
+<button type="submit" asp-action="SendEmail" class="govuk-button" data_module="govuk-button">Send email</button>
