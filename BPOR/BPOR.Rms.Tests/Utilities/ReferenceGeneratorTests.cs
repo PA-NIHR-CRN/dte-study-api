@@ -8,7 +8,7 @@ namespace BPOR.Rms.Tests.Utilities;
 public partial class ReferenceGeneratorTests
 {
     private readonly IReferenceGenerator _generator = new ReferenceGenerator();
-    private const int _expectedLength = 16;
+    private const int _expectedLength = 19;
     private static readonly Regex _digitsOnlyRegex = MyRegex();
 
     [Fact]
@@ -34,16 +34,11 @@ public partial class ReferenceGeneratorTests
     [Fact]
     public void GenerateReference_ShouldHaveValidLuhnCheckDigit()
     {
-        // Act
         var reference = _generator.GenerateReference();
-        var digits = reference.Select(c => c - '0').ToArray();
-        var checkDigit = digits[^1];
-        var withoutCheckDigit = digits[..^1];
 
-        // Assert
-        Assert.Equal(checkDigit, Luhn.CalculateCheckDigit(string.Concat(withoutCheckDigit)));
+        Assert.True(Luhn.IsValid(reference));
     }
-    
+
     [Fact]
     public void GenerateReference_ShouldBeUnique()
     {
@@ -61,6 +56,6 @@ public partial class ReferenceGeneratorTests
         Assert.Equal(1000, references.Count);
     }
 
-    [GeneratedRegex(@"^\d+$")]
+    [GeneratedRegex(@"^(\d{4}[\s-]?){3}\d{4}$")]
     private static partial Regex MyRegex();
 }

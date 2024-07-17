@@ -11,9 +11,13 @@ public class ReferenceGenerator : IReferenceGenerator
     public string GenerateReference()
     {
         var reference = new StringBuilder();
-        for (var i = 0; i < 15; i++)
+        for (var i = 1; i < 16; i++)
         {
             reference.Append(_random.Next(0, 10));
+            if (i % 4 == 0)
+            {
+                reference.Append(' ');
+            }
         }
 
         var checkDigit = Luhn.CalculateCheckDigit(reference.ToString());
