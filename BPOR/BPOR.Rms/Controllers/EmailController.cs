@@ -56,35 +56,24 @@ public class EmailController(
 
         if (ModelState.IsValid)
         {
-            if (hostEnvironment.IsProduction()) // TODO: remove for final release
+            var selectedTemplateName =
+                model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
+
+            var emailCampaign = new EmailCampaign
             {
-                this.AddNotification(new NotificationBannerModel
-                {
-                    Heading = "For testing purposes only",
-                    Body = "Production email sending not enabled, campaign not sent.", IsSuccess = false
-                });
-            }
-            else
-            {
-                var selectedTemplateName =
-                    model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
+                FilterCriteriaId = model.FilterCriteriaId,
+                TargetGroupSize = model.TotalVolunteers,
+                EmailTemplateId = new Guid(model.SelectedTemplateId!),
+                Name = selectedTemplateName
+            };
 
-                var emailCampaign = new EmailCampaign
-                {
-                    FilterCriteriaId = model.FilterCriteriaId,
-                    TargetGroupSize = model.TotalVolunteers,
-                    EmailTemplateId = new Guid(model.SelectedTemplateId!),
-                    Name = selectedTemplateName
-                };
+            await AddCampaignToContextAsync(emailCampaign, cancellationToken);
 
-                await AddCampaignToContextAsync(emailCampaign, cancellationToken);
+            var callback =
+                linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest)) ??
+                throw new InvalidOperationException("Callback URL not found");
 
-                var callback =
-                    linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest)) ??
-                    throw new InvalidOperationException("Callback URL not found");
-                
-                await taskQueue.QueueBackgroundWorkItemAsync(emailCampaign.Id, callback, cancellationToken);
-            }
+            await taskQueue.QueueBackgroundWorkItemAsync(emailCampaign.Id, callback, cancellationToken);
 
             return View("EmailSuccess",
                 new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });
