@@ -370,3 +370,8 @@ button.govuk-back-link {
     border: none;
     background: none;
 }
+
+
+.govuk-button.govuk-input__suffix {
+    border-radius: 0px 4.2px 4.2px 0px !important;
+}
