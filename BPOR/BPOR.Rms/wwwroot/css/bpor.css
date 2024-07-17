@@ -43,12 +43,12 @@
     color: #193E72;
 }
 
-.header-user-info .govuk-link.sign-out-nav__link,
-.header-user-info .govuk-link.sign-out-nav__link:visited {
-    color: #193E72;
-}
+    .header-user-info .govuk-link.sign-out-nav__link,
+    .header-user-info .govuk-link.sign-out-nav__link:visited {
+        color: #193E72;
+    }
 
-.social-container, 
+.social-container,
 .social-container-header {
     font-stretch: normal;
     color: #212b32;
@@ -81,6 +81,7 @@
         max-width: 33.333333%;
         flex-basis: 33.333333%;
     }
+
     .social-container-header {
         justify-content: flex-end;
     }
@@ -121,15 +122,15 @@
     color: #1d70b8;
 }
 
-.social-link:focus,
-.social-link:hover {
-    text-decoration: none;
-    color: #212b32;
-    outline: 4px solid transparent;
-    border-color: rgb(254, 212, 122);
-    box-shadow: none;
-    background-color: rgb(14, 46, 90);
-}
+    .social-link:focus,
+    .social-link:hover {
+        text-decoration: none;
+        color: #212b32;
+        outline: 4px solid transparent;
+        border-color: rgb(254, 212, 122);
+        box-shadow: none;
+        background-color: rgb(14, 46, 90);
+    }
 
 .social-icon {
     font-stretch: normal;
@@ -297,14 +298,10 @@
 }
 
 .footer-link-li {
-
-
     font-stretch: normal;
-
     color: #212b32;
     line-height: 1.47368;
     box-sizing: inherit;
-
     margin: 2px 0px 0px;
     font-size: 0.8rem;
     font-weight: 400;
@@ -331,38 +328,38 @@
     color: rgb(255, 255, 255);
 }
 
-.footer-link-li-a:visited {
-    font-stretch: normal;
-    line-height: 1.47368;
-    font-size: 0.8rem;
-    font-weight: 400;
-    list-style: none;
-    box-sizing: inherit;
-    text-decoration: underline;
-    text-decoration-thickness: max(1px, .0625rem);
-    text-underline-offset: 2.5px;
-    padding-left: 0px;
-    padding-right: 0px;
-    cursor: pointer;
-    text-decoration-color: rgb(255, 255, 255);
-    color: rgb(255, 255, 255);
-}
+    .footer-link-li-a:visited {
+        font-stretch: normal;
+        line-height: 1.47368;
+        font-size: 0.8rem;
+        font-weight: 400;
+        list-style: none;
+        box-sizing: inherit;
+        text-decoration: underline;
+        text-decoration-thickness: max(1px, .0625rem);
+        text-underline-offset: 2.5px;
+        padding-left: 0px;
+        padding-right: 0px;
+        cursor: pointer;
+        text-decoration-color: rgb(255, 255, 255);
+        color: rgb(255, 255, 255);
+    }
 
 
-.footer-link-li-a:hover {
-    color: rgb(255, 255, 255);
-    text-decoration-color: rgb(255, 255, 255);
-    text-decoration-line: underline;
-    text-decoration-thickness: max(3px, 0.1875rem, 0.12em);
-}
+    .footer-link-li-a:hover {
+        color: rgb(255, 255, 255);
+        text-decoration-color: rgb(255, 255, 255);
+        text-decoration-line: underline;
+        text-decoration-thickness: max(3px, 0.1875rem, 0.12em);
+    }
 
 
-.footer-link-li-a:focus {
+    .footer-link-li-a:focus {
         color: rgb(25, 62, 114);
         text-decoration: none;
         background-color: rgb(254, 212, 122);
         box-shadow: rgb(254, 212, 122) 0px -2px, rgb(33, 43, 50) 0px 4px;
-}
+    }
 
 .link-bpor {
     font-stretch: normal;
@@ -392,11 +389,11 @@
     color: #330072;
 }
 
-.link-bpor-a:focus, .link-bpor-a:hover {
-    background-color: rgb(25, 62, 114);
-    border-color: rgb(254, 212, 122);
-    box-shadow: none;
-}
+    .link-bpor-a:focus, .link-bpor-a:hover {
+        background-color: rgb(25, 62, 114);
+        border-color: rgb(254, 212, 122);
+        box-shadow: none;
+    }
 
 .link-bpor-img {
     font-stretch: normal;
@@ -453,12 +450,12 @@
     color: #1d70b8;
 }
 
-.footerImage:focus, .footerImage:hover {
-    background-color: #fff;
-    border-color: #fed47a;
-    box-shadow: none;
-    box-shadow: 0 0 3px 3px rgba(0, 0, 0, .75);
-}
+    .footerImage:focus, .footerImage:hover {
+        background-color: #fff;
+        border-color: #fed47a;
+        box-shadow: none;
+        box-shadow: 0 0 3px 3px rgba(0, 0, 0, .75);
+    }
 
 .img-responsive {
     font-stretch: normal;
@@ -530,6 +527,18 @@
         max-width: 90%;
         padding: 5px;
     }
+
+    .header-content-container {
+        flex-direction: column;
+    }
+
+    .header-user-info {
+        padding-bottom: 1em;
+    }
+
+    .header-content-left {
+        justify-content: center;
+    }
 }
 
 
@@ -538,20 +547,23 @@
         flex: 0 0 55%;
         padding-right: 5px;
     }
+
     .NI-logo {
         flex: 0 0 30%;
     }
+
     #NihrLogo {
         width: 90%;
     }
+
     .Scot-logo {
         display: flex;
         flex: 0 0 40%;
         justify-content: center;
         left: 4%;
     }
+
     .HCW-logo {
         flex: 0 0 40%;
     }
 }
-
