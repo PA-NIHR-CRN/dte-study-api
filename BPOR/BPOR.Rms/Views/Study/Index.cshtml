@@ -3,6 +3,14 @@
 
 @{
     ViewData["Title"] = "All studies";
+
+    if (Model.HasSearched)
+    {
+        var studies = Model.Studies.TotalCount == 1 ? "study" : "studies";
+
+        ViewData["Title"] = $"{ViewData["Title"] as string} - {Model.Studies.TotalCount:n0} {studies} found";
+    }
+
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="govuk-grid-row">
