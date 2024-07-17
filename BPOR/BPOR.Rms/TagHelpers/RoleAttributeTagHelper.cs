@@ -18,6 +18,11 @@ namespace BPOR.Rms.TagHelpers
 
         public static void Process(ICurrentUserProvider<User> currentUserProvider, TagHelperOutput output, string? roleInclude, string? roleExclude)
         {
+            if (string.Equals(output.TagName, "role", StringComparison.InvariantCultureIgnoreCase))
+            {
+                output.TagName = null;
+            }
+
             var include = roleInclude?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
             var exclude = roleExclude?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
 
