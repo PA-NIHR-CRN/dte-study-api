@@ -159,24 +159,22 @@
 
 @if (Model.HasSearched)
 {
-    @if (!Model.Studies.Any())
+    if (Model.Studies.TotalCount == 0)
     {
         <div class="govuk-inset-text">
             No studies match your search
         </div>
     }
-
-    @if (Model.Studies.Count() > 1)
-    {
-        <div class="govuk-inset-text">
-            @Model.Studies.Count() results match your search.
-        </div>
-    }
-
-    @if (Model.Studies.Count() == 1)
+    else if (Model.Studies.TotalCount == 1)
     {
         <div class="govuk-inset-text">
             1 study matches your search.
+        </div>
+    }
+    else if (Model.Studies.TotalCount > 1)
+    {
+        <div class="govuk-inset-text">
+            @Model.Studies.TotalCount results match your search.
         </div>
     }
 }
@@ -187,7 +185,7 @@
         The search results have been reset and all studies are listed.
     </div>
 }
-@if (Model.Studies.Any())
+@if (Model.Studies.TotalCount > 0)
 {
     // TODO: Add default empty state to page control.
     <div class="study-card-container">
