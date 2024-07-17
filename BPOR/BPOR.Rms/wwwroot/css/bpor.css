@@ -216,8 +216,8 @@
 }
 
 .link-title {
+    color: white;
     font-stretch: normal;
-    color: #212b32;
     box-sizing: inherit;
     display: block;
     font-weight: 600;
@@ -366,7 +366,6 @@
     font-size: 16px;
     line-height: 1.5;
     box-sizing: inherit;
-    text-decoration: underline;
     text-decoration-thickness: max(1px, .0625rem);
     text-underline-offset: 0.1578em;
     border: 3px solid rgb(25, 62, 114);
@@ -380,7 +379,6 @@
     font-size: 16px;
     line-height: 1.5;
     box-sizing: inherit;
-    text-decoration: underline;
     text-decoration-thickness: max(1px, .0625rem);
     text-underline-offset: 0.1578em;
     border: 3px solid rgb(25, 62, 114);
