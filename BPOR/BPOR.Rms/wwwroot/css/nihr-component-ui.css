@@ -210,6 +210,19 @@
         outline: rgb(254, 212, 122) solid 4px;
     }
 
+.govuk-input__suffix {
+    font-size: 18px;
+    line-height: 27px;
+    border-radius: 0 0.3em 0.3em 0;
+    border-color: rgb(145, 145, 145);
+    color: darkslategray; 
+}
+
+.govuk-input__wrapper > .govuk-input:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 .govuk-textarea {
     width: 100%;
     font-size: 18px;
@@ -287,9 +300,9 @@
         outline: none;
     }
 
-    .govuk-grid-row-age-range .govuk-form-group {
-        display: flex;
-    }
+.govuk-grid-row-age-range .govuk-form-group {
+    display: flex;
+}
 
     .govuk-grid-row-age-range .govuk-form-group label {
         flex: 0 0 auto;
@@ -335,7 +348,7 @@
     max-width: 100%;
     height: 2.5rem;
     padding: 5px;
-    border: 2px solid #0b0c0c;
+    border: 2px solid rgb(145, 145, 145);
     color: #0b0c0c;
     background-color: #fff;
     border-radius: 0.3rem
@@ -352,7 +365,7 @@
     max-width: 100%;
     height: 12.5rem;
     padding: 5px;
-    border: 2px solid #0b0c0c;
+    border: 2px solid rgb(145, 145, 145);
     color: #0b0c0c;
     background-color: #fff;
     border-radius: 0.3rem
@@ -366,7 +379,6 @@
 }
 
 .filter-count-container {
-
     border: 2px solid;
     border-color: lightgrey;
     border-radius: 0.5rem;
@@ -414,6 +426,7 @@
     border: 3px solid #193E72;
     background: #193E72;
 }
+
 .govuk-warning-text__text {
     color: #193E72;
 }
@@ -449,8 +462,8 @@
     padding-left: 10px;
 }
 
-.filter-buttons-container{
-    text-align:center;
+.filter-buttons-container {
+    text-align: center;
 }
 
 .sr-only {
@@ -492,8 +505,7 @@
         color: #002060;
     }
 
-.govuk-button.govuk-password-input__toggle{
-    line-height:19px;
-    margin-left:5px;
+.govuk-button.govuk-password-input__toggle {
+    line-height: 19px;
+    margin-left: 5px;
 }
-

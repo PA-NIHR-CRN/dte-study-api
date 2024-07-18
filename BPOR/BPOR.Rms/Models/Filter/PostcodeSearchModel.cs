@@ -52,7 +52,7 @@ namespace BPOR.Rms.Models.Filter
         [LookupLocation(From = nameof(FullPostcode))]
         public Point? Location { get; set; }
 
-        [Display(Name = "Radius", Description = "Indicate the radius for searching volunteers based on the provided full postcode.")]
+        [Display(Name = "Radius", Description = "Indicate the radius, in miles, for searching volunteers based on the provided full postcode.")]
         [IntegerOrDecimal(ErrorMessage = "Enter a whole number or a positive number with one decimal place, like 8 or 1.3", RequiredIfNotNull = nameof(FullPostcode))]
         public double? SearchRadiusMiles { get; set; }
 
