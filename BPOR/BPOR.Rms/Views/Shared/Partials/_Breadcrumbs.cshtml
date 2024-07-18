@@ -40,7 +40,7 @@
 @if (breadcrumbs is not null && breadcrumbs.Any())
 {
     <div class="govuk-grid-row">
-        <div class="govuk-breadcrumbs breadcrumb-container" style="text-align: left;">
+        <nav aria-label="breadcrumb" class="govuk-breadcrumbs breadcrumb-container" style="text-align: left;">
             <ol class="govuk-breadcrumbs__list">
                 @for (int i = 0; i < breadcrumbs.Count(); i++)
                 {
@@ -53,12 +53,14 @@
                     }
                     else
                     {
+                        // TODO: The breadcrumbs should start with your ‘home’ page and end with the parent section of the current page.
+                        // see https://design-system.service.gov.uk/components/breadcrumbs/
                         <li class="govuk-breadcrumbs__list-item">
-                            <span class="govuk-breadcrumbs__link breadcrumb-current">@item.Text</span>
+                            <a class="govuk-breadcrumbs__link breadcrumb-link breadcrumb-current" href="#" aria-current="page">@item.Text</a>
                         </li>
                     }
                 }
             </ol>
-        </div>
+        </nav>
     </div>
 }
