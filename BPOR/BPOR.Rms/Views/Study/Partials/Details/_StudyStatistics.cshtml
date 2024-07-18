@@ -42,22 +42,23 @@
     <div class="govuk-grid-column-one-third">
         <div class="card-wrapper">
             <div class="stat-card">
-                <div class="stat-card-number">@Model.TotalEmailsSent</div>
                 <div class="stat-card-text">Total emailed</div>
+                <div class="stat-card-number">@Model.TotalEmailsSent</div>
             </div>
         </div>
     </div>
     <div class="govuk-grid-column-one-third">
         <div class="card-wrapper">
             <div class="stat-card">
-                <div class="stat-card-number">@Model.TotalRegisteredInterest</div>
                 <div class="stat-card-text">Total interested</div>
+                <div class="stat-card-number">@Model.TotalRegisteredInterest</div>
             </div>
         </div>
     </div>
     <div class="govuk-grid-column-one-third">
         <div class="card-wrapper">
             <div class="stat-card">
+                <div class="stat-card-text">Recruited</div>
                 <div class="stat-card-number">
                     @if (Model.Study.IsRecruitingIdentifiableParticipants)
                     {
@@ -68,7 +69,6 @@
                         @Model.LatestRecruitmentTotal
                     }
                 </div>
-                <div class="stat-card-text">Recruited</div>
             </div>
         </div>
     </div>
