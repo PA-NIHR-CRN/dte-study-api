@@ -1,20 +1,19 @@
 @model BPOR.Rms.Models.Volunteer.UpdateRecruitedViewModel
 
 @{
+    ViewData["Title"] = "Update recruited volunteers";
     ViewData.AddBreadcrumbs(new Dictionary<string, string>
             {
                 ["All studies"] = "/Study/Index",
                 ["Study"] = $"/Study/Details/{Model.StudyId}",
-                ["Update newly recruited volunteers"] = "/Study/Edit",
+                ["Update recruited volunteers"] = "/Study/Edit",
             });
 }
 
 <div style="display: flex;flex-direction: column;gap: 50px;width: 100% ;">
     <div>
         <h1 class="govuk-heading-xl govuk-!-margin-bottom-0">Update recruited volunteers</h1>
-        <h4 class="text-secondary govuk-!-margin-0">
-            @Html.DisplayFor(model => model.StudyName)
-        </h4>
+        <span class="govuk-caption-xl govuk-!-margin-bottom-0">@Html.DisplayFor(model => model.StudyName)</span>
     </div>
 
     <form asp-action="SubmitVolunteerNumbers" asp-controller="Volunteer" method="post">
