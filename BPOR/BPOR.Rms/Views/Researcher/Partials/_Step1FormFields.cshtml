@@ -46,7 +46,7 @@
     <label asp-for="StudySponsors" class="govuk-label" for="StudySponsors">
         @Html.DisplayNameFor(model => model.StudySponsors)
     </label>
-    <div id="event-name-hint" class="govuk-hint">
+    <div id="study-sponsor-hint" class="govuk-hint">
         For example, John Smith, Astra Pharma, BLP Pharma Ltd
     </div>
     @if (Html.ViewData.ModelState["StudySponsors"]?.Errors.Count > 0)
@@ -55,11 +55,11 @@
             <span class="govuk-visually-hidden">Error:</span>
             @Html.ValidationMessageFor(model => model.StudySponsors)
         </span>
-        <input asp-for="StudySponsors" class="govuk-input  govuk-input govuk-input--error" id="StudySponsors" aria-describedby="StudySponsors-error" value="@(Model.StudySponsors)" />
+        <input asp-for="StudySponsors" class="govuk-input  govuk-input govuk-input--error" id="StudySponsors" aria-describedby="study-sponsor-hint" aria-errormessage="StudySponsors-error" value="@(Model.StudySponsors)" />
     }
     else
     {
-        <input asp-for="StudySponsors" class=" govuk-input" id="StudySponsors" value="@(Model.StudySponsors)" />
+        <input asp-for="StudySponsors" class=" govuk-input" id="StudySponsors" value="@(Model.StudySponsors)" aria-describedby="study-sponsor-hint" />
     }
 </div>
 

@@ -73,11 +73,13 @@ namespace BPOR.Rms.TagHelpers
 
             if (!string.IsNullOrEmpty(For.Metadata.Description))
             {
-                output.PreContent.AppendHtml($"""
-                    <div class="govuk-hint">
-                        {_generator.Encode(For.Metadata.Description)}
-                    </div>
-                """);
+                var hintBuilder = new TagBuilder("div");
+                hintBuilder.AddCssClass("govuk-hint");
+                hintBuilder.GenerateId($"{For.Name}-hint", "-");
+
+                hintBuilder.InnerHtml.Append(For.Metadata.Description);
+
+                output.PreContent.AppendHtml(hintBuilder);
             }
 
             foreach (var name in modelNames)

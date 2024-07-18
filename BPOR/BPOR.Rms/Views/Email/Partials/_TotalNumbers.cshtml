@@ -42,12 +42,12 @@
             <span class="govuk-visually-hidden">Error:</span>
             @Html.ValidationMessageFor(model => model.TotalVolunteers)
         </span>
-        <input asp-for="TotalVolunteers" class="govuk-input govuk-input--error" aria-describedby="TotalVolunteers-error" type="text" />
+        <input asp-for="TotalVolunteers" class="govuk-input govuk-input--error" aria-describedby="TotalVolunteers-hint" aria-errormessage="TotalVolunteers-error" type="text" />
         <span class="govuk-body-l body-bold" style="color: #000"> / @Model.MaxNumbers.ToString("N0") max</span>
     }
     else
     {
-        <input asp-for="TotalVolunteers" class="govuk-input" type="text"/>
+        <input asp-for="TotalVolunteers" class="govuk-input" type="text" aria-describedby="TotalVolunteers-hint" />
         <span class="govuk-body-l body-bold" style="color: #000"> / @Model.MaxNumbers.ToString("N0") max</span>
     }
 </div>

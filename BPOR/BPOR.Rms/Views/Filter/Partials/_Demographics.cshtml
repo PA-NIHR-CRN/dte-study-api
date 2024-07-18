@@ -7,11 +7,11 @@
         <div class="govuk-form-group">
             <div class="govuk-age-input__item">
                 @Html.LabelFor(m => Model.AgeRange.From, new { @class = "govuk-label" })
-                <input asp-for="AgeRange.From" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" inputmode="numeric" />
+                <input asp-for="AgeRange.From" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" inputmode="numeric" aria-describedby="AgeRange-hint" />
             </div>
             <div class="govuk-age-input__item">
                 @Html.LabelFor(m => Model.AgeRange.To, new { @class = "govuk-label" })
-                <input asp-for="AgeRange.To" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" inputmode="numeric" />
+                <input asp-for="AgeRange.To" class="govuk-input govuk-age-input__input govuk-input--width-10" type="text" inputmode="numeric" aria-describedby="AgeRange-hint" />
             </div>
         </div>
     </div>

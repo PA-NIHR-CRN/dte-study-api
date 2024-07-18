@@ -43,11 +43,11 @@
                             <span class="govuk-visually-hidden">Error:</span>
                             @Html.ValidationMessageFor(model => model.RecruitmentTotal)
                         </span>
-                        <input asp-for="RecruitmentTotal" class="govuk-input  govuk-input govuk-input--error" id="RecruitmentTotal" aria-describedby="RecruitmentTotal-error" value="@(Model.RecruitmentTotal)" type="text"/>
+                        <input asp-for="RecruitmentTotal" class="govuk-input govuk-input govuk-input--error" id="RecruitmentTotal" aria-describedby="RecruitmentTotal-hint" aria-errormessage="RecruitmentTotal-error" value="@(Model.RecruitmentTotal)" type="text" />
                     }
                     else
                     {
-                        <input asp-for="RecruitmentTotal" class="govuk-input" id="RecruitmentTotal" value="@(Model.RecruitmentTotal)" type="text"/>
+                        <input asp-for="RecruitmentTotal" class="govuk-input" id="RecruitmentTotal" value="@(Model.RecruitmentTotal)" aria-describedby="RecruitmentTotal-hint" type="text" />
                     }
                 </div>
             </div>

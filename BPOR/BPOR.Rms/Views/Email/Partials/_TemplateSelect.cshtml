@@ -38,7 +38,9 @@
             Text = t.name
         }).ToList();
 
-        @Html.DropDownListFor(model => model.SelectedTemplateId, selectListItems, "Select a template", new { @class = Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0 ? "govuk-select govuk-select--error" : "govuk-select" })
+        <select asp-for="SelectedTemplateId" asp-items="selectListItems" class=@(Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0 ? "govuk-select govuk-select--error" : "govuk-select") aria-describedby="SelectedTemplateId-hint" aria-errormessage="SelectedTemplateId-error">
+            <option value="" disabled selected>Select a template</option>
+        </select>
     }
     else
     {

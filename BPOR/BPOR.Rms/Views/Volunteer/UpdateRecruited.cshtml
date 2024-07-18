@@ -42,11 +42,11 @@
                         <span class="govuk-visually-hidden">Error:</span>
                         @Html.ValidationMessageFor(model => model.VolunteerReferenceNumbers)
                     </span>
-                    <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea govuk-textarea--error" aria-describedby="VolunteerReferenceNumbers-error"></textarea>
+                    <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea govuk-textarea--error" aria-describedby="VolunteerReferenceNumbers-hint" aria-errormessage="VolunteerReferenceNumbers-error"></textarea>
                 }
                 else
                 {
-                    <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea"></textarea>
+                    <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea" aria-describedby="VolunteerReferenceNumbers-hint"></textarea>
                 }
             </div>
         </div>
