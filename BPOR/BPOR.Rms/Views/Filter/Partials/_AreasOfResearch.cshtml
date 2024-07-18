@@ -7,6 +7,7 @@
     var noneName = (ViewData["__AreasOfResearch_None_Name"] as string);
     var noneCurrentValue = (ViewData["__AreasOfResearch_None_CurrentValue"] as string) ?? string.Empty;
     int itemOffset = 0;
+    var firstItemFragment = string.IsNullOrWhiteSpace(noneName) ? $"#{areasOfResearch.First().Value}" : "#option-none";
 }
 
 <div class="govuk-form-group">
@@ -23,7 +24,7 @@
             @* TODO: add selected item count *@
         </div>
         <span id="areas-of-interest-announcement" class="govuk-visually-hidden" data-single="option found" data-multiple="options found" data-selected="selected" aria-live="polite"></span>
-        <a href="#@areasOfResearch.Last().Value" class="govuk-skip-link start-of-options" data-module="govuk-skip-link">Skip to the end of the areas of research options list</a>
+        <a id="areas-of-interest-first-skip-to-end-link" href="#@areasOfResearch.Last().Value" class="govuk-skip-link start-of-options" data-module="govuk-skip-link">Skip to the end of the areas of research options list</a>
 
         <div class="govuk-checkboxes research-areas-list" id="areas-of-research-container" data-module="govuk-checkboxes">
 
@@ -40,7 +41,7 @@
                 @if (option.index > 0 && option.index % 10 == 0) // Add skip link every 10 options
                 {
                     <div class="govuk-checkboxes__item skip-link">
-                        <a href="#@areasOfResearch.Last().Value" class="govuk-skip-link options-list" data-module="govuk-skip-link">Skip to end</a>
+                        <a href="#@areasOfResearch.Last().Value" class="govuk-skip-link options-list" data-module="govuk-skip-link" aria-describedby="areas-of-interest-first-skip-to-end-link">Skip to end</a>
                     </div>
                 }
 
@@ -50,6 +51,6 @@
                 </div>
             }
         </div>
-        <a href="#@areasOfResearch.First().Value" class="govuk-skip-link end-of-options" data-module="govuk-skip-link">Skip to the start of the areas of research options list</a>
+        <a href="@(firstItemFragment)" class="govuk-skip-link end-of-options" data-module="govuk-skip-link">Skip to the start of the areas of research options list</a>
     </fieldset>
 </div>
