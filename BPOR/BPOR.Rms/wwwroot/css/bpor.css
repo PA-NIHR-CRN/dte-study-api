@@ -501,6 +501,11 @@
     width: 90%;
 }
 
+.govuk-button.search-button {
+    border-color: #193E72;
+    color: white;
+}
+
 @media (min-width: 960px) {
     .link-column-list-container {
         flex-grow: 0;
