@@ -1,12 +1,12 @@
 ﻿using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
-using BPOR.Rms.Models;
 using HandlebarsDotNet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.Authentication;
 using NIHR.Infrastructure.Authentication.IDG.SCIM;
 using NIHR.Infrastructure.Interfaces;

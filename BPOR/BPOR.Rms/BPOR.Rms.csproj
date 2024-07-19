@@ -19,6 +19,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BPOR.Registration.Stream.Handler\src\BPOR.Registration.Stream.Handler\BPOR.Registration.Stream.Handler.csproj" />
+      <ProjectReference Include="..\NIHR.GOVUK.AspNetCore.MVC\NIHR.GovUk.AspNetCore.Mvc.csproj" />
       <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
       <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
       <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />

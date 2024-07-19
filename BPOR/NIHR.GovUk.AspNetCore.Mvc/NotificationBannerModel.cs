@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NIHR.Infrastructure.AspNetCore;
 
-namespace BPOR.Rms.Models;
+namespace NIHR.GovUk.AspNetCore.Mvc;
 
 public class NotificationBannerModel
 {

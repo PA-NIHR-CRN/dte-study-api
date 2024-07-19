@@ -1,11 +1,8 @@
 ﻿using Contentful.Core.Models;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using NIHR.Infrastructure.AspNetCore;
-using System.Text;
-using System.Text.Encodings.Web;
 
-namespace NIHR.Infrastructure.Extensions
+namespace NIHR.GovUk.AspNetCore.Mvc.ContentManagement
 {
     public class GovUkHeadingRenderer : GovUkBaseRenderer
     {

@@ -1,15 +1,9 @@
-﻿using Amazon.SimpleEmail.Model;
-using Contentful.Core.Models;
+﻿using Contentful.Core.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 
-namespace NIHR.Infrastructure.AspNetCore
+namespace NIHR.GovUk.AspNetCore.Mvc.ContentManagement
 {
     public abstract class GovUkBaseRenderer : IContentRenderer
     {

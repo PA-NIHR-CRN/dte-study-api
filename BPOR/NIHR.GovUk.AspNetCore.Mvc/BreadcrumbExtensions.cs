@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace BPOR.Rms;
+namespace NIHR.GovUk.AspNetCore.Mvc;
 
 public class BreadcrumbItem(string text, string url)
 {

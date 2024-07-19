@@ -2,11 +2,11 @@ using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using Microsoft.AspNetCore.Mvc;
 using BPOR.Rms.Models.Email;
-using BPOR.Rms.Models;
 using NIHR.Infrastructure.Paging;
 using Z.EntityFramework.Plus;
 using Rbec.Postcodes;
 using BPOR.Rms.Startup;
+using NIHR.GovUk.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Controllers;
 

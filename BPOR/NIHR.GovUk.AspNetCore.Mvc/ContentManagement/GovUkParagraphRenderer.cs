@@ -1,14 +1,13 @@
 ﻿using Contentful.Core.Models;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using NIHR.Infrastructure.AspNetCore;
 
-namespace BPOR.Rms.Startup
+namespace NIHR.GovUk.AspNetCore.Mvc.ContentManagement
 {
     public class GovUkParagraphRenderer : GovUkBaseRenderer
     {
 
-        public GovUkParagraphRenderer(ContentRendererCollection rendererCollection):base(rendererCollection)
+        public GovUkParagraphRenderer(ContentRendererCollection rendererCollection) : base(rendererCollection)
         {
         }
 

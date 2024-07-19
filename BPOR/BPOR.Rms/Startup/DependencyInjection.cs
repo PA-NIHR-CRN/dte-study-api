@@ -15,7 +15,6 @@ using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
 using Ganss.Xss;
-using NIHR.Infrastructure.Extensions;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Settings;
 using NIHR.NotificationService.Context;
@@ -30,6 +29,7 @@ using Contentful.AspNetCore;
 using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
+using NIHR.GovUk.AspNetCore.Mvc.ContentManagement;
 
 namespace BPOR.Rms.Startup;
 

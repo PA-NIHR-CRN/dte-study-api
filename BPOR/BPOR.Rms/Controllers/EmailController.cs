@@ -1,11 +1,11 @@
 using System.Text;
 using BPOR.Domain.Entities;
-using BPOR.Rms.Models;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
+using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;

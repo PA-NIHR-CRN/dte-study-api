@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures.Buffers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace BPOR.Rms.TagHelpers
+namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
 {
     public class BreadcrumbsTagHelper : PartialTagHelper
     {
@@ -15,7 +15,7 @@ namespace BPOR.Rms.TagHelpers
         {
             if (string.IsNullOrWhiteSpace(Name))
             {
-                Name = "Partials/_Breadcrumbs";
+                Name = "_Breadcrumbs";
             }
 
             return base.ProcessAsync(context, output);

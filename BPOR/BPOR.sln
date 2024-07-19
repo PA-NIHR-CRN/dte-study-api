@@ -31,7 +31,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{94C3A807
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms.Tests", "BPOR.Rms.Tests\BPOR.Rms.Tests.csproj", "{DB8E1DBE-FBB1-4A1F-B2D6-D75F02898EFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImportGeocodeData", "ImportGeocodeData\ImportGeocodeData.csproj", "{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImportGeocodeData", "ImportGeocodeData\ImportGeocodeData.csproj", "{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.GovUk.AspNetCore.Mvc", "NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj", "{310FC69F-836B-4940-9634-EE74BA4F219C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +93,10 @@ Global
 		{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}.Release|Any CPU.Build.0 = Release|Any CPU
+		{310FC69F-836B-4940-9634-EE74BA4F219C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{310FC69F-836B-4940-9634-EE74BA4F219C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{310FC69F-836B-4940-9634-EE74BA4F219C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{310FC69F-836B-4940-9634-EE74BA4F219C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

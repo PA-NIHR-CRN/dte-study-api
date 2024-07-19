@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Text.Encodings.Web;
 
-namespace BPOR.Rms.TagHelpers
+namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
 {
     public class BackLinkTagHelper(IHtmlGenerator generator) : TagHelper
     {
