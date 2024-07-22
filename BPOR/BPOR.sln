@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms.Tests", "BPOR.Rms.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImportGeocodeData", "ImportGeocodeData\ImportGeocodeData.csproj", "{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.GovUk.AspNetCore.Mvc", "NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj", "{310FC69F-836B-4940-9634-EE74BA4F219C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.GovUk.AspNetCore.Mvc", "NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj", "{310FC69F-836B-4940-9634-EE74BA4F219C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
