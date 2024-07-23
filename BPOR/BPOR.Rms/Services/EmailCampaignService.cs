@@ -236,7 +236,7 @@ public class EmailCampaignService(
             if (reference == null)
             {
                 logger.LogWarning("Reference not found for volunteer {VolunteerId}", volunteer.Id);
-                continue;
+                reference = $"no-study.{emailCampaignParticipant.Id}";
             }
 
             var baseUri = new Uri(callback);
