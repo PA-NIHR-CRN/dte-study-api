@@ -10,13 +10,13 @@ namespace BPOR.Rms.Models.Researcher
         [Display(Name = "Study ID")]
         public int Id { get; set; }
 
-        [Display(Name = "What is the study short name?")]
+        [Display(Name = "What is the study short name?", Order = 1)]
         public string? ShortName { get; set; }
 
-        [Display(Name = "Who is the Chief Investigator for the study?")]
+        [Display(Name = "Who is the Chief Investigator for the study?", Order = 2)]
         public string? ChiefInvestigator { get; set; }
 
-        [Display(Name = "Provide the name(s) of the study sponsor(s), funder(s) and CRO (if applicable)")]
+        [Display(Name = "Provide the name(s) of the study sponsor(s), funder(s) and CRO (if applicable)", Order = 3)]
         public string? StudySponsors { get; set; }
 
         public List<Submitted>? PortfolioSubmissionStatusOptions { get; set; }
