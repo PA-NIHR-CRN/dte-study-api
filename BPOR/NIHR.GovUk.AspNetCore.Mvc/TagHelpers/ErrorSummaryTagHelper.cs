@@ -10,19 +10,19 @@ public class ErrorSummaryTagHelper(IHtmlHelper htmlHelper) : PartialTagHelperBas
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         output.TagName = null;
-        var model = ViewContext.ModelState
+        var modelErrors = ViewContext.ModelState
             .Where(ms => ms.Value.Errors.Count > 0)
             .DistinctBy(x => x.Value.Errors.FirstOrDefault()?.ErrorMessage);
 
         var modelProperties = ViewContext.ViewData.Model?.GetType().GetProperties();
 
         var errors = new List<KeyValuePair<int, KeyValuePair<string, ModelStateEntry>>>();
-        foreach (var keyValuePair in model)
+        foreach (var errorKeyValuePair in modelErrors)
         {
-            var modelProperty = modelProperties?.FirstOrDefault(o => o.Name == keyValuePair.Key);
+            var modelProperty = modelProperties?.FirstOrDefault(o => o.Name == errorKeyValuePair.Key);
             var displayAttribute = modelProperty?.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
             var propertyOrder = displayAttribute?.Order ?? 0;
-            errors.Add(new KeyValuePair<int, KeyValuePair<string, ModelStateEntry>>(propertyOrder, keyValuePair));
+            errors.Add(new(propertyOrder, errorKeyValuePair));
         }
 
         var orderedErrors = errors.OrderBy(o => o.Key)
