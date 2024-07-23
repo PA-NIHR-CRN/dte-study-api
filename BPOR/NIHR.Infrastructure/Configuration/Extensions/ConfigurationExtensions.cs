@@ -6,13 +6,13 @@ using System.Linq;
 using Amazon;
 using Amazon.SecretsManager;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.Configuration;
 using NIHR.Infrastructure.Settings;
 
-namespace NIHR.Infrastructure.Configuration
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ConfigurationExtensions
     {
@@ -154,7 +154,7 @@ IHostEnvironment hostEnvironment)
                 .ValidateOnStart();
 
 
-            return Options.Create(settings);
+            return Options.Options.Create(settings);
         }
 
         private static T BindFlatConfigurationKeys<T>(IConfiguration configuration, string sectionName) where T : class, new()

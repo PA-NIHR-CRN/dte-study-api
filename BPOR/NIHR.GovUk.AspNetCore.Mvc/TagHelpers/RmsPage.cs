@@ -1,4 +1,4 @@
-﻿namespace BPOR.Rms.TagHelpers
+﻿namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
 {
     public class RmsPage
     {

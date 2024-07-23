@@ -22,8 +22,6 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
             {
                 var formId = ViewContext.ViewData["_BackLinkForm"] as string;
 
-
-
                 output.TagName = "button";
                 output.TagMode = TagMode.StartTagAndEndTag;
 

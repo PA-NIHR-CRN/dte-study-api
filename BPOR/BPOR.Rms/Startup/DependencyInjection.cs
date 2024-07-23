@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
-using NIHR.Infrastructure.Configuration;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
@@ -22,14 +21,10 @@ using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
 using NIHR.NotificationService.Settings;
 using Notify.Client;
-using ContentfulService = NIHR.Infrastructure.Services.ContentfulService;
 using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
-using Contentful.Core.Models;
-using Contentful.AspNetCore;
 using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
-using NIHR.GovUk.AspNetCore.Mvc.ContentManagement;
 
 namespace BPOR.Rms.Startup;
 
@@ -54,7 +49,6 @@ public static class DependencyInjection
             });
         });
 
-
         services.AddScoped<IEmailCampaignService, EmailCampaignService>();
         services.AddScoped<IPostcodeMapper, LocationApiClient>();
         services.AddScoped<IRefDataService, RefDataService>();
@@ -62,7 +56,7 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserIdAccessor<int>, SimpleCurrentUserIdAccessor<int>>();
         services.AddScoped<ICurrentUserProvider<User>, CurrentUserProvider<User>>();
         services.AddScoped<IReferenceGenerator, ReferenceGenerator>();
-        services.AddScoped<IContentProvider, ContentfulService>();
+
         services.AddScoped<IEmailService, EmailService>();
         services.GetSectionAndValidate<EmailSettings>(configuration);
 
@@ -74,16 +68,8 @@ public static class DependencyInjection
         services.AddDataProtection();
         services.AddSingleton<HtmlSanitizer>();
         services.AddSingleton<BaseAddressAccessor>();
+        services.AddContentManagement(configuration);
 
-        services.AddContentful(configuration);
-
-        services.AddTransient((c) =>
-        {
-            var renderer = new HtmlRenderer();
-            renderer.AddRenderer(new GovUkHeadingRenderer(renderer.Renderers) { Order = 10 });
-            renderer.AddRenderer(new GovUkParagraphRenderer(renderer.Renderers) { Order = 10 });
-            return renderer;
-        });
 
         var awsSettings = services.GetSectionAndValidate<AwsSecretsManagerSettings>(configuration).Value;
 

@@ -1,14 +1,22 @@
-﻿namespace NIHR.GovUk
+﻿
+namespace NIHR.GovUk
 {
     public class Navigation
     {
         public IList<NavigationItem> Items { get; set; } = [];
 
-        public void Add(string label, Uri uri)
+        public void Add(string? url, string label)
         {
-            Items.Add(new NavigationItem { Label = label, Uri = uri });
+            var item = new NavigationItem { Label = label };
+
+            if (!string.IsNullOrEmpty(url))
+            {
+                item.Uri = new Uri(url, UriKind.RelativeOrAbsolute);
+            }
+
+            Add(item);
         }
-        
+
         public void Add(NavigationItem item)
         {
             Items.Add(item);

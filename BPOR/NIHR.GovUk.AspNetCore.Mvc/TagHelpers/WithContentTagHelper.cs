@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure.Interfaces;
 using System.Text.Encodings.Web;
 
-namespace BPOR.Rms.TagHelpers;
+namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers;
 
 [HtmlTargetElement(Attributes = "with-content")]
 public class WithContentTagHelper(IContentProvider contentProvider, ILogger<WithContentTagHelper> logger) : TagHelper
