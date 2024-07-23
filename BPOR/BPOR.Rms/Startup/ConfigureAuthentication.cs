@@ -23,6 +23,7 @@ public static class ConfigureAuthentication
 
         if (authenticationSettings.Bypass && !hostEnvironment.IsProduction())
         {
+            builder.Services.AddTransient<IUserAccountStore, NullUserAccountStore>();
             return builder;
         }
 
