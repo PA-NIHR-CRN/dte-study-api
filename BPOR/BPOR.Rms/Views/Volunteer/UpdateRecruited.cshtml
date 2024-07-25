@@ -10,46 +10,48 @@
             });
 }
 
-<div style="display: flex;flex-direction: column;gap: 50px;width: 100% ;">
-    <div>
-        <h1 class="govuk-heading-xl govuk-!-margin-bottom-0">Update recruited volunteers</h1>
-        <span class="govuk-caption-xl govuk-!-margin-bottom-0">@Html.DisplayFor(model => model.StudyName)</span>
-    </div>
-
-    <form asp-action="SubmitVolunteerNumbers" asp-controller="Volunteer" method="post">
-        <input asp-for="StudyId" type="hidden" />
-        <input asp-for="StudyName" type="hidden" />
-        <label asp-for="VolunteerReferenceNumbers" class="govuk-label" for="VolunteerReferenceNumbers">
-            @Html.DisplayNameFor(model => model.VolunteerReferenceNumbers)
-        </label>
-
-        <div id="VolunteerReferenceNumbers-hint" class="govuk-hint">
-            Each volunteer will have been given a unique volunteer reference when they were contacted by Be Part of Research.<br><br>
-            Please enter your list of these references into the text area below. Each reference should be on its own line.<br><br>
-            For example,
-            <br>9703 8766 0187 7339
-            <br>2011 0847 7647 6613
-            <br>9670 3897 0359 7499
-            <br>6113 4532 3776 1467
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <div>
+            <h1 class="govuk-heading-xl govuk-!-margin-bottom-0">Update recruited volunteers</h1>
+            <h2 class="govuk-caption-xl govuk-!-margin-bottom-5 govuk-!-margin-top-0">@Html.DisplayFor(model => model.StudyName)</h2>
         </div>
 
-        <div class="govuk-form-group @(Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <div class="govuk-grid-column-one-quarter-from-desktop-no-padding">
-                @if (Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0)
-                {
-                    <span id="VolunteerReferenceNumbers-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.VolunteerReferenceNumbers)
-                    </span>
-                    <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea govuk-textarea--error" aria-describedby="VolunteerReferenceNumbers-hint" aria-errormessage="VolunteerReferenceNumbers-error"></textarea>
-                }
-                else
-                {
-                    <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea" aria-describedby="VolunteerReferenceNumbers-hint"></textarea>
-                }
+        <form asp-action="SubmitVolunteerNumbers" asp-controller="Volunteer" method="post">
+            <input asp-for="StudyId" type="hidden" />
+            <input asp-for="StudyName" type="hidden" />
+            <label asp-for="VolunteerReferenceNumbers" class="govuk-label" for="VolunteerReferenceNumbers">
+                @Html.DisplayNameFor(model => model.VolunteerReferenceNumbers)
+            </label>
+
+            <div id="VolunteerReferenceNumbers-hint" class="govuk-hint">
+                Each volunteer will have been given a unique volunteer reference when they were contacted by Be Part of Research.<br><br>
+                Please enter your list of these references into the text area below. Each reference should be on its own line.<br><br>
+                For example,
+                <br>9703 8766 0187 7339
+                <br>2011 0847 7647 6613
+                <br>9670 3897 0359 7499
+                <br>6113 4532 3776 1467
             </div>
-        </div>
 
-        <button type="submit" class="govuk-button">Submit volunteer numbers</button>
-    </form>
+            <div class="govuk-form-group @(Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <div class="govuk-grid-column-one-half-from-desktop govuk-!-padding-0">
+                    @if (Html.ViewData.ModelState["VolunteerReferenceNumbers"]?.Errors.Count > 0)
+                    {
+                        <span id="VolunteerReferenceNumbers-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @Html.ValidationMessageFor(model => model.VolunteerReferenceNumbers)
+                        </span>
+                        <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea govuk-textarea--error" aria-describedby="VolunteerReferenceNumbers-hint" aria-errormessage="VolunteerReferenceNumbers-error"></textarea>
+                    }
+                    else
+                    {
+                        <textarea asp-for="VolunteerReferenceNumbers" class="govuk-textarea" aria-describedby="VolunteerReferenceNumbers-hint"></textarea>
+                    }
+                </div>
+            </div>
+
+            <button type="submit" class="govuk-button">Submit volunteer numbers</button>
+        </form>
+    </div>
 </div>

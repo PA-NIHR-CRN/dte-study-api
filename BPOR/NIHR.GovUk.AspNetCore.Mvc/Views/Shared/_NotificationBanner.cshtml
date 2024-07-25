@@ -8,26 +8,28 @@
 @{
     var notification = TempData.Get<NotificationBannerModel>("Notification");
 }
+
 @if (notification != null)
 {
-    <div class="govuk-notification-banner @(notification.IsSuccess ? "govuk-notification-banner--success" : "govuk-notification-banner--failure")" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner" id="notification-banner">
+    <div class="govuk-notification-banner @(notification.IsSuccess ? "govuk-notification-banner--success" : "govuk-notification-banner--failure")" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
         <div class="govuk-notification-banner__header">
             <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-                @notification.Heading
+                @notification.Title
             </h2>
         </div>
         <div class="govuk-notification-banner__content">
-            @if (!string.IsNullOrWhiteSpace(notification.Body))
+            @if (notification.Heading is not null)
             {
-                <p class="govuk-notification-banner__heading">@Html.Raw(notification.Body)</p>
+                <h3 class="govuk-notification-banner__heading">
+                    @Html.Raw(notification.Heading)
+                </h3>
             }
-            @if (!string.IsNullOrWhiteSpace(notification.SubBodyText))
+
+            @if (notification.Body is not null || notification.LinkText is not null)
             {
-                <p>@Html.Raw(notification.SubBodyText)</p>
-            }
-            @if (!string.IsNullOrWhiteSpace(notification.LinkText) && !string.IsNullOrWhiteSpace(notification.LinkUrl))
-            {
-                <a class="govuk-notification-banner__link" href="@notification.LinkUrl">@notification.LinkText</a>
+                <p class="govuk-body">
+                    @Html.Raw(notification.Body) <a class="govuk-notification-banner__link" href="@Html.Raw(@notification.LinkUrl)">@notification.LinkText</a>
+                </p>
             }
         </div>
     </div>

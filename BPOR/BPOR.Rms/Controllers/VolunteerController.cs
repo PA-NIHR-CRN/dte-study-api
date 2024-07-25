@@ -112,9 +112,9 @@ public class VolunteerController(ParticipantDbContext context) : Controller
                     this.AddNotification(new NotificationBannerModel
                     {
                         IsSuccess = true,
-                        Heading = "Success",
-                        Body = bodyText,
-                        SubBodyText = totalPreviouslyEnrolled > 0 ? subBodyText : null,
+                        Title = "Success",
+                        Heading = bodyText,
+                        Body = totalPreviouslyEnrolled > 0 ? subBodyText : null,
                         LinkText = "Return to the study details page",
                         LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
                     });
@@ -125,8 +125,8 @@ public class VolunteerController(ParticipantDbContext context) : Controller
                     this.AddNotification(new NotificationBannerModel
                     {
                         IsSuccess = true,
-                        Heading = "Success",
-                        Body = subBodyText,
+                        Title = "Success",
+                        Heading = subBodyText,
                         LinkText = "Return to the study details page",
                         LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
                     });
@@ -177,8 +177,8 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         this.AddNotification(new NotificationBannerModel
         {
             IsSuccess = true,
-            Heading = "Success",
-            Body = $" {model.RecruitmentTotal} volunteer(s) recorded as recruited.",
+            Title = "Success",
+            Heading = $"{model.RecruitmentTotal} volunteer(s) recorded as recruited.",
             LinkText = "Return to study details page",
             LinkUrl = Url.ActionLink("Details", "Study", new { id = model.StudyId })
         });

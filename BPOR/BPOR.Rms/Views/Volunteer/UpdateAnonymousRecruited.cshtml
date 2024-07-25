@@ -4,56 +4,58 @@
     ViewData["Title"] = "Update recruited volunteers";
 
     ViewData.AddBreadcrumbs(new Dictionary<string, string>
-    {
-        ["All studies"] = "/Study/Index",
-        ["Study"] = $"/Study/Details/{Model.StudyId}",
-        ["Update recruited volunteers"] = "/Study/Edit",
-    });
+            {
+                ["All studies"] = "/Study/Index",
+                ["Study"] = $"/Study/Details/{Model.StudyId}",
+                ["Update recruited volunteers"] = "/Study/Edit",
+            });
 }
 
-<div style="display: flex;flex-direction: column;gap: 50px;width: 100% ;">
-    <div>
-        <h1 class="govuk-heading-xl govuk-!-margin-bottom-0">Update recruited volunteers</h1>
-        <span class="govuk-caption-xl govuk-!-margin-bottom-0">@Html.DisplayFor(model => model.StudyName)</span>
-    </div>
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <div>
+            <h1 class="govuk-heading-xl govuk-!-margin-bottom-0">Update recruited volunteers</h1>
+            <h2 class="govuk-caption-xl govuk-!-margin-bottom-5 govuk-!-margin-top-0">@Html.DisplayFor(model => model.StudyName)</h2>
+        </div>
 
 
-    <h2 class="govuk-heading-m govuk-!-margin-bottom-4 govuk-!-margin-top-0">
-        Recruited (@Model.LatestRecruitmentTotal)
-    </h2>
+        <h3 class="govuk-heading-m govuk-!-margin-bottom-4 govuk-!-margin-top-0">
+            Recruited (@Model.LatestRecruitmentTotal)
+        </h3>
 
 
-    <partial name="Partials/_RecruitedTable", for="EnrollmentDetails"/>
-    <form asp-action="UpdateRecruitmentTotal" asp-controller="Volunteer" method="post">
+        <partial name="Partials/_RecruitedTable" , for="EnrollmentDetails" />
+        <form asp-action="UpdateRecruitmentTotal" asp-controller="Volunteer" method="post">
 
-        <div class="govuk-form-group @(Html.ViewData.ModelState["RecruitmentTotal"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <input asp-for="StudyId" type="hidden"/>
-            <input asp-for="StudyName" type="hidden"/>
-            <label asp-for="RecruitmentTotal" class="govuk-label" for="RecruitmentTotal">
-                @Html.DisplayNameFor(model => model.RecruitmentTotal)
-            </label>
-            <div id="RecruitmentTotal-hint" class="govuk-hint">
-                Enter the total number of Be Part of Research volunteers recruited to date
-            </div>
-            <div class="govuk-grid-column-one-quarter-from-desktop">
-                <div class="govuk-grid-row">
-                    @if (Html.ViewData.ModelState["RecruitmentTotal"]?.Errors.Count > 0)
-                    {
-                        <span id="RecruitmentTotal-error" class="govuk-error-message">
-                            <span class="govuk-visually-hidden">Error:</span>
-                            @Html.ValidationMessageFor(model => model.RecruitmentTotal)
-                        </span>
-                        <input asp-for="RecruitmentTotal" class="govuk-input govuk-input govuk-input--error" id="RecruitmentTotal" aria-describedby="RecruitmentTotal-hint" aria-errormessage="RecruitmentTotal-error" value="@(Model.RecruitmentTotal)" type="text" />
-                    }
-                    else
-                    {
-                        <input asp-for="RecruitmentTotal" class="govuk-input" id="RecruitmentTotal" value="@(Model.RecruitmentTotal)" aria-describedby="RecruitmentTotal-hint" type="text" />
-                    }
+            <div class="govuk-form-group @(Html.ViewData.ModelState["RecruitmentTotal"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <input asp-for="StudyId" type="hidden" />
+                <input asp-for="StudyName" type="hidden" />
+                <label asp-for="RecruitmentTotal" class="govuk-label" for="RecruitmentTotal">
+                    @Html.DisplayNameFor(model => model.RecruitmentTotal)
+                </label>
+                <div id="RecruitmentTotal-hint" class="govuk-hint">
+                    Enter the total number of Be Part of Research volunteers recruited to date
+                </div>
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-grid-row">
+                        @if (Html.ViewData.ModelState["RecruitmentTotal"]?.Errors.Count > 0)
+                        {
+                            <span id="RecruitmentTotal-error" class="govuk-error-message">
+                                <span class="govuk-visually-hidden">Error:</span>
+                                @Html.ValidationMessageFor(model => model.RecruitmentTotal)
+                            </span>
+                            <input asp-for="RecruitmentTotal" class="govuk-input govuk-input govuk-input--error" id="RecruitmentTotal" aria-describedby="RecruitmentTotal-hint" aria-errormessage="RecruitmentTotal-error" value="@(Model.RecruitmentTotal)" type="text" />
+                        }
+                        else
+                        {
+                            <input asp-for="RecruitmentTotal" class="govuk-input" id="RecruitmentTotal" value="@(Model.RecruitmentTotal)" aria-describedby="RecruitmentTotal-hint" type="text" />
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
-        <button type="submit" class="govuk-button">
-            Update recruitment total
-        </button>
-    </form>
+            <button type="submit" class="govuk-button">
+                Update recruitment total
+            </button>
+        </form>
+    </div>
 </div>

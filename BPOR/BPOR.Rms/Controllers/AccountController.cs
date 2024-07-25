@@ -162,10 +162,9 @@ namespace BPOR.Rms.Controllers
 
             this.AddNotification(new NotificationBannerModel
             {
-                Heading = "Email verification error",
-                Body = "There was a problem with your email verification code.",
-                IsSuccess = false,
-                SubBodyText = "You can try to resend the email below."
+                Title = "Email verification error",
+                Heading = "There was a problem with your email verification code.",
+                Body = "You can try to resend the email below."
             });
 
             return RedirectToAction(nameof(Create));
@@ -201,10 +200,9 @@ namespace BPOR.Rms.Controllers
 
             this.AddNotification(new NotificationBannerModel
             {
-                Heading = "Email verification error",
-                Body = "There was a problem with your email verification code.",
-                IsSuccess = false,
-                SubBodyText = "You can try to resend the email below."
+                Title = "Email verification error",
+                Heading = "There was a problem with your email verification code.",
+                Body = "You can try to resend the email below."
             });
 
             return RedirectToAction(nameof(Create));
@@ -225,10 +223,9 @@ namespace BPOR.Rms.Controllers
                     {
                         this.AddNotification(new NotificationBannerModel
                         {
-                            Heading = "Account already exists",
-                            Body = "An account already exists for your email address",
-                            IsSuccess = false,
-                            SubBodyText = "Sign in from the RMS homepage"
+                            Title = "Account already exists",
+                            Heading = "An account already exists for your email address",
+                            Body = "Sign in from the RMS homepage"
                         });
 
                         return View(model);
@@ -244,9 +241,8 @@ namespace BPOR.Rms.Controllers
                     {
                         this.AddNotification(new NotificationBannerModel
                         {
+                            Title = "Unable to create user account",
                             Heading = "Unable to create user account",
-                            Body = "Unable to create user account",
-                            IsSuccess = false,
                         });
                     }
                 }
@@ -258,10 +254,9 @@ namespace BPOR.Rms.Controllers
 
                 this.AddNotification(new NotificationBannerModel
                 {
-                    Heading = "Email verification error",
-                    Body = "There was a problem with your email verification code.",
-                    IsSuccess = false,
-                    SubBodyText = "You can try to resend the email below."
+                    Title = "Email verification error",
+                    Heading = "There was a problem with your email verification code.",
+                    Body = "You can try to resend the email below."
                 });
 
                 return RedirectToAction(nameof(Create));
