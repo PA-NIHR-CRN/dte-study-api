@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService.Settings;
 using LuhnNet;
+using NetTopologySuite.Index.IntervalRTree;
 using static System.Int32;
 
 namespace BPOR.Rms.Controllers;
@@ -20,6 +21,8 @@ public class NotifyCallbackController(
     IOptions<NotificationServiceSettings> settings,
     IRefDataService refDataService,
     IEncryptionService encryptionService,
+    ILogger<NotifyCallbackController> logger,
+    IOptions<RmsSettings> rmsSettings,
     TimeProvider timeProvider
 ) : ControllerBase
 {
@@ -85,19 +88,29 @@ public class NotifyCallbackController(
             return BadRequest("Invalid reference.");
         }
 
-        var participant = await context.EmailCampaignParticipants
-            .Where(p => p.Id == emailCampaignParticipantId && p.RegisteredInterestAt == null)
-            .FirstOrDefaultAsync(cancellationToken);
+        var participantQuery = context.EmailCampaignParticipants
+            .Where(p => p.Id == emailCampaignParticipantId);
 
-        if (participant == null)
+        var participant = await participantQuery.FirstOrDefaultAsync(o => o.RegisteredInterestAt == null, cancellationToken);
+        if (participant is null)
         {
-            return NotFound();
+            return Ok();
         }
-
         participant.RegisteredInterestAt = timeProvider.GetLocalNow().DateTime;
         await context.SaveChangesAsync(cancellationToken);
 
-        return Ok();
+        var informationUrl = await participantQuery.Where(p => p.Id == emailCampaignParticipantId)
+            .Select(o => o.EmailCampaign.FilterCriteria.Study.InformationUrl)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(informationUrl) && Uri.IsWellFormedUriString(informationUrl, UriKind.Absolute))
+        {
+            return Redirect(informationUrl);
+        }
+        
+        logger.LogWarning("Information Url is empty or malformed: {informationUrl}", informationUrl);
+        return Redirect(rmsSettings.Value.StudyInformationFallbackUrl);
+
     }
 }
 

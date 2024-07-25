@@ -103,6 +103,7 @@ public static class Projections
                 TargetPopulation = s.TargetPopulation,
                 RecruitmentStartDate =  GovUkDate.FromDateTime(s.RecruitmentStartDate).ToDateOnly(),
                 RecruitmentEndDate =  GovUkDate.FromDateTime(s.RecruitmentEndDate).ToDateOnly(),
+                InformationUrl = s.InformationUrl,
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 

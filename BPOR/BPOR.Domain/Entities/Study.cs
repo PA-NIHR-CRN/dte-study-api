@@ -29,6 +29,7 @@ public class Study : ISoftDelete, IAudit
     public int? SubmittedId { get; set; }
     public Submitted? Submitted { get; set; }
     public SubmissionOutcome? SubmissionOutcome { get; set; }
+    public string? InformationUrl { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
