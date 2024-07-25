@@ -19,17 +19,17 @@ public class SetupCampaignViewModel
     public int FilterCriteriaId { get; set; }
 
 
-    [DisplayName("Select email template")]
+    [Display(Name = "Select email template", Order = 1)]
     public string? SelectedTemplateId { get; set; }
     public TemplateList EmailTemplates { get; set; } = new ();
 
 
-    [DisplayName("How many volunteers do you want to send it to?")]
+    [Display(Name = "How many volunteers do you want to send it to?", Order = 3)]
     [Range(1, int.MaxValue, ErrorMessage = "Total Volunteers must be at least 1.")]
     public int? TotalVolunteers { get; set; }
 
 
-    [DisplayName("Preview email")]
+    [Display(Name ="Preview email", Order = 2)]
     public string? PreviewEmails { get; set; }
     
     public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries)?.Select(x=>x.Trim()) ?? Enumerable.Empty<string>();

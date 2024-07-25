@@ -18,7 +18,7 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     public bool ShowRecruitedFilter { get; set; }
 
-    [Display(Name = "Volunteers contacted")]
+    [Display(Name = "Volunteers contacted", Order = 1)]
     public bool? SelectedVolunteersContacted { get; set; }
     public IEnumerable<SelectListItem> VolunteersContactedItems { get; set; } = SetVolunteersContactedItems();
 
@@ -34,7 +34,7 @@ public class VolunteerFilterViewModel : IValidatableObject
         return items;
     }
 
-    [Display(Name = "Volunteers recruited")]
+    [Display(Name = "Volunteers recruited", Order = 3)]
     public bool? SelectedVolunteersRecruited { get; set; }
     public IEnumerable<SelectListItem> VolunteersRecruitedItems { get; set; } = SetVolunteersRecruitedItems();
 
@@ -50,7 +50,7 @@ public class VolunteerFilterViewModel : IValidatableObject
         return items;
     }
 
-    [Display(Name = "Volunteers registered interest")]
+    [Display(Name = "Volunteers registered interest", Order = 2)]
     public bool? SelectedVolunteersRegisteredInterest { get; set; }
     public IEnumerable<SelectListItem> VolunteersRegisteredInterestItems { get; set; } = SetVolunteersRegisteredInterestItems();
 
@@ -66,7 +66,7 @@ public class VolunteerFilterViewModel : IValidatableObject
         return items;
     }
 
-    [Display(Name = "Volunteers completed registration")]
+    [Display(Name = "Volunteers completed registration", Order = 4)]
     public bool? SelectedVolunteersCompletedRegistration { get; set; }
     public IEnumerable<SelectListItem> VolunteersCompletedRegistrationItems { get; set; } = SetVolunteersCompletedRegistrationItems();
 
@@ -88,41 +88,41 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     public bool IncludeNoAreasOfInterest { get; set; }
 
-    [Display(Name = "Date of volunteer registration (from)")]
+    [Display(Name = "Date of volunteer registration (from)", Order = 5)]
     public GovUkDate RegistrationFromDate { get; set; } = new();
 
-    [Display(Name = "Date of volunteer registration (to)")]
+    [Display(Name = "Date of volunteer registration (to)", Order = 6)]
     public GovUkDate RegistrationToDate { get; set; } = new();
 
     public PostcodeSearchModel PostcodeSearch { get; set; } = new();
 
 
     // Demographic information
-    [Display(Name = "Age range", Description = "Please specify the age range you wish to filter. The minimum starting age is 18.")]
+    [Display(Name = "Age range", Description = "Please specify the age range you wish to filter. The minimum starting age is 18.", Order = 8)]
     public AgeRange AgeRange { get; set; } = new();
 
 
-    [Display(Name = "Male")]
+    [Display(Name = "Male", Order = 9)]
     public bool IsSexMale { get; set; }
 
-    [Display(Name = "Female")]
+    [Display(Name = "Female", Order = 10)]
     public bool IsSexFemale { get; set; }
 
-    [Display(Name = "Yes")]
+    [Display(Name = "Yes", Order = 11)]
     public bool IsGenderSameAsSexRegisteredAtBirth_Yes { get; set; }
-    [Display(Name = "No")]
+    [Display(Name = "No", Order = 12)]
     public bool IsGenderSameAsSexRegisteredAtBirth_No { get; set; }
-    [Display(Name = "Prefer Not To Say")]
+    [Display(Name = "Prefer Not To Say", Order = 13)]
     public bool IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay { get; set; }
-    [Display(Name = "Asian")]
+    [Display(Name = "Asian", Order = 14)]
     public bool Ethnicity_Asian { get; set; }
-    [Display(Name = "Black")]
+    [Display(Name = "Black", Order = 15)]
     public bool Ethnicity_Black { get; set; }
-    [Display(Name = "Mixed")]
+    [Display(Name = "Mixed", Order = 16)]
     public bool Ethnicity_Mixed { get; set; }
-    [Display(Name = "Other")]
+    [Display(Name = "Other", Order = 17)]
     public bool Ethnicity_Other { get; set; }
-    [Display(Name = "White")]
+    [Display(Name = "White", Order = 18)]
     public bool Ethnicity_White { get; set; }
     public int? VolunteerCount { get; set; }
 
