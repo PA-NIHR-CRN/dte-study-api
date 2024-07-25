@@ -1,9 +1,12 @@
 using System.Text;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Email;
+using BPOR.Rms.Services;
+using HandlebarsDotNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.Interfaces;
@@ -21,8 +24,9 @@ public class EmailController(
     ILogger<EmailController> logger,
     IRmsTaskQueue taskQueue,
     IEncryptionService encryptionService,
-    IHostEnvironment hostEnvironment,
-    LinkGenerator linkGenerator
+    LinkGenerator linkGenerator,
+    ITransactionalEmailService transactionalEmailService,
+    IOptions<RmsSettings> rmsOptions
 )
     : Controller
 {
@@ -75,6 +79,28 @@ public class EmailController(
 
             await taskQueue.QueueBackgroundWorkItemAsync(emailCampaign.Id, callback, cancellationToken);
 
+            var studyInfo = await context.Studies
+                                    .Where(x => x.Id == model.StudyId)
+                                    .Select(x => new { x.StudyName, x.EmailAddress })
+                                    .FirstOrDefaultAsync(cancellationToken);
+
+            if (studyInfo is not null)
+            {
+                IEnumerable<string> notificationRecipients = [rmsOptions.Value.CampaignNotificationEmailAddress, studyInfo.EmailAddress];
+
+                foreach (var recipient in notificationRecipients)
+                {
+                    if (string.IsNullOrWhiteSpace(recipient))
+                    {
+                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', email campaign ({emailCampaignId}).", model.StudyId, model.StudyName, emailCampaign.Id);
+
+                        continue;
+                    }
+
+                    await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
+                }
+            }
+
             return View("EmailSuccess",
                 new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });
         }
@@ -85,27 +111,27 @@ public class EmailController(
 
     private async Task PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false,
     CancellationToken cancellationToken = default)
-{
-    model.EmailTemplates = await FetchEmailTemplates(forceRefresh, cancellationToken);
-    
-    if (model.StudyId is not null)
     {
-        var studyData = await context.Studies
-            .Where(s => s.Id == model.StudyId)
-            .Select(s => new 
-            {
-                s.StudyName,
-                s.EmailAddress
-            })
-            .FirstOrDefaultAsync(cancellationToken);
+        model.EmailTemplates = await FetchEmailTemplates(forceRefresh, cancellationToken);
 
-        if (studyData != null)
+        if (model.StudyId is not null)
         {
-            model.StudyName = studyData.StudyName;
-            model.EmailAddress = studyData.EmailAddress;
+            var studyData = await context.Studies
+                .Where(s => s.Id == model.StudyId)
+                .Select(s => new
+                {
+                    s.StudyName,
+                    s.EmailAddress
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (studyData != null)
+            {
+                model.StudyName = studyData.StudyName;
+                model.EmailAddress = studyData.EmailAddress;
+            }
         }
     }
-}
 
     [HttpPost]
     public async Task<IActionResult> SendPreviewEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
@@ -167,7 +193,6 @@ public class EmailController(
                     return View(nameof(SetupCampaign), model);
                 }
             }
-
 
             this.AddSuccessNotification(
                 $"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");

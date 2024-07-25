@@ -1,6 +1,8 @@
 ﻿@using Microsoft.Extensions.Hosting
 @using Microsoft.Extensions.Options
+@using NIHR.Infrastructure.Settings
 @inject IOptions<DevelopmentSettings> developmentSettings
+@inject IOptions<AuthenticationSettings> authenticationSettings
 
 @{
     ViewData["Title"] = "Signed out";
@@ -26,7 +28,7 @@
 </div>
 
 <environment exclude="Production">
-@if (developmentSettings.Value.EnableUnauthenticatedTestFeatures)
+@if (developmentSettings.Value.EnableUnauthenticatedTestFeatures && !authenticationSettings.Value.Bypass)
 {
     <div class="govuk-grid-row testing-only govuk-!-margin-top-9">
         <div class="govuk-grid-column-one-half">

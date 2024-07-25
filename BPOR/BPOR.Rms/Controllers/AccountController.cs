@@ -1,6 +1,5 @@
 ﻿using BPOR.Domain.Entities;
-using BPOR.Domain.Entities.Configuration;
-using HandlebarsDotNet;
+using BPOR.Rms.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
@@ -9,35 +8,14 @@ using Microsoft.Extensions.Options;
 using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.Authentication;
 using NIHR.Infrastructure.Authentication.IDG.SCIM;
-using NIHR.Infrastructure.Interfaces;
 using System.Security.Cryptography;
 
 namespace BPOR.Rms.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController(ParticipantDbContext dbContext, IDataProtectionProvider dataProtectionProvider, ILogger<AccountController> logger, IHostEnvironment hostEnvironment, LinkGenerator linkGenerator, IUserAccountStore userAccountStore, IOptions<DevelopmentSettings> developmentSettings, ITransactionalEmailService transactionalEmailService) : Controller
     {
-        private ITimeLimitedDataProtector _dataProtector;
-        private readonly ParticipantDbContext _dbContext;
-        private readonly ILogger<AccountController> _logger;
-        private readonly IEmailService _emailService;
-        private readonly IHostEnvironment _hostEnvironment;
-        private readonly IContentProvider _contentProvider;
-        private readonly LinkGenerator _linkGenerator;
-        private readonly IUserAccountStore _userAccountStore;
-        private readonly DevelopmentSettings _developmentSettings;
-
-        public AccountController(ParticipantDbContext dbContext, IDataProtectionProvider dataProtectionProvider, ILogger<AccountController> logger, IEmailService emailService, IHostEnvironment hostEnvironment, IContentProvider contentProvider, LinkGenerator linkGenerator, IUserAccountStore userAccountStore, IOptions<DevelopmentSettings> developmentSettings)
-        {
-            _dataProtector = dataProtectionProvider.CreateProtector("CreateAccountEmailLink").ToTimeLimitedDataProtector();
-            _dbContext = dbContext;
-            _logger = logger;
-            _emailService = emailService;
-            _hostEnvironment = hostEnvironment;
-            _contentProvider = contentProvider;
-            _linkGenerator = linkGenerator;
-            _userAccountStore = userAccountStore;
-            _developmentSettings = developmentSettings.Value;
-        }
+        private readonly ITimeLimitedDataProtector _dataProtector = dataProtectionProvider.CreateProtector("CreateAccountEmailLink").ToTimeLimitedDataProtector();
+        private readonly DevelopmentSettings _developmentSettings = developmentSettings.Value;
 
         [AllowAnonymous]
         public IActionResult AccessDenied()
@@ -86,17 +64,15 @@ namespace BPOR.Rms.Controllers
                 await Task.Delay(1000); // TODO: Rate limit email sending to avoid abuse.
                 var code = _dataProtector.Protect(createAccountModel.Email, TimeSpan.FromHours(24));
 
-                var link = _linkGenerator.GetUriByName(HttpContext, nameof(VerifyEmailAsync), new { code });
+                var link = linkGenerator.GetUriByName(HttpContext, nameof(VerifyEmailAsync), new { code });
 
-                var emailKey = await HasAccount(createAccountModel.Email, token)
+                var emailTemplateKey = await HasAccount(createAccountModel.Email, token)
                     ? "email-rms-registration-attempt"
                     : "email-rms-new-registration";
 
-                var emailContent = await GetEmailContent(emailKey, new { recipientEmail = createAccountModel.Email, link }, token);
+                var emailContent = await transactionalEmailService.SendAsync(createAccountModel.Email, emailTemplateKey, new { recipientEmail = createAccountModel.Email, link }, token);
 
-                await _emailService.SendEmailAsync(createAccountModel.Email, emailContent.EmailSubject, emailContent.EmailBody, token);
-
-                if (!_hostEnvironment.IsProduction() && _developmentSettings.EnableUnauthenticatedTestFeatures)
+                if (!hostEnvironment.IsProduction() && _developmentSettings.EnableUnauthenticatedTestFeatures)
                 {
                     ViewData["email-to"] = createAccountModel.Email;
                     ViewData["email-subject"] = emailContent.EmailSubject;
@@ -112,27 +88,6 @@ namespace BPOR.Rms.Controllers
             }
         }
 
-        private async Task<EmailTemplate> GetEmailContent<TData>(string templateName, TData data, CancellationToken token)
-        {
-            var source = await _contentProvider.GetContentAsync<EmailTemplate>(templateName, token);
-
-            if (!string.IsNullOrWhiteSpace(source.EmailBody))
-            {
-                var template = Handlebars.Compile(source.EmailBody);
-
-
-                source.EmailBody = Dte.Common.Content.CustomMessageEmail.GetCustomMessageHtml().Replace("###BODY_REPLACE###", template(data));
-            }
-
-            if (!string.IsNullOrWhiteSpace(source.EmailSubject))
-            {
-                var template = Handlebars.Compile(source.EmailSubject);
-                source.EmailSubject = template(data);
-            }
-
-            return source;
-        }
-
         [AllowAnonymous]
         [HttpGet]
         [Route("[controller]/verifyemail", Name = nameof(VerifyEmailAsync))]
@@ -145,7 +100,7 @@ namespace BPOR.Rms.Controllers
                 if (await HasAccount(email, token))
                 {
                     // Sign in
-                    var homeUrl = _linkGenerator.GetUriByAction(HttpContext, nameof(HomeController.Index), "Home") + "?sign-in";
+                    var homeUrl = linkGenerator.GetUriByAction(HttpContext, nameof(HomeController.Index), "Home") + "?sign-in";
                     return Redirect(homeUrl);
                 }
                 else
@@ -157,7 +112,7 @@ namespace BPOR.Rms.Controllers
             catch (CryptographicException ex)
             {
                 // Code is invalid or has expired.
-                _logger.LogWarning(ex, ex?.Message);
+                logger.LogWarning(ex, ex?.Message);
             }
 
             this.AddNotification(new NotificationBannerModel
@@ -172,11 +127,11 @@ namespace BPOR.Rms.Controllers
 
         private async Task<bool> HasAccount(string email, CancellationToken token)
         {
-            var hasAccount = await _dbContext.User
+            var hasAccount = await dbContext.User
                                 .IgnoreQueryFilters() // check for active and deleted accounts.
                                 .AnyAsync(x => x.ContactEmail == email, token);
 
-            hasAccount = hasAccount || await _userAccountStore.UserWithEmailExistsAsync(email, token);
+            hasAccount = hasAccount || await userAccountStore.UserWithEmailExistsAsync(email, token);
             return hasAccount;
         }
 
@@ -195,7 +150,7 @@ namespace BPOR.Rms.Controllers
             catch (CryptographicException ex)
             {
                 // Code is invalid or has expired.
-                _logger.LogWarning(ex, ex?.Message);
+                logger.LogWarning(ex, ex?.Message);
             }
 
             this.AddNotification(new NotificationBannerModel
@@ -231,7 +186,7 @@ namespace BPOR.Rms.Controllers
                         return View(model);
                     }
 
-                    var userId = await _userAccountStore.CreateNewUserAsync(email, model.FirstName, model.LastName, model.Password, token);
+                    var userId = await userAccountStore.CreateNewUserAsync(email, model.FirstName, model.LastName, model.Password, token);
 
                     if (!string.IsNullOrWhiteSpace(userId))
                     {
@@ -250,7 +205,7 @@ namespace BPOR.Rms.Controllers
             catch (CryptographicException ex)
             {
                 // Code is invalid or has expired.
-                _logger.LogWarning(ex, ex?.Message);
+                logger.LogWarning(ex, ex?.Message);
 
                 this.AddNotification(new NotificationBannerModel
                 {
@@ -261,7 +216,7 @@ namespace BPOR.Rms.Controllers
 
                 return RedirectToAction(nameof(Create));
             }
-            catch(PasswordPolicyException ex)
+            catch (PasswordPolicyException ex)
             {
                 ModelState.AddModelError(nameof(GatherAccountInformationModel.Password), ex.Message);
             }
