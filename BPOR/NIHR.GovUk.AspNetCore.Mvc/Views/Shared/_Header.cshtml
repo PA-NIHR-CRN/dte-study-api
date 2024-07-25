@@ -1,7 +1,5 @@
-@{
-    var serviceName = ViewData["ServiceName"] as string;
-    var hasServiceName = !string.IsNullOrWhiteSpace(serviceName);
-}
+@inject GovUkOptions options
+
 <header class="govuk-header" data-module="govuk-header">
     <div class="govuk-header__container govuk-width-container">
         <div class="govuk-header__logo">
@@ -20,10 +18,10 @@
             </a>
         </div>
         <div class="govuk-header__content">
-            @if (hasServiceName)
+            @if (options.HasServiceName())
             {
                 <a href="#" class="govuk-header__link govuk-header__service-name">
-                    @serviceName
+                    @options.ServiceName
                 </a>
             }
             <navigation />

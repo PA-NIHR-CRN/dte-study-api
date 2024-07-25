@@ -1,6 +1,7 @@
 ﻿using Contentful.AspNetCore;
 using Contentful.Core.Models;
 using Microsoft.Extensions.Configuration;
+using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.GovUk.AspNetCore.Mvc.ContentManagement;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Services;
@@ -20,6 +21,19 @@ namespace Microsoft.Extensions.DependencyInjection
                 renderer.AddRenderer(new GovUkHeadingRenderer(renderer.Renderers) { Order = 10 });
                 renderer.AddRenderer(new GovUkParagraphRenderer(renderer.Renderers) { Order = 10 });
                 return renderer;
+            });
+
+            return services;
+        }
+
+        public static IServiceCollection AddGovUk(this IServiceCollection services, Action<GovUkOptions> configureOptions)
+        {
+
+            services.AddTransient(_ =>
+            {
+                var options = new GovUkOptions();
+                configureOptions(options);
+                return options;
             });
 
             return services;
