@@ -12,9 +12,10 @@ namespace BPOR.Rms.Models.Filter
 {
     public class PostcodeSearchModel : IValidatableObject
     {
-        [Display(Name = "Postcode districts", Description = "Enter one or more postcode districts separated by commas.\r\nFor example: SW1A, WC2B, EC1V.")]
+        [Display(Name = "Postcode districts", Description = "Enter one or more postcode districts separated by commas.\r\nFor example: SW1A, WC2B, EC1V.", Order = 1)]
         public string? PostcodeDistricts { get; set; }
 
+        [Display(Order = 2)]
         public PostcodeRadiusSearchModel PostcodeRadiusSearch { get; set; } = new();
 
         public ISet<string> GetPostcodeDistricts() => PostcodeDistricts?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet() ?? [];
@@ -45,14 +46,14 @@ namespace BPOR.Rms.Models.Filter
 
     public class PostcodeRadiusSearchModel : IValidatableObject
     {
-        [Display(Name = "Full postcode", Description = "For example: EC1A 1BB.")]
+        [Display(Name = "Full postcode", Description = "For example: EC1A 1BB.", Order = 1)]
 
         public Postcode? FullPostcode { get; set; }
 
         [LookupLocation(From = nameof(FullPostcode))]
         public Point? Location { get; set; }
 
-        [Display(Name = "Radius", Description = "Indicate the radius, in miles, for searching volunteers based on the provided full postcode.")]
+        [Display(Name = "Radius", Description = "Indicate the radius, in miles, for searching volunteers based on the provided full postcode.", Order = 2)]
         [IntegerOrDecimal(ErrorMessage = "Enter a whole number or a positive number with one decimal place, like 8 or 1.3", RequiredIfNotNull = nameof(FullPostcode))]
         public double? SearchRadiusMiles { get; set; }
 

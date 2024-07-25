@@ -56,8 +56,6 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
                 modelNames.AddRange(ViewContext.ViewData.ModelState.Where(x => x.Key.StartsWith(childPrefix)).Select(x => x.Key));
             }
 
-
-
             var modelState = ViewContext.ViewData.ModelState.Where(x => modelNames.Contains(x.Key));
 
             if (modelState?.Where(x => x.Value?.Errors.Count > 0).Any() ?? false)
@@ -82,11 +80,11 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
                 output.PreContent.AppendHtml(hintBuilder);
             }
 
-            foreach (var name in modelNames)
+            if (!ViewContext.ViewData.ModelState.IsValid)
             {
-                if (ViewContext.ViewData.ModelState[name]?.Errors.Count > 0)
+                foreach (var error in ViewContext.Errors().Where(x => modelNames.Contains(x.Key)))
                 {
-                    var validationMessage = _generator.GenerateValidationMessage(ViewContext, For.ModelExplorer, name, null, null, null);
+                    var validationMessage = _generator.GenerateValidationMessage(ViewContext, For.ModelExplorer, error.Key, null, null, null);
 
                     output.PreContent.AppendHtml($"""
                     <span class="govuk-error-message">
