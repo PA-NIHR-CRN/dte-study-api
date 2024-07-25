@@ -10,25 +10,6 @@ using NIHR.Infrastructure;
 using NIHR.Infrastructure.Settings;
 using System.Security.Claims;
 
-public class BaseAddressAccessor
-{
-    private bool isSet = false;
-
-    public string Scheme { get; private set; }
-    public HostString Host { get; private set; }
-    public PathString PathBase { get; private set; }
-
-    public void SetBaseAddress(string scheme, HostString host, PathString pathBase)
-    {
-        if (!isSet)
-        {
-            Scheme = scheme;
-            Host = host;
-            PathBase = pathBase;
-            isSet = true;
-        }
-    }
-}
 public class IdgAuthenticationMiddleware
 {
     private const string AccountNotRegisteredPath = "/Account/NotRegistered";
@@ -40,7 +21,7 @@ public class IdgAuthenticationMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context, ParticipantDbContext dbContext, ICurrentUserIdAccessor<int> currentUserIdAccessor, ICurrentUserProvider<User> userProvider, IOptions<AuthenticationSettings> authenticationOptions, BaseAddressAccessor baseAddressAccessor)
+    public async Task InvokeAsync(HttpContext context, ParticipantDbContext dbContext, ICurrentUserIdAccessor<int> currentUserIdAccessor, ICurrentUserProvider<User> userProvider, IOptions<AuthenticationSettings> authenticationOptions)
     {
         ArgumentNullException.ThrowIfNull(context);
 
@@ -48,18 +29,19 @@ public class IdgAuthenticationMiddleware
 
         ArgumentNullException.ThrowIfNull(currentUserIdAccessor);
 
-        baseAddressAccessor.SetBaseAddress(context.Request.Scheme, context.Request.Host, context.Request.PathBase);
-
         if (context.Request.Query.ContainsKey("sign-out"))
         {
-            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            if (!authenticationOptions.Value.Bypass)
+            {
+                await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
             // Logout functionality will not log the user out of IDG; similar to other IDG apps in the NIHR, you will still be logged in to other tools pending session expiry
             // await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
 
             context.Response.Redirect("/Account/SignedOut");
         }
 
-        if (context.Request.Query.ContainsKey("idg-sign-out"))
+        if (!authenticationOptions.Value.Bypass && context.Request.Query.ContainsKey("idg-sign-out"))
         {
             // Logout functionality will not log the user out of IDG; similar to other IDG apps in the NIHR, you will still be logged in to other tools pending session expiry
             await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);

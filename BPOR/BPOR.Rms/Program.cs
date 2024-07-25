@@ -1,7 +1,6 @@
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authorization;
-using NIHR.Infrastructure.Configuration;
 
 var builder = WebApplication
     .CreateBuilder(args);
