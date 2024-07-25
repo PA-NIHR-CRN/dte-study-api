@@ -29,6 +29,8 @@ public class Study : ISoftDelete, IAudit
     public int? SubmittedId { get; set; }
     public Submitted? Submitted { get; set; }
     public SubmissionOutcome? SubmissionOutcome { get; set; }
+
+    [MaxLength(2048)]
     public string? InformationUrl { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
