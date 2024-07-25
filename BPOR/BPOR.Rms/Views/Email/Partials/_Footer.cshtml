@@ -1,7 +1,8 @@
 @using BPOR.Rms.Startup
 @using BPOR.Domain.Entities
+@using Microsoft.Extensions.Options
 @model BPOR.Rms.Models.Email.SetupCampaignViewModel
-@inject ICurrentUserProvider<User> UserProvider
+@inject IOptions<RmsSettings> rmsOptions
 
 <div class="govuk-inset-text">
     <strong>Please note:</strong> GOV UK Notify has an email allowance of 250,000 per day. This includes all email
@@ -15,7 +16,7 @@
     {
         <span>Both</span>
     }
-    @UserProvider?.User?.ContactEmail
+    @rmsOptions.Value.CampaignNotificationEmailAddress
     @if (!string.IsNullOrEmpty(Model.EmailAddress))
     {
         <span> and @Model.EmailAddress</span>

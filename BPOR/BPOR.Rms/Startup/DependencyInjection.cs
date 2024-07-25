@@ -50,14 +50,15 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IEmailCampaignService, EmailCampaignService>();
-        services.AddScoped<IPostcodeMapper, LocationApiClient>();
+        services.AddTransient<IPostcodeMapper, LocationApiClient>();
         services.AddScoped<IRefDataService, RefDataService>();
         services.AddScoped<ICurrentUserIdProvider<int>, SimpleCurrentUserIdProvider<int>>();
         services.AddScoped<ICurrentUserIdAccessor<int>, SimpleCurrentUserIdAccessor<int>>();
         services.AddScoped<ICurrentUserProvider<User>, CurrentUserProvider<User>>();
-        services.AddScoped<IReferenceGenerator, ReferenceGenerator>();
+        services.AddTransient<IReferenceGenerator, ReferenceGenerator>();
 
-        services.AddScoped<IEmailService, EmailService>();
+        services.AddTransient<IEmailService, EmailService>();
+        services.AddTransient<ITransactionalEmailService, TransactionalEmailService>();
         services.GetSectionAndValidate<EmailSettings>(configuration);
 
         services.AddTransient<INotificationService, NotificationService>();
@@ -66,8 +67,7 @@ public static class DependencyInjection
         services.AddDistributedMemoryCache();
         services.AddPaging();
         services.AddDataProtection();
-        services.AddSingleton<HtmlSanitizer>();
-        services.AddSingleton<BaseAddressAccessor>();
+        services.AddTransient<HtmlSanitizer>();
         services.AddContentManagement(configuration);
 
 
@@ -80,6 +80,7 @@ public static class DependencyInjection
         services.AddSingleton<IAmazonSimpleEmailService>(new AmazonSimpleEmailServiceClient(sesConfig));
 
 
+        _ = services.GetSectionAndValidate<RmsSettings>(configuration);
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var participantConnectionString = dbSettings.Value.BuildConnectionString();
 
