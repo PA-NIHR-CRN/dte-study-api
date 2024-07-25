@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService.Settings;
-using LuhnNet;
-using NetTopologySuite.Index.IntervalRTree;
 using static System.Int32;
 
 namespace BPOR.Rms.Controllers;
@@ -80,37 +78,46 @@ public class NotifyCallbackController(
     [Route("registerinterest", Name = nameof(RegisterInterest))]
     public async Task<IActionResult> RegisterInterest([FromQuery] string reference, CancellationToken cancellationToken)
     {
-        var decryptedReference = encryptionService.Decrypt(reference);
-
-        if (!TryParse(decryptedReference, out var emailCampaignParticipantId) ||
-            emailCampaignParticipantId == 0)
+        try
         {
-            return BadRequest("Invalid reference.");
+            var decryptedReference = encryptionService.Decrypt(reference);
+
+            if (TryParse(decryptedReference, out var emailCampaignParticipantId) &&
+                emailCampaignParticipantId != 0)
+            {
+                var participantQuery = context.EmailCampaignParticipants
+                    .Where(p => p.Id == emailCampaignParticipantId);
+
+                var participant = await participantQuery.FirstOrDefaultAsync(o => o.RegisteredInterestAt == null, cancellationToken);
+                if (participant is not null)
+                {
+                    participant.RegisteredInterestAt = timeProvider.GetLocalNow().DateTime;
+                    await context.SaveChangesAsync(cancellationToken);
+                }
+                var informationUrl = await participantQuery.Where(p => p.Id == emailCampaignParticipantId)
+                    .Select(o => o.EmailCampaign.FilterCriteria.Study.InformationUrl)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (!string.IsNullOrWhiteSpace(informationUrl) && Uri.IsWellFormedUriString(informationUrl, UriKind.Absolute))
+                {
+                    return Redirect(informationUrl);
+                }
+                else
+                {
+                    logger.LogWarning("Study information Url is empty or malformed: '{informationUrl}'. emailCampaignParticipantId: {emailCampaignParticipantId}", informationUrl, emailCampaignParticipantId);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // This is a public facing endpoint.
+            // We don't want to surface exceptions
+            // to the general public.
+            // Use the fallback URL if anything goes wrong.
+            logger.LogError(ex, ex.Message);
         }
 
-        var participantQuery = context.EmailCampaignParticipants
-            .Where(p => p.Id == emailCampaignParticipantId);
-
-        var participant = await participantQuery.FirstOrDefaultAsync(o => o.RegisteredInterestAt == null, cancellationToken);
-        if (participant is null)
-        {
-            return Ok();
-        }
-        participant.RegisteredInterestAt = timeProvider.GetLocalNow().DateTime;
-        await context.SaveChangesAsync(cancellationToken);
-
-        var informationUrl = await participantQuery.Where(p => p.Id == emailCampaignParticipantId)
-            .Select(o => o.EmailCampaign.FilterCriteria.Study.InformationUrl)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (!string.IsNullOrWhiteSpace(informationUrl) && Uri.IsWellFormedUriString(informationUrl, UriKind.Absolute))
-        {
-            return Redirect(informationUrl);
-        }
-        
-        logger.LogWarning("Information Url is empty or malformed: {informationUrl}", informationUrl);
         return Redirect(rmsSettings.Value.StudyInformationFallbackUrl);
-
     }
 }
 
