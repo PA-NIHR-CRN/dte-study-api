@@ -29,6 +29,7 @@ public class NotifyCallbackController(
     public async Task<IActionResult> ReceiveCallback([FromBody] NotifyCallbackMessage message,
         CancellationToken cancellationToken)
     {
+        logger.LogDebug("NotifyCallbackMessage {@message}", message);
         var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
         if (token != settings.Value.BearerToken)
         {
@@ -42,6 +43,7 @@ public class NotifyCallbackController(
 
         if (!TryParse(message.Reference, out var emailCampaignParticipantId))
         {
+            logger.LogError("Invalid callback reference {reference}", message.Reference);
             return BadRequest("Invalid reference.");
         }
 
@@ -51,16 +53,29 @@ public class NotifyCallbackController(
 
         if (participantEmail == null)
         {
+            logger.LogError("EmailCampaignParticipant not found for Id {emailCampaignParticipantId}.", emailCampaignParticipantId);
             return NotFound();
         }
 
         switch (message.Status)
         {
+            case "accepted":
+            case "received":
+            case "cancelled":
+            case "pending-virus-check":
+            case "virus-scan-failed":
+            case "validation-failed":
+            case "created":
+            case "sending":
+            case "pending":
+            case "sent":
+                break;
             case "delivered":
                 participantEmail.DeliveredAt = DateTime.UtcNow;
                 participantEmail.DeliveryStatusId =
                     refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Delivered);
                 break;
+            case "temporary-failure":
             case "permanent-failure":
             case "technical-failure":
                 participantEmail.DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Failed);
