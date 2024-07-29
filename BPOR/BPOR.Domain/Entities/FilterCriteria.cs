@@ -12,8 +12,8 @@ public class FilterCriteria
     public double? SearchRadiusMiles { get; set; }
     public DateTime? RegistrationFromDate { get; set; }
     public DateTime? RegistrationToDate { get; set; }
-    public DateTime? DateOfBirthFrom { get; set; }
-    public DateTime? DateOfBirthTo { get; set; }
+    public int? AgeFrom { get; set; }
+    public int? AgeTo { get; set; }
     public ICollection<EmailCampaign> EmailCampaigns { get; set; } = [];
     public ICollection<FilterAreaOfInterest> FilterAreaOfInterest { get; set; } = [];
     public ICollection<FilterPostcode> FilterPostcode { get; set; } = [];

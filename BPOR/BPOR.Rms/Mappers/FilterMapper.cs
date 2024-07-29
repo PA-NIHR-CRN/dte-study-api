@@ -32,14 +32,8 @@ public class FilterMapper
             // TODO: ShowRecruitedFilter, StudyCpmsId, StudyName need to be initialised. Might be a job of a component / tag helper.
             AgeRange = new AgeRange
             {
-                From = criteria.DateOfBirthTo.HasValue
-                    ? DateTime.Today.Year - criteria.DateOfBirthTo.Value.Year -
-                      (DateTime.Today.DayOfYear < criteria.DateOfBirthTo.Value.DayOfYear ? 1 : 0)
-                    : null,
-                To = criteria.DateOfBirthFrom.HasValue
-                    ? DateTime.Today.Year - criteria.DateOfBirthFrom.Value.Year -
-                      (DateTime.Today.DayOfYear < criteria.DateOfBirthFrom.Value.DayOfYear ? 1 : 0)
-                    : null,
+                From = criteria.AgeFrom,
+                To = criteria.AgeTo,
             },
             IsSexMale = criteria.FilterGender.Any(fg => fg.GenderId == 1),
             IsSexFemale = criteria.FilterGender.Any(fg => fg.GenderId == 2),
