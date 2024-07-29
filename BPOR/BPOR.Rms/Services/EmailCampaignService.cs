@@ -222,7 +222,7 @@ public class EmailCampaignService(
         foreach (var volunteer in volunteers)
         {
             var emailCampaignParticipant = emailQueue.SelectMany(e => e.EmailCampaignParticipants)
-                .FirstOrDefault(e => e.ContactEmail == volunteer.Email);
+                .FirstOrDefault(e => e.ParticipantId == volunteer.Id);
 
             if (emailCampaignParticipant == null)
             {
