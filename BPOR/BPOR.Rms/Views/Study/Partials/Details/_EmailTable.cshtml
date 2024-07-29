@@ -56,7 +56,7 @@
                 <td class="govuk-table__cell">@emailCampaign.Name</td>
                 <td class="govuk-table__cell">@emailCampaign.TotalCampaignEmailsSent / @emailCampaign.TargetGroupSize</td>
                 <td class="govuk-table__cell">@emailCampaign.TotalCampaignRegisteredInterest</td>
-                <td class="govuk-table__cell">0</td>
+                <td class="govuk-table__cell">@emailCampaign.TotalEmailsFailed</td>
                 <td class="govuk-table__cell">
                     @if(emailCampaign.TotalCampaignEmailsSent < emailCampaign.TargetGroupSize)
                     {

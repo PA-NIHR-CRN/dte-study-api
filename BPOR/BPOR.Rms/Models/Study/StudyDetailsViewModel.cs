@@ -26,6 +26,7 @@ public class EmailCampaign
     public int? TargetGroupSize { get; set; }
     public IEnumerable<EmailCampaignParticipant> EmailCampaignParticipants { get; set; }
     public int TotalCampaignEmailsSent => EmailCampaignParticipants.Where(e => e.DeliveryStatusId == 3).Count();
+    public int TotalEmailsFailed => EmailCampaignParticipants.Where(e => e.DeliveryStatusId == 5).Count();
     public int TotalCampaignRegisteredInterest => EmailCampaignParticipants.Where(p => p.RegisteredInterestAt != null).Count();
 }
 
