@@ -240,7 +240,7 @@
                             }
                         </p>
                     </div>
-                    @Html.ActionLink("View study", "Details", new { id = item.Id }, new { @class = "govuk-button" })
+                    <a asp-action="Details" asp-route-id="@item.Id" class="govuk-button" aria-label="View study id @item.Id, @item.StudyName">View study</a>
                 </div>
             </div>
         }
