@@ -3,11 +3,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  defaults:
-    run:
-      working-directory: ./BPOR
   dev_build_test_deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./BPOR
     environment: DEV
     steps:
       - uses: actions/checkout@v2
@@ -57,6 +57,9 @@ jobs:
   
   QA_deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./BPOR
     needs: dev_build_test_deploy
     environment: QA
     steps:
@@ -87,6 +90,9 @@ jobs:
   
   UAT_deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./BPOR
     needs: QA_deploy
     environment: UAT
     steps:
@@ -117,6 +123,9 @@ jobs:
   
   OAT_deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./BPOR
     needs: UAT_deploy
     environment: OAT
     steps:
@@ -147,6 +156,9 @@ jobs:
   
   PROD_deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./BPOR
     needs: OAT_deploy
     environment: PROD
     steps:
