@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: stream-handler-artifact
-          path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net6.0/publish/
+          path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
   
   QA_deploy:
     runs-on: ubuntu-latest
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: stream-handler-artifact
-          path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net6.0/publish/
+          path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -100,7 +100,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: stream-handler-artifact
-          path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net6.0/publish/
+          path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -133,7 +133,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: stream-handler-artifact
-          path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net6.0/publish/
+          path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -166,7 +166,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: stream-handler-artifact
-          path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net6.0/publish/
+          path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
