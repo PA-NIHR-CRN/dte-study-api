@@ -458,7 +458,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         studyModel.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         studyModel.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
 
-        ViewData["EditMode"] = true;
+        ViewData["IsEditMode"] = true;
         return View(studyModel);
     }
 
@@ -469,7 +469,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
         [Bind("ShortName,ChiefInvestigator,StudySponsors,CPMSId,PortfolioSubmissionStatus,OutcomeOfSubmission," +
-        "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,Step")]
+        "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,RecruitingIdentifiableVolunteers,Step")]
         ResearcherStudyFormViewModel model)
     {
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
