@@ -107,6 +107,8 @@
     </div>
 </div>
 
+@Html.HiddenFor(m => m.RecruitingIdentifiableVolunteers)
+
 @if (!isEditMode)
 {
     <div class="govuk-form-group @(Html.ViewData.ModelState["RecruitingIdentifiableVolunteers"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
