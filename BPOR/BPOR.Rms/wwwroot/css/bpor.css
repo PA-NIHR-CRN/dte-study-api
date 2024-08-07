@@ -15,12 +15,27 @@
     padding-top: 20px;
     padding-bottom: 20px;
 }
+.header-logo-container {
+    flex-direction: row;
+}
 
 #NHSLogo {
-    height: 45px;
+    height: 40px;
     margin: 30px;
     position: relative;
-    width: 112.5px;
+    width: unset;
+}
+@media(max-width:960px){
+    #NHSLogo {
+        height: 35px;
+        margin: 20px;
+    }
+}
+@media(max-width:640px){
+    #NHSLogo {
+        height: 30px;
+        margin: 15px;
+    }
 }
 
 .govuk-phase-banner__content__tag {
@@ -43,10 +58,10 @@
     color: #193E72;
 }
 
-    .header-user-info .govuk-link.sign-out-nav__link,
-    .header-user-info .govuk-link.sign-out-nav__link:visited {
-        color: #193E72;
-    }
+.header-user-info .govuk-link.sign-out-nav__link,
+.header-user-info .govuk-link.sign-out-nav__link:visited {
+    color: #193E72;
+}
 
 .social-container,
 .social-container-header {
@@ -537,6 +552,7 @@
 
     .header-user-info {
         padding-bottom: 1em;
+        justify-content:right;
     }
 
     .header-content-left {
@@ -569,4 +585,16 @@
     .HCW-logo {
         flex: 0 0 40%;
     }
+}
+
+@media(max-width: 640px) {
+
+    .search-button{
+        width:unset;
+    }
+}
+
+
+.header-logo-container {
+    flex-direction: row;
 }
