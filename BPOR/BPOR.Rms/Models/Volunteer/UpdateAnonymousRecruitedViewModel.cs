@@ -8,7 +8,7 @@ public class UpdateAnonymousRecruitedViewModel
     public string? StudyName { get; set; }
     public int StudyId { get; set; }
 
-    [Display(Name = "Latest Recruitment Total")]
+    [Display(Name = "Latest recruitment total")]
     [Required(ErrorMessage = "Enter the total number of Be Part of Research volunteers recruited")]
     [IntegerOrDecimal(ErrorMessage = "Please enter a valid number")]
     [Range(0, int.MaxValue, ErrorMessage = "Please enter a valid number")]
