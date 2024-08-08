@@ -83,8 +83,19 @@ namespace BPOR.Rms.Models.Researcher
                 return null;
             }
         }
+        private static String? formatDateForUK(int? year, int? month, int? day)
+        {
+            if (!year.HasValue || !month.HasValue || !day.HasValue)
+            {
+                return null;
+            }
+
+            return ""+ day.Value + "/" + month.Value + "/" + year.Value;
+        }
 
         public DateOnly? ToDateOnly() => ConstructDate(Year, Month, Day);
+
+        public String? UKDisplayDate() => formatDateForUK(Year, Month, Day);
 
         public static GovUkDate FromDateTime(DateTime? date) => new GovUkDate { Day = date?.Day, Month = date?.Month, Year = date?.Year };
     }
