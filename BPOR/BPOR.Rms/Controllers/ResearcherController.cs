@@ -564,7 +564,12 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 }
             }
 
-            this.AddSuccessNotification($"{model.ShortName} has been successfully updated");
+            this.AddNotification(new NotificationBannerModel
+            {
+                IsSuccess = true,
+                Title = "Study details updated",
+                Body = $"{model.ShortName} has been successfully updated"
+            });
 
             return RedirectToAction(nameof(StudyController.Details), "Study", new { id });
         }
