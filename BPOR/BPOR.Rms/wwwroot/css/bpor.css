@@ -1,9 +1,21 @@
-﻿.govuk-header {
+﻿body {
+    color: #0b0c0c;
+}
+
+.govuk-header {
     background-color: unset;
     flex-direction: column;
     margin-top: 0.5em;
     padding-left: 1em;
     padding-right: 1em;
+}
+
+.govuk-body {
+    color: #0b0c0c;
+}
+
+.govuk-button--secondary:visited {
+    color: #0b0c0c;
 }
 
 .govuk-header__container {
