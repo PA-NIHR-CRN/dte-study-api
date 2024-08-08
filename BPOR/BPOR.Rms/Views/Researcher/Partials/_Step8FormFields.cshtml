@@ -132,7 +132,7 @@
             Recruitment Start Date
         </dt>
         <dd class="govuk-summary-list__value">
-            @(Model.RecruitmentStartDate.ToDateOnly())
+            @(Model.RecruitmentStartDate.UKDisplayDate())
         </dd>
         <dd class="govuk-summary-list__actions">
             <button type="submit" name="Step" value="7" class="link-button">Change</button>
@@ -143,7 +143,7 @@
             Recruitment End Date
         </dt>
         <dd class="govuk-summary-list__value">
-            @(Model.RecruitmentEndDate.ToDateOnly())
+            @(Model.RecruitmentEndDate.UKDisplayDate())
         </dd>
         <dd class="govuk-summary-list__actions">
             <button type="submit" name="Step" value="7" class="link-button">Change</button>
