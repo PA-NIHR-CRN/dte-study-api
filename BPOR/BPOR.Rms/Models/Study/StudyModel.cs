@@ -76,7 +76,7 @@ public class StudyModel
 
     [Display(Name = "Does the study have NIHR funding?")]
     [ResearcherEdit(4)]
-    public string HasFundingDisplay => HasFunding == true ? "Yes" : "No";
-    
+    public string? HasFundingDisplay => HasFunding == null ? null : (HasFunding == true ? "Yes" : "No");
+
     public string? InformationUrl { get; set; }
 }
