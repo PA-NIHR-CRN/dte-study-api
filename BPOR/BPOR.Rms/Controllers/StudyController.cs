@@ -237,7 +237,12 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
                 }
             }
 
-            this.AddSuccessNotification($"{model.StudyName} has been successfully updated");
+            this.AddNotification(new NotificationBannerModel
+            {
+                IsSuccess = true,
+                Title = "Study details updated",
+                Body = $"{model.StudyName} has been successfully updated"
+            });
 
             return RedirectToAction(nameof(Details), new { id });
         }
