@@ -1,14 +1,15 @@
 ﻿@model BPOR.Rms.Controllers.CreateAccountModel
 
 @{
-    ViewData["Title"] = "What is your email address?";
+    ViewData["Title"] = "Create an account, What is your email address?";
     ViewData.ShowBackLink();
 }
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
+        <h1 class="govuk-heading-l">Create an account to access the Be Part of Research volunteer registry</h1>
         <form method="post">
-            <form-group for="Email" label="What is your email address?" label-level="h1">
+            <form-group for="Email" label="What is your email address?" label-level="h3">
                 <div id="email-hint" class="govuk-hint">
                     We will send you a confirmation email to set up your account. Once your account is created, you will need to use your email address to sign in.
                 </div>
