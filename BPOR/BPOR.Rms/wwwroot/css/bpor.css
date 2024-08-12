@@ -481,14 +481,18 @@
         box-shadow: none;
         box-shadow: 0 0 3px 3px rgba(0, 0, 0, .75);
     }
-
-.headerImage:focus, .headerImage:hover {
-    background-color: #fff;
-    border-color: #fed47a;
-    box-shadow: none;
-    box-shadow: 0 0 3px 3px rgba(0, 0, 0, .75);
+.headerImage {
+    border: 3px solid #fff;
 }
-
+    .headerImage:focus, .headerImage:hover {
+        background-color: #fff;
+        border-color: #fed47a;
+        box-shadow: none;
+        box-shadow: 0 0 3px 3px rgba(0, 0, 0, .75);
+    }
+#BPoR-header-logo{
+    width:100%;
+}
 .img-responsive {
     font-stretch: normal;
     font-size: 16px;
