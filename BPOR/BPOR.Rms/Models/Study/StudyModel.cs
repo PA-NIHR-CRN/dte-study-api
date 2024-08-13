@@ -34,7 +34,7 @@ public class StudyModel
     public bool IsRecruitingIdentifiableParticipants { get; set; }
     public int? LatestRecruitmentTotal { get; set; }
     public int? TotalRecruited { get; set; }
-    
+
     [Display(Name = "Who is the Chief Investigator for the study?")]
     [ResearcherEdit(1)]
     public string? ChiefInvestigator { get; set; }
@@ -65,18 +65,18 @@ public class StudyModel
     [ResearcherEdit(6)]
     public string? TargetPopulation { get; set; }
 
-    // TODO 2 GovUkDates, need to amalgamate
     [Display(Name = "Recruitment start date")]
     [ResearcherEdit(7)]
-    public DateOnly? RecruitmentStartDate { get; set; } = new();
-    [Display(Name = "Recruitment end date")]
+    public string? RecruitmentStartDate { get; set; }
 
+    [Display(Name = "Recruitment end date")]
     [ResearcherEdit(7)]
-    public DateOnly? RecruitmentEndDate { get; set; } = new();
+    public string? RecruitmentEndDate { get; set; }
 
     [Display(Name = "Does the study have NIHR funding?")]
     [ResearcherEdit(4)]
     public string? HasFundingDisplay => HasFunding == null ? null : (HasFunding == true ? "Yes" : "No");
 
     public string? InformationUrl { get; set; }
+
 }

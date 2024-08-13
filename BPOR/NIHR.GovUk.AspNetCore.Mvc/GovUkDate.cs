@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BPOR.Rms.Models.Filter;
+namespace NIHR.GovUk.AspNetCore.Mvc;
 
 public class GovUkDate : IValidatableObject
 {
@@ -59,4 +59,18 @@ public class GovUkDate : IValidatableObject
             yield return new ValidationResult($"{validationContext.DisplayName} must include a year.", [nameof(Year)]);
         }
     }
+
+   
+    private static string? formatDateForUK(int? year, int? month, int? day)
+    {
+        if (!year.HasValue || !month.HasValue || !day.HasValue)
+        {
+            return null;
+        }
+
+        return "" + day.Value + "/" + month.Value + "/" + year.Value;
+    }
+
+
+    public string? UKDisplayDate() => formatDateForUK(Year, Month, Day);
 }

@@ -1,5 +1,6 @@
 ﻿using BPOR.Domain.Entities.RefData;
 using System.ComponentModel.DataAnnotations;
+using NIHR.GovUk.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Models.Researcher
 {
@@ -50,53 +51,5 @@ namespace BPOR.Rms.Models.Researcher
 
         [Display(Name = "Will participants in the study be recruited as named individual volunteers?", Order = 13)]
         public bool? RecruitingIdentifiableVolunteers { get; set; }
-    }
-
-    public class GovUkDate
-    {
-
-        [Display(Name = "Day", Order = 1)]
-        [Range(1, 31, ErrorMessage = "Day must be between 1 and 31")]
-        public int? Day { get; set; }
-
-        [Display(Name = "Month", Order = 2)]
-        [Range(1, 12, ErrorMessage = "Month must be between 1 and 12")]
-        public int? Month { get; set; }
-
-        [Display(Name = "Year", Order = 3)]
-        public int? Year { get; set; }
-
-
-        private static DateOnly? ConstructDate(int? year, int? month, int? day)
-        {
-            if (!year.HasValue || !month.HasValue || !day.HasValue)
-            {
-                return null;
-            }
-
-            try
-            {
-                return new DateOnly(year.Value, month.Value, day.Value);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return null;
-            }
-        }
-        private static String? formatDateForUK(int? year, int? month, int? day)
-        {
-            if (!year.HasValue || !month.HasValue || !day.HasValue)
-            {
-                return null;
-            }
-
-            return ""+ day.Value + "/" + month.Value + "/" + year.Value;
-        }
-
-        public DateOnly? ToDateOnly() => ConstructDate(Year, Month, Day);
-
-        public String? UKDisplayDate() => formatDateForUK(Year, Month, Day);
-
-        public static GovUkDate FromDateTime(DateTime? date) => new GovUkDate { Day = date?.Day, Month = date?.Month, Year = date?.Year };
     }
 }

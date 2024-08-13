@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Researcher;
+using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Models.Volunteer;
 using EmailCampaign = BPOR.Rms.Models.Study.EmailCampaign;
@@ -101,8 +102,8 @@ public static class Projections
                 FundingCode = s.FundingCode,
                 UKRecruitmentTarget = s.RecruitmentTarget,
                 TargetPopulation = s.TargetPopulation,
-                RecruitmentStartDate =  GovUkDate.FromDateTime(s.RecruitmentStartDate).ToDateOnly(),
-                RecruitmentEndDate =  GovUkDate.FromDateTime(s.RecruitmentEndDate).ToDateOnly(),
+                RecruitmentStartDate = GovUkDate.FromDateTime(s.RecruitmentStartDate).UKDisplayDate(),
+                RecruitmentEndDate =  GovUkDate.FromDateTime(s.RecruitmentEndDate).UKDisplayDate(),
                 InformationUrl = s.InformationUrl,
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
