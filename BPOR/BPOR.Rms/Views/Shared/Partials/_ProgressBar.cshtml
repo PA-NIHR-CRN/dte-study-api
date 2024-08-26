@@ -1,7 +1,7 @@
-@if (ViewData["Step"] is not null && ViewData["TotalSteps"] is not null)
-{
-    var step = ViewData["Step"] as int?;
-    var totalSteps = ViewData["TotalSteps"] as int?;
+@if (ViewData["Step"] is not null && ViewData["TotalSteps"] is not null && !(ViewData["Step"].Equals(ViewData["TotalSteps"]) && (int?) ViewData["Step"] > 2))
+    {
+        var step = ViewData["Step"] as int?;
+        var totalSteps = ViewData["TotalSteps"] as int?;
 
     <style>
         .progress-bar-container {
