@@ -34,6 +34,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
     public IActionResult SubmitStudy(ResearcherStudyFormViewModel model)
     {
+        ViewData["Title"] = getPageTitle(model.Step);
         ViewData["Step"] = model.Step;
         ViewData["TotalSteps"] = model.TotalSteps;
         return View(model);
@@ -170,10 +171,40 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
 
+
+        ViewData["Title"] = getPageTitle(model.Step);
         ViewData["Step"] = model.Step;
         ViewData["TotalSteps"] = model.TotalSteps;
         return View(model);
     }
+
+    private String getPageTitle(int? step)
+    {
+        if (step == null)
+        {
+            return "Submit study";
+        }
+        switch (step)
+        {
+            case 1:
+                return "Study information";
+            case 2:
+            case 3:
+                return "NIHR CRN portfolio status ";
+            case 4:
+            case 5:
+                return "NIHR funding";
+            case 6:
+                return "Target population";
+            case 7:
+                return "Study recruitment";
+            case 8:
+                return "Check your answers";
+            default:
+                return "Submit study";
+        }
+    }
+
 
     private void ValidateMandatoryFields(ResearcherStudyFormViewModel model)
     {
