@@ -403,23 +403,25 @@
     font-size: 1.1875rem;
 }
 
-.govuk-checkboxes__input:focus {
-    padding: 0.9em;
-    border: 4px solid rgb(25, 62, 114);
-    box-shadow: none;
-    outline: rgb(254, 212, 122) solid 4px
+.govuk-checkboxes__input {
+    opacity: 0;
+    cursor: pointer;
 }
 
-.govuk-checkboxes__input {
+    .govuk-checkboxes__input + .govuk-checkboxes__label::before {
+        content: '';
+        display: inline-block;
+        background-color: #FFF;
+        border: 2px solid #919191;
+        vertical-align: middle;
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+
+.govuk-checkboxes__item {
+    position: relative;
     display: flex;
-    width: 40px;
-    height: 40px;
-    padding: 10px 7px;
-    flex-direction: column;
-    justify-content: space-between;
     align-items: center;
-    border-radius: 5px;
-    border: 2px solid #0B0C0C;
+    margin-bottom: 10px;
 }
 
 .govuk-radios__input {
@@ -457,7 +459,7 @@
     overflow-y: scroll;
     height: 240px;
     border: 2px solid;
-    border-color: lightgrey;
+    border-color: #919191;
     border-radius: 0.5rem;
     padding: 10px;
 }
