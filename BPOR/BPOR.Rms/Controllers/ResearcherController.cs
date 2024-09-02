@@ -468,7 +468,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
-        [Bind("ShortName,ChiefInvestigator,StudySponsors,CPMSId,PortfolioSubmissionStatus,OutcomeOfSubmission,Id," +
+        [Bind("ShortName,ChiefInvestigator,StudySponsors,CPMSId,PortfolioSubmissionStatus,OutcomeOfSubmission," +
         "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,RecruitingIdentifiableVolunteers,Step")]
         ResearcherStudyFormViewModel model)
     {
@@ -479,6 +479,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
         ValidateMandatoryFields(model);
 
+        model.Id = id;
         switch (model.Step)
         {
             case 2:
@@ -574,7 +575,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             return RedirectToAction(nameof(StudyController.Details), "Study", new { id });
         }
 
-        model.Id = id;
         ViewData["IsEditMode"] = true;
 
         return View(model);
