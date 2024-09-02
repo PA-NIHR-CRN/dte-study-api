@@ -1,4 +1,4 @@
-@if (ViewData["Step"] is not null && ViewData["TotalSteps"] is not null && !(ViewData["Step"].Equals(ViewData["TotalSteps"]) && (int?) ViewData["Step"] > 2))
+@if (ViewData["Step"] is not null && ViewData["TotalSteps"] is not null && !ViewData["Step"].Equals(ViewData["TotalSteps"]) && (int?)ViewData["TotalSteps"] > 3)
     {
         var step = ViewData["Step"] as int?;
         var totalSteps = ViewData["TotalSteps"] as int?;
