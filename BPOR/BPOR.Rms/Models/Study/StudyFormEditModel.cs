@@ -28,4 +28,6 @@ public class StudyFormEditModel : FormWithSteps
     [Display(Name = "Is this study recruiting identifiable participants?", Order = 4)]
     [Required(ErrorMessage = "Select whether the study is recruiting identifiable participants")]
     public bool? IsRecruitingIdentifiableParticipants { get; set; }
+
+    public override string? StepName => throw new NotImplementedException();
 }
