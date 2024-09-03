@@ -24,10 +24,16 @@ public class StudyFormEditModel : FormWithSteps
     [Display(Name = "CPMS ID", Order = 5)]
     [RegularExpression(@"^\d+$", ErrorMessage = "Enter a CPMS ID in the correct format, like 12345")]
     public long? CpmsId { get; set; }
-    
+
     [Display(Name = "Is this study recruiting identifiable participants?", Order = 4)]
     [Required(ErrorMessage = "Select whether the study is recruiting identifiable participants")]
     public bool? IsRecruitingIdentifiableParticipants { get; set; }
 
-    public override string? StepName => throw new NotImplementedException();
+    public override String StepName
+    {
+        get
+        {
+            return "Add a study";
+        }
+    }
 }
