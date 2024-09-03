@@ -170,10 +170,14 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
 
+
         ViewData["Step"] = model.Step;
         ViewData["TotalSteps"] = model.TotalSteps;
         return View(model);
     }
+
+   
+
 
     private void ValidateMandatoryFields(ResearcherStudyFormViewModel model)
     {

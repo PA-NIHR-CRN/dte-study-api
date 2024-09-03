@@ -5,6 +5,7 @@
         public int Step { get; set; } = 1;
         public abstract int TotalSteps { get; }
         public bool Completed { get; set; }
+        public abstract string StepName { get; }
 
         public void GotoNextStep()
         {
