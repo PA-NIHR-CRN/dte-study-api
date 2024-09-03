@@ -472,6 +472,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,RecruitingIdentifiableVolunteers,Step")]
         ResearcherStudyFormViewModel model)
     {
+        model.Id = id;
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
 
@@ -479,7 +480,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
         ValidateMandatoryFields(model);
 
-        model.Id = id;
         switch (model.Step)
         {
             case 2:
