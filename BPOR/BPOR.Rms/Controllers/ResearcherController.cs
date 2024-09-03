@@ -476,6 +476,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,RecruitingIdentifiableVolunteers,Step")]
         ResearcherStudyFormViewModel model)
     {
+        model.Id = id;
         model.PortfolioSubmissionStatusOptions = context.Submitted.ToList();
         model.OutcomeOfSubmissionOptions = context.SubmissionOutcome.ToList();
 
@@ -578,7 +579,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             return RedirectToAction(nameof(StudyController.Details), "Study", new { id });
         }
 
-        model.Id = id;
         ViewData["IsEditMode"] = true;
 
         return View(model);
