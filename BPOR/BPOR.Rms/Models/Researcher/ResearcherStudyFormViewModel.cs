@@ -51,5 +51,31 @@ namespace BPOR.Rms.Models.Researcher
 
         [Display(Name = "Will participants in the study be recruited as named individual volunteers?", Order = 13)]
         public bool? RecruitingIdentifiableVolunteers { get; set; }
+
+        public override String StepName
+        {
+            get
+            {
+                switch (Step)
+                {
+                    case 1:
+                        return "Study information";
+                    case 2:
+                    case 3:
+                        return "NIHR CRN portfolio status ";
+                    case 4:
+                    case 5:
+                        return "NIHR funding";
+                    case 6:
+                        return "Target population";
+                    case 7:
+                        return "Study recruitment";
+                    case 8:
+                        return "Check your answers";
+                    default:
+                        return "Submit study";
+                }
+            }
+        }
     }
 }

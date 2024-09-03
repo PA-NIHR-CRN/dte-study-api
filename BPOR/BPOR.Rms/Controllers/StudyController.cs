@@ -194,6 +194,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         [Bind("FullName,EmailAddress,StudyName,CpmsId, Step")]
         StudyFormViewModel model)
     {
+        model.Id = id;
         ModelState.Remove("IsRecruitingIdentifiableParticipants");
 
         if (model.StudyName.Length > 255)
@@ -242,7 +243,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        model.Id = id;
         ViewData["IsEditMode"] = true;
 
         return View(model);
