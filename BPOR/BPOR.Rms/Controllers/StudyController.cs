@@ -81,8 +81,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
     public IActionResult Create()
     {
         var model = new StudyFormViewModel();
-        ViewData["Step"] = model.Step;
-        ViewData["TotalSteps"] = model.TotalSteps;
         return View(model);
     }
 
@@ -159,9 +157,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
                 return RedirectToAction("Index");
             }
         }
-
-        ViewData["Step"] = model.Step;
-        ViewData["TotalSteps"] = model.TotalSteps;
 
         return View(model);
     }

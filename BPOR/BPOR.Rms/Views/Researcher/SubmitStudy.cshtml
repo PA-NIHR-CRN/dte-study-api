@@ -10,15 +10,7 @@
     <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
 
         <form asp-action="SubmitStudy" back-link-for="Step">
-            @if (ViewData["Step"] is not null && ViewData["TotalSteps"] is not null)
-            {
-                var step = ViewData["Step"] as int?;
-                var totalSteps = ViewData["TotalSteps"] as int?;
-                if (step < totalSteps)
-                {
-                    <span class="govuk-caption-xl">Question @step of @(totalSteps - 1)</span>
-                }
-            }
+
             <div style="@(Model.Step == 1 ? "" : "display:none;")">
                 @await Html.PartialAsync("Partials/_Step1FormFields", Model)
             </div>
