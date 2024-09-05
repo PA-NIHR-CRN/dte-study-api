@@ -156,10 +156,9 @@ public class AuthenticationService : IAuthenticationService
         {
             _logger.LogError(ex, "Error signing up user {Email}, username already exists", email);
             // Return a generic success response, to appear as though registration was successful
-            return Response<SignUpResponse>.CreateErrorMessageResponse(
-                ProjectAssemblyNames.ApiAssemblyName, nameof(UserService),
-                ErrorCode.SignUpError, "An error occurred during sign up. Please try again later.",
-                _headerService.GetConversationId());
+            return Response<SignUpResponse>.CreateSuccessfulContentResponse(
+               new SignUpResponse { IsSuccess = true },
+               _headerService.GetConversationId());
         }
 
         catch (InvalidParameterException ex)
