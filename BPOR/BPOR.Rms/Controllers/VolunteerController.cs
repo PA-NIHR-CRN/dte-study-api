@@ -1,5 +1,6 @@
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
+using BPOR.Rms.Models.Study;
 using BPOR.Rms.Models.Volunteer;
 using LuhnNet;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,38 @@ namespace BPOR.Rms.Controllers;
 
 public class VolunteerController(ParticipantDbContext context) : Controller
 {
-    private async Task<UpdateAnonymousRecruitedViewModel?> GetStudyDetails(int studyId)
+
+    public IActionResult Create()
+    {
+        var model = new VolunteerFormViewModel();
+        return View(model);
+    }
+
+    // POST: Study/Create
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    // [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(
+        [Bind("FirstName,LastName,PostCode,AddressLine1,AddressLine2,AddressLine3,AddressLine4,Town,PreferredContactMethod,Email,LandLine,Mobile" +
+        ",SexRegisteredAtBirth,GenderIdentitySameAsBirth,EthnicGroup,EthnicBackground,LongTermConditionOrIllness,AreasOfResearch")]
+        VolunteerFormViewModel model, string action)
+    {
+
+        if (model.LandLine == null && model.Mobile == null)
+        {
+            ModelState.AddModelError("LandLine", "At least one of either a Landline or Mobile number must be provided");
+        }
+        if (model.PreferredContactMethod == "Email" && model.Email == null)
+        {
+            ModelState.AddModelError("email", "email must be provided when preferred contact method is email");
+        }
+
+
+        return View(model);
+    }
+
+        private async Task<UpdateAnonymousRecruitedViewModel?> GetStudyDetails(int studyId)
     {
         return await context.Studies
             .Where(s => s.Id == studyId)
