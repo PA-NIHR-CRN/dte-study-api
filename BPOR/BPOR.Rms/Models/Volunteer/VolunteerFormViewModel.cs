@@ -12,65 +12,67 @@ public class VolunteerFormViewModel : FormWithSteps
 {
 // should all be made nullable and control be used in the controller?
 
-    [Display(Name = "First Name", Order = 1)]
-    public String FirstName { get; set; }
+    [Display(Name = "First name", Order = 1)]
+    [Required(ErrorMessage = "Enter a first name")]
+    public string FirstName { get; set; }
 
-    [Display(Name = "Last Name", Order = 2)]
-    public String LastName { get; set; }
+    [Display(Name = "Last name", Order = 2)]
+    [Required(ErrorMessage = "Enter a last name")]
+    public string LastName { get; set; }
 
-    [Display(Name = "Date Of Birth", Order = 3)]
+    [Display(Name = "Date of birth", Order = 3)]
     public GovUkDate DateOfBirth { get; set; }
 
-    [Display(Name = "Post Code", Order = 4)]
-    public String PostCode { get; set; }
+    [Display(Name = "Postcode", Order = 4)]
+    public string PostCode { get; set; }
 
     [Display(Name = "Address line 1", Order = 5)]
-    public String AddressLine1 { get; set; }
+    public string AddressLine1 { get; set; }
 
     [Display(Name = "Address line 2 (optional)", Order = 6)]
-    public String? AddressLine2 { get; set; }
+    public string? AddressLine2 { get; set; }
 
     [Display(Name = "Address line 3 (optional)", Order = 7)]
-    public String? AddressLine3 { get; set; }
+    public string? AddressLine3 { get; set; }
 
     [Display(Name = "Address line 4 (optional)", Order = 8)]
-    public String? AddressLine4 { get; set; }
+    public string? AddressLine4 { get; set; }
 
     [Display(Name = "Town", Order = 9)]
-    public String Town { get; set; }
+    public string Town { get; set; }
 
     [Display(Name = "Preferred contact method", Order = 10)]
-    public String PreferredContactMethod { get; set; }
+    public string PreferredContactMethod { get; set; }
 
     [Display(Name = "Email address", Order = 11)]
-    public String? Email { get; set; }
+    public string? Email { get; set; }
 
 
-    [Display(Name = "Landline Number", Order = 12)]
-    public String? LandLine { get; set; }
+    [Display(Name = "Landline number", Order = 12)]
+    public string? LandLine { get; set; }
 
 
     [Display(Name = "Mobile phone number", Order = 13)]
-    public String? Mobile { get; set; }
+    public string? Mobile { get; set; }
 
 
     [Display(Name = "Sex registered at birth", Order = 14)]
-    public String SexRegisteredAtBirth { get; set; }
+    public string SexRegisteredAtBirth { get; set; }
 
     [Display(Name = "Gender identity same as sex registered at birth", Order = 15)]
-    public String GenderIdentitySameAsBirth { get; set; }
+    public string GenderIdentitySameAsBirth { get; set; }
 
     [Display(Name = "Ethnic group", Order = 16)]
-    public String EthnicGroup { get; set; }
+    public string EthnicGroup { get; set; }
 
     [Display(Name = "Ethnic background", Order = 17)]
-    public String EthnicBackground { get; set; }
+    public string EthnicBackground { get; set; }
 
     [Display(Name = "Long-term conditions or illnesses", Order = 18)]
-    public String LongTermConditionOrIllness { get; set; }
+    public string LongTermConditionOrIllness { get; set; }
 
     [Display(Name = "Areas of research (optional)", Order = 19)]
-    public List<String>? AreasOfResearch { get; set; }
+    public List<string>? AreasOfResearch { get; set; }
 
     public bool IncludeNoAreasOfInterest { get; set; }
 
@@ -85,10 +87,6 @@ public class VolunteerFormViewModel : FormWithSteps
             return "Add a volunteer to the volunteer registry";
         }
     }
-
-
-
-
 
     // options for each form input, should be replaced by options from db.
     public List<Dictionary<string, string>> PrefferdContactMethodValues

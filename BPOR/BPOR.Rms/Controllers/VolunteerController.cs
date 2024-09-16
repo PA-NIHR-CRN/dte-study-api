@@ -12,6 +12,26 @@ namespace BPOR.Rms.Controllers;
 
 public class VolunteerController(ParticipantDbContext context) : Controller
 {
+    public IActionResult Consent()
+    {
+        return View(new VolunteerContactConsentViewModel());
+    }
+
+    [HttpPost]
+    public IActionResult Consent(VolunteerContactConsentViewModel model)
+    {
+        if (!model.AgreedToContactConsent)
+        {
+            ModelState.AddModelError("AgreedToContactConsent", "Confirm you have read and understood the privacy policy");
+        }
+
+        if (ModelState.IsValid)
+        {
+            return RedirectToAction("Create");
+        }
+
+        return View(model);
+    }
 
     public IActionResult Create()
     {
@@ -25,25 +45,44 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     [HttpPost]
     // [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-        [Bind("FirstName,LastName,PostCode,AddressLine1,AddressLine2,AddressLine3,AddressLine4,Town,PreferredContactMethod,Email,LandLine,Mobile" +
+        [Bind("FirstName,LastName,DateOfBirth,PostCode,AddressLine1,AddressLine2,AddressLine3,AddressLine4,Town,PreferredContactMethod,Email,LandLine,Mobile" +
         ",SexRegisteredAtBirth,GenderIdentitySameAsBirth,EthnicGroup,EthnicBackground,LongTermConditionOrIllness,AreasOfResearch")]
         VolunteerFormViewModel model, string action)
     {
 
-        if (model.LandLine == null && model.Mobile == null)
+        if (String.IsNullOrEmpty(model.LandLine) && String.IsNullOrEmpty(model.Mobile))
         {
             ModelState.AddModelError("LandLine", "At least one of either a Landline or Mobile number must be provided");
         }
-        if (model.PreferredContactMethod == "Email" && model.Email == null)
+        if (model.PreferredContactMethod == "Email" && String.IsNullOrEmpty(model.Email))
         {
-            ModelState.AddModelError("email", "email must be provided when preferred contact method is email");
+            ModelState.AddModelError("Email", "Email must be provided when preferred contact method is email");
         }
 
+        ValidateDateOfBirth(model);
+
+        if (ModelState.IsValid)
+        {
+            return RedirectToAction(nameof(VolunteerController.AccountSuccess));
+        }
 
         return View(model);
     }
 
-        private async Task<UpdateAnonymousRecruitedViewModel?> GetStudyDetails(int studyId)
+    private void ValidateDateOfBirth(VolunteerFormViewModel model)
+    {
+        if (!model.DateOfBirth.HasValue)
+        {
+            ModelState.AddModelError("DateOfBirth_Day", "Date of birth is required");
+        }
+    }
+
+    public IActionResult AccountSuccess()
+    {
+        return View();
+    }
+
+    private async Task<UpdateAnonymousRecruitedViewModel?> GetStudyDetails(int studyId)
     {
         return await context.Studies
             .Where(s => s.Id == studyId)
