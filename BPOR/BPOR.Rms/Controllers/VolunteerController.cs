@@ -22,7 +22,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     {
         if (!model.AgreedToContactConsent)
         {
-            ModelState.AddModelError("AgreedToContactConsent", "Confirm you have read and understood the privacy policy");
+            ModelState.AddModelError("AgreedToContactConsent", "Confirm that the Privacy and Data Sharing Policy has been read and understood before giving consent");
         }
 
         if (ModelState.IsValid)
@@ -59,7 +59,17 @@ public class VolunteerController(ParticipantDbContext context) : Controller
             ModelState.AddModelError("Email", "Email must be provided when preferred contact method is email");
         }
 
-        ValidateDateOfBirth(model);
+        ValidateDateOfBirth(model.DateOfBirth);
+
+        if (!String.IsNullOrEmpty(model.Email))
+        {
+            DoesUserEmailExistInDatabase(model.Email);
+        }
+
+        if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
+        {
+            DoesPostcodeSurnameDoBComboExist(model.PostCode.Value.ToString(), model.LastName, model.DateOfBirth);
+        }
 
         if (ModelState.IsValid)
         {
@@ -69,11 +79,46 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         return View(model);
     }
 
-    private void ValidateDateOfBirth(VolunteerFormViewModel model)
+    private void DoesPostcodeSurnameDoBComboExist(string postCode, string lastName, GovUkDate dateOfBirth)
     {
-        if (!model.DateOfBirth.HasValue)
+        DateTime DoB = new DateTime(dateOfBirth.Year.Value, dateOfBirth.Month.Value, dateOfBirth.Day.Value);
+
+        var user = context.Participants.Where(p => p.LastName == lastName && 
+        p.DateOfBirth.HasValue && p.DateOfBirth.Value.Date == DoB.Date &&
+        p.Address.Postcode == postCode).FirstOrDefault();
+
+        if (user != null)
         {
-            ModelState.AddModelError("DateOfBirth_Day", "Date of birth is required");
+            ModelState.AddModelError("LastName", "Combination of surname, date of birth and postcode already exists and cannot be used");
+        }
+    }
+
+    private void DoesUserEmailExistInDatabase(string email)
+    {
+        var user = context.Participants.Where(p => p.Email == email).FirstOrDefault();
+
+        if (user != null)
+        {
+            ModelState.AddModelError("Email", "Email address already exists and cannot be used");
+        }
+    }
+
+    private void ValidateDateOfBirth(GovUkDate dateOfBirth)
+    {
+        if (!dateOfBirth.HasValue)
+        {
+            ModelState.AddModelError("DateOfBirth", "Date of birth is required");
+        }
+
+        if (dateOfBirth.HasValue)
+        {
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+            DateOnly eighteenYearsAgo = today.AddYears(-18);
+
+            if (dateOfBirth.ToDateOnly() > eighteenYearsAgo)
+            {
+                ModelState.AddModelError("DateOfBirth_Day", "Volunteer must be aged 18 or older");
+            }
         }
     }
 

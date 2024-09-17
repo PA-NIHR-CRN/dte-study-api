@@ -1,6 +1,7 @@
 ﻿using Amazon.Runtime.Internal.Transform;
 using BPOR.Rms.Models.Researcher;
 using NIHR.GovUk.AspNetCore.Mvc;
+using Rbec.Postcodes;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
@@ -21,10 +22,10 @@ public class VolunteerFormViewModel : FormWithSteps
     public string LastName { get; set; }
 
     [Display(Name = "Date of birth", Order = 3)]
-    public GovUkDate DateOfBirth { get; set; }
+    public GovUkDate DateOfBirth { get; set; } = new GovUkDate(1900, 2100);
 
     [Display(Name = "Postcode", Order = 4)]
-    public string PostCode { get; set; }
+    public Postcode? PostCode { get; set; }
 
     [Display(Name = "Address line 1", Order = 5)]
     public string AddressLine1 { get; set; }
@@ -45,6 +46,8 @@ public class VolunteerFormViewModel : FormWithSteps
     public string PreferredContactMethod { get; set; }
 
     [Display(Name = "Email address", Order = 11)]
+    [StringLength(254, ErrorMessage = "The email address cannot exceed 254 characters.")]
+    [EmailAddress(ErrorMessage = "Enter an email address in the correct format, like name@example.com")]
     public string? Email { get; set; }
 
 

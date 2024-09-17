@@ -5,6 +5,15 @@ namespace NIHR.GovUk.AspNetCore.Mvc;
 public class GovUkDate : IValidatableObject
 {
 
+    private readonly int _minYear;
+    private readonly int _maxYear;
+
+    public GovUkDate(int minYear, int maxYear)
+    {
+        _minYear = minYear;
+        _maxYear = maxYear;
+    }
+
     [Display(Name = "Day")]
     [Range(1, 31, ErrorMessage = "Day must be between 1 and 31")]
     public int? Day { get; set; }
@@ -14,7 +23,6 @@ public class GovUkDate : IValidatableObject
     public int? Month { get; set; }
 
     [Display(Name = "Year")]
-    [Range(1970, 2100, ErrorMessage = "Year must be a reasonable value")]
     public int? Year { get; set; }
 
     public bool HasValue => Day.HasValue && Month.HasValue && Year.HasValue;
@@ -38,7 +46,7 @@ public class GovUkDate : IValidatableObject
         }
     }
 
-    public static GovUkDate FromDateTime(DateTime? date) => new GovUkDate { Day = date?.Day, Month = date?.Month, Year = date?.Year };
+    public static GovUkDate FromDateTime(DateTime? date) => new GovUkDate(1900,2100) { Day = date?.Day, Month = date?.Month, Year = date?.Year };
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -57,6 +65,14 @@ public class GovUkDate : IValidatableObject
         if (!Year.HasValue)
         {
             yield return new ValidationResult($"{validationContext.DisplayName} must include a year.", [nameof(Year)]);
+        }
+
+        if (Day.HasValue && Month.HasValue && Year.HasValue)
+        {
+            if (Year < _minYear || Year > _maxYear)
+            {
+                yield return new ValidationResult($"{validationContext.DisplayName} year must be a reasonable value.", new[] { nameof(Year) });
+            }
         }
     }
 
