@@ -52,10 +52,12 @@ public class VolunteerFormViewModel : FormWithSteps
 
 
     [Display(Name = "Landline number", Order = 12)]
+    [RegularExpression(@"^(01|02|03)\s*\d(\s*\d)*$", ErrorMessage = "Enter a phone number in the correct format, like 01632 960 001")]
     public string? LandLine { get; set; }
 
 
     [Display(Name = "Mobile phone number", Order = 13)]
+    [RegularExpression(@"^07\s*\d(\s*\d)*$", ErrorMessage = "Enter a phone number in the correct format, like 07700 900 982")]
     public string? Mobile { get; set; }
 
 

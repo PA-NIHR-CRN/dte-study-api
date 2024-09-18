@@ -85,7 +85,9 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
         var user = context.Participants.Where(p => p.LastName == lastName && 
         p.DateOfBirth.HasValue && p.DateOfBirth.Value.Date == DoB.Date &&
-        p.Address.Postcode == postCode).FirstOrDefault();
+        p.Address != null &&
+        p.Address.Postcode == postCode)
+        .FirstOrDefault();
 
         if (user != null)
         {
