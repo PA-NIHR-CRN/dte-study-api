@@ -63,12 +63,12 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
         if (!String.IsNullOrEmpty(model.Email))
         {
-            DoesUserEmailExistInDatabase(model.Email);
+            await DoesUserEmailExistInDatabaseAsync(model.Email);
         }
 
         if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
         {
-            DoesPostcodeSurnameDoBComboExist(model.PostCode.Value.ToString(), model.LastName, model.DateOfBirth);
+            await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode.Value.ToString(), model.LastName, model.DateOfBirth);
         }
 
         if (ModelState.IsValid)
@@ -79,15 +79,17 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         return View(model);
     }
 
-    private void DoesPostcodeSurnameDoBComboExist(string postCode, string lastName, GovUkDate dateOfBirth)
+    private async Task DoesPostcodeSurnameDoBComboExistAsync(string postCode, string lastName, GovUkDate dateOfBirth)
     {
         DateTime DoB = new DateTime(dateOfBirth.Year.Value, dateOfBirth.Month.Value, dateOfBirth.Day.Value);
 
-        var user = context.Participants.Where(p => p.LastName == lastName && 
-        p.DateOfBirth.HasValue && p.DateOfBirth.Value.Date == DoB.Date &&
-        p.Address != null &&
-        p.Address.Postcode == postCode)
-        .FirstOrDefault();
+        var user = await context.Participants
+            .Where(p => p.LastName == lastName &&
+                        p.DateOfBirth.HasValue &&
+                        p.DateOfBirth.Value.Date == DoB.Date &&
+                        p.Address != null &&
+                        p.Address.Postcode == postCode)
+            .FirstOrDefaultAsync();
 
         if (user != null)
         {
@@ -95,9 +97,11 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         }
     }
 
-    private void DoesUserEmailExistInDatabase(string email)
+    private async Task DoesUserEmailExistInDatabaseAsync(string email)
     {
-        var user = context.Participants.Where(p => p.Email == email).FirstOrDefault();
+        var user = await context.Participants
+            .Where(p => p.Email == email)
+            .FirstOrDefaultAsync();
 
         if (user != null)
         {
