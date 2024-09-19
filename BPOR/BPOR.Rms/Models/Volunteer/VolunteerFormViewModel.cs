@@ -28,6 +28,7 @@ public class VolunteerFormViewModel : FormWithSteps
     public Postcode? PostCode { get; set; }
 
     [Display(Name = "Address line 1", Order = 5)]
+    [Required(ErrorMessage = "Enter the first line of the address")]
     public string AddressLine1 { get; set; }
 
     [Display(Name = "Address line 2 (optional)", Order = 6)]
@@ -40,9 +41,11 @@ public class VolunteerFormViewModel : FormWithSteps
     public string? AddressLine4 { get; set; }
 
     [Display(Name = "Town", Order = 9)]
+    [Required(ErrorMessage = "Enter the town of the address")]
     public string Town { get; set; }
 
     [Display(Name = "Preferred contact method", Order = 10)]
+    [Required(ErrorMessage = "Select if the preferred contact method is email or letter")]
     public string PreferredContactMethod { get; set; }
 
     [Display(Name = "Email address", Order = 11)]
@@ -62,18 +65,23 @@ public class VolunteerFormViewModel : FormWithSteps
 
 
     [Display(Name = "Sex registered at birth", Order = 14)]
+    [Required(ErrorMessage = "Select if the sex registered at birth is female or male")]
     public string SexRegisteredAtBirth { get; set; }
 
     [Display(Name = "Gender identity same as sex registered at birth", Order = 15)]
+    [Required(ErrorMessage = "Select gender identity same as sex registered at birth")]
     public string GenderIdentitySameAsBirth { get; set; }
 
     [Display(Name = "Ethnic group", Order = 16)]
+    [Required(ErrorMessage = "Select ethnic group")]
     public string EthnicGroup { get; set; }
 
     [Display(Name = "Ethnic background", Order = 17)]
+    [Required(ErrorMessage = "Select ethnic background")]
     public string EthnicBackground { get; set; }
 
     [Display(Name = "Long-term conditions or illnesses", Order = 18)]
+    [Required(ErrorMessage = "Select long-term conditions or illnesses")]
     public string LongTermConditionOrIllness { get; set; }
 
     [Display(Name = "Areas of research (optional)", Order = 19)]

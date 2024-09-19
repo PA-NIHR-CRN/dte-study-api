@@ -52,11 +52,11 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
         if (String.IsNullOrEmpty(model.LandLine) && String.IsNullOrEmpty(model.Mobile))
         {
-            ModelState.AddModelError("LandLine", "At least one of either a Landline or Mobile number must be provided");
+            ModelState.AddModelError("LandLine", "Enter either a UK landline number or UK mobile number");
         }
         if (model.PreferredContactMethod == "Email" && String.IsNullOrEmpty(model.Email))
         {
-            ModelState.AddModelError("Email", "Email must be provided when preferred contact method is email");
+            ModelState.AddModelError("Email", "Email address cannot be blank");
         }
 
         ValidateDateOfBirth(model.DateOfBirth);
@@ -64,6 +64,11 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         if (!String.IsNullOrEmpty(model.Email))
         {
             await DoesUserEmailExistInDatabaseAsync(model.Email);
+        }
+
+        if (!model.PostCode.HasValue)
+        {
+            ModelState.AddModelError("PostCode", "Enter a postcode");
         }
 
         if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
@@ -111,9 +116,9 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
     private void ValidateDateOfBirth(GovUkDate dateOfBirth)
     {
-        if (!dateOfBirth.HasValue)
+        if (!dateOfBirth.Day.HasValue && !dateOfBirth.Month.HasValue && !dateOfBirth.Year.HasValue)
         {
-            ModelState.AddModelError("DateOfBirth", "Date of birth is required");
+            ModelState.AddModelError("DateOfBirth", "Enter a date of birth");
         }
 
         if (dateOfBirth.HasValue)
