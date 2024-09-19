@@ -399,7 +399,15 @@
             <div class="govuk-form-group @(Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <label asp-for="LongTermConditionOrIllness" class="govuk-label" for="LongTermConditionOrIllness">
                     @Html.DisplayNameFor(model => Model.LongTermConditionOrIllness)
+                    @Html.HiddenFor(model => Model.LongTermConditionOrIllness)
                 </label>
+                @if (Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0)
+                {
+                    <span id="LongTermConditionOrIllness-error" class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @Html.ValidationMessageFor(model => model.LongTermConditionOrIllness)
+                    </span>
+                }
                 <div class="govuk-radios" data-module="govuk-radios">
                     <div class="govuk-radios__item">
                         @Html.RadioButtonFor(m => m.LongTermConditionOrIllness, "Yes" , new { @class = "govuk-radios__input", id = "LongTermConditionOrIllnessYes" })

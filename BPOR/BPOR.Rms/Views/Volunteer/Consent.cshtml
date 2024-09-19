@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Consent - Volunteer Registry - Be Part of Research";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData.ShowBackLink();
 }
 
 <div class="govuk-grid-row">
@@ -38,7 +37,7 @@
          <button type="submit" class="govuk-button">
              Yes, I consent and wish to register now
          </button>
-         <a asp-action="Index" asp-controller="Study" class="govuk-button govuk-button--secondary" data_module="govuk-button--secondary">
+         <a asp-action="Index" asp-controller="Study" class="link-button" data_module="govuk-button--secondary">
              Cancel
          </a>
     </div>

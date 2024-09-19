@@ -59,7 +59,7 @@ public class VolunteerFormViewModel : FormWithSteps
     public string? LandLine { get; set; }
 
 
-    [Display(Name = "Mobile phone number", Order = 13)]
+    [Display(Name = "Mobile number", Order = 13)]
     [RegularExpression(@"^07\s*\d(\s*\d)*$", ErrorMessage = "Enter a phone number in the correct format, like 07700 900 982")]
     public string? Mobile { get; set; }
 
@@ -119,9 +119,9 @@ public class VolunteerFormViewModel : FormWithSteps
         get
         {
             var SexRegisteredAtBirthValues = new List<Dictionary<string, string>>();
-            SexRegisteredAtBirthValues.Add(new Dictionary<string, string> { { "label", "Male" }, { "value", "Male" } });
             SexRegisteredAtBirthValues.Add(new Dictionary<string, string> { { "label", "Female" }, { "value", "Female" } });
-
+            SexRegisteredAtBirthValues.Add(new Dictionary<string, string> { { "label", "Male" }, { "value", "Male" } });
+            
             return SexRegisteredAtBirthValues;
         }
     }
