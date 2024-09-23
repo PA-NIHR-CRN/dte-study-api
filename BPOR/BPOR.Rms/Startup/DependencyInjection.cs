@@ -25,6 +25,7 @@ using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
 using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
+using NIHR.Infrastructure.EntityFrameworkCore.Settings;
 
 namespace BPOR.Rms.Startup;
 
@@ -60,6 +61,7 @@ public static class DependencyInjection
         services.AddTransient<IEmailService, EmailService>();
         services.AddTransient<ITransactionalEmailService, TransactionalEmailService>();
         services.GetSectionAndValidate<EmailSettings>(configuration);
+        services.GetSectionAndValidate<PostcodeLookupSettings>(configuration);
 
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();

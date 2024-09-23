@@ -26,6 +26,12 @@ public class VolunteerFormViewModel : FormWithSteps
 
     [Display(Name = "Postcode", Order = 4)]
     public Postcode? PostCode { get; set; }
+    public List<AddressDetails>? Addresses { get; set; }
+    public AddressDetails? SelectedAddress { get; set; }
+
+    [Display(Name = "Select an address", Order = 5)]
+    [Required(ErrorMessage = "Select an address")]
+    public string? SelectedAddressId { get; set; }
 
     [Display(Name = "Address line 1", Order = 5)]
     [Required(ErrorMessage = "Enter the first line of the address")]
