@@ -399,7 +399,6 @@
             <div class="govuk-form-group @(Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <label asp-for="LongTermConditionOrIllness" class="govuk-label" for="LongTermConditionOrIllness">
                     @Html.DisplayNameFor(model => Model.LongTermConditionOrIllness)
-                    @Html.HiddenFor(model => Model.LongTermConditionOrIllness)
                 </label>
                 @if (Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0)
                 {
@@ -410,7 +409,7 @@
                 }
                 <div class="govuk-radios" data-module="govuk-radios">
                     <div class="govuk-radios__item">
-                        @Html.RadioButtonFor(m => m.LongTermConditionOrIllness, "Yes" , new { @class = "govuk-radios__input", id = "LongTermConditionOrIllnessYes" })
+                        @Html.RadioButtonFor(m => m.LongTermConditionOrIllness, "Yes" , new { @class = "govuk-radios__input", id = "LongTermConditionOrIllness" })
                         @Html.Label("LongTermConditionOrIllnessYes","Yes", new { @class = "govuk-label govuk-radios__label" })
                     </div>
                     <div class="govuk-radios__item">
