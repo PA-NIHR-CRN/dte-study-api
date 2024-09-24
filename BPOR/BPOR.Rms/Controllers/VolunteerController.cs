@@ -16,7 +16,8 @@ using System.Text.RegularExpressions;
 
 namespace BPOR.Rms.Controllers;
 
-public class VolunteerController(ParticipantDbContext context) : Controller
+public class VolunteerController(ParticipantDbContext context,
+    ILogger<VolunteerController> logger) : Controller
 {
     private readonly IOptions<PostcodeLookupSettings> _postcodeLookupSettings;
     public IActionResult Consent()
@@ -371,12 +372,13 @@ public class VolunteerController(ParticipantDbContext context) : Controller
                 }
                 else
                 {
-                    // Handle the error (logging / throwing exception)
+                    logger.LogError("An unsuccessful response was received during the postcode address lookup: " + response.ToString());
                 }
             }
             catch (Exception ex)
             {
-                // Handle the error (logging / throwing exception)
+                logger.LogError(ex, "Error retrieving addresses via postcode lookup");
+                throw new InvalidOperationException("Error retrieving addresses via postcode lookup");
             }
         }
 
@@ -385,15 +387,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
     public List<AddressDetails> MapResponseToAddressDetails(string jsonResponse)
     {
-        try
-        {
-            List<AddressDetails> addressDetailsList = JsonSerializer.Deserialize<List<AddressDetails>>(jsonResponse);
-            return addressDetailsList;
-        }
-        catch (Exception ex)
-        {
-            // Handle the error (logging / throwing exception)
-            return new List<AddressDetails>();
-        }
+        List<AddressDetails> addressDetailsList = JsonSerializer.Deserialize<List<AddressDetails>>(jsonResponse);
+        return addressDetailsList;
     }
 }
