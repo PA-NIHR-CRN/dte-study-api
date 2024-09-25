@@ -6,6 +6,7 @@ using LuhnNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NIHR.GovUk.AspNetCore.Mvc;
+using System;
 using System.Text.RegularExpressions;
 
 namespace BPOR.Rms.Controllers;
@@ -116,22 +117,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
     private void ValidateDateOfBirth(GovUkDate dateOfBirth)
     {
-        if (!dateOfBirth.Day.HasValue && !dateOfBirth.Month.HasValue && !dateOfBirth.Year.HasValue)
-        {
-            ModelState.AddModelError("DateOfBirth", "Enter a date of birth");
-        }
-
-        if (dateOfBirth.HasValue)
-        {
-            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-            DateOnly eighteenYearsAgo = today.AddYears(-18);
-
-            if (dateOfBirth.ToDateOnly() > eighteenYearsAgo)
-            {
-                ModelState.AddModelError("DateOfBirth.Day", "Volunteer must be aged 18 or older");
-            }
-        }
-
+        
         // lot of dupelication here with recruitment start and end dates, can these be consolidated or largly consolidated?
 
         if (dateOfBirth.Day == null)
@@ -167,11 +153,22 @@ public class VolunteerController(ParticipantDbContext context) : Controller
             ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a day and month");
         }
 
+        if (!dateOfBirth.Day.HasValue && !dateOfBirth.Month.HasValue && !dateOfBirth.Year.HasValue)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth", "Enter a date of birth");
+        }
 
+        if (dateOfBirth.HasValue)
+        {
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+            DateOnly eighteenYearsAgo = today.AddYears(-18);
 
-
-
-
+            if (dateOfBirth.ToDateOnly() > eighteenYearsAgo)
+            {
+                ModelState.AddModelError("DateOfBirth.Day", "Volunteer must be aged 18 or older");
+            }
+        }
     }
 
     private void CleardateOfBirthErrorStates()
