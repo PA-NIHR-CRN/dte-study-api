@@ -128,9 +128,57 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
             if (dateOfBirth.ToDateOnly() > eighteenYearsAgo)
             {
-                ModelState.AddModelError("DateOfBirth_Day", "Volunteer must be aged 18 or older");
+                ModelState.AddModelError("DateOfBirth.Day", "Volunteer must be aged 18 or older");
             }
         }
+
+        // lot of dupelication here with recruitment start and end dates, can these be consolidated or largly consolidated?
+
+        if (dateOfBirth.Day == null)
+        {
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a day");
+        }
+
+        if (dateOfBirth.Month == null)
+        {
+            ModelState.AddModelError("DateOfBirth.Month", "Date of birth must include a month");
+        }
+
+        if (dateOfBirth.Year == null)
+        {
+            ModelState.AddModelError("DateOfBirth.Year", "Date of birth must include a year");
+        }
+
+        if (dateOfBirth.Day != null && dateOfBirth.Month == null && dateOfBirth.Year == null)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a month and year");
+        }
+
+        if (dateOfBirth.Day == null && dateOfBirth.Month != null && dateOfBirth.Year == null)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a day and year");
+        }
+
+        if (dateOfBirth.Day == null && dateOfBirth.Month == null && dateOfBirth.Year != null)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a day and month");
+        }
+
+
+
+
+
+
+    }
+
+    private void CleardateOfBirthErrorStates()
+    {
+        ModelState["DateOfBirth.Day"].Errors.Clear();
+        ModelState["DateOfBirth.Month"].Errors.Clear();
+        ModelState["DateOfBirth.Year"].Errors.Clear();
     }
 
     public IActionResult AccountSuccess()
