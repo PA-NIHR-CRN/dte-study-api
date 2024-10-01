@@ -8,19 +8,31 @@
     var noneCurrentValue = (ViewData["__AreasOfResearch_None_CurrentValue"] as string) ?? string.Empty;
     int itemOffset = 0;
     var firstItemFragment = string.IsNullOrWhiteSpace(noneName) ? $"#{areasOfResearch.FirstOrDefault()?.Value}" : "#option-none";
+    var isplain = ViewData["__AreasOfResearch_isPlain"] as string;
+    var headingLevel = "h2";
+    var headingClass = "govuk-heading-l";
+    var shouldShowHintText = true;
+    // hate how this ended up
+    if (isplain == "true")
+    {
+        headingLevel = "label";
+        headingClass = "govuk-label";
+        shouldShowHintText = false;
+    }
 }
 
 <div class="govuk-form-group">
     <fieldset class="govuk-fieldset">
-        <h2 class="govuk-heading-l">
+        <@headingLevel class="@headingClass">
             <legend>
                 @displayName
             </legend>
-        </h2>
+        </@headingLevel>
+        @if(shouldShowHintText) {
         <div id="areas-of-interest-hint" class="govuk-hint">
             Leave blank to include all volunteers and those who have not specified any areas of research. Enter one or more areas of research to refine by interests.
         </div>
-
+            }
         <input type="text" class="govuk-input nihr-option-search govuk-!-margin-bottom-1 js-only" aria-label="Search areas of research list" id="searchInput" placeholder="Search..." data-option-class="area-of-research-option" data-announcement-id="areas-of-interest-announcement" data-selected-counter-id="selected-counter" aria-describedby="areas-of-interest-hint">
         <div id="selected-counter">
             @* TODO: add selected item count *@

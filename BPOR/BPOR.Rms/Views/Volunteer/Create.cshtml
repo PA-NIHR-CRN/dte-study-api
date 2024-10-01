@@ -261,17 +261,17 @@
 
                 <div class="govuk-radios" data-module="govuk-radios">
                     <div class="govuk-radios__item">
-                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "Yes" , new { @class = "govuk-radios__input", id = "SexRegisteredAtBirthYes" })
-                        @Html.Label("SexRegisteredAtBirthYes","Yes", new { @class = "govuk-label govuk-radios__label" })
+                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "true" , new { @class = "govuk-radios__input", id = "GenderIdentitySameAsBirthYes" })
+                        @Html.Label("GenderIdentitySameAsBirthYes", "Yes", new { @class = "govuk-label govuk-radios__label" })
                     </div>
                     <div class="govuk-radios__item">
-                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "No" , new { @class = "govuk-radios__input", id = "SexRegisteredAtBirthNo" })
-                        @Html.Label("SexRegisteredAtBirthNo", "No", new { @class = "govuk-label govuk-radios__label" })
+                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "false" , new { @class = "govuk-radios__input", id = "GenderIdentitySameAsBirthNo" })
+                        @Html.Label("GenderIdentitySameAsBirthNo", "No", new { @class = "govuk-label govuk-radios__label" })
                     </div>
                     <p class="govuk-body text-secondary radio-options-divider">or</p>
                     <div class="govuk-radios__item">
-                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "Prefer not to say", new { @class = "govuk-radios__input", id = "SexRegisteredAtBirthpreferNotToSay" })
-                        @Html.Label("SexRegisteredAtBirthpreferNotToSay", "Prefer not to say", new { @class = "govuk-label govuk-radios__label" })
+                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "null", new { @class = "govuk-radios__input", id = "GenderIdentitySameAsBirthpreferNotToSay" })
+                        @Html.Label("SGenderIdentitySameAsBirthpreferNotToSay", "Prefer not to say", new { @class = "govuk-label govuk-radios__label" })
                     </div>
                 </div>
             </div>
@@ -325,7 +325,6 @@
             <div class="govuk-form-group @(Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <label asp-for="LongTermConditionOrIllness" class="govuk-label" for="LongTermConditionOrIllness">
                     @Html.DisplayNameFor(model => Model.LongTermConditionOrIllness)
-                    @Html.HiddenFor(model => Model.LongTermConditionOrIllness)
                 </label>
                 @if (Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0)
                 {
@@ -336,7 +335,7 @@
                 }
                 <div class="govuk-radios" data-module="govuk-radios">
                     <div class="govuk-radios__item">
-                        @Html.RadioButtonFor(m => m.LongTermConditionOrIllness, "Yes" , new { @class = "govuk-radios__input", id = "LongTermConditionOrIllnessYes" })
+                        @Html.RadioButtonFor(m => m.LongTermConditionOrIllness, "Yes" , new { @class = "govuk-radios__input", id = "LongTermConditionOrIllness" })
                         @Html.Label("LongTermConditionOrIllnessYes","Yes", new { @class = "govuk-label govuk-radios__label" })
                     </div>
                     <div class="govuk-radios__item">
@@ -351,7 +350,7 @@
                 </div>
             </div>
 
-            <areas-of-research-select-list for="AreasOfResearch" for-none="IncludeNoAreasOfInterest" />
+            <areas-of-research-select-list for="AreasOfResearch" for-none="IncludeNoAreasOfInterest" plain="true" />
 
             <div class="govuk-button-group govuk-!-margin-bottom-0">
                 <button type="submit" name="action" value="Save" class="govuk-button" data_module="govuk-button">Save</button>

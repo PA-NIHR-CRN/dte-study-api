@@ -12,6 +12,7 @@ using NIHR.Infrastructure.Settings;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System;
 using System.Text.RegularExpressions;
 
 namespace BPOR.Rms.Controllers;
@@ -111,11 +112,11 @@ public class VolunteerController(ParticipantDbContext context,
                 await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode.Value.ToString(), model.LastName, model.DateOfBirth);
             }
 
-            if (ModelState.IsValid)
-            {
-                return RedirectToAction(nameof(VolunteerController.AccountSuccess));
-            }
-        }
+
+          if (ModelState.IsValid)
+          {
+              return RedirectToAction(nameof(VolunteerController.AccountSuccess), model);
+          }
 
         return View(model);
     }
@@ -152,8 +153,45 @@ public class VolunteerController(ParticipantDbContext context,
 
     private void ValidateDateOfBirth(GovUkDate dateOfBirth)
     {
+        
+        // lot of dupelication here with recruitment start and end dates, can these be consolidated or largly consolidated?
+
+        if (dateOfBirth.Day == null)
+        {
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a day");
+        }
+
+        if (dateOfBirth.Month == null)
+        {
+            ModelState.AddModelError("DateOfBirth.Month", "Date of birth must include a month");
+        }
+
+        if (dateOfBirth.Year == null)
+        {
+            ModelState.AddModelError("DateOfBirth.Year", "Date of birth must include a year");
+        }
+
+        if (dateOfBirth.Day != null && dateOfBirth.Month == null && dateOfBirth.Year == null)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a month and year");
+        }
+
+        if (dateOfBirth.Day == null && dateOfBirth.Month != null && dateOfBirth.Year == null)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a day and year");
+        }
+
+        if (dateOfBirth.Day == null && dateOfBirth.Month == null && dateOfBirth.Year != null)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a day and month");
+        }
+
         if (!dateOfBirth.Day.HasValue && !dateOfBirth.Month.HasValue && !dateOfBirth.Year.HasValue)
         {
+            CleardateOfBirthErrorStates();
             ModelState.AddModelError("DateOfBirth", "Enter a date of birth");
         }
 
@@ -164,13 +202,54 @@ public class VolunteerController(ParticipantDbContext context,
 
             if (dateOfBirth.ToDateOnly() > eighteenYearsAgo)
             {
-                ModelState.AddModelError("DateOfBirth_Day", "Volunteer must be aged 18 or older");
+                ModelState.AddModelError("DateOfBirth.Day", "Volunteer must be aged 18 or older");
             }
         }
     }
 
-    public IActionResult AccountSuccess()
+    private void CleardateOfBirthErrorStates()
     {
+        ModelState["DateOfBirth.Day"].Errors.Clear();
+        ModelState["DateOfBirth.Month"].Errors.Clear();
+        ModelState["DateOfBirth.Year"].Errors.Clear();
+    }
+
+    public async Task<IActionResult> AccountSuccess(VolunteerFormViewModel model)
+    {
+        var participant = new Participant
+        {
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            RegistrationConsent = true,
+            Stage2CompleteUtc = DateTime.Now,
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now,
+            Email = model.Email == null ? "" : model.Email,
+            EthnicGroup = model.EthnicGroup,
+            EthnicBackground = model.EthnicBackground,
+            DateOfBirth = model.DateOfBirth.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
+            HasLongTermCondition = model.LongTermConditionOrIllness == "Prefer not to say" ? null : model.LongTermConditionOrIllness == "Yes",
+            GenderId = model.SexRegisteredAtBirth,
+            GenderIsSameAsSexRegisteredAtBirth = model.GenderIdentitySameAsBirth,
+            MobileNumber = model.Mobile,
+            LandlineNumber = model.LandLine,
+            // not yet implemented
+            //DailyLifeImpactId = 0,
+            CommunicationLanguageId = 1,
+            Address = new ParticipantAddress
+            {
+                AddressLine1 = model.AddressLine1,
+                AddressLine2 = model.AddressLine2,
+                AddressLine3 = model.AddressLine3,
+                AddressLine4 = model.AddressLine4,
+                Town = model.Town,
+                Postcode = model.PostCode.ToString()
+            },
+            IsDeleted = false,
+            HealthConditions = model.AreasOfResearch
+        };
+        context.Add(participant);
+        await context.SaveChangesAsync();
         return View();
     }
 
