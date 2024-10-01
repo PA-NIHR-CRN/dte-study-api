@@ -5,14 +5,22 @@ using BPOR.Rms.Models.Volunteer;
 using LuhnNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NIHR.GovUk.AspNetCore.Mvc;
+using NIHR.Infrastructure.EntityFrameworkCore.Settings;
+using NIHR.Infrastructure.Settings;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using System;
 using System.Text.RegularExpressions;
 
 namespace BPOR.Rms.Controllers;
 
-public class VolunteerController(ParticipantDbContext context) : Controller
+public class VolunteerController(ParticipantDbContext context,
+    ILogger<VolunteerController> logger) : Controller
 {
+    private readonly IOptions<PostcodeLookupSettings> _postcodeLookupSettings;
     public IActionResult Consent()
     {
         return View(new VolunteerContactConsentViewModel());
@@ -47,40 +55,68 @@ public class VolunteerController(ParticipantDbContext context) : Controller
     // [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
         [Bind("FirstName,LastName,DateOfBirth,PostCode,AddressLine1,AddressLine2,AddressLine3,AddressLine4,Town,PreferredContactMethod,Email,LandLine,Mobile" +
-        ",SexRegisteredAtBirth,GenderIdentitySameAsBirth,EthnicGroup,EthnicBackground,LongTermConditionOrIllness,AreasOfResearch")]
+        ",SexRegisteredAtBirth,GenderIdentitySameAsBirth,EthnicGroup,EthnicBackground,LongTermConditionOrIllness,AreasOfResearch,Addresses,SelectedAddress,SelectedAddressId")]
         VolunteerFormViewModel model, string action)
     {
-
-        if (String.IsNullOrEmpty(model.LandLine) && String.IsNullOrEmpty(model.Mobile))
+        if (action == "AddressLookup")
         {
-            ModelState.AddModelError("LandLine", "Enter either a UK landline number or UK mobile number");
-        }
-        if (model.PreferredContactMethod == "Email" && String.IsNullOrEmpty(model.Email))
-        {
-            ModelState.AddModelError("Email", "Email address cannot be blank");
-        }
-
-        ValidateDateOfBirth(model.DateOfBirth);
-
-        if (!String.IsNullOrEmpty(model.Email))
-        {
-            await DoesUserEmailExistInDatabaseAsync(model.Email);
+            if (!model.PostCode.HasValue)
+            {
+                ModelState.Clear();
+                ModelState.AddModelError("PostCode", "Enter a postcode");
+            }
+            else
+            {
+                model.Addresses = await GetAddresses(model.PostCode.Value.ToString());
+                ModelState.Clear();
+            }
         }
 
-        if (!model.PostCode.HasValue)
+        if (action == "Save")
         {
-            ModelState.AddModelError("PostCode", "Enter a postcode");
-        }
+            if (String.IsNullOrEmpty(model.LandLine) && String.IsNullOrEmpty(model.Mobile))
+            {
+                ModelState.AddModelError("LandLine", "Enter either a UK landline number or UK mobile number");
+            }
+            if (model.PreferredContactMethod == "Email" && String.IsNullOrEmpty(model.Email))
+            {
+                ModelState.AddModelError("Email", "Email address cannot be blank");
+            }
 
-        if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
-        {
-            await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode.Value.ToString(), model.LastName, model.DateOfBirth);
-        }
+            ValidateDateOfBirth(model.DateOfBirth);
 
-        if (ModelState.IsValid)
-        {
-            return RedirectToAction(nameof(VolunteerController.AccountSuccess), model);
-        }
+            if (!String.IsNullOrEmpty(model.Email))
+            {
+                await DoesUserEmailExistInDatabaseAsync(model.Email);
+            }
+
+            if (!model.PostCode.HasValue)
+            {
+                ModelState.AddModelError("PostCode", "Enter a postcode");
+            }
+            else
+            {
+                if (model.Addresses == null)
+                {
+                    model.Addresses = await GetAddresses(model.PostCode.Value.ToString());
+                }
+            }
+
+            if (model.SelectedAddressId != null)
+            {
+                model.SelectedAddress = model.Addresses?.FirstOrDefault(a => a.FullAddress == model.SelectedAddressId);
+            }
+
+            if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
+            {
+                await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode.Value.ToString(), model.LastName, model.DateOfBirth);
+            }
+
+
+          if (ModelState.IsValid)
+          {
+              return RedirectToAction(nameof(VolunteerController.AccountSuccess), model);
+          }
 
         return View(model);
     }
@@ -390,5 +426,47 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         });
 
         return RedirectToAction("UpdateAnonymousRecruited", model);
+    }
+
+    public async Task<List<AddressDetails>?> GetAddresses(string postcode)
+    {
+        List<AddressDetails> addresses = new List<AddressDetails>();
+        string baseUrl = "https://szye9d9gqf.execute-api.eu-west-2.amazonaws.com/dev/api/address/postcode/";
+        string username = "nihr-dte-study-api";
+        string password = "0qvNuUymNt6o";
+
+        using (HttpClient client = new HttpClient())
+        {
+            var authToken = Encoding.ASCII.GetBytes($"{username}:{password}");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authToken));
+
+            try
+            {
+                HttpResponseMessage response = await client.GetAsync(baseUrl + postcode);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseConent = response.Content.ReadAsStringAsync();
+                    return MapResponseToAddressDetails(responseConent.Result.ToString());
+                }
+                else
+                {
+                    logger.LogError("An unsuccessful response was received during the postcode address lookup: " + response.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error retrieving addresses via postcode lookup");
+                throw new InvalidOperationException("Error retrieving addresses via postcode lookup");
+            }
+        }
+
+        return addresses;
+    }
+
+    public List<AddressDetails> MapResponseToAddressDetails(string jsonResponse)
+    {
+        List<AddressDetails> addressDetailsList = JsonSerializer.Deserialize<List<AddressDetails>>(jsonResponse);
+        return addressDetailsList;
     }
 }
