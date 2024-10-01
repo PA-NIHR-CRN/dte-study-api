@@ -335,17 +335,17 @@
 
                 <div class="govuk-radios" data-module="govuk-radios">
                     <div class="govuk-radios__item">
-                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "Yes" , new { @class = "govuk-radios__input", id = "SexRegisteredAtBirthYes" })
-                        @Html.Label("SexRegisteredAtBirthYes","Yes", new { @class = "govuk-label govuk-radios__label" })
+                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "true" , new { @class = "govuk-radios__input", id = "GenderIdentitySameAsBirthYes" })
+                        @Html.Label("GenderIdentitySameAsBirthYes", "Yes", new { @class = "govuk-label govuk-radios__label" })
                     </div>
                     <div class="govuk-radios__item">
-                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "No" , new { @class = "govuk-radios__input", id = "SexRegisteredAtBirthNo" })
-                        @Html.Label("SexRegisteredAtBirthNo", "No", new { @class = "govuk-label govuk-radios__label" })
+                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "false" , new { @class = "govuk-radios__input", id = "GenderIdentitySameAsBirthNo" })
+                        @Html.Label("GenderIdentitySameAsBirthNo", "No", new { @class = "govuk-label govuk-radios__label" })
                     </div>
                     <p class="govuk-body text-secondary radio-options-divider">or</p>
                     <div class="govuk-radios__item">
-                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "Prefer not to say", new { @class = "govuk-radios__input", id = "SexRegisteredAtBirthpreferNotToSay" })
-                        @Html.Label("SexRegisteredAtBirthpreferNotToSay", "Prefer not to say", new { @class = "govuk-label govuk-radios__label" })
+                        @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "null", new { @class = "govuk-radios__input", id = "GenderIdentitySameAsBirthpreferNotToSay" })
+                        @Html.Label("SGenderIdentitySameAsBirthpreferNotToSay", "Prefer not to say", new { @class = "govuk-label govuk-radios__label" })
                     </div>
                 </div>
             </div>

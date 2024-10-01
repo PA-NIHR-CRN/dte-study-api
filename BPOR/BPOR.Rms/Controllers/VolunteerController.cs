@@ -79,7 +79,7 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
         if (ModelState.IsValid)
         {
-            return RedirectToAction(nameof(VolunteerController.AccountSuccess));
+            return RedirectToAction(nameof(VolunteerController.AccountSuccess), model);
         }
 
         return View(model);
@@ -178,8 +178,42 @@ public class VolunteerController(ParticipantDbContext context) : Controller
         ModelState["DateOfBirth.Year"].Errors.Clear();
     }
 
-    public IActionResult AccountSuccess()
+    public async Task<IActionResult> AccountSuccess(VolunteerFormViewModel model)
     {
+        var participant = new Participant
+        {
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            RegistrationConsent = true,
+            Stage2CompleteUtc = DateTime.Now,
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now,
+            Email = model.Email == null ? "" : model.Email,
+            EthnicGroup = model.EthnicGroup,
+            EthnicBackground = model.EthnicBackground,
+            DateOfBirth = model.DateOfBirth.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
+            HasLongTermCondition = model.LongTermConditionOrIllness == "Prefer not to say" ? null : model.LongTermConditionOrIllness == "Yes",
+            GenderId = model.SexRegisteredAtBirth,
+            GenderIsSameAsSexRegisteredAtBirth = model.GenderIdentitySameAsBirth,
+            MobileNumber = model.Mobile,
+            LandlineNumber = model.LandLine,
+            // not yet implemented
+            //DailyLifeImpactId = 0,
+            CommunicationLanguageId = 1,
+            Address = new ParticipantAddress
+            {
+                AddressLine1 = model.AddressLine1,
+                AddressLine2 = model.AddressLine2,
+                AddressLine3 = model.AddressLine3,
+                AddressLine4 = model.AddressLine4,
+                Town = model.Town,
+                Postcode = model.PostCode.ToString()
+            },
+            IsDeleted = false,
+            HealthConditions = model.AreasOfResearch
+        };
+        context.Add(participant);
+        await context.SaveChangesAsync();
         return View();
     }
 

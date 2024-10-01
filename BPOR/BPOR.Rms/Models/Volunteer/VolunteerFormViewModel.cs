@@ -1,4 +1,5 @@
 ﻿using Amazon.Runtime.Internal.Transform;
+using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Researcher;
 using NIHR.GovUk.AspNetCore.Mvc;
 using Rbec.Postcodes;
@@ -66,11 +67,11 @@ public class VolunteerFormViewModel : FormWithSteps
 
     [Display(Name = "Sex registered at birth", Order = 14)]
     [Required(ErrorMessage = "Select if the sex registered at birth is female or male")]
-    public string SexRegisteredAtBirth { get; set; }
+    public int SexRegisteredAtBirth { get; set; }
 
     [Display(Name = "Gender identity same as sex registered at birth", Order = 15)]
     [Required(ErrorMessage = "Select gender identity same as sex registered at birth")]
-    public string GenderIdentitySameAsBirth { get; set; }
+    public bool GenderIdentitySameAsBirth { get; set; }
 
     [Display(Name = "Ethnic group", Order = 16)]
     [Required(ErrorMessage = "Select ethnic group")]
@@ -82,10 +83,10 @@ public class VolunteerFormViewModel : FormWithSteps
 
     [Display(Name = "Long-term conditions or illnesses", Order = 18)]
     [Required(ErrorMessage = "Select long-term conditions or illnesses")]
-    public string LongTermConditionOrIllness { get; set; }
+    public String LongTermConditionOrIllness { get; set; }
 
     [Display(Name = "Areas of research (optional)", Order = 19)]
-    public List<string>? AreasOfResearch { get; set; }
+    public List<ParticipantHealthCondition>? AreasOfResearch { get; set; }
 
     public bool IncludeNoAreasOfInterest { get; set; }
 
@@ -119,8 +120,8 @@ public class VolunteerFormViewModel : FormWithSteps
         get
         {
             var SexRegisteredAtBirthValues = new List<Dictionary<string, string>>();
-            SexRegisteredAtBirthValues.Add(new Dictionary<string, string> { { "label", "Female" }, { "value", "Female" } });
-            SexRegisteredAtBirthValues.Add(new Dictionary<string, string> { { "label", "Male" }, { "value", "Male" } });
+            SexRegisteredAtBirthValues.Add(new Dictionary<string, string> { { "label", "Female" }, { "value", "2" } });
+            SexRegisteredAtBirthValues.Add(new Dictionary<string, string> { { "label", "Male" }, { "value", "1" } });
             
             return SexRegisteredAtBirthValues;
         }
