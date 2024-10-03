@@ -48,64 +48,124 @@ public class VolunteerController(ParticipantDbContext context,
         return View(model);
     }
 
+
+    private bool isPostcodeValid(string postcode)
+    {
+        return Regex.IsMatch(postcode, "([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9][A-Za-z]?))))\\s?[0-9][A-Za-z]{2})");
+    }
     // POST: Study/Create
     // To protect from overposting attacks, enable the specific properties you want to bind to.
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     // [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-        [Bind("FirstName,LastName,DateOfBirth,PostCode,AddressLine1,AddressLine2,AddressLine3,AddressLine4,Town,PreferredContactMethod,Email,LandLine,Mobile" +
-        ",SexRegisteredAtBirth,GenderIdentitySameAsBirth,EthnicGroup,EthnicBackground,LongTermConditionOrIllness,AreasOfResearch,Addresses,SelectedAddress,SelectedAddressId")]
+        [Bind("FirstName,LastName,DateOfBirth,PostCode,AddressLine1,AddressLine2,AddressLine3,AddressLine4,Town,PreferredContactMethod,EmailAddress,LandLine,Mobile" +
+        ",ManualAdressEntry,SexRegisteredAtBirth,GenderIdentitySameAsBirth,EthnicGroup,EthnicBackground,EthnicBackgroundOptions,EthnicBackgroundOther,LongTermConditionOrIllness,AreasOfResearch,Addresses,SelectedAddress,SelectedAddressId")]
         VolunteerFormViewModel model, string action)
     {
         if (action == "AddressLookup")
         {
+            ModelState.Clear();
             if (!model.PostCode.HasValue)
             {
-                ModelState.Clear();
                 ModelState.AddModelError("PostCode", "Enter a postcode");
             }
             else
+            if (isPostcodeValid(model.PostCode.ToString()))
             {
                 model.Addresses = await GetAddresses(model.PostCode.Value.ToString());
-                ModelState.Clear();
+                model.Addresses.Insert(0,new AddressDetails
+                {
+                    FullAddress = model.Addresses.Count() + " Addresses found"
+                    
+                });
             }
+            if (model.ManualAdressEntry)
+            {
+                model.ManualAdressEntry = false;
+            }
+            return View(model);
         }
+        if (action == "ManualAddress")
+        {
+            if (model.Addresses != null)
+            {
+                model.Addresses = null;
+            }
+            if (model.SelectedAddressId != null)
+            {
+                model.SelectedAddressId = null;
+
+            }
+            model.ManualAdressEntry = true;
+           
+            return View(model);
+        }
+
+        if (action == "DisplayEthnicBackgrounds")
+        {
+            
+            if (model.EthnicGroup == null)
+            { 
+                ModelState.AddModelError("EthnicGroup", "Select a ethnic group");
+                return View(model);
+            }
+            switch (model.EthnicGroup)
+            {
+                case "Asian or Asian British":
+                    model.EthnicBackgroundOptions = model.EthnicbackgroundValuesAAB;
+                    break;
+                case "Black, African, Black British or Caribbean":
+                    model.EthnicBackgroundOptions = model.EthnicbackgroundValuesBABBC;
+                    break;
+                case "Mixed or multiple ethnic groups":
+                    model.EthnicBackgroundOptions = model.EthnicbackgroundValuesMM;
+                    break;
+                case "White":
+                    model.EthnicBackgroundOptions = model.EthnicbackgroundValuesW;
+                    break;
+                case "Other ethnic group":
+                    model.EthnicBackgroundOptions = model.EthnicbackgroundValuesO;
+                    break;
+            }
+            return View(model);
+        }
+
 
         if (action == "Save")
         {
-            if (String.IsNullOrEmpty(model.LandLine) && String.IsNullOrEmpty(model.Mobile))
+
+            ValidateFields(model);
+           
+            
+
+
+            if (!String.IsNullOrEmpty(model.EmailAddress))
             {
-                ModelState.AddModelError("LandLine", "Enter either a UK landline number or UK mobile number");
-            }
-            if (model.PreferredContactMethod == "Email" && String.IsNullOrEmpty(model.Email))
-            {
-                ModelState.AddModelError("Email", "Email address cannot be blank");
+                await DoesUserEmailExistInDatabaseAsync(model.EmailAddress);
             }
 
-            ValidateDateOfBirth(model.DateOfBirth);
 
-            if (!String.IsNullOrEmpty(model.Email))
-            {
-                await DoesUserEmailExistInDatabaseAsync(model.Email);
-            }
+            //validate and check email.
 
-            if (!model.PostCode.HasValue)
-            {
-                ModelState.AddModelError("PostCode", "Enter a postcode");
-            }
-            else
-            {
-                if (model.Addresses == null)
-                {
-                    model.Addresses = await GetAddresses(model.PostCode.Value.ToString());
-                }
-            }
+            //else
+            //{
+            //    if (model.Addresses == null)
+            //    {
+            //        model.Addresses = await GetAddresses(model.PostCode.Value.ToString());
+            //    }
+            //}
 
-            if (model.SelectedAddressId != null)
-            {
-                model.SelectedAddress = model.Addresses?.FirstOrDefault(a => a.FullAddress == model.SelectedAddressId);
-            }
+            //if (model.SelectedAddressId != null)
+            //{
+            //    var SelectedAddress = model.Addresses?.FirstOrDefault(a => a.FullAddress == model.SelectedAddressId);
+            //    model.Town = SelectedAddress.Town;
+            //    model.AddressLine1 = SelectedAddress.AddressLine1;
+            //    model.AddressLine2 = SelectedAddress.AddressLine2;
+            //    model.AddressLine3 = SelectedAddress.AddressLine3;
+            //    model.AddressLine4 = SelectedAddress.AddressLine4;
+
+            //}
 
             if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
             {
@@ -113,12 +173,132 @@ public class VolunteerController(ParticipantDbContext context,
             }
 
 
-          if (ModelState.IsValid)
-          {
-              return RedirectToAction(nameof(VolunteerController.AccountSuccess), model);
-          }
+            if (ModelState.IsValid)
+            { 
+                bool? hasLongTermIllness = null;
+                int? dailyLifeImpact= null;
+                switch (model.LongTermConditionOrIllness)
+                {
+                    case 1:
+                        hasLongTermIllness = null;
+                        dailyLifeImpact = null;
+                        break;
+                    case 2:
+                        hasLongTermIllness = false;
+                        dailyLifeImpact = null;
+                        break;
+                    case 3:
+                        hasLongTermIllness = true;
+                        dailyLifeImpact = 3;
+                        break;
+                    case 4:
+                        hasLongTermIllness = true;
+                        dailyLifeImpact = 2;
+                        break;
+                    case 5:
+                        hasLongTermIllness = true;
+                        dailyLifeImpact = 1;
+                        break;
+                }
 
+
+                var participant = new Participant
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    RegistrationConsent = true,
+                    Stage2CompleteUtc = DateTime.Now,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    Email = model.EmailAddress == null ? "" : model.EmailAddress,
+                    EthnicGroup = model.EthnicGroup,
+                    EthnicBackground = model.EthnicBackground,
+                    DateOfBirth = model.DateOfBirth.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
+                    HasLongTermCondition = hasLongTermIllness,
+                    DailyLifeImpactId = dailyLifeImpact,
+                    GenderId = model.SexRegisteredAtBirth,
+                    GenderIsSameAsSexRegisteredAtBirth = model.GenderIdentitySameAsBirth == "Prefer" ? null: model.GenderIdentitySameAsBirth == "Yes",
+                    MobileNumber = model.Mobile,
+                    LandlineNumber = model.LandLine,
+                    CommunicationLanguageId = 1,
+                    Address = new ParticipantAddress
+                    {
+                        AddressLine1 = model.AddressLine1,
+                        AddressLine2 = model.AddressLine2,
+                        AddressLine3 = model.AddressLine3,
+                        AddressLine4 = model.AddressLine4,
+                        Town = model.Town,
+                        Postcode = model.PostCode.ToString()
+                    },
+                    IsDeleted = false,
+                    HealthConditions = model.AreasOfResearch.Select(x => new ParticipantHealthCondition
+                    {
+                        HealthConditionId = x
+                    }).ToList()
+                };
+                context.Add(participant);
+                await context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(VolunteerController.AccountSuccess));
+            }
+        }
         return View(model);
+    }
+
+    private void ValidateFields(VolunteerFormViewModel model)
+    {
+
+        // validate required fields
+        if (String.IsNullOrEmpty(model.LandLine) && String.IsNullOrEmpty(model.Mobile))
+        {
+            ModelState.AddModelError("LandLine", "Enter either a UK landline number or UK mobile number");
+        }
+        if (model.PreferredContactMethod == "Email" && String.IsNullOrEmpty(model.EmailAddress))
+        {
+            ModelState.AddModelError("EmailAddress", "Email address cannot be blank");
+        }
+
+        if (!model.PostCode.HasValue)
+        {
+            ModelState.AddModelError("PostCode", "Enter a postcode");
+        }
+        if (!model.ManualAdressEntry)
+        {
+            //addressline1 &town needs verified
+            if (String.IsNullOrEmpty(model.AddressLine1))
+            {
+                ModelState.AddModelError("AddressLine1", "Enter the first line of the address");
+            }
+
+            if (String.IsNullOrEmpty(model.Town))
+            {
+                ModelState.AddModelError("Town", "Enter the town of the address");
+            }
+        }
+        if(model.SexRegisteredAtBirth == 0)
+        {
+            ModelState.AddModelError("SexRegisteredAtBirth", "Select if the sex registered at birth is female or male");
+        }
+        if (model.LongTermConditionOrIllness == 0)
+        {
+            ModelState.AddModelError("LongTermConditionOrIllness", "Select long-term conditions or illnesses and reduced ability to carry out daily activities");
+        }
+
+
+
+
+        // invalid values for fields
+        if (!isPostcodeValid(model.PostCode.ToString()))
+        {
+            ModelState.AddModelError("PostCode", "Enter a full UK postcode");
+        }
+        string emailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+        if (model.EmailAddress != null && !Regex.IsMatch(model.EmailAddress, emailRegex))
+        {
+            ModelState.AddModelError("EmailAddress", "Enter an email address in the correct format, like name@example.com");
+        }
+
+        ValidateDateOfBirth(model.DateOfBirth);
     }
 
     private async Task DoesPostcodeSurnameDoBComboExistAsync(string postCode, string lastName, GovUkDate dateOfBirth)
@@ -147,7 +327,7 @@ public class VolunteerController(ParticipantDbContext context,
 
         if (user != null)
         {
-            ModelState.AddModelError("Email", "Email address already exists and cannot be used");
+            ModelState.AddModelError("EmailAddress", "Email address already exists and cannot be used");
         }
     }
 
@@ -204,6 +384,10 @@ public class VolunteerController(ParticipantDbContext context,
             {
                 ModelState.AddModelError("DateOfBirth.Day", "Volunteer must be aged 18 or older");
             }
+            if (dateOfBirth.ToDateOnly() > today)
+            {
+                ModelState.AddModelError("DateOfBirth.Day", "Date of birth must be in the past");
+            }
         }
     }
 
@@ -214,42 +398,8 @@ public class VolunteerController(ParticipantDbContext context,
         ModelState["DateOfBirth.Year"].Errors.Clear();
     }
 
-    public async Task<IActionResult> AccountSuccess(VolunteerFormViewModel model)
-    {
-        var participant = new Participant
-        {
-            FirstName = model.FirstName,
-            LastName = model.LastName,
-            RegistrationConsent = true,
-            Stage2CompleteUtc = DateTime.Now,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now,
-            Email = model.Email == null ? "" : model.Email,
-            EthnicGroup = model.EthnicGroup,
-            EthnicBackground = model.EthnicBackground,
-            DateOfBirth = model.DateOfBirth.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
-            HasLongTermCondition = model.LongTermConditionOrIllness == "Prefer not to say" ? null : model.LongTermConditionOrIllness == "Yes",
-            GenderId = model.SexRegisteredAtBirth,
-            GenderIsSameAsSexRegisteredAtBirth = model.GenderIdentitySameAsBirth,
-            MobileNumber = model.Mobile,
-            LandlineNumber = model.LandLine,
-            // not yet implemented
-            //DailyLifeImpactId = 0,
-            CommunicationLanguageId = 1,
-            Address = new ParticipantAddress
-            {
-                AddressLine1 = model.AddressLine1,
-                AddressLine2 = model.AddressLine2,
-                AddressLine3 = model.AddressLine3,
-                AddressLine4 = model.AddressLine4,
-                Town = model.Town,
-                Postcode = model.PostCode.ToString()
-            },
-            IsDeleted = false,
-            HealthConditions = model.AreasOfResearch
-        };
-        context.Add(participant);
-        await context.SaveChangesAsync();
+    public IActionResult AccountSuccess()
+    { 
         return View();
     }
 

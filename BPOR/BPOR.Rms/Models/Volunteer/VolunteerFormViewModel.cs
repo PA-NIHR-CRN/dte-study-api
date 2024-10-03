@@ -5,6 +5,7 @@ using NIHR.GovUk.AspNetCore.Mvc;
 using Rbec.Postcodes;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 
@@ -23,20 +24,17 @@ public class VolunteerFormViewModel : FormWithSteps
     public string LastName { get; set; }
 
     [Display(Name = "Date of birth", Order = 3)]
-    public GovUkDate DateOfBirth { get; set; } = new GovUkDate(1900, 2100);
+    public GovUkDate? DateOfBirth { get; set; } = new GovUkDate(1900, 2100);
 
     [Display(Name = "Postcode", Order = 4)]
     public Postcode? PostCode { get; set; }
     public List<AddressDetails>? Addresses { get; set; }
-    public AddressDetails? SelectedAddress { get; set; }
 
     [Display(Name = "Select an address", Order = 5)]
-    [Required(ErrorMessage = "Select an address")]
     public string? SelectedAddressId { get; set; }
 
     [Display(Name = "Address line 1", Order = 5)]
-    [Required(ErrorMessage = "Enter the first line of the address")]
-    public string AddressLine1 { get; set; }
+    public string? AddressLine1 { get; set; }
 
     [Display(Name = "Address line 2 (optional)", Order = 6)]
     public string? AddressLine2 { get; set; }
@@ -48,8 +46,7 @@ public class VolunteerFormViewModel : FormWithSteps
     public string? AddressLine4 { get; set; }
 
     [Display(Name = "Town", Order = 9)]
-    [Required(ErrorMessage = "Enter the town of the address")]
-    public string Town { get; set; }
+    public string? Town { get; set; }
 
     [Display(Name = "Preferred contact method", Order = 10)]
     [Required(ErrorMessage = "Select if the preferred contact method is email or letter")]
@@ -58,7 +55,7 @@ public class VolunteerFormViewModel : FormWithSteps
     [Display(Name = "Email address", Order = 11)]
     [StringLength(254, ErrorMessage = "The email address cannot exceed 254 characters.")]
     [EmailAddress(ErrorMessage = "Enter an email address in the correct format, like name@example.com")]
-    public string? Email { get; set; }
+    public string? EmailAddress { get; set; }
 
 
     [Display(Name = "Landline number", Order = 12)]
@@ -77,7 +74,7 @@ public class VolunteerFormViewModel : FormWithSteps
 
     [Display(Name = "Gender identity same as sex registered at birth", Order = 15)]
     [Required(ErrorMessage = "Select gender identity same as sex registered at birth")]
-    public bool GenderIdentitySameAsBirth { get; set; }
+    public string GenderIdentitySameAsBirth { get; set; }
 
     [Display(Name = "Ethnic group", Order = 16)]
     [Required(ErrorMessage = "Select ethnic group")]
@@ -86,15 +83,20 @@ public class VolunteerFormViewModel : FormWithSteps
     [Display(Name = "Ethnic background", Order = 17)]
     [Required(ErrorMessage = "Select ethnic background")]
     public string EthnicBackground { get; set; }
+    public List<Dictionary<string, string>>? EthnicBackgroundOptions { get; set; }
+
+    [Display (Name = "How would you describe your background?", Order = 17)]
+    public string? EthnicBackgroundOther { get; set; }
 
     [Display(Name = "Long-term conditions or illnesses", Order = 18)]
     [Required(ErrorMessage = "Select long-term conditions or illnesses")]
-    public String LongTermConditionOrIllness { get; set; }
+    public int LongTermConditionOrIllness { get; set; }
 
     [Display(Name = "Areas of research (optional)", Order = 19)]
-    public List<ParticipantHealthCondition>? AreasOfResearch { get; set; }
+    public List<int>? AreasOfResearch { get; set; }
 
     public bool IncludeNoAreasOfInterest { get; set; }
+    public bool ManualAdressEntry { get; set; } = false;
 
 
 
