@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NIHR.GovUk.AspNetCore.Mvc;
-using NIHR.Infrastructure.EntityFrameworkCore.Settings;
 using NIHR.Infrastructure.Settings;
 using System.Net.Http.Headers;
 using System.Text;
@@ -26,7 +25,7 @@ public class VolunteerController(ParticipantDbContext context,
     ILogger<VolunteerController> logger,
    IPostcodeMapper locationApiClient) : Controller
 {
-    private readonly IOptions<PostcodeLookupSettings> _postcodeLookupSettings;
+
     public IActionResult Consent()
     {
         return View(new VolunteerContactConsentViewModel());
