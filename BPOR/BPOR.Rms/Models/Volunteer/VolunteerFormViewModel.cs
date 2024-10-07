@@ -1,19 +1,15 @@
-﻿using Amazon.Runtime.Internal.Transform;
-using BPOR.Domain.Entities;
-using BPOR.Rms.Models.Researcher;
+﻿using BPOR.Rms.Models.Researcher;
 using NIHR.GovUk.AspNetCore.Mvc;
 using Rbec.Postcodes;
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-
+using NIHR.Infrastructure.Models;
 
 namespace BPOR.Rms.Models.Volunteer;
 
 public class VolunteerFormViewModel : FormWithSteps
 {
-// should all be made nullable and control be used in the controller?
+
+    // should all be made nullable and control be used in the controller?
 
     [Display(Name = "First name", Order = 1)]
     [Required(ErrorMessage = "Enter a first name")]
@@ -28,7 +24,8 @@ public class VolunteerFormViewModel : FormWithSteps
 
     [Display(Name = "Postcode", Order = 4)]
     public Postcode? PostCode { get; set; }
-    public List<AddressDetails>? Addresses { get; set; }
+
+    public List<PostcodeAddressModel>? Addresses { get; set; }
 
     [Display(Name = "Select an address", Order = 5)]
     public string? SelectedAddressId { get; set; }
@@ -81,8 +78,7 @@ public class VolunteerFormViewModel : FormWithSteps
     public string EthnicGroup { get; set; }
 
     [Display(Name = "Ethnic background", Order = 17)]
-    [Required(ErrorMessage = "Select ethnic background")]
-    public string EthnicBackground { get; set; }
+    public string? EthnicBackground { get; set; }
     public List<Dictionary<string, string>>? EthnicBackgroundOptions { get; set; }
 
     [Display (Name = "How would you describe your background?", Order = 17)]
@@ -96,7 +92,7 @@ public class VolunteerFormViewModel : FormWithSteps
     public List<int>? AreasOfResearch { get; set; }
 
     public bool IncludeNoAreasOfInterest { get; set; }
-    public bool ManualAdressEntry { get; set; } = false;
+    public bool ManualAddressEntry { get; set; }
 
 
 
@@ -135,17 +131,39 @@ public class VolunteerFormViewModel : FormWithSteps
         }
     }
 
+    public void addEthnicOptions()
+    {
+        switch (EthnicGroup)
+        {
+            case "Asian":
+                EthnicBackgroundOptions = EthnicbackgroundValuesAAB;
+                break;
+            case "Black":
+                EthnicBackgroundOptions = EthnicbackgroundValuesBABBC;
+                break;
+            case "Mixed":
+                EthnicBackgroundOptions = EthnicbackgroundValuesMM;
+                break;
+            case "White":
+                EthnicBackgroundOptions = EthnicbackgroundValuesW;
+                break;
+            case "Other":
+                EthnicBackgroundOptions = EthnicbackgroundValuesO;
+                break;
+        }
+    }
 
     public List<Dictionary<string, string>> EthnicGroupValues
     {
         get
         {
+            ;
             var EthnicGroupValues = new List<Dictionary<string, string>>();
-            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Asian or Asian British" }, { "value", "Asian or Asian British" } });
-            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Black, African, Black British or Caribbean" }, { "value", "Black, African, Black British or Caribbean" } });
-            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Mixed or multiple ethnic groups" }, { "value", "Mixed or multiple ethnic groups" } });
+            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Asian or Asian British" }, { "value", "Asian" } });
+            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Black, African, Black British or Caribbean" }, { "value", "Black" } });
+            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Mixed or multiple ethnic groups" }, { "value", "Mixed" } });
             EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "White" }, { "value", "White" } });
-            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Other ethnic group" }, { "value", "Other ethnic group" } });
+            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Other ethnic group" }, { "value", "Other" } });
 
             return EthnicGroupValues;
         }

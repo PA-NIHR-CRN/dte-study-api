@@ -14,11 +14,17 @@ using System.Text;
 using System.Text.Json;
 using System;
 using System.Text.RegularExpressions;
+using Amazon.DynamoDBv2;
+using BPOR.Domain.Entities.RefData;
+using System.Collections.Generic;
+using NIHR.Infrastructure;
+using NIHR.Infrastructure.Models;
 
 namespace BPOR.Rms.Controllers;
 
 public class VolunteerController(ParticipantDbContext context,
-    ILogger<VolunteerController> logger) : Controller
+    ILogger<VolunteerController> logger,
+   IPostcodeMapper locationApiClient) : Controller
 {
     private readonly IOptions<PostcodeLookupSettings> _postcodeLookupSettings;
     public IActionResult Consent()
@@ -44,7 +50,10 @@ public class VolunteerController(ParticipantDbContext context,
 
     public IActionResult Create()
     {
-        var model = new VolunteerFormViewModel();
+        var model = new VolunteerFormViewModel()
+        {
+            ManualAddressEntry = false
+        };
         return View(model);
     }
 
@@ -60,9 +69,15 @@ public class VolunteerController(ParticipantDbContext context,
     // [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
         [Bind("FirstName,LastName,DateOfBirth,PostCode,AddressLine1,AddressLine2,AddressLine3,AddressLine4,Town,PreferredContactMethod,EmailAddress,LandLine,Mobile" +
-        ",ManualAdressEntry,SexRegisteredAtBirth,GenderIdentitySameAsBirth,EthnicGroup,EthnicBackground,EthnicBackgroundOptions,EthnicBackgroundOther,LongTermConditionOrIllness,AreasOfResearch,Addresses,SelectedAddress,SelectedAddressId")]
+        ",ManualAddressEntry,SexRegisteredAtBirth,GenderIdentitySameAsBirth,EthnicGroup,EthnicBackground,EthnicBackgroundOptions,EthnicBackgroundOther,LongTermConditionOrIllness,AreasOfResearch,Addresses,SelectedAddress,SelectedAddressId")]
         VolunteerFormViewModel model, string action)
     {
+
+        if (model.EthnicBackground != null)
+        {
+            model.addEthnicOptions();
+        }
+
         if (action == "AddressLookup")
         {
             ModelState.Clear();
@@ -74,20 +89,22 @@ public class VolunteerController(ParticipantDbContext context,
             if (isPostcodeValid(model.PostCode.ToString()))
             {
                 model.Addresses = await GetAddresses(model.PostCode.Value.ToString());
-                model.Addresses.Insert(0,new AddressDetails
+                model.Addresses.Insert(0, new PostcodeAddressModel
                 {
                     FullAddress = model.Addresses.Count() + " Addresses found"
-                    
                 });
             }
-            if (model.ManualAdressEntry)
+            if (model.ManualAddressEntry)
             {
-                model.ManualAdressEntry = false;
+                model.ManualAddressEntry = false;
             }
+            model.SelectedAddressId = null;
             return View(model);
         }
+
         if (action == "ManualAddress")
         {
+            ModelState.Clear();
             if (model.Addresses != null)
             {
                 model.Addresses = null;
@@ -97,37 +114,22 @@ public class VolunteerController(ParticipantDbContext context,
                 model.SelectedAddressId = null;
 
             }
-            model.ManualAdressEntry = true;
-           
+            model.ManualAddressEntry = true;
+
+
             return View(model);
         }
 
         if (action == "DisplayEthnicBackgrounds")
         {
-            
+            ModelState.Clear();
             if (model.EthnicGroup == null)
             { 
                 ModelState.AddModelError("EthnicGroup", "Select a ethnic group");
                 return View(model);
             }
-            switch (model.EthnicGroup)
-            {
-                case "Asian or Asian British":
-                    model.EthnicBackgroundOptions = model.EthnicbackgroundValuesAAB;
-                    break;
-                case "Black, African, Black British or Caribbean":
-                    model.EthnicBackgroundOptions = model.EthnicbackgroundValuesBABBC;
-                    break;
-                case "Mixed or multiple ethnic groups":
-                    model.EthnicBackgroundOptions = model.EthnicbackgroundValuesMM;
-                    break;
-                case "White":
-                    model.EthnicBackgroundOptions = model.EthnicbackgroundValuesW;
-                    break;
-                case "Other ethnic group":
-                    model.EthnicBackgroundOptions = model.EthnicbackgroundValuesO;
-                    break;
-            }
+            model.addEthnicOptions();
+
             return View(model);
         }
 
@@ -144,28 +146,23 @@ public class VolunteerController(ParticipantDbContext context,
             {
                 await DoesUserEmailExistInDatabaseAsync(model.EmailAddress);
             }
+            if (!model.ManualAddressEntry)
+            {
+                if (model.Addresses == null)
+                {
+                    model.Addresses = await GetAddresses(model.PostCode.Value.ToString());
+                }
 
-
-            //validate and check email.
-
-            //else
-            //{
-            //    if (model.Addresses == null)
-            //    {
-            //        model.Addresses = await GetAddresses(model.PostCode.Value.ToString());
-            //    }
-            //}
-
-            //if (model.SelectedAddressId != null)
-            //{
-            //    var SelectedAddress = model.Addresses?.FirstOrDefault(a => a.FullAddress == model.SelectedAddressId);
-            //    model.Town = SelectedAddress.Town;
-            //    model.AddressLine1 = SelectedAddress.AddressLine1;
-            //    model.AddressLine2 = SelectedAddress.AddressLine2;
-            //    model.AddressLine3 = SelectedAddress.AddressLine3;
-            //    model.AddressLine4 = SelectedAddress.AddressLine4;
-
-            //}
+                if (model.SelectedAddressId != null)
+                {
+                    var SelectedAddress = model.Addresses?.FirstOrDefault(a => a.FullAddress == model.SelectedAddressId);
+                    model.Town = SelectedAddress.Town;
+                    model.AddressLine1 = SelectedAddress.AddressLine1;
+                    model.AddressLine2 = SelectedAddress.AddressLine2;
+                    model.AddressLine3 = SelectedAddress.AddressLine3;
+                    model.AddressLine4 = SelectedAddress.AddressLine4;
+                }
+            }
 
             if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
             {
@@ -207,6 +204,7 @@ public class VolunteerController(ParticipantDbContext context,
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     RegistrationConsent = true,
+                    RegistrationConsentAtUtc = DateTime.Now,
                     Stage2CompleteUtc = DateTime.Now,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
@@ -217,7 +215,7 @@ public class VolunteerController(ParticipantDbContext context,
                     HasLongTermCondition = hasLongTermIllness,
                     DailyLifeImpactId = dailyLifeImpact,
                     GenderId = model.SexRegisteredAtBirth,
-                    GenderIsSameAsSexRegisteredAtBirth = model.GenderIdentitySameAsBirth == "Prefer" ? null: model.GenderIdentitySameAsBirth == "Yes",
+                    GenderIsSameAsSexRegisteredAtBirth = model.GenderIdentitySameAsBirth == "Prefer" ? null : model.GenderIdentitySameAsBirth == "Yes",
                     MobileNumber = model.Mobile,
                     LandlineNumber = model.LandLine,
                     CommunicationLanguageId = 1,
@@ -230,12 +228,20 @@ public class VolunteerController(ParticipantDbContext context,
                         Town = model.Town,
                         Postcode = model.PostCode.ToString()
                     },
+                    //may need to save participant and update GUID
+                    ParticipantIdentifiers = new List<ParticipantIdentifier> {
+                        new ParticipantIdentifier() {
+                            IdentifierTypeId = 2,
+                            Value = Guid.NewGuid()
+                        }
+                    },
                     IsDeleted = false,
                     HealthConditions = model.AreasOfResearch.Select(x => new ParticipantHealthCondition
                     {
                         HealthConditionId = x
                     }).ToList()
                 };
+
                 context.Add(participant);
                 await context.SaveChangesAsync();
 
@@ -262,7 +268,7 @@ public class VolunteerController(ParticipantDbContext context,
         {
             ModelState.AddModelError("PostCode", "Enter a postcode");
         }
-        if (!model.ManualAdressEntry)
+        if (model.ManualAddressEntry)
         {
             //addressline1 &town needs verified
             if (String.IsNullOrEmpty(model.AddressLine1))
@@ -283,9 +289,21 @@ public class VolunteerController(ParticipantDbContext context,
         {
             ModelState.AddModelError("LongTermConditionOrIllness", "Select long-term conditions or illnesses and reduced ability to carry out daily activities");
         }
+        if(model.EthnicBackground == null)
+        {
+            ModelState.AddModelError("EthnicBackground", "Select ethnic background"); 
+        }
+
+        if (!model.ManualAddressEntry)
+        {
+            // make sure one of the address is selected.\
+            if(model.SelectedAddressId == null || model.SelectedAddressId.Contains("Addresses found"))
+            {
+                ModelState.AddModelError("SelectedAddressId", "Select a address or enter address manually");
+            }
 
 
-
+        }
 
         // invalid values for fields
         if (!isPostcodeValid(model.PostCode.ToString()))
@@ -296,6 +314,11 @@ public class VolunteerController(ParticipantDbContext context,
         if (model.EmailAddress != null && !Regex.IsMatch(model.EmailAddress, emailRegex))
         {
             ModelState.AddModelError("EmailAddress", "Enter an email address in the correct format, like name@example.com");
+        }
+
+        if (!model.ManualAddressEntry && !model.SelectedAddressId.Contains(model.PostCode.ToString()))
+        {
+            ModelState.AddModelError("PostCode", "Postcode does not match selected address");
         }
 
         ValidateDateOfBirth(model.DateOfBirth);
@@ -578,30 +601,21 @@ public class VolunteerController(ParticipantDbContext context,
         return RedirectToAction("UpdateAnonymousRecruited", model);
     }
 
-    public async Task<List<AddressDetails>?> GetAddresses(string postcode)
+    public async Task<List<PostcodeAddressModel>?> GetAddresses(string postcode)
     {
-        List<AddressDetails> addresses = new List<AddressDetails>();
-        string baseUrl = "https://szye9d9gqf.execute-api.eu-west-2.amazonaws.com/dev/api/address/postcode/";
-        string username = "nihr-dte-study-api";
-        string password = "0qvNuUymNt6o";
-
-        using (HttpClient client = new HttpClient())
-        {
-            var authToken = Encoding.ASCII.GetBytes($"{username}:{password}");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authToken));
-
+        IEnumerable<PostcodeAddressModel> addressModels;
             try
             {
-                HttpResponseMessage response = await client.GetAsync(baseUrl + postcode);
+            addressModels = await locationApiClient.GetAddressesByPostcodeAsync(postcode, new CancellationToken());
 
-                if (response.IsSuccessStatusCode)
+                if (addressModels != null && addressModels.Any())
                 {
-                    var responseConent = response.Content.ReadAsStringAsync();
-                    return MapResponseToAddressDetails(responseConent.Result.ToString());
+                return addressModels.ToList();
                 }
                 else
                 {
-                    logger.LogError("An unsuccessful response was received during the postcode address lookup: " + response.ToString());
+                    logger.LogError("No addresses found for post code : " + postcode);
+                return new List<PostcodeAddressModel>();
                 }
             }
             catch (Exception ex)
@@ -609,14 +623,6 @@ public class VolunteerController(ParticipantDbContext context,
                 logger.LogError(ex, "Error retrieving addresses via postcode lookup");
                 throw new InvalidOperationException("Error retrieving addresses via postcode lookup");
             }
-        }
-
-        return addresses;
     }
 
-    public List<AddressDetails> MapResponseToAddressDetails(string jsonResponse)
-    {
-        List<AddressDetails> addressDetailsList = JsonSerializer.Deserialize<List<AddressDetails>>(jsonResponse);
-        return addressDetailsList;
-    }
 }

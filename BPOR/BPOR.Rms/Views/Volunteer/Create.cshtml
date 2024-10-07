@@ -4,12 +4,10 @@
     ViewData["Title"] = "Add a volunteer - Volunteer Registry - Be Part of Research";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
         <h1 class="govuk-heading-xl">Add a volunteer to the volunteer registry</h1>
         <p class="govuk-body">All fields are mandatory unless specified otherwise</p>
-
         <form asp-action="Create">
             <div class="govuk-form-group @(Html.ViewData.ModelState["FirstName"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <label asp-for="FirstName" class="govuk-label" for="FirstName">
@@ -124,12 +122,13 @@
 
                 }
             </div>
-            <div class="govuk-form-group" >
+            <div class="govuk-form-group">
                 <button type="submit" name="action" value="AddressLookup" class="govuk-button" data_module="govuk-button">Search Addresses</button>
-                <button type="submit" name="action" value="ManualAddress" class="govuk-button" data_module="govuk-button">Enter Address manually</button>
+                <button type="submit" name="action" value="ManualAddress" class="govuk-button govuk-button--secondary" data_module="govuk-button">Enter Address manually</button>
             </div>
-            @if (Model.ManualAdressEntry)
+            @if (Model.ManualAddressEntry)
             {
+                <input asp-for="ManualAddressEntry" hidden value="@(Model.ManualAddressEntry)" type="checkbox" />
                 <div class="govuk-form-group @(Html.ViewData.ModelState["AddressLine1"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                     <label asp-for="AddressLine1" class="govuk-label" for="AddressLine1">
                         @Html.DisplayNameFor(model => model.AddressLine1)
@@ -222,7 +221,7 @@
 
             }
 
-            @if (Model.Addresses != null)
+            @if (Model.Addresses != null && Model.SelectedAddressId == null)
             {
                 <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedAddressId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                     <label asp-for="SelectedAddressId" class="govuk-label" for="SelectedAddressId">
@@ -236,32 +235,54 @@
 
                 </div>
             }
+            else
+            {
+        <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedAddressId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label asp-for="SelectedAddressId" class="govuk-label" for="SelectedAddressId">
+                @Html.DisplayNameFor(model => model.SelectedAddressId)
+            </label>
+            @if (Html.ViewData.ModelState["SelectedAddressId"]?.Errors.Count > 0)
+            {
+                <span id="SelectedAddressId-error" class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @Html.ValidationMessageFor(model => model.SelectedAddressId)
+                </span>
+                <input asp-for="SelectedAddressId" class="govuk-input  govuk-input govuk-input--error" id="SelectedAddressId" aria-describedby="SelectedAddressId-error" value="@(Model.SelectedAddressId)" />
+            }
+            else
+            {
+                <input asp-for="SelectedAddressId" class="govuk-input" id="SelectedAddressId-disabled" value="@(Model.SelectedAddressId)" disabled />
+                <input asp-for="SelectedAddressId" class="govuk-input" id="SelectedAddressId" value="@(Model.SelectedAddressId)" hidden />
 
-        <div class="govuk-form-group @(Html.ViewData.ModelState["PreferredContactMethod"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <fieldset class="govuk-fieldset" id="PreferredContactMethod">
-                <legend>
-                    <label asp-for="PreferredContactMethod" class="govuk-label" for="PreferredContactMethod">
-                        @Html.DisplayNameFor(model => Model.PreferredContactMethod)
-                    </label>
-                </legend>
-                @if (Html.ViewData.ModelState["PreferredContactMethod"]?.Errors.Count > 0)
-                {
-                    <span id="LastName-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.PreferredContactMethod)
-                    </span>
-                }
-                <div class="govuk-radios" data-module="govuk-radios">
-                    @foreach (var preferredContactOptions in Model.PrefferdContactMethodValues)
-                    {
-                        <div class="govuk-radios__item">
-                            @Html.RadioButtonFor(m => m.PreferredContactMethod, preferredContactOptions["value"], new { @class = "govuk-radios__input", id = "PreferredContactMethod" + preferredContactOptions["value"] })
-                            @Html.Label("PreferredContactMethod" + preferredContactOptions["value"], preferredContactOptions["label"], new { @class = "govuk-label govuk-radios__label" })
-                        </div>
-                    }
-                </div>
-            </fieldset>
+            }
         </div>
+
+            }
+            <div class="govuk-form-group @(Html.ViewData.ModelState["PreferredContactMethod"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset" id="PreferredContactMethod">
+                    <legend>
+                        <label asp-for="PreferredContactMethod" class="govuk-label" for="PreferredContactMethod">
+                            @Html.DisplayNameFor(model => Model.PreferredContactMethod)
+                        </label>
+                    </legend>
+                    @if (Html.ViewData.ModelState["PreferredContactMethod"]?.Errors.Count > 0)
+                    {
+                        <span id="LastName-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @Html.ValidationMessageFor(model => model.PreferredContactMethod)
+                        </span>
+                    }
+                    <div class="govuk-radios" data-module="govuk-radios">
+                        @foreach (var preferredContactOptions in Model.PrefferdContactMethodValues)
+                        {
+                            <div class="govuk-radios__item">
+                                @Html.RadioButtonFor(m => m.PreferredContactMethod, preferredContactOptions["value"], new { @class = "govuk-radios__input", id = "PreferredContactMethod" + preferredContactOptions["value"] })
+                                @Html.Label("PreferredContactMethod" + preferredContactOptions["value"], preferredContactOptions["label"], new { @class = "govuk-label govuk-radios__label" })
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
 
             <div class="govuk-form-group @(Html.ViewData.ModelState["EmailAddress"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <label asp-for="EmailAddress" class="govuk-label" for="EmailAddress">
@@ -273,11 +294,11 @@
                         <span class="govuk-visually-hidden">Error:</span>
                         @Html.ValidationMessageFor(model => model.EmailAddress)
                     </span>
-                    <input asp-for="EmailAddress" class="govuk-input  govuk-input govuk-input--error" id="EmailAddress" aria-describedby="EmailAddress-error" value="@(Model.EmailAddress)"  type="text"/>
+                    <input asp-for="EmailAddress" class="govuk-input  govuk-input govuk-input--error" id="EmailAddress" aria-describedby="EmailAddress-error" value="@(Model.EmailAddress)" type="text" />
                 }
                 else
                 {
-                    <input asp-for="EmailAddress" class=" govuk-input" id="EmailAddress" value="@(Model.EmailAddress)" type="text"/>
+                    <input asp-for="EmailAddress" class=" govuk-input" id="EmailAddress" value="@(Model.EmailAddress)" type="text" />
                 }
             </div>
 
@@ -353,7 +374,7 @@
                         </label>
                     </legend>
 
-                    
+
                     @if (Html.ViewData.ModelState["GenderIdentitySameAsBirth"]?.Errors.Count > 0)
                     {
                         <span id="GenderIdentitySameAsBirth-error" class="govuk-error-message">
@@ -455,12 +476,12 @@
             }
 
 
-        <div class="govuk-form-group @(Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <fieldset class="govuk-fieldset" id="LongTermConditionOrIllness">
-                <legend>
-                    <label asp-for="LongTermConditionOrIllness" class="govuk-label" for="LongTermConditionOrIllness">
-                        @Html.DisplayNameFor(model => Model.LongTermConditionOrIllness)
-                    </label>
+            <div class="govuk-form-group @(Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset" id="LongTermConditionOrIllness">
+                    <legend>
+                        <label asp-for="LongTermConditionOrIllness" class="govuk-label" for="LongTermConditionOrIllness">
+                            @Html.DisplayNameFor(model => Model.LongTermConditionOrIllness)
+                        </label>
                     </legend>
                     @if (Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0)
                     {
@@ -492,8 +513,8 @@
                             @Html.Label("LongTermConditionOrIllnesspreferNotToSay", "Prefer not to say", new { @class = "govuk-label govuk-radios__label" })
                         </div>
                     </div>
-            </fieldset>
-        </div>
+                </fieldset>
+            </div>
 
             <areas-of-research-select-list for="AreasOfResearch" for-none="IncludeNoAreasOfInterest" plain="true" />
 
@@ -506,5 +527,5 @@
 
         </form>
 
-        </div>
     </div>
+</div>
