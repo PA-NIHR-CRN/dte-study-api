@@ -104,28 +104,6 @@
                 </div>
             </div>
 
-            <div class="govuk-form-group @(Html.ViewData.ModelState["PostCode"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                <label asp-for="PostCode" class="govuk-label" for="PostCode">
-                    @Html.DisplayNameFor(model => model.PostCode)
-                </label>
-                @if (Html.ViewData.ModelState["PostCode"]?.Errors.Count > 0)
-                {
-                    <span id="PostCode-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.PostCode)
-                    </span>
-                    <input asp-for="PostCode" class="govuk-input  govuk-input govuk-input--error" id="PostCode" aria-describedby="PostCode-error" value="@(Model.PostCode)" />
-                }
-                else
-                {
-                    <input asp-for="PostCode" class=" govuk-input" id="PostCode" value="@(Model.PostCode)" />
-
-                }
-            </div>
-            <div class="govuk-form-group">
-                <button type="submit" name="action" value="AddressLookup" class="govuk-button" data_module="govuk-button">Search Addresses</button>
-                <button type="submit" name="action" value="ManualAddress" class="govuk-button govuk-button--secondary" data_module="govuk-button">Enter Address manually</button>
-            </div>
             @if (Model.ManualAddressEntry)
             {
                 <input asp-for="ManualAddressEntry" hidden value="@(Model.ManualAddressEntry)" type="checkbox" />
@@ -143,7 +121,7 @@
                     }
                     else
                     {
-                        <input asp-for="AddressLine1" class=" govuk-input" id="AddressLine1" value="@(Model.AddressLine1)" />
+                        <input asp-for="AddressLine1" class=" govuk-input" id="AddressLine1" value="@(Model.AddressLine1)" autofocus="@(Model.lastAction=="ManualAddress")" />
                     }
                 </div>
 
@@ -221,42 +199,75 @@
 
             }
 
-            @if (Model.Addresses != null && Model.SelectedAddressId == null)
-            {
-                <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedAddressId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                    <label asp-for="SelectedAddressId" class="govuk-label" for="SelectedAddressId">
-                        @Html.DisplayNameFor(model => model.SelectedAddressId)
-                    </label>
+            <div class="govuk-form-group @(Html.ViewData.ModelState["PostCode"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <label asp-for="PostCode" class="govuk-label" for="PostCode">
+                    @Html.DisplayNameFor(model => model.PostCode)
+                </label>
+                @if (Html.ViewData.ModelState["PostCode"]?.Errors.Count > 0)
+                {
+                    <span id="PostCode-error" class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @Html.ValidationMessageFor(model => model.PostCode)
+                    </span>
+                    <input asp-for="PostCode" class="govuk-input  govuk-input govuk-input--error" id="PostCode" aria-describedby="PostCode-error" value="@(Model.PostCode)" />
+                }
+                else
+                {
+                    <input asp-for="PostCode" class=" govuk-input" id="PostCode" value="@(Model.PostCode)" />
 
-                    @Html.DropDownListFor(
-                             model => model.SelectedAddressId,
-                             new SelectList(Model.Addresses, "FullAddress", "FullAddress"),
-                             new { @class = "govuk-select-custom" })
+                }
+            </div>
+            <div class="govuk-form-group">
+                <button type="submit" name="action" value="AddressLookup" class="govuk-button" data_module="govuk-button">Search addresses</button>
+                @if (!Model.ManualAddressEntry)
+                    {
+                <button type="submit" name="action" value="ManualAddress" class="govuk-button govuk-button--secondary" data_module="govuk-button">Enter address manually</button>
+                    }
+            </div>
 
-                </div>
-            }
-            else
-            {
-        <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedAddressId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <label asp-for="SelectedAddressId" class="govuk-label" for="SelectedAddressId">
-                @Html.DisplayNameFor(model => model.SelectedAddressId)
-            </label>
-            @if (Html.ViewData.ModelState["SelectedAddressId"]?.Errors.Count > 0)
-            {
-                <span id="SelectedAddressId-error" class="govuk-error-message">
-                    <span class="govuk-visually-hidden">Error:</span>
-                    @Html.ValidationMessageFor(model => model.SelectedAddressId)
-                </span>
-                <input asp-for="SelectedAddressId" class="govuk-input  govuk-input govuk-input--error" id="SelectedAddressId" aria-describedby="SelectedAddressId-error" value="@(Model.SelectedAddressId)" />
-            }
-            else
-            {
-                <input asp-for="SelectedAddressId" class="govuk-input" id="SelectedAddressId-disabled" value="@(Model.SelectedAddressId)" disabled />
-                <input asp-for="SelectedAddressId" class="govuk-input" id="SelectedAddressId" value="@(Model.SelectedAddressId)" hidden />
 
-            }
-        </div>
+            @if (!Model.ManualAddressEntry)
+            {
+                if (Model.Addresses != null && Model.SelectedAddressId == null)
+                {
+                    <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedAddressId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                        <label asp-for="SelectedAddressId" class="govuk-label" for="SelectedAddressId">
+                            @Html.DisplayNameFor(model => model.SelectedAddressId)
+                        </label>
 
+                        @Html.DropDownListFor(
+                                          model => model.SelectedAddressId,
+                                          new SelectList(Model.Addresses, "FullAddress", "FullAddress"),
+                                          new
+                                               {
+                                                   @class = "govuk-select govuk-select-custom",
+                                              @autofocus = Model.lastAction == "AddressLookup"
+                                          })
+                    </div>
+                }
+                else
+                {
+                    <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedAddressId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                        <label asp-for="SelectedAddressId" class="govuk-label" for="SelectedAddressId">
+                            @Html.DisplayNameFor(model => model.SelectedAddressId)
+                        </label>
+                        @if (Html.ViewData.ModelState["SelectedAddressId"]?.Errors.Count > 0)
+                        {
+                            <span id="SelectedAddressId-error" class="govuk-error-message">
+                                <span class="govuk-visually-hidden">Error:</span>
+                                @Html.ValidationMessageFor(model => model.SelectedAddressId)
+                            </span>
+                            <input asp-for="SelectedAddressId" class="govuk-input  govuk-input govuk-input--error" id="SelectedAddressId" aria-describedby="SelectedAddressId-error" value="@(Model.SelectedAddressId)" />
+                        }
+                        else
+                        {
+                            <input asp-for="SelectedAddressId" class="govuk-input" id="SelectedAddressId-disabled" value="@(Model.SelectedAddressId)" disabled />
+                            <input asp-for="SelectedAddressId" class="govuk-input" id="SelectedAddressId" value="@(Model.SelectedAddressId)" hidden />
+
+                        }
+                    </div>
+
+                }
             }
             <div class="govuk-form-group @(Html.ViewData.ModelState["PreferredContactMethod"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <fieldset class="govuk-fieldset" id="PreferredContactMethod">
@@ -448,7 +459,11 @@
                     @Html.DropDownListFor(
                              model => model.EthnicBackground,
                              new SelectList(Model.EthnicBackgroundOptions, "label", "value"),
-                             new { @class = "govuk-select-custom" })
+                             new
+                                  {
+                                      @class = "govuk-select govuk-select-custom",
+                                 @autofocus = Model.lastAction == "DisplayEthnicBackgrounds"
+                             })
 
                 </div>
 

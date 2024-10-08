@@ -1,23 +1,14 @@
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
-using BPOR.Rms.Models.Study;
 using BPOR.Rms.Models.Volunteer;
 using LuhnNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using NIHR.GovUk.AspNetCore.Mvc;
-using NIHR.Infrastructure.Settings;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using System;
 using System.Text.RegularExpressions;
-using Amazon.DynamoDBv2;
-using BPOR.Domain.Entities.RefData;
-using System.Collections.Generic;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.Models;
+using Rbec.Postcodes;
 
 namespace BPOR.Rms.Controllers;
 
@@ -72,11 +63,6 @@ public class VolunteerController(ParticipantDbContext context,
         VolunteerFormViewModel model, string action)
     {
 
-        if (model.EthnicBackground != null)
-        {
-            model.addEthnicOptions();
-        }
-
         if (action == "AddressLookup")
         {
             ModelState.Clear();
@@ -98,7 +84,6 @@ public class VolunteerController(ParticipantDbContext context,
                 model.ManualAddressEntry = false;
             }
             model.SelectedAddressId = null;
-            return View(model);
         }
 
         if (action == "ManualAddress")
@@ -114,32 +99,32 @@ public class VolunteerController(ParticipantDbContext context,
 
             }
             model.ManualAddressEntry = true;
-
-
-            return View(model);
         }
 
         if (action == "DisplayEthnicBackgrounds")
         {
             ModelState.Clear();
             if (model.EthnicGroup == null)
-            { 
-                ModelState.AddModelError("EthnicGroup", "Select a ethnic group");
-                return View(model);
+            {
+                ModelState.AddModelError("EthnicGroup", "Select an ethnic group");
             }
-            model.addEthnicOptions();
-
-            return View(model);
+            else
+            {
+                model.addEthnicOptions();
+            }
         }
-
 
         if (action == "Save")
         {
 
             ValidateFields(model);
-           
-            
 
+            if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
+            {
+                await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode.Value.ToString(), model.LastName, model.DateOfBirth);
+            }
+
+            if (ModelState.IsValid) { 
 
             if (!String.IsNullOrEmpty(model.EmailAddress))
             {
@@ -160,17 +145,10 @@ public class VolunteerController(ParticipantDbContext context,
                     model.AddressLine2 = SelectedAddress.AddressLine2;
                     model.AddressLine3 = SelectedAddress.AddressLine3;
                     model.AddressLine4 = SelectedAddress.AddressLine4;
+                    model.PostCode = Postcode.Parse(SelectedAddress.Postcode);
                 }
             }
 
-            if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
-            {
-                await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode.Value.ToString(), model.LastName, model.DateOfBirth);
-            }
-
-
-            if (ModelState.IsValid)
-            { 
                 bool? hasLongTermIllness = null;
                 int? dailyLifeImpact= null;
                 switch (model.LongTermConditionOrIllness)
@@ -247,9 +225,22 @@ public class VolunteerController(ParticipantDbContext context,
                 return RedirectToAction(nameof(VolunteerController.AccountSuccess));
             }
         }
+
+
+
+        //add the data needed for the model.
+        FillModel(model);
+        model.lastAction = action;
         return View(model);
     }
+    private async void FillModel(VolunteerFormViewModel model)
+    {
 
+        if (model.EthnicBackground != null)
+        {
+            model.addEthnicOptions();
+        }
+    }
     private void ValidateFields(VolunteerFormViewModel model)
     {
 
@@ -300,8 +291,6 @@ public class VolunteerController(ParticipantDbContext context,
             {
                 ModelState.AddModelError("SelectedAddressId", "Select a address or enter address manually");
             }
-
-
         }
 
         // invalid values for fields
@@ -313,11 +302,6 @@ public class VolunteerController(ParticipantDbContext context,
         if (model.EmailAddress != null && !Regex.IsMatch(model.EmailAddress, emailRegex))
         {
             ModelState.AddModelError("EmailAddress", "Enter an email address in the correct format, like name@example.com");
-        }
-
-        if (!model.ManualAddressEntry && !model.SelectedAddressId.Contains(model.PostCode.ToString()))
-        {
-            ModelState.AddModelError("PostCode", "Postcode does not match selected address");
         }
 
         ValidateDateOfBirth(model.DateOfBirth);
@@ -401,6 +385,7 @@ public class VolunteerController(ParticipantDbContext context,
         {
             DateOnly today = DateOnly.FromDateTime(DateTime.Today);
             DateOnly eighteenYearsAgo = today.AddYears(-18);
+            DateOnly nineteenHundred = DateOnly.FromDateTime(new DateTime(1900, 1, 1));
 
             if (dateOfBirth.ToDateOnly() > eighteenYearsAgo)
             {
@@ -409,6 +394,10 @@ public class VolunteerController(ParticipantDbContext context,
             if (dateOfBirth.ToDateOnly() > today)
             {
                 ModelState.AddModelError("DateOfBirth.Day", "Date of birth must be in the past");
+            }
+            if(dateOfBirth.ToDateOnly() < nineteenHundred)
+            {
+                ModelState.AddModelError("DateOfBirth.Day", "Date of birth year must be after 1900");
             }
         }
     }

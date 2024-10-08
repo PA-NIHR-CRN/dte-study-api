@@ -20,14 +20,14 @@ public class VolunteerFormViewModel : FormWithSteps
     public string LastName { get; set; }
 
     [Display(Name = "Date of birth", Order = 3)]
-    public GovUkDate? DateOfBirth { get; set; } = new GovUkDate(1900, 2100);
+    public GovUkDate? DateOfBirth { get; set; } = new GovUkDate(0, 2100000);
 
     [Display(Name = "Postcode", Order = 4)]
     public Postcode? PostCode { get; set; }
 
     public List<PostcodeAddressModel>? Addresses { get; set; }
 
-    [Display(Name = "Select an address", Order = 5)]
+    [Display(Name = "Find address", Order = 5)]
     public string? SelectedAddressId { get; set; }
 
     [Display(Name = "Address line 1", Order = 5)]
@@ -56,15 +56,15 @@ public class VolunteerFormViewModel : FormWithSteps
 
 
     [Display(Name = "Landline number", Order = 12)]
-    [RegularExpression(@"^(01|02|03)\s*\d(\s*\d)*$", ErrorMessage = "Enter a phone number in the correct format, like 01632 960 001")]
+    [RegularExpression(@"^(01|02|03)\s*\d(\s*\d)*$", ErrorMessage = "Enter a landline phone number in the correct format, like 01632 960 001")]
     public string? LandLine { get; set; }
 
 
     [Display(Name = "Mobile number", Order = 13)]
-    [RegularExpression(@"^07\s*\d(\s*\d)*$", ErrorMessage = "Enter a phone number in the correct format, like 07700 900 982")]
+    [RegularExpression(@"^07\s*\d(\s*\d)*$", ErrorMessage = "Enter a mobile phone number in the correct format, like 07700 900 982")]
     public string? Mobile { get; set; }
 
-
+    
     [Display(Name = "Sex registered at birth", Order = 14)]
     [Required(ErrorMessage = "Select if the sex registered at birth is female or male")]
     public int SexRegisteredAtBirth { get; set; }
@@ -93,6 +93,7 @@ public class VolunteerFormViewModel : FormWithSteps
 
     public bool IncludeNoAreasOfInterest { get; set; }
     public bool ManualAddressEntry { get; set; }
+    public string? lastAction { get; set; }
 
 
 
