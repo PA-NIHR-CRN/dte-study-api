@@ -6,11 +6,442 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NIHR.GovUk.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using NIHR.Infrastructure;
+using NIHR.Infrastructure.Models;
+using Rbec.Postcodes;
 
 namespace BPOR.Rms.Controllers;
 
-public class VolunteerController(ParticipantDbContext context) : Controller
+public class VolunteerController(ParticipantDbContext context,
+    ILogger<VolunteerController> logger,
+   IPostcodeMapper locationApiClient) : Controller
 {
+
+    public IActionResult Consent()
+    {
+        return View(new VolunteerContactConsentViewModel());
+    }
+
+    [HttpPost]
+    public IActionResult Consent(VolunteerContactConsentViewModel model)
+    {
+        if (!model.AgreedToContactConsent)
+        {
+            ModelState.AddModelError("AgreedToContactConsent", "Confirm that the Privacy and Data Sharing Policy has been read and understood before giving consent");
+        }
+
+        if (ModelState.IsValid)
+        {
+            return RedirectToAction("Create");
+        }
+
+        return View(model);
+    }
+
+    public IActionResult Create()
+    {
+        var model = new VolunteerFormViewModel()
+        {
+            ManualAddressEntry = false
+        };
+        return View(model);
+    }
+
+
+    private bool isPostcodeValid(string postcode)
+    {
+        if (postcode == null)
+        {
+            return false;
+        }
+        return Regex.IsMatch(postcode, "^([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([AZa-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z])))) [0-9][A-Za-z]{2})$");
+    }
+    // POST: Study/Create
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    // [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(
+        [Bind("FirstName,LastName,DateOfBirth,PostCode,AddressLine1,AddressLine2,AddressLine3,AddressLine4,Town,PreferredContactMethod,EmailAddress,LandLine,Mobile" +
+        ",ManualAddressEntry,SexRegisteredAtBirth,GenderIdentitySameAsBirth,EthnicGroup,EthnicBackground,EthnicBackgroundOptions,EthnicBackgroundOther,LongTermConditionOrIllness,AreasOfResearch,Addresses,SelectedAddress,SelectedAddressId")]
+        VolunteerFormViewModel model, string action)
+    {
+
+        if (action == "AddressLookup")
+        {
+            ModelState.Clear();
+            if (model.PostCode == null || model.PostCode == "")
+            {
+                ModelState.AddModelError("PostCode", "Enter a postcode");
+            }
+            else
+            if (isPostcodeValid(model.PostCode))
+            {
+                model.Addresses = await GetAddresses(model.PostCode);
+                if(model.Addresses.Count > 0) { 
+                model.Addresses.Insert(0, new PostcodeAddressModel
+                {
+                    FullAddress = model.Addresses.Count() + " Addresses found"
+                });
+                }
+                else
+                {
+                    ModelState.AddModelError("PostCode", "We cannot find a match for the postcode entered. Please try again or enter your address manually.");
+                }
+            }
+            else
+            {
+                    ModelState.AddModelError("PostCode", "Enter a full UK postcode");
+            }
+            if (model.ManualAddressEntry)
+            {
+                model.ManualAddressEntry = false;
+            }
+            model.SelectedAddressId = null;
+        }
+
+        if (action == "ManualAddress")
+        {
+            ModelState.Clear();
+            if (model.Addresses != null)
+            {
+                model.Addresses = null;
+            }
+            if (model.SelectedAddressId != null)
+            {
+                model.SelectedAddressId = null;
+
+            }
+            model.ManualAddressEntry = true;
+        }
+
+        if (action == "DisplayEthnicBackgrounds")
+        {
+            ModelState.Clear();
+            if (model.EthnicGroup == null)
+            {
+                ModelState.AddModelError("EthnicGroup", "Select an ethnic group");
+            }
+            else
+            {
+                model.addEthnicOptions();
+            }
+        }
+
+        if (action == "Save")
+        {
+
+            ValidateFields(model);
+
+            if (model.DateOfBirth.HasValue && (model.PostCode != null && model.PostCode != "") && !String.IsNullOrEmpty(model.LastName))
+            {
+                await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode, model.LastName, model.DateOfBirth);
+            }
+
+            if (ModelState.IsValid) { 
+
+            if (!String.IsNullOrEmpty(model.EmailAddress))
+            {
+                await DoesUserEmailExistInDatabaseAsync(model.EmailAddress);
+            }
+            if (!model.ManualAddressEntry)
+            {
+                if (model.Addresses == null)
+                {
+                    model.Addresses = await GetAddresses(model.PostCode);
+                }
+
+                if (model.SelectedAddressId != null)
+                {
+                    var SelectedAddress = model.Addresses?.FirstOrDefault(a => a.FullAddress == model.SelectedAddressId);
+                    model.Town = SelectedAddress.Town;
+                    model.AddressLine1 = SelectedAddress.AddressLine1;
+                    model.AddressLine2 = SelectedAddress.AddressLine2;
+                    model.AddressLine3 = SelectedAddress.AddressLine3;
+                    model.AddressLine4 = SelectedAddress.AddressLine4;
+                    model.PostCode = SelectedAddress.Postcode;
+                }
+            }
+
+                bool? hasLongTermIllness = null;
+                int? dailyLifeImpact= null;
+                switch (model.LongTermConditionOrIllness)
+                {
+                    case 1:
+                        hasLongTermIllness = null;
+                        dailyLifeImpact = null;
+                        break;
+                    case 2:
+                        hasLongTermIllness = false;
+                        dailyLifeImpact = null;
+                        break;
+                    case 3:
+                        hasLongTermIllness = true;
+                        dailyLifeImpact = 3;
+                        break;
+                    case 4:
+                        hasLongTermIllness = true;
+                        dailyLifeImpact = 2;
+                        break;
+                    case 5:
+                        hasLongTermIllness = true;
+                        dailyLifeImpact = 1;
+                        break;
+                }
+
+
+                var participant = new Participant
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    RegistrationConsent = true,
+                    RegistrationConsentAtUtc = DateTime.Now,
+                    Stage2CompleteUtc = DateTime.Now,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    Email = model.EmailAddress == null ? "" : model.EmailAddress,
+                    EthnicGroup = model.EthnicGroup,
+                    EthnicBackground = model.EthnicBackground,
+                    DateOfBirth = model.DateOfBirth.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
+                    HasLongTermCondition = hasLongTermIllness,
+                    DailyLifeImpactId = dailyLifeImpact,
+                    GenderId = model.SexRegisteredAtBirth,
+                    GenderIsSameAsSexRegisteredAtBirth = model.GenderIdentitySameAsBirth == "Prefer" ? null : model.GenderIdentitySameAsBirth == "Yes",
+                    MobileNumber = model.Mobile,
+                    LandlineNumber = model.LandLine,
+                    CommunicationLanguageId = 1,
+                    Address = new ParticipantAddress
+                    {
+                        AddressLine1 = model.AddressLine1,
+                        AddressLine2 = model.AddressLine2,
+                        AddressLine3 = model.AddressLine3,
+                        AddressLine4 = model.AddressLine4,
+                        Town = model.Town,
+                        Postcode = model.PostCode
+                    },
+                    //may need to save participant and update GUID
+                    ParticipantIdentifiers = new List<ParticipantIdentifier> {
+                        new ParticipantIdentifier() {
+                            IdentifierTypeId = 2,
+                            Value = Guid.NewGuid()
+                        }
+                    },
+                    IsDeleted = false,
+                    HealthConditions = model.AreasOfResearch.Select(x => new ParticipantHealthCondition
+                    {
+                        HealthConditionId = x
+                    }).ToList()
+                };
+
+                context.Add(participant);
+                await context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(VolunteerController.AccountSuccess));
+            }
+        }
+
+
+
+        //add the data needed for the model.
+        FillModel(model);
+        model.lastAction = action;
+        return View(model);
+    }
+    private async void FillModel(VolunteerFormViewModel model)
+    {
+
+        if (model.EthnicBackground != null)
+        {
+            model.addEthnicOptions();
+        }
+    }
+    private async void ValidateFields(VolunteerFormViewModel model)
+    {
+
+        // validate required fields
+        if (String.IsNullOrEmpty(model.LandLine) && String.IsNullOrEmpty(model.Mobile))
+        {
+            ModelState.AddModelError("LandLine", "Enter either a UK landline number or UK mobile number");
+        }
+        if (model.PreferredContactMethod == "Email" && String.IsNullOrEmpty(model.EmailAddress))
+        {
+            ModelState.AddModelError("EmailAddress", "Email address cannot be blank");
+        }
+
+        if (model.PostCode == null || model.PostCode == "")
+        {
+            ModelState.AddModelError("PostCode", "Enter a postcode");
+        }
+        if (model.ManualAddressEntry)
+        {
+            //addressline1 &town needs verified
+            if (String.IsNullOrEmpty(model.AddressLine1))
+            {
+                ModelState.AddModelError("AddressLine1", "Enter the first line of the address");
+            }
+
+            if (String.IsNullOrEmpty(model.Town))
+            {
+                ModelState.AddModelError("Town", "Enter the town of the address");
+            }
+        }
+        if(model.SexRegisteredAtBirth == 0)
+        {
+            ModelState.AddModelError("SexRegisteredAtBirth", "Select if the sex registered at birth is female or male");
+        }
+        if (model.LongTermConditionOrIllness == 0)
+        {
+            ModelState.AddModelError("LongTermConditionOrIllness", "Select long-term conditions or illnesses and reduced ability to carry out daily activities");
+        }
+        if(model.EthnicBackground == null && model.EthnicGroup != null)
+        {
+            ModelState.AddModelError("EthnicBackground", "Select ethnic background");
+        }
+        // need to check for other.
+        if(model.EthnicBackground == "Other" && model.EthnicBackgroundOther == null)
+        {
+            ModelState.AddModelError("EthnicBackgroundOther", "please describe your ethnic background");
+        }
+        if (!model.ManualAddressEntry)
+        {
+            if(model.SelectedAddressId != null && model.SelectedAddressId.Contains("Addresses found"))
+            {
+                model.SelectedAddressId = null;
+            }
+            // make sure one of the address is selected.
+            if (model.SelectedAddressId == null && (model.PostCode != null && model.PostCode != "") )
+            {
+                ModelState.AddModelError("SelectedAddressId", "Select an address or enter an address manually");
+
+            }
+        }
+
+        // invalid values for fields
+        if (!isPostcodeValid(model.PostCode))
+        {
+            ModelState.AddModelError("PostCode", "Enter a full UK postcode");
+        }
+        string emailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+        if (model.EmailAddress != null && !Regex.IsMatch(model.EmailAddress, emailRegex))
+        {
+            ModelState.AddModelError("EmailAddress", "Enter an email address in the correct format, like name@example.com");
+        }
+
+        ValidateDateOfBirth(model.DateOfBirth);
+    }
+
+    private async Task DoesPostcodeSurnameDoBComboExistAsync(string postCode, string lastName, GovUkDate dateOfBirth)
+    {
+        DateTime DoB = new DateTime(dateOfBirth.Year.Value, dateOfBirth.Month.Value, dateOfBirth.Day.Value);
+
+        var user = await context.Participants
+            .Where(p => p.LastName == lastName &&
+                        p.DateOfBirth.HasValue &&
+                        p.DateOfBirth.Value.Date == DoB.Date &&
+                        p.Address != null &&
+                        p.Address.Postcode == postCode)
+            .FirstOrDefaultAsync();
+
+        if (user != null)
+        {
+            ModelState.AddModelError("LastName", "Combination of surname, date of birth and postcode already exists and cannot be used");
+        }
+    }
+
+    private async Task DoesUserEmailExistInDatabaseAsync(string email)
+    {
+        var user = await context.Participants
+            .Where(p => p.Email == email)
+            .FirstOrDefaultAsync();
+
+        if (user != null)
+        {
+            ModelState.AddModelError("EmailAddress", "Email address already exists and cannot be used");
+        }
+    }
+
+    private void ValidateDateOfBirth(GovUkDate dateOfBirth)
+    {
+        
+        // lot of dupelication here with recruitment start and end dates, can these be consolidated or largly consolidated?
+
+        if (dateOfBirth.Day == null)
+        {
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a day");
+        }
+
+        if (dateOfBirth.Month == null)
+        {
+            ModelState.AddModelError("DateOfBirth.Month", "Date of birth must include a month");
+        }
+
+        if (dateOfBirth.Year == null)
+        {
+            ModelState.AddModelError("DateOfBirth.Year", "Date of birth must include a year");
+        }
+
+        if (dateOfBirth.Day != null && dateOfBirth.Month == null && dateOfBirth.Year == null)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a month and year");
+        }
+
+        if (dateOfBirth.Day == null && dateOfBirth.Month != null && dateOfBirth.Year == null)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a day and year");
+        }
+
+        if (dateOfBirth.Day == null && dateOfBirth.Month == null && dateOfBirth.Year != null)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth.Day", "Date of birth must include a day and month");
+        }
+
+        if (!dateOfBirth.Day.HasValue && !dateOfBirth.Month.HasValue && !dateOfBirth.Year.HasValue)
+        {
+            CleardateOfBirthErrorStates();
+            ModelState.AddModelError("DateOfBirth.Day", "Enter a date of birth");
+        }
+
+        if (dateOfBirth.HasValue)
+        {
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+            DateOnly eighteenYearsAgo = today.AddYears(-18);
+            DateOnly nineteenHundred = DateOnly.FromDateTime(new DateTime(1900, 1, 1));
+
+            if (dateOfBirth.ToDateOnly() > eighteenYearsAgo)
+            {
+                ModelState.AddModelError("DateOfBirth.Day", "Volunteer must be 18 or over to use this service");
+            }
+            if (dateOfBirth.ToDateOnly() > today)
+            {
+                CleardateOfBirthErrorStates();
+                ModelState.AddModelError("DateOfBirth.Month", "Date of birth must be in the past");
+            }
+            if(dateOfBirth.ToDateOnly() < nineteenHundred && dateOfBirth.Year > 1000)
+            {
+                ModelState.AddModelError("DateOfBirth.year", "Date of birth year must be after 1900");
+            }
+            if(dateOfBirth.Year < 1000 || dateOfBirth.Year > 9999)
+            {
+                ModelState.AddModelError("DateOfBirth.year", "Date of birth year must include 4 numbers");
+            }
+        }
+    }
+
+    private void CleardateOfBirthErrorStates()
+    {
+        ModelState["DateOfBirth.Day"].Errors.Clear();
+        ModelState["DateOfBirth.Month"].Errors.Clear();
+        ModelState["DateOfBirth.Year"].Errors.Clear();
+    }
+
+    public IActionResult AccountSuccess()
+    { 
+        return View();
+    }
+
     private async Task<UpdateAnonymousRecruitedViewModel?> GetStudyDetails(int studyId)
     {
         return await context.Studies
@@ -185,4 +616,29 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
         return RedirectToAction("UpdateAnonymousRecruited", model);
     }
+
+    public async Task<List<PostcodeAddressModel>?> GetAddresses(string postcode)
+    {
+        IEnumerable<PostcodeAddressModel> addressModels;
+            try
+            {
+            addressModels = await locationApiClient.GetAddressesByPostcodeAsync(postcode, new CancellationToken());
+
+                if (addressModels != null && addressModels.Any())
+                {
+                return addressModels.ToList();
+                }
+                else
+                {
+                    logger.LogError("No addresses found for post code : " + postcode);
+                return new List<PostcodeAddressModel>();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error retrieving addresses via postcode lookup");
+                throw new InvalidOperationException("Error retrieving addresses via postcode lookup");
+            }
+    }
+
 }

@@ -37,6 +37,8 @@ namespace BPOR.Rms.TagHelpers
 
             ViewContext.ViewData["__AreasOfResearch_Name"] = GetModelName(For);
 
+            ViewContext.ViewData["__AreasOfResearch_isPlain"] = output.Attributes?["plain"]?.Value?.ToString();
+
             if (ForNone is not null)
             {
                 ViewContext.ViewData["__AreasOfResearch_None_Name"] = GetModelName(ForNone);

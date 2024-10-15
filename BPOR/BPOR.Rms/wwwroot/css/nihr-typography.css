@@ -140,3 +140,7 @@ a:focus {
 .muted {
     color: #505A5F;
 }
+
+.radio-options-divider {
+    margin-left: 13px;
+}
