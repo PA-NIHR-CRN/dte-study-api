@@ -1,6 +1,5 @@
 ﻿using BPOR.Rms.Models.Researcher;
 using NIHR.GovUk.AspNetCore.Mvc;
-using Rbec.Postcodes;
 using System.ComponentModel.DataAnnotations;
 using NIHR.Infrastructure.Models;
 
@@ -22,15 +21,15 @@ public class VolunteerFormViewModel : FormWithSteps
     [Display(Name = "Date of birth", Order = 3)]
     public GovUkDate? DateOfBirth { get; set; } = new GovUkDate(0, 2100000);
 
-    [Display(Name = "Postcode", Order = 4)]
-    public Postcode? PostCode { get; set; }
+    [Display(Name = "Postcode", Order = 9)]
+    public string? PostCode { get; set; }
 
     public List<PostcodeAddressModel>? Addresses { get; set; }
 
-    [Display(Name = "Find address", Order = 5)]
+    [Display(Name = "Select an address")]
     public string? SelectedAddressId { get; set; }
 
-    [Display(Name = "Address line 1", Order = 5)]
+    [Display(Name = "Address line 1", Order = 4)]
     public string? AddressLine1 { get; set; }
 
     [Display(Name = "Address line 2 (optional)", Order = 6)]
@@ -42,7 +41,7 @@ public class VolunteerFormViewModel : FormWithSteps
     [Display(Name = "Address line 4 (optional)", Order = 8)]
     public string? AddressLine4 { get; set; }
 
-    [Display(Name = "Town", Order = 9)]
+    [Display(Name = "Town", Order = 5)]
     public string? Town { get; set; }
 
     [Display(Name = "Preferred contact method", Order = 10)]
@@ -84,8 +83,8 @@ public class VolunteerFormViewModel : FormWithSteps
     [Display (Name = "How would you describe your background?", Order = 17)]
     public string? EthnicBackgroundOther { get; set; }
 
-    [Display(Name = "Long-term conditions or illnesses", Order = 18)]
-    [Required(ErrorMessage = "Select long-term conditions or illnesses")]
+    [Display(Name = "Long-term conditions or illnesses and reduced ability to carry out daily activities", Order = 18)]
+    [Required(ErrorMessage = "Select Long-term conditions or illnesses and reduced ability to carry out daily activities")]
     public int LongTermConditionOrIllness { get; set; }
 
     [Display(Name = "Areas of research (optional)", Order = 19)]
@@ -185,7 +184,7 @@ public class VolunteerFormViewModel : FormWithSteps
             EthnicbackgroundValuesAAB.Add(new Dictionary<string, string> { { "label", "Chinese" }, { "value", "Chinese" } });
             EthnicbackgroundValuesAAB.Add(new Dictionary<string, string> { { "label", "Indian" }, { "value", "Indian" } });
             EthnicbackgroundValuesAAB.Add(new Dictionary<string, string> { { "label", "Pakistani" }, { "value", "Pakistani" } });
-            EthnicbackgroundValuesAAB.Add(new Dictionary<string, string> { { "label", "Another Asian or Asian British background" }, { "value", "Another Asian or Asian British background" } });
+            EthnicbackgroundValuesAAB.Add(new Dictionary<string, string> { { "label", "Another Asian or Asian British background" }, { "value", "Other" } });
 
             return EthnicbackgroundValuesAAB;
 
@@ -205,7 +204,7 @@ public class VolunteerFormViewModel : FormWithSteps
             EthnicbackgroundValuesBABBC.Add(new Dictionary<string, string> { { "label", "African" }, { "value", "African" } });
             EthnicbackgroundValuesBABBC.Add(new Dictionary<string, string> { { "label", "Black British" }, { "value", "Black British" } });
             EthnicbackgroundValuesBABBC.Add(new Dictionary<string, string> { { "label", "Caribbean" }, { "value", "Caribbean" } });
-            EthnicbackgroundValuesBABBC.Add(new Dictionary<string, string> { { "label", "Another Black, African, Black British or Caribbean background" }, { "value", "Another Black, African, Black British or Caribbean background" } });
+            EthnicbackgroundValuesBABBC.Add(new Dictionary<string, string> { { "label", "Another Black, African, Black British or Caribbean background" }, { "value", "Other" } });
 
             return EthnicbackgroundValuesBABBC;
 
@@ -225,7 +224,7 @@ public class VolunteerFormViewModel : FormWithSteps
             EthnicbackgroundValuesMM.Add(new Dictionary<string, string> { { "label", "Asian and White" }, { "value", "Asian and White" } });
             EthnicbackgroundValuesMM.Add(new Dictionary<string, string> { { "label", "Black African and White" }, { "value", "Black African and White" } });
             EthnicbackgroundValuesMM.Add(new Dictionary<string, string> { { "label", "Black Caribbean and White" }, { "value", "Black Caribbean and White" } });
-            EthnicbackgroundValuesMM.Add(new Dictionary<string, string> { { "label", "Another mixed background" }, { "value", "Another mixed background" } });
+            EthnicbackgroundValuesMM.Add(new Dictionary<string, string> { { "label", "Another mixed background" }, { "value", "Other" } });
 
             return EthnicbackgroundValuesMM;
 
@@ -246,7 +245,7 @@ public class VolunteerFormViewModel : FormWithSteps
             EthnicbackgroundValuesW.Add(new Dictionary<string, string> { { "label", "Irish" }, { "value", "Irish" } });
             EthnicbackgroundValuesW.Add(new Dictionary<string, string> { { "label", "Irish Traveller" }, { "value", "Irish Traveller" } });
             EthnicbackgroundValuesW.Add(new Dictionary<string, string> { { "label", "Roma" }, { "value", "Roma" } });
-            EthnicbackgroundValuesW.Add(new Dictionary<string, string> { { "label", "Another White background" }, { "value", "Another White background" } });
+            EthnicbackgroundValuesW.Add(new Dictionary<string, string> { { "label", "Another White background" }, { "value", "Other" } });
 
             return EthnicbackgroundValuesW;
 
@@ -264,7 +263,7 @@ public class VolunteerFormViewModel : FormWithSteps
 
 
             EthnicbackgroundValuesO.Add(new Dictionary<string, string> { { "label", "Arab" }, { "value", "Arab" } });
-            EthnicbackgroundValuesO.Add(new Dictionary<string, string> { { "label", "Any other ethnic group" }, { "value", "Any other ethnic group" } });
+            EthnicbackgroundValuesO.Add(new Dictionary<string, string> { { "label", "Any other ethnic group" }, { "value", "Other" } });
 
             return EthnicbackgroundValuesO;
 

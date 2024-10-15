@@ -50,7 +50,11 @@ public class VolunteerController(ParticipantDbContext context,
 
     private bool isPostcodeValid(string postcode)
     {
-        return Regex.IsMatch(postcode, "([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9][A-Za-z]?))))\\s?[0-9][A-Za-z]{2})");
+        if (postcode == null)
+        {
+            return false;
+        }
+        return Regex.IsMatch(postcode, "^([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([AZa-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z])))) [0-9][A-Za-z]{2})$");
     }
     // POST: Study/Create
     // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -66,18 +70,28 @@ public class VolunteerController(ParticipantDbContext context,
         if (action == "AddressLookup")
         {
             ModelState.Clear();
-            if (!model.PostCode.HasValue)
+            if (model.PostCode == null || model.PostCode == "")
             {
                 ModelState.AddModelError("PostCode", "Enter a postcode");
             }
             else
-            if (isPostcodeValid(model.PostCode.ToString()))
+            if (isPostcodeValid(model.PostCode))
             {
-                model.Addresses = await GetAddresses(model.PostCode.Value.ToString());
+                model.Addresses = await GetAddresses(model.PostCode);
+                if(model.Addresses.Count > 0) { 
                 model.Addresses.Insert(0, new PostcodeAddressModel
                 {
                     FullAddress = model.Addresses.Count() + " Addresses found"
                 });
+                }
+                else
+                {
+                    ModelState.AddModelError("PostCode", "We cannot find a match for the postcode entered. Please try again or enter your address manually.");
+                }
+            }
+            else
+            {
+                    ModelState.AddModelError("PostCode", "Enter a full UK postcode");
             }
             if (model.ManualAddressEntry)
             {
@@ -119,9 +133,9 @@ public class VolunteerController(ParticipantDbContext context,
 
             ValidateFields(model);
 
-            if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
+            if (model.DateOfBirth.HasValue && (model.PostCode != null && model.PostCode != "") && !String.IsNullOrEmpty(model.LastName))
             {
-                await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode.Value.ToString(), model.LastName, model.DateOfBirth);
+                await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode, model.LastName, model.DateOfBirth);
             }
 
             if (ModelState.IsValid) { 
@@ -134,7 +148,7 @@ public class VolunteerController(ParticipantDbContext context,
             {
                 if (model.Addresses == null)
                 {
-                    model.Addresses = await GetAddresses(model.PostCode.Value.ToString());
+                    model.Addresses = await GetAddresses(model.PostCode);
                 }
 
                 if (model.SelectedAddressId != null)
@@ -145,7 +159,7 @@ public class VolunteerController(ParticipantDbContext context,
                     model.AddressLine2 = SelectedAddress.AddressLine2;
                     model.AddressLine3 = SelectedAddress.AddressLine3;
                     model.AddressLine4 = SelectedAddress.AddressLine4;
-                    model.PostCode = Postcode.Parse(SelectedAddress.Postcode);
+                    model.PostCode = SelectedAddress.Postcode;
                 }
             }
 
@@ -203,7 +217,7 @@ public class VolunteerController(ParticipantDbContext context,
                         AddressLine3 = model.AddressLine3,
                         AddressLine4 = model.AddressLine4,
                         Town = model.Town,
-                        Postcode = model.PostCode.ToString()
+                        Postcode = model.PostCode
                     },
                     //may need to save participant and update GUID
                     ParticipantIdentifiers = new List<ParticipantIdentifier> {
@@ -241,7 +255,7 @@ public class VolunteerController(ParticipantDbContext context,
             model.addEthnicOptions();
         }
     }
-    private void ValidateFields(VolunteerFormViewModel model)
+    private async void ValidateFields(VolunteerFormViewModel model)
     {
 
         // validate required fields
@@ -254,7 +268,7 @@ public class VolunteerController(ParticipantDbContext context,
             ModelState.AddModelError("EmailAddress", "Email address cannot be blank");
         }
 
-        if (!model.PostCode.HasValue)
+        if (model.PostCode == null || model.PostCode == "")
         {
             ModelState.AddModelError("PostCode", "Enter a postcode");
         }
@@ -279,22 +293,31 @@ public class VolunteerController(ParticipantDbContext context,
         {
             ModelState.AddModelError("LongTermConditionOrIllness", "Select long-term conditions or illnesses and reduced ability to carry out daily activities");
         }
-        if(model.EthnicBackground == null)
+        if(model.EthnicBackground == null && model.EthnicGroup != null)
         {
-            ModelState.AddModelError("EthnicBackground", "Select ethnic background"); 
+            ModelState.AddModelError("EthnicBackground", "Select ethnic background");
         }
-
+        // need to check for other.
+        if(model.EthnicBackground == "Other" && model.EthnicBackgroundOther == null)
+        {
+            ModelState.AddModelError("EthnicBackgroundOther", "please describe your ethnic background");
+        }
         if (!model.ManualAddressEntry)
         {
-            // make sure one of the address is selected.\
-            if(model.SelectedAddressId == null || model.SelectedAddressId.Contains("Addresses found"))
+            if(model.SelectedAddressId != null && model.SelectedAddressId.Contains("Addresses found"))
             {
-                ModelState.AddModelError("SelectedAddressId", "Select a address or enter address manually");
+                model.SelectedAddressId = null;
+            }
+            // make sure one of the address is selected.
+            if (model.SelectedAddressId == null && (model.PostCode != null && model.PostCode != "") )
+            {
+                ModelState.AddModelError("SelectedAddressId", "Select an address or enter an address manually");
+
             }
         }
 
         // invalid values for fields
-        if (!isPostcodeValid(model.PostCode.ToString()))
+        if (!isPostcodeValid(model.PostCode))
         {
             ModelState.AddModelError("PostCode", "Enter a full UK postcode");
         }
@@ -378,7 +401,7 @@ public class VolunteerController(ParticipantDbContext context,
         if (!dateOfBirth.Day.HasValue && !dateOfBirth.Month.HasValue && !dateOfBirth.Year.HasValue)
         {
             CleardateOfBirthErrorStates();
-            ModelState.AddModelError("DateOfBirth", "Enter a date of birth");
+            ModelState.AddModelError("DateOfBirth.Day", "Enter a date of birth");
         }
 
         if (dateOfBirth.HasValue)
@@ -389,15 +412,20 @@ public class VolunteerController(ParticipantDbContext context,
 
             if (dateOfBirth.ToDateOnly() > eighteenYearsAgo)
             {
-                ModelState.AddModelError("DateOfBirth.Day", "Volunteer must be aged 18 or older");
+                ModelState.AddModelError("DateOfBirth.Day", "Volunteer must be 18 or over to use this service");
             }
             if (dateOfBirth.ToDateOnly() > today)
             {
-                ModelState.AddModelError("DateOfBirth.Day", "Date of birth must be in the past");
+                CleardateOfBirthErrorStates();
+                ModelState.AddModelError("DateOfBirth.Month", "Date of birth must be in the past");
             }
-            if(dateOfBirth.ToDateOnly() < nineteenHundred)
+            if(dateOfBirth.ToDateOnly() < nineteenHundred && dateOfBirth.Year > 1000)
             {
-                ModelState.AddModelError("DateOfBirth.Day", "Date of birth year must be after 1900");
+                ModelState.AddModelError("DateOfBirth.year", "Date of birth year must be after 1900");
+            }
+            if(dateOfBirth.Year < 1000 || dateOfBirth.Year > 9999)
+            {
+                ModelState.AddModelError("DateOfBirth.year", "Date of birth year must include 4 numbers");
             }
         }
     }
