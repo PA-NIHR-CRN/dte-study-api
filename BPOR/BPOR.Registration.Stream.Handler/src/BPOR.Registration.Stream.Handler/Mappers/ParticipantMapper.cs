@@ -3,6 +3,7 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
 using BPOR.Registration.Stream.Handler.Services;
@@ -56,6 +57,15 @@ public class ParticipantMapper : IParticipantMapper
                 participant.ParticipantIdentifiers.Add(newIdentifier);
             }
         }
+    }
+    private void AddParticipantContactMethod(Participant participant)
+    {
+        // all records coming from VS need to be set to email preferance for contact.
+        participant.participantContactMethod = new ParticipantContactMethod()
+        {
+            ContactMethodId = (int)ContactMethods.Email,
+           
+        };
     }
 
     private void MapHealthConditions(DynamoParticipant source, Participant participant)
@@ -149,6 +159,7 @@ public class ParticipantMapper : IParticipantMapper
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);
+        AddParticipantContactMethod(destination);
 
         return destination;
     }
