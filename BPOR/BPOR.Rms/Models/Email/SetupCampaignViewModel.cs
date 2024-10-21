@@ -16,6 +16,8 @@ public class SetupCampaignViewModel
     public string? StudyName { get; set; }
     public string? EmailAddress { get; set; }
 
+    public string? ContactPreference { get; set; }
+
     public int FilterCriteriaId { get; set; }
 
 

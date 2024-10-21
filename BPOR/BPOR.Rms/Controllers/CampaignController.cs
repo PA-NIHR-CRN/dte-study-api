@@ -17,11 +17,11 @@ using Notify.Models.Responses;
 
 namespace BPOR.Rms.Controllers;
 
-public class EmailController(
+public class CampaignController(
     ParticipantDbContext context,
     INotificationService notificationService,
     IDistributedCache cache,
-    ILogger<EmailController> logger,
+    ILogger<CampaignController> logger,
     IRmsTaskQueue taskQueue,
     IEncryptionService encryptionService,
     LinkGenerator linkGenerator,
@@ -32,14 +32,14 @@ public class EmailController(
 {
     private const string _emailCacheKey = "EmailTemplates";
 
-    public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model)
+    public async Task<IActionResult> Setup(SetupCampaignViewModel model)
     {
         await PopulateReferenceDataAsync(model, true);
         return View(model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Send(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         await PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
 
@@ -105,33 +105,9 @@ public class EmailController(
                 new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });
         }
 
-        return View(nameof(SetupCampaign), model);
+        return View(nameof(Setup), model);
     }
 
-
-    private async Task PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false,
-    CancellationToken cancellationToken = default)
-    {
-        model.EmailTemplates = await FetchEmailTemplates(forceRefresh, cancellationToken);
-
-        if (model.StudyId is not null)
-        {
-            var studyData = await context.Studies
-                .Where(s => s.Id == model.StudyId)
-                .Select(s => new
-                {
-                    s.StudyName,
-                    s.EmailAddress
-                })
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (studyData != null)
-            {
-                model.StudyName = studyData.StudyName;
-                model.EmailAddress = studyData.EmailAddress;
-            }
-        }
-    }
 
     [HttpPost]
     public async Task<IActionResult> SendPreviewEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
@@ -190,7 +166,7 @@ public class EmailController(
                     logger.LogError(e, "Error sending preview email");
                     ModelState.AddModelError(nameof(model.PreviewEmails),
                         "Gov Notify does not accept the email address(es) provided.");
-                    return View(nameof(SetupCampaign), model);
+                    return View(nameof(Setup), model);
                 }
             }
 
@@ -198,7 +174,7 @@ public class EmailController(
                 $"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
         }
 
-        return View(nameof(SetupCampaign), model);
+        return View(nameof(Setup), model);
     }
 
     private bool IsValidEmail(string email) => System.Net.Mail.MailAddress.TryCreate(email, out var address) &&
