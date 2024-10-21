@@ -50,10 +50,11 @@ jobs:
           aws lambda update-alias --function-name crnccd-lambda-dev-dte-participant-stream --name main --function-version $VERSION
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: stream-handler-artifact
           path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
+          overwrite: true
   
   QA_deploy:
     runs-on: ubuntu-latest
@@ -64,10 +65,11 @@ jobs:
     environment: QA
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: stream-handler-artifact
           path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
+          overwrite: true
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -97,10 +99,11 @@ jobs:
     environment: UAT
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: stream-handler-artifact
           path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
+          overwrite: true
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -130,10 +133,11 @@ jobs:
     environment: OAT
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: stream-handler-artifact
           path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
+          overwrite: true
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -163,10 +167,11 @@ jobs:
     environment: PROD
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: stream-handler-artifact
           path: BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
+          overwrite: true
       - name: Configure AWS credentials - All
         uses: aws-actions/configure-aws-credentials@v1
         with:
