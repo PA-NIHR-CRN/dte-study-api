@@ -71,7 +71,7 @@ public class EmailCampaignService(
             .FirstOrDefaultAsync(fc => fc.Id == campaign.FilterCriteriaId, cancellationToken);
     }
 
-    private async Task<List<EmailParticipantDetails>> GetFilteredVolunteersAsync(FilterCriteria dbFilter,
+    private async Task<List<CampaignParticipantDetails>> GetFilteredVolunteersAsync(FilterCriteria dbFilter,
         int? targetGroupSize, CancellationToken cancellationToken)
     {
         var filter = FilterMapper.MapToFilterModel(dbFilter);
@@ -93,7 +93,7 @@ public class EmailCampaignService(
             .ToListAsync(cancellationToken);
     }
 
-    private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
+    private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, EmailCampaign campaign,
         FilterCriteria dbFilter, int emailDeliveryStatusId, string callback, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
@@ -157,7 +157,7 @@ public class EmailCampaignService(
     }
 
     private async IAsyncEnumerable<ProcessingResults> ProcessVolunteersAsync(
-        List<EmailParticipantDetails> volunteers,
+        List<CampaignParticipantDetails> volunteers,
         EmailCampaign campaign,
         FilterCriteria dbFilter,
         int emailDeliveryStatusId,
@@ -180,7 +180,7 @@ public class EmailCampaignService(
         }
     }
 
-    private void ProcessVolunteer(EmailParticipantDetails volunteer, EmailCampaign campaign, FilterCriteria dbFilter,
+    private void ProcessVolunteer(CampaignParticipantDetails volunteer, EmailCampaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int emailDeliveryStatusId)
     {
         processingResult.EmailCampaignParticipants.Add(new EmailCampaignParticipant
@@ -216,7 +216,7 @@ public class EmailCampaignService(
         }
     }
 
-    private async Task QueueNotificationsAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
+    private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, EmailCampaign campaign,
         List<ProcessingResults> emailQueue, string callback, CancellationToken cancellationToken)
     {
         foreach (var volunteer in volunteers)

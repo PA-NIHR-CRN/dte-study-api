@@ -109,6 +109,30 @@ public class CampaignController(
     }
 
 
+    private async Task PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false,
+    CancellationToken cancellationToken = default)
+    {
+        model.EmailTemplates = await FetchEmailTemplates(forceRefresh, cancellationToken);
+
+        if (model.StudyId is not null)
+        {
+            var studyData = await context.Studies
+                .Where(s => s.Id == model.StudyId)
+                .Select(s => new
+                {
+                    s.StudyName,
+                    s.EmailAddress
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (studyData != null)
+            {
+                model.StudyName = studyData.StudyName;
+                model.EmailAddress = studyData.EmailAddress;
+            }
+        }
+    }
+
     [HttpPost]
     public async Task<IActionResult> SendPreviewEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
