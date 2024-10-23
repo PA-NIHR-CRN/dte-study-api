@@ -19,5 +19,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\BPOR.Domain\BPOR.Domain.csproj" />
+        <ProjectReference Include="..\..\..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
     </ItemGroup>
 </Project>

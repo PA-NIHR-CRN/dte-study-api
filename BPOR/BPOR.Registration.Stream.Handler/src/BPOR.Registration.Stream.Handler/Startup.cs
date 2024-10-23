@@ -10,7 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Configuration;
-
+using NIHR.Infrastructure;
+using BPOR.Infrastructure.Clients;
+using Dte.Common.Authentication;
+using Dte.Common.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace BPOR.Registration.Stream.Handler;
 
@@ -36,6 +40,8 @@ public static class Startup
         services.AddSingleton<IRefDataService, RefDataService>();
         services.AddTransient<IStreamHandler, StreamHandler>();
         services.AddTransient<IParticipantMapper, ParticipantMapper>();
+        services.AddTransient<IPostcodeMapper, LocationApiClient>();
+        services.AddHttpClient();
 
         services.ConfigureNihrLogging(configuration);
     }

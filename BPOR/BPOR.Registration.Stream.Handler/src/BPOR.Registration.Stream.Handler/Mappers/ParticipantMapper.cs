@@ -61,11 +61,13 @@ public class ParticipantMapper : IParticipantMapper
     private void AddParticipantContactMethod(Participant participant)
     {
         // all records coming from VS need to be set to email preferance for contact.
-        participant.participantContactMethod = new ParticipantContactMethod()
-        {
-            ContactMethodId = (int)ContactMethods.Email,
-           
-        };
+        if (participant.participantContactMethod == null) { 
+            participant.participantContactMethod = new ParticipantContactMethod()
+            {
+                ContactMethodId = (int)ContactMethods.Email,
+
+            };
+        }
     }
 
     private void MapHealthConditions(DynamoParticipant source, Participant participant)
@@ -147,15 +149,16 @@ public class ParticipantMapper : IParticipantMapper
         }
 
         ParticipantAddressMapper.Map(source.Address, destination);
-        var coordinates =
-            await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
+        // coordinates are not in current stream handler.
+        //var coordinates =
+        //    await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
 
-        if (coordinates != null)
-        {
-            destination.ParticipantLocation ??= new ParticipantLocation();
-            destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
-                { SRID = ParticipantLocationConfiguration.LocationSrid };
-        }
+        //if (coordinates != null)
+        //{
+        //    destination.ParticipantLocation ??= new ParticipantLocation();
+        //    destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+        //        { SRID = ParticipantLocationConfiguration.LocationSrid };
+        //}
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);
