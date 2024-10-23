@@ -3,6 +3,7 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
 using BPOR.Registration.Stream.Handler.Services;
@@ -55,6 +56,17 @@ public class ParticipantMapper : IParticipantMapper
 
                 participant.ParticipantIdentifiers.Add(newIdentifier);
             }
+        }
+    }
+    private void AddParticipantContactMethod(Participant participant)
+    {
+        // all records coming from VS need to be set to email preferance for contact.
+        if (participant.participantContactMethod == null) { 
+            participant.participantContactMethod = new ParticipantContactMethod()
+            {
+                ContactMethodId = (int)ContactMethods.Email,
+
+            };
         }
     }
 
@@ -137,18 +149,20 @@ public class ParticipantMapper : IParticipantMapper
         }
 
         ParticipantAddressMapper.Map(source.Address, destination);
-        var coordinates =
-            await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
+        // coordinates are not in current stream handler.
+        //var coordinates =
+        //    await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
 
-        if (coordinates != null)
-        {
-            destination.ParticipantLocation ??= new ParticipantLocation();
-            destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
-                { SRID = ParticipantLocationConfiguration.LocationSrid };
-        }
+        //if (coordinates != null)
+        //{
+        //    destination.ParticipantLocation ??= new ParticipantLocation();
+        //    destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+        //        { SRID = ParticipantLocationConfiguration.LocationSrid };
+        //}
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);
+        AddParticipantContactMethod(destination);
 
         return destination;
     }

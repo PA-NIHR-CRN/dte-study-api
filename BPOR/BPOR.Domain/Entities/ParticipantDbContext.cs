@@ -38,6 +38,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<FilterCriteria> FilterCriterias { get; set; } = null!;
     public DbSet<EmailCampaign> EmailCampaigns { get; set; } = null!;
     public DbSet<ParticipantLocation> ParticipantLocation { get; set; } = null!;
+    public DbSet<ParticipantContactMethod> ParticipantContactMethod { get; set; } = null!;
     public DbSet<ParticipantAddress> ParticipantAddress { get; set; } = null!;
     public DbSet<FilterEthnicGroup> FilterEthnicGroup { get; set; } = null!;
     public DbSet<FilterPostcode> FilterPostcode { get; set; } = null!;
@@ -65,7 +66,7 @@ public class ParticipantDbContext : DbContext
     {
         var values = identifiers.Select(id => id.Value).ToList();
 
-        return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value)));
+        return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value))).Include(x => x.participantContactMethod);
     }
 
     public void ThrowIfInMaintenanceMode()

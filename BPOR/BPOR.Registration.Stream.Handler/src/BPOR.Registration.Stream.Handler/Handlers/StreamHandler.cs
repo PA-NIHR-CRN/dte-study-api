@@ -154,6 +154,9 @@ public class StreamHandler(
             await participantDbContext.SaveChangesAsync(cancellationToken);
         }
 
+        // Remove participant contact method record
+        participantDbContext.ParticipantContactMethod.Remove(participant.participantContactMethod);
+
         // TODO: are we removing the Participant here, or just the ParticipantIdentifer?
         // Only delete the Participant if all participant identifiers have also been deleted.
         var idsToRemove =
