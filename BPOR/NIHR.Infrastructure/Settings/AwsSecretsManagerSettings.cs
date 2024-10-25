@@ -8,8 +8,8 @@ namespace NIHR.Infrastructure.Settings
     {
         public static string SectionName => "AwsSecretsManagerSettings";
         public bool Enabled { get; set; } = true;
-        public string Region { get; set; } = Environment.GetEnvironmentVariable("AwsSecretsManagerSettings__Region");
-        public string SecretName { get; set; } = Environment.GetEnvironmentVariable("AwsSecretsManagerSettings__SecretName");
+        public string Region { get; set; } = string.Empty;
+        public string SecretName { get; set; } = string.Empty;
 
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
