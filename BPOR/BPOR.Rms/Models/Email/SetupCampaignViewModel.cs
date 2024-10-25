@@ -4,6 +4,12 @@ using Notify.Models.Responses;
 
 namespace BPOR.Rms.Models.Email;
 
+public enum ContactPreference
+{
+    Email,
+    Letter
+}
+
 public class SetupCampaignViewModel
 {
     private static readonly char[] _emailListDelimiters = [',', ';'];
@@ -16,14 +22,15 @@ public class SetupCampaignViewModel
     public string? StudyName { get; set; }
     public string? EmailAddress { get; set; }
 
-    public string? ContactPreference { get; set; }
+    public ContactPreference ContactPreference { get; set; } = ContactPreference.Letter;
 
     public int FilterCriteriaId { get; set; }
 
 
-    [Display(Name = "Select email template", Order = 1)]
+    [Display(Name = "Select template", Order = 1)]
     public string? SelectedTemplateId { get; set; }
     public TemplateList EmailTemplates { get; set; } = new ();
+    public TemplateList LetterTemplates { get; set; } = new ();
 
 
     [Display(Name = "How many volunteers do you want to send it to?", Order = 3)]
@@ -35,4 +42,8 @@ public class SetupCampaignViewModel
     public string? PreviewEmails { get; set; }
     
     public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries)?.Select(x=>x.Trim()) ?? Enumerable.Empty<string>();
+    public string GetArticle(ContactPreference preference)
+    {
+        return (preference == ContactPreference.Email) ? "an" : "a";
+    }
 }

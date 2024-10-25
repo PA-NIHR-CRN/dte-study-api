@@ -1,20 +1,15 @@
 ﻿using System.Text;
 using Amazon.DynamoDBv2;
+using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace BPOR.Rms.TagHelpers
 {
-    public enum ContactPreferenceType
-    {
-        Email,
-        Letter
-    }
-
     public class TemplateSelectTagHelper : TagHelper
     {
-        public ContactPreferenceType ContactPreference { get; set; }
+        public ContactPreference ContactPreference { get; set; } = ContactPreference.Email;
 
         public string SelectedTemplateId { get; set; }
 
@@ -43,7 +38,7 @@ namespace BPOR.Rms.TagHelpers
             s.AddCssClass("govuk-input_select__wrapper");
 
 
-            if (ContactPreference == ContactPreferenceType.Email)
+            if (ContactPreference == ContactPreference.Email)
             {
                 var label = Generator.GenerateLabel(
                     ViewContext,
@@ -68,7 +63,7 @@ namespace BPOR.Rms.TagHelpers
                 s.InnerHtml.AppendHtml(label);
                 s.InnerHtml.AppendHtml(selectList);
             }
-            else if (ContactPreference == ContactPreferenceType.Letter)
+            else if (ContactPreference == ContactPreference.Letter)
             {
                 var label = Generator.GenerateLabel(
                    ViewContext,

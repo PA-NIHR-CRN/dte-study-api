@@ -128,7 +128,7 @@ public class FilterController(ParticipantDbContext context,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
             StudyName = model.StudyName
         };
-        return RedirectToAction("Setup", "Email", campaignDetails);
+        return RedirectToAction("Setup", "Campaign", campaignDetails);
     }
 
     private static List<T> Map<T>(IEnumerable<bool> inputList, Func<int, T> getOutput) =>

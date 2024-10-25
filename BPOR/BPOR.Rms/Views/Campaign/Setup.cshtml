@@ -1,9 +1,9 @@
 @using BPOR.Rms.Models.Email
-@addTagHelper *, BPOR.Rms.TagHelpers
 @model SetupCampaignViewModel
+@addTagHelper *, BPOR.Rms.TagHelpers
 
 @{
-    ViewData["Title"] = $"Set up {Model.ContactPreference?.ToString().ToLower()} campaign";
+    ViewData["Title"] = $"Set up {Model.GetArticle(Model.ContactPreference)} {Model.ContactPreference.ToString().ToLower()} campaign";
     ViewData.AddBreadcrumb("All studies", "/Study/Index");
 
     if (Model.StudyId is not null)
@@ -16,18 +16,19 @@
         ViewData.AddBreadcrumb("Find volunteers", "/Filter");
     }
 
-    ViewData.AddBreadcrumb($"Set up {Model.ContactPreference} campaign", "/Email/SetupCampaign");
+    ViewData.AddBreadcrumb($"Set up {Model.GetArticle(Model.ContactPreference)} {Model.ContactPreference.ToString().ToLower()} campaign", "/Email/SetupCampaign");
 }
 
-
 <div class="govuk-grid-column-two-thirds govuk-!-margin-bottom-6">
-    <h1 class="govuk-heading-l govuk-!-margin-bottom-0">Set up @Model.ContactPreference?.ToString().ToLower() campaign</h1>
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-0">Set up @Model.GetArticle(Model.ContactPreference) @Model.ContactPreference.ToString().ToLower() campaign</h1>
     <p class="govuk-hint body-bold">@Html.DisplayFor(x => x.StudyName)</p>
     <form method="post">
         <input type="hidden" asp-for="StudyId" />
         <input type="hidden" asp-for="MaxNumbers" />
         <input type="hidden" asp-for="FilterCriteriaId" />
-        <partial name="Partials/_TemplateSelect" />
+        @*<partial name="Partials/_TemplateSelect" />*@
+
+
         @if (Model.ContactPreference == ContactPreference.Email)
         {
             <partial name="Partials/_Preview" />
