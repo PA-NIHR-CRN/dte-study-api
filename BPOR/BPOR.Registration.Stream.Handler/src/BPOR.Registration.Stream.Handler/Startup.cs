@@ -19,9 +19,9 @@ public static class Startup
     public static void ConfigureServices(IServiceCollection services, IHostEnvironment hostEnvironment)
     {
         // configuration
-        var configurationBuilder = new ConfigurationManager()
-            .AddNihrConfiguration(services, hostEnvironment)
-            .AddEnvironmentVariables();
+        var configurationBuilder = new ConfigurationBuilder()
+            .AddEnvironmentVariables()
+            .AddNihrConfiguration(services, hostEnvironment);
 
         var configuration = configurationBuilder.Build();
 
