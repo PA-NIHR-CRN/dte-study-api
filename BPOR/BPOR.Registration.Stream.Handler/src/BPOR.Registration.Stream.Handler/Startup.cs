@@ -9,12 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NIHR.Infrastructure.EntityFrameworkCore;
-using NIHR.Infrastructure.Configuration;
 using NIHR.Infrastructure;
 using BPOR.Infrastructure.Clients;
-using Dte.Common.Authentication;
-using Dte.Common.Extensions;
-using Microsoft.Extensions.Logging;
 
 namespace BPOR.Registration.Stream.Handler;
 
@@ -23,7 +19,12 @@ public static class Startup
     public static void ConfigureServices(IServiceCollection services, IHostEnvironment hostEnvironment)
     {
         // configuration
-        var configuration = new ConfigurationManager().AddNihrConfiguration(services, hostEnvironment);
+        var configurationBuilder = new ConfigurationManager()
+            .AddNihrConfiguration(services, hostEnvironment)
+            .AddEnvironmentVariables();
+
+        var configuration = configurationBuilder.Build();
+
         services.AddSingleton(configuration);
 
         // db setup
