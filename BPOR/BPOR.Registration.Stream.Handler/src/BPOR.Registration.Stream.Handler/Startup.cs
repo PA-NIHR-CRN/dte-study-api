@@ -11,6 +11,9 @@ using Microsoft.Extensions.Hosting;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure;
 using BPOR.Infrastructure.Clients;
+using Dte.Common.Authentication;
+using Dte.Common.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace BPOR.Registration.Stream.Handler;
 
@@ -42,7 +45,13 @@ public static class Startup
         services.AddTransient<IStreamHandler, StreamHandler>();
         services.AddTransient<IParticipantMapper, ParticipantMapper>();
         services.AddTransient<IPostcodeMapper, LocationApiClient>();
-        services.AddHttpClient();
+        var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
+
+        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
+            .CreateLogger("BPOR.Geolocation");
+
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings.Value.LocationService, 2,
+            logger);
 
         services.ConfigureNihrLogging(configuration);
     }
