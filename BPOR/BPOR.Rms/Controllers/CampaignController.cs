@@ -97,11 +97,11 @@ public class CampaignController(
                         continue;
                     }
 
-                    await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
+                    //await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
                 }
             }
 
-            return View("EmailSuccess",
+            return View("Success",
                 new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });
         }
 

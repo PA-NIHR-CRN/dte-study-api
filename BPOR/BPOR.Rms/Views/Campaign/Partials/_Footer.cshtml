@@ -1,27 +1,33 @@
 @using BPOR.Rms.Startup
 @using BPOR.Domain.Entities
 @using Microsoft.Extensions.Options
-@model BPOR.Rms.Models.Email.SetupCampaignViewModel
+@using BPOR.Rms.Models.Email
+@model SetupCampaignViewModel
 @inject IOptions<RmsSettings> rmsOptions
 
-<div class="govuk-inset-text">
-    <strong>Please note:</strong> GOV UK Notify has an email allowance of 250,000 per day. This includes all email
-    campaigns sent by our team. Your email may exceed this limit which means it may be sent out over multiple days.
-</div>
 
-<hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+@if (Model.ContactPreference == ContactPreference.Email)
+{
+    <div class="govuk-inset-text">
+        <strong>Please note:</strong> GOV UK Notify has an email allowance of 250,000 per day. This includes all email
+        campaigns sent by our team. Your email may exceed this limit which means it may be sent out over multiple days.
+    </div>
 
-<p class="govuk-body text-secondary">
-    @if (!string.IsNullOrEmpty(Model.EmailAddress))
-    {
-        <span>Both</span>
-    }
-    @rmsOptions.Value.CampaignNotificationEmailAddress
-    @if (!string.IsNullOrEmpty(Model.EmailAddress))
-    {
-        <span> and @Model.EmailAddress</span>
-    }
-    will be notified by email that the email campaign has started sending and to how many recipients.
-</p>
+    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
 
-<button type="submit" asp-action="SendEmail" class="govuk-button" data_module="govuk-button">Send email</button>
+    <p class="govuk-body text-secondary">
+        @if (!string.IsNullOrEmpty(Model.EmailAddress))
+        {
+            <span>Both</span>
+        }
+        @rmsOptions.Value.CampaignNotificationEmailAddress
+        @if (!string.IsNullOrEmpty(Model.EmailAddress))
+        {
+            <span> and @Model.EmailAddress</span>
+        }
+        will be notified by email that the email campaign has started sending and to how many recipients.
+    </p>
+}
+
+
+<button type="submit" asp-action="Send" class="govuk-button" data_module="govuk-button">Send @Model.ContactPreference.ToString().ToLower()</button>

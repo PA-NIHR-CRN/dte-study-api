@@ -22,7 +22,7 @@ public class SetupCampaignViewModel
     public string? StudyName { get; set; }
     public string? EmailAddress { get; set; }
 
-    public ContactPreference ContactPreference { get; set; } = ContactPreference.Letter;
+    public ContactPreference ContactPreference { get; set; } = ContactPreference.Email;
 
     public int FilterCriteriaId { get; set; }
 

@@ -4,5 +4,5 @@ public class EmailSuccessViewModel
 {
     public int? StudyId { get; set; }
     public string? StudyName { get; set; }
-    public string? ContactPreference { get; set; } = "Email";
+    public ContactPreference ContactPreference { get; set; } = ContactPreference.Email;
 }

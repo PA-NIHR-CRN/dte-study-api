@@ -10,7 +10,7 @@
         <div class="govuk-grid-column-one-half-from-desktop">
             <div class="govuk-panel govuk-panel--confirmation">
                 <h1 class="govuk-panel__title">
-                    Request to send @Html.DisplayFor(model => model.ContactPreference) for @Html.DisplayFor(model => model.StudyName) has been submitted to GOV.UK Notify
+                    Request to send @(Model.ContactPreference.ToString().ToLower() + "s") for @Html.DisplayFor(model => model.StudyName) has been submitted to GOV.UK Notify
                 </h1>
             </div>
         </div>
@@ -22,7 +22,7 @@ else
         <div class="govuk-grid-column-one-half-from-desktop">
             <div class="govuk-panel govuk-panel--confirmation">
                 <h1 class="govuk-panel__title">
-                    The @Html.DisplayFor(model => model.ContactPreference).ToString().ToLower() campaign has been sent
+                    The @Model.ContactPreference.ToString().ToLower() campaign has been sent
                 </h1>
             </div>
         </div>
