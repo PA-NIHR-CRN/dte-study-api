@@ -58,15 +58,14 @@ public class ParticipantMapper : IParticipantMapper
             }
         }
     }
-    private void AddParticipantContactMethod(Participant participant)
+    private void MapParticipantContactMethod(DynamoParticipant source, Participant participant)
     {
-        // all records coming from VS need to be set to email preferance for contact.
-        if (participant.participantContactMethod == null) { 
-            participant.participantContactMethod = new ParticipantContactMethod()
+        if (participant.PreferredContactMethods.Any()) { 
+            participant.PreferredContactMethods.Add(new ParticipantContactMethod()
             {
                 ContactMethodId = (int)ContactMethods.Email,
 
-            };
+            });
         }
     }
 
@@ -149,20 +148,21 @@ public class ParticipantMapper : IParticipantMapper
         }
 
         ParticipantAddressMapper.Map(source.Address, destination);
-        // coordinates are not in current stream handler.
-        //var coordinates =
-        //    await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
 
-        //if (coordinates != null)
-        //{
-        //    destination.ParticipantLocation ??= new ParticipantLocation();
-        //    destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
-        //        { SRID = ParticipantLocationConfiguration.LocationSrid };
-        //}
+       
+        var coordinates =
+            await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
+
+        if (coordinates != null)
+        {
+            destination.ParticipantLocation ??= new ParticipantLocation();
+            destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+            { SRID = ParticipantLocationConfiguration.LocationSrid };
+        }
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);
-        AddParticipantContactMethod(destination);
+        MapParticipantContactMethod(source,destination);
 
         return destination;
     }

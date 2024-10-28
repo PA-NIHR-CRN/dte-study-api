@@ -66,7 +66,7 @@ public class ParticipantDbContext : DbContext
     {
         var values = identifiers.Select(id => id.Value).ToList();
 
-        return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value))).Include(x => x.participantContactMethod);
+        return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value)));
     }
 
     public void ThrowIfInMaintenanceMode()

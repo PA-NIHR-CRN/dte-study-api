@@ -13,7 +13,7 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20241018103410_add_ParticipantContactMethod_table_and_ref_data")]
+    [Migration("20241028132238_add_ParticipantContactMethod_table_and_ref_data")]
     partial class add_ParticipantContactMethod_table_and_ref_data
     {
         /// <inheritdoc />

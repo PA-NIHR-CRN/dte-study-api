@@ -109,6 +109,8 @@ public class StreamHandler(
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
         var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
+            .Include(x => x.PreferredContactMethods)
+            .Include(x => x.ParticipantLocation)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 

@@ -63,7 +63,7 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
 
     public ICollection<SourceReference> SourceReferences { get; set; } = new List<SourceReference>();
     public ParticipantLocation? ParticipantLocation { get; set; }
-    public ParticipantContactMethod participantContactMethod { get; set; }
+    public ICollection<ParticipantContactMethod> PreferredContactMethods { get; set; }
 
     public void Anonymise()
     {
