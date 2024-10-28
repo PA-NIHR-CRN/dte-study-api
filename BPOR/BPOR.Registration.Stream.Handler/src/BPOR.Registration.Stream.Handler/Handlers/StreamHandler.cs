@@ -148,6 +148,8 @@ public class StreamHandler(
         var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
             .IgnoreQueryFilters()
             .Include(x => x.ParticipantIdentifiers)
+            .Include(x => x.PreferredContactMethods)
+            .Include(x => x.ParticipantLocation)
             .SingleOrDefaultAsync(cancellationToken);
 
         if (participant == null)
@@ -157,7 +159,7 @@ public class StreamHandler(
         }
 
         // Remove participant contact method record
-        participantDbContext.ParticipantContactMethod.Remove(participant.participantContactMethod);
+        participantDbContext.ParticipantContactMethod.RemoveRange(participant.PreferredContactMethods);
 
         // TODO: are we removing the Participant here, or just the ParticipantIdentifer?
         // Only delete the Participant if all participant identifiers have also been deleted.
