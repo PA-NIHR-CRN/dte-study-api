@@ -19,8 +19,8 @@ using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
 
-public class EmailCampaignService(
-    ILogger<EmailCampaignService> logger,
+public class CampaignService(
+    ILogger<CampaignService> logger,
     IRefDataService refDataService,
     ParticipantDbContext context,
     IEncryptionService encryptionService,
@@ -29,7 +29,7 @@ public class EmailCampaignService(
     IPostcodeMapper locationApiClient,
     TimeProvider timeProvider
     )
-    : IEmailCampaignService
+    : ICampaignService
 {
     public async Task SendCampaignAsync(EmailServiceQueueItem item, CancellationToken cancellationToken = default)
     {

@@ -22,8 +22,8 @@ public class HostedEmailQueueService(
             try
             {
                 using var scope = serviceProvider.CreateScope();
-                var emailCampaignService = scope.ServiceProvider.GetRequiredService<IEmailCampaignService>();
-                await emailCampaignService.SendCampaignAsync(id, stoppingToken);
+                var campaignService = scope.ServiceProvider.GetRequiredService<ICampaignService>();
+                await campaignService.SendCampaignAsync(id, stoppingToken);
             }
             catch (Exception ex)
             {
