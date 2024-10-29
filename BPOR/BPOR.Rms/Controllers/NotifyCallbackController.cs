@@ -47,7 +47,7 @@ public class NotifyCallbackController(
             return BadRequest("Invalid reference.");
         }
 
-        var participantEmail = await context.EmailCampaignParticipants
+        var participantEmail = await context.CampaignParticipants
             .Where(x => x.Id == emailCampaignParticipantId)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -100,7 +100,7 @@ public class NotifyCallbackController(
             if (TryParse(decryptedReference, out var emailCampaignParticipantId) &&
                 emailCampaignParticipantId != 0)
             {
-                var participantQuery = context.EmailCampaignParticipants
+                var participantQuery = context.CampaignParticipants
                     .Where(p => p.Id == emailCampaignParticipantId);
 
                 var participant = await participantQuery.FirstOrDefaultAsync(o => o.RegisteredInterestAt == null, cancellationToken);

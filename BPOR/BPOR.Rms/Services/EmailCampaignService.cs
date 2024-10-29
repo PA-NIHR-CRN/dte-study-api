@@ -33,7 +33,7 @@ public class EmailCampaignService(
 {
     public async Task SendCampaignAsync(EmailServiceQueueItem item, CancellationToken cancellationToken = default)
     {
-        var campaign = await context.EmailCampaigns
+        var campaign = await context.Campaigns
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == item.Id, cancellationToken);
         var emailDeliveryStatusId = GetEmailDeliveryStatusId();
@@ -106,7 +106,7 @@ public class EmailCampaignService(
         await foreach (var processingResult in ProcessVolunteersAsync(volunteers, campaign, dbFilter,
                            emailDeliveryStatusId, batchSize, cancellationToken))
         {
-            await context.EmailCampaignParticipants.AddRangeAsync(processingResult.EmailCampaignParticipants,
+            await context.CampaignParticipants.AddRangeAsync(processingResult.CampaignParticipants,
                 cancellationToken);
             await context.StudyParticipantEnrollment.AddRangeAsync(processingResult.StudyParticipantEnrollments,
                 cancellationToken);
@@ -183,7 +183,7 @@ public class EmailCampaignService(
     private void ProcessVolunteer(CampaignParticipantDetails volunteer, EmailCampaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int emailDeliveryStatusId)
     {
-        processingResult.EmailCampaignParticipants.Add(new EmailCampaignParticipant
+        processingResult.CampaignParticipants.Add(new EmailCampaignParticipant
         {
             EmailCampaignId = campaign.Id,
             ParticipantId = volunteer.Id,
@@ -221,7 +221,7 @@ public class EmailCampaignService(
     {
         foreach (var volunteer in volunteers)
         {
-            var emailCampaignParticipant = emailQueue.SelectMany(e => e.EmailCampaignParticipants)
+            var emailCampaignParticipant = emailQueue.SelectMany(e => e.CampaignParticipants)
                 .FirstOrDefault(e => e.ParticipantId == volunteer.Id);
 
             if (emailCampaignParticipant == null)
@@ -289,6 +289,6 @@ internal static class DbContextExtensions
 
 internal class ProcessingResults
 {
-    public List<EmailCampaignParticipant> EmailCampaignParticipants { get; } = [];
+    public List<EmailCampaignParticipant> CampaignParticipants { get; } = [];
     public List<StudyParticipantEnrollment> StudyParticipantEnrollments { get; } = [];
 }

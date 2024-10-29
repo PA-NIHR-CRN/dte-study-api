@@ -97,7 +97,7 @@ public class CampaignController(
                         continue;
                     }
 
-                    //await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
+                    await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
                 }
             }
 
@@ -230,7 +230,7 @@ public class CampaignController(
 
     private async Task AddCampaignToContextAsync(EmailCampaign campaign, CancellationToken cancellationToken)
     {
-        await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
+        await context.Campaigns.AddAsync(campaign, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 }
