@@ -64,7 +64,7 @@ public class ParticipantMapper : IParticipantMapper
             }
         }
     }
-    private void MapParticipantContactMethod(Participant participant)
+    private void MapParticipantContactMethod(DynamoParticipant source, Participant participant)
     {
         if (!participant.PreferredContactMethods.Any()) { 
             participant.PreferredContactMethods.Add(new ParticipantContactMethod()
