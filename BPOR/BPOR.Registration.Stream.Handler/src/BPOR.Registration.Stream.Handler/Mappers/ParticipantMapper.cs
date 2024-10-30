@@ -64,7 +64,7 @@ public class ParticipantMapper : IParticipantMapper
             }
         }
     }
-    private void MapParticipantContactMethod(DynamoParticipant? source, Participant participant)
+    private void MapParticipantContactMethod(Participant participant)
     {
         if (!participant.PreferredContactMethods.Any()) { 
             participant.PreferredContactMethods.Add(new ParticipantContactMethod()
@@ -170,7 +170,7 @@ public class ParticipantMapper : IParticipantMapper
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);
-        MapParticipantContactMethod(source,destination);
+        MapParticipantContactMethod(destination);
 
         return destination;
     }
