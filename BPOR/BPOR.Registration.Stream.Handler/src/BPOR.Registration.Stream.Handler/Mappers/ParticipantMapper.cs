@@ -170,7 +170,7 @@ public class ParticipantMapper : IParticipantMapper
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);
-        MapParticipantContactMethod(destination);
+        MapParticipantContactMethod(source, destination);
 
         return destination;
     }
