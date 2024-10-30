@@ -64,7 +64,7 @@ public class ParticipantMapper : IParticipantMapper
             }
         }
     }
-    private void MapParticipantContactMethod(DynamoParticipant source, Participant participant)
+    private void MapParticipantContactMethod(DynamoParticipant? source, Participant participant)
     {
         if (!participant.PreferredContactMethods.Any()) { 
             participant.PreferredContactMethods.Add(new ParticipantContactMethod()
@@ -153,7 +153,7 @@ public class ParticipantMapper : IParticipantMapper
         {
             destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
         }
-
+        _logger.LogInformation("{tempVar}",JsonSerializer.Serialize(source));
         if(source.Address != null) { 
             ParticipantAddressMapper.Map(source.Address, destination);
 
