@@ -135,6 +135,8 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(record.Dynamodb.NewImage);
         var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
+            .Include(x => x.PreferredContactMethods)
+            .Include(x => x.ParticipantLocation)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
