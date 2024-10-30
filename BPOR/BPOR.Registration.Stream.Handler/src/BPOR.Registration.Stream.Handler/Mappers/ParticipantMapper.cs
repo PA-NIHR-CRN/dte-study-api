@@ -1,14 +1,18 @@
+using System.Text.Json;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
+using Amazon.Runtime.Internal.Util;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
 using BPOR.Registration.Stream.Handler.Services;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BPOR.Registration.Stream.Handler.Mappers;
 
@@ -17,13 +21,15 @@ public class ParticipantMapper : IParticipantMapper
     private readonly IDynamoDBContext _context;
     private readonly IRefDataService _refDataService;
     private readonly IPostcodeMapper _locationApiClient;
+    private readonly ILogger<ParticipantMapper> _logger;
 
     public ParticipantMapper(IDynamoDBContext context, IRefDataService refDataService,
-        IPostcodeMapper locationApiClient)
+        IPostcodeMapper locationApiClient, ILogger<ParticipantMapper> logger)
     {
         _context = context;
         _refDataService = refDataService;
         _locationApiClient = locationApiClient;
+        _logger = logger;
     }
 
     private void MapIdentifiers(DynamoParticipant source, Participant participant)
@@ -60,7 +66,7 @@ public class ParticipantMapper : IParticipantMapper
     }
     private void MapParticipantContactMethod(DynamoParticipant source, Participant participant)
     {
-        if (participant.PreferredContactMethods.Any()) { 
+        if (!participant.PreferredContactMethods.Any()) { 
             participant.PreferredContactMethods.Add(new ParticipantContactMethod()
             {
                 ContactMethodId = (int)ContactMethods.Email,
@@ -117,9 +123,15 @@ public class ParticipantMapper : IParticipantMapper
     public async Task<Participant> Map(Dictionary<string, AttributeValue> record, Participant destination,
         CancellationToken cancellationToken)
     {
+
         var doc = Document.FromAttributeMap(record);
 
+        _logger.LogInformation(doc.ToJson());
+
         var source = _context.FromDocument<DynamoParticipant>(doc);
+
+        var sourceString = JsonSerializer.Serialize(source, new JsonSerializerOptions { WriteIndented = true });
+        _logger.LogInformation("sourceSting. {address}", sourceString);
 
         destination.Email = source.Email;
         destination.FirstName = source.Firstname;
@@ -146,10 +158,8 @@ public class ParticipantMapper : IParticipantMapper
         {
             destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
         }
+            ParticipantAddressMapper.Map(source.Address, destination);
 
-        ParticipantAddressMapper.Map(source.Address, destination);
-
-       
         var coordinates =
             await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
 
