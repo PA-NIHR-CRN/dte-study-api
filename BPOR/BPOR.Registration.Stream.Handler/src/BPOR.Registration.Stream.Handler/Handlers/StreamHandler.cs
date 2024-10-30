@@ -109,10 +109,6 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
-        foreach (KeyValuePair<string, AttributeValue> kvp in image)
-        {
-            logger.LogInformation("Key = {0}, Value = {1}", kvp.Key, kvp.Value.ToString());
-        }
 
         var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
             .Include(x => x.PreferredContactMethods)

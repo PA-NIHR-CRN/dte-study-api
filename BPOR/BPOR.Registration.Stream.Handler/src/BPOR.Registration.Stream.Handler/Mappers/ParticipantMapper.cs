@@ -126,12 +126,7 @@ public class ParticipantMapper : IParticipantMapper
 
         var doc = Document.FromAttributeMap(record);
 
-        _logger.LogInformation(doc.ToJson());
-
         var source = _context.FromDocument<DynamoParticipant>(doc);
-
-        var sourceString = JsonSerializer.Serialize(source, new JsonSerializerOptions { WriteIndented = true });
-        _logger.LogInformation("sourceSting. {address}", sourceString);
 
         destination.Email = source.Email;
         destination.FirstName = source.Firstname;
@@ -158,16 +153,19 @@ public class ParticipantMapper : IParticipantMapper
         {
             destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
         }
+
+        if(source.Address != null) { 
             ParticipantAddressMapper.Map(source.Address, destination);
 
-        var coordinates =
-            await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
+            var coordinates =
+                await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
 
-        if (coordinates != null)
-        {
-            destination.ParticipantLocation ??= new ParticipantLocation();
-            destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
-            { SRID = ParticipantLocationConfiguration.LocationSrid };
+            if (coordinates != null)
+            {
+                destination.ParticipantLocation ??= new ParticipantLocation();
+                destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+                { SRID = ParticipantLocationConfiguration.LocationSrid };
+            }
         }
 
         MapHealthConditions(source, destination);
