@@ -153,7 +153,7 @@ public class ParticipantMapper : IParticipantMapper
         {
             destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
         }
-        _logger.LogInformation("{tempVar}",JsonSerializer.Serialize(source));
+
         if(source.Address != null) { 
             ParticipantAddressMapper.Map(source.Address, destination);
 
