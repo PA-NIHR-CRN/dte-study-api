@@ -76,21 +76,23 @@ IHostEnvironment hostEnvironment)
             return configuration;
         }
 
-        public static IConfigurationManager AddNihrConfiguration(this IConfigurationManager configuration, IServiceCollection services,
+        public static IConfigurationBuilder AddNihrConfiguration(this IConfigurationBuilder configurationBuilder, IServiceCollection services,
 IHostEnvironment hostEnvironment)
         {
 
-            AddNihrConfiguration(configuration, hostEnvironment);
+            configurationBuilder.AddNihrConfiguration(hostEnvironment);
+
+            var configuration = configurationBuilder.Build();
 
             var secretsManagerSettings = services.GetSectionAndValidate<AwsSecretsManagerSettings>(configuration).Value;
             if (secretsManagerSettings.Enabled)
             {
-                configuration.AddAwsSecretsManager(secretsManagerSettings.SecretName,
+                configurationBuilder.AddAwsSecretsManager(secretsManagerSettings.SecretName,
                     () => new AmazonSecretsManagerClient(
                         RegionEndpoint.GetBySystemName(secretsManagerSettings.Region)));
             }
 
-            return configuration;
+            return configurationBuilder;
         }
 
         public static IHostApplicationBuilder AddNihrConfiguration(this IHostApplicationBuilder builder)
