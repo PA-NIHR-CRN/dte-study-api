@@ -74,7 +74,7 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     private static IEnumerable<SelectListItem> SetVolunteersCompletedRegistrationItems()
     {
-        var items = new List<SelectListItem>
+        var items = new List<SelectListItem>=
         {
             new SelectListItem { Value = string.Empty, Text = "No preference" },
             new SelectListItem { Value = true.ToString(), Text = "Completed registration" },
@@ -145,6 +145,22 @@ public class VolunteerFilterViewModel : IValidatableObject
         }
 
         // TODO: prefer not to say
+
+        return retval;
+    }
+
+    public ISet<ContactPreferenceId?> GetContactPreferenceOptions()
+    {
+        var retval = new HashSet<ContactPreferenceId?>();
+        if (IsEmail)
+        {
+            retval.Add(ContactPreferenceId.Email);
+        }
+
+        if (IsLetter)
+        {
+            retval.Add(ContactPreferenceId.Letter);
+        }
 
         return retval;
     }

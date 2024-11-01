@@ -118,7 +118,6 @@ public static class Projections
                     CampaignParticipants = ec.Participants
                         .Select(p => new EmailCampaignParticipant
                         {
-                            ContactEmail = p.ContactEmail,
                             SentAt = p.SentAt,
                             RegisteredInterestAt = p.RegisteredInterestAt,
                             DeliveredAt = p.DeliveredAt,
