@@ -1,14 +1,9 @@
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Enums;
 using Notify.Models.Responses;
 
 namespace BPOR.Rms.Models.Email;
-
-public enum ContactPreference
-{
-    Email,
-    Letter
-}
 
 public class SetupCampaignViewModel
 {
@@ -22,7 +17,7 @@ public class SetupCampaignViewModel
     public string? StudyName { get; set; }
     public string? EmailAddress { get; set; }
 
-    public ContactPreference ContactPreference { get; set; } = ContactPreference.Email;
+    public ContactMethods ContactMethod { get; set; } = ContactMethods.Email;
 
     public int FilterCriteriaId { get; set; }
 
@@ -42,8 +37,8 @@ public class SetupCampaignViewModel
     public string? PreviewEmails { get; set; }
     
     public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries)?.Select(x=>x.Trim()) ?? Enumerable.Empty<string>();
-    public string GetArticle(ContactPreference preference)
+    public string GetArticle(ContactMethods method)
     {
-        return (preference == ContactPreference.Email) ? "an" : "a";
+        return (method == ContactMethods.Email) ? "an" : "a";
     }
 }

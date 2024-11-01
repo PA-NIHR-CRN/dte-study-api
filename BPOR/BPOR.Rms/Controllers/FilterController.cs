@@ -7,6 +7,7 @@ using Z.EntityFramework.Plus;
 using Rbec.Postcodes;
 using BPOR.Rms.Startup;
 using NIHR.GovUk.AspNetCore.Mvc;
+using BPOR.Domain.Enums;
 
 namespace BPOR.Rms.Controllers;
 
@@ -113,7 +114,7 @@ public class FilterController(ParticipantDbContext context,
             // TODO bind this directly into the model as a collection
             FilterPostcode = model.PostcodeSearch.GetPostcodeDistricts().Select(x => new FilterPostcode { PostcodeFragment = x }).ToList(),
             FilterGender = model.GetGenderOptions().Select(x => new FilterGender { GenderId = (int)x }).ToList(), // TODO: support null gender
-            FilterContactPreference = model.GetContactPreferenceOptions().Select(x => new FilterContactPreference { ContactPreferenceId = (int)x }).ToList(),
+            //FilterContactMethod = ContactMethods.Email,
             FilterSexSameAsRegisteredAtBirth = GetSexSameAsRegisteredAtBirths(model),
             FilterEthnicGroup = GetEthnicGroups(model),
         };
@@ -127,7 +128,8 @@ public class FilterController(ParticipantDbContext context,
             FilterCriteriaId = filterCriteria.Id,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
-            StudyName = model.StudyName
+            StudyName = model.StudyName,
+            ContactMethod = ContactMethods.Email
         };
         return RedirectToAction("Setup", "Campaign", campaignDetails);
     }

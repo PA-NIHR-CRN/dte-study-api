@@ -1,6 +1,8 @@
-﻿using System.Text;
+﻿using System.Net.NetworkInformation;
+using System.Text;
 using Amazon.DynamoDBv2;
 using BPOR.Rms.Models.Email;
+using BPOR.Domain.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -9,7 +11,7 @@ namespace BPOR.Rms.TagHelpers
 {
     public class TemplateSelectTagHelper : TagHelper
     {
-        public ContactPreference ContactPreference { get; set; } = ContactPreference.Email;
+        public ContactMethods ContactMethod { get; set; } = ContactMethods.Email;
 
         public string SelectedTemplateId { get; set; }
 
@@ -38,7 +40,7 @@ namespace BPOR.Rms.TagHelpers
             s.AddCssClass("govuk-input_select__wrapper");
 
 
-            if (ContactPreference == ContactPreference.Email)
+            if (ContactMethod == ContactMethods.Email)
             {
                 var label = Generator.GenerateLabel(
                     ViewContext,
@@ -63,7 +65,7 @@ namespace BPOR.Rms.TagHelpers
                 s.InnerHtml.AppendHtml(label);
                 s.InnerHtml.AppendHtml(selectList);
             }
-            else if (ContactPreference == ContactPreference.Letter)
+            else if (ContactMethod == ContactMethods.Letter)
             {
                 var label = Generator.GenerateLabel(
                    ViewContext,

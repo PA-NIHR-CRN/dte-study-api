@@ -2,11 +2,13 @@
 @using BPOR.Domain.Entities
 @using Microsoft.Extensions.Options
 @using BPOR.Rms.Models.Email
+@using BPOR.Domain.Enums;
+
 @model SetupCampaignViewModel
 @inject IOptions<RmsSettings> rmsOptions
 
 
-@if (Model.ContactPreference == ContactPreference.Email)
+@if (Model.ContactMethod == ContactMethods.Email)
 {
     <div class="govuk-inset-text">
         <strong>Please note:</strong> GOV UK Notify has an email allowance of 250,000 per day. This includes all email
@@ -30,4 +32,4 @@
 }
 
 
-<button type="submit" asp-action="Send" class="govuk-button" data_module="govuk-button">Send @Model.ContactPreference.ToString().ToLower()</button>
+<button type="submit" asp-action="Send" class="govuk-button" data_module="govuk-button">Send @Model.ContactMethod.ToString().ToLower()</button>
