@@ -31,12 +31,12 @@ public class CampaignService(
     )
     : ICampaignService
 {
-    public async Task SendCampaignAsync(EmailServiceQueueItem item, CancellationToken cancellationToken = default)
+    public async Task SendCampaignAsync(ServiceQueueItem item, CancellationToken cancellationToken = default)
     {
         var campaign = await context.EmailCampaigns
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == item.Id, cancellationToken);
-        var emailDeliveryStatusId = GetEmailDeliveryStatusId();
+        var deliveryStatusId = GetDeliveryStatusId();
 
         var dbFilter = await GetFilterCriteriaAsync(campaign, cancellationToken);
 
@@ -53,12 +53,12 @@ public class CampaignService(
             return;
         }
 
-        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, emailDeliveryStatusId, item.Callback, cancellationToken);
+        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, deliveryStatusId, item.Callback, cancellationToken);
     }
 
-    private int GetEmailDeliveryStatusId()
+    private int GetDeliveryStatusId()
     {
-        return refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Pending) ??
+        return refDataService.GetDeliveryStatusId(DeliveryStatus.Pending) ??
                throw new InvalidOperationException("Email delivery status not found");
     }
 
@@ -94,7 +94,7 @@ public class CampaignService(
     }
 
     private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
-        FilterCriteria dbFilter, int emailDeliveryStatusId, string callback, CancellationToken cancellationToken)
+        FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
 
@@ -104,7 +104,7 @@ public class CampaignService(
         var emailQueue = new List<ProcessingResults>();
 
         await foreach (var processingResult in ProcessVolunteersAsync(volunteers, campaign, dbFilter,
-                           emailDeliveryStatusId, batchSize, cancellationToken))
+                           deliveryStatusId, batchSize, cancellationToken))
         {
             await context.EmailCampaignParticipants.AddRangeAsync(processingResult.EmailCampaignParticipants,
                 cancellationToken);
@@ -160,7 +160,7 @@ public class CampaignService(
         List<EmailParticipantDetails> volunteers,
         EmailCampaign campaign,
         FilterCriteria dbFilter,
-        int emailDeliveryStatusId,
+        int deliveryStatusId,
         int batchSize,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -173,7 +173,7 @@ public class CampaignService(
 
             foreach (var volunteer in volunteerChunk)
             {
-                ProcessVolunteer(volunteer, campaign, dbFilter, processingResult, emailDeliveryStatusId);
+                ProcessVolunteer(volunteer, campaign, dbFilter, processingResult, deliveryStatusId);
             }
 
             yield return processingResult;
@@ -181,13 +181,13 @@ public class CampaignService(
     }
 
     private void ProcessVolunteer(EmailParticipantDetails volunteer, EmailCampaign campaign, FilterCriteria dbFilter,
-        ProcessingResults processingResult, int emailDeliveryStatusId)
+        ProcessingResults processingResult, int deliveryStatusId)
     {
         processingResult.EmailCampaignParticipants.Add(new EmailCampaignParticipant
         {
             EmailCampaignId = campaign.Id,
             ParticipantId = volunteer.Id,
-            DeliveryStatusId = emailDeliveryStatusId,
+            DeliveryStatusId = deliveryStatusId,
             SentAt = DateTime.UtcNow,
             ContactEmail = volunteer.Email,
         });

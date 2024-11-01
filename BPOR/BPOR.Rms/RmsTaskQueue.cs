@@ -7,7 +7,7 @@ namespace BPOR.Rms;
 public class RmsTaskQueue : IRmsTaskQueue
 {
     private readonly ILogger _logger;
-    private readonly Channel<EmailServiceQueueItem> _queue;
+    private readonly Channel<ServiceQueueItem> _queue;
 
     public RmsTaskQueue(int capacity, ILogger logger)
     {
@@ -17,7 +17,7 @@ public class RmsTaskQueue : IRmsTaskQueue
             FullMode = BoundedChannelFullMode.Wait
         };
 
-        _queue = Channel.CreateBounded<EmailServiceQueueItem>(options);
+        _queue = Channel.CreateBounded<ServiceQueueItem>(options);
     }
     
 
@@ -25,11 +25,11 @@ public class RmsTaskQueue : IRmsTaskQueue
     {
         _logger.LogInformation("Queueing background work item");
         ArgumentNullException.ThrowIfNull(id);
-        var item = new EmailServiceQueueItem { Id = id, Callback = callback };
+        var item = new ServiceQueueItem { Id = id, Callback = callback };
         await _queue.Writer.WriteAsync(item, cancellationToken);
     }
 
-    async ValueTask<EmailServiceQueueItem> IRmsTaskQueue.DequeueAsync(CancellationToken cancellationToken)
+    async ValueTask<ServiceQueueItem> IRmsTaskQueue.DequeueAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Dequeuing background work item");
         return await _queue.Reader.ReadAsync(cancellationToken);

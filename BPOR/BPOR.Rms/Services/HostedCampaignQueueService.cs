@@ -1,14 +1,14 @@
 namespace BPOR.Rms.Services;
 
-public class HostedEmailQueueService(
+public class HostedQueueService(
     IRmsTaskQueue taskQueue,
-    ILogger<HostedEmailQueueService> logger,
+    ILogger<HostedQueueService> logger,
     IServiceProvider serviceProvider)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("HostedEmailQueueService is running");
+        logger.LogInformation("HostedQueueService is running");
 
         await BackgroundProcessing(stoppingToken);
     }

@@ -19,7 +19,7 @@ public class EmailCampaignParticipant : IAudit, ISoftDelete
     public int CreatedById { get; set; }
     public int UpdatedById { get; set; }
     public bool IsDeleted { get; set; }
-    public EmailDeliveryStatus DeliveryStatus { get; set; }
+    public DeliveryStatus DeliveryStatus { get; set; }
     public EmailCampaign EmailCampaign { get; set; }
     public Participant Participant { get; set; }
 }

@@ -73,12 +73,12 @@ public class NotifyCallbackController(
             case "delivered":
                 participantEmail.DeliveredAt = DateTime.UtcNow;
                 participantEmail.DeliveryStatusId =
-                    refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Delivered);
+                    refDataService.GetDeliveryStatusId(DeliveryStatus.Delivered);
                 break;
             case "temporary-failure":
             case "permanent-failure":
             case "technical-failure":
-                participantEmail.DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Failed);
+                participantEmail.DeliveryStatusId = refDataService.GetDeliveryStatusId(DeliveryStatus.Failed);
                 break;
             default:
                 return BadRequest("Invalid status.");

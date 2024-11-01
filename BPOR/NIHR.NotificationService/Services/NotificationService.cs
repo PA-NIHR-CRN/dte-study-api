@@ -15,9 +15,11 @@ namespace NIHR.NotificationService.Services
         private readonly NotificationClient _client;
         private readonly ILogger<NotificationService> _logger;
         private static readonly SemaphoreSlim _semaphore = new(1, 1);
-        private static int _dailyEmailCount = 0;
-        private const int _dailyLimit = 250000;
         private const int _rateLimitPerMinute = 3000;
+        private static int _emailDailyCount = 0;
+        private const int _emailDailyLimit = 250000;
+        private static int _letterDailyCount = 0;
+        private const int _letterDailyLimit = 20000;
 
         public NotificationService(NotificationClient client, ILogger<NotificationService> logger)
         {
@@ -25,30 +27,44 @@ namespace NIHR.NotificationService.Services
             _logger = logger;
         }
 
-        private async Task SendEmailAsync(SendEmailRequest request, CancellationToken cancellationToken)
+        public async Task SendNotificationAsync(SendNotificationRequest request, CancellationToken cancellationToken)
         {
+            request.Validate();
+
             var stopwatch = Stopwatch.StartNew();
             try
             {
                 var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
-                    
-                await _client.SendEmailAsync(request.EmailAddress, request.EmailTemplateId,
-                    personalisation, request.Reference);
-                await IncrementDailyEmailCountAsync(1);
+
+                switch (request.ContactMethod)
+                {
+                    case ContactMethod.Email:
+                        await _client.SendEmailAsync(request.EmailAddress, request.EmailTemplateId, personalisation, request.Reference);
+                        await IncrementDailyCountAsync(ContactMethod.Email, 1);
+                        break;
+
+                    case ContactMethod.Letter:
+                        await _client.SendLetterAsync(request.LetterTemplateId, personalisation, request.Reference);
+                        await IncrementDailyCountAsync(ContactMethod.Letter, 1);
+                        break;
+
+                    default:
+                        throw new NotSupportedException($"Contact method {request.ContactMethod} is not supported.");
+                }
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
-                _logger.LogError(httpEx, "429 Rate Limit Exceeded error while sending email");
-                throw new InvalidOperationException("429 Rate Limit Exceeded error while sending email.", httpEx);
+                _logger.LogError(httpEx, "429 Rate Limit Exceeded error while sending notification");
+                throw new InvalidOperationException("429 Rate Limit Exceeded error while sending notification.", httpEx);
             }
             finally
             {
                 stopwatch.Stop();
-                _logger.LogInformation("Request for {EmailAddress} took {ElapsedMilliseconds} ms", request.EmailAddress, stopwatch.ElapsedMilliseconds);
+                _logger.LogInformation("Request for {Reference} took {ElapsedMilliseconds} ms", request.Reference, stopwatch.ElapsedMilliseconds);
             }
         }
 
-        public async Task SendPreviewEmailAsync(SendEmailRequest request, CancellationToken cancellationToken)
+        public async Task SendPreviewEmailAsync(SendNotificationRequest request, CancellationToken cancellationToken)
         {
             var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
 
@@ -56,7 +72,7 @@ namespace NIHR.NotificationService.Services
                 personalisation, request.Reference);
         }
 
-        public async Task<EmailNotificationResponse> SendBatchEmailAsync(List<Notification> notifications,
+        public async Task<NotificationResponse> SendBatchNotificationAsync(List<Notification> notifications,
             CancellationToken cancellationToken)
         {
             const int batchSize = 100;
@@ -77,7 +93,7 @@ namespace NIHR.NotificationService.Services
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogWarning("Batch email sending cancelled");
+                    _logger.LogWarning("Batch notification sending cancelled");
                     cancellationToken.ThrowIfCancellationRequested();
                 }
 
@@ -89,7 +105,7 @@ namespace NIHR.NotificationService.Services
             totalStopwatch.Stop();
             _logger.LogInformation("Total time for all batches: {TotalMilliseconds} ms", totalStopwatch.ElapsedMilliseconds);
 
-            return new EmailNotificationResponse();
+            return new NotificationResponse();
         }
 
         private async Task SendBatchWithRateLimitAsync(List<Notification> batch,
@@ -99,45 +115,66 @@ namespace NIHR.NotificationService.Services
             var individualTimes = new List<long>();
 
             var tasks = batch.Select(notification => 
-                SendEmailWithRetryAsync(notification, retryPolicy, cancellationToken, individualTimes)).ToList();
+                SendNotificationWithRetryAsync(notification, retryPolicy, cancellationToken, individualTimes)).ToList();
 
             await rateLimitPolicy.ExecuteAsync(() => Task.WhenAll(tasks));
 
             batchStopwatch.Stop();
             var averageTimePerRequest = individualTimes.Average();
-            _logger.LogInformation("Batch of {BatchCount} emails took {ElapsedMilliseconds} ms. Average time per request: {AverageTimePerRequest} ms",
+            _logger.LogInformation("Batch of {BatchCount} notifications took {ElapsedMilliseconds} ms. Average time per request: {AverageTimePerRequest} ms",
                 batch.Count, batchStopwatch.ElapsedMilliseconds, averageTimePerRequest);
         }
 
-        private async Task SendEmailWithRetryAsync(Notification notification,
-            AsyncPolicy retryPolicy, CancellationToken cancellationToken, List<long> individualTimes)
+        //private async Task SendNotificationWithRetryAsync(Notification notification,
+        //    AsyncPolicy retryPolicy, CancellationToken cancellationToken, List<long> individualTimes)
+        //{
+        //    var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
+        //    var email = personalisation["email"];
+        //    var sendNotificationRequest = CreateSendNotificationRequest(email, personalisation);
+
+        //    var stopwatch = Stopwatch.StartNew();
+        //    await retryPolicy.ExecuteAsync(async () => { await SendNotificationAsync(sendNotificationRequest, cancellationToken); });
+        //    stopwatch.Stop();
+        //    lock (individualTimes)
+        //    {
+        //        individualTimes.Add(stopwatch.ElapsedMilliseconds);
+        //    }
+        //}
+
+        private async Task SendNotificationWithRetryAsync(Notification notification,
+        AsyncPolicy retryPolicy, CancellationToken cancellationToken, List<long> individualTimes)
         {
             var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
-            var email = personalisation["email"];
-            var sendEmailRequest = CreateSendEmailRequest(email, personalisation);
+
+            // Determine the contact method (email or letter) and prepare the request accordingly
+            var sendNotificationRequest = CreateSendNotificationRequest(personalisation);
 
             var stopwatch = Stopwatch.StartNew();
-            await retryPolicy.ExecuteAsync(async () => { await SendEmailAsync(sendEmailRequest, cancellationToken); });
+            await retryPolicy.ExecuteAsync(async () => { await SendNotificationAsync(sendNotificationRequest, cancellationToken); });
             stopwatch.Stop();
+
             lock (individualTimes)
             {
                 individualTimes.Add(stopwatch.ElapsedMilliseconds);
             }
         }
 
-        private static SendEmailRequest CreateSendEmailRequest(string email, Dictionary<string, string> personalisation)
+        private static SendNotificationRequest CreateSendNotificationRequest(Dictionary<string, string> personalisation)
         {
+            var email = personalisation["email"];
+
+            // TODO: if email, else letter
             if (!personalisation.TryGetValue("emailCampaignParticipantId", out var reference))
             {
                 throw new KeyNotFoundException($"EmailCampaignParticipantId not found for email: {email}");
             }
-            
+
             if (!personalisation.TryGetValue("emailTemplateId", out var emailTemplateId))
             {
                 throw new KeyNotFoundException($"EmailTemplateId not found for email: {email}");
             }
 
-            return new SendEmailRequest
+            return new SendNotificationRequest
             {
                 EmailAddress = email,
                 EmailTemplateId = emailTemplateId,
@@ -146,23 +183,40 @@ namespace NIHR.NotificationService.Services
             };
         }
 
-        private async Task IncrementDailyEmailCountAsync(int count)
+
+        private async Task IncrementDailyCountAsync(ContactMethod contactMethod, int count)
         {
             var lockStopwatch = Stopwatch.StartNew();
             await _semaphore.WaitAsync();
             lockStopwatch.Stop();
+
             try
             {
-                _dailyEmailCount += count;
-                if (_dailyEmailCount >= _dailyLimit)
+                switch (contactMethod)
                 {
-                    throw new InvalidOperationException("Daily email limit reached.");
+                    case ContactMethod.Email:
+                        _emailDailyCount += count;
+
+                        if (_emailDailyCount >= _emailDailyLimit)
+                        {
+                            throw new InvalidOperationException("Daily email limit reached.");
+                        }
+                        break;
+
+                    case ContactMethod.Letter:
+                        _letterDailyCount += count;
+
+                        if (_letterDailyCount >= _letterDailyLimit)
+                        {
+                            throw new InvalidOperationException("Daily letter limit reached.");
+                        }
+                        break;
                 }
             }
             finally
             {
                 _semaphore.Release();
-                _logger.LogInformation("Lock duration for IncrementDailyEmailCountAsync: {ElapsedMilliseconds} ms", lockStopwatch.ElapsedMilliseconds);
+                _logger.LogInformation("Lock duration for IncrementDailyCountAsync: {ElapsedMilliseconds} ms", lockStopwatch.ElapsedMilliseconds);
             }
         }
 

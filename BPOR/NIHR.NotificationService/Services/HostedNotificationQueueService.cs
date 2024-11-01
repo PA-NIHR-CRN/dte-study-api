@@ -58,7 +58,7 @@ namespace NIHR.NotificationService.Services
 
                 try
                 {
-                    await notificationService.SendBatchEmailAsync(notifications, stoppingToken);
+                    await notificationService.SendBatchNotificationAsync(notifications, stoppingToken);
 
                     foreach (var notification in notifications)
                     {

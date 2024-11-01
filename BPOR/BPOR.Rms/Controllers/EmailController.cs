@@ -177,7 +177,7 @@ public class EmailController(
             {
                 try
                 {
-                    await notificationService.SendPreviewEmailAsync(new SendEmailRequest
+                    await notificationService.SendPreviewEmailAsync(new SendNotificationRequest
                     {
                         EmailAddress = email,
                         EmailTemplateId = model.SelectedTemplateId,
