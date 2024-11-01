@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.Net.Mail;
 using Microsoft.Extensions.Logging;
+using NIHR.Infrastructure.Authentication.IDG.SCIM.Models;
 using NIHR.NotificationService.Context;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
@@ -39,12 +41,12 @@ namespace NIHR.NotificationService.Services
                 switch (request.ContactMethod)
                 {
                     case ContactMethod.Email:
-                        await _client.SendEmailAsync(request.EmailAddress, request.EmailTemplateId, personalisation, request.Reference);
+                        await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation, request.Reference);
                         await IncrementDailyCountAsync(ContactMethod.Email, 1);
                         break;
 
                     case ContactMethod.Letter:
-                        await _client.SendLetterAsync(request.LetterTemplateId, personalisation, request.Reference);
+                        await _client.SendLetterAsync(request.TemplateId, personalisation, request.Reference);
                         await IncrementDailyCountAsync(ContactMethod.Letter, 1);
                         break;
 
@@ -68,7 +70,7 @@ namespace NIHR.NotificationService.Services
         {
             var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
 
-            await _client.SendEmailAsync(request.EmailAddress, request.EmailTemplateId,
+            await _client.SendEmailAsync(request.EmailAddress, request.TemplateId,
                 personalisation, request.Reference);
         }
 
@@ -125,29 +127,15 @@ namespace NIHR.NotificationService.Services
                 batch.Count, batchStopwatch.ElapsedMilliseconds, averageTimePerRequest);
         }
 
-        //private async Task SendNotificationWithRetryAsync(Notification notification,
-        //    AsyncPolicy retryPolicy, CancellationToken cancellationToken, List<long> individualTimes)
-        //{
-        //    var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
-        //    var email = personalisation["email"];
-        //    var sendNotificationRequest = CreateSendNotificationRequest(email, personalisation);
-
-        //    var stopwatch = Stopwatch.StartNew();
-        //    await retryPolicy.ExecuteAsync(async () => { await SendNotificationAsync(sendNotificationRequest, cancellationToken); });
-        //    stopwatch.Stop();
-        //    lock (individualTimes)
-        //    {
-        //        individualTimes.Add(stopwatch.ElapsedMilliseconds);
-        //    }
-        //}
-
         private async Task SendNotificationWithRetryAsync(Notification notification,
         AsyncPolicy retryPolicy, CancellationToken cancellationToken, List<long> individualTimes)
         {
             var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
 
-            // Determine the contact method (email or letter) and prepare the request accordingly
-            var sendNotificationRequest = CreateSendNotificationRequest(personalisation);
+            // TODO: determine contact method
+            var contactMethod = ContactMethod.Email;
+
+            var sendNotificationRequest = CreateSendNotificationRequest(contactMethod, personalisation);
 
             var stopwatch = Stopwatch.StartNew();
             await retryPolicy.ExecuteAsync(async () => { await SendNotificationAsync(sendNotificationRequest, cancellationToken); });
@@ -159,30 +147,60 @@ namespace NIHR.NotificationService.Services
             }
         }
 
-        private static SendNotificationRequest CreateSendNotificationRequest(Dictionary<string, string> personalisation)
+        private static SendNotificationRequest CreateSendNotificationRequest(ContactMethod contactMethod, Dictionary<string, string> personalisation)
         {
-            var email = personalisation["email"];
-
-            // TODO: if email, else letter
-            if (!personalisation.TryGetValue("emailCampaignParticipantId", out var reference))
+            if (!personalisation.TryGetValue("CampaignParticipantId", out var reference))
             {
-                throw new KeyNotFoundException($"EmailCampaignParticipantId not found for email: {email}");
+                throw new KeyNotFoundException("CampaignParticipantId not found in personalisation data.");
             }
 
-            if (!personalisation.TryGetValue("emailTemplateId", out var emailTemplateId))
+            if (!personalisation.TryGetValue("templateId", out var templateId))
             {
-                throw new KeyNotFoundException($"EmailTemplateId not found for email: {email}");
+                throw new KeyNotFoundException("TemplateId not found in personalisation data.");
             }
 
-            return new SendNotificationRequest
+            var request = new SendNotificationRequest
             {
-                EmailAddress = email,
-                EmailTemplateId = emailTemplateId,
+                TemplateId = templateId,
                 Personalisation = personalisation,
-                Reference = reference
+                Reference = reference,
+                ContactMethod = contactMethod
             };
-        }
 
+            switch (contactMethod)
+            {
+                case ContactMethod.Email:
+                    if (!personalisation.TryGetValue("email", out var email))
+                    {
+                        throw new KeyNotFoundException("Email address not found for email notification.");
+                    }
+                    request.EmailAddress = email;
+                    break;
+
+                case ContactMethod.Letter:
+                    if (!personalisation.TryGetValue("address_line_1", out var addressLine1) ||
+                        !personalisation.TryGetValue("address_line_2", out var addressLine2) ||
+                        !personalisation.TryGetValue("address_line_3", out var addressLine3))
+                    {
+                        throw new KeyNotFoundException("Address lines 1, 2, and 3 are required for letter notifications.");
+                    }
+
+                    request.Personalisation["address_line_1"] = addressLine1;
+                    request.Personalisation["address_line_2"] = addressLine2;
+                    request.Personalisation["address_line_3"] = addressLine3;
+
+                    if (personalisation.TryGetValue("address_line_4", out var addressLine4))
+                        request.Personalisation["address_line_4"] = addressLine4;
+                    if (personalisation.TryGetValue("address_line_5", out var addressLine5))
+                        request.Personalisation["address_line_5"] = addressLine5;
+                    break;
+
+                default:
+                    throw new NotSupportedException($"Contact method {contactMethod} is not supported.");
+            }
+
+            return request;
+        }
 
         private async Task IncrementDailyCountAsync(ContactMethod contactMethod, int count)
         {

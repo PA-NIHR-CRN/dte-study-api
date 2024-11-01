@@ -68,7 +68,7 @@ public class RefDataService : IRefDataService
         {
             lock (_lockObject)
             {
-                return participantDbContext.EmailDeliveryStatus.IgnoreQueryFilters().AsNoTracking().ToList();
+                return participantDbContext.DeliveryStatus.IgnoreQueryFilters().AsNoTracking().ToList();
             }
         });
     }

@@ -30,7 +30,7 @@ public class EmailController(
 )
     : Controller
 {
-    private const string _emailCacheKey = "EmailTemplates";
+    private const string _templateCacheKey = "Templates";
 
     public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model)
     {
@@ -112,7 +112,9 @@ public class EmailController(
     private async Task PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false,
     CancellationToken cancellationToken = default)
     {
-        model.EmailTemplates = await FetchEmailTemplates(forceRefresh, cancellationToken);
+        model.EmailTemplates = await FetchTemplates(ContactMethod.Email, forceRefresh, cancellationToken);
+        //model.LetterTemplates = await FetchTemplates(forceRefresh, ContactMethod.Letter, cancellationToken);
+
 
         if (model.StudyId is not null)
         {
@@ -180,7 +182,7 @@ public class EmailController(
                     await notificationService.SendPreviewEmailAsync(new SendNotificationRequest
                     {
                         EmailAddress = email,
-                        EmailTemplateId = model.SelectedTemplateId,
+                        TemplateId = model.SelectedTemplateId,
                         Personalisation = personalisationData[email],
                         Reference = "PreviewEmailReference"
                     }, cancellationToken);
@@ -205,10 +207,10 @@ public class EmailController(
                                                email.Equals(address.Address,
                                                    StringComparison.InvariantCultureIgnoreCase);
 
-    private async Task<TemplateList> FetchEmailTemplates(bool forceRefresh = false,
+    private async Task<TemplateList> FetchTemplates(ContactMethod contactMethod, bool forceRefresh = false,
         CancellationToken cancellationToken = default)
     {
-        var cachedData = await cache.GetAsync(_emailCacheKey, cancellationToken);
+        var cachedData = await cache.GetAsync(_templateCacheKey, cancellationToken);
         if (cachedData != null && !forceRefresh)
         {
             var jsonData = Encoding.UTF8.GetString(cachedData);
@@ -216,16 +218,16 @@ public class EmailController(
         }
 
         var templates = await notificationService.GetTemplatesAsync(cancellationToken);
-        await CacheEmailTemplates(templates, cancellationToken);
+        await CacheTemplates(templates, cancellationToken);
         return templates;
     }
 
-    private async Task CacheEmailTemplates(TemplateList templates, CancellationToken cancellationToken = default)
+    private async Task CacheTemplates(TemplateList templates, CancellationToken cancellationToken = default)
     {
         var jsonData = JsonConvert.SerializeObject(templates);
         var data = Encoding.UTF8.GetBytes(jsonData);
 
-        await cache.SetAsync(_emailCacheKey, data, cancellationToken);
+        await cache.SetAsync(_templateCacheKey, data, cancellationToken);
     }
 
     private async Task AddCampaignToContextAsync(EmailCampaign campaign, CancellationToken cancellationToken)
