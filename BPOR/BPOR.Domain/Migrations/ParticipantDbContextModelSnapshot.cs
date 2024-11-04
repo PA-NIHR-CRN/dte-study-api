@@ -513,8 +513,7 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("ContactMethodId");
 
-                    b.HasIndex("ParticipantId")
-                        .IsUnique();
+                    b.HasIndex("ParticipantId");
 
                     b.ToTable("ParticipantContactMethod");
                 });
@@ -10244,8 +10243,8 @@ namespace Dynamo.Stream.Handler.Migrations
                         .IsRequired();
 
                     b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
-                        .WithOne("participantContactMethod")
-                        .HasForeignKey("BPOR.Domain.Entities.ParticipantContactMethod", "ParticipantId")
+                        .WithMany("ContactMethods")
+                        .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -10406,6 +10405,8 @@ namespace Dynamo.Stream.Handler.Migrations
                 {
                     b.Navigation("Address");
 
+                    b.Navigation("ContactMethods");
+
                     b.Navigation("EmailCampaignParticipants");
 
                     b.Navigation("HealthConditions");
@@ -10417,9 +10418,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("SourceReferences");
 
                     b.Navigation("StudyParticipantEnrollments");
-
-                    b.Navigation("participantContactMethod")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.Study", b =>
