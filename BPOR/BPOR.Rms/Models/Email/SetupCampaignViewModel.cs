@@ -21,11 +21,9 @@ public class SetupCampaignViewModel
 
     public int FilterCriteriaId { get; set; }
 
+    public List<TemplateResponse> templates { get; set; } = new List<TemplateResponse>();
 
-    [Display(Name = "Select template", Order = 1)]
     public string? SelectedTemplateId { get; set; }
-    public TemplateList EmailTemplates { get; set; } = new ();
-    public TemplateList LetterTemplates { get; set; } = new ();
 
 
     [Display(Name = "How many volunteers do you want to send it to?", Order = 3)]

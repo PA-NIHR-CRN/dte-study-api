@@ -61,7 +61,7 @@ public class CampaignController(
         if (ModelState.IsValid)
         {
             var selectedTemplateName =
-                model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
+                model.templates.First(t => t.id == model.SelectedTemplateId).name;
 
             var emailCampaign = new EmailCampaign
             {
@@ -112,7 +112,9 @@ public class CampaignController(
     private async Task PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false,
     CancellationToken cancellationToken = default)
     {
-        model.EmailTemplates = await FetchEmailTemplates(forceRefresh, cancellationToken);
+
+        TemplateList templateList = await FetchEmailTemplates(forceRefresh, cancellationToken);
+        model.templates = templateList.templates.ToList();
 
         if (model.StudyId is not null)
         {
@@ -156,7 +158,7 @@ public class CampaignController(
 
         if (ModelState.IsValid)
         {
-            var selectedTemplateName = model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
+            var selectedTemplateName = model.templates.First(t => t.id == model.SelectedTemplateId).name;
             var personalisationData = emailAddresses.ToDictionary(
                 email => email,
                 email => new Dictionary<string, string>

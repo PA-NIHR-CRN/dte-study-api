@@ -28,15 +28,9 @@
         <input type="hidden" asp-for="MaxNumbers" />
         <input type="hidden" asp-for="FilterCriteriaId" />
 
-
-        <template-select for="Model.TemplateId"
-                         contact-preference="@Model.ContactMethod"
-                         email-templates="Model.EmailTemplates"
-                         letter-templates="Model.LetterTemplates"
-                         selected-template-id="@Model.SelectedTemplateId" />
-
-
-        <partial name="Partials/_TemplateSelect" />
+        <template-select for="@Model.SelectedTemplateId"
+                         contact-method="@Model.ContactMethod"
+                         templates="@Model.templates" />
 
 
         @if (Model.ContactMethod == ContactMethods.Email)
