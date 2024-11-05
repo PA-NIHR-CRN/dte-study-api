@@ -111,8 +111,6 @@ public class StreamHandler(
 
 
         var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
-            .Include(x => x.ContactMethods)
-            .Include(x => x.ParticipantLocation)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -131,8 +129,6 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(record.Dynamodb.NewImage);
         var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
-            .Include(x => x.ContactMethods)
-            .Include(x => x.ParticipantLocation)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -153,7 +149,6 @@ public class StreamHandler(
             .IgnoreQueryFilters()
             .Include(x => x.ParticipantIdentifiers)
             .Include(x => x.ContactMethods)
-            .Include(x => x.ParticipantLocation)
             .SingleOrDefaultAsync(cancellationToken);
 
         if (participant == null)
