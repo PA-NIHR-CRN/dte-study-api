@@ -55,13 +55,13 @@ public class CampaignController(
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
         {
-            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Please select an email template.");
+            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Select a template.");
         }
 
         if (ModelState.IsValid)
         {
             var selectedTemplateName =
-                model.templates.First(t => t.id == model.SelectedTemplateId).name;
+                model.Templates.First(t => t.id == model.SelectedTemplateId).name;
 
             var emailCampaign = new EmailCampaign
             {
@@ -114,7 +114,7 @@ public class CampaignController(
     {
 
         TemplateList templateList = await FetchEmailTemplates(forceRefresh, cancellationToken);
-        model.templates = templateList.templates.ToList();
+        model.Templates = templateList.templates.ToList();
 
         if (model.StudyId is not null)
         {
@@ -158,7 +158,7 @@ public class CampaignController(
 
         if (ModelState.IsValid)
         {
-            var selectedTemplateName = model.templates.First(t => t.id == model.SelectedTemplateId).name;
+            var selectedTemplateName = model.Templates.First(t => t.id == model.SelectedTemplateId).name;
             var personalisationData = emailAddresses.ToDictionary(
                 email => email,
                 email => new Dictionary<string, string>
@@ -217,14 +217,14 @@ public class CampaignController(
             return JsonConvert.DeserializeObject<TemplateList>(jsonData);
         }
 
-        var templates = await notificationService.GetTemplatesAsync(cancellationToken);
-        await CacheEmailTemplates(templates, cancellationToken);
-        return templates;
+        var Templates = await notificationService.GetTemplatesAsync(cancellationToken);
+        await CacheEmailTemplates(Templates, cancellationToken);
+        return Templates;
     }
 
-    private async Task CacheEmailTemplates(TemplateList templates, CancellationToken cancellationToken = default)
+    private async Task CacheEmailTemplates(TemplateList Templates, CancellationToken cancellationToken = default)
     {
-        var jsonData = JsonConvert.SerializeObject(templates);
+        var jsonData = JsonConvert.SerializeObject(Templates);
         var data = Encoding.UTF8.GetBytes(jsonData);
 
         await cache.SetAsync(_emailCacheKey, data, cancellationToken);

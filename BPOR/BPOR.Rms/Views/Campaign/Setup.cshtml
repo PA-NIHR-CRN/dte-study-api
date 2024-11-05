@@ -1,7 +1,6 @@
 @using BPOR.Rms.Models.Email
 @using BPOR.Domain.Enums;
 @model SetupCampaignViewModel
-@addTagHelper *, BPOR.Rms.TagHelpers
 
 @{
     ViewData["Title"] = $"Set up {Model.GetArticle(Model.ContactMethod)} {Model.ContactMethod.ToString().ToLower()} campaign";
@@ -27,16 +26,13 @@
         <input type="hidden" asp-for="StudyId" />
         <input type="hidden" asp-for="MaxNumbers" />
         <input type="hidden" asp-for="FilterCriteriaId" />
-
-        <template-select for="@Model.SelectedTemplateId"
-                         contact-method="@Model.ContactMethod"
-                         templates="@Model.templates" />
-
+        <partial name="Partials/_TemplateSelect" />
 
         @if (Model.ContactMethod == ContactMethods.Email)
         {
             <partial name="Partials/_Preview" />
         }
+
         <partial name="Partials/_TotalNumbers" />
         <partial name="Partials/_Footer" />
     </form>

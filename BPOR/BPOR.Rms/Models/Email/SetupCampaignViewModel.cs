@@ -21,7 +21,7 @@ public class SetupCampaignViewModel
 
     public int FilterCriteriaId { get; set; }
 
-    public List<TemplateResponse> templates { get; set; } = new List<TemplateResponse>();
+    public List<TemplateResponse> Templates { get; set; } = new List<TemplateResponse>();
 
     public string? SelectedTemplateId { get; set; }
 
