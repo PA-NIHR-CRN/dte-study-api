@@ -3,7 +3,7 @@
 @model SetupCampaignViewModel
 
 @{
-    ViewData["Title"] = $"Set up {Model.GetArticle(Model.ContactMethod)} {Model.ContactMethod.ToString().ToLower()} campaign";
+    ViewData["Title"] = $"Set up {Model.GetArticle(Model.ContactMethod)} {Model.ContactMethod.ToString().ToLower()} campaign - Volunteer Registry - Be Part of Research";
     ViewData.AddBreadcrumb("All studies", "/Study/Index");
 
     if (Model.StudyId is not null)

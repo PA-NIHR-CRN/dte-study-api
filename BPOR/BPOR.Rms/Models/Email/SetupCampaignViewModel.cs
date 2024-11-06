@@ -27,7 +27,7 @@ public class SetupCampaignViewModel
 
 
     [Display(Name = "How many volunteers do you want to send it to?", Order = 3)]
-    [Range(1, int.MaxValue, ErrorMessage = "Total Volunteers must be at least 1.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Number of volunteers to be contacted must be 1 or more.")]
     public int? TotalVolunteers { get; set; }
 
 

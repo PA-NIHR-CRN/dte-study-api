@@ -50,7 +50,7 @@ public class CampaignController(
         else if (model.TotalVolunteers > model.MaxNumbers)
         {
             ModelState.AddModelError(nameof(model.TotalVolunteers),
-                "The number of volunteers to be contacted must be the same as, or less than, the 'total number of volunteer accounts matching the filter options'.");
+                $"Number of volunteers to be contacted must be between 1 and {model.MaxNumbers:N0}.");
         }
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
@@ -97,7 +97,7 @@ public class CampaignController(
                         continue;
                     }
 
-                    await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
+                    //await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
                 }
             }
 

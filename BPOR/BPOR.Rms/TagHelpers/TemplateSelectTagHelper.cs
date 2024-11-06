@@ -44,7 +44,7 @@ namespace BPOR.Rms.TagHelpers
 
             var filteredTemplates = new List<SelectListItem>
             {
-                new SelectListItem { Value = "", Text = "Select a template", Disabled = true, Selected = true }
+                new SelectListItem { Value = "", Text = "Select template", Disabled = true, Selected = true }
             };
             filteredTemplates.AddRange(Templates
                 .Where(t => (ContactMethod == ContactMethods.Email && t.@type == "email") ||
