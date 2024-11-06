@@ -1,13 +1,18 @@
+using System.Text.Json;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
+using Amazon.Runtime.Internal.Util;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
 using BPOR.Registration.Stream.Handler.Services;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BPOR.Registration.Stream.Handler.Mappers;
 
@@ -16,13 +21,15 @@ public class ParticipantMapper : IParticipantMapper
     private readonly IDynamoDBContext _context;
     private readonly IRefDataService _refDataService;
     private readonly IPostcodeMapper _locationApiClient;
+    private readonly ILogger<ParticipantMapper> _logger;
 
     public ParticipantMapper(IDynamoDBContext context, IRefDataService refDataService,
-        IPostcodeMapper locationApiClient)
+        IPostcodeMapper locationApiClient, ILogger<ParticipantMapper> logger)
     {
         _context = context;
         _refDataService = refDataService;
         _locationApiClient = locationApiClient;
+        _logger = logger;
     }
 
     private void MapIdentifiers(DynamoParticipant source, Participant participant)
@@ -55,6 +62,16 @@ public class ParticipantMapper : IParticipantMapper
 
                 participant.ParticipantIdentifiers.Add(newIdentifier);
             }
+        }
+    }
+    private void MapParticipantContactMethod(DynamoParticipant source, Participant participant)
+    {
+        if (participant.ContactMethods.Count == 0) { 
+            participant.ContactMethods.Add(new ParticipantContactMethod()
+            {
+                ContactMethodId = (int)ContactMethods.Email,
+
+            });
         }
     }
 
@@ -106,6 +123,7 @@ public class ParticipantMapper : IParticipantMapper
     public async Task<Participant> Map(Dictionary<string, AttributeValue> record, Participant destination,
         CancellationToken cancellationToken)
     {
+
         var doc = Document.FromAttributeMap(record);
 
         var source = _context.FromDocument<DynamoParticipant>(doc);
@@ -136,19 +154,23 @@ public class ParticipantMapper : IParticipantMapper
             destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
         }
 
-        ParticipantAddressMapper.Map(source.Address, destination);
-        var coordinates =
-            await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
+        if(source.Address != null) { 
+            ParticipantAddressMapper.Map(source.Address, destination);
 
-        if (coordinates != null)
-        {
-            destination.ParticipantLocation ??= new ParticipantLocation();
-            destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+            var coordinates =
+                await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
+
+            if (coordinates != null)
+            {
+                destination.ParticipantLocation ??= new ParticipantLocation();
+                destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
                 { SRID = ParticipantLocationConfiguration.LocationSrid };
+            }
         }
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);
+        MapParticipantContactMethod(source, destination);
 
         return destination;
     }
