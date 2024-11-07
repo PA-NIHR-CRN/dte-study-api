@@ -23,9 +23,11 @@
     <h1 class="govuk-heading-l govuk-!-margin-bottom-0">Set up @Model.GetArticle(Model.ContactMethod) @Model.ContactMethod.ToString().ToLower() campaign</h1>
     <p class="govuk-hint body-bold">@Html.DisplayFor(x => x.StudyName)</p>
     <form method="post">
+
         <input type="hidden" asp-for="StudyId" />
         <input type="hidden" asp-for="MaxNumbers" />
         <input type="hidden" asp-for="FilterCriteriaId" />
+        <input type="hidden" asp-for="ContactMethod" />
         <partial name="Partials/_TemplateSelect" />
 
         @if (Model.ContactMethod == ContactMethods.Email)

@@ -47,6 +47,7 @@ public class CampaignController(
         {
             ModelState.AddModelError(nameof(model.TotalVolunteers), "Enter the number of volunteers to be contacted.");
         }
+
         else if (model.TotalVolunteers > model.MaxNumbers)
         {
             ModelState.AddModelError(nameof(model.TotalVolunteers),
@@ -102,7 +103,7 @@ public class CampaignController(
             }
 
             return View("Success",
-                new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });
+                new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName, ContactMethod = model.ContactMethod });
         }
 
         return View(nameof(Setup), model);

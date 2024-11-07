@@ -1,3 +1,5 @@
+@using BPOR.Rms.Models.Email
+@using BPOR.Domain.Enums;
 @model BPOR.Rms.Models.Email.EmailSuccessViewModel
 
 @{
@@ -6,15 +8,31 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.StudyName))
 {
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-one-half-from-desktop">
-            <div class="govuk-panel govuk-panel--confirmation">
-                <h1 class="govuk-panel__title">
-                    Request to send @(Model.ContactMethod.ToString().ToLower() + "s") for @Html.DisplayFor(model => model.StudyName) has been submitted to GOV.UK Notify
-                </h1>
+    @if (Model.ContactMethod == ContactMethods.Email)
+    {
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-half-from-desktop">
+                <div class="govuk-panel govuk-panel--confirmation">
+                    <h1 class="govuk-panel__title">
+                        Request to send emails for @Html.DisplayFor(model => model.StudyName) has been submitted to GOV.UK Notify
+                    </h1>
+                </div>
             </div>
         </div>
-    </div>
+    }
+    @if (Model.ContactMethod == ContactMethods.Letter)
+    {
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-half-from-desktop">
+                <div class="govuk-panel govuk-panel--confirmation">
+                    <h1 class="govuk-panel__title">
+                        The letter campaign request for @Html.DisplayFor(model => model.StudyName) has been sent to GOV UK Notify
+                    </h1>
+                </div>
+            </div>
+        </div>
+    }
 }
 else
 {
@@ -28,8 +46,6 @@ else
         </div>
     </div>
 }
-
-
 
 <div class="govuk-button-group">
     @if (Model.StudyId is not null)
