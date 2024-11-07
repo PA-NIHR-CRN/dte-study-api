@@ -189,7 +189,6 @@ public class EmailCampaignService(
             ParticipantId = volunteer.Id,
             DeliveryStatusId = emailDeliveryStatusId,
             SentAt = DateTime.UtcNow,
-            ContactEmail = volunteer.Email,
         });
 
         if (dbFilter is { Study.IsRecruitingIdentifiableParticipants: true, StudyId: not null })
