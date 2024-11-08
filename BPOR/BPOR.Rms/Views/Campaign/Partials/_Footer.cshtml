@@ -44,14 +44,15 @@
     <p class="govuk-body text-secondary">
         @if (!string.IsNullOrEmpty(Model.EmailAddress))
         {
-            <span>bepartofresearch-volunteerservice@nihr.ac.uk</span>
+            <span>bepartofresearch-volunteerservice@nihr.ac.uk and @Model.EmailAddress</span>
         }
-        @if (!string.IsNullOrEmpty(Model.EmailAddress))
+        else
         {
-            <span> and @Model.EmailAddress</span>
+            <span>bepartofresearch-volunteerservice@nihr.ac.uk</span>
         }
         will be notified by email that the letter campaign request has been sent and to how many recipients.
     </p>
+
 }
 
 
