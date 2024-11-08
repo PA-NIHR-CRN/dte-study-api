@@ -33,7 +33,7 @@ public class CampaignService(
 {
     public async Task SendCampaignAsync(ServiceQueueItem item, CancellationToken cancellationToken = default)
     {
-        var campaign = await context.EmailCampaigns
+        var campaign = await context.Campaigns
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == item.Id, cancellationToken);
         var deliveryStatusId = GetDeliveryStatusId();
@@ -62,7 +62,7 @@ public class CampaignService(
                throw new InvalidOperationException("Email delivery status not found");
     }
 
-    private async Task<FilterCriteria?> GetFilterCriteriaAsync(EmailCampaign campaign,
+    private async Task<FilterCriteria?> GetFilterCriteriaAsync(Campaign campaign,
         CancellationToken cancellationToken)
     {
         return await context.FilterCriterias
@@ -89,11 +89,11 @@ public class CampaignService(
             .Where(v => !string.IsNullOrEmpty(v.Email))
             .Randomise()
             .Take(targetGroupSize ?? int.MaxValue)
-            .AsEmailCampaignParticipant()
+            .AsCampaignParticipant()
             .ToListAsync(cancellationToken);
     }
 
-    private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
+    private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, Campaign campaign,
         FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
@@ -106,7 +106,7 @@ public class CampaignService(
         await foreach (var processingResult in ProcessVolunteersAsync(volunteers, campaign, dbFilter,
                            deliveryStatusId, batchSize, cancellationToken))
         {
-            await context.EmailCampaignParticipants.AddRangeAsync(processingResult.EmailCampaignParticipants,
+            await context.CampaignParticipants.AddRangeAsync(processingResult.CampaignParticipants,
                 cancellationToken);
             await context.StudyParticipantEnrollment.AddRangeAsync(processingResult.StudyParticipantEnrollments,
                 cancellationToken);
@@ -158,7 +158,7 @@ public class CampaignService(
 
     private async IAsyncEnumerable<ProcessingResults> ProcessVolunteersAsync(
         List<EmailParticipantDetails> volunteers,
-        EmailCampaign campaign,
+        Campaign campaign,
         FilterCriteria dbFilter,
         int deliveryStatusId,
         int batchSize,
@@ -180,12 +180,12 @@ public class CampaignService(
         }
     }
 
-    private void ProcessVolunteer(EmailParticipantDetails volunteer, EmailCampaign campaign, FilterCriteria dbFilter,
+    private void ProcessVolunteer(EmailParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int deliveryStatusId)
     {
-        processingResult.EmailCampaignParticipants.Add(new EmailCampaignParticipant
+        processingResult.CampaignParticipants.Add(new CampaignParticipant
         {
-            EmailCampaignId = campaign.Id,
+            CampaignId = campaign.Id,
             ParticipantId = volunteer.Id,
             DeliveryStatusId = deliveryStatusId,
             SentAt = DateTime.UtcNow,
@@ -216,12 +216,12 @@ public class CampaignService(
         }
     }
 
-    private async Task QueueNotificationsAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
+    private async Task QueueNotificationsAsync(List<EmailParticipantDetails> volunteers, Campaign campaign,
         List<ProcessingResults> emailQueue, string callback, CancellationToken cancellationToken)
     {
         foreach (var volunteer in volunteers)
         {
-            var emailCampaignParticipant = emailQueue.SelectMany(e => e.EmailCampaignParticipants)
+            var emailCampaignParticipant = emailQueue.SelectMany(e => e.CampaignParticipants)
                 .FirstOrDefault(e => e.ParticipantId == volunteer.Id);
 
             if (emailCampaignParticipant == null)
@@ -289,6 +289,6 @@ internal static class DbContextExtensions
 
 internal class ProcessingResults
 {
-    public List<EmailCampaignParticipant> EmailCampaignParticipants { get; } = [];
+    public List<CampaignParticipant> CampaignParticipants { get; } = [];
     public List<StudyParticipantEnrollment> StudyParticipantEnrollments { get; } = [];
 }

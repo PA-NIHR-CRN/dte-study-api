@@ -36,7 +36,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<Study> Studies { get; set; } = null!;
     public DbSet<ManualEnrollment> ManualEnrollments { get; set; } = null!;
     public DbSet<FilterCriteria> FilterCriterias { get; set; } = null!;
-    public DbSet<EmailCampaign> EmailCampaigns { get; set; } = null!;
+    public DbSet<Campaign> Campaigns { get; set; } = null!;
     public DbSet<ParticipantLocation> ParticipantLocation { get; set; } = null!;
     public DbSet<ParticipantAddress> ParticipantAddress { get; set; } = null!;
     public DbSet<FilterEthnicGroup> FilterEthnicGroup { get; set; } = null!;
@@ -44,7 +44,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<FilterAreaOfInterest> FilterAreaOfInterest { get; set; } = null!;
     public DbSet<FilterGender> FilterGender { get; set; } = null!;
     public DbSet<FilterSexSameAsRegisteredAtBirth> FilterSexSameAsRegisteredAtBirth { get; set; } = null!;
-    public DbSet<EmailCampaignParticipant> EmailCampaignParticipants { get; set; } = null!;
+    public DbSet<CampaignParticipant> CampaignParticipants { get; set; } = null!;
     public DbSet<DeliveryStatus> DeliveryStatus { get; set; } = null!;
     public DbSet<StudyParticipantEnrollment> StudyParticipantEnrollment { get; set; } = null!;
     public DbSet<Submitted> Submitted { get; set; } = null!;

@@ -4,8 +4,8 @@ using BPOR.Rms.Models.Researcher;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Models.Volunteer;
-using EmailCampaign = BPOR.Rms.Models.Study.EmailCampaign;
-using EmailCampaignParticipant = BPOR.Rms.Models.Study.EmailCampaignParticipant;
+using Campaign = BPOR.Rms.Models.Study.Campaign;
+using CampaignParticipant = BPOR.Rms.Models.Study.CampaignParticipant;
 
 namespace BPOR.Rms.Models;
 
@@ -20,7 +20,7 @@ public static class Projections
     public static IQueryable<EnrollmentDetails> AsEnrollmentDetails(this IQueryable<ManualEnrollment> source) =>
         source.Select(ManualEnrollmentToEnrollmentDetails());    
     
-    public static IQueryable<EmailParticipantDetails> AsEmailCampaignParticipant(this IQueryable<Participant> source) =>
+    public static IQueryable<EmailParticipantDetails> AsCampaignParticipant(this IQueryable<Participant> source) =>
         source.Select(VolunteerToEmailParticipantDetails());
 
     public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyFormViewModel());
@@ -108,15 +108,15 @@ public static class Projections
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 
-            EmailCampaigns = s.FilterCriterias
-                .SelectMany(fc => fc.EmailCampaigns)
-                .Select(ec => new EmailCampaign
+            Campaigns = s.FilterCriterias
+                .SelectMany(fc => fc.Campaigns)
+                .Select(ec => new Campaign
                 {
                     TargetGroupSize = (int)ec.TargetGroupSize,
                     CreatedAt = ec.CreatedAt,
                     Name = ec.Name,
-                    EmailCampaignParticipants = ec.Participants
-                        .Select(p => new EmailCampaignParticipant
+                    CampaignParticipants = ec.Participants
+                        .Select(p => new CampaignParticipant
                         {
                             ContactEmail = p.ContactEmail,
                             SentAt = p.SentAt,
@@ -126,7 +126,7 @@ public static class Projections
                         })
                         .ToList(),
                 }),
-            HasEmailCampaigns = s.FilterCriterias.Any(fc => fc.EmailCampaigns.Any())
+            HasEmailCampaigns = s.FilterCriterias.Any(fc => fc.Campaigns.Any())
         };
     }
 

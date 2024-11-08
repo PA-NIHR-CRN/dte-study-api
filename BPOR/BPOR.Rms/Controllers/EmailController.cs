@@ -63,7 +63,7 @@ public class EmailController(
             var selectedTemplateName =
                 model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
 
-            var emailCampaign = new EmailCampaign
+            var emailCampaign = new Campaign
             {
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
@@ -230,9 +230,9 @@ public class EmailController(
         await cache.SetAsync(_templateCacheKey, data, cancellationToken);
     }
 
-    private async Task AddCampaignToContextAsync(EmailCampaign campaign, CancellationToken cancellationToken)
+    private async Task AddCampaignToContextAsync(Campaign campaign, CancellationToken cancellationToken)
     {
-        await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
+        await context.Campaigns.AddAsync(campaign, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -1,7 +1,5 @@
 using System.Diagnostics;
-using System.Net.Mail;
 using Microsoft.Extensions.Logging;
-using NIHR.Infrastructure.Authentication.IDG.SCIM.Models;
 using NIHR.NotificationService.Context;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
