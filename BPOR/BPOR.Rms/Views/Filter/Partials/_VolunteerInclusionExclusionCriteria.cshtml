@@ -60,7 +60,7 @@
                      new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-completed-registration-hint" }
                      )
 
-            @if (Model.ShowRecruitedFilter)
+            @if (Model.ShowPreferredContactFilter)
             {
                 @Html.LabelFor(m => m.SelectedVolunteersPreferredContact, new { @class = "govuk-label exclusion_label" })
                 <div id="volunteers-preferred-contact-hint" class="govuk-hint">

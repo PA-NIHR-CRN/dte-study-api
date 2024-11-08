@@ -54,6 +54,7 @@ public class FilterController(ParticipantDbContext context,
             model.StudyCpmsId = selectedStudy.CpmsId;
 
             model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
+            model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
         }
 
         model.VolunteerCount = results.Count?.Value;
@@ -87,6 +88,7 @@ public class FilterController(ParticipantDbContext context,
         return new VolunteerFilterViewModel { StudyId = model.StudyId };
     }
 
+   
     [HttpPost]
     public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {

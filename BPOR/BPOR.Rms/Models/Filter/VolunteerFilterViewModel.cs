@@ -19,6 +19,8 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     public bool ShowRecruitedFilter { get; set; }
 
+    public bool ShowPreferredContactFilter { get; set; }
+
     [Display(Name = "Volunteers contacted", Order = 1)]
     public bool? SelectedVolunteersContacted { get; set; }
     public IEnumerable<SelectListItem> VolunteersContactedItems { get; set; } = SetVolunteersContactedItems();

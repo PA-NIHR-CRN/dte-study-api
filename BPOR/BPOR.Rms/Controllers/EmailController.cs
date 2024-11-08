@@ -63,7 +63,7 @@ public class EmailController(
             var selectedTemplateName =
                 model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
 
-            var emailCampaign = new EmailCampaign
+            var Campaign = new Campaign
             {
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
@@ -71,13 +71,13 @@ public class EmailController(
                 Name = selectedTemplateName
             };
 
-            await AddCampaignToContextAsync(emailCampaign, cancellationToken);
+            await AddCampaignToContextAsync(Campaign, cancellationToken);
 
             var callback =
                 linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest)) ??
                 throw new InvalidOperationException("Callback URL not found");
 
-            await taskQueue.QueueBackgroundWorkItemAsync(emailCampaign.Id, callback, cancellationToken);
+            await taskQueue.QueueBackgroundWorkItemAsync(Campaign.Id, callback, cancellationToken);
 
             var studyInfo = await context.Studies
                                     .Where(x => x.Id == model.StudyId)
@@ -92,7 +92,7 @@ public class EmailController(
                 {
                     if (string.IsNullOrWhiteSpace(recipient))
                     {
-                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', email campaign ({emailCampaignId}).", model.StudyId, model.StudyName, emailCampaign.Id);
+                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', email campaign ({CampaignId}).", model.StudyId, model.StudyName, Campaign.Id);
 
                         continue;
                     }
@@ -162,7 +162,7 @@ public class EmailController(
                 email => new Dictionary<string, string>
                 {
                     { "email", email },
-                    { "emailCampaignParticipantId", "PreviewEmailReference" },
+                    { "emailParticipantId", "PreviewEmailReference" },
                     { "firstName", "John" },
                     { "lastName", "Doe" },
                     {
@@ -228,9 +228,9 @@ public class EmailController(
         await cache.SetAsync(_emailCacheKey, data, cancellationToken);
     }
 
-    private async Task AddCampaignToContextAsync(EmailCampaign campaign, CancellationToken cancellationToken)
+    private async Task AddCampaignToContextAsync(Campaign campaign, CancellationToken cancellationToken)
     {
-        await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
+        await context.Campaigns.AddAsync(campaign, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 }
