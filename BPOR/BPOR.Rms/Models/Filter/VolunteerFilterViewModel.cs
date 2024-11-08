@@ -84,6 +84,22 @@ public class VolunteerFilterViewModel : IValidatableObject
         return items;
     }
 
+    [Display(Name = "Volunteers preferred contact method", Order = 4)]
+    public bool? SelectedVolunteersPreferredContact { get; set; }
+    public IEnumerable<SelectListItem> VolunteersPreferredContactItems { get; set; } = SetVolunteersPreferredContactItems();
+
+    private static IEnumerable<SelectListItem> SetVolunteersPreferredContactItems()
+    {
+        var items = new List<SelectListItem>
+        {
+            new SelectListItem { Value = string.Empty, Text = "No preference" },
+            new SelectListItem { Value = true.ToString(), Text = "Email" },
+            new SelectListItem { Value = false.ToString(), Text = "Letter" }
+        };
+
+        return items;
+    }
+
     // Areas of research volunteers are interested in
     [Display(Name = "Areas of research volunteers are interested in", Order = 5)]
     public List<int> SelectedAreasOfInterest { get; set; } = [];
