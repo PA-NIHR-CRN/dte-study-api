@@ -2,6 +2,7 @@ using System.Text;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
+using BPOR.Domain.Enums;
 using HandlebarsDotNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,15 @@ public class CampaignController(
     public async Task<IActionResult> Send(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         await PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
+
+        if (!ModelState.IsValid)
+        {
+            if (ModelState[nameof(model.TotalVolunteers)]?.Errors.Any(e => e.ErrorMessage.Contains("is not valid")) ?? false)
+            {
+                ModelState[nameof(model.TotalVolunteers)].Errors.Clear();
+                ModelState.AddModelError(nameof(model.TotalVolunteers), "Number of volunteers to be contacted must be a whole number, like 15.");
+            }
+        }
 
         if (model.TotalVolunteers is null)
         {
@@ -98,7 +108,14 @@ public class CampaignController(
                         continue;
                     }
 
-                    //await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
+                    if (model.ContactMethod == ContactMethods.Email)
+                    {
+                        await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
+                    }
+                    if (model.ContactMethod == ContactMethods.Letter)
+                    {
+                        await transactionalEmailService.SendAsync(recipient, "letter-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, letterTemplateFilename = selectedTemplateName }, cancellationToken);
+                    }
                 }
             }
 

@@ -16,7 +16,6 @@ public class SetupCampaignViewModel
 
     public string? StudyName { get; set; }
     public string? EmailAddress { get; set; }
-
     public ContactMethods ContactMethod { get; set; }
 
     public int FilterCriteriaId { get; set; }
@@ -24,7 +23,6 @@ public class SetupCampaignViewModel
     public List<TemplateResponse> Templates { get; set; } = new List<TemplateResponse>();
 
     public string? SelectedTemplateId { get; set; }
-
 
     [Display(Name = "How many volunteers do you want to send it to?", Order = 3)]
     [Range(1, int.MaxValue, ErrorMessage = "Number of volunteers to be contacted must be 1 or more.")]
