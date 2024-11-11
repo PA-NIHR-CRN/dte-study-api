@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Tokens;
 using Rbec.Postcodes;
 using System.ComponentModel;
+using BPOR.Domain.Enums;
+using Amazon.Runtime.Internal.Transform;
 
 namespace BPOR.Rms.Models.Volunteer;
 
@@ -47,7 +49,7 @@ public class VolunteerFormViewModel : IValidatableObject
 
     [Display(Name = "Preferred contact method", Order = 10)]
     [Required(ErrorMessage = "Select if the preferred contact method is email or letter")]
-    public string PreferredContactMethod { get; set; }
+    public int? PreferredContactMethod { get; set; }
 
     [Display(Name = "Email address", Order = 11)]
     public string? EmailAddress { get; set; }
@@ -60,7 +62,7 @@ public class VolunteerFormViewModel : IValidatableObject
     [Display(Name = "Mobile number", Order = 13)]
     public string? Mobile { get; set; }
 
-    
+
     [Display(Name = "Sex registered at birth", Order = 14)]
     [Required(ErrorMessage = "Select if the sex registered at birth is female or male")]
     public int? SexRegisteredAtBirth { get; set; }
@@ -76,7 +78,7 @@ public class VolunteerFormViewModel : IValidatableObject
     [Display(Name = "Ethnic background", Order = 17)]
     public string? EthnicBackground { get; set; }
 
-    [Display (Name = "How would you describe your background?", Order = 17)]
+    [Display(Name = "How would you describe your background?", Order = 17)]
     public string? EthnicBackgroundOther { get; set; }
 
     [Display(Name = "Long-term conditions or illnesses and reduced ability to carry out daily activities", Order = 18)]
@@ -90,21 +92,15 @@ public class VolunteerFormViewModel : IValidatableObject
     public string? lastAction { get; set; }
 
     // todo CRNCC-2387 has these as enums that can be used.
-    public List<Dictionary<string, string>> PrefferdContactMethodValues
-    {
-        get
-        {
-            var prefferdContactValues = new List<Dictionary<string, string>>();
-            prefferdContactValues.Add(new Dictionary<string, string> { { "label", "Email" }, { "value", "Email" } });
-            prefferdContactValues.Add(new Dictionary<string, string> { { "label", "Letter" }, { "value", "Letter" } });
-
-            return prefferdContactValues;
+    public List<ContactMethods> GetPrefferdContactMethodValues{
+        get { 
+        return Enum.GetValues<ContactMethods>().ToList();
         }
+
     }
 
 
-
-    public List<Dictionary<string, string>> SexRegisteredAtBirthValues 
+public List<Dictionary<string, string>> SexRegisteredAtBirthValues 
     {
         get
         {
@@ -141,9 +137,9 @@ public class VolunteerFormViewModel : IValidatableObject
         {
             yield return new ValidationResult("Enter a mobile phone number in the correct format, like 07700 900 982", [nameof(Mobile)]);
         }
-        if (PreferredContactMethod == "Email" && String.IsNullOrEmpty(EmailAddress))
+        if (PreferredContactMethod != null && PreferredContactMethod == (int)ContactMethods.Email && String.IsNullOrEmpty(EmailAddress))
         {
-            yield return new ValidationResult( "Email address cannot be blank", [nameof(EmailAddress)]);
+            yield return new ValidationResult("Email address cannot be blank", [nameof(EmailAddress)]);
         }
 
         if (ManualAddressEntry)
@@ -192,7 +188,7 @@ public class VolunteerFormViewModel : IValidatableObject
         }
 
         // invalid values for fields
-        if (PostCode.HasValue)
+        if (!PostCode.HasValue)
         {
             yield return new ValidationResult( "Enter a full UK postcode", [nameof(PostCode)]);
         }

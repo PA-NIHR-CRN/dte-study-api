@@ -39,7 +39,7 @@ namespace BPOR.Rms.TagHelpers
 
             ViewContext.ViewData["__AreasOfResearch_Name"] = GetModelName(For);
 
-            ViewContext.ViewData["__AreasOfResearch_mode"] = formGroupMode;
+            ViewContext.ViewData["__AreasOfResearch_formGroupMode"] = formGroupMode;
 
             if (ForNone is not null)
             {

@@ -173,15 +173,15 @@
                             @Html.ValidationMessageFor(model => model.PreferredContactMethod)
                         </span>
                     }
-                    <div class="govuk-radios" data-module="govuk-radios">
-                        @for (int i = 0; i < Model.PrefferdContactMethodValues.Count; i++)
-                        {
-                            <div class="govuk-radios__item">
-                                @Html.RadioButtonFor(m => m.PreferredContactMethod, Model.PrefferdContactMethodValues[i]["value"], new { @class = "govuk-radios__input", id = "PreferredContactMethod" + (i == 0 ? "" : i) })
-                                @Html.Label("PreferredContactMethod" + (i == 0 ? "" : i), Model.PrefferdContactMethodValues[i]["label"], new { @class = "govuk-label govuk-radios__label" })
-                            </div>
-                        }
-                    </div>
+                <div class="govuk-radios" data-module="govuk-radios">
+                    @for (int i = 0; i < Model.GetPrefferdContactMethodValues.Count; i++)
+                    {
+                        <div class="govuk-radios__item">
+                            @Html.RadioButtonFor(m => m.PreferredContactMethod, (int)Model.GetPrefferdContactMethodValues[i], new { @class = "govuk-radios__input", id = "PreferredContactMethod" + (i == 0 ? "" : i) })
+                            @Html.Label("PreferredContactMethod" + (i == 0 ? "" : i), Model.GetPrefferdContactMethodValues[i].ToString(), new { @class = "govuk-label govuk-radios__label" })
+                        </div>
+                    }
+                </div>
                 </fieldset>
             </div>
 
@@ -375,7 +375,7 @@
                 </fieldset>
             </div>
 
-            <areas-of-research-select-list for="AreasOfResearch" formGroupMode="true" addresses="Model.Addresses" />
+            <areas-of-research-select-list for="AreasOfResearch" form-group-mode="true"/>
 
             <div class="govuk-button-group govuk-!-margin-bottom-0">
                 <button type="submit" name="action" value="Save" class="govuk-button" data_module="govuk-button">Save</button>

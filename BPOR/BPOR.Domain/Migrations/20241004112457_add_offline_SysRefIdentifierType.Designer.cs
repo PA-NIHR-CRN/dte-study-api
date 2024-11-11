@@ -13,8 +13,8 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20241004112457_...")]
-    partial class _
+    [Migration("20241004112457_add_offline_SysRefIdentifierType")]
+    partial class add_offline_SysRefIdentifierType
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

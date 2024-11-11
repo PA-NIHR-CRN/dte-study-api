@@ -12,6 +12,7 @@ using Rbec.Postcodes;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using BPOR.Rms.Constants;
 using System.Text.Json;
+using BPOR.Domain.Enums;
 
 namespace BPOR.Rms.Controllers;
 
@@ -187,6 +188,13 @@ public class VolunteerController(ParticipantDbContext context,
                         Town = model.Town,
                         Postcode = model.PostCode.ToString()
                     },
+                    ContactMethods = new List<ParticipantContactMethod>()
+                    {
+                        new ParticipantContactMethod
+                        {
+                            ContactMethodId = (int) model.PreferredContactMethod
+                        }
+                    },
                     //may need to save participant and update GUID
                     ParticipantIdentifiers = new List<ParticipantIdentifier> {
                         new ParticipantIdentifier() {
@@ -195,7 +203,7 @@ public class VolunteerController(ParticipantDbContext context,
                         }
                     },
                     IsDeleted = false,
-                    HealthConditions = model.AreasOfResearch.Select(x => new ParticipantHealthCondition
+                    HealthConditions = model.AreasOfResearch == null ? null : model.AreasOfResearch.Select(x => new ParticipantHealthCondition
                     {
                         HealthConditionId = x
                     }).ToList()

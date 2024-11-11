@@ -8,7 +8,7 @@
                 var noneCurrentValue = (ViewData["__AreasOfResearch_None_CurrentValue"] as string) ?? string.Empty;
                 int itemOffset = 0;
                 var firstItemFragment = string.IsNullOrWhiteSpace(noneName) ? $"#{areasOfResearch.FirstOrDefault()?.Value}" : "#option-none";
-                var formGroupMode = ViewData["__AreasOfResearch_isPlain"] as string;
+                var formGroupMode = ViewData["__AreasOfResearch_formGroupMode"] as string;
                 var headingLevel = "h2";
                 var headingClass = "govuk-heading-l";
                 var shouldShowHintText = true;
