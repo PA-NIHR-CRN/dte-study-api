@@ -128,10 +128,10 @@ public class EmailCampaignService(
         var retryPolicy = Policy
             .Handle<DbUpdateException>(IsUniqueConstraintViolation)
             .RetryAsync(3, onRetry: (exception, retryCount) =>
-        {
-            logger.LogError(exception, "Error saving email campaign participants, attempt {Attempt}", retryCount);
-            UpdateUniqueConstraintViolations(emailQueue);
-        });
+            {
+                logger.LogError(exception, "Error saving email campaign participants, attempt {Attempt}", retryCount);
+                UpdateUniqueConstraintViolations(emailQueue);
+            });
 
         await retryPolicy.ExecuteAsync(async () => await context.SaveChangesAsync(cancellationToken));
     }
