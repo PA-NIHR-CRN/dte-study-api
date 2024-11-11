@@ -621,3 +621,7 @@
 .header-logo-container {
     flex-direction: row;
 }
+
+.govuk-hint{
+    white-space:break-spaces;
+}

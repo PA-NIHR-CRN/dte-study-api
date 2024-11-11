@@ -4,6 +4,7 @@ using NIHR.Infrastructure.Models;
 using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Tokens;
 using Rbec.Postcodes;
+using System.ComponentModel;
 
 namespace BPOR.Rms.Models.Volunteer;
 
@@ -18,9 +19,9 @@ public class VolunteerFormViewModel : IValidatableObject
     [Required(ErrorMessage = "Enter a last name")]
     public string? LastName { get; set; }
 
-    [Display(Name = "Date of birth", Order = 3)]
+    [Display(Name = "Date of birth", Order = 3, Description = "For example, 31 3 1980.\n\nMust be 18 or over")]
     [Required(ErrorMessage = "Enter a Date of birth")]
-    public GovUkDate? DateOfBirth { get; set; } = new ();
+    public GovUkDate? DateOfBirth { get; set; }
 
     [Display(Name = "Postcode", Order = 9)]
     [Required(ErrorMessage = "Enter a postcode")]

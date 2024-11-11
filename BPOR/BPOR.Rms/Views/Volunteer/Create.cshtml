@@ -13,7 +13,7 @@
             <form-group for="FirstName">
                 @if (Html.ViewData.ModelState["FirstName"]?.Errors.Count > 0)
                 {
-                    <input asp-for="FirstName" class="govuk-input  govuk-input govuk-input--error" id="FirstName" aria-describedby="FirstName-error" value="@(Model.FirstName)" />
+                    <input asp-for="FirstName" class="govuk-input  govuk-input--error" id="FirstName" aria-describedby="FirstName-error" value="@(Model.FirstName)" />
                 }
                 else
                 {
@@ -22,82 +22,19 @@
 
             </form-group>
 
-            @*<div class="govuk-form-group @(Html.ViewData.ModelState["FirstName"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                <label asp-for="FirstName" class="govuk-label">
-                    @Html.DisplayNameFor(model => model.FirstName)
-                </label>
-                @if (Html.ViewData.ModelState["FirstName"]?.Errors.Count > 0)
-                {
-                    <span id="FirstName-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.FirstName)
-                    </span>
-                    <input asp-for="FirstName" class="govuk-input  govuk-input govuk-input--error" id="FirstName" aria-describedby="FirstName-error" value="@(Model.FirstName)" />
-                }
-                else
-                {
-                    <input asp-for="FirstName" class=" govuk-input" id="FirstName" value="@(Model.FirstName)" />
-                }
-            </div>*@
-
-            <div class="govuk-form-group @(Html.ViewData.ModelState["LastName"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                <label asp-for="LastName" class="govuk-label">
-                    @Html.DisplayNameFor(model => model.LastName)
-                </label>
+            <form-group for="LastName">
                 @if (Html.ViewData.ModelState["LastName"]?.Errors.Count > 0)
                 {
-                    <span id="LastName-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.LastName)
-                    </span>
-                    <input asp-for="LastName" class="govuk-input  govuk-input govuk-input--error" id="LastName" aria-describedby="LastName-error" value="@(Model.LastName)" />
+                    <input asp-for="LastName" class="govuk-input  govuk-input--error" id="LastName" aria-describedby="LastName-error" value="@(Model.LastName)" />
                 }
                 else
                 {
                     <input asp-for="LastName" class=" govuk-input" id="LastName" value="@(Model.LastName)" />
                 }
-            </div>
+            </form-group>
 
-            <div class="govuk-form-group  @(Html.ViewData.ModelState["DateOfBirth"]?.Errors.Count > 0 || Html.ViewData.ModelState["DateOfBirth.Day"]?.Errors.Count > 0 || Html.ViewData.ModelState["DateOfBirth.Month"]?.Errors.Count > 0 || Html.ViewData.ModelState["DateOfBirth.Year"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                <label asp-for="DateOfBirth" class="govuk-label">
-                    @Html.DisplayNameFor(model => model.DateOfBirth)
-                </label>
+            <form-group for="DateOfBirth" include-child-errors="true">
 
-                <div class="govuk-hint">
-                    For example, 31 3 1980.
-
-                    Must be 18 or over
-                </div>
-
-                @if (Html.ViewData.ModelState["DateOfBirth"]?.Errors.Count > 0)
-                {
-                    <span id="LastName-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.DateOfBirth)
-                    </span>
-                }
-
-                @if (Html.ViewData.ModelState["DateOfBirth.Day"]?.Errors.Count > 0)
-                {
-                    <span id="DateOfBirthDay-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.DateOfBirth.Day)
-                    </span>
-                }
-                @if (Html.ViewData.ModelState["DateOfBirth.Month"]?.Errors.Count > 0)
-                {
-                    <span id="DateOfBirthMonth-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.DateOfBirth.Month)
-                    </span>
-                }
-                @if (Html.ViewData.ModelState["DateOfBirth.Year"]?.Errors.Count > 0)
-                {
-                    <span id="DateOfBirthYear-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.DateOfBirth.Year)
-                    </span>
-                }
                 <div class="govuk-date-input" id="DateOfBirth">
                     <!-- Day -->
                     <div class="govuk-date-input__item">
@@ -115,121 +52,83 @@
                         <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="DateOfBirth.Year" autocomplete="off" type="text" inputmode="numeric" />
                     </div>
                 </div>
-            </div>
+
+            </form-group>
+
 
             @if (Model.ManualAddressEntry)
             {
                 <input asp-for="ManualAddressEntry" hidden value="@(Model.ManualAddressEntry)" type="checkbox" />
-                <div class="govuk-form-group @(Html.ViewData.ModelState["AddressLine1"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                    <label asp-for="AddressLine1" class="govuk-label">
-                        @Html.DisplayNameFor(model => model.AddressLine1)
-                    </label>
+
+                <form-group for="AddressLine1">
                     @if (Html.ViewData.ModelState["AddressLine1"]?.Errors.Count > 0)
                     {
-                        <span id="AddressLine1-error" class="govuk-error-message">
-                            <span class="govuk-visually-hidden">Error:</span>
-                            @Html.ValidationMessageFor(model => model.AddressLine1)
-                        </span>
-                        <input asp-for="AddressLine1" class="govuk-input  govuk-input govuk-input--error" id="AddressLine1" aria-describedby="AddressLine1-error" value="@(Model.AddressLine1)" />
+                        <input asp-for="AddressLine1" class="govuk-input  govuk-input--error" id="AddressLine1" aria-describedby="AddressLine1-error" value="@(Model.AddressLine1)" />
                     }
                     else
                     {
                         <input asp-for="AddressLine1" class=" govuk-input" id="AddressLine1" value="@(Model.AddressLine1)" autofocus="@(Model.lastAction == "ManualAddress")" />
                     }
-                </div>
+                </form-group>
 
-                <div class="govuk-form-group @(Html.ViewData.ModelState["AddressLine2"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                    <label asp-for="AddressLine2" class="govuk-label">
-                        @Html.DisplayNameFor(model => model.AddressLine2)
-                    </label>
+                <form-group for="AddressLine1">
                     @if (Html.ViewData.ModelState["AddressLine2"]?.Errors.Count > 0)
                     {
-                        <span id="AddressLine2-error" class="govuk-error-message">
-                            <span class="govuk-visually-hidden">Error:</span>
-                            @Html.ValidationMessageFor(model => model.AddressLine2)
-                        </span>
-                        <input asp-for="AddressLine2" class="govuk-input  govuk-input govuk-input--error" id="AddressLine2" aria-describedby="AddressLine2-error" value="@(Model.AddressLine2)" />
+                        <input asp-for="AddressLine2" class="govuk-input govuk-input--error" id="AddressLine2" aria-describedby="AddressLine2-error" value="@(Model.AddressLine2)" />
                     }
                     else
                     {
                         <input asp-for="AddressLine2" class=" govuk-input" id="AddressLine2" value="@(Model.AddressLine2)" />
                     }
-                </div>
+                </form-group>
 
-                <div class="govuk-form-group @(Html.ViewData.ModelState["AddressLine3"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                    <label asp-for="AddressLine3" class="govuk-label">
-                        @Html.DisplayNameFor(model => model.AddressLine3)
-                    </label>
+                <form-group for="AddressLine3">
                     @if (Html.ViewData.ModelState["AddressLine3"]?.Errors.Count > 0)
                     {
-                        <span id="AddressLine3-error" class="govuk-error-message">
-                            <span class="govuk-visually-hidden">Error:</span>
-                            @Html.ValidationMessageFor(model => model.AddressLine3)
-                        </span>
-                        <input asp-for="AddressLine3" class="govuk-input  govuk-input govuk-input--error" id="AddressLine3" aria-describedby="AddressLine3-error" value="@(Model.AddressLine3)" />
+                        <input asp-for="AddressLine3" class="govuk-input govuk-input--error" id="AddressLine3" aria-describedby="AddressLine3-error" value="@(Model.AddressLine3)" />
                     }
                     else
                     {
                         <input asp-for="AddressLine3" class=" govuk-input" id="AddressLine3" value="@(Model.AddressLine3)" />
                     }
-                </div>
+                </form-group>
 
-                <div class="govuk-form-group @(Html.ViewData.ModelState["AddressLine4"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                    <label asp-for="AddressLine4" class="govuk-label">
-                        @Html.DisplayNameFor(model => model.AddressLine4)
-                    </label>
+                <form-group for="AddressLine4">
                     @if (Html.ViewData.ModelState["AddressLine4"]?.Errors.Count > 0)
                     {
-                        <span id="AddressLine4-error" class="govuk-error-message">
-                            <span class="govuk-visually-hidden">Error:</span>
-                            @Html.ValidationMessageFor(model => model.AddressLine4)
-                        </span>
-                        <input asp-for="AddressLine4" class="govuk-input  govuk-input govuk-input--error" id="AddressLine4" aria-describedby="AddressLine4-error" value="@(Model.AddressLine4)" />
+                        <input asp-for="AddressLine4" class="govuk-input govuk-input--error" id="AddressLine4" aria-describedby="AddressLine4-error" value="@(Model.AddressLine4)" />
                     }
                     else
                     {
                         <input asp-for="AddressLine4" class=" govuk-input" id="AddressLine4" value="@(Model.AddressLine4)" />
                     }
-                </div>
+                </form-group>
 
-                <div class="govuk-form-group @(Html.ViewData.ModelState["Town"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                    <label asp-for="Town" class="govuk-label">
-                        @Html.DisplayNameFor(model => model.Town)
-                    </label>
+                <form-group for="AddressLine4">
                     @if (Html.ViewData.ModelState["Town"]?.Errors.Count > 0)
                     {
-                        <span id="Town-error" class="govuk-error-message">
-                            <span class="govuk-visually-hidden">Error:</span>
-                            @Html.ValidationMessageFor(model => model.Town)
-                        </span>
-                        <input asp-for="Town" class="govuk-input  govuk-input govuk-input--error" id="Town" aria-describedby="Town-error" value="@(Model.Town)" />
+                        <input asp-for="Town" class="govuk-input  govuk-input--error" id="Town" aria-describedby="Town-error" value="@(Model.Town)" />
                     }
                     else
                     {
                         <input asp-for="Town" class=" govuk-input" id="Town" value="@(Model.Town)" />
                     }
-                </div>
-
+                </form-group>
             }
 
-            <div class="govuk-form-group @(Html.ViewData.ModelState["PostCode"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                <label asp-for="PostCode" class="govuk-label">
-                    @Html.DisplayNameFor(model => model.PostCode)
-                </label>
+            <form-group for="PostCode">
                 @if (Html.ViewData.ModelState["PostCode"]?.Errors.Count > 0)
                 {
-                    <span id="PostCode-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.PostCode)
-                    </span>
-                    <input asp-for="PostCode" class="govuk-input  govuk-input govuk-input--error" id="PostCode" aria-describedby="PostCode-error" />
+                    <input asp-for="PostCode" class="govuk-input  govuk-input--error" id="PostCode" aria-describedby="PostCode-error" />
                 }
                 else
                 {
                     <input asp-for="PostCode" class=" govuk-input" id="PostCode" />
 
                 }
-            </div>
+            </form-group>
+
+
             <div class="govuk-form-group">
                 <button type="submit" name="action" value="AddressLookup" id="@(Model.lastAction != "AddressLookup" && Model.SelectedAddress == null ? "SelectedAddress" : "")" class="govuk-button" data_module="govuk-button">@(Model.ManualAddressEntry ? "Find an address by postcode" : "Find address")</button>
                 @if (!Model.ManualAddressEntry)
@@ -243,31 +142,19 @@
             {
                 if (Model.SelectedAddress == null)
                 {
-                    <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedAddress"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                        <label asp-for="SelectedAddress" class="govuk-label">
-                            @Html.DisplayNameFor(model => model.SelectedAddress)
-                        </label>
-
+                    <form-group for="SelectedAddress">
                         <address-lookup postcode="@(Model.PostCode)" for="SelectedAddress" auto-Focus="@(Model.lastAction=="AddressLookup")"></address-lookup>
-
-                    </div>
+                    </form-group>
                 }
                 else
                 {
                     @if (Model.SelectedAddress != null)
                     {
-                        <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedAddress"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                            <label asp-for="SelectedAddress" class="govuk-label">
-                                @Html.DisplayNameFor(model => model.SelectedAddress)
-                            </label>
-                            <span id="SelectedAddress-error" class="govuk-error-message">
-                                <span class="govuk-visually-hidden">Error:</span>
-                                @Html.ValidationMessageFor(model => model.SelectedAddress)
-                            </span>
 
+                        <form-group for="SelectedAddress">
                             <input asp-for="SelectedAddress" class="govuk-input" id="SelectedAddress" value="@(TempData["selectedAddress"])" disabled />
                             <input asp-for="SelectedAddress" class="govuk-input" id="SelectedAddress" value="@(Model.SelectedAddress)" hidden />
-                        </div>
+                        </form-group>
                     }
 
                 }
@@ -298,60 +185,39 @@
                 </fieldset>
             </div>
 
-            <div class="govuk-form-group @(Html.ViewData.ModelState["EmailAddress"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                <label asp-for="EmailAddress" class="govuk-label">
-                    @Html.DisplayNameFor(model => model.EmailAddress)
-                </label>
+
+            <form-group for="EmailAddress">
                 @if (Html.ViewData.ModelState["EmailAddress"]?.Errors.Count > 0)
                 {
-                    <span id="EmailAddress-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.EmailAddress)
-                    </span>
-                    <input asp-for="EmailAddress" class="govuk-input  govuk-input govuk-input--error" id="EmailAddress" aria-describedby="EmailAddress-error" value="@(Model.EmailAddress)" type="text" />
+                    <input asp-for="EmailAddress" class="govuk-input  govuk-input--error" id="EmailAddress" aria-describedby="EmailAddress-error" value="@(Model.EmailAddress)" type="text" />
                 }
                 else
                 {
                     <input asp-for="EmailAddress" class=" govuk-input" id="EmailAddress" value="@(Model.EmailAddress)" type="text" />
                 }
-            </div>
+            </form-group>
 
-            <div class="govuk-form-group @(Html.ViewData.ModelState["LandLine"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                <label asp-for="LandLine" class="govuk-label">
-                    @Html.DisplayNameFor(model => model.LandLine)
-                </label>
+            <form-group for="LandLine">
                 @if (Html.ViewData.ModelState["LandLine"]?.Errors.Count > 0)
                 {
-                    <span id="LandLine-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.LandLine)
-                    </span>
-                    <input asp-for="LandLine" class="govuk-input  govuk-input govuk-input--error" id="LandLine" aria-describedby="LandLine-error" value="@(Model.LandLine)" />
+                    <input asp-for="LandLine" class="govuk-input  govuk-input--error" id="LandLine" aria-describedby="LandLine-error" value="@(Model.LandLine)" />
                 }
                 else
                 {
                     <input asp-for="LandLine" class=" govuk-input" id="LandLine" value="@(Model.LandLine)" />
                 }
-            </div>
+            </form-group>
 
-            <div class="govuk-form-group @(Html.ViewData.ModelState["Mobile"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                <label asp-for="Mobile" class="govuk-label">
-                    @Html.DisplayNameFor(model => model.Mobile)
-                </label>
+            <form-group for="Mobile">
                 @if (Html.ViewData.ModelState["Mobile"]?.Errors.Count > 0)
                 {
-                    <span id="Mobile-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span>
-                        @Html.ValidationMessageFor(model => model.Mobile)
-                    </span>
-                    <input asp-for="Mobile" class="govuk-input  govuk-input govuk-input--error" id="Mobile" aria-describedby="Mobile-error" value="@(Model.Mobile)" />
+                    <input asp-for="Mobile" class="govuk-input  govuk-input--error" id="Mobile" aria-describedby="Mobile-error" value="@(Model.Mobile)" />
                 }
                 else
                 {
                     <input asp-for="Mobile" class=" govuk-input" id="Mobile" value="@(Model.Mobile)" />
                 }
-            </div>
-
+            </form-group>
 
             <div class="govuk-form-group @(Html.ViewData.ModelState["SexRegisteredAtBirth"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <fieldset class="govuk-fieldset" id="SexRegisteredAtBirthQuestion">
@@ -387,8 +253,6 @@
                             @Html.DisplayNameFor(model => Model.GenderIdentitySameAsBirth)
                         </label>
                     </legend>
-
-
                     @if (Html.ViewData.ModelState["GenderIdentitySameAsBirth"]?.Errors.Count > 0)
                     {
                         <span id="GenderIdentitySameAsBirth-error" class="govuk-error-message">
@@ -396,7 +260,6 @@
                             @Html.ValidationMessageFor(model => model.GenderIdentitySameAsBirth)
                         </span>
                     }
-
                     <div class="govuk-radios" data-module="govuk-radios">
                         <div class="govuk-radios__item">
                             @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "Yes", new { @class = "govuk-radios__input", id = "GenderIdentitySameAsBirth" })
@@ -447,17 +310,8 @@
 
             @if (Model.EthnicGroup != null)
             {
-                <div class="govuk-form-group @(Html.ViewData.ModelState["EthnicBackground"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                    <label asp-for="EthnicBackground" class="govuk-label">
-                        @Html.DisplayNameFor(model => model.EthnicBackground)
-                    </label>
-                    @if (Html.ViewData.ModelState["EthnicBackground"]?.Errors.Count > 0)
-                    {
-                        <span id="EthnicBackground-error" class="govuk-error-message">
-                            <span class="govuk-visually-hidden">Error:</span>
-                            @Html.ValidationMessageFor(model => model.EthnicBackground)
-                        </span>
-                    }
+
+                <form-group for="EthnicBackground">
                     @Html.DropDownListFor(
                              model => model.EthnicBackground,
                              new SelectList(Model.EthnicBackgroundOptions(), "label", "value"),
@@ -466,30 +320,18 @@
                                       @class = "govuk-select govuk-select-custom",
                                       @autofocus = Model.lastAction == "DisplayEthnicBackgrounds"
                              })
+                </form-group>
 
-                </div>
-
-
-
-                //    EthnicBackgroundOther
-                <div class="govuk-form-group @(Html.ViewData.ModelState["EthnicBackgroundOther"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                    <label asp-for="EthnicBackgroundOther" class="govuk-label">
-                        @Html.DisplayNameFor(model => model.EthnicBackgroundOther)
-                    </label>
+                <form-group for="EthnicBackgroundOther">
                     @if (Html.ViewData.ModelState["EthnicBackgroundOther"]?.Errors.Count > 0)
                     {
-                        <span id="EthnicBackgroundOther-error" class="govuk-error-message">
-                            <span class="govuk-visually-hidden">Error:</span>
-                            @Html.ValidationMessageFor(model => model.EthnicBackgroundOther)
-                        </span>
-                        <input asp-for="EthnicBackgroundOther" class="govuk-input  govuk-input govuk-input--error" id="EthnicBackgroundOther" aria-describedby="EthnicBackgroundOther-error" value="@(Model.EthnicBackgroundOther)" />
+                        <input asp-for="EthnicBackgroundOther" class="govuk-input  govuk-input--error" id="EthnicBackgroundOther" aria-describedby="EthnicBackgroundOther-error" value="@(Model.EthnicBackgroundOther)" />
                     }
                     else
                     {
                         <input asp-for="EthnicBackgroundOther" class=" govuk-input" id="EthnicBackgroundOther" value="@(Model.EthnicBackgroundOther)" />
                     }
-                </div>
-
+                </form-group>              
             }
 
 
