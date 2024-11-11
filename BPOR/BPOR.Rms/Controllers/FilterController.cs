@@ -122,6 +122,18 @@ public class FilterController(ParticipantDbContext context,
         context.FilterCriterias.Add(filterCriteria);
         await context.SaveChangesAsync(cancellationToken);
 
+        // early validation check
+
+        //a
+        if (model.SelectedVolunteersPreferredContact.Value = "No preference")
+        {
+            ModelState.AddModelError("Something went wrong with the validation check as aresukt of Preferred Contact being {model.SelectedVolunteersPreferredContact.Value}");
+        }
+
+        //b
+
+        //c
+
         // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
         {
