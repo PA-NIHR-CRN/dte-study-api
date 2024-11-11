@@ -250,7 +250,7 @@ public class CampaignController(
 
     private async Task AddCampaignToContextAsync(EmailCampaign campaign, CancellationToken cancellationToken)
     {
-        await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
+        await context.Campaigns.AddAsync(campaign, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 }

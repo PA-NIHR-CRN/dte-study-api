@@ -125,7 +125,7 @@ public static class Projections
                         })
                         .ToList(),
                 }),
-            HasEmailCampaigns = s.FilterCriterias.Any(fc => fc.Campaigns.Any())
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaigns.Any())
         };
     }
 

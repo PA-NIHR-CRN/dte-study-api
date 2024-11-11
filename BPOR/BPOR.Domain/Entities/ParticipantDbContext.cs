@@ -36,7 +36,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<Study> Studies { get; set; } = null!;
     public DbSet<ManualEnrollment> ManualEnrollments { get; set; } = null!;
     public DbSet<FilterCriteria> FilterCriterias { get; set; } = null!;
-    public DbSet<EmailCampaign> EmailCampaigns { get; set; } = null!;
+    public DbSet<EmailCampaign> Campaigns { get; set; } = null!;
     public DbSet<ParticipantLocation> ParticipantLocation { get; set; } = null!;
     public DbSet<ParticipantContactMethod> ParticipantContactMethod { get; set; } = null!;
     public DbSet<ParticipantAddress> ParticipantAddress { get; set; } = null!;
