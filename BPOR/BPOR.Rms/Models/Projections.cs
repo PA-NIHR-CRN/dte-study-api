@@ -18,17 +18,17 @@ public static class Projections
         this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyDetailsViewModel());
 
     public static IQueryable<EnrollmentDetails> AsEnrollmentDetails(this IQueryable<ManualEnrollment> source) =>
-        source.Select(ManualEnrollmentToEnrollmentDetails());    
-    
+        source.Select(ManualEnrollmentToEnrollmentDetails());
+
     public static IQueryable<EmailParticipantDetails> AsEmailCampaignParticipant(this IQueryable<Participant> source) =>
         source.Select(VolunteerToEmailParticipantDetails());
 
     public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyFormViewModel());
-    
+
     public static IQueryable<ResearcherStudyFormViewModel> AsResearcherFormViewModel(
         this IQueryable<Domain.Entities.Study> source) =>
         source.Select(StudyAsResearcherFormViewModel());
-    
+
     public static Expression<Func<Domain.Entities.Study, ResearcherStudyFormViewModel>> StudyAsResearcherFormViewModel()
     {
         return r => new ResearcherStudyFormViewModel
@@ -40,8 +40,8 @@ public static class Projections
             FundingCode = r.FundingCode,
             UKRecruitmentTarget = r.RecruitmentTarget,
             TargetPopulation = r.TargetPopulation,
-            RecruitmentStartDate =  GovUkDate.FromDateTime(r.RecruitmentStartDate),
-            RecruitmentEndDate =  GovUkDate.FromDateTime(r.RecruitmentEndDate),
+            RecruitmentStartDate = GovUkDate.FromDateTime(r.RecruitmentStartDate),
+            RecruitmentEndDate = GovUkDate.FromDateTime(r.RecruitmentEndDate),
             ShortName = r.StudyName,
             CPMSId = r.CpmsId,
             RecruitingIdentifiableVolunteers = r.IsRecruitingIdentifiableParticipants,
@@ -103,7 +103,7 @@ public static class Projections
                 UKRecruitmentTarget = s.RecruitmentTarget,
                 TargetPopulation = s.TargetPopulation,
                 RecruitmentStartDate = GovUkDate.FromDateTime(s.RecruitmentStartDate).UKDisplayDate(),
-                RecruitmentEndDate =  GovUkDate.FromDateTime(s.RecruitmentEndDate).UKDisplayDate(),
+                RecruitmentEndDate = GovUkDate.FromDateTime(s.RecruitmentEndDate).UKDisplayDate(),
                 InformationUrl = s.InformationUrl,
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
@@ -162,7 +162,7 @@ public static class Projections
                 CreatedAt = e.CreatedAt
             }).AsEnumerable();
     }
-    
+
     private static Expression<Func<Participant, EmailParticipantDetails>> VolunteerToEmailParticipantDetails()
     {
         return v => new EmailParticipantDetails

@@ -125,10 +125,10 @@ public class FilterController(ParticipantDbContext context,
         // early validation check
 
         //a
-        if (model.SelectedVolunteersPreferredContact.Value = "No preference")
+        /*if (model.SelectedVolunteersPreferredContact.Value = "No preference")
         {
             ModelState.AddModelError("Something went wrong with the validation check as aresukt of Preferred Contact being {model.SelectedVolunteersPreferredContact.Value}");
-        }
+        }*/
 
         //b
 
