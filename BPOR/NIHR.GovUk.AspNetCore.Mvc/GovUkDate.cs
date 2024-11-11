@@ -5,21 +5,10 @@ namespace NIHR.GovUk.AspNetCore.Mvc;
 public class GovUkDate : IValidatableObject
 {
 
-    private readonly int _minYear;
-    private readonly int _maxYear;
-
-    public GovUkDate(int minYear, int maxYear)
-    {
-        _minYear = minYear;
-        _maxYear = maxYear;
-    }
-
     [Display(Name = "Day")]
-    [Range(1, 31, ErrorMessage = "Day must be between 1 and 31")]
     public int? Day { get; set; }
 
     [Display(Name = "Month")]
-    [Range(1, 12, ErrorMessage = "Month must be between 1 and 12")]
     public int? Month { get; set; }
 
     [Display(Name = "Year")]
@@ -46,34 +35,62 @@ public class GovUkDate : IValidatableObject
         }
     }
 
-    public static GovUkDate FromDateTime(DateTime? date) => new GovUkDate(1900,2100) { Day = date?.Day, Month = date?.Month, Year = date?.Year };
+    public static GovUkDate FromDateTime(DateTime? date) => new GovUkDate() { Day = date?.Day, Month = date?.Month, Year = date?.Year };
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (!HasAnyDateComponent) { yield break; }
 
-        if (!Day.HasValue)
-        {
-            yield return new ValidationResult($"{validationContext.DisplayName} must include a day.", [nameof(Day)]);
-        }
+        if (!Day.HasValue) {
+            if(Month.HasValue && Year.HasValue)
+            {
+                yield return new ValidationResult($"{validationContext.DisplayName} must include a day.", [nameof(Day)]);
+            }
+            if (Month.HasValue && !Year.HasValue)
+            {
+                yield return new ValidationResult($"{validationContext.DisplayName} must include a day and year", [nameof(Day)]);
+            }
+            if (!Month.HasValue && Year.HasValue)
+            {
+                yield return new ValidationResult($"{validationContext.DisplayName} must include a day and month", [nameof(Day)]);
+            }
 
+        }
         if (!Month.HasValue)
         {
-            yield return new ValidationResult($"{validationContext.DisplayName} must include a month.", [nameof(Month)]);
+            if(Day.HasValue && Year.HasValue)
+            {
+                yield return new ValidationResult($"{validationContext.DisplayName} must include a month.", [nameof(Month)]);
+            }
+            if(Day.HasValue && !Year.HasValue)
+            {
+                yield return new ValidationResult($"{validationContext.DisplayName} must include a month and year", [nameof(Month)]);
+            }
         }
 
         if (!Year.HasValue)
         {
-            yield return new ValidationResult($"{validationContext.DisplayName} must include a year.", [nameof(Year)]);
-        }
-
-        if (Day.HasValue && Month.HasValue && Year.HasValue)
-        {
-            if (Year < _minYear || Year > _maxYear)
+            if(Day.HasValue && Month.HasValue)
             {
-                yield return new ValidationResult($"{validationContext.DisplayName} year must be a reasonable value.", new[] { nameof(Year) });
+                yield return new ValidationResult($"{validationContext.DisplayName} must include a year.", [nameof(Year)]);
             }
         }
+
+        if (Day.HasValue && (Day > 31 || Day < 1))
+        {
+            yield return new ValidationResult($"Day must be between 1 and 31.", [nameof(Day)]);
+        }
+
+        if (Month.HasValue && (Month > 12 || Month < 1))
+        {
+            yield return new ValidationResult($"Month must be between 1 and 12", [nameof(Month)]);
+        }
+            
+        if(Year.HasValue && (Year < 1000 || Year > 9999))               
+        {
+            yield return new ValidationResult($"{validationContext.DisplayName} year must include 4 numbers", ["DateOfBirth.Year"]);
+        }
+        
     }
 
    

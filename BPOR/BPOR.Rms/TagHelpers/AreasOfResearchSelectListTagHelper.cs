@@ -15,6 +15,8 @@ namespace BPOR.Rms.TagHelpers
         private IEnumerable<SelectListItem> _healthConditions;
 
         public ModelExpression? ForNone { get; set; }
+        public string formGroupMode { get; set; }
+
 
         public AreasOfResearchSelectListTagHelper(ParticipantDbContext dbContext, ICompositeViewEngine viewEngine, IViewBufferScope viewBufferScope, IHtmlGenerator generator) : base(viewEngine, viewBufferScope)
         {
@@ -37,7 +39,7 @@ namespace BPOR.Rms.TagHelpers
 
             ViewContext.ViewData["__AreasOfResearch_Name"] = GetModelName(For);
 
-            ViewContext.ViewData["__AreasOfResearch_isPlain"] = output.Attributes?["plain"]?.Value?.ToString();
+            ViewContext.ViewData["__AreasOfResearch_mode"] = formGroupMode;
 
             if (ForNone is not null)
             {

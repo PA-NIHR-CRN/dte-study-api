@@ -91,10 +91,10 @@ public class VolunteerFilterViewModel : IValidatableObject
     public bool IncludeNoAreasOfInterest { get; set; }
 
     [Display(Name = "Date of volunteer registration (from)", Order = 6)]
-    public GovUkDate RegistrationFromDate { get; set; } = new GovUkDate(1970,2100);
+    public GovUkDate RegistrationFromDate { get; set; } = new ();
 
     [Display(Name = "Date of volunteer registration (to)", Order = 7)]
-    public GovUkDate RegistrationToDate { get; set; } = new GovUkDate(1970,2100);
+    public GovUkDate RegistrationToDate { get; set; } = new ();
 
     [Display(Order = 8)]
     public PostcodeSearchModel PostcodeSearch { get; set; } = new();

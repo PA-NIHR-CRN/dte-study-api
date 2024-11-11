@@ -1,14 +1,14 @@
-﻿using BPOR.Rms.Models.Researcher;
-using NIHR.GovUk.AspNetCore.Mvc;
+﻿using NIHR.GovUk.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using NIHR.Infrastructure.Models;
+using System.Text.RegularExpressions;
+using Microsoft.IdentityModel.Tokens;
+using Rbec.Postcodes;
 
 namespace BPOR.Rms.Models.Volunteer;
 
-public class VolunteerFormViewModel : FormWithSteps
+public class VolunteerFormViewModel : IValidatableObject
 {
-
-    // should all be made nullable and control be used in the controller?
 
     [Display(Name = "First name", Order = 1)]
     [Required(ErrorMessage = "Enter a first name")]
@@ -16,18 +16,18 @@ public class VolunteerFormViewModel : FormWithSteps
 
     [Display(Name = "Last name", Order = 2)]
     [Required(ErrorMessage = "Enter a last name")]
-    public string LastName { get; set; }
+    public string? LastName { get; set; }
 
     [Display(Name = "Date of birth", Order = 3)]
-    public GovUkDate? DateOfBirth { get; set; } = new GovUkDate(0, 2100000);
+    [Required(ErrorMessage = "Enter a Date of birth")]
+    public GovUkDate? DateOfBirth { get; set; } = new ();
 
     [Display(Name = "Postcode", Order = 9)]
-    public string? PostCode { get; set; }
-
-    public List<PostcodeAddressModel>? Addresses { get; set; }
+    [Required(ErrorMessage = "Enter a postcode")]
+    public Postcode? PostCode { get; set; }
 
     [Display(Name = "Select an address")]
-    public string? SelectedAddressId { get; set; }
+    public string? SelectedAddress { get; set; }
 
     [Display(Name = "Address line 1", Order = 4)]
     public string? AddressLine1 { get; set; }
@@ -49,64 +49,46 @@ public class VolunteerFormViewModel : FormWithSteps
     public string PreferredContactMethod { get; set; }
 
     [Display(Name = "Email address", Order = 11)]
-    [StringLength(254, ErrorMessage = "The email address cannot exceed 254 characters.")]
-    [EmailAddress(ErrorMessage = "Enter an email address in the correct format, like name@example.com")]
     public string? EmailAddress { get; set; }
 
 
     [Display(Name = "Landline number", Order = 12)]
-    [RegularExpression(@"^(01|02|03)\s*\d(\s*\d)*$", ErrorMessage = "Enter a landline phone number in the correct format, like 01632 960 001")]
     public string? LandLine { get; set; }
 
 
     [Display(Name = "Mobile number", Order = 13)]
-    [RegularExpression(@"^07\s*\d(\s*\d)*$", ErrorMessage = "Enter a mobile phone number in the correct format, like 07700 900 982")]
     public string? Mobile { get; set; }
 
     
     [Display(Name = "Sex registered at birth", Order = 14)]
     [Required(ErrorMessage = "Select if the sex registered at birth is female or male")]
-    public int SexRegisteredAtBirth { get; set; }
+    public int? SexRegisteredAtBirth { get; set; }
 
     [Display(Name = "Gender identity same as sex registered at birth", Order = 15)]
     [Required(ErrorMessage = "Select gender identity same as sex registered at birth")]
-    public string GenderIdentitySameAsBirth { get; set; }
+    public string? GenderIdentitySameAsBirth { get; set; }
 
     [Display(Name = "Ethnic group", Order = 16)]
     [Required(ErrorMessage = "Select ethnic group")]
-    public string EthnicGroup { get; set; }
+    public string? EthnicGroup { get; set; }
 
     [Display(Name = "Ethnic background", Order = 17)]
     public string? EthnicBackground { get; set; }
-    public List<Dictionary<string, string>>? EthnicBackgroundOptions { get; set; }
 
     [Display (Name = "How would you describe your background?", Order = 17)]
     public string? EthnicBackgroundOther { get; set; }
 
     [Display(Name = "Long-term conditions or illnesses and reduced ability to carry out daily activities", Order = 18)]
-    [Required(ErrorMessage = "Select Long-term conditions or illnesses and reduced ability to carry out daily activities")]
-    public int LongTermConditionOrIllness { get; set; }
+    [Required(ErrorMessage = "Select long-term conditions or illnesses and reduced ability to carry out daily activities")]
+    public int? LongTermConditionOrIllness { get; set; }
 
     [Display(Name = "Areas of research (optional)", Order = 19)]
     public List<int>? AreasOfResearch { get; set; }
 
-    public bool IncludeNoAreasOfInterest { get; set; }
     public bool ManualAddressEntry { get; set; }
     public string? lastAction { get; set; }
 
-
-
-    public override int TotalSteps => 1;
-
-    public override String StepName
-    {
-        get
-        {
-            return "Add a volunteer to the volunteer registry";
-        }
-    }
-
-    // options for each form input, should be replaced by options from db.
+    // todo CRNCC-2387 has these as enums that can be used.
     public List<Dictionary<string, string>> PrefferdContactMethodValues
     {
         get
@@ -119,158 +101,138 @@ public class VolunteerFormViewModel : FormWithSteps
         }
     }
 
-    public List<Dictionary<string, string>> SexRegisteredAtBirthValues
+
+
+    public List<Dictionary<string, string>> SexRegisteredAtBirthValues 
     {
         get
         {
-            var SexRegisteredAtBirthValues = new List<Dictionary<string, string>>();
-            SexRegisteredAtBirthValues.Add(new Dictionary<string, string> { { "label", "Female" }, { "value", "2" } });
-            SexRegisteredAtBirthValues.Add(new Dictionary<string, string> { { "label", "Male" }, { "value", "1" } });
-            
-            return SexRegisteredAtBirthValues;
+            return Constants.SexRegisteredAtBirth.getSexRegisteredAtBirthOptions();
         }
     }
-
-    public void addEthnicOptions()
-    {
-        switch (EthnicGroup)
-        {
-            case "Asian":
-                EthnicBackgroundOptions = EthnicbackgroundValuesAAB;
-                break;
-            case "Black":
-                EthnicBackgroundOptions = EthnicbackgroundValuesBABBC;
-                break;
-            case "Mixed":
-                EthnicBackgroundOptions = EthnicbackgroundValuesMM;
-                break;
-            case "White":
-                EthnicBackgroundOptions = EthnicbackgroundValuesW;
-                break;
-            case "Other":
-                EthnicBackgroundOptions = EthnicbackgroundValuesO;
-                break;
-        }
-    }
-
     public List<Dictionary<string, string>> EthnicGroupValues
     {
         get
         {
-            ;
-            var EthnicGroupValues = new List<Dictionary<string, string>>();
-            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Asian or Asian British" }, { "value", "Asian" } });
-            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Black, African, Black British or Caribbean" }, { "value", "Black" } });
-            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Mixed or multiple ethnic groups" }, { "value", "Mixed" } });
-            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "White" }, { "value", "White" } });
-            EthnicGroupValues.Add(new Dictionary<string, string> { { "label", "Other ethnic group" }, { "value", "Other" } });
-
-            return EthnicGroupValues;
+            return Constants.EthnicGroups.getEthnicGroupOptions();
         }
     }
 
-    
-    //Asian or Asian British
-    public List<Dictionary<string, string>> EthnicbackgroundValuesAAB
+    public List<Dictionary<string, string>> EthnicBackgroundOptions()
     {
-        get
-        {
-
-            var EthnicbackgroundValuesAAB = new List<Dictionary<string, string>>();
-
-            
-
-            EthnicbackgroundValuesAAB.Add(new Dictionary<string, string> { { "label", "Bangladeshi" }, { "value", "Bangladeshi" } });
-            EthnicbackgroundValuesAAB.Add(new Dictionary<string, string> { { "label", "Chinese" }, { "value", "Chinese" } });
-            EthnicbackgroundValuesAAB.Add(new Dictionary<string, string> { { "label", "Indian" }, { "value", "Indian" } });
-            EthnicbackgroundValuesAAB.Add(new Dictionary<string, string> { { "label", "Pakistani" }, { "value", "Pakistani" } });
-            EthnicbackgroundValuesAAB.Add(new Dictionary<string, string> { { "label", "Another Asian or Asian British background" }, { "value", "Other" } });
-
-            return EthnicbackgroundValuesAAB;
-
-        }
+        return Constants.EthnicBackgrounds.getEthnicBackground(EthnicGroup);
     }
 
-    //Black, African, Black British or Caribbean
-    public List<Dictionary<string, string>> EthnicbackgroundValuesBABBC
+
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        get
+
+        if (String.IsNullOrEmpty(LandLine) && String.IsNullOrEmpty(Mobile))
         {
-
-            var EthnicbackgroundValuesBABBC = new List<Dictionary<string, string>>();
-
-
-
-            EthnicbackgroundValuesBABBC.Add(new Dictionary<string, string> { { "label", "African" }, { "value", "African" } });
-            EthnicbackgroundValuesBABBC.Add(new Dictionary<string, string> { { "label", "Black British" }, { "value", "Black British" } });
-            EthnicbackgroundValuesBABBC.Add(new Dictionary<string, string> { { "label", "Caribbean" }, { "value", "Caribbean" } });
-            EthnicbackgroundValuesBABBC.Add(new Dictionary<string, string> { { "label", "Another Black, African, Black British or Caribbean background" }, { "value", "Other" } });
-
-            return EthnicbackgroundValuesBABBC;
-
+            yield return new ValidationResult( "Enter either a UK landline number or UK mobile number", [nameof(LandLine)]);
         }
-    }
-
-    //Mixed or multiple ethnic groups
-    public List<Dictionary<string, string>> EthnicbackgroundValuesMM
-    {
-        get
+        if (!String.IsNullOrEmpty(LandLine) && !Regex.IsMatch(LandLine, @"^(01|02|03)\s*\d(\s*\d)*$"))
         {
-
-            var EthnicbackgroundValuesMM = new List<Dictionary<string, string>>();
-
-
-
-            EthnicbackgroundValuesMM.Add(new Dictionary<string, string> { { "label", "Asian and White" }, { "value", "Asian and White" } });
-            EthnicbackgroundValuesMM.Add(new Dictionary<string, string> { { "label", "Black African and White" }, { "value", "Black African and White" } });
-            EthnicbackgroundValuesMM.Add(new Dictionary<string, string> { { "label", "Black Caribbean and White" }, { "value", "Black Caribbean and White" } });
-            EthnicbackgroundValuesMM.Add(new Dictionary<string, string> { { "label", "Another mixed background" }, { "value", "Other" } });
-
-            return EthnicbackgroundValuesMM;
-
+            yield return new ValidationResult("Enter a landline phone number in the correct format, like 01632 960 001", [nameof(LandLine)]);
         }
-    }
-
-    //White
-    public List<Dictionary<string, string>> EthnicbackgroundValuesW
-    {
-        get
+        if (!String.IsNullOrEmpty(Mobile) && !Regex.IsMatch(Mobile, @"^07\s*\d(\s*\d)*$"))
         {
-
-            var EthnicbackgroundValuesW = new List<Dictionary<string, string>>();
-
-
-
-            EthnicbackgroundValuesW.Add(new Dictionary<string, string> { { "label", "British, English, Northern Irish, Scottish, or Welsh" }, { "value", "British, English, Northern Irish, Scottish, or Welsh" } });
-            EthnicbackgroundValuesW.Add(new Dictionary<string, string> { { "label", "Irish" }, { "value", "Irish" } });
-            EthnicbackgroundValuesW.Add(new Dictionary<string, string> { { "label", "Irish Traveller" }, { "value", "Irish Traveller" } });
-            EthnicbackgroundValuesW.Add(new Dictionary<string, string> { { "label", "Roma" }, { "value", "Roma" } });
-            EthnicbackgroundValuesW.Add(new Dictionary<string, string> { { "label", "Another White background" }, { "value", "Other" } });
-
-            return EthnicbackgroundValuesW;
-
+            yield return new ValidationResult("Enter a mobile phone number in the correct format, like 07700 900 982", [nameof(Mobile)]);
         }
-    }
-
-    //Other ethnic group
-    public List<Dictionary<string, string>> EthnicbackgroundValuesO
-    {
-        get
+        if (PreferredContactMethod == "Email" && String.IsNullOrEmpty(EmailAddress))
         {
-
-            var EthnicbackgroundValuesO = new List<Dictionary<string, string>>();
-
-
-
-            EthnicbackgroundValuesO.Add(new Dictionary<string, string> { { "label", "Arab" }, { "value", "Arab" } });
-            EthnicbackgroundValuesO.Add(new Dictionary<string, string> { { "label", "Any other ethnic group" }, { "value", "Other" } });
-
-            return EthnicbackgroundValuesO;
-
+            yield return new ValidationResult( "Email address cannot be blank", [nameof(EmailAddress)]);
         }
+
+        if (ManualAddressEntry)
+        {
+            //addressline1 &town needs verified
+            if (String.IsNullOrEmpty(AddressLine1))
+            {
+                yield return new ValidationResult( "Enter the first line of the address", [nameof(AddressLine1)]);
+            }
+
+            if (String.IsNullOrEmpty(Town))
+            {
+                yield return new ValidationResult( "Enter the town of the address", [nameof(Town)]);
+            }
+        }
+        else
+        {
+            if (SelectedAddress != null && SelectedAddress.Contains("Addresses found"))
+            {
+                SelectedAddress = null;
+            }
+            // make sure one of the address is selected.
+            if (SelectedAddress == null && PostCode.HasValue)
+            {
+                yield return new ValidationResult("Select an address or enter an address manually", [nameof(SelectedAddress)]);
+
+            }
+        }
+
+        if (LongTermConditionOrIllness == 0)
+        {
+            yield return new ValidationResult( "Select long-term conditions or illnesses and reduced ability to carry out daily activities", [nameof(LongTermConditionOrIllness)]);
+        }
+        if (EthnicBackground == null && EthnicGroup != null)
+        {
+            yield return new ValidationResult( "Select ethnic background", [nameof(EthnicBackground)]);
+        }
+        // need to check for other.
+        if (EthnicBackground == "Other" && EthnicBackgroundOther == null)
+        {
+            yield return new ValidationResult( "please describe your ethnic background", [nameof(EthnicBackgroundOther)]);
+        }
+        if (EthnicGroup == "Other" && String.IsNullOrEmpty(EthnicBackgroundOther))
+        {
+            yield return new ValidationResult( "Describe Ethnic Background", [nameof(EthnicBackgroundOther)]);
+        }
+
+        // invalid values for fields
+        if (PostCode.HasValue)
+        {
+            yield return new ValidationResult( "Enter a full UK postcode", [nameof(PostCode)]);
+        }
+
+        if(EmailAddress != null)
+        { 
+            string emailRegex = "^[^@]+@?[^@]+$";
+            if (!Regex.IsMatch(EmailAddress, emailRegex))
+            {
+                yield return new ValidationResult( "Enter an email address in the correct format, like name@example.com", [nameof(EmailAddress)]);
+            }
+            if (EmailAddress.Length >= 254)
+            {
+                yield return new ValidationResult("The email address cannot exceed 254 characters.", [nameof(EmailAddress)]);
+            }
+        }
+
+        if (DateOfBirth.HasValue)
+        {
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+            DateOnly eighteenYearsAgo = today.AddYears(-18);
+            DateOnly nineteenHundred = DateOnly.FromDateTime(new DateTime(1900, 1, 1));
+
+            if (DateOfBirth.ToDateOnly() > eighteenYearsAgo && DateOfBirth.ToDateOnly() <= today)
+            {
+                yield return new ValidationResult("Volunteer must be 18 or over to use this service", ["DateOfBirth.Day"]);
+            }
+            if (DateOfBirth.ToDateOnly() > today)
+            {
+                yield return new ValidationResult( "Date of birth must be in the past", ["DateOfBirth.Month"]);
+            }
+            if (DateOfBirth.ToDateOnly() < nineteenHundred && DateOfBirth.Year >= 1000)
+            {
+                yield return new ValidationResult( "Date of birth year must be after 1900", ["DateOfBirth.Year"]);
+            }
+        }
+
+
+
+
     }
-
-
 
 }
 
