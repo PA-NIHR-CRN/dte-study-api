@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
+using Humanizer;
 using Notify.Models.Responses;
 
 namespace BPOR.Rms.Models.Email;
@@ -29,12 +30,30 @@ public class SetupCampaignViewModel
     public int? TotalVolunteers { get; set; }
 
 
-    [Display(Name ="Preview email", Order = 2)]
+    [Display(Name = "Preview email", Order = 2)]
     public string? PreviewEmails { get; set; }
-    
-    public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries)?.Select(x=>x.Trim()) ?? Enumerable.Empty<string>();
+
+    public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries)?.Select(x => x.Trim()) ?? Enumerable.Empty<string>();
+
     public string GetArticle(ContactMethods method)
     {
         return (method == ContactMethods.Email) ? "an" : "a";
+    }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (TotalVolunteers is null)
+        {
+            yield return new ValidationResult("Enter the number of volunteers to be contacted.", new[] { nameof(TotalVolunteers) });
+            yield break;
+        }
+        else if (TotalVolunteers.HasValue && TotalVolunteers % 1 != 0)
+        {
+            yield return new ValidationResult("Number of volunteers to be contacted must be a whole number, like 15.", new[] { nameof(TotalVolunteers) });
+        }
+        else if (TotalVolunteers > MaxNumbers)
+        {
+            yield return new ValidationResult($"Number of volunteers to be contacted must be between 1 and {MaxNumbers}.", new[] { nameof(TotalVolunteers) });
+        }
     }
 }
