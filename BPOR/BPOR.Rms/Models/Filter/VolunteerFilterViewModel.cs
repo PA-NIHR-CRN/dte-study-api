@@ -19,6 +19,8 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     public bool ShowRecruitedFilter { get; set; }
 
+    public bool ShowPreferredContactFilter { get; set; }
+
     [Display(Name = "Volunteers contacted", Order = 1)]
     public bool? SelectedVolunteersContacted { get; set; }
     public IEnumerable<SelectListItem> VolunteersContactedItems { get; set; } = SetVolunteersContactedItems();
@@ -79,6 +81,22 @@ public class VolunteerFilterViewModel : IValidatableObject
             new SelectListItem { Value = string.Empty, Text = "No preference" },
             new SelectListItem { Value = true.ToString(), Text = "Completed registration" },
             new SelectListItem { Value = false.ToString(), Text = "Not completed registration" }
+        };
+
+        return items;
+    }
+
+    [Display(Name = "Volunteers preferred contact method", Order = 4)]
+    public bool? SelectedVolunteersPreferredContact { get; set; }
+    public IEnumerable<SelectListItem> VolunteersPreferredContactItems { get; set; } = SetVolunteersPreferredContactItems();
+
+    private static IEnumerable<SelectListItem> SetVolunteersPreferredContactItems()
+    {
+        var items = new List<SelectListItem>
+        {
+            new SelectListItem { Value = string.Empty, Text = "No preference" },
+            new SelectListItem { Value = true.ToString(), Text = "Email" },
+            new SelectListItem { Value = false.ToString(), Text = "Letter" }
         };
 
         return items;

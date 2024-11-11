@@ -12,7 +12,17 @@ public static class ParticipantQueryExtensions
     {
         if (selectedVolunteersContacted.HasValue)
         {
-            return query.Where(x => x.CampaignParticipants.Any(e => e.EmailCampaign.FilterCriteria.StudyId == studyId) == selectedVolunteersContacted.Value);
+            return query.Where(x => x.CampaignParticipants.Any(e => e.Campaign.FilterCriteria.StudyId == studyId) == selectedVolunteersContacted.Value);
+        }
+
+        return query;
+    }
+
+    public static IQueryable<Participant> WhereHasPreferredContactMethod(this IQueryable<Participant> query, int? studyId, bool? SelectedVolunteersPreferredContact)
+    {
+        if (SelectedVolunteersPreferredContact.HasValue)
+        {
+            return query.Where(x => x.CampaignParticipants.Any(e => e.Campaign.FilterCriteria.StudyId == studyId) == SelectedVolunteersPreferredContact.Value);
         }
 
         return query;
@@ -22,7 +32,7 @@ public static class ParticipantQueryExtensions
     {
         if (selectedVolunteersRegisteredInterest.HasValue)
         {
-            return query.Where(x => x.CampaignParticipants.Any(e => (e.RegisteredInterestAt != null) == selectedVolunteersRegisteredInterest.Value && e.EmailCampaign.FilterCriteria.StudyId == studyId));
+            return query.Where(x => x.CampaignParticipants.Any(e => (e.RegisteredInterestAt != null) == selectedVolunteersRegisteredInterest.Value && e.Campaign.FilterCriteria.StudyId == studyId));
         }
 
         return query;

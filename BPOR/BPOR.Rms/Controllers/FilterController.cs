@@ -55,6 +55,7 @@ public class FilterController(ParticipantDbContext context,
             model.StudyCpmsId = selectedStudy.CpmsId;
 
             model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
+            model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
         }
 
         model.VolunteerCount = results.Count?.Value;
@@ -88,6 +89,7 @@ public class FilterController(ParticipantDbContext context,
         return new VolunteerFilterViewModel { StudyId = model.StudyId };
     }
 
+   
     [HttpPost]
     public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
@@ -121,6 +123,18 @@ public class FilterController(ParticipantDbContext context,
 
         context.FilterCriterias.Add(filterCriteria);
         await context.SaveChangesAsync(cancellationToken);
+
+        // early validation check
+
+        //a
+        if (model.SelectedVolunteersPreferredContact.Value = "No preference")
+        {
+            ModelState.AddModelError("Something went wrong with the validation check as aresukt of Preferred Contact being {model.SelectedVolunteersPreferredContact.Value}");
+        }
+
+        //b
+
+        //c
 
         // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
