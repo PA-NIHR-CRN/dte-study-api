@@ -5,7 +5,7 @@
 namespace Dynamo.Stream.Handler.Migrations
 {
     /// <inheritdoc />
-    public partial class _ : Migration
+    public partial class add_offline_SysRefIdentifierType : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
