@@ -44,25 +44,29 @@ public class CampaignController(
     {
         await PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
 
-        //if (!ModelState.IsValid)
-        //{
-        //    if (ModelState[nameof(model.TotalVolunteers)]?.Errors.Any(e => e.ErrorMessage.Contains("is not valid")) ?? false)
-        //    {
-        //        ModelState[nameof(model.TotalVolunteers)].Errors.Clear();
-        //        ModelState.AddModelError(nameof(model.TotalVolunteers), "Number of volunteers to be contacted must be a whole number, like 15.");
-        //    }
-        //}
+        if (!ModelState.IsValid)
+        {
+            if (ModelState[nameof(model.TotalVolunteers)]?.Errors.Any(e => e.ErrorMessage.Contains("is not valid")) ?? false)
+            {
+                ModelState[nameof(model.TotalVolunteers)].Errors.Clear();
+                ModelState.AddModelError(nameof(model.TotalVolunteers), "Number of volunteers to be contacted must be a whole number, like 15.");
+            }
+        }
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
 
-        //if (model.TotalVolunteers is null)
-        //{
-        //    ModelState.AddModelError(nameof(model.TotalVolunteers), "Enter the number of volunteers to be contacted.");
-        //}
+        if (model.TotalVolunteers is null)
+        {
+            ModelState.AddModelError(nameof(model.TotalVolunteers), "Enter the number of volunteers to be contacted.");
+        }
 
-        //else if (model.TotalVolunteers > model.MaxNumbers)
-        //{
-        //    ModelState.AddModelError(nameof(model.TotalVolunteers),
-        //        $"Number of volunteers to be contacted must be between 1 and {model.MaxNumbers:N0}.");
-        //}
+        else if (model.TotalVolunteers > model.MaxNumbers)
+        {
+            ModelState.AddModelError(nameof(model.TotalVolunteers),
+                $"Number of volunteers to be contacted must be between 1 and {model.MaxNumbers:N0}.");
+        }
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
         {

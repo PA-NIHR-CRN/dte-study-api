@@ -39,21 +39,4 @@ public class SetupCampaignViewModel
     {
         return (method == ContactMethods.Email) ? "an" : "a";
     }
-
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (TotalVolunteers is null)
-        {
-            yield return new ValidationResult("Enter the number of volunteers to be contacted.", new[] { nameof(TotalVolunteers) });
-            yield break;
-        }
-        else if (TotalVolunteers.HasValue && TotalVolunteers % 1 != 0)
-        {
-            yield return new ValidationResult("Number of volunteers to be contacted must be a whole number, like 15.", new[] { nameof(TotalVolunteers) });
-        }
-        else if (TotalVolunteers > MaxNumbers)
-        {
-            yield return new ValidationResult($"Number of volunteers to be contacted must be between 1 and {MaxNumbers}.", new[] { nameof(TotalVolunteers) });
-        }
-    }
 }

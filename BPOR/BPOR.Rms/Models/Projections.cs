@@ -164,7 +164,7 @@ public static class Projections
 
     private static Expression<Func<Participant, EmailParticipantDetails>> VolunteerToEmailParticipantDetails()
     {
-        return v => new CampaignParticipantDetails
+        return v => new EmailParticipantDetails
         {
             Id = v.Id,
             Email = v.Email,
