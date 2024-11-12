@@ -1,6 +1,6 @@
 namespace BPOR.Rms.Models.Volunteer;
 
-public class EmailParticipantDetails
+public class CampaignParticipantDetails
 {
         public int Id { get; set; }
         public string? Email { get; set; }

@@ -1,5 +1,6 @@
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Enums;
 using Notify.Models.Responses;
 
 namespace BPOR.Rms.Models.Email;
@@ -16,12 +17,13 @@ public class SetupCampaignViewModel
     public string? StudyName { get; set; }
     public string? EmailAddress { get; set; }
 
+    public ContactMethods ContactMethod { get; set; } = ContactMethods.Email;
+
     public int FilterCriteriaId { get; set; }
 
+    public List<TemplateResponse> Templates { get; set; } = new List<TemplateResponse>();
 
-    [Display(Name = "Select email template", Order = 1)]
     public string? SelectedTemplateId { get; set; }
-    public TemplateList EmailTemplates { get; set; } = new ();
 
 
     [Display(Name = "How many volunteers do you want to send it to?", Order = 3)]
@@ -33,4 +35,8 @@ public class SetupCampaignViewModel
     public string? PreviewEmails { get; set; }
     
     public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries)?.Select(x=>x.Trim()) ?? Enumerable.Empty<string>();
+    public string GetArticle(ContactMethods method)
+    {
+        return (method == ContactMethods.Email) ? "an" : "a";
+    }
 }

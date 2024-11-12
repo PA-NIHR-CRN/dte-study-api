@@ -18,9 +18,9 @@ public static class Projections
         this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyDetailsViewModel());
 
     public static IQueryable<EnrollmentDetails> AsEnrollmentDetails(this IQueryable<ManualEnrollment> source) =>
-        source.Select(ManualEnrollmentToEnrollmentDetails());
-
-    public static IQueryable<EmailParticipantDetails> AsEmailCampaignParticipant(this IQueryable<Participant> source) =>
+        source.Select(ManualEnrollmentToEnrollmentDetails());    
+    
+    public static IQueryable<CampaignParticipantDetails> AsEmailCampaignParticipant(this IQueryable<Participant> source) =>
         source.Select(VolunteerToEmailParticipantDetails());
 
     public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyFormViewModel());
@@ -108,17 +108,16 @@ public static class Projections
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 
-            EmailCampaigns = s.FilterCriterias
-                .SelectMany(fc => fc.EmailCampaigns)
+            Campaigns = s.FilterCriterias
+                .SelectMany(fc => fc.Campaigns)
                 .Select(ec => new EmailCampaign
                 {
                     TargetGroupSize = (int)ec.TargetGroupSize,
                     CreatedAt = ec.CreatedAt,
                     Name = ec.Name,
-                    EmailCampaignParticipants = ec.Participants
+                    CampaignParticipants = ec.Participants
                         .Select(p => new EmailCampaignParticipant
                         {
-                            ContactEmail = p.ContactEmail,
                             SentAt = p.SentAt,
                             RegisteredInterestAt = p.RegisteredInterestAt,
                             DeliveredAt = p.DeliveredAt,
@@ -126,7 +125,7 @@ public static class Projections
                         })
                         .ToList(),
                 }),
-            HasEmailCampaigns = s.FilterCriterias.Any(fc => fc.EmailCampaigns.Any())
+            HasEmailCampaigns = s.FilterCriterias.Any(fc => fc.Campaigns.Any())
         };
     }
 
@@ -161,11 +160,10 @@ public static class Projections
                 RecruitmentTotal = e.TotalEnrollments,
                 CreatedAt = e.CreatedAt
             }).AsEnumerable();
-    }
-
-    private static Expression<Func<Participant, EmailParticipantDetails>> VolunteerToEmailParticipantDetails()
+    } 
+    private static Expression<Func<Participant, CampaignParticipantDetails>> VolunteerToEmailParticipantDetails()
     {
-        return v => new EmailParticipantDetails
+        return v => new CampaignParticipantDetails
         {
             Id = v.Id,
             Email = v.Email,

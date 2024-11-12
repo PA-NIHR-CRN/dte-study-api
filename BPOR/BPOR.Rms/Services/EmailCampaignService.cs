@@ -33,7 +33,7 @@ public class EmailCampaignService(
 {
     public async Task SendCampaignAsync(EmailServiceQueueItem item, CancellationToken cancellationToken = default)
     {
-        var campaign = await context.EmailCampaigns
+        var campaign = await context.Campaigns
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == item.Id, cancellationToken);
         var emailDeliveryStatusId = GetEmailDeliveryStatusId();
@@ -71,7 +71,7 @@ public class EmailCampaignService(
             .FirstOrDefaultAsync(fc => fc.Id == campaign.FilterCriteriaId, cancellationToken);
     }
 
-    private async Task<List<EmailParticipantDetails>> GetFilteredVolunteersAsync(FilterCriteria dbFilter,
+    private async Task<List<CampaignParticipantDetails>> GetFilteredVolunteersAsync(FilterCriteria dbFilter,
         int? targetGroupSize, CancellationToken cancellationToken)
     {
         var filter = FilterMapper.MapToFilterModel(dbFilter);
@@ -93,7 +93,7 @@ public class EmailCampaignService(
             .ToListAsync(cancellationToken);
     }
 
-    private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
+    private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, EmailCampaign campaign,
         FilterCriteria dbFilter, int emailDeliveryStatusId, string callback, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
@@ -106,7 +106,7 @@ public class EmailCampaignService(
         await foreach (var processingResult in ProcessVolunteersAsync(volunteers, campaign, dbFilter,
                            emailDeliveryStatusId, batchSize, cancellationToken))
         {
-            await context.EmailCampaignParticipants.AddRangeAsync(processingResult.EmailCampaignParticipants,
+            await context.CampaignParticipants.AddRangeAsync(processingResult.CampaignParticipants,
                 cancellationToken);
             await context.StudyParticipantEnrollment.AddRangeAsync(processingResult.StudyParticipantEnrollments,
                 cancellationToken);
@@ -157,7 +157,7 @@ public class EmailCampaignService(
     }
 
     private async IAsyncEnumerable<ProcessingResults> ProcessVolunteersAsync(
-        List<EmailParticipantDetails> volunteers,
+        List<CampaignParticipantDetails> volunteers,
         EmailCampaign campaign,
         FilterCriteria dbFilter,
         int emailDeliveryStatusId,
@@ -180,10 +180,10 @@ public class EmailCampaignService(
         }
     }
 
-    private void ProcessVolunteer(EmailParticipantDetails volunteer, EmailCampaign campaign, FilterCriteria dbFilter,
+    private void ProcessVolunteer(CampaignParticipantDetails volunteer, EmailCampaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int emailDeliveryStatusId)
     {
-        processingResult.EmailCampaignParticipants.Add(new EmailCampaignParticipant
+        processingResult.CampaignParticipants.Add(new EmailCampaignParticipant
         {
             EmailCampaignId = campaign.Id,
             ParticipantId = volunteer.Id,
@@ -216,12 +216,12 @@ public class EmailCampaignService(
         }
     }
 
-    private async Task QueueNotificationsAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
+    private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, EmailCampaign campaign,
         List<ProcessingResults> emailQueue, string callback, CancellationToken cancellationToken)
     {
         foreach (var volunteer in volunteers)
         {
-            var emailCampaignParticipant = emailQueue.SelectMany(e => e.EmailCampaignParticipants)
+            var emailCampaignParticipant = emailQueue.SelectMany(e => e.CampaignParticipants)
                 .FirstOrDefault(e => e.ParticipantId == volunteer.Id);
 
             if (emailCampaignParticipant == null)
@@ -289,6 +289,6 @@ internal static class DbContextExtensions
 
 internal class ProcessingResults
 {
-    public List<EmailCampaignParticipant> EmailCampaignParticipants { get; } = [];
+    public List<EmailCampaignParticipant> CampaignParticipants { get; } = [];
     public List<StudyParticipantEnrollment> StudyParticipantEnrollments { get; } = [];
 }

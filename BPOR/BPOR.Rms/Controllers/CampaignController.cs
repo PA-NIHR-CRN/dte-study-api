@@ -17,11 +17,11 @@ using Notify.Models.Responses;
 
 namespace BPOR.Rms.Controllers;
 
-public class EmailController(
+public class CampaignController(
     ParticipantDbContext context,
     INotificationService notificationService,
     IDistributedCache cache,
-    ILogger<EmailController> logger,
+    ILogger<CampaignController> logger,
     IRmsTaskQueue taskQueue,
     IEncryptionService encryptionService,
     LinkGenerator linkGenerator,
@@ -32,14 +32,14 @@ public class EmailController(
 {
     private const string _emailCacheKey = "EmailTemplates";
 
-    public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model)
+    public async Task<IActionResult> Setup(SetupCampaignViewModel model)
     {
         await PopulateReferenceDataAsync(model, true);
         return View(model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Send(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         await PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
 
@@ -55,13 +55,13 @@ public class EmailController(
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
         {
-            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Please select an email template.");
+            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Select a template.");
         }
 
         if (ModelState.IsValid)
         {
             var selectedTemplateName =
-                model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
+                model.Templates.First(t => t.id == model.SelectedTemplateId).name;
 
             var emailCampaign = new EmailCampaign
             {
@@ -101,18 +101,20 @@ public class EmailController(
                 }
             }
 
-            return View("EmailSuccess",
+            return View("Success",
                 new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });
         }
 
-        return View(nameof(SetupCampaign), model);
+        return View(nameof(Setup), model);
     }
 
 
     private async Task PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false,
     CancellationToken cancellationToken = default)
     {
-        model.EmailTemplates = await FetchEmailTemplates(forceRefresh, cancellationToken);
+
+        TemplateList templateList = await FetchEmailTemplates(forceRefresh, cancellationToken);
+        model.Templates = templateList.templates.ToList();
 
         if (model.StudyId is not null)
         {
@@ -156,7 +158,7 @@ public class EmailController(
 
         if (ModelState.IsValid)
         {
-            var selectedTemplateName = model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
+            var selectedTemplateName = model.Templates.First(t => t.id == model.SelectedTemplateId).name;
             var personalisationData = emailAddresses.ToDictionary(
                 email => email,
                 email => new Dictionary<string, string>
@@ -190,7 +192,7 @@ public class EmailController(
                     logger.LogError(e, "Error sending preview email");
                     ModelState.AddModelError(nameof(model.PreviewEmails),
                         "Gov Notify does not accept the email address(es) provided.");
-                    return View(nameof(SetupCampaign), model);
+                    return View(nameof(Setup), model);
                 }
             }
 
@@ -198,7 +200,7 @@ public class EmailController(
                 $"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
         }
 
-        return View(nameof(SetupCampaign), model);
+        return View(nameof(Setup), model);
     }
 
     private bool IsValidEmail(string email) => System.Net.Mail.MailAddress.TryCreate(email, out var address) &&
@@ -215,14 +217,14 @@ public class EmailController(
             return JsonConvert.DeserializeObject<TemplateList>(jsonData);
         }
 
-        var templates = await notificationService.GetTemplatesAsync(cancellationToken);
-        await CacheEmailTemplates(templates, cancellationToken);
-        return templates;
+        var Templates = await notificationService.GetTemplatesAsync(cancellationToken);
+        await CacheEmailTemplates(Templates, cancellationToken);
+        return Templates;
     }
 
-    private async Task CacheEmailTemplates(TemplateList templates, CancellationToken cancellationToken = default)
+    private async Task CacheEmailTemplates(TemplateList Templates, CancellationToken cancellationToken = default)
     {
-        var jsonData = JsonConvert.SerializeObject(templates);
+        var jsonData = JsonConvert.SerializeObject(Templates);
         var data = Encoding.UTF8.GetBytes(jsonData);
 
         await cache.SetAsync(_emailCacheKey, data, cancellationToken);
@@ -230,7 +232,7 @@ public class EmailController(
 
     private async Task AddCampaignToContextAsync(EmailCampaign campaign, CancellationToken cancellationToken)
     {
-        await context.EmailCampaigns.AddAsync(campaign, cancellationToken);
+        await context.Campaigns.AddAsync(campaign, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 }

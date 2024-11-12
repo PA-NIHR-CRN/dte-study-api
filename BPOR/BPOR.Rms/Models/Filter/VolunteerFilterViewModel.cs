@@ -167,6 +167,7 @@ public class VolunteerFilterViewModel : IValidatableObject
         return retval;
     }
 
+
     public ISet<bool?> GetGenderSameAsSexRegisteredAtBirthOptions()
     {
         var retval = new HashSet<bool?>();

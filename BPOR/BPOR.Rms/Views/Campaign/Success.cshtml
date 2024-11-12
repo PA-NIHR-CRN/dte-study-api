@@ -1,7 +1,7 @@
 @model BPOR.Rms.Models.Email.EmailSuccessViewModel
 
 @{
-    ViewData["Title"] = "Email campaign success";
+    ViewData["Title"] = $"{Model.ContactMethod} campaign success";
 }
 
 @if (!string.IsNullOrWhiteSpace(Model.StudyName))
@@ -10,7 +10,7 @@
         <div class="govuk-grid-column-one-half-from-desktop">
             <div class="govuk-panel govuk-panel--confirmation">
                 <h1 class="govuk-panel__title">
-                    Request to send emails for @Html.DisplayFor(model => model.StudyName) has been submitted to GOV.UK Notify
+                    Request to send @(Model.ContactMethod.ToString().ToLower() + "s") for @Html.DisplayFor(model => model.StudyName) has been submitted to GOV.UK Notify
                 </h1>
             </div>
         </div>
@@ -22,7 +22,7 @@ else
         <div class="govuk-grid-column-one-half-from-desktop">
             <div class="govuk-panel govuk-panel--confirmation">
                 <h1 class="govuk-panel__title">
-                    The email campaign has been sent
+                    The @Model.ContactMethod.ToString().ToLower() campaign has been sent
                 </h1>
             </div>
         </div>

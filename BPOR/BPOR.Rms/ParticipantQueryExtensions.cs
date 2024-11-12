@@ -23,6 +23,7 @@ public static class ParticipantQueryExtensions
         if (SelectedVolunteersPreferredContact.HasValue)
         {
             return query.Where(x => x.CampaignParticipants.Any(e => e.EmailCampaign.FilterCriteria.StudyId == studyId) == SelectedVolunteersPreferredContact.Value);
+
         }
 
         return query;
