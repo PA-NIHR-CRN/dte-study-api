@@ -511,8 +511,6 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("ContactMethodId");
 
-                    b.HasIndex("FilterCriteriaId");
-
                     b.HasIndex("ParticipantId");
 
                     b.ToTable("ParticipantContactMethod");
@@ -10247,7 +10245,7 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasForeignKey("FilterCriteriaId");
 
                     b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
-                        .WithMany("PreferredContactMethods")
+                        .WithMany("ContactMethods")
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -10410,6 +10408,8 @@ namespace Dynamo.Stream.Handler.Migrations
             modelBuilder.Entity("BPOR.Domain.Entities.Participant", b =>
                 {
                     b.Navigation("Address");
+
+                    b.Navigation("ContactMethods");
 
                     b.Navigation("CampaignParticipants");
 

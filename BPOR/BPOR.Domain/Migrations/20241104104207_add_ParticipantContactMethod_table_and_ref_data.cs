@@ -76,8 +76,7 @@ namespace Dynamo.Stream.Handler.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_ParticipantContactMethod_ParticipantId",
                 table: "ParticipantContactMethod",
-                column: "ParticipantId",
-                unique: true);
+                column: "ParticipantId");
 
             migrationBuilder.Sql(@"INSERT INTO
                                 dte.ParticipantContactMethod (ParticipantId, contactMethodId)
