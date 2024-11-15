@@ -71,7 +71,7 @@ public class EmailController(
                 TargetGroupSize = model.TotalVolunteers,
                 TemplateId = new Guid(model.SelectedTemplateId!),
                 Name = selectedTemplateName,
-                TypeId = (int) ContactMethod.Letter // TODO: get type from model
+                TypeId = (int) ContactMethod.Letter // TODO: KO get type from model
             };
 
             await AddCampaignToContextAsync(campaign, cancellationToken);
@@ -111,7 +111,7 @@ public class EmailController(
                             break;
                     }
 
-                    // TODO: add other params
+                    // TODO: KO add other params
                     await transactionalEmailService.SendAsync(recipient, contentfulTemplateId, new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
 
                 }

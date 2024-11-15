@@ -70,7 +70,7 @@ public class NotifyCallbackController(
             case "pending":
             case "sent":
                 break;
-            case "delivered":
+            case "delivered": // TODO: KO letter status - no delivered status, but received is similar?
                 participantEmail.DeliveredAt = DateTime.UtcNow;
                 participantEmail.DeliveryStatusId =
                     refDataService.GetDeliveryStatusId(DeliveryStatus.Delivered);
