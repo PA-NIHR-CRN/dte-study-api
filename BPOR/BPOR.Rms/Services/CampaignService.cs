@@ -19,6 +19,7 @@ using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
 using BPOR.Rms.Models.Study;
+using NIHR.NotificationService.Models;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -188,10 +189,11 @@ public class CampaignService(
         processingResult.CampaignParticipants.Add(new CampaignParticipant
         {
             CampaignId = campaign.Id,
+            CampaignTypeId = campaign.TypeId,
             ParticipantId = volunteer.Id,
             DeliveryStatusId = deliveryStatusId,
             SentAt = DateTime.UtcNow,
-            ContactEmail = volunteer.Email,
+            ContactEmail = volunteer.Email
         });
 
         if (dbFilter is { Study.IsRecruitingIdentifiableParticipants: true, StudyId: not null })
@@ -251,22 +253,35 @@ public class CampaignService(
             var link = uriWithQuery.ToString();
             var notification = new Notification
             {
-                PrimaryIdentifier = volunteer.Email,
                 NotificationDatas = new List<NotificationData>
                 {
-                    new() { Key = "email", Value = volunteer.Email },
                     new() { Key = "campaignParticipantId", Value = campaignParticipant.Id.ToString() },
+                    new() { Key = "campaignTypeId", Value = campaignParticipant.CampaignTypeId.ToString() },
                     new() { Key = "firstName", Value = volunteer.FirstName },
                     new() { Key = "lastName", Value = volunteer.LastName },
-                    new()
-                    {
-                        Key = "uniqueLink",
-                        Value = link
-                    },
+                    new() { Key = "uniqueLink", Value = link },
                     new() { Key = "templateId", Value = campaign.TemplateId.ToString() },
                     new() { Key = "uniqueReference", Value = reference }
                 }
             };
+
+            switch (campaign.TypeId)
+            {
+                case (int)ContactMethod.Email:
+                    notification.PrimaryIdentifier = volunteer.Email;
+                    notification.NotificationDatas.Add(new NotificationData { Key = "email", Value = volunteer.Email });
+                    break;
+
+                case (int)ContactMethod.Letter:
+                    notification.PrimaryIdentifier = campaignParticipant.Id.ToString(); //  TODO: what primary identifier?
+                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_1", Value = "123" });
+                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_2", Value = "Street" });
+                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_3", Value = "County" }); 
+                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_4", Value = "BT1 2AC" }); // last line treated as postcode
+
+
+                    break;
+            }
 
             await notificationContext.Notifications.AddAsync(notification, cancellationToken);
         }

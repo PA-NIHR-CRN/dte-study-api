@@ -1,4 +1,5 @@
 using System.Text;
+using AngleSharp.Io;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
@@ -31,6 +32,7 @@ public class EmailController(
     : Controller
 {
     private const string _templateCacheKey = "Templates";
+    private string contentfulTemplateId;
 
     public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model)
     {
@@ -68,7 +70,8 @@ public class EmailController(
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
                 TemplateId = new Guid(model.SelectedTemplateId!),
-                Name = selectedTemplateName
+                Name = selectedTemplateName,
+                TypeId = (int) ContactMethod.Letter // TODO: get type from model
             };
 
             await AddCampaignToContextAsync(campaign, cancellationToken);
@@ -97,8 +100,20 @@ public class EmailController(
                         continue;
                     }
 
-                    await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
-                    // TODO: send letter campaign notification instead
+                    switch (campaign.TypeId)
+                    {
+                        case (int) ContactMethod.Email:
+                            contentfulTemplateId = "email-rms-campaign-sent";
+                            break;
+
+                        case (int) ContactMethod.Letter:
+                            contentfulTemplateId = "letter-rms-campaign-sent";
+                            break;
+                    }
+
+                    // TODO: add other params
+                    await transactionalEmailService.SendAsync(recipient, contentfulTemplateId, new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
+
                 }
             }
 

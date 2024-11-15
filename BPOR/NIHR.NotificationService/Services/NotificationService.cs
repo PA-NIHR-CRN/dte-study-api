@@ -36,7 +36,19 @@ namespace NIHR.NotificationService.Services
             {
                 var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
 
-                switch (request.ContactMethod)
+                if (!request.Personalisation.TryGetValue("campaignTypeId", out var campaignTypeIdStr))
+                {
+                    throw new KeyNotFoundException("campaignTypeId not found in personalisation data.");
+                }
+
+                if (!int.TryParse(campaignTypeIdStr, out var campaignTypeId))
+                {
+                    throw new ArgumentException($"campaignTypeId '{campaignTypeIdStr}' is not a valid integer.");
+                }
+
+                var contactMethod = (ContactMethod)campaignTypeId;
+
+                switch (contactMethod)
                 {
                     case ContactMethod.Email:
                         await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation, request.Reference);
@@ -49,7 +61,7 @@ namespace NIHR.NotificationService.Services
                         break;
 
                     default:
-                        throw new NotSupportedException($"Contact method {request.ContactMethod} is not supported.");
+                        throw new NotSupportedException($"Contact method {contactMethod} is not supported.");
                 }
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
@@ -130,10 +142,7 @@ namespace NIHR.NotificationService.Services
         {
             var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
 
-            // TODO: determine contact method
-            var contactMethod = ContactMethod.Email;
-
-            var sendNotificationRequest = CreateSendNotificationRequest(contactMethod, personalisation);
+            var sendNotificationRequest = CreateSendNotificationRequest(personalisation);
 
             var stopwatch = Stopwatch.StartNew();
             await retryPolicy.ExecuteAsync(async () => { await SendNotificationAsync(sendNotificationRequest, cancellationToken); });
@@ -145,7 +154,7 @@ namespace NIHR.NotificationService.Services
             }
         }
 
-        private static SendNotificationRequest CreateSendNotificationRequest(ContactMethod contactMethod, Dictionary<string, string> personalisation)
+        private static SendNotificationRequest CreateSendNotificationRequest(Dictionary<string, string> personalisation)
         {
             if (!personalisation.TryGetValue("campaignParticipantId", out var reference))
             {
@@ -157,13 +166,24 @@ namespace NIHR.NotificationService.Services
                 throw new KeyNotFoundException("templateId not found in personalisation data.");
             }
 
+            if (!personalisation.TryGetValue("campaignTypeId", out var campaignTypeIdStr))
+            {
+                throw new KeyNotFoundException("campaignTypeId not found in personalisation data.");
+            }
+
+            if (!int.TryParse(campaignTypeIdStr, out var campaignTypeId))
+            {
+                throw new ArgumentException($"campaignTypeId '{campaignTypeIdStr}' is not a valid integer.");
+            }
+
             var request = new SendNotificationRequest
             {
                 TemplateId = templateId,
                 Personalisation = personalisation,
                 Reference = reference,
-                ContactMethod = contactMethod
             };
+
+            var contactMethod = (ContactMethod)campaignTypeId;
 
             switch (contactMethod)
             {
@@ -178,7 +198,8 @@ namespace NIHR.NotificationService.Services
                 case ContactMethod.Letter:
                     if (!personalisation.TryGetValue("address_line_1", out var addressLine1) ||
                         !personalisation.TryGetValue("address_line_2", out var addressLine2) ||
-                        !personalisation.TryGetValue("address_line_3", out var addressLine3))
+                        !personalisation.TryGetValue("address_line_3", out var addressLine3) ||
+                        !personalisation.TryGetValue("address_line_4", out var postcode))
                     {
                         throw new KeyNotFoundException("Address lines 1, 2, and 3 are required for letter notifications.");
                     }
@@ -186,11 +207,8 @@ namespace NIHR.NotificationService.Services
                     request.Personalisation["address_line_1"] = addressLine1;
                     request.Personalisation["address_line_2"] = addressLine2;
                     request.Personalisation["address_line_3"] = addressLine3;
+                    request.Personalisation["address_line_4"] = postcode;
 
-                    if (personalisation.TryGetValue("address_line_4", out var addressLine4))
-                        request.Personalisation["address_line_4"] = addressLine4;
-                    if (personalisation.TryGetValue("address_line_5", out var addressLine5))
-                        request.Personalisation["address_line_5"] = addressLine5;
                     break;
 
                 default:
