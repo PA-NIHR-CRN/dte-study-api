@@ -63,21 +63,21 @@ public class EmailController(
             var selectedTemplateName =
                 model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
 
-            var emailCampaign = new Campaign
+            var campaign = new Campaign
             {
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
-                EmailTemplateId = new Guid(model.SelectedTemplateId!),
+                TemplateId = new Guid(model.SelectedTemplateId!),
                 Name = selectedTemplateName
             };
 
-            await AddCampaignToContextAsync(emailCampaign, cancellationToken);
+            await AddCampaignToContextAsync(campaign, cancellationToken);
 
             var callback =
                 linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest)) ??
                 throw new InvalidOperationException("Callback URL not found");
 
-            await taskQueue.QueueBackgroundWorkItemAsync(emailCampaign.Id, callback, cancellationToken);
+            await taskQueue.QueueBackgroundWorkItemAsync(campaign.Id, callback, cancellationToken);
 
             var studyInfo = await context.Studies
                                     .Where(x => x.Id == model.StudyId)
@@ -92,12 +92,13 @@ public class EmailController(
                 {
                     if (string.IsNullOrWhiteSpace(recipient))
                     {
-                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', email campaign ({emailCampaignId}).", model.StudyId, model.StudyName, emailCampaign.Id);
+                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', email campaign ({emailCampaignId}).", model.StudyId, model.StudyName, campaign.Id);
 
                         continue;
                     }
 
                     await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
+                    // TODO: send letter campaign notification instead
                 }
             }
 
@@ -164,7 +165,7 @@ public class EmailController(
                 email => new Dictionary<string, string>
                 {
                     { "email", email },
-                    { "emailCampaignParticipantId", "PreviewEmailReference" },
+                    { "campaignParticipantId", "PreviewEmailReference" },
                     { "firstName", "John" },
                     { "lastName", "Doe" },
                     {

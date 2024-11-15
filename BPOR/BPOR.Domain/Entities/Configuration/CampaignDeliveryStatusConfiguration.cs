@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BPOR.Domain.Entities.Configuration;
 
-public class EmailDeliveryStatusConfiguration : IEntityTypeConfiguration<DeliveryStatus>
+public class CampaignDeliveryStatusConfiguration : IEntityTypeConfiguration<DeliveryStatus>
 {
     public void Configure(EntityTypeBuilder<DeliveryStatus> builder)
     {

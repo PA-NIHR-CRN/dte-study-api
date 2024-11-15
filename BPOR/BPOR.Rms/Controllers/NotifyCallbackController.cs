@@ -41,19 +41,19 @@ public class NotifyCallbackController(
             return Ok();
         }
 
-        if (!TryParse(message.Reference, out var emailCampaignParticipantId))
+        if (!TryParse(message.Reference, out var campaignParticipantId))
         {
             logger.LogError("Invalid callback reference {reference}", message.Reference);
             return BadRequest("Invalid reference.");
         }
 
         var participantEmail = await context.CampaignParticipants
-            .Where(x => x.Id == emailCampaignParticipantId)
+            .Where(x => x.Id == campaignParticipantId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (participantEmail == null)
         {
-            logger.LogError("EmailCampaignParticipant not found for Id {emailCampaignParticipantId}.", emailCampaignParticipantId);
+            logger.LogError("CampaignParticipant not found for Id {campaignParticipantId}.", campaignParticipantId);
             return NotFound();
         }
 
@@ -97,11 +97,11 @@ public class NotifyCallbackController(
         {
             var decryptedReference = encryptionService.Decrypt(reference);
 
-            if (TryParse(decryptedReference, out var emailCampaignParticipantId) &&
-                emailCampaignParticipantId != 0)
+            if (TryParse(decryptedReference, out var campaignParticipantId) &&
+                campaignParticipantId != 0)
             {
                 var participantQuery = context.CampaignParticipants
-                    .Where(p => p.Id == emailCampaignParticipantId);
+                    .Where(p => p.Id == campaignParticipantId);
 
                 var participant = await participantQuery.FirstOrDefaultAsync(o => o.RegisteredInterestAt == null, cancellationToken);
                 if (participant is not null)
@@ -109,7 +109,7 @@ public class NotifyCallbackController(
                     participant.RegisteredInterestAt = timeProvider.GetLocalNow().DateTime;
                     await context.SaveChangesAsync(cancellationToken);
                 }
-                var informationUrl = await participantQuery.Where(p => p.Id == emailCampaignParticipantId)
+                var informationUrl = await participantQuery.Where(p => p.Id == campaignParticipantId)
                     .Select(o => o.Campaign.FilterCriteria.Study.InformationUrl)
                     .FirstOrDefaultAsync(cancellationToken);
 
@@ -119,7 +119,7 @@ public class NotifyCallbackController(
                 }
                 else
                 {
-                    logger.LogWarning("Study information Url is empty or malformed: '{informationUrl}'. emailCampaignParticipantId: {emailCampaignParticipantId}", informationUrl, emailCampaignParticipantId);
+                    logger.LogWarning("Study information Url is empty or malformed: '{informationUrl}'. campaignParticipantId: {campaignParticipantId}", informationUrl, campaignParticipantId);
                 }
             }
         }

@@ -119,6 +119,7 @@ public static class DependencyInjection
         });
 
         services.AddHostedService<HostedNotificationQueueService>();
+        services.AddHostedService<HostedCampaignQueueService>();
 
         var govNotifySettings = services.GetSectionAndValidate<NotificationServiceSettings>(configuration);
         services.AddSingleton(new NotificationClient(govNotifySettings.Value.ApiKey));

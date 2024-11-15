@@ -6,12 +6,11 @@ public class SendBatchNotificationRequest
 
     // Common fields for all batch notifications
     public Dictionary<string, Dictionary<string, string>> PersonalisationData { get; set; }
+    public Guid? TemplateId { get; set; }
 
     // Email fields
     public IEnumerable<string>? EmailAddresses { get; set; }
-    public Guid? EmailTemplateId { get; set; }
 
     // Letter fields
     public IEnumerable<string>? Addresses { get; set; }
-    public Guid? LetterTemplateId { get; set; }
 }

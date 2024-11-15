@@ -1,14 +1,14 @@
 namespace BPOR.Rms.Services;
 
-public class HostedQueueService(
+public class HostedCampaignQueueService(
     IRmsTaskQueue taskQueue,
-    ILogger<HostedQueueService> logger,
+    ILogger<HostedCampaignQueueService> logger,
     IServiceProvider serviceProvider)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("HostedQueueService is running");
+        logger.LogInformation("HostedCampaignQueueService is running");
 
         await BackgroundProcessing(stoppingToken);
     }

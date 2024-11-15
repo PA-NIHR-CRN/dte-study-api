@@ -147,14 +147,14 @@ namespace NIHR.NotificationService.Services
 
         private static SendNotificationRequest CreateSendNotificationRequest(ContactMethod contactMethod, Dictionary<string, string> personalisation)
         {
-            if (!personalisation.TryGetValue("CampaignParticipantId", out var reference))
+            if (!personalisation.TryGetValue("campaignParticipantId", out var reference))
             {
-                throw new KeyNotFoundException("CampaignParticipantId not found in personalisation data.");
+                throw new KeyNotFoundException("campaignParticipantId not found in personalisation data.");
             }
 
             if (!personalisation.TryGetValue("templateId", out var templateId))
             {
-                throw new KeyNotFoundException("TemplateId not found in personalisation data.");
+                throw new KeyNotFoundException("templateId not found in personalisation data.");
             }
 
             var request = new SendNotificationRequest

@@ -18,6 +18,7 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
+using BPOR.Rms.Models.Study;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -101,7 +102,7 @@ public class CampaignService(
         var startTime = DateTime.UtcNow;
         logger.LogInformation("Started processing volunteers at {Time}", startTime);
 
-        var emailQueue = new List<ProcessingResults>();
+        var queue = new List<ProcessingResults>();
 
         await foreach (var processingResult in ProcessVolunteersAsync(volunteers, campaign, dbFilter,
                            deliveryStatusId, batchSize, cancellationToken))
@@ -110,16 +111,16 @@ public class CampaignService(
                 cancellationToken);
             await context.StudyParticipantEnrollment.AddRangeAsync(processingResult.StudyParticipantEnrollments,
                 cancellationToken);
-            emailQueue.Add(processingResult);
+            queue.Add(processingResult);
         }
 
         var endTime = DateTime.UtcNow;
         logger.LogInformation("Finished processing volunteers at {Time}, Duration: {Duration}ms", endTime,
             (endTime - startTime).TotalMilliseconds);
 
-        await SaveChangesWithRetryAsync(emailQueue, cancellationToken);
+        await SaveChangesWithRetryAsync(queue, cancellationToken);
 
-        await QueueNotificationsAsync(volunteers, campaign, emailQueue, callback, cancellationToken);
+        await QueueNotificationsAsync(volunteers, campaign, queue, callback, cancellationToken);
     }
 
     private async Task SaveChangesWithRetryAsync(List<ProcessingResults> emailQueue,
@@ -183,6 +184,7 @@ public class CampaignService(
     private void ProcessVolunteer(EmailParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int deliveryStatusId)
     {
+        // TODO: add address for letter?
         processingResult.CampaignParticipants.Add(new CampaignParticipant
         {
             CampaignId = campaign.Id,
@@ -217,32 +219,32 @@ public class CampaignService(
     }
 
     private async Task QueueNotificationsAsync(List<EmailParticipantDetails> volunteers, Campaign campaign,
-        List<ProcessingResults> emailQueue, string callback, CancellationToken cancellationToken)
+        List<ProcessingResults> queue, string callback, CancellationToken cancellationToken)
     {
         foreach (var volunteer in volunteers)
         {
-            var emailCampaignParticipant = emailQueue.SelectMany(e => e.CampaignParticipants)
+            var campaignParticipant = queue.SelectMany(e => e.CampaignParticipants)
                 .FirstOrDefault(e => e.ParticipantId == volunteer.Id);
 
-            if (emailCampaignParticipant == null)
+            if (campaignParticipant == null)
             {
-                logger.LogWarning("Email campaign participant not found for volunteer {VolunteerId}", volunteer.Id);
+                logger.LogWarning("Campaign participant not found for volunteer {VolunteerId}", volunteer.Id);
                 continue;
             }
 
-            var reference = emailQueue.SelectMany(e => e.StudyParticipantEnrollments)
+            var reference = queue.SelectMany(e => e.StudyParticipantEnrollments)
                 .FirstOrDefault(e => e.ParticipantId == volunteer.Id)?.Reference;
 
             if (reference == null)
             {
                 logger.LogWarning("Reference not found for volunteer {VolunteerId}", volunteer.Id);
-                reference = $"no-study.{emailCampaignParticipant.Id}";
+                reference = $"no-study.{campaignParticipant.Id}";
             }
 
             var baseUri = new Uri(callback);
             var queryParams = new Dictionary<string, string>
             {
-                { "reference", encryptionService.Encrypt(emailCampaignParticipant.Id.ToString()) }
+                { "reference", encryptionService.Encrypt(campaignParticipant.Id.ToString()) }
             };
 
             var uriWithQuery = new Uri(QueryHelpers.AddQueryString(baseUri.ToString(), queryParams));
@@ -253,7 +255,7 @@ public class CampaignService(
                 NotificationDatas = new List<NotificationData>
                 {
                     new() { Key = "email", Value = volunteer.Email },
-                    new() { Key = "emailCampaignParticipantId", Value = emailCampaignParticipant.Id.ToString() },
+                    new() { Key = "campaignParticipantId", Value = campaignParticipant.Id.ToString() },
                     new() { Key = "firstName", Value = volunteer.FirstName },
                     new() { Key = "lastName", Value = volunteer.LastName },
                     new()
@@ -261,7 +263,7 @@ public class CampaignService(
                         Key = "uniqueLink",
                         Value = link
                     },
-                    new() { Key = "emailTemplateId", Value = campaign.EmailTemplateId.ToString() },
+                    new() { Key = "templateId", Value = campaign.TemplateId.ToString() },
                     new() { Key = "uniqueReference", Value = reference }
                 }
             };
