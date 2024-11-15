@@ -4,8 +4,8 @@ using BPOR.Rms.Models.Researcher;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Models.Volunteer;
-using EmailCampaign = BPOR.Rms.Models.Study.EmailCampaign;
-using EmailCampaignParticipant = BPOR.Rms.Models.Study.EmailCampaignParticipant;
+using EmailCampaign = BPOR.Rms.Models.Study.Campaign;
+using EmailCampaignParticipant = BPOR.Rms.Models.Study.CampaignParticipant;
 
 namespace BPOR.Rms.Models;
 
