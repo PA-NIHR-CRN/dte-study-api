@@ -20,8 +20,8 @@ public static class Projections
     public static IQueryable<EnrollmentDetails> AsEnrollmentDetails(this IQueryable<ManualEnrollment> source) =>
         source.Select(ManualEnrollmentToEnrollmentDetails());    
     
-    public static IQueryable<EmailParticipantDetails> AsCampaignParticipant(this IQueryable<Participant> source) =>
-        source.Select(VolunteerToEmailParticipantDetails());
+    public static IQueryable<CampaignParticipantDetails> AsCampaignParticipant(this IQueryable<Participant> source) =>
+        source.Select(VolunteerToCampaignParticipantDetails());
 
     public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyFormViewModel());
     
@@ -163,14 +163,16 @@ public static class Projections
             }).AsEnumerable();
     }
     
-    private static Expression<Func<Participant, EmailParticipantDetails>> VolunteerToEmailParticipantDetails()
+    private static Expression<Func<Participant, CampaignParticipantDetails>> VolunteerToCampaignParticipantDetails()
     {
-        return v => new EmailParticipantDetails
+        return v => new CampaignParticipantDetails
         {
             Id = v.Id,
             Email = v.Email,
             FirstName = v.FirstName,
-            LastName = v.LastName
+            LastName = v.LastName,
+            Address = v.Address
         };
     }
+
 }

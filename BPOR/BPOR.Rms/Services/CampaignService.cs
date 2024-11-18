@@ -61,7 +61,7 @@ public class CampaignService(
     private int GetDeliveryStatusId()
     {
         return refDataService.GetDeliveryStatusId(DeliveryStatus.Pending) ??
-               throw new InvalidOperationException("Email delivery status not found");
+               throw new InvalidOperationException("Campaign delivery status not found");
     }
 
     private async Task<FilterCriteria?> GetFilterCriteriaAsync(Campaign campaign,
@@ -73,7 +73,7 @@ public class CampaignService(
             .FirstOrDefaultAsync(fc => fc.Id == campaign.FilterCriteriaId, cancellationToken);
     }
 
-    private async Task<List<EmailParticipantDetails>> GetFilteredVolunteersAsync(FilterCriteria dbFilter,
+    private async Task<List<CampaignParticipantDetails>> GetFilteredVolunteersAsync(FilterCriteria dbFilter,
         int? targetGroupSize, CancellationToken cancellationToken)
     {
         var filter = FilterMapper.MapToFilterModel(dbFilter);
@@ -95,7 +95,7 @@ public class CampaignService(
             .ToListAsync(cancellationToken);
     }
 
-    private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, Campaign campaign,
+    private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
@@ -159,7 +159,7 @@ public class CampaignService(
     }
 
     private async IAsyncEnumerable<ProcessingResults> ProcessVolunteersAsync(
-        List<EmailParticipantDetails> volunteers,
+        List<CampaignParticipantDetails> volunteers,
         Campaign campaign,
         FilterCriteria dbFilter,
         int deliveryStatusId,
@@ -182,7 +182,7 @@ public class CampaignService(
         }
     }
 
-    private void ProcessVolunteer(EmailParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
+    private void ProcessVolunteer(CampaignParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int deliveryStatusId)
     {
         // TODO: add address for letter?
@@ -220,7 +220,7 @@ public class CampaignService(
         }
     }
 
-    private async Task QueueNotificationsAsync(List<EmailParticipantDetails> volunteers, Campaign campaign,
+    private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         List<ProcessingResults> queue, string callback, CancellationToken cancellationToken)
     {
         foreach (var volunteer in volunteers)
@@ -273,11 +273,11 @@ public class CampaignService(
                     break;
 
                 case (int)ContactMethod.Letter:
-                    notification.PrimaryIdentifier = campaignParticipant.Id.ToString(); //  TODO: what primary identifier?
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_1", Value = "123" });
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_2", Value = "Street" });
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_3", Value = "County" }); 
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_4", Value = "BT1 2AC" }); // last line treated as postcode
+                    notification.PrimaryIdentifier = campaignParticipant.Id.ToString(); //  TODO: KO what primary identifier?
+                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_1", Value = volunteer.Address.AddressLine1 });
+                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_2", Value = volunteer.Address.AddressLine2 });
+                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_3", Value = volunteer.Address.AddressLine3 }); 
+                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_4", Value = volunteer.Address.Postcode }); // last line treated as postcode
 
 
                     break;
