@@ -62,16 +62,21 @@ public class EmailController(
 
         if (ModelState.IsValid)
         {
-            var selectedTemplateName =
-                model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
+            var selectedTemplate =
+                model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId);
+
+            if (!Enum.TryParse<ContactMethod>(selectedTemplate.type, true, out var contactMethod))
+            {
+                throw new ArgumentException($"Invalid contact method type: {selectedTemplate.type}");
+            }
 
             var campaign = new Campaign
             {
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
                 TemplateId = new Guid(model.SelectedTemplateId!),
-                Name = selectedTemplateName,
-                TypeId = (int) ContactMethod.Letter // TODO: KO get type from model
+                Name = selectedTemplate.name,
+                TypeId = (int)contactMethod
             };
 
             await AddCampaignToContextAsync(campaign, cancellationToken);
@@ -111,8 +116,7 @@ public class EmailController(
                             break;
                     }
 
-                    // TODO: KO add other params
-                    await transactionalEmailService.SendAsync(recipient, contentfulTemplateId, new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
+                    await transactionalEmailService.SendAsync(recipient, contentfulTemplateId, new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName, templateName = selectedTemplate.name }, cancellationToken);
 
                 }
             }

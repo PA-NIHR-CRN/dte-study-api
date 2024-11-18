@@ -277,7 +277,7 @@ public class CampaignService(
                     notification.NotificationDatas.Add(new NotificationData { Key = "address_line_1", Value = volunteer.Address.AddressLine1 });
                     notification.NotificationDatas.Add(new NotificationData { Key = "address_line_2", Value = volunteer.Address.AddressLine2 });
                     notification.NotificationDatas.Add(new NotificationData { Key = "address_line_3", Value = volunteer.Address.AddressLine3 }); 
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_4", Value = volunteer.Address.Postcode }); // last line treated as postcode
+                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_4", Value = volunteer.Address.Postcode }); // GOV Notify expects postcode on the last line
 
 
                     break;
