@@ -60,7 +60,6 @@ public class NotifyCallbackController(
         switch (message.Status)
         {
             case "accepted":
-            case "received":
             case "cancelled":
             case "pending-virus-check":
             case "virus-scan-failed":
@@ -70,7 +69,8 @@ public class NotifyCallbackController(
             case "pending":
             case "sent":
                 break;
-            case "delivered": // TODO: KO letter status - no delivered status, but received is similar?
+            case "received": // Letter printed and posted
+            case "delivered":
                 participantEmail.DeliveredAt = DateTime.UtcNow;
                 participantEmail.DeliveryStatusId =
                     refDataService.GetDeliveryStatusId(DeliveryStatus.Delivered);

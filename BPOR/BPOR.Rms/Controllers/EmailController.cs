@@ -1,5 +1,4 @@
 using System.Text;
-using AngleSharp.Io;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
@@ -133,6 +132,7 @@ public class EmailController(
     CancellationToken cancellationToken = default)
     {
         model.EmailTemplates = await FetchTemplates(ContactMethod.Email, forceRefresh, cancellationToken);
+        // TODO: KO ticket 2394
         //model.LetterTemplates = await FetchTemplates(forceRefresh, ContactMethod.Letter, cancellationToken);
 
 

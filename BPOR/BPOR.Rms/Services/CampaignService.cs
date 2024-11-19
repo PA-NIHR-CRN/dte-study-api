@@ -184,7 +184,6 @@ public class CampaignService(
     private void ProcessVolunteer(CampaignParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int deliveryStatusId)
     {
-        // TODO: add address for letter?
         processingResult.CampaignParticipants.Add(new CampaignParticipant
         {
             CampaignId = campaign.Id,

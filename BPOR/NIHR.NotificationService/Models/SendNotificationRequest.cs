@@ -10,11 +10,6 @@ public class SendNotificationRequest
     public void Validate()
     {
 
-        if (!Personalisation.TryGetValue("address_line_1", out var addressLine1))
-        {
-            throw new KeyNotFoundException("address_line_1 not found in personalisation data.");
-        }
-
         if (!Personalisation.TryGetValue("campaignTypeId", out var campaignTypeIdStr))
         {
             throw new KeyNotFoundException("campaignTypeId not found in personalisation data.");
@@ -38,8 +33,10 @@ public class SendNotificationRequest
                 break;
 
             case ContactMethod.Letter:
-                if (string.IsNullOrWhiteSpace(addressLine1))
-                    throw new ArgumentException("Address is required for letter notifications.");
+                if (!Personalisation.TryGetValue("address_line_1", out var addressLine1) || string.IsNullOrWhiteSpace(addressLine1))
+                {
+                    throw new ArgumentException("Address line 1 is required for letter notifications.");
+                }
                 if (string.IsNullOrWhiteSpace(TemplateId))
                     throw new ArgumentException("TemplateId is required for letter notifications.");
                 break;
