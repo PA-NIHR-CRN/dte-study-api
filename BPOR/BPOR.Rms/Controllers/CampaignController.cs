@@ -15,6 +15,9 @@ using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Notify.Exceptions;
 using Notify.Models.Responses;
+using System.Linq;
+using BPOR.Domain.Entities.RefData;
+using System;
 
 namespace BPOR.Rms.Controllers;
 
@@ -31,7 +34,8 @@ public class CampaignController(
 )
     : Controller
 {
-    private const string _emailCacheKey = "EmailTemplates";
+    private const string _templateCacheKey = "Templates";
+    private string contentfulTemplateId;
 
     public async Task<IActionResult> Setup(SetupCampaignViewModel model)
     {
@@ -40,7 +44,7 @@ public class CampaignController(
     }
 
     [HttpPost]
-    public async Task<IActionResult> Send(SetupCampaignViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Send(SetupCampaignViewModel model, CancellationToken cancellationToken, ContactMethod contactMethod)
     {
         await PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
 
@@ -51,10 +55,6 @@ public class CampaignController(
                 ModelState[nameof(model.TotalVolunteers)].Errors.Clear();
                 ModelState.AddModelError(nameof(model.TotalVolunteers), "Number of volunteers to be contacted must be a whole number, like 15.");
             }
-        }
-        if (!ModelState.IsValid)
-        {
-            return View(model);
         }
 
         if (model.TotalVolunteers is null)
@@ -75,24 +75,25 @@ public class CampaignController(
 
         if (ModelState.IsValid)
         {
-            var selectedTemplateName =
-                model.Templates.First(t => t.id == model.SelectedTemplateId).name;
+            var selectedTemplate =
+                model.Templates.First(t => t.id == model.SelectedTemplateId);
 
-            var emailCampaign = new EmailCampaign
+            var campaign = new Campaign
             {
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
-                EmailTemplateId = new Guid(model.SelectedTemplateId!),
-                Name = selectedTemplateName
+                TemplateId = new Guid(model.SelectedTemplateId!),
+                Name = selectedTemplate.name,
+                TypeId = contactMethod.Id
             };
 
-            await AddCampaignToContextAsync(emailCampaign, cancellationToken);
+            await AddCampaignToContextAsync(campaign, cancellationToken);
 
             var callback =
                 linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest)) ??
                 throw new InvalidOperationException("Callback URL not found");
 
-            await taskQueue.QueueBackgroundWorkItemAsync(emailCampaign.Id, callback, cancellationToken);
+            await taskQueue.QueueBackgroundWorkItemAsync(campaign.Id, callback, cancellationToken);
 
             var studyInfo = await context.Studies
                                     .Where(x => x.Id == model.StudyId)
@@ -107,19 +108,31 @@ public class CampaignController(
                 {
                     if (string.IsNullOrWhiteSpace(recipient))
                     {
-                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', email campaign ({emailCampaignId}).", model.StudyId, model.StudyName, emailCampaign.Id);
+                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', email campaign ({emailCampaignId}).", model.StudyId, model.StudyName, campaign.Id);
 
                         continue;
                     }
 
-                    if (model.ContactMethod == ContactMethods.Email)
+                    object sendParams = new { };
+
+                    if (string.IsNullOrWhiteSpace(model.StudyName))
                     {
-                        await transactionalEmailService.SendAsync(recipient, "email-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName }, cancellationToken);
+                        sendParams = (new { numberOfVolunteers = model.TotalVolunteers, letterTemplateFilename = selectedTemplate });
                     }
-                    if (model.ContactMethod == ContactMethods.Letter)
+                    sendParams = (new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName });
+
+                    switch (campaign.TypeId)
                     {
-                        await transactionalEmailService.SendAsync(recipient, "letter-rms-campaign-sent", new { numberOfVolunteers = model.TotalVolunteers, letterTemplateFilename = selectedTemplateName }, cancellationToken);
+                        case (int)ContactMethods.Email:
+                            contentfulTemplateId = "email-rms-campaign-sent";
+                            break;
+
+                        case (int)ContactMethods.Letter:
+                            contentfulTemplateId = "letter-rms-campaign-sent";
+                            break;
                     }
+
+                    await transactionalEmailService.SendAsync(recipient, contentfulTemplateId, sendParams, cancellationToken);
                 }
             }
 
@@ -232,7 +245,7 @@ public class CampaignController(
     private async Task<TemplateList> FetchEmailTemplates(bool forceRefresh = false,
         CancellationToken cancellationToken = default)
     {
-        var cachedData = await cache.GetAsync(_emailCacheKey, cancellationToken);
+        var cachedData = await cache.GetAsync(_templateCacheKey, cancellationToken);
         if (cachedData != null && !forceRefresh)
         {
             var jsonData = Encoding.UTF8.GetString(cachedData);
@@ -249,10 +262,10 @@ public class CampaignController(
         var jsonData = JsonConvert.SerializeObject(Templates);
         var data = Encoding.UTF8.GetBytes(jsonData);
 
-        await cache.SetAsync(_emailCacheKey, data, cancellationToken);
+        await cache.SetAsync(_templateCacheKey, data, cancellationToken);
     }
 
-    private async Task AddCampaignToContextAsync(EmailCampaign campaign, CancellationToken cancellationToken)
+    private async Task AddCampaignToContextAsync(Campaign campaign, CancellationToken cancellationToken)
     {
         await context.Campaigns.AddAsync(campaign, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);

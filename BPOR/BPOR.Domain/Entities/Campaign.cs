@@ -2,11 +2,12 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 
-public class EmailCampaign : IAudit, ISoftDelete
+public class Campaign : IAudit, ISoftDelete
 {
     public int Id { get; set; }
     public int FilterCriteriaId { get; set; }
-    public Guid EmailTemplateId { get; set; }
+    public Guid TemplateId { get; set; }
+    public int TypeId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? PreviewRecipients { get; set; }
@@ -16,7 +17,7 @@ public class EmailCampaign : IAudit, ISoftDelete
     public int CreatedById { get; set; }
     public int UpdatedById { get; set; }
     public bool IsDeleted { get; set; }
-    public ICollection<EmailCampaignParticipant> Participants { get; set; } = new List<EmailCampaignParticipant>();
+    public ICollection<CampaignParticipant> Participants { get; set; } = new List<CampaignParticipant>();
 
     public FilterCriteria FilterCriteria { get; set; } = null!;
 }

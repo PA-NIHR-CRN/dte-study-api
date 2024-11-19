@@ -143,7 +143,12 @@ public class FilterController(ParticipantDbContext context,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
             StudyName = model.StudyName,
-            ContactMethod = ContactMethods.Email
+            ContactMethod = model.SelectedVolunteersPreferredContact switch
+            {
+                "Email" => ContactMethods.Email,
+                "Letter" => ContactMethods.Letter,
+                _ => throw new System.NotImplementedException(),
+            }
         };
         return RedirectToAction("Setup", "Campaign", campaignDetails);
     }

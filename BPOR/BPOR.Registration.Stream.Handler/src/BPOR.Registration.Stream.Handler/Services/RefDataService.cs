@@ -15,7 +15,7 @@ public class RefDataService : IRefDataService
     private readonly Lazy<List<CommunicationLanguage>> _communicationLanguageRefData;
     private readonly Lazy<List<DailyLifeImpact>> _dailyLifeImpactRefData;
     private readonly Lazy<List<EthnicGroup>> _ethnicGroupRefData;
-    private readonly Lazy<List<EmailDeliveryStatus>> _emailDeliveryStatusRefData;
+    private readonly Lazy<List<DeliveryStatus>> _emailDeliveryStatusRefData;
     private readonly object _lockObject = new object();
     private readonly ParticipantDbContext _participantDbContext;
 
@@ -64,11 +64,11 @@ public class RefDataService : IRefDataService
             }
         });
         
-        _emailDeliveryStatusRefData = new Lazy<List<EmailDeliveryStatus>>(() =>
+        _emailDeliveryStatusRefData = new Lazy<List<DeliveryStatus>>(() =>
         {
             lock (_lockObject)
             {
-                return participantDbContext.EmailDeliveryStatus.IgnoreQueryFilters().AsNoTracking().ToList();
+                return participantDbContext.DeliveryStatus.IgnoreQueryFilters().AsNoTracking().ToList();
             }
         });
     }
@@ -95,7 +95,7 @@ public class RefDataService : IRefDataService
             case EthnicGroup ethnicGroup:
                 _ethnicGroupRefData.Value.Add(ethnicGroup);
                 break;
-            case EmailDeliveryStatus emailDeliveryStatus:
+            case DeliveryStatus emailDeliveryStatus:
                 _emailDeliveryStatusRefData.Value.Add(emailDeliveryStatus);
                 break;
             default:

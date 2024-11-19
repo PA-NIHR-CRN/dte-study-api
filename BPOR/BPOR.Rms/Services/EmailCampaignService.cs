@@ -62,7 +62,7 @@ public class EmailCampaignService(
                throw new InvalidOperationException("Email delivery status not found");
     }
 
-    private async Task<FilterCriteria?> GetFilterCriteriaAsync(EmailCampaign campaign,
+    private async Task<FilterCriteria?> GetFilterCriteriaAsync(Campaign campaign,
         CancellationToken cancellationToken)
     {
         return await context.FilterCriterias
@@ -93,7 +93,7 @@ public class EmailCampaignService(
             .ToListAsync(cancellationToken);
     }
 
-    private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
+    private async Task ProcessAndQueueVolunteersAsync(List<EmailParticipantDetails> volunteers, Campaign campaign,
         FilterCriteria dbFilter, int emailDeliveryStatusId, string callback, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
@@ -158,7 +158,7 @@ public class EmailCampaignService(
 
     private async IAsyncEnumerable<ProcessingResults> ProcessVolunteersAsync(
         List<EmailParticipantDetails> volunteers,
-        EmailCampaign campaign,
+        Campaign campaign,
         FilterCriteria dbFilter,
         int emailDeliveryStatusId,
         int batchSize,
@@ -180,12 +180,12 @@ public class EmailCampaignService(
         }
     }
 
-    private void ProcessVolunteer(EmailParticipantDetails volunteer, EmailCampaign campaign, FilterCriteria dbFilter,
+    private void ProcessVolunteer(EmailParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int emailDeliveryStatusId)
     {
-        processingResult.CampaignParticipants.Add(new EmailCampaignParticipant
+        processingResult.CampaignParticipants.Add(new CampaignParticipant
         {
-            EmailCampaignId = campaign.Id,
+            CampaignId = campaign.Id,
             ParticipantId = volunteer.Id,
             DeliveryStatusId = emailDeliveryStatusId,
             SentAt = DateTime.UtcNow,
@@ -215,7 +215,7 @@ public class EmailCampaignService(
         }
     }
 
-    private async Task QueueNotificationsAsync(List<EmailParticipantDetails> volunteers, EmailCampaign campaign,
+    private async Task QueueNotificationsAsync(List<EmailParticipantDetails> volunteers, Campaign campaign,
         List<ProcessingResults> emailQueue, string callback, CancellationToken cancellationToken)
     {
         foreach (var volunteer in volunteers)
@@ -260,7 +260,7 @@ public class EmailCampaignService(
                         Key = "uniqueLink",
                         Value = link
                     },
-                    new() { Key = "emailTemplateId", Value = campaign.EmailTemplateId.ToString() },
+                    new() { Key = "emailTemplateId", Value = campaign.TemplateId.ToString() },
                     new() { Key = "uniqueReference", Value = reference }
                 }
             };
@@ -288,6 +288,6 @@ internal static class DbContextExtensions
 
 internal class ProcessingResults
 {
-    public List<EmailCampaignParticipant> CampaignParticipants { get; } = [];
+    public List<CampaignParticipant> CampaignParticipants { get; } = [];
     public List<StudyParticipantEnrollment> StudyParticipantEnrollments { get; } = [];
 }
