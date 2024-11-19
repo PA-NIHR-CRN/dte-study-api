@@ -18,7 +18,6 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
-using BPOR.Rms.Models.Study;
 using NIHR.NotificationService.Models;
 
 public class CampaignService(
@@ -273,17 +272,46 @@ public class CampaignService(
                     break;
 
                 case (int)ContactMethod.Letter:
-                    notification.PrimaryIdentifier = campaignParticipant.Id.ToString(); //  TODO: KO what primary identifier?
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_1", Value = volunteer.Address.AddressLine1 });
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_2", Value = volunteer.Address.AddressLine2 });
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_3", Value = volunteer.Address.AddressLine3 }); 
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_line_4", Value = volunteer.Address.Postcode }); // GOV Notify expects postcode on the last line
+                    if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1) ||
+                        string.IsNullOrWhiteSpace(volunteer.Address.AddressLine2) ||
+                        string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
+                    {
+                        throw new InvalidOperationException("Address lines 1, 2, and postcode are required for letter notifications.");
+                    }
 
+                    notification.PrimaryIdentifier = $"ParticipantAddress({volunteer.Address.Id})";
+
+                    var addressFields = new Dictionary<string, string>
+                    {
+                        { "addressLine1", volunteer.Address.AddressLine1 },
+                        { "addressLine2", volunteer.Address.AddressLine2 },
+                        { "addressLine3", volunteer.Address.AddressLine3 },
+                        { "addressLine4", volunteer.Address.AddressLine4 },
+                        { "Town", volunteer.Address.Town },
+                        { "Postcode", volunteer.Address.Postcode } // Postcode is always the last line
+                    };
+
+                    int addressFieldsIndex = 1;
+                    foreach (var field in addressFields)
+                    {
+                        if (!string.IsNullOrWhiteSpace(field.Value))
+                        {
+                            notification.NotificationDatas.Add(new NotificationData
+                            {
+                                Key = $"address_line_{addressFieldsIndex}",
+                                Value = field.Value
+                            });
+                            addressFieldsIndex++;
+                        }
+                    }
+
+                    notification.NotificationDatas.Add(new NotificationData { Key = "address_postcode", Value = volunteer.Address.Postcode });
 
                     break;
             }
 
             await notificationContext.Notifications.AddAsync(notification, cancellationToken);
+
         }
 
         await notificationContext.SaveChangesAsync(cancellationToken);
