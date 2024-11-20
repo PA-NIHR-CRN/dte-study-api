@@ -12,7 +12,7 @@ public class SetupCampaignViewModel
 
     public int? StudyId { get; set; }
 
-    [Range(1, int.MaxValue, ErrorMessage = "Please enter a number greater than zero for Max Numbers.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Please enter a number greater than zero for Max Numbers")]
     public int MaxNumbers { get; set; }
 
     public string? StudyName { get; set; }
@@ -26,7 +26,7 @@ public class SetupCampaignViewModel
     public string? SelectedTemplateId { get; set; }
 
     [Display(Name = "How many volunteers do you want to send it to?", Order = 3)]
-    [Range(1, int.MaxValue, ErrorMessage = "Number of volunteers to be contacted must be 1 or more.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Number of volunteers to be contacted must be 1 or more")]
     public int? TotalVolunteers { get; set; }
 
 
