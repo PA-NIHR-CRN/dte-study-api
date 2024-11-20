@@ -116,7 +116,7 @@ public class FilterController(ParticipantDbContext context,
             // TODO bind this directly into the model as a collection
             FilterPostcode = model.PostcodeSearch.GetPostcodeDistricts().Select(x => new FilterPostcode { PostcodeFragment = x }).ToList(),
             FilterGender = model.GetGenderOptions().Select(x => new FilterGender { GenderId = (int)x }).ToList(), // TODO: support null gender
-            //FilterContactMethod = ContactMethods.Email,
+            //FilterContactMethod = ,
             FilterSexSameAsRegisteredAtBirth = GetSexSameAsRegisteredAtBirths(model),
             FilterEthnicGroup = GetEthnicGroups(model),
         };
@@ -143,7 +143,12 @@ public class FilterController(ParticipantDbContext context,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
             StudyName = model.StudyName,
-            ContactMethod = ContactMethods.Email
+            ContactMethod = model.SelectedVolunteersPreferredContact switch
+            {
+                "Email" => ContactMethods.Email,
+                "Letter" => ContactMethods.Letter,
+                _ => throw new System.NotImplementedException(),
+            }
         };
         return RedirectToAction("Setup", "Campaign", campaignDetails);
     }

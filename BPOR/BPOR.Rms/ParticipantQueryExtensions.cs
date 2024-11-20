@@ -1,6 +1,8 @@
 ﻿using System.Linq.Expressions;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Models.Filter;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,28 +14,31 @@ public static class ParticipantQueryExtensions
     {
         if (selectedVolunteersContacted.HasValue)
         {
-            return query.Where(x => x.CampaignParticipants.Any(e => e.EmailCampaign.FilterCriteria.StudyId == studyId) == selectedVolunteersContacted.Value);
+
+            return query.Where(x => x.CampaignParticipants.Any(e => e.Campaign.FilterCriteria.StudyId == studyId) == selectedVolunteersContacted.Value);
+
         }
 
         return query;
     }
 
-    public static IQueryable<Participant> WhereHasPreferredContactMethod(this IQueryable<Participant> query, int? studyId, bool? SelectedVolunteersPreferredContact)
+    public static IQueryable<Participant> WhereHasPreferredContactMethod(this IQueryable<Participant> query, string? selectedVolunteersPreferredContact)
     {
-        if (SelectedVolunteersPreferredContact.HasValue)
+        if (!string.IsNullOrEmpty(selectedVolunteersPreferredContact) && Enum.TryParse(selectedVolunteersPreferredContact, out ContactMethods contactMethod))
         {
-            return query.Where(x => x.CampaignParticipants.Any(e => e.EmailCampaign.FilterCriteria.StudyId == studyId) == SelectedVolunteersPreferredContact.Value);
+
+            return query.Where(x => x.ContactMethods.Any(e => e.ContactMethodId == (int)contactMethod));
 
         }
-
         return query;
     }
+
 
     public static IQueryable<Participant> WhereRegisteredInterest(this IQueryable<Participant> query, int? studyId, bool? selectedVolunteersRegisteredInterest)
     {
         if (selectedVolunteersRegisteredInterest.HasValue)
         {
-            return query.Where(x => x.CampaignParticipants.Any(e => (e.RegisteredInterestAt != null) == selectedVolunteersRegisteredInterest.Value && e.EmailCampaign.FilterCriteria.StudyId == studyId));
+            return query.Where(x => x.CampaignParticipants.Any(e => (e.RegisteredInterestAt != null) == selectedVolunteersRegisteredInterest.Value && e.Campaign.FilterCriteria.StudyId == studyId));
         }
 
         return query;

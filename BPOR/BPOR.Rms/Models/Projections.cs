@@ -18,9 +18,11 @@ public static class Projections
         this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyDetailsViewModel());
 
     public static IQueryable<EnrollmentDetails> AsEnrollmentDetails(this IQueryable<ManualEnrollment> source) =>
-        source.Select(ManualEnrollmentToEnrollmentDetails());    
-    
-    public static IQueryable<CampaignParticipantDetails> AsEmailCampaignParticipant(this IQueryable<Participant> source) =>
+
+        source.Select(ManualEnrollmentToEnrollmentDetails());
+
+    public static IQueryable<EmailParticipantDetails> AsEmailCampaignParticipant(this IQueryable<Participant> source) =>
+
         source.Select(VolunteerToEmailParticipantDetails());
 
     public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyFormViewModel());
@@ -125,7 +127,7 @@ public static class Projections
                         })
                         .ToList(),
                 }),
-            HasEmailCampaigns = s.FilterCriterias.Any(fc => fc.Campaigns.Any())
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaigns.Any())
         };
     }
 
@@ -162,8 +164,9 @@ public static class Projections
             }).AsEnumerable();
     } 
     private static Expression<Func<Participant, CampaignParticipantDetails>> VolunteerToEmailParticipantDetails()
+
     {
-        return v => new CampaignParticipantDetails
+        return v => new EmailParticipantDetails
         {
             Id = v.Id,
             Email = v.Email,

@@ -14,6 +14,7 @@ public class StudyDetailsViewModel
     public int LatestRecruitmentTotal => EnrollmentDetails.FirstOrDefault()?.RecruitmentTotal ?? 0;
     public bool HasEmailCampaigns { get; set; } = false;
     public IEnumerable<Campaign> Campaigns { get; set; }
+
     public int TotalEmailsSent => Campaigns.Sum(e => e.TotalCampaignEmailsSent);
     public int TotalRegisteredInterest => Campaigns.Sum(e => e.TotalCampaignRegisteredInterest);
 }

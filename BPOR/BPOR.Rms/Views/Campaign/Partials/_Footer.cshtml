@@ -31,5 +31,29 @@
     </p>
 }
 
+@if (Model.ContactMethod == ContactMethods.Letter)
+{
+    <div class="govuk-inset-text">
+        <strong>Please note:</strong> GOV UK Notify has a maximum daily limit of 20,000 letters. This includes all letter campaigns sent by our team.
+        Your letter may exceed this limit which means it may be sent out over multiple days. Letters are printed at 5:30pm and dispatched the next working day
+        (Monday to Friday).
+    </div>
+
+    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+    <p class="govuk-body text-secondary">
+        @if (!string.IsNullOrEmpty(Model.EmailAddress))
+        {
+            <span>bepartofresearch-volunteerservice@nihr.ac.uk and @Model.EmailAddress</span>
+        }
+        else
+        {
+            <span>bepartofresearch-volunteerservice@nihr.ac.uk</span>
+        }
+        will be notified by email that the letter campaign request has been sent and to how many recipients.
+    </p>
+
+}
+
 
 <button type="submit" asp-action="Send" class="govuk-button" data_module="govuk-button">Send @Model.ContactMethod.ToString().ToLower()</button>
