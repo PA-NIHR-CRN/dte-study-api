@@ -32,7 +32,7 @@ public class CampaignService(
     )
     : ICampaignService
 {
-    public async Task SendCampaignAsync(ServiceQueueItem item, CancellationToken cancellationToken = default)
+    public async Task SendCampaignAsync(CampaignServiceQueueItem item, CancellationToken cancellationToken = default)
     {
         var campaign = await context.Campaigns
             .AsNoTracking()

@@ -1,6 +1,6 @@
 namespace BPOR.Rms.Models.Email;
 
-public class ServiceQueueItem
+public class CampaignServiceQueueItem
 {
     public int Id { get; set; }
     public string Callback { get; set; }

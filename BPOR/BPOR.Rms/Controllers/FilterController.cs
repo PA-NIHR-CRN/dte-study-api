@@ -7,6 +7,7 @@ using Z.EntityFramework.Plus;
 using Rbec.Postcodes;
 using BPOR.Rms.Startup;
 using NIHR.GovUk.AspNetCore.Mvc;
+using System.Threading;
 
 namespace BPOR.Rms.Controllers;
 
@@ -44,7 +45,7 @@ public class FilterController(ParticipantDbContext context,
 
         if (model.StudyId is not null)
         {
-            var selectedStudy = await context.Studies
+            var selectedStudy = await context.StudieseTask < CampaignServiceQueueItem > DequeueAsync(CancellationToken
                 .Where(x => x.Id == model.StudyId)
                 .Select(x => new { x.StudyName, x.CpmsId, x.IsRecruitingIdentifiableParticipants })
                 .DeferredFirst()
