@@ -7,6 +7,7 @@ using Notify.Client;
 using Notify.Models.Responses;
 using Polly;
 using Polly.RateLimit;
+using BPOR.Domain.Enums;
 
 namespace NIHR.NotificationService.Services
 {
@@ -46,18 +47,18 @@ namespace NIHR.NotificationService.Services
                     throw new ArgumentException($"campaignTypeId '{campaignTypeIdStr}' is not a valid integer.");
                 }
 
-                var contactMethod = (ContactMethod)campaignTypeId;
+                var contactMethod = (ContactMethods)campaignTypeId;
 
                 switch (contactMethod)
                 {
-                    case ContactMethod.Email:
+                    case ContactMethods.Email:
                         await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation, request.Reference);
-                        await IncrementDailyCountAsync(ContactMethod.Email, 1);
+                        await IncrementDailyCountAsync(ContactMethods.Email, 1);
                         break;
 
-                    case ContactMethod.Letter:
+                    case ContactMethods.Letter:
                         await _client.SendLetterAsync(request.TemplateId, personalisation, request.Reference);
-                        await IncrementDailyCountAsync(ContactMethod.Letter, 1);
+                        await IncrementDailyCountAsync(ContactMethods.Letter, 1);
                         break;
 
                     default:
@@ -183,11 +184,11 @@ namespace NIHR.NotificationService.Services
                 Reference = reference,
             };
 
-            var contactMethod = (ContactMethod)campaignTypeId;
+            var contactMethod = (ContactMethods)campaignTypeId;
 
             switch (contactMethod)
             {
-                case ContactMethod.Email:
+                case ContactMethods.Email:
                     if (!personalisation.TryGetValue("email", out var email))
                     {
                         throw new KeyNotFoundException("Email address not found for email notification.");
@@ -195,7 +196,7 @@ namespace NIHR.NotificationService.Services
                     request.EmailAddress = email;
                     break;
 
-                case ContactMethod.Letter:
+                case ContactMethods.Letter:
                     if (!personalisation.TryGetValue("address_line_1", out var addressLine1) ||
                         !personalisation.TryGetValue("address_line_5", out var town) ||
                         !personalisation.TryGetValue("address_line_6", out var postcode))
@@ -227,7 +228,7 @@ namespace NIHR.NotificationService.Services
             return request;
         }
 
-        private async Task IncrementDailyCountAsync(ContactMethod contactMethod, int count)
+        private async Task IncrementDailyCountAsync(ContactMethods contactMethod, int count)
         {
             var lockStopwatch = Stopwatch.StartNew();
             await _semaphore.WaitAsync();
@@ -237,7 +238,7 @@ namespace NIHR.NotificationService.Services
             {
                 switch (contactMethod)
                 {
-                    case ContactMethod.Email:
+                    case ContactMethods.Email:
                         _emailDailyCount += count;
 
                         if (_emailDailyCount >= _emailDailyLimit)
@@ -246,7 +247,7 @@ namespace NIHR.NotificationService.Services
                         }
                         break;
 
-                    case ContactMethod.Letter:
+                    case ContactMethods.Letter:
                         _letterDailyCount += count;
 
                         if (_letterDailyCount >= _letterDailyLimit)

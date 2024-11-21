@@ -1,3 +1,5 @@
+using BPOR.Domain.Enums;
+
 namespace NIHR.NotificationService.Models;
 
 public class SendNotificationRequest
@@ -20,19 +22,19 @@ public class SendNotificationRequest
             throw new ArgumentException($"campaignTypeId '{campaignTypeIdStr}' is not a valid integer.");
         }
 
-        var contactMethod = (ContactMethod)campaignTypeId;
+        var contactMethod = (ContactMethods)campaignTypeId;
 
 
         switch (contactMethod)
         {
-            case ContactMethod.Email:
+            case ContactMethods.Email:
                 if (string.IsNullOrWhiteSpace(EmailAddress))
                     throw new ArgumentException("EmailAddress is required for email notifications.");
                 if (string.IsNullOrWhiteSpace(TemplateId))
                     throw new ArgumentException("TemplateId is required for email notifications.");
                 break;
 
-            case ContactMethod.Letter:
+            case ContactMethods.Letter:
                 if (!Personalisation.TryGetValue("address_line_1", out var addressLine1) || string.IsNullOrWhiteSpace(addressLine1))
                 {
                     throw new ArgumentException("Address line 1 is required for letter notifications.");
@@ -45,10 +47,4 @@ public class SendNotificationRequest
                 throw new NotSupportedException($"Contact method {contactMethod} is not supported.");
         }
     }
-}
-
-public enum ContactMethod
-{
-    Email = 1,
-    Letter = 2
 }

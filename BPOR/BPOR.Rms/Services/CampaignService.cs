@@ -1,3 +1,4 @@
+using BPOR.Domain.Enums;
 using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
@@ -18,7 +19,6 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
-using NIHR.NotificationService.Models;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -187,7 +187,7 @@ public class CampaignService(
         processingResult.CampaignParticipants.Add(new CampaignParticipant
         {
             CampaignId = campaign.Id,
-            CampaignTypeId = campaign.TypeId,
+            CampaignTypeId = (int)campaign.Type,
             ParticipantId = volunteer.Id,
             DeliveryStatusId = deliveryStatusId,
             SentAt = DateTime.UtcNow,
@@ -263,14 +263,14 @@ public class CampaignService(
                 }
             };
 
-            switch (campaign.TypeId)
+            switch (campaign.Type)
             {
-                case (int)ContactMethod.Email:
+                case ContactMethods.Email:
                     notification.PrimaryIdentifier = volunteer.Email;
                     notification.NotificationDatas.Add(new NotificationData { Key = "email", Value = volunteer.Email });
                     break;
 
-                case (int)ContactMethod.Letter:
+                case ContactMethods.Letter:
                     if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1) ||
                         string.IsNullOrWhiteSpace(volunteer.Address.Town) ||
                         string.IsNullOrWhiteSpace(volunteer.Address.Postcode))

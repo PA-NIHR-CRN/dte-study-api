@@ -14,6 +14,7 @@ using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Notify.Exceptions;
 using Notify.Models.Responses;
+using BPOR.Domain.Enums;
 
 namespace BPOR.Rms.Controllers;
 
@@ -64,7 +65,7 @@ public class EmailController(
             var selectedTemplate =
                 model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId);
 
-            if (!Enum.TryParse<ContactMethod>(selectedTemplate.type, true, out var contactMethod))
+            if (!Enum.TryParse<ContactMethods>(selectedTemplate.type, true, out var contactMethod))
             {
                 throw new ArgumentException($"Invalid contact method type: {selectedTemplate.type}");
             }
@@ -75,7 +76,7 @@ public class EmailController(
                 TargetGroupSize = model.TotalVolunteers,
                 TemplateId = new Guid(model.SelectedTemplateId!),
                 Name = selectedTemplate.name,
-                TypeId = (int)contactMethod
+                Type = contactMethod
             };
 
             await AddCampaignToContextAsync(campaign, cancellationToken);
@@ -104,13 +105,13 @@ public class EmailController(
                         continue;
                     }
 
-                    switch (campaign.TypeId)
+                    switch (campaign.Type)
                     {
-                        case (int) ContactMethod.Email:
+                        case ContactMethods.Email:
                             contentfulTemplateId = "email-rms-campaign-sent";
                             break;
 
-                        case (int) ContactMethod.Letter:
+                        case ContactMethods.Letter:
                             contentfulTemplateId = "letter-rms-campaign-sent";
                             break;
                     }
@@ -131,7 +132,7 @@ public class EmailController(
     private async Task PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false,
     CancellationToken cancellationToken = default)
     {
-        model.EmailTemplates = await FetchTemplates(ContactMethod.Email, forceRefresh, cancellationToken);
+        model.EmailTemplates = await FetchTemplates(ContactMethods.Email, forceRefresh, cancellationToken);
         // TODO: KO ticket 2394
         //model.LetterTemplates = await FetchTemplates(forceRefresh, ContactMethod.Letter, cancellationToken);
 
@@ -227,7 +228,7 @@ public class EmailController(
                                                email.Equals(address.Address,
                                                    StringComparison.InvariantCultureIgnoreCase);
 
-    private async Task<TemplateList> FetchTemplates(ContactMethod contactMethod, bool forceRefresh = false,
+    private async Task<TemplateList> FetchTemplates(ContactMethods contactMethod, bool forceRefresh = false,
         CancellationToken cancellationToken = default)
     {
         var cachedData = await cache.GetAsync(_templateCacheKey, cancellationToken);

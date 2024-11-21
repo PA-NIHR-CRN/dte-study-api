@@ -1,8 +1,10 @@
+using BPOR.Domain.Enums;
+
 namespace NIHR.NotificationService.Models;
 
 public class SendBatchNotificationRequest
 {
-    public ContactMethod ContactMethod { get; set; }
+    public ContactMethods ContactMethod { get; set; }
 
     // Common fields for all batch notifications
     public Dictionary<string, Dictionary<string, string>> PersonalisationData { get; set; }
