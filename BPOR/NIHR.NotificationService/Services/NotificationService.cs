@@ -204,7 +204,6 @@ namespace NIHR.NotificationService.Services
                     }
 
                     request.Personalisation["address_line_1"] = addressLine1;
-                    request.Personalisation["address_line_5"] = town;
 
                     for (int i = 2; i <= 4; i++) // assign optional address fields
                     {
@@ -215,6 +214,7 @@ namespace NIHR.NotificationService.Services
                         }
                     }
 
+                    request.Personalisation["address_line_5"] = town;
                     request.Personalisation["address_line_6"] = postcode;
                     request.Personalisation["address_postcode"] = postcode;
 
