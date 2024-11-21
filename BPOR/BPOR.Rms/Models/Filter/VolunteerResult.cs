@@ -21,6 +21,6 @@ namespace BPOR.Rms.Models.Filter
         public string? EthnicGroup { get; internal set; }
         public bool? GenderIsSameAsSexRegisteredAtBirth { get; internal set; }
         public double? DistanceInMiles { get; internal set; }
-        public ContactMethod ContactMethod { get; internal set; }
+        public int? ContactMethod { get; internal set; }
     }
 }

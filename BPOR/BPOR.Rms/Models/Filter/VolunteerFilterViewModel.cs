@@ -88,17 +88,17 @@ public class VolunteerFilterViewModel : IValidatableObject
     }
 
     [Display(Name = "Volunteers preferred contact method", Order = 5)]
-    public string? SelectedVolunteersPreferredContact { get; set; }
+    public int? SelectedVolunteersPreferredContact { get; set; }
     public IEnumerable<SelectListItem> VolunteersPreferredContactItems { get; set; } = SetVolunteersPreferredContactItems();
 
     private static IEnumerable<SelectListItem> SetVolunteersPreferredContactItems()
     {
         var items = new List<SelectListItem>
-        {
-            new SelectListItem { Value = string.Empty, Text = "No preference" },
-            new SelectListItem { Value = ContactMethods.Email.ToString(), Text = "Email" },
-            new SelectListItem { Value = ContactMethods.Letter.ToString(), Text = "Letter" }
-        };
+    {
+        new SelectListItem { Value = string.Empty, Text = "No preference" },
+        new SelectListItem { Value = ((int)ContactMethods.Email).ToString(), Text = "Email" },
+        new SelectListItem { Value = ((int)ContactMethods.Letter).ToString(), Text = "Letter" }
+    };
 
         return items;
     }

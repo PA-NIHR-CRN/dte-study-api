@@ -20,14 +20,15 @@ public static class ParticipantQueryExtensions
         return query;
     }
 
-    public static IQueryable<Participant> WhereHasPreferredContactMethod(this IQueryable<Participant> query, string? selectedVolunteersPreferredContact)
+    public static IQueryable<Participant> WhereHasPreferredContactMethod(this IQueryable<Participant> query, int? selectedVolunteersPreferredContact)
     {
-        if (!string.IsNullOrEmpty(selectedVolunteersPreferredContact) && Enum.TryParse(selectedVolunteersPreferredContact, out ContactMethods contactMethod))
+        if (selectedVolunteersPreferredContact.HasValue)
         {
-            return query.Where(x => x.ContactMethods.Any(e => e.ContactMethodId == (int)contactMethod));
+            return query.Where(x => x.ContactMethods.Any(e => e.ContactMethodId == selectedVolunteersPreferredContact.Value));
         }
         return query;
     }
+
 
 
     public static IQueryable<Participant> WhereRegisteredInterest(this IQueryable<Participant> query, int? studyId, bool? selectedVolunteersRegisteredInterest)

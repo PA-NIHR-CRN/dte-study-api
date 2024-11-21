@@ -15,7 +15,6 @@ using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Notify.Exceptions;
 using Notify.Models.Responses;
-using BPOR.Domain.Entities.RefData;
 
 namespace BPOR.Rms.Controllers;
 

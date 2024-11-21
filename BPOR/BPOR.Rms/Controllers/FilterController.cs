@@ -106,6 +106,7 @@ public class FilterController(ParticipantDbContext context,
             RegistrationToDate = model.RegistrationToDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
             AgeFrom = model.AgeRange.From,
             AgeTo = model.AgeRange.To,
+            ContactMethodId = model.SelectedVolunteersPreferredContact,
             FullPostcode = model.PostcodeSearch.PostcodeRadiusSearch.FullPostcode?.ToString(),
             SearchRadiusMiles = model.PostcodeSearch.PostcodeRadiusSearch.SearchRadiusMiles,
             StudyId = model.StudyId,
@@ -124,19 +125,6 @@ public class FilterController(ParticipantDbContext context,
         context.FilterCriterias.Add(filterCriteria);
         await context.SaveChangesAsync(cancellationToken);
 
-        // early validation check
-
-        //a
-        /*if (model.SelectedVolunteersPreferredContact.Value = "No preference")
-        {
-            ModelState.AddModelError("Something went wrong with the validation check as aresukt of Preferred Contact being {model.SelectedVolunteersPreferredContact.Value}");
-        }*/
-
-        //b
-
-        //c
-
-        // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
         {
             FilterCriteriaId = filterCriteria.Id,
@@ -145,9 +133,8 @@ public class FilterController(ParticipantDbContext context,
             StudyName = model.StudyName,
             ContactMethod = model.SelectedVolunteersPreferredContact switch
             {
-                "Email" => ContactMethods.Email,
-                "Letter" => ContactMethods.Letter,
-                _ => throw new System.NotImplementedException(),
+                (int)ContactMethods.Email => ContactMethods.Email,
+                (int)ContactMethods.Letter => ContactMethods.Letter
             }
         };
         return RedirectToAction("Setup", "Campaign", campaignDetails);
@@ -195,6 +182,7 @@ public class FilterController(ParticipantDbContext context,
                     HasRegistered = x.RegistrationConsentAtUtc,
                     EthnicGroup = x.EthnicGroup,
                     GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
+                    ContactMethod = x.ContactMethods.FirstOrDefault().ContactMethodId
                 })
                 .OrderBy(x => x.Id)
                 .DeferredPage(paginationService);

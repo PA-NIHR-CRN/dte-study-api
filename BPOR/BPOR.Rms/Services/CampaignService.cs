@@ -191,7 +191,6 @@ public class CampaignService(
             ParticipantId = volunteer.Id,
             DeliveryStatusId = deliveryStatusId,
             SentAt = DateTime.UtcNow,
-            ContactEmail = volunteer.Email
         });
 
         if (dbFilter is { Study.IsRecruitingIdentifiableParticipants: true, StudyId: not null })
@@ -272,35 +271,33 @@ public class CampaignService(
 
                 case (int)ContactMethod.Letter:
                     if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1) ||
-                        string.IsNullOrWhiteSpace(volunteer.Address.AddressLine2) ||
                         string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
                     {
-                        throw new InvalidOperationException("Address lines 1, 2, and postcode are required for letter notifications.");
+                        throw new InvalidOperationException("Address line 1, and postcode are required for letter notifications.");
                     }
 
                     notification.PrimaryIdentifier = $"ParticipantAddress({volunteer.Address.Id})";
 
                     var addressFields = new Dictionary<string, string>
                     {
-                        { "addressLine1", volunteer.Address.AddressLine1 },
-                        { "addressLine2", volunteer.Address.AddressLine2 },
-                        { "addressLine3", volunteer.Address.AddressLine3 },
-                        { "addressLine4", volunteer.Address.AddressLine4 },
-                        { "Town", volunteer.Address.Town },
-                        { "Postcode", volunteer.Address.Postcode } // Postcode is always the last line
+                    { "address_line_1", volunteer.Address.AddressLine1 },
+                    { "address_line_2", volunteer.Address.AddressLine2 ?? string.Empty },
+                    { "address_line_3", volunteer.Address.AddressLine3 },
+                    { "address_line_4", volunteer.Address.AddressLine4 },
+                    { "address_line_5", volunteer.Address.Town },
+                    { "address_line_6", volunteer.Address.Postcode } // Postcode is always the last line
                     };
 
-                    int addressFieldsIndex = 1;
                     foreach (var field in addressFields)
                     {
                         if (!string.IsNullOrWhiteSpace(field.Value))
                         {
                             notification.NotificationDatas.Add(new NotificationData
                             {
-                                Key = $"address_line_{addressFieldsIndex}",
+                                Key = field.Key,
                                 Value = field.Value
                             });
-                            addressFieldsIndex++;
+
                         }
                     }
 

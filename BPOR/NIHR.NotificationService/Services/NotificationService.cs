@@ -197,14 +197,15 @@ namespace NIHR.NotificationService.Services
 
                 case ContactMethod.Letter:
                     if (!personalisation.TryGetValue("address_line_1", out var addressLine1) ||
-                        !personalisation.TryGetValue("address_line_2", out var addressLine2) ||
                         !personalisation.TryGetValue("address_line_6", out var postcode))
                     {
-                        throw new KeyNotFoundException("Address lines 1, 2, and postcode are required for letter notifications.");
+                        throw new KeyNotFoundException("Address line 1, and postcode are required for letter notifications.");
                     }
 
                     request.Personalisation["address_line_1"] = addressLine1;
-                    request.Personalisation["address_line_2"] = addressLine2;
+                    request.Personalisation["address_line_2"] = personalisation.TryGetValue("address_line_2", out var addressLine2)
+                        ? addressLine2
+                        : string.Empty;
 
                     for (int i = 3; i <= 5; i++) // assign optional address fields
                     {
