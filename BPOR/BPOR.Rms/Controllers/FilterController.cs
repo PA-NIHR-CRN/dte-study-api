@@ -45,7 +45,7 @@ public class FilterController(ParticipantDbContext context,
 
         if (model.StudyId is not null)
         {
-            var selectedStudy = await context.StudieseTask < CampaignServiceQueueItem > DequeueAsync(CancellationToken
+            var selectedStudy = await context.Studies
                 .Where(x => x.Id == model.StudyId)
                 .Select(x => new { x.StudyName, x.CpmsId, x.IsRecruitingIdentifiableParticipants })
                 .DeferredFirst()
