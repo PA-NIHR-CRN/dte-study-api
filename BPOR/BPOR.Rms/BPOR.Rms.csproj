@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <Content Remove="Views\Shared\Unauthorised.cshtml" />
+      <Content Remove="Views\Campaign\EmailSuccess.cshtml" />
     </ItemGroup>
 
     <ItemGroup>

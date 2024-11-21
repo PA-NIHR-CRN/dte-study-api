@@ -1,6 +1,8 @@
 ﻿using System.Linq.Expressions;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Models.Filter;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +19,16 @@ public static class ParticipantQueryExtensions
 
         return query;
     }
+
+    public static IQueryable<Participant> WhereHasPreferredContactMethod(this IQueryable<Participant> query, string? selectedVolunteersPreferredContact)
+    {
+        if (!string.IsNullOrEmpty(selectedVolunteersPreferredContact) && Enum.TryParse(selectedVolunteersPreferredContact, out ContactMethods contactMethod))
+        {
+            return query.Where(x => x.ContactMethods.Any(e => e.ContactMethodId == (int)contactMethod));
+        }
+        return query;
+    }
+
 
     public static IQueryable<Participant> WhereRegisteredInterest(this IQueryable<Participant> query, int? studyId, bool? selectedVolunteersRegisteredInterest)
     {

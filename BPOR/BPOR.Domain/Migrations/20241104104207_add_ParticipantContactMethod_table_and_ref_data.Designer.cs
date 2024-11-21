@@ -4,6 +4,7 @@ using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
@@ -12,9 +13,11 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    partial class ParticipantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241104104207_add_ParticipantContactMethod_table_and_ref_data")]
+    partial class add_ParticipantContactMethod_table_and_ref_data
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,7 +26,7 @@ namespace Dynamo.Stream.Handler.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("BPOR.Domain.Entities.Campaign", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaign", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -41,6 +44,9 @@ namespace Dynamo.Stream.Handler.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<Guid>("EmailTemplateId")
+                        .HasColumnType("char(36)");
+
                     b.Property<int>("FilterCriteriaId")
                         .HasColumnType("int");
 
@@ -57,12 +63,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<int?>("TargetGroupSize")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TemplateId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<int>("TypeId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -73,22 +73,16 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("FilterCriteriaId");
 
-                    b.ToTable("Campaigns");
+                    b.ToTable("EmailCampaigns");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.CampaignParticipant", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaignParticipant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CampaignTypeId")
-                        .HasColumnType("int");
 
                     b.Property<string>("ContactEmail")
                         .IsRequired()
@@ -105,6 +99,9 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<int?>("DeliveryStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmailCampaignId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -127,13 +124,13 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CampaignId");
-
                     b.HasIndex("DeliveryStatusId");
+
+                    b.HasIndex("EmailCampaignId");
 
                     b.HasIndex("ParticipantId");
 
-                    b.ToTable("CampaignParticipants");
+                    b.ToTable("EmailCampaignParticipants");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.EngagementPreferences", b =>
@@ -188,27 +185,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.HasIndex("HealthConditionId");
 
                     b.ToTable("FilterAreaOfInterest");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.FilterContactMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ContactMethodId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FilterCriteriaId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContactMethodId");
-
-                    b.ToTable("FilterContactMethod");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.FilterCriteria", b =>
@@ -530,9 +506,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<int>("ContactMethodId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("FilterCriteriaId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -542,8 +515,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ContactMethodId");
-
-                    b.HasIndex("FilterCriteriaId");
 
                     b.HasIndex("ParticipantId");
 
@@ -789,7 +760,7 @@ namespace Dynamo.Stream.Handler.Migrations
                         });
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.RefData.DeliveryStatus", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.RefData.EmailDeliveryStatus", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -811,7 +782,7 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SysRefDeliveryStatus");
+                    b.ToTable("SysRefEmailDeliveryStatus");
 
                     b.HasData(
                         new
@@ -10100,10 +10071,10 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.ToTable("UserRole");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.Campaign", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaign", b =>
                 {
                     b.HasOne("BPOR.Domain.Entities.FilterCriteria", "FilterCriteria")
-                        .WithMany("Campaigns")
+                        .WithMany("EmailCampaigns")
                         .HasForeignKey("FilterCriteriaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -10111,27 +10082,27 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("FilterCriteria");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.CampaignParticipant", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaignParticipant", b =>
                 {
-                    b.HasOne("BPOR.Domain.Entities.Campaign", "Campaign")
-                        .WithMany("Participants")
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BPOR.Domain.Entities.RefData.DeliveryStatus", "DeliveryStatus")
+                    b.HasOne("BPOR.Domain.Entities.RefData.EmailDeliveryStatus", "DeliveryStatus")
                         .WithMany()
                         .HasForeignKey("DeliveryStatusId");
 
+                    b.HasOne("BPOR.Domain.Entities.EmailCampaign", "EmailCampaign")
+                        .WithMany("Participants")
+                        .HasForeignKey("EmailCampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
-                        .WithMany("CampaignParticipants")
+                        .WithMany("EmailCampaignParticipants")
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Campaign");
-
                     b.Navigation("DeliveryStatus");
+
+                    b.Navigation("EmailCampaign");
 
                     b.Navigation("Participant");
                 });
@@ -10160,17 +10131,6 @@ namespace Dynamo.Stream.Handler.Migrations
                         .IsRequired();
 
                     b.Navigation("HealthCondition");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.FilterContactMethod", b =>
-                {
-                    b.HasOne("BPOR.Domain.Entities.RefData.ContactMethod", "ContactMethod")
-                        .WithMany()
-                        .HasForeignKey("ContactMethodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ContactMethod");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.FilterCriteria", b =>
@@ -10284,10 +10244,6 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasForeignKey("ContactMethodId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("BPOR.Domain.Entities.FilterCriteria", null)
-                        .WithMany("FilterContactMethod")
-                        .HasForeignKey("FilterCriteriaId");
 
                     b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
                         .WithMany("ContactMethods")
@@ -10428,18 +10384,16 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.Campaign", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaign", b =>
                 {
                     b.Navigation("Participants");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.FilterCriteria", b =>
                 {
-                    b.Navigation("Campaigns");
+                    b.Navigation("EmailCampaigns");
 
                     b.Navigation("FilterAreaOfInterest");
-
-                    b.Navigation("FilterContactMethod");
 
                     b.Navigation("FilterEthnicGroup");
 
@@ -10454,9 +10408,9 @@ namespace Dynamo.Stream.Handler.Migrations
                 {
                     b.Navigation("Address");
 
-                    b.Navigation("CampaignParticipants");
-
                     b.Navigation("ContactMethods");
+
+                    b.Navigation("EmailCampaignParticipants");
 
                     b.Navigation("HealthConditions");
 

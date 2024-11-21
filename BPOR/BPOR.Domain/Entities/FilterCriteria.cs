@@ -18,6 +18,7 @@ public class FilterCriteria
     public ICollection<FilterAreaOfInterest> FilterAreaOfInterest { get; set; } = [];
     public ICollection<FilterPostcode> FilterPostcode { get; set; } = [];
     public ICollection<FilterGender> FilterGender { get; set; } = [];
+    public ICollection<ParticipantContactMethod> FilterContactMethod { get; set; } = [];
     public ICollection<FilterSexSameAsRegisteredAtBirth> FilterSexSameAsRegisteredAtBirth { get; set; } = [];
     public ICollection<FilterEthnicGroup> FilterEthnicGroup { get; set; } = [];
     public bool IncludeNoAreasOfInterest { get; set; }

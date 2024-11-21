@@ -1,4 +1,6 @@
-﻿using NetTopologySuite.Geometries;
+﻿using BPOR.Domain.Entities;
+using BPOR.Domain.Entities.RefData;
+using NetTopologySuite.Geometries;
 
 namespace BPOR.Rms.Models.Filter
 {
@@ -19,5 +21,6 @@ namespace BPOR.Rms.Models.Filter
         public string? EthnicGroup { get; internal set; }
         public bool? GenderIsSameAsSexRegisteredAtBirth { get; internal set; }
         public double? DistanceInMiles { get; internal set; }
+        public ContactMethod ContactMethod { get; internal set; }
     }
 }

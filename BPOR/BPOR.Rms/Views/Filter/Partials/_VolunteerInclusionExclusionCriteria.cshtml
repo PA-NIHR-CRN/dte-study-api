@@ -46,7 +46,7 @@
                         <div class="govuk-hint govuk-!-margin-top-4" style="margin-bottom: 12px;">
                             Study uses anonymous recruitment
                         </div>
-                    </div>            
+                    </div>
                 }
             }
 
@@ -59,6 +59,29 @@
                      Model.VolunteersCompletedRegistrationItems,
                      new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-completed-registration-hint" }
                      )
+
+            @if (Model.ShowPreferredContactFilter)
+            {
+                @Html.LabelFor(m => m.SelectedVolunteersPreferredContact, new { @class = "govuk-label exclusion_label" })
+                <div id="volunteers-preferred-contact-hint" class="govuk-hint">
+                    Do you want to find volunteers who have a specific preferred contact method?
+                </div>
+                @Html.DropDownListFor(
+                        m => m.SelectedVolunteersPreferredContact,
+                        Model.VolunteersPreferredContactItems,
+                        new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-preferred-contact-hint" }
+                        )
+            }
+            else
+            {
+                <div class="govuk-input_select__wrapper">
+                    <div class="govuk-label exclusion_label">Volunteers preferred contact method</div>
+                    <div class="govuk-hint govuk-!-margin-top-4" style="margin-bottom: 12px;">
+                        Studies recruiting anonymous participants can only contact volunteers by email.
+                    </div>
+                </div>
+            }
+
         </legend>
     </fieldset>
 </div>

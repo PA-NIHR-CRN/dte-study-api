@@ -2,6 +2,7 @@ using System.Text;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
+using BPOR.Domain.Enums;
 using HandlebarsDotNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,14 +15,17 @@ using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Notify.Exceptions;
 using Notify.Models.Responses;
+using System.Linq;
+using BPOR.Domain.Entities.RefData;
+using System;
 
 namespace BPOR.Rms.Controllers;
 
-public class EmailController(
+public class CampaignController(
     ParticipantDbContext context,
     INotificationService notificationService,
     IDistributedCache cache,
-    ILogger<EmailController> logger,
+    ILogger<CampaignController> logger,
     IRmsTaskQueue taskQueue,
     IEncryptionService encryptionService,
     LinkGenerator linkGenerator,
@@ -33,41 +37,46 @@ public class EmailController(
     private const string _templateCacheKey = "Templates";
     private string contentfulTemplateId;
 
-    public async Task<IActionResult> SetupCampaign(SetupCampaignViewModel model)
+    public async Task<IActionResult> Setup(SetupCampaignViewModel model)
     {
         await PopulateReferenceDataAsync(model, true);
         return View(model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendEmail(SetupCampaignViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Send(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         await PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
 
+        if (!ModelState.IsValid)
+        {
+            if (ModelState[nameof(model.TotalVolunteers)]?.Errors.Any(e => e.ErrorMessage.Contains("is not valid")) ?? false)
+            {
+                ModelState[nameof(model.TotalVolunteers)].Errors.Clear();
+                ModelState.AddModelError(nameof(model.TotalVolunteers), "Number of volunteers to be contacted must be a whole number, like 15");
+            }
+        }
+
         if (model.TotalVolunteers is null)
         {
-            ModelState.AddModelError(nameof(model.TotalVolunteers), "Enter the number of volunteers to be contacted.");
+            ModelState.AddModelError(nameof(model.TotalVolunteers), "Enter the number of volunteers to be contacted");
         }
+
         else if (model.TotalVolunteers > model.MaxNumbers)
         {
             ModelState.AddModelError(nameof(model.TotalVolunteers),
-                "The number of volunteers to be contacted must be the same as, or less than, the 'total number of volunteer accounts matching the filter options'.");
+                $"Number of volunteers to be contacted must be between 1 and {model.MaxNumbers:N0}");
         }
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
         {
-            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Please select an email template.");
+            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Select a template");
         }
 
         if (ModelState.IsValid)
         {
             var selectedTemplate =
-                model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId);
-
-            if (!Enum.TryParse<ContactMethod>(selectedTemplate.type, true, out var contactMethod))
-            {
-                throw new ArgumentException($"Invalid contact method type: {selectedTemplate.type}");
-            }
+                model.Templates.First(t => t.id == model.SelectedTemplateId);
 
             var campaign = new Campaign
             {
@@ -75,7 +84,7 @@ public class EmailController(
                 TargetGroupSize = model.TotalVolunteers,
                 TemplateId = new Guid(model.SelectedTemplateId!),
                 Name = selectedTemplate.name,
-                TypeId = (int)contactMethod
+                TypeId = (int)model.ContactMethod
             };
 
             await AddCampaignToContextAsync(campaign, cancellationToken);
@@ -99,42 +108,48 @@ public class EmailController(
                 {
                     if (string.IsNullOrWhiteSpace(recipient))
                     {
-                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', email campaign ({emailCampaignId}).", model.StudyId, model.StudyName, campaign.Id);
+                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', campaign ({campaignId}).", model.StudyId, model.StudyName, campaign.Id);
 
                         continue;
                     }
 
+                    object sendParams = new { };
+
+                    if (string.IsNullOrWhiteSpace(model.StudyName))
+                    {
+                        sendParams = (new { numberOfVolunteers = model.TotalVolunteers, letterTemplateFilename = selectedTemplate });
+                    }
+                    sendParams = (new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName });
+
                     switch (campaign.TypeId)
                     {
-                        case (int) ContactMethod.Email:
+                        case (int)ContactMethods.Email:
                             contentfulTemplateId = "email-rms-campaign-sent";
                             break;
 
-                        case (int) ContactMethod.Letter:
+                        case (int)ContactMethods.Letter:
                             contentfulTemplateId = "letter-rms-campaign-sent";
                             break;
                     }
 
-                    await transactionalEmailService.SendAsync(recipient, contentfulTemplateId, new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName, templateName = selectedTemplate.name }, cancellationToken);
-
+                    await transactionalEmailService.SendAsync(recipient, contentfulTemplateId, sendParams, cancellationToken);
                 }
             }
 
-            return View("EmailSuccess",
-                new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName });
+            return View("Success",
+                new EmailSuccessViewModel { StudyId = model.StudyId, StudyName = model.StudyName, ContactMethod = model.ContactMethod });
         }
 
-        return View(nameof(SetupCampaign), model);
+        return View(nameof(Setup), model);
     }
 
 
     private async Task PopulateReferenceDataAsync(SetupCampaignViewModel model, bool forceRefresh = false,
     CancellationToken cancellationToken = default)
     {
-        model.EmailTemplates = await FetchTemplates(ContactMethod.Email, forceRefresh, cancellationToken);
-        // TODO: KO ticket 2394
-        //model.LetterTemplates = await FetchTemplates(forceRefresh, ContactMethod.Letter, cancellationToken);
 
+        TemplateList templateList = await FetchEmailTemplates(forceRefresh, cancellationToken);
+        model.Templates = templateList.templates.ToList();
 
         if (model.StudyId is not null)
         {
@@ -178,7 +193,7 @@ public class EmailController(
 
         if (ModelState.IsValid)
         {
-            var selectedTemplateName = model.EmailTemplates.templates.First(t => t.id == model.SelectedTemplateId).name;
+            var selectedTemplateName = model.Templates.First(t => t.id == model.SelectedTemplateId).name;
             var personalisationData = emailAddresses.ToDictionary(
                 email => email,
                 email => new Dictionary<string, string>
@@ -212,7 +227,7 @@ public class EmailController(
                     logger.LogError(e, "Error sending preview email");
                     ModelState.AddModelError(nameof(model.PreviewEmails),
                         "Gov Notify does not accept the email address(es) provided.");
-                    return View(nameof(SetupCampaign), model);
+                    return View(nameof(Setup), model);
                 }
             }
 
@@ -220,7 +235,7 @@ public class EmailController(
                 $"Preview email using template {selectedTemplateName} has been sent to {model.PreviewEmails}");
         }
 
-        return View(nameof(SetupCampaign), model);
+        return View(nameof(Setup), model);
     }
 
     private bool IsValidEmail(string email) => System.Net.Mail.MailAddress.TryCreate(email, out var address) &&
@@ -244,7 +259,7 @@ public class EmailController(
 
     private async Task CacheTemplates(TemplateList templates, CancellationToken cancellationToken = default)
     {
-        var jsonData = JsonConvert.SerializeObject(templates);
+        var jsonData = JsonConvert.SerializeObject(Templates);
         var data = Encoding.UTF8.GetBytes(jsonData);
 
         await cache.SetAsync(_templateCacheKey, data, cancellationToken);

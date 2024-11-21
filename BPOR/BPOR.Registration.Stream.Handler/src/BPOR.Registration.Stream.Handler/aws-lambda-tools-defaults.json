@@ -8,9 +8,9 @@
   "profile": "",
   "region": "eu-west-2",
   "configuration": "Release",
-  "framework": "net6.0",
-  "function-runtime":"dotnet6",
-  "function-handler" : "Dynamo.Stream.Handler::Dynamo.Stream.Handler.Functions::ProcessStream",
-  "function-memory-size" : 256,
-  "function-timeout" : 900
+  "framework": "net8.0",
+  "function-runtime": "dotnet8",
+  "function-handler": "BPOR.Registration.Stream.Handler::BPOR.Registration.Stream.Handler.Functions::ProcessStream",
+  "function-memory-size": 256,
+  "function-timeout": 900
 }

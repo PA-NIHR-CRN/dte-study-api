@@ -8,6 +8,7 @@ using Rbec.Postcodes;
 using BPOR.Rms.Startup;
 using NIHR.GovUk.AspNetCore.Mvc;
 using System.Threading;
+using BPOR.Domain.Enums;
 
 namespace BPOR.Rms.Controllers;
 
@@ -55,6 +56,7 @@ public class FilterController(ParticipantDbContext context,
             model.StudyCpmsId = selectedStudy.CpmsId;
 
             model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
+            model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
         }
 
         model.VolunteerCount = results.Count?.Value;
@@ -88,8 +90,9 @@ public class FilterController(ParticipantDbContext context,
         return new VolunteerFilterViewModel { StudyId = model.StudyId };
     }
 
+   
     [HttpPost]
-    public async Task<IActionResult> SetupEmailCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
         var dobRange = _today.GetDatesWithinYearRange(model.AgeRange.From, model.AgeRange.To);
 
@@ -121,15 +124,33 @@ public class FilterController(ParticipantDbContext context,
         context.FilterCriterias.Add(filterCriteria);
         await context.SaveChangesAsync(cancellationToken);
 
+        // early validation check
+
+        //a
+        /*if (model.SelectedVolunteersPreferredContact.Value = "No preference")
+        {
+            ModelState.AddModelError("Something went wrong with the validation check as aresukt of Preferred Contact being {model.SelectedVolunteersPreferredContact.Value}");
+        }*/
+
+        //b
+
+        //c
+
         // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
         {
             FilterCriteriaId = filterCriteria.Id,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
-            StudyName = model.StudyName
+            StudyName = model.StudyName,
+            ContactMethod = model.SelectedVolunteersPreferredContact switch
+            {
+                "Email" => ContactMethods.Email,
+                "Letter" => ContactMethods.Letter,
+                _ => throw new System.NotImplementedException(),
+            }
         };
-        return RedirectToAction("SetupCampaign", "Email", campaignDetails);
+        return RedirectToAction("Setup", "Campaign", campaignDetails);
     }
 
     private static List<T> Map<T>(IEnumerable<bool> inputList, Func<int, T> getOutput) =>
