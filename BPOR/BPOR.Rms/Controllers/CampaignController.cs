@@ -15,9 +15,7 @@ using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Notify.Exceptions;
 using Notify.Models.Responses;
-using System.Linq;
 using BPOR.Domain.Entities.RefData;
-using System;
 
 namespace BPOR.Rms.Controllers;
 
@@ -148,7 +146,7 @@ public class CampaignController(
     CancellationToken cancellationToken = default)
     {
 
-        TemplateList templateList = await FetchEmailTemplates(forceRefresh, cancellationToken);
+        TemplateList templateList = await FetchTemplates(forceRefresh, cancellationToken);
         model.Templates = templateList.templates.ToList();
 
         if (model.StudyId is not null)
@@ -242,7 +240,7 @@ public class CampaignController(
                                                email.Equals(address.Address,
                                                    StringComparison.InvariantCultureIgnoreCase);
 
-    private async Task<TemplateList> FetchTemplates(ContactMethod contactMethod, bool forceRefresh = false,
+    private async Task<TemplateList> FetchTemplates(bool forceRefresh = false,
         CancellationToken cancellationToken = default)
     {
         var cachedData = await cache.GetAsync(_templateCacheKey, cancellationToken);
@@ -259,7 +257,7 @@ public class CampaignController(
 
     private async Task CacheTemplates(TemplateList templates, CancellationToken cancellationToken = default)
     {
-        var jsonData = JsonConvert.SerializeObject(Templates);
+        var jsonData = JsonConvert.SerializeObject(templates);
         var data = Encoding.UTF8.GetBytes(jsonData);
 
         await cache.SetAsync(_templateCacheKey, data, cancellationToken);
