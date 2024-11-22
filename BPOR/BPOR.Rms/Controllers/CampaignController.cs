@@ -44,7 +44,7 @@ public class CampaignController(
     }
 
     [HttpPost]
-    public async Task<IActionResult> Send(SetupCampaignViewModel model, CancellationToken cancellationToken, ContactMethod contactMethod)
+    public async Task<IActionResult> Send(SetupCampaignViewModel model, CancellationToken cancellationToken)
     {
         await PopulateReferenceDataAsync(model, cancellationToken: cancellationToken);
 
@@ -53,24 +53,24 @@ public class CampaignController(
             if (ModelState[nameof(model.TotalVolunteers)]?.Errors.Any(e => e.ErrorMessage.Contains("is not valid")) ?? false)
             {
                 ModelState[nameof(model.TotalVolunteers)].Errors.Clear();
-                ModelState.AddModelError(nameof(model.TotalVolunteers), "Number of volunteers to be contacted must be a whole number, like 15.");
+                ModelState.AddModelError(nameof(model.TotalVolunteers), "Number of volunteers to be contacted must be a whole number, like 15");
             }
         }
 
         if (model.TotalVolunteers is null)
         {
-            ModelState.AddModelError(nameof(model.TotalVolunteers), "Enter the number of volunteers to be contacted.");
+            ModelState.AddModelError(nameof(model.TotalVolunteers), "Enter the number of volunteers to be contacted");
         }
 
         else if (model.TotalVolunteers > model.MaxNumbers)
         {
             ModelState.AddModelError(nameof(model.TotalVolunteers),
-                $"Number of volunteers to be contacted must be between 1 and {model.MaxNumbers:N0}.");
+                $"Number of volunteers to be contacted must be between 1 and {model.MaxNumbers:N0}");
         }
 
         if (string.IsNullOrEmpty(model.SelectedTemplateId))
         {
-            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Select a template.");
+            ModelState.AddModelError(nameof(model.SelectedTemplateId), "Select a template");
         }
 
         if (ModelState.IsValid)
@@ -84,7 +84,7 @@ public class CampaignController(
                 TargetGroupSize = model.TotalVolunteers,
                 TemplateId = new Guid(model.SelectedTemplateId!),
                 Name = selectedTemplate.name,
-                TypeId = contactMethod.Id
+                TypeId = (int)model.ContactMethod
             };
 
             await AddCampaignToContextAsync(campaign, cancellationToken);
@@ -108,7 +108,7 @@ public class CampaignController(
                 {
                     if (string.IsNullOrWhiteSpace(recipient))
                     {
-                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', email campaign ({emailCampaignId}).", model.StudyId, model.StudyName, campaign.Id);
+                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', campaign ({campaignId}).", model.StudyId, model.StudyName, campaign.Id);
 
                         continue;
                     }

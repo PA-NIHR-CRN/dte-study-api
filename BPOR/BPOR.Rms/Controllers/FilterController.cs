@@ -116,7 +116,6 @@ public class FilterController(ParticipantDbContext context,
             // TODO bind this directly into the model as a collection
             FilterPostcode = model.PostcodeSearch.GetPostcodeDistricts().Select(x => new FilterPostcode { PostcodeFragment = x }).ToList(),
             FilterGender = model.GetGenderOptions().Select(x => new FilterGender { GenderId = (int)x }).ToList(), // TODO: support null gender
-            //FilterContactMethod = ,
             FilterSexSameAsRegisteredAtBirth = GetSexSameAsRegisteredAtBirths(model),
             FilterEthnicGroup = GetEthnicGroups(model),
         };
