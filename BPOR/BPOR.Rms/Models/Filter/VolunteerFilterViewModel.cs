@@ -91,7 +91,7 @@ public class VolunteerFilterViewModel : IValidatableObject
     public int? SelectedVolunteersPreferredContact { get; set; }
     public IEnumerable<SelectListItem> VolunteersPreferredContactItems { get; set; } = SetVolunteersPreferredContactItems();
 
-    private static IEnumerable<SelectListItem> SetVolunteersPreferredContactItems()
+    public static IEnumerable<SelectListItem> SetVolunteersPreferredContactItems()
     {
         var items = new List<SelectListItem>
     {
