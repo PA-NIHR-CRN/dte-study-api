@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Enums;
 using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
@@ -7,7 +8,7 @@ public class CampaignParticipant : IAudit, ISoftDelete
 {
     public int Id { get; set; }
     public int CampaignId { get; set; }
-    public int CampaignTypeId { get; set; }
+    public ContactMethods CampaignTypeId { get; set; }
     public int ParticipantId { get; set; }
     public int? DeliveryStatusId { get; set; }
     public DateTime? SentAt { get; set; }

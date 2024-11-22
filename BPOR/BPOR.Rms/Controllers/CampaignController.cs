@@ -15,6 +15,7 @@ using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Notify.Exceptions;
 using Notify.Models.Responses;
+using BPOR.Rms.Exceptions;
 
 namespace BPOR.Rms.Controllers;
 
@@ -75,13 +76,18 @@ public class CampaignController(
             var selectedTemplate =
                 model.Templates.First(t => t.id == model.SelectedTemplateId);
 
+            if (!Enum.TryParse<ContactMethods>(selectedTemplate.type, true, out var contactMethod))
+            {
+                throw new InvalidContactMethodException(selectedTemplate.type);
+            }
+
             var campaign = new Campaign
             {
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
                 TemplateId = new Guid(model.SelectedTemplateId!),
                 Name = selectedTemplate.name,
-                TypeId = (int)model.ContactMethod
+                TypeId = contactMethod
             };
 
             await AddCampaignToContextAsync(campaign, cancellationToken);
@@ -110,22 +116,21 @@ public class CampaignController(
                         continue;
                     }
 
-                    object sendParams = new { };
-
-                    if (string.IsNullOrWhiteSpace(model.StudyName))
+                    var sendParams = new Dictionary<string, object>
                     {
-                        sendParams = (new { numberOfVolunteers = model.TotalVolunteers, letterTemplateFilename = selectedTemplate });
-                    }
-                    sendParams = (new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName });
+                        { "numberOfVolunteers", model.TotalVolunteers }
+                    };
 
                     switch (campaign.TypeId)
                     {
-                        case (int)ContactMethods.Email:
+                        case ContactMethods.Email:
                             contentfulTemplateId = "email-rms-campaign-sent";
+                            sendParams.Add("studyName", studyInfo.StudyName);
                             break;
 
-                        case (int)ContactMethods.Letter:
+                        case ContactMethods.Letter:
                             contentfulTemplateId = "letter-rms-campaign-sent";
+                            sendParams.Add("letterTemplateFilename", selectedTemplate.name);
                             break;
                     }
 

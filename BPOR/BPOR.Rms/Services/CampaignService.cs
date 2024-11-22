@@ -1,3 +1,4 @@
+using BPOR.Domain.Enums;
 using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
@@ -18,7 +19,6 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
-using NIHR.NotificationService.Models;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -253,7 +253,7 @@ public class CampaignService(
                 NotificationDatas = new List<NotificationData>
                 {
                     new() { Key = "campaignParticipantId", Value = campaignParticipant.Id.ToString() },
-                    new() { Key = "campaignTypeId", Value = campaignParticipant.CampaignTypeId.ToString() },
+                    new() { Key = "campaignTypeId", Value = ((int)campaignParticipant.CampaignTypeId).ToString() },
                     new() { Key = "firstName", Value = volunteer.FirstName },
                     new() { Key = "lastName", Value = volunteer.LastName },
                     new() { Key = "uniqueLink", Value = link },
@@ -264,28 +264,29 @@ public class CampaignService(
 
             switch (campaign.TypeId)
             {
-                case (int)ContactMethod.Email:
+                case ContactMethods.Email:
                     notification.PrimaryIdentifier = volunteer.Email;
                     notification.NotificationDatas.Add(new NotificationData { Key = "email", Value = volunteer.Email });
                     break;
 
-                case (int)ContactMethod.Letter:
+                case ContactMethods.Letter:
                     if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1) ||
+                        string.IsNullOrWhiteSpace(volunteer.Address.Town) ||
                         string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
                     {
-                        throw new InvalidOperationException("Address line 1, and postcode are required for letter notifications.");
+                        throw new InvalidOperationException("Letter notifications require at least 3 address lines");
                     }
 
                     notification.PrimaryIdentifier = $"ParticipantAddress({volunteer.Address.Id})";
 
                     var addressFields = new Dictionary<string, string>
                     {
-                    { "address_line_1", volunteer.Address.AddressLine1 },
-                    { "address_line_2", volunteer.Address.AddressLine2 ?? string.Empty },
-                    { "address_line_3", volunteer.Address.AddressLine3 },
-                    { "address_line_4", volunteer.Address.AddressLine4 },
-                    { "address_line_5", volunteer.Address.Town },
-                    { "address_line_6", volunteer.Address.Postcode } // Postcode is always the last line
+                        { "address_line_1", volunteer.Address.AddressLine1 },
+                        { "address_line_2", volunteer.Address.AddressLine2 },
+                        { "address_line_3", volunteer.Address.AddressLine3 },
+                        { "address_line_4", volunteer.Address.AddressLine4 },
+                        { "address_line_5", volunteer.Address.Town },
+                        { "address_line_6", volunteer.Address.Postcode }
                     };
 
                     foreach (var field in addressFields)
@@ -297,7 +298,6 @@ public class CampaignService(
                                 Key = field.Key,
                                 Value = field.Value
                             });
-
                         }
                     }
 

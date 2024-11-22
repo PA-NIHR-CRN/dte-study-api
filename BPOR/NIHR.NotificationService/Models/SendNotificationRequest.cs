@@ -1,38 +1,33 @@
+using BPOR.Domain.Enums;
+
 namespace NIHR.NotificationService.Models;
 
 public class SendNotificationRequest
 {
-    public string Reference { get; set; }
-    public Dictionary<string, string> Personalisation { get; set; }
-    public string TemplateId { get; set; }
+    public string Reference { get; set; } = string.Empty;
+    public Dictionary<string, string> Personalisation { get; set; } = new Dictionary<string, string>();
+    public string TemplateId { get; set; } = string.Empty;
     public string? EmailAddress { get; set; }
+    public ContactMethods ContactMethod { get; set; }
 
     public void Validate()
     {
 
-        if (!Personalisation.TryGetValue("campaignTypeId", out var campaignTypeIdStr))
+        if (string.IsNullOrWhiteSpace(TemplateId))
         {
-            throw new KeyNotFoundException("campaignTypeId not found in personalisation data.");
+            throw new ArgumentException("TemplateId is required for all notifications.");
         }
 
-        if (!int.TryParse(campaignTypeIdStr, out var campaignTypeId))
+        switch (ContactMethod)
         {
-            throw new ArgumentException($"campaignTypeId '{campaignTypeIdStr}' is not a valid integer.");
-        }
-
-        var contactMethod = (ContactMethod)campaignTypeId;
-
-
-        switch (contactMethod)
-        {
-            case ContactMethod.Email:
+            case ContactMethods.Email:
                 if (string.IsNullOrWhiteSpace(EmailAddress))
                     throw new ArgumentException("EmailAddress is required for email notifications.");
                 if (string.IsNullOrWhiteSpace(TemplateId))
                     throw new ArgumentException("TemplateId is required for email notifications.");
                 break;
 
-            case ContactMethod.Letter:
+            case ContactMethods.Letter:
                 if (!Personalisation.TryGetValue("address_line_1", out var addressLine1) || string.IsNullOrWhiteSpace(addressLine1))
                 {
                     throw new ArgumentException("Address line 1 is required for letter notifications.");
@@ -42,13 +37,7 @@ public class SendNotificationRequest
                 break;
 
             default:
-                throw new NotSupportedException($"Contact method {contactMethod} is not supported.");
+                throw new NotSupportedException($"Contact method {ContactMethod} is not supported.");
         }
     }
-}
-
-public enum ContactMethod
-{
-    Email = 1,
-    Letter = 2
 }
