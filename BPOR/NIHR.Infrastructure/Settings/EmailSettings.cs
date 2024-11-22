@@ -7,7 +7,7 @@ namespace NIHR.Infrastructure.Settings
     {
         public const string SectionName = nameof(EmailSettings);
         public string FromAddress { get; set; }
-        public bool? Enabled { get; set; }
+        public bool? Enabled { get; set; } = true;
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

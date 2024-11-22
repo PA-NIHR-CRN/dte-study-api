@@ -15,17 +15,26 @@ namespace NIHR.NotificationService.Services
     {
         private readonly NotificationClient _client;
         private readonly ILogger<NotificationService> _logger;
-        private static readonly SemaphoreSlim _semaphore = new(1, 1);
         private const int _rateLimitPerMinute = 3000;
-        private static int _emailDailyCount = 0;
-        private const int _emailDailyLimit = 250000;
-        private static int _letterDailyCount = 0;
-        private const int _letterDailyLimit = 20000;
+
+        private static readonly Dictionary<ContactMethods, int> _dailyCount = new();
+        private static readonly Dictionary<ContactMethods, int> _dailyLimit = new()
+        {
+            { ContactMethods.Email, 250000 },
+            { ContactMethods.Letter, 20000 }
+        };
+
+        private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
         public NotificationService(NotificationClient client, ILogger<NotificationService> logger)
         {
             _client = client;
             _logger = logger;
+
+            foreach (var method in Enum.GetValues<ContactMethods>())
+            {
+                _dailyCount[method] = 0;
+            }
         }
 
         public async Task SendNotificationAsync(SendNotificationRequest request, CancellationToken cancellationToken)
@@ -37,17 +46,7 @@ namespace NIHR.NotificationService.Services
             {
                 var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
 
-                if (!request.Personalisation.TryGetValue("campaignTypeId", out var campaignTypeIdStr))
-                {
-                    throw new KeyNotFoundException("campaignTypeId not found in personalisation data.");
-                }
-
-                if (!int.TryParse(campaignTypeIdStr, out var campaignTypeId))
-                {
-                    throw new ArgumentException($"campaignTypeId '{campaignTypeIdStr}' is not a valid integer.");
-                }
-
-                var contactMethod = (ContactMethods)campaignTypeId;
+                var contactMethod = (ContactMethods)int.Parse(personalisation["campaignTypeId"]);
 
                 switch (contactMethod)
                 {
@@ -127,7 +126,7 @@ namespace NIHR.NotificationService.Services
             var batchStopwatch = Stopwatch.StartNew();
             var individualTimes = new List<long>();
 
-            var tasks = batch.Select(notification => 
+            var tasks = batch.Select(notification =>
                 SendNotificationWithRetryAsync(notification, retryPolicy, cancellationToken, individualTimes)).ToList();
 
             await rateLimitPolicy.ExecuteAsync(() => Task.WhenAll(tasks));
@@ -139,7 +138,7 @@ namespace NIHR.NotificationService.Services
         }
 
         private async Task SendNotificationWithRetryAsync(Notification notification,
-        AsyncPolicy retryPolicy, CancellationToken cancellationToken, List<long> individualTimes)
+            AsyncPolicy retryPolicy, CancellationToken cancellationToken, List<long> individualTimes)
         {
             var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
 
@@ -182,18 +181,18 @@ namespace NIHR.NotificationService.Services
                 TemplateId = templateId,
                 Personalisation = personalisation,
                 Reference = reference,
+                ContactMethod = (ContactMethods)campaignTypeId
             };
 
-            var contactMethod = (ContactMethods)campaignTypeId;
+            var contactMethod = (ContactMethods)int.Parse(personalisation["campaignTypeId"]);
 
             switch (contactMethod)
             {
                 case ContactMethods.Email:
-                    if (!personalisation.TryGetValue("email", out var email))
+                    if (string.IsNullOrWhiteSpace(request.EmailAddress))
                     {
-                        throw new KeyNotFoundException("Email address not found for email notification.");
+                        throw new ArgumentException("EmailAddress is required for email notifications.");
                     }
-                    request.EmailAddress = email;
                     break;
 
                 case ContactMethods.Letter:
@@ -218,7 +217,6 @@ namespace NIHR.NotificationService.Services
                     request.Personalisation["address_line_5"] = town;
                     request.Personalisation["address_line_6"] = postcode;
                     request.Personalisation["address_postcode"] = postcode;
-
                     break;
 
                 default:
@@ -234,27 +232,20 @@ namespace NIHR.NotificationService.Services
             await _semaphore.WaitAsync();
             lockStopwatch.Stop();
 
+            _logger.LogInformation("Waited {ElapsedMilliseconds} ms for semaphore lock", lockStopwatch.ElapsedMilliseconds);
+
             try
             {
-                switch (contactMethod)
+                if (!_dailyCount.ContainsKey(contactMethod))
                 {
-                    case ContactMethods.Email:
-                        _emailDailyCount += count;
+                    throw new InvalidOperationException($"Unsupported contact method: {contactMethod}");
+                }
 
-                        if (_emailDailyCount >= _emailDailyLimit)
-                        {
-                            throw new InvalidOperationException("Daily email limit reached.");
-                        }
-                        break;
+                _dailyCount[contactMethod] += count;
 
-                    case ContactMethods.Letter:
-                        _letterDailyCount += count;
-
-                        if (_letterDailyCount >= _letterDailyLimit)
-                        {
-                            throw new InvalidOperationException("Daily letter limit reached.");
-                        }
-                        break;
+                if (_dailyCount[contactMethod] >= _dailyLimit[contactMethod])
+                {
+                    throw new InvalidOperationException($"Daily limit reached for {contactMethod}: {_dailyLimit[contactMethod]}");
                 }
             }
             finally
@@ -263,6 +254,7 @@ namespace NIHR.NotificationService.Services
                 _logger.LogInformation("Lock duration for IncrementDailyCountAsync: {ElapsedMilliseconds} ms", lockStopwatch.ElapsedMilliseconds);
             }
         }
+
 
         public async Task<TemplateList> GetTemplatesAsync(CancellationToken cancellationToken)
         {

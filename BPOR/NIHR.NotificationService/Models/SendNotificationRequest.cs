@@ -4,28 +4,21 @@ namespace NIHR.NotificationService.Models;
 
 public class SendNotificationRequest
 {
-    public string Reference { get; set; }
-    public Dictionary<string, string> Personalisation { get; set; }
-    public string TemplateId { get; set; }
+    public string Reference { get; set; } = string.Empty;
+    public Dictionary<string, string> Personalisation { get; set; } = new Dictionary<string, string>();
+    public string TemplateId { get; set; } = string.Empty;
     public string? EmailAddress { get; set; }
+    public ContactMethods ContactMethod { get; set; }
 
     public void Validate()
     {
 
-        if (!Personalisation.TryGetValue("campaignTypeId", out var campaignTypeIdStr))
+        if (string.IsNullOrWhiteSpace(TemplateId))
         {
-            throw new KeyNotFoundException("campaignTypeId not found in personalisation data.");
+            throw new ArgumentException("TemplateId is required for all notifications.");
         }
 
-        if (!int.TryParse(campaignTypeIdStr, out var campaignTypeId))
-        {
-            throw new ArgumentException($"campaignTypeId '{campaignTypeIdStr}' is not a valid integer.");
-        }
-
-        var contactMethod = (ContactMethods)campaignTypeId;
-
-
-        switch (contactMethod)
+        switch (ContactMethod)
         {
             case ContactMethods.Email:
                 if (string.IsNullOrWhiteSpace(EmailAddress))
@@ -44,7 +37,7 @@ public class SendNotificationRequest
                 break;
 
             default:
-                throw new NotSupportedException($"Contact method {contactMethod} is not supported.");
+                throw new NotSupportedException($"Contact method {ContactMethod} is not supported.");
         }
     }
 }

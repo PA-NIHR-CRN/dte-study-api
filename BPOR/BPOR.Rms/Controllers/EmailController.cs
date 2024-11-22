@@ -15,6 +15,7 @@ using NIHR.NotificationService.Models;
 using Notify.Exceptions;
 using Notify.Models.Responses;
 using BPOR.Domain.Enums;
+using BPOR.Rms.Exceptions;
 
 namespace BPOR.Rms.Controllers;
 
@@ -67,7 +68,7 @@ public class EmailController(
 
             if (!Enum.TryParse<ContactMethods>(selectedTemplate.type, true, out var contactMethod))
             {
-                throw new ArgumentException($"Invalid contact method type: {selectedTemplate.type}");
+                throw new InvalidContactMethodException(selectedTemplate.type);
             }
 
             var campaign = new Campaign
