@@ -8,7 +8,7 @@ using Rbec.Postcodes;
 using BPOR.Rms.Startup;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Domain.Enums;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 
 namespace BPOR.Rms.Controllers;
 
@@ -90,10 +90,44 @@ public class FilterController(ParticipantDbContext context,
         return new VolunteerFilterViewModel { StudyId = model.StudyId };
     }
 
-   
+    private async Task PopulateFilterIndexDataAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken)
+    {
+        if (model.StudyId.HasValue)
+        {
+            var study = await context.Studies
+                .Where(s => s.Id == model.StudyId)
+                .Select(s => new { s.StudyName, s.CpmsId, s.IsRecruitingIdentifiableParticipants })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (study != null)
+            {
+                model.StudyName = study.StudyName;
+                model.StudyCpmsId = study.CpmsId;
+                model.ShowRecruitedFilter = study.IsRecruitingIdentifiableParticipants;
+                model.ShowPreferredContactFilter = study.IsRecruitingIdentifiableParticipants;
+            }
+        }
+
+        if (model.VolunteersPreferredContactItems == null || !model.VolunteersPreferredContactItems.Any())
+        {
+            model.VolunteersPreferredContactItems = VolunteerFilterViewModel.SetVolunteersPreferredContactItems();
+        }
+    }
+
     [HttpPost]
     public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrEmpty(model.SelectedVolunteersPreferredContact))
+        {
+            ModelState.AddModelError("SelectedVolunteersPreferredContact", "You must select a preferred contact method.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await PopulateFilterIndexDataAsync(model, cancellationToken);
+            return View("Index", model);
+        }
+
         var dobRange = _today.GetDatesWithinYearRange(model.AgeRange.From, model.AgeRange.To);
 
         var filterCriteria = new FilterCriteria
@@ -124,7 +158,6 @@ public class FilterController(ParticipantDbContext context,
         context.FilterCriterias.Add(filterCriteria);
         await context.SaveChangesAsync(cancellationToken);
 
-        // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
         {
             FilterCriteriaId = filterCriteria.Id,
@@ -143,10 +176,10 @@ public class FilterController(ParticipantDbContext context,
                 campaignDetails.ContactMethod = ContactMethods.Letter;
                 break;
 
-            default:
-                ModelState.AddModelError("No Contact Preference Error","Something went wrong with the validation check as a result of Preferred Contact being {model.SelectedVolunteersPreferredContact.Value}");
-                //doesn't direct as expected?
-                return View(model);
+            //default:
+            //    ModelState.AddModelError("No Contact Preference Error","Something went wrong with the validation check as a result of Preferred Contact being {model.SelectedVolunteersPreferredContact.Value}");
+            //    return View("Index", model);
+                
         }
 
         return RedirectToAction("Setup", "Campaign", campaignDetails);
