@@ -100,35 +100,43 @@ public class CampaignController(
                                     .Select(x => new { x.StudyName, x.EmailAddress })
                                     .FirstOrDefaultAsync(cancellationToken);
 
-            if (studyInfo is not null)
+
+            if (studyInfo is not null || campaign.TypeId == (int)ContactMethods.Letter)
             {
-                IEnumerable<string> notificationRecipients = [rmsOptions.Value.CampaignNotificationEmailAddress, studyInfo.EmailAddress];
+                IEnumerable<string> notificationRecipients = studyInfo is not null
+                    ? new List<string> { rmsOptions.Value.CampaignNotificationEmailAddress, studyInfo.EmailAddress }
+                    : new List<string> { rmsOptions.Value.CampaignNotificationEmailAddress };
 
                 foreach (var recipient in notificationRecipients)
                 {
                     if (string.IsNullOrWhiteSpace(recipient))
                     {
                         logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', campaign ({campaignId}).", model.StudyId, model.StudyName, campaign.Id);
-
                         continue;
                     }
 
-                    object sendParams = new { };
-
-                    if (string.IsNullOrWhiteSpace(model.StudyName))
-                    {
-                        sendParams = (new { numberOfVolunteers = model.TotalVolunteers, letterTemplateFilename = selectedTemplate });
-                    }
-                    sendParams = (new { numberOfVolunteers = model.TotalVolunteers, studyName = studyInfo.StudyName });
+                    string contentfulTemplateId = string.Empty;
+                    var sendParams = new Dictionary<string, object>{
+                        { "numberOfVolunteers", model.TotalVolunteers }
+                    };
 
                     switch (campaign.TypeId)
                     {
                         case (int)ContactMethods.Email:
                             contentfulTemplateId = "email-rms-campaign-sent";
+                            sendParams.Add("studyName", studyInfo.StudyName);
                             break;
 
                         case (int)ContactMethods.Letter:
                             contentfulTemplateId = "letter-rms-campaign-sent";
+                            if (studyInfo is not null)
+                            {
+                                sendParams.Add("studyName", studyInfo.StudyName);
+                            }
+                            else
+                            {
+                                sendParams.Add("letterTemplateFilename", selectedTemplate);
+                            }
                             break;
                     }
 
