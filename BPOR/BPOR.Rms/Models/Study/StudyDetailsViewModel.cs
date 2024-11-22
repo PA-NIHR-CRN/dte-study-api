@@ -12,25 +12,25 @@ public class StudyDetailsViewModel
     public IEnumerable<EnrollmentDetails> EnrollmentDetails { get; set; }
     public int TotalRecruited => EnrollmentDetails.Sum(e => e.RecruitmentTotal);
     public int LatestRecruitmentTotal => EnrollmentDetails.FirstOrDefault()?.RecruitmentTotal ?? 0;
-    public IEnumerable<StudyCampaign> Campaigns { get; set; }
     public bool HasCampaigns { get; set; } = false;
+    public IEnumerable<Campaign> Campaigns { get; set; }
     public int TotalEmailsSent => Campaigns.Sum(e => e.TotalCampaignEmailsSent);
     public int TotalRegisteredInterest => Campaigns.Sum(e => e.TotalCampaignRegisteredInterest);
 }
 
-public class StudyCampaign
+public class Campaign
 {
     public string Name { get; set; }
     public string Description { get; set; }
     public DateTime CreatedAt { get; set; }
     public int? TargetGroupSize { get; set; }
-    public IEnumerable<StudyCampaignParticipant> CampaignParticipants { get; set; }
+    public IEnumerable<CampaignParticipant> CampaignParticipants { get; set; }
     public int TotalCampaignEmailsSent => CampaignParticipants.Where(e => e.DeliveryStatusId == 3).Count();
     public int TotalEmailsFailed => CampaignParticipants.Where(e => e.DeliveryStatusId == 5).Count();
     public int TotalCampaignRegisteredInterest => CampaignParticipants.Where(p => p.RegisteredInterestAt != null).Count();
 }
 
-public class StudyCampaignParticipant
+public class CampaignParticipant
 {
     public string ContactEmail { get; set; }
     public DateTime? SentAt { get; set; }

@@ -8,6 +8,7 @@ using Rbec.Postcodes;
 using BPOR.Rms.Startup;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Domain.Enums;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace BPOR.Rms.Controllers;
 
@@ -130,12 +131,24 @@ public class FilterController(ParticipantDbContext context,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
             StudyName = model.StudyName,
-            ContactMethod = model.SelectedVolunteersPreferredContact switch
-            {
-                (int)ContactMethods.Email => ContactMethods.Email,
-                (int)ContactMethods.Letter => ContactMethods.Letter
-            }
         };
+
+        switch (model.SelectedVolunteersPreferredContact)
+        {
+            case (int)ContactMethods.Email:
+                campaignDetails.ContactMethod = ContactMethods.Email;
+                break;
+
+            case (int)ContactMethods.Letter:
+                campaignDetails.ContactMethod = ContactMethods.Letter;
+                break;
+
+            default:
+                ModelState.AddModelError("No Contact Preference Error","Something went wrong with the validation check as a result of Preferred Contact being {model.SelectedVolunteersPreferredContact.Value}");
+                //doesn't direct as expected?
+                return View(model);
+        }
+
         return RedirectToAction("Setup", "Campaign", campaignDetails);
     }
 

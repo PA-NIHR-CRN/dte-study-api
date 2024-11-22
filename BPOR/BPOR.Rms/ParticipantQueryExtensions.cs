@@ -1,8 +1,6 @@
 ﻿using System.Linq.Expressions;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
-using BPOR.Domain.Entities.RefData;
-using BPOR.Domain.Enums;
 using BPOR.Rms.Models.Filter;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +12,9 @@ public static class ParticipantQueryExtensions
     {
         if (selectedVolunteersContacted.HasValue)
         {
+
             return query.Where(x => x.CampaignParticipants.Any(e => e.Campaign.FilterCriteria.StudyId == studyId) == selectedVolunteersContacted.Value);
+
         }
 
         return query;
@@ -24,7 +24,8 @@ public static class ParticipantQueryExtensions
     {
         if (selectedVolunteersPreferredContact.HasValue)
         {
-            return query.Where(x => x.ContactMethods.Any(e => e.ContactMethodId == selectedVolunteersPreferredContact.Value));
+
+            return query.Where(x => x.ContactMethods.Any(e => e.ContactMethodId == (int)selectedVolunteersPreferredContact));
         }
         return query;
     }
