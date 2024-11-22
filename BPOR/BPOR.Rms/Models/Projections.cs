@@ -163,7 +163,7 @@ public static class Projections
                 CreatedAt = e.CreatedAt
             }).AsEnumerable();
     } 
-    private static Expression<Func<Participant, CampaignParticipantDetails>> VolunteerToEmailParticipantDetails()
+    private static Expression<Func<Participant, EmailParticipantDetails >> VolunteerToEmailParticipantDetails()
 
     {
         return v => new EmailParticipantDetails

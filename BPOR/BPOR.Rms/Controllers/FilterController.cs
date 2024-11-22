@@ -8,6 +8,7 @@ using Rbec.Postcodes;
 using BPOR.Rms.Startup;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Domain.Enums;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace BPOR.Rms.Controllers;
 
@@ -123,18 +124,6 @@ public class FilterController(ParticipantDbContext context,
         context.FilterCriterias.Add(filterCriteria);
         await context.SaveChangesAsync(cancellationToken);
 
-        // early validation check
-
-        //a
-        /*if (model.SelectedVolunteersPreferredContact.Value = "No preference")
-        {
-            ModelState.AddModelError("Something went wrong with the validation check as aresukt of Preferred Contact being {model.SelectedVolunteersPreferredContact.Value}");
-        }*/
-
-        //b
-
-        //c
-
         // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
         {
@@ -142,13 +131,24 @@ public class FilterController(ParticipantDbContext context,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
             StudyName = model.StudyName,
-            ContactMethod = model.SelectedVolunteersPreferredContact switch
-            {
-                "Email" => ContactMethods.Email,
-                "Letter" => ContactMethods.Letter,
-                _ => throw new System.NotImplementedException(),
-            }
         };
+
+        switch (model.SelectedVolunteersPreferredContact)
+        {
+            case "Email":
+                campaignDetails.ContactMethod = ContactMethods.Email;
+                break;
+
+            case "Letter":
+                campaignDetails.ContactMethod = ContactMethods.Letter;
+                break;
+
+            default:
+                ModelState.AddModelError("No Contact Preference Error","Something went wrong with the validation check as a result of Preferred Contact being {model.SelectedVolunteersPreferredContact.Value}");
+                //doesn't direct as expected?
+                return View(model);
+        }
+
         return RedirectToAction("Setup", "Campaign", campaignDetails);
     }
 

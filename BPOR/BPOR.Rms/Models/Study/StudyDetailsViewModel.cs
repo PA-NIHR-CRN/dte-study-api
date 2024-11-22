@@ -12,7 +12,7 @@ public class StudyDetailsViewModel
     public IEnumerable<EnrollmentDetails> EnrollmentDetails { get; set; }
     public int TotalRecruited => EnrollmentDetails.Sum(e => e.RecruitmentTotal);
     public int LatestRecruitmentTotal => EnrollmentDetails.FirstOrDefault()?.RecruitmentTotal ?? 0;
-    public bool HasEmailCampaigns { get; set; } = false;
+    public bool HasCampaigns { get; set; } = false;
     public IEnumerable<Campaign> Campaigns { get; set; }
 
     public int TotalEmailsSent => Campaigns.Sum(e => e.TotalCampaignEmailsSent);
