@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Models.Volunteer;
 
 namespace BPOR.Rms.Models.Study;
@@ -14,7 +15,7 @@ public class StudyDetailsViewModel
     public int LatestRecruitmentTotal => EnrollmentDetails.FirstOrDefault()?.RecruitmentTotal ?? 0;
     public bool HasCampaigns { get; set; } = false;
     public IEnumerable<Campaign> Campaigns { get; set; }
-    public int TotalEmailsSent => Campaigns.Sum(e => e.TotalCampaignEmailsSent);
+    public int TotalNotificationsSent => Campaigns.Sum(e => e.TotalCampaignNotificationsSent);
     public int TotalRegisteredInterest => Campaigns.Sum(e => e.TotalCampaignRegisteredInterest);
 }
 
@@ -25,9 +26,11 @@ public class Campaign
     public DateTime CreatedAt { get; set; }
     public int? TargetGroupSize { get; set; }
     public IEnumerable<CampaignParticipant> CampaignParticipants { get; set; }
-    public int TotalCampaignEmailsSent => CampaignParticipants.Where(e => e.DeliveryStatusId == 3).Count();
-    public int TotalEmailsFailed => CampaignParticipants.Where(e => e.DeliveryStatusId == 5).Count();
+    public int TotalCampaignNotificationsSent => CampaignParticipants.Where(e => e.DeliveryStatusId == 3).Count();
+    public int TotalContactAttemptsFailed => CampaignParticipants.Where(e => e.DeliveryStatusId == 5).Count();
     public int TotalCampaignRegisteredInterest => CampaignParticipants.Where(p => p.RegisteredInterestAt != null).Count();
+    public ContactMethods TypeId { get; set; }
+
 }
 
 public class CampaignParticipant
