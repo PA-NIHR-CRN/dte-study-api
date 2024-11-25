@@ -115,6 +115,7 @@ public static class Projections
                     TargetGroupSize = (int)ec.TargetGroupSize,
                     CreatedAt = ec.CreatedAt,
                     Name = ec.Name,
+                    TypeId = ec.TypeId,
                     CampaignParticipants = ec.Participants
                         .Select(p => new CampaignParticipant
                         {
