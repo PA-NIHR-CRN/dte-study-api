@@ -69,7 +69,8 @@
                          )
 
             </div>
-                 
+
+            <input asp-for="ShowPreferredContactFilter" class="govuk-input" id="ShowPreferredContactFilter" value="@(Model.ShowPreferredContactFilter)" hidden />
             <div class="govuk-form-group  @(Html.ViewData.ModelState["SelectedVolunteersPreferredContact"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 @if (Model.ShowPreferredContactFilter)
                 {

@@ -121,18 +121,6 @@ public class FilterController(ParticipantDbContext context,
     public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
 
-        if (!model.SelectedVolunteersPreferredContact.HasValue)
-        {
-            ModelState.AddModelError("SelectedVolunteersPreferredContact", "You must select a preferred contact method.");
-        }
-
-        if (!ModelState.IsValid)
-        {
-            await PopulateFilterIndexDataAsync(model, cancellationToken);
-            return View("Index", model);
-
-        }
-
         var dobRange = _today.GetDatesWithinYearRange(model.AgeRange.From, model.AgeRange.To);
 
         var filterCriteria = new FilterCriteria
