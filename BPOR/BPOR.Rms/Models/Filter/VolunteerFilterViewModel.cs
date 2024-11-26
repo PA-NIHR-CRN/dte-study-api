@@ -231,9 +231,9 @@ public class VolunteerFilterViewModel : IValidatableObject
                     new[] { $"{nameof(RegistrationFromDate)}.{nameof(RegistrationFromDate.Day)}", $"{nameof(RegistrationToDate)}.{nameof(RegistrationToDate.Day)}" });
             }
         }
-        if((!SelectedVolunteersPreferredContact.Equals(ContactMethods.Email)|| !SelectedVolunteersPreferredContact.Equals(ContactMethods.Letter)) && ShowPreferredContactFilter)
+        if(!SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Email) && !SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Letter) && ShowPreferredContactFilter)
         {
-            yield return new ValidationResult($"{validationContext.GetMemberDisplayName(nameof(SelectedVolunteersPreferredContact))} year must be 2022 or later", [$"{nameof(SelectedVolunteersPreferredContact)}"]);
+            yield return new ValidationResult("You must select a preferred contact method.", [$"{nameof(SelectedVolunteersPreferredContact)}"]);
         }
 
     }
