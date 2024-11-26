@@ -25,6 +25,13 @@ public class FilterController(ParticipantDbContext context,
     {
         //ModelState.Clear();
 
+        if (TempData["ContactMethodError"] != null)
+        {
+            ModelState.AddModelError(nameof(model.SelectedVolunteersPreferredContact), TempData["ContactMethodError"].ToString());
+            await PopulateFilterIndexDataAsync(model, cancellationToken);
+            return View(model);
+
+        }
         bool isResearcher = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
 
         if (isResearcher)
@@ -40,7 +47,6 @@ public class FilterController(ParticipantDbContext context,
 
         if (activity == "FilterVolunteers")
         {
-            model.SkipSubmitValidation = true;
             results = await FilterVolunteersAsync(model, cancellationToken);
         }
         else if (activity == "ClearFilters")
@@ -116,11 +122,37 @@ public class FilterController(ParticipantDbContext context,
         {
             model.VolunteersPreferredContactItems = VolunteerFilterViewModel.SetVolunteersPreferredContactItems();
         }
+
+        if (model.VolunteersContactedItems == null || !model.VolunteersContactedItems.Any())
+        {
+            model.VolunteersContactedItems = VolunteerFilterViewModel.SetVolunteersContactedItems();
+        }
+
+        if (model.VolunteersRecruitedItems == null || !model.VolunteersRecruitedItems.Any())
+        {
+            model.VolunteersRecruitedItems = VolunteerFilterViewModel.SetVolunteersRecruitedItems();
+        }
+
+        if (model.VolunteersCompletedRegistrationItems == null || !model.VolunteersCompletedRegistrationItems.Any())
+        {
+            model.VolunteersCompletedRegistrationItems = VolunteerFilterViewModel.SetVolunteersCompletedRegistrationItems();
+        }
+
+        if (model.VolunteersRegisteredInterestItems == null || !model.VolunteersRegisteredInterestItems.Any())
+        {
+            model.VolunteersRegisteredInterestItems = VolunteerFilterViewModel.SetVolunteersRegisteredInterestItems();
+        }
     }
 
     [HttpPost]
     public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
+        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Email) && !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Letter) && model.ShowPreferredContactFilter)
+        {
+            TempData["ContactMethodError"] = "You must select a preferred contact method.";
+            return RedirectToAction("Index",model);
+        }
+        
 
         var dobRange = _today.GetDatesWithinYearRange(model.AgeRange.From, model.AgeRange.To);
 

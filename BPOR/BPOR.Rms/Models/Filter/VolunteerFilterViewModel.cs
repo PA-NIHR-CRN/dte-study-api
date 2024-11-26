@@ -20,13 +20,13 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     public bool ShowRecruitedFilter { get; set; }
 
-    public bool ShowPreferredContactFilter { get; set; }
+    public bool ShowPreferredContactFilter { get; set; } = true;
 
     [Display(Name = "Volunteers contacted", Order = 1)]
     public bool? SelectedVolunteersContacted { get; set; }
     public IEnumerable<SelectListItem> VolunteersContactedItems { get; set; } = SetVolunteersContactedItems();
 
-    private static IEnumerable<SelectListItem> SetVolunteersContactedItems()
+    public static IEnumerable<SelectListItem> SetVolunteersContactedItems()
     {
         var items = new List<SelectListItem>
         {
@@ -45,7 +45,7 @@ public class VolunteerFilterViewModel : IValidatableObject
     public bool? SelectedVolunteersRecruited { get; set; }
     public IEnumerable<SelectListItem> VolunteersRecruitedItems { get; set; } = SetVolunteersRecruitedItems();
 
-    private static IEnumerable<SelectListItem> SetVolunteersRecruitedItems()
+    public static IEnumerable<SelectListItem> SetVolunteersRecruitedItems()
     {
         var items = new List<SelectListItem>
         {
@@ -59,7 +59,7 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     public IEnumerable<SelectListItem> VolunteersRegisteredInterestItems { get; set; } = SetVolunteersRegisteredInterestItems();
 
-    private static IEnumerable<SelectListItem> SetVolunteersRegisteredInterestItems()
+    public static IEnumerable<SelectListItem> SetVolunteersRegisteredInterestItems()
     {
         var items = new List<SelectListItem>
         {
@@ -75,7 +75,7 @@ public class VolunteerFilterViewModel : IValidatableObject
     public bool? SelectedVolunteersCompletedRegistration { get; set; }
     public IEnumerable<SelectListItem> VolunteersCompletedRegistrationItems { get; set; } = SetVolunteersCompletedRegistrationItems();
 
-    private static IEnumerable<SelectListItem> SetVolunteersCompletedRegistrationItems()
+    public static IEnumerable<SelectListItem> SetVolunteersCompletedRegistrationItems()
     {
         var items = new List<SelectListItem>
         {
@@ -147,8 +147,6 @@ public class VolunteerFilterViewModel : IValidatableObject
     [Display(Name = "White", Order = 20)]
     public bool Ethnicity_White { get; set; }
     public int? VolunteerCount { get; set; }
-
-    public bool SkipSubmitValidation { get; set; } = false;
 
     public VolunteerFilterViewTestingModel Testing { get; set; } = new();
 
@@ -233,11 +231,6 @@ public class VolunteerFilterViewModel : IValidatableObject
                     new[] { $"{nameof(RegistrationFromDate)}.{nameof(RegistrationFromDate.Day)}", $"{nameof(RegistrationToDate)}.{nameof(RegistrationToDate.Day)}" });
             }
         }
-        if(!SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Email) && !SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Letter) && ShowPreferredContactFilter && SkipSubmitValidation)
-        {
-            yield return new ValidationResult("You must select a preferred contact method.", [$"{nameof(SelectedVolunteersPreferredContact)}"]);
-        }
-
     }
 
 
