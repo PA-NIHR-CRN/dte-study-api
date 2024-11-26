@@ -40,6 +40,7 @@ public class FilterController(ParticipantDbContext context,
 
         if (activity == "FilterVolunteers")
         {
+            model.SkipSubmitValidation = true;
             results = await FilterVolunteersAsync(model, cancellationToken);
         }
         else if (activity == "ClearFilters")

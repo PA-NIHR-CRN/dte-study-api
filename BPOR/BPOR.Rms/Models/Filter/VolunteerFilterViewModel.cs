@@ -148,6 +148,8 @@ public class VolunteerFilterViewModel : IValidatableObject
     public bool Ethnicity_White { get; set; }
     public int? VolunteerCount { get; set; }
 
+    public bool SkipSubmitValidation { get; set; } = false;
+
     public VolunteerFilterViewTestingModel Testing { get; set; } = new();
 
     public ISet<GenderId?> GetGenderOptions()
@@ -231,7 +233,7 @@ public class VolunteerFilterViewModel : IValidatableObject
                     new[] { $"{nameof(RegistrationFromDate)}.{nameof(RegistrationFromDate.Day)}", $"{nameof(RegistrationToDate)}.{nameof(RegistrationToDate.Day)}" });
             }
         }
-        if(!SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Email) && !SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Letter) && ShowPreferredContactFilter)
+        if(!SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Email) && !SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Letter) && ShowPreferredContactFilter && SkipSubmitValidation)
         {
             yield return new ValidationResult("You must select a preferred contact method.", [$"{nameof(SelectedVolunteersPreferredContact)}"]);
         }
