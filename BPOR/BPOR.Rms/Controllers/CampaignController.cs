@@ -81,7 +81,7 @@ public class CampaignController(
                 throw new InvalidContactMethodException(selectedTemplate.type);
             }
 
-            var campaign = new Campaign
+            var campaign = new Campaigns
             {
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
@@ -267,7 +267,7 @@ public class CampaignController(
         await cache.SetAsync(_templateCacheKey, data, cancellationToken);
     }
 
-    private async Task AddCampaignToContextAsync(Campaign campaign, CancellationToken cancellationToken)
+    private async Task AddCampaignToContextAsync(Campaigns campaign, CancellationToken cancellationToken)
     {
         await context.Campaigns.AddAsync(campaign, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);

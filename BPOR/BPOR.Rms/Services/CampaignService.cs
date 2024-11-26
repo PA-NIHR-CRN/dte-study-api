@@ -63,7 +63,7 @@ public class CampaignService(
                throw new InvalidOperationException("Campaign delivery status not found");
     }
 
-    private async Task<FilterCriteria?> GetFilterCriteriaAsync(Campaign campaign,
+    private async Task<FilterCriteria?> GetFilterCriteriaAsync(Campaigns campaign,
         CancellationToken cancellationToken)
     {
         return await context.FilterCriterias
@@ -94,7 +94,7 @@ public class CampaignService(
             .ToListAsync(cancellationToken);
     }
 
-    private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
+    private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaigns campaign,
         FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
@@ -159,7 +159,7 @@ public class CampaignService(
 
     private async IAsyncEnumerable<ProcessingResults> ProcessVolunteersAsync(
         List<CampaignParticipantDetails> volunteers,
-        Campaign campaign,
+        Campaigns campaign,
         FilterCriteria dbFilter,
         int deliveryStatusId,
         int batchSize,
@@ -181,10 +181,10 @@ public class CampaignService(
         }
     }
 
-    private void ProcessVolunteer(CampaignParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
+    private void ProcessVolunteer(CampaignParticipantDetails volunteer, Campaigns campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int deliveryStatusId)
     {
-        processingResult.CampaignParticipants.Add(new CampaignParticipant
+        processingResult.CampaignParticipants.Add(new CampaignParticipants
         {
             CampaignId = campaign.Id,
             CampaignTypeId = campaign.TypeId,
@@ -217,7 +217,7 @@ public class CampaignService(
         }
     }
 
-    private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
+    private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, Campaigns campaign,
         List<ProcessingResults> queue, string callback, CancellationToken cancellationToken)
     {
         foreach (var volunteer in volunteers)
@@ -330,6 +330,6 @@ internal static class DbContextExtensions
 
 internal class ProcessingResults
 {
-    public List<CampaignParticipant> CampaignParticipants { get; } = [];
+    public List<CampaignParticipants> CampaignParticipants { get; } = [];
     public List<StudyParticipantEnrollment> StudyParticipantEnrollments { get; } = [];
 }

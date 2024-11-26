@@ -48,8 +48,8 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
     public CommunicationLanguage CommunicationLanguage { get; set; }
     public Gender Gender { get; set; }
 
-    public ICollection<CampaignParticipant> CampaignParticipants { get; set; } =
-        new List<CampaignParticipant>();
+    public ICollection<CampaignParticipants> CampaignParticipants { get; set; } =
+        new List<CampaignParticipants>();
     public ICollection<ParticipantHealthCondition> HealthConditions { get; set; } =
         new List<ParticipantHealthCondition>();
 

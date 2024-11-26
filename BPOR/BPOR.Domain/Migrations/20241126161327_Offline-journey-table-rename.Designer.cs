@@ -13,8 +13,8 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20241119185555_CRNCC-2394-adding-letter-campaign-functionality")]
-    partial class CRNCC2394addinglettercampaignfunctionality
+    [Migration("20241126161327_Offline-journey-table-rename")]
+    partial class Offlinejourneytablerename
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,7 +26,62 @@ namespace Dynamo.Stream.Handler.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("BPOR.Domain.Entities.Campaign", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaignParticipants", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CampaignId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CampaignTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeliveredAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("DeliveryStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("ParticipantId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("RegisteredInterestAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CampaignId");
+
+                    b.HasIndex("DeliveryStatusId");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.ToTable("CampaignParticipants");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaigns", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -77,58 +132,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.HasIndex("FilterCriteriaId");
 
                     b.ToTable("Campaigns");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.CampaignParticipant", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("DeliveredAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("DeliveryStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("ParticipantId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("RegisteredInterestAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("SentAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("UpdatedById")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CampaignId");
-
-                    b.HasIndex("DeliveryStatusId");
-
-                    b.HasIndex("ParticipantId");
-
-                    b.ToTable("CampaignParticipants");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.EngagementPreferences", b =>
@@ -218,6 +221,9 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("AgeTo")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ContactMethodId")
                         .HasColumnType("int");
 
                     b.Property<string>("FullPostcode")
@@ -525,9 +531,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<int>("ContactMethodId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("FilterCriteriaId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -537,8 +540,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ContactMethodId");
-
-                    b.HasIndex("FilterCriteriaId");
 
                     b.HasIndex("ParticipantId");
 
@@ -10095,20 +10096,9 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.ToTable("UserRole");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.Campaign", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaignParticipants", b =>
                 {
-                    b.HasOne("BPOR.Domain.Entities.FilterCriteria", "FilterCriteria")
-                        .WithMany("Campaigns")
-                        .HasForeignKey("FilterCriteriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FilterCriteria");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.CampaignParticipant", b =>
-                {
-                    b.HasOne("BPOR.Domain.Entities.Campaign", "Campaign")
+                    b.HasOne("BPOR.Domain.Entities.EmailCampaigns", "Campaign")
                         .WithMany("Participants")
                         .HasForeignKey("CampaignId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -10129,6 +10119,17 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("DeliveryStatus");
 
                     b.Navigation("Participant");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaigns", b =>
+                {
+                    b.HasOne("BPOR.Domain.Entities.FilterCriteria", "FilterCriteria")
+                        .WithMany("Campaign")
+                        .HasForeignKey("FilterCriteriaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FilterCriteria");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.EngagementPreferences", b =>
@@ -10280,10 +10281,6 @@ namespace Dynamo.Stream.Handler.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BPOR.Domain.Entities.FilterCriteria", null)
-                        .WithMany("FilterContactMethod")
-                        .HasForeignKey("FilterCriteriaId");
-
                     b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
                         .WithMany("ContactMethods")
                         .HasForeignKey("ParticipantId")
@@ -10423,18 +10420,16 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.Campaign", b =>
+            modelBuilder.Entity("BPOR.Domain.Entities.EmailCampaigns", b =>
                 {
                     b.Navigation("Participants");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.FilterCriteria", b =>
                 {
-                    b.Navigation("Campaigns");
+                    b.Navigation("Campaign");
 
                     b.Navigation("FilterAreaOfInterest");
-
-                    b.Navigation("FilterContactMethod");
 
                     b.Navigation("FilterEthnicGroup");
 

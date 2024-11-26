@@ -16,7 +16,7 @@ public class FilterCriteria
     public int? AgeTo { get; set; }
     public int? ContactMethodId { get; set; }
 
-    public ICollection<Campaign> Campaigns { get; set; } = [];
+    public ICollection<Campaigns> Campaigns { get; set; } = [];
     public ICollection<FilterAreaOfInterest> FilterAreaOfInterest { get; set; } = [];
     public ICollection<FilterPostcode> FilterPostcode { get; set; } = [];
     public ICollection<FilterGender> FilterGender { get; set; } = [];

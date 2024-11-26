@@ -8,40 +8,56 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Dynamo.Stream.Handler.Migrations
 {
     /// <inheritdoc />
-    public partial class CRNCC2394addinglettercampaignfunctionality : Migration
+    public partial class Offlinejourneytablerenamesetup : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_CampaignParticipants_Campaigns_EmailCampaignId",
-                table: "CampaignParticipants");
+                name: "FK_EmailCampaignParticipants_EmailCampaigns_EmailCampaignId",
+                table: "EmailCampaignParticipants");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_CampaignParticipants_SysRefEmailDeliveryStatus_DeliveryStatu~",
-                table: "CampaignParticipants");
+                name: "FK_EmailCampaignParticipants_SysRefEmailDeliveryStatus_Delivery~",
+                table: "EmailCampaignParticipants");
 
             migrationBuilder.DropTable(
                 name: "SysRefEmailDeliveryStatus");
 
+            migrationBuilder.DropIndex(
+                name: "IX_EmailCampaignParticipants_EmailCampaignId",
+                table: "EmailCampaignParticipants");
+
+            migrationBuilder.DropColumn(
+                name: "ContactEmail",
+                table: "EmailCampaignParticipants");
+
             migrationBuilder.RenameColumn(
                 name: "EmailTemplateId",
-                table: "Campaigns",
+                table: "EmailCampaigns",
                 newName: "TemplateId");
 
             migrationBuilder.RenameColumn(
                 name: "EmailCampaignId",
-                table: "CampaignParticipants",
-                newName: "CampaignId");
+                table: "EmailCampaignParticipants",
+                newName: "CampaignTypeId");
 
-            migrationBuilder.RenameIndex(
-                name: "IX_CampaignParticipants_EmailCampaignId",
-                table: "CampaignParticipants",
-                newName: "IX_CampaignParticipants_CampaignId");
+            migrationBuilder.AddColumn<int>(
+                name: "ContactMethodId",
+                table: "FilterCriterias",
+                type: "int",
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "TypeId",
-                table: "Campaigns",
+                table: "EmailCampaigns",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
+
+            migrationBuilder.AddColumn<int>(
+                name: "CampaignId",
+                table: "EmailCampaignParticipants",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
@@ -98,21 +114,26 @@ namespace Dynamo.Stream.Handler.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_EmailCampaignParticipants_CampaignId",
+                table: "EmailCampaignParticipants",
+                column: "CampaignId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_FilterContactMethod_ContactMethodId",
                 table: "FilterContactMethod",
                 column: "ContactMethodId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_CampaignParticipants_Campaigns_CampaignId",
-                table: "CampaignParticipants",
+                name: "FK_EmailCampaignParticipants_EmailCampaigns_CampaignId",
+                table: "EmailCampaignParticipants",
                 column: "CampaignId",
-                principalTable: "Campaigns",
+                principalTable: "EmailCampaigns",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_CampaignParticipants_SysRefDeliveryStatus_DeliveryStatusId",
-                table: "CampaignParticipants",
+                name: "FK_EmailCampaignParticipants_SysRefDeliveryStatus_DeliveryStatu~",
+                table: "EmailCampaignParticipants",
                 column: "DeliveryStatusId",
                 principalTable: "SysRefDeliveryStatus",
                 principalColumn: "Id");
@@ -122,12 +143,12 @@ namespace Dynamo.Stream.Handler.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_CampaignParticipants_Campaigns_CampaignId",
-                table: "CampaignParticipants");
+                name: "FK_EmailCampaignParticipants_EmailCampaigns_CampaignId",
+                table: "EmailCampaignParticipants");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_CampaignParticipants_SysRefDeliveryStatus_DeliveryStatusId",
-                table: "CampaignParticipants");
+                name: "FK_EmailCampaignParticipants_SysRefDeliveryStatus_DeliveryStatu~",
+                table: "EmailCampaignParticipants");
 
             migrationBuilder.DropTable(
                 name: "FilterContactMethod");
@@ -135,24 +156,40 @@ namespace Dynamo.Stream.Handler.Migrations
             migrationBuilder.DropTable(
                 name: "SysRefDeliveryStatus");
 
+            migrationBuilder.DropIndex(
+                name: "IX_EmailCampaignParticipants_CampaignId",
+                table: "EmailCampaignParticipants");
+
+            migrationBuilder.DropColumn(
+                name: "ContactMethodId",
+                table: "FilterCriterias");
+
             migrationBuilder.DropColumn(
                 name: "TypeId",
-                table: "Campaigns");
+                table: "EmailCampaigns");
+
+            migrationBuilder.DropColumn(
+                name: "CampaignId",
+                table: "EmailCampaignParticipants");
 
             migrationBuilder.RenameColumn(
                 name: "TemplateId",
-                table: "Campaigns",
+                table: "EmailCampaigns",
                 newName: "EmailTemplateId");
 
             migrationBuilder.RenameColumn(
-                name: "CampaignId",
-                table: "CampaignParticipants",
+                name: "CampaignTypeId",
+                table: "EmailCampaignParticipants",
                 newName: "EmailCampaignId");
 
-            migrationBuilder.RenameIndex(
-                name: "IX_CampaignParticipants_CampaignId",
-                table: "CampaignParticipants",
-                newName: "IX_CampaignParticipants_EmailCampaignId");
+            migrationBuilder.AddColumn<string>(
+                name: "ContactEmail",
+                table: "EmailCampaignParticipants",
+                type: "varchar(255)",
+                maxLength: 255,
+                nullable: false,
+                defaultValue: "")
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "SysRefEmailDeliveryStatus",
@@ -184,17 +221,22 @@ namespace Dynamo.Stream.Handler.Migrations
                     { 5, "Failed", "Failed", false }
                 });
 
+            migrationBuilder.CreateIndex(
+                name: "IX_EmailCampaignParticipants_EmailCampaignId",
+                table: "EmailCampaignParticipants",
+                column: "EmailCampaignId");
+
             migrationBuilder.AddForeignKey(
-                name: "FK_CampaignParticipants_Campaigns_EmailCampaignId",
-                table: "CampaignParticipants",
+                name: "FK_EmailCampaignParticipants_EmailCampaigns_EmailCampaignId",
+                table: "EmailCampaignParticipants",
                 column: "EmailCampaignId",
-                principalTable: "Campaigns",
+                principalTable: "EmailCampaigns",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_CampaignParticipants_SysRefEmailDeliveryStatus_DeliveryStatu~",
-                table: "CampaignParticipants",
+                name: "FK_EmailCampaignParticipants_SysRefEmailDeliveryStatus_Delivery~",
+                table: "EmailCampaignParticipants",
                 column: "DeliveryStatusId",
                 principalTable: "SysRefEmailDeliveryStatus",
                 principalColumn: "Id");
