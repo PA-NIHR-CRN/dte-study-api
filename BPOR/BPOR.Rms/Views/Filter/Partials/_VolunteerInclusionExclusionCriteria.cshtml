@@ -18,7 +18,7 @@
                              new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-contacted-hint" }
                              )
                 </div>
-                
+
                 <div class="govuk-form-group">
                     @Html.LabelFor(m => m.SelectedVolunteersRegisteredInterest, new { @class = "govuk-label exclusion_label" })
                     <div id="volunteers-registered-hint" class="govuk-hint">
@@ -30,7 +30,7 @@
                              new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-registered-hint" }
                              )
                 </div>
-                
+
                 <div class="govuk-form-group">
                     @if (Model.ShowRecruitedFilter)
                     {
@@ -54,7 +54,7 @@
                         </div>
                     }
                 </div>
-                
+
             }
 
             <div class="govuk-form-group">
@@ -69,42 +69,42 @@
                          )
 
             </div>
-
-            <input asp-for="ShowPreferredContactFilter" class="govuk-input" id="ShowPreferredContactFilter" value="@(Model.ShowPreferredContactFilter)" hidden />
-            <div class="govuk-form-group  @(Html.ViewData.ModelState["SelectedVolunteersPreferredContact"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                @if (Model.ShowPreferredContactFilter)
-                {
-
-                    @Html.LabelFor(m => m.SelectedVolunteersPreferredContact, new { @class = "govuk-label exclusion_label" })
-                    <div id="volunteers-preferred-contact-hint" class="govuk-hint">
-                        Do you want to find volunteers who have a specific preferred contact method?
-                    </div>
-
-                    @if (Html.ViewData.ModelState["SelectedVolunteersPreferredContact"]?.Errors.Count > 0)
-                    {
-                        <span id="SelectedVolunteersPreferredContact-error" class="govuk-error-message">
-                            <span class="govuk-visually-hidden">Error:</span>
-                            @Html.ValidationMessageFor(model => model.SelectedVolunteersPreferredContact)
-                        </span>
-                    }
-
-                    @Html.DropDownListFor(
-                            m => m.SelectedVolunteersPreferredContact,
-                            Model.VolunteersPreferredContactItems,
-                            new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-preferred-contact-hint" }
-                            )
-                }
-                else
-                {
-                    <div class="govuk-input_select__wrapper">
-                        <div class="govuk-label exclusion_label">Volunteers preferred contact method</div>
-                        <div class="govuk-hint govuk-!-margin-top-4" style="margin-bottom: 12px;">
-                            Studies recruiting anonymous participants can only contact volunteers by email.
-                        </div>
-                    </div>
-                }
-            </div>
-
         </legend>
     </fieldset>
+
+    <h2 class="govuk-heading-l">Volunteers preferred contact method</h2>
+    <div class="govuk-form-group  @(Html.ViewData.ModelState["SelectedVolunteersPreferredContact"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+        @if (Model.ShowPreferredContactFilter)
+        {
+
+            @Html.LabelFor(m => m.SelectedVolunteersPreferredContact, new { @class = "govuk-label exclusion_label sr-only" })
+            <div id="volunteers-preferred-contact-hint" class="govuk-hint">
+                Do you want to find volunteers who have a specific preferred contact method?
+            </div>
+
+            @if (Html.ViewData.ModelState["SelectedVolunteersPreferredContact"]?.Errors.Count > 0)
+            {
+                <span id="SelectedVolunteersPreferredContact-error" class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @Html.ValidationMessageFor(model => model.SelectedVolunteersPreferredContact)
+                </span>
+            }
+
+            @Html.DropDownListFor(
+                    m => m.SelectedVolunteersPreferredContact,
+                    Model.VolunteersPreferredContactItems,
+                    new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-preferred-contact-hint" }
+                    )
+        }
+        else
+        {
+            <div class="govuk-input_select__wrapper">
+                <div class="govuk-label exclusion_label sr-only">Volunteers preferred contact method</div>
+                <div class="govuk-hint govuk-!-margin-top-4" style="margin-bottom: 12px;">
+                    Studies recruiting anonymous participants can only contact volunteers by email.
+                </div>
+            </div>
+        }
+    </div>
+
 </div>
