@@ -149,7 +149,7 @@ public class FilterController(ParticipantDbContext context,
     {
         if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Email) && !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Letter) && model.ShowPreferredContactFilter)
         {
-            TempData["ContactMethodError"] = "You must select a preferred contact method.";
+            TempData["ContactMethodError"] = "Select if the volunteers preferred contact method is email or letter";
             return RedirectToAction("Index",model);
         }
         
