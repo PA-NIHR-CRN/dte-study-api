@@ -5,9 +5,9 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Registration.Api", "BPOR.Registration.Api\BPOR.Registration.Api.csproj", "{51271F93-49F8-4A0B-8FAD-7911D81A0D70}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms", "BPOR.Rms\BPOR.Rms.csproj", "{A369E709-3D8A-4F5F-8740-231DD890B949}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Rms", "BPOR.Rms\BPOR.Rms.csproj", "{A369E709-3D8A-4F5F-8740-231DD890B949}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Registration.Stream.Handler", "BPOR.Registration.Stream.Handler\src\BPOR.Registration.Stream.Handler\BPOR.Registration.Stream.Handler.csproj", "{CEF9BD95-2830-4833-B4A4-4B9401D55D2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Registration.Stream.Handler", "BPOR.Registration.Stream.Handler\src\BPOR.Registration.Stream.Handler\BPOR.Registration.Stream.Handler.csproj", "{CEF9BD95-2830-4833-B4A4-4B9401D55D2B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Domain", "BPOR.Domain\BPOR.Domain.csproj", "{CF2BA9F4-300F-42F0-B47B-53612A3F3F50}"
 EndProject
@@ -21,15 +21,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.Infrastructure.EntityF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.Infrastructure.AspNetCore", "NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj", "{B112F387-4349-4A82-9A33-B21906EFF4B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Geolocation", "BPOR.Geolocation\BPOR.Geolocation.csproj", "{5ED83769-29C7-4504-94C3-C8962CB62500}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Geolocation", "BPOR.Geolocation\BPOR.Geolocation.csproj", "{5ED83769-29C7-4504-94C3-C8962CB62500}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{7D035B4F-4ECD-4D3F-B31E-0908D729085E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.NotificationService", "NIHR.NotificationService\NIHR.NotificationService.csproj", "{A8F63B96-9F20-4FFE-84C4-02EC62D2581F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.NotificationService", "NIHR.NotificationService\NIHR.NotificationService.csproj", "{A8F63B96-9F20-4FFE-84C4-02EC62D2581F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{94C3A807-9598-40BE-8D1A-D6C6B79100F8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms.Tests", "BPOR.Rms.Tests\BPOR.Rms.Tests.csproj", "{DB8E1DBE-FBB1-4A1F-B2D6-D75F02898EFE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Rms.Tests", "BPOR.Rms.Tests\BPOR.Rms.Tests.csproj", "{DB8E1DBE-FBB1-4A1F-B2D6-D75F02898EFE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImportGeocodeData", "ImportGeocodeData\ImportGeocodeData.csproj", "{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}"
 EndProject
