@@ -3,16 +3,28 @@
 <h2 class="govuk-heading-l">Location</h2>
 
 <form-group for="PostcodeDistricts">
+    <p class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span>
+        @Html.ValidationMessageFor(model => model.PostcodeDistricts)
+    </p>
     <input asp-for="PostcodeDistricts" class="govuk-input" type="text" aria-describedby="PostcodeDistricts-hint" />
 </form-group>
 
 <h3 class="govuk-heading-m">OR</h3>
 
 <form-group for="PostcodeRadiusSearch.FullPostcode">
+    <p class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span>
+        @Html.ValidationMessageFor(model => model.PostcodeRadiusSearch.FullPostcode)
+    </p>
     <input asp-for="PostcodeRadiusSearch.FullPostcode" class="govuk-input govuk-input--width-10" type="text" aria-describedby="PostcodeRadiusSearch-FullPostcode-hint" />
 </form-group>
 
 <form-group for="PostcodeRadiusSearch.SearchRadiusMiles">
+    <p class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span>
+        @Html.ValidationMessageFor(model => model.PostcodeRadiusSearch.SearchRadiusMiles)
+    </p>
     <div class="govuk-input__wrapper">
         <input asp-for="PostcodeRadiusSearch.SearchRadiusMiles" class="govuk-input govuk-input--width-5" type="text" inputmode="numeric" aria-describedby="PostcodeRadiusSearch-SearchRadiusMiles-hint" />
         <div class="govuk-input__suffix" aria-hidden="true">Miles</div>
