@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Volunteer account added - Volunteer Registry - Be Part of Research";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half-from-desktop">
+        <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title">
+                Volunteer account successfully created
+            </h1>
+        </div>
+    </div>
+</div>
+
+<div class="govuk-button-group">
+    @Html.ActionLink("Add volunteer", "Consent", "Volunteer", null, new { @class = "govuk-button", data_module = "govuk-button" })
+    @Html.ActionLink("All studies", "Index", "Study", null, new { @class = "govuk-button govuk-button--secondary", data_module = "govuk-button" })
+</div>
