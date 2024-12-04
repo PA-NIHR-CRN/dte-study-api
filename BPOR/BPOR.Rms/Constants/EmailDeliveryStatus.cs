@@ -1,6 +1,6 @@
 namespace BPOR.Rms.Constants;
 
-public static class EmailDeliveryStatus
+public static class DeliveryStatus
 {
     public const string Pending = "Pending";
     public const string Sent = "Sent";

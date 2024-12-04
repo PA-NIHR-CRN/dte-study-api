@@ -7,6 +7,9 @@ using Z.EntityFramework.Plus;
 using Rbec.Postcodes;
 using BPOR.Rms.Startup;
 using NIHR.GovUk.AspNetCore.Mvc;
+using BPOR.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BPOR.Rms.Controllers;
 
@@ -20,6 +23,15 @@ public class FilterController(ParticipantDbContext context,
 
     public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
+        //ModelState.Clear();
+
+        if (TempData["ContactMethodError"] != null)
+        {
+            ModelState.AddModelError(nameof(model.SelectedVolunteersPreferredContact), TempData["ContactMethodError"].ToString());
+            await PopulateFilterIndexDataAsync(model, cancellationToken);
+            return View(model);
+
+        }
         bool isResearcher = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
 
         if (isResearcher)
@@ -54,6 +66,7 @@ public class FilterController(ParticipantDbContext context,
             model.StudyCpmsId = selectedStudy.CpmsId;
 
             model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
+            model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
         }
 
         model.VolunteerCount = results.Count?.Value;
@@ -87,9 +100,60 @@ public class FilterController(ParticipantDbContext context,
         return new VolunteerFilterViewModel { StudyId = model.StudyId };
     }
 
-    [HttpPost]
-    public async Task<IActionResult> SetupEmailCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
+    private async Task PopulateFilterIndexDataAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken)
     {
+        if (model.StudyId.HasValue)
+        {
+            var study = await context.Studies
+                .Where(s => s.Id == model.StudyId)
+                .Select(s => new { s.StudyName, s.CpmsId, s.IsRecruitingIdentifiableParticipants })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (study != null)
+            {
+                model.StudyName = study.StudyName;
+                model.StudyCpmsId = study.CpmsId;
+                model.ShowRecruitedFilter = study.IsRecruitingIdentifiableParticipants;
+                model.ShowPreferredContactFilter = study.IsRecruitingIdentifiableParticipants;
+            }
+        }
+
+        if (model.VolunteersPreferredContactItems == null || !model.VolunteersPreferredContactItems.Any())
+        {
+            model.VolunteersPreferredContactItems = VolunteerFilterViewModel.SetVolunteersPreferredContactItems();
+        }
+
+        if (model.VolunteersContactedItems == null || !model.VolunteersContactedItems.Any())
+        {
+            model.VolunteersContactedItems = VolunteerFilterViewModel.SetVolunteersContactedItems();
+        }
+
+        if (model.VolunteersRecruitedItems == null || !model.VolunteersRecruitedItems.Any())
+        {
+            model.VolunteersRecruitedItems = VolunteerFilterViewModel.SetVolunteersRecruitedItems();
+        }
+
+        if (model.VolunteersCompletedRegistrationItems == null || !model.VolunteersCompletedRegistrationItems.Any())
+        {
+            model.VolunteersCompletedRegistrationItems = VolunteerFilterViewModel.SetVolunteersCompletedRegistrationItems();
+        }
+
+        if (model.VolunteersRegisteredInterestItems == null || !model.VolunteersRegisteredInterestItems.Any())
+        {
+            model.VolunteersRegisteredInterestItems = VolunteerFilterViewModel.SetVolunteersRegisteredInterestItems();
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
+    {
+        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Email) && !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Letter) && model.ShowPreferredContactFilter)
+        {
+            TempData["ContactMethodError"] = "Select if the volunteers preferred contact method is email or letter";
+            return RedirectToAction("Index",model);
+        }
+        
+
         var dobRange = _today.GetDatesWithinYearRange(model.AgeRange.From, model.AgeRange.To);
 
         var filterCriteria = new FilterCriteria
@@ -102,6 +166,7 @@ public class FilterController(ParticipantDbContext context,
             RegistrationToDate = model.RegistrationToDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
             AgeFrom = model.AgeRange.From,
             AgeTo = model.AgeRange.To,
+            ContactMethodId = model.SelectedVolunteersPreferredContact,
             FullPostcode = model.PostcodeSearch.PostcodeRadiusSearch.FullPostcode?.ToString(),
             SearchRadiusMiles = model.PostcodeSearch.PostcodeRadiusSearch.SearchRadiusMiles,
             StudyId = model.StudyId,
@@ -120,15 +185,26 @@ public class FilterController(ParticipantDbContext context,
         context.FilterCriterias.Add(filterCriteria);
         await context.SaveChangesAsync(cancellationToken);
 
-        // TODO do we need studyID?
         var campaignDetails = new SetupCampaignViewModel
         {
             FilterCriteriaId = filterCriteria.Id,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
-            StudyName = model.StudyName
+            StudyName = model.StudyName,
         };
-        return RedirectToAction("SetupCampaign", "Email", campaignDetails);
+
+        switch (model.SelectedVolunteersPreferredContact)
+        {
+            case (int)ContactMethods.Email:
+                campaignDetails.ContactMethod = ContactMethods.Email;
+                break;
+
+            case (int)ContactMethods.Letter:
+                campaignDetails.ContactMethod = ContactMethods.Letter;
+                break;
+        }
+
+        return RedirectToAction("Setup", "Campaign", campaignDetails);
     }
 
     private static List<T> Map<T>(IEnumerable<bool> inputList, Func<int, T> getOutput) =>
@@ -173,6 +249,7 @@ public class FilterController(ParticipantDbContext context,
                     HasRegistered = x.RegistrationConsentAtUtc,
                     EthnicGroup = x.EthnicGroup,
                     GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
+                    ContactMethod = x.ContactMethods.FirstOrDefault().ContactMethodId
                 })
                 .OrderBy(x => x.Id)
                 .DeferredPage(paginationService);

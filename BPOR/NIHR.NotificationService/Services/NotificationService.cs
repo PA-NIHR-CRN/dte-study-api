@@ -7,6 +7,7 @@ using Notify.Client;
 using Notify.Models.Responses;
 using Polly;
 using Polly.RateLimit;
+using BPOR.Domain.Enums;
 
 namespace NIHR.NotificationService.Services
 {
@@ -14,49 +15,76 @@ namespace NIHR.NotificationService.Services
     {
         private readonly NotificationClient _client;
         private readonly ILogger<NotificationService> _logger;
-        private static readonly SemaphoreSlim _semaphore = new(1, 1);
-        private static int _dailyEmailCount = 0;
-        private const int _dailyLimit = 250000;
         private const int _rateLimitPerMinute = 3000;
+
+        private static readonly Dictionary<ContactMethods, int> _dailyCount = new();
+        private static readonly Dictionary<ContactMethods, int> _dailyLimit = new()
+        {
+            { ContactMethods.Email, 250000 },
+            { ContactMethods.Letter, 20000 }
+        };
+
+        private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
         public NotificationService(NotificationClient client, ILogger<NotificationService> logger)
         {
             _client = client;
             _logger = logger;
+
+            foreach (var method in Enum.GetValues<ContactMethods>())
+            {
+                _dailyCount[method] = 0;
+            }
         }
 
-        private async Task SendEmailAsync(SendEmailRequest request, CancellationToken cancellationToken)
+        public async Task SendNotificationAsync(SendNotificationRequest request, CancellationToken cancellationToken)
         {
+            request.Validate();
+
             var stopwatch = Stopwatch.StartNew();
             try
             {
                 var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
-                    
-                await _client.SendEmailAsync(request.EmailAddress, request.EmailTemplateId,
-                    personalisation, request.Reference);
-                await IncrementDailyEmailCountAsync(1);
+
+                var contactMethod = (ContactMethods)int.Parse(personalisation["campaignTypeId"]);
+
+                switch (contactMethod)
+                {
+                    case ContactMethods.Email:
+                        await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation, request.Reference);
+                        await IncrementDailyCountAsync(ContactMethods.Email, 1);
+                        break;
+
+                    case ContactMethods.Letter:
+                        await _client.SendLetterAsync(request.TemplateId, personalisation, request.Reference);
+                        await IncrementDailyCountAsync(ContactMethods.Letter, 1);
+                        break;
+
+                    default:
+                        throw new NotSupportedException($"Contact method {contactMethod} is not supported.");
+                }
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
-                _logger.LogError(httpEx, "429 Rate Limit Exceeded error while sending email");
-                throw new InvalidOperationException("429 Rate Limit Exceeded error while sending email.", httpEx);
+                _logger.LogError(httpEx, "429 Rate Limit Exceeded error while sending notification");
+                throw new InvalidOperationException("429 Rate Limit Exceeded error while sending notification.", httpEx);
             }
             finally
             {
                 stopwatch.Stop();
-                _logger.LogInformation("Request for {EmailAddress} took {ElapsedMilliseconds} ms", request.EmailAddress, stopwatch.ElapsedMilliseconds);
+                _logger.LogInformation("Request for {Reference} took {ElapsedMilliseconds} ms", request.Reference, stopwatch.ElapsedMilliseconds);
             }
         }
 
-        public async Task SendPreviewEmailAsync(SendEmailRequest request, CancellationToken cancellationToken)
+        public async Task SendPreviewEmailAsync(SendNotificationRequest request, CancellationToken cancellationToken)
         {
             var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
 
-            await _client.SendEmailAsync(request.EmailAddress, request.EmailTemplateId,
+            await _client.SendEmailAsync(request.EmailAddress, request.TemplateId,
                 personalisation, request.Reference);
         }
 
-        public async Task<EmailNotificationResponse> SendBatchEmailAsync(List<Notification> notifications,
+        public async Task<NotificationResponse> SendBatchNotificationAsync(List<Notification> notifications,
             CancellationToken cancellationToken)
         {
             const int batchSize = 100;
@@ -77,7 +105,7 @@ namespace NIHR.NotificationService.Services
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogWarning("Batch email sending cancelled");
+                    _logger.LogWarning("Batch notification sending cancelled");
                     cancellationToken.ThrowIfCancellationRequested();
                 }
 
@@ -89,7 +117,7 @@ namespace NIHR.NotificationService.Services
             totalStopwatch.Stop();
             _logger.LogInformation("Total time for all batches: {TotalMilliseconds} ms", totalStopwatch.ElapsedMilliseconds);
 
-            return new EmailNotificationResponse();
+            return new NotificationResponse();
         }
 
         private async Task SendBatchWithRateLimitAsync(List<Notification> batch,
@@ -98,73 +126,135 @@ namespace NIHR.NotificationService.Services
             var batchStopwatch = Stopwatch.StartNew();
             var individualTimes = new List<long>();
 
-            var tasks = batch.Select(notification => 
-                SendEmailWithRetryAsync(notification, retryPolicy, cancellationToken, individualTimes)).ToList();
+            var tasks = batch.Select(notification =>
+                SendNotificationWithRetryAsync(notification, retryPolicy, cancellationToken, individualTimes)).ToList();
 
             await rateLimitPolicy.ExecuteAsync(() => Task.WhenAll(tasks));
 
             batchStopwatch.Stop();
             var averageTimePerRequest = individualTimes.Average();
-            _logger.LogInformation("Batch of {BatchCount} emails took {ElapsedMilliseconds} ms. Average time per request: {AverageTimePerRequest} ms",
+            _logger.LogInformation("Batch of {BatchCount} notifications took {ElapsedMilliseconds} ms. Average time per request: {AverageTimePerRequest} ms",
                 batch.Count, batchStopwatch.ElapsedMilliseconds, averageTimePerRequest);
         }
 
-        private async Task SendEmailWithRetryAsync(Notification notification,
+        private async Task SendNotificationWithRetryAsync(Notification notification,
             AsyncPolicy retryPolicy, CancellationToken cancellationToken, List<long> individualTimes)
         {
             var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
-            var email = personalisation["email"];
-            var sendEmailRequest = CreateSendEmailRequest(email, personalisation);
+
+            var sendNotificationRequest = CreateSendNotificationRequest(personalisation);
 
             var stopwatch = Stopwatch.StartNew();
-            await retryPolicy.ExecuteAsync(async () => { await SendEmailAsync(sendEmailRequest, cancellationToken); });
+            await retryPolicy.ExecuteAsync(async () => { await SendNotificationAsync(sendNotificationRequest, cancellationToken); });
             stopwatch.Stop();
+
             lock (individualTimes)
             {
                 individualTimes.Add(stopwatch.ElapsedMilliseconds);
             }
         }
 
-        private static SendEmailRequest CreateSendEmailRequest(string email, Dictionary<string, string> personalisation)
+        private static SendNotificationRequest CreateSendNotificationRequest(Dictionary<string, string> personalisation)
         {
-            if (!personalisation.TryGetValue("emailCampaignParticipantId", out var reference))
+            if (!personalisation.TryGetValue("campaignParticipantId", out var reference))
             {
-                throw new KeyNotFoundException($"EmailCampaignParticipantId not found for email: {email}");
-            }
-            
-            if (!personalisation.TryGetValue("emailTemplateId", out var emailTemplateId))
-            {
-                throw new KeyNotFoundException($"EmailTemplateId not found for email: {email}");
+                throw new KeyNotFoundException("campaignParticipantId not found in personalisation data.");
             }
 
-            return new SendEmailRequest
+            if (!personalisation.TryGetValue("templateId", out var templateId))
             {
-                EmailAddress = email,
-                EmailTemplateId = emailTemplateId,
+                throw new KeyNotFoundException("templateId not found in personalisation data.");
+            }
+
+            if (!personalisation.TryGetValue("campaignTypeId", out var campaignTypeIdStr))
+            {
+                throw new KeyNotFoundException("campaignTypeId not found in personalisation data.");
+            }
+
+            if (!int.TryParse(campaignTypeIdStr, out var campaignTypeId))
+            {
+                throw new ArgumentException($"campaignTypeId '{campaignTypeIdStr}' is not a valid integer.");
+            }
+
+            var request = new SendNotificationRequest
+            {
+                TemplateId = templateId,
                 Personalisation = personalisation,
-                Reference = reference
+                Reference = reference,
+                ContactMethod = (ContactMethods)campaignTypeId
             };
+
+            var contactMethod = (ContactMethods)int.Parse(personalisation["campaignTypeId"]);
+
+            switch (contactMethod)
+            {
+                case ContactMethods.Email:
+                    if (string.IsNullOrWhiteSpace(request.EmailAddress))
+                    {
+                        throw new ArgumentException("EmailAddress is required for email notifications.");
+                    }
+                    break;
+
+                case ContactMethods.Letter:
+                    if (!personalisation.TryGetValue("address_line_1", out var addressLine1) ||
+                        !personalisation.TryGetValue("address_line_5", out var town) ||
+                        !personalisation.TryGetValue("address_line_6", out var postcode))
+                    {
+                        throw new KeyNotFoundException("Letter notifications require at least 3 address lines");
+                    }
+
+                    request.Personalisation["address_line_1"] = addressLine1;
+
+                    for (int i = 2; i <= 4; i++) // assign optional address fields
+                    {
+                        var key = $"address_line_{i}";
+                        if (personalisation.TryGetValue(key, out var value))
+                        {
+                            request.Personalisation[key] = value;
+                        }
+                    }
+
+                    request.Personalisation["address_line_5"] = town;
+                    request.Personalisation["address_line_6"] = postcode;
+                    request.Personalisation["address_postcode"] = postcode;
+                    break;
+
+                default:
+                    throw new NotSupportedException($"Contact method {contactMethod} is not supported.");
+            }
+
+            return request;
         }
 
-        private async Task IncrementDailyEmailCountAsync(int count)
+        private async Task IncrementDailyCountAsync(ContactMethods contactMethod, int count)
         {
             var lockStopwatch = Stopwatch.StartNew();
             await _semaphore.WaitAsync();
             lockStopwatch.Stop();
+
+            _logger.LogInformation("Waited {ElapsedMilliseconds} ms for semaphore lock", lockStopwatch.ElapsedMilliseconds);
+
             try
             {
-                _dailyEmailCount += count;
-                if (_dailyEmailCount >= _dailyLimit)
+                if (!_dailyCount.ContainsKey(contactMethod))
                 {
-                    throw new InvalidOperationException("Daily email limit reached.");
+                    throw new InvalidOperationException($"Unsupported contact method: {contactMethod}");
+                }
+
+                _dailyCount[contactMethod] += count;
+
+                if (_dailyCount[contactMethod] >= _dailyLimit[contactMethod])
+                {
+                    throw new InvalidOperationException($"Daily limit reached for {contactMethod}: {_dailyLimit[contactMethod]}");
                 }
             }
             finally
             {
                 _semaphore.Release();
-                _logger.LogInformation("Lock duration for IncrementDailyEmailCountAsync: {ElapsedMilliseconds} ms", lockStopwatch.ElapsedMilliseconds);
+                _logger.LogInformation("Lock duration for IncrementDailyCountAsync: {ElapsedMilliseconds} ms", lockStopwatch.ElapsedMilliseconds);
             }
         }
+
 
         public async Task<TemplateList> GetTemplatesAsync(CancellationToken cancellationToken)
         {

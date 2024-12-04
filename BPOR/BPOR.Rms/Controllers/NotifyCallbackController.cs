@@ -41,26 +41,25 @@ public class NotifyCallbackController(
             return Ok();
         }
 
-        if (!TryParse(message.Reference, out var emailCampaignParticipantId))
+        if (!TryParse(message.Reference, out var campaignParticipantId))
         {
             logger.LogError("Invalid callback reference {reference}", message.Reference);
             return BadRequest("Invalid reference.");
         }
 
-        var participantEmail = await context.EmailCampaignParticipants
-            .Where(x => x.Id == emailCampaignParticipantId)
+        var participantEmail = await context.CampaignParticipants
+            .Where(x => x.Id == campaignParticipantId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (participantEmail == null)
         {
-            logger.LogError("EmailCampaignParticipant not found for Id {emailCampaignParticipantId}.", emailCampaignParticipantId);
+            logger.LogError("CampaignParticipant not found for Id {campaignParticipantId}.", campaignParticipantId);
             return NotFound();
         }
 
         switch (message.Status)
         {
             case "accepted":
-            case "received":
             case "cancelled":
             case "pending-virus-check":
             case "virus-scan-failed":
@@ -70,15 +69,16 @@ public class NotifyCallbackController(
             case "pending":
             case "sent":
                 break;
+            case "received": // Letter printed and posted
             case "delivered":
                 participantEmail.DeliveredAt = DateTime.UtcNow;
                 participantEmail.DeliveryStatusId =
-                    refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Delivered);
+                    refDataService.GetDeliveryStatusId(DeliveryStatus.Delivered);
                 break;
             case "temporary-failure":
             case "permanent-failure":
             case "technical-failure":
-                participantEmail.DeliveryStatusId = refDataService.GetEmailDeliveryStatusId(EmailDeliveryStatus.Failed);
+                participantEmail.DeliveryStatusId = refDataService.GetDeliveryStatusId(DeliveryStatus.Failed);
                 break;
             default:
                 return BadRequest("Invalid status.");
@@ -97,11 +97,11 @@ public class NotifyCallbackController(
         {
             var decryptedReference = encryptionService.Decrypt(reference);
 
-            if (TryParse(decryptedReference, out var emailCampaignParticipantId) &&
-                emailCampaignParticipantId != 0)
+            if (TryParse(decryptedReference, out var campaignParticipantId) &&
+                campaignParticipantId != 0)
             {
-                var participantQuery = context.EmailCampaignParticipants
-                    .Where(p => p.Id == emailCampaignParticipantId);
+                var participantQuery = context.CampaignParticipants
+                    .Where(p => p.Id == campaignParticipantId);
 
                 var participant = await participantQuery.FirstOrDefaultAsync(o => o.RegisteredInterestAt == null, cancellationToken);
                 if (participant is not null)
@@ -109,8 +109,8 @@ public class NotifyCallbackController(
                     participant.RegisteredInterestAt = timeProvider.GetLocalNow().DateTime;
                     await context.SaveChangesAsync(cancellationToken);
                 }
-                var informationUrl = await participantQuery.Where(p => p.Id == emailCampaignParticipantId)
-                    .Select(o => o.EmailCampaign.FilterCriteria.Study.InformationUrl)
+                var informationUrl = await participantQuery.Where(p => p.Id == campaignParticipantId)
+                    .Select(o => o.Campaign.FilterCriteria.Study.InformationUrl)
                     .FirstOrDefaultAsync(cancellationToken);
 
                 if (!string.IsNullOrWhiteSpace(informationUrl) && Uri.IsWellFormedUriString(informationUrl, UriKind.Absolute))
@@ -119,7 +119,7 @@ public class NotifyCallbackController(
                 }
                 else
                 {
-                    logger.LogWarning("Study information Url is empty or malformed: '{informationUrl}'. emailCampaignParticipantId: {emailCampaignParticipantId}", informationUrl, emailCampaignParticipantId);
+                    logger.LogWarning("Study information Url is empty or malformed: '{informationUrl}'. campaignParticipantId: {campaignParticipantId}", informationUrl, campaignParticipantId);
                 }
             }
         }

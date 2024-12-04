@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <Content Remove="Views\Shared\Unauthorised.cshtml" />
+      <Content Remove="Views\Campaign\EmailSuccess.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -53,6 +54,9 @@
       <PackageReference Include="Dte.Common" Version="1.7.7" />
     </ItemGroup>
     <ItemGroup>
+      <None Remove="Exceptions\" />
+    </ItemGroup>
+    <ItemGroup>
         <None Update="Views/Study/Partials/_StudyList.cshtml.css" SingleFile="true" CssScope="custom-scope-identifier" />
     </ItemGroup>
     <PropertyGroup>
@@ -67,5 +71,8 @@
     </ItemGroup>
     <ItemGroup>
       <None Include="Views\Shared\Unauthorised.cshtml" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Exceptions\" />
     </ItemGroup>
 </Project>

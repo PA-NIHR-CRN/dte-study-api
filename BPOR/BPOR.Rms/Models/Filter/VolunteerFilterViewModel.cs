@@ -1,5 +1,6 @@
 using BPOR.Domain.Entities.Configuration;
 using NIHR.GovUk.AspNetCore.Mvc;
+using BPOR.Domain.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NIHR.Infrastructure.Paging;
 using System.ComponentModel.DataAnnotations;
@@ -19,11 +20,13 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     public bool ShowRecruitedFilter { get; set; }
 
+    public bool ShowPreferredContactFilter { get; set; } = true;
+
     [Display(Name = "Volunteers contacted", Order = 1)]
     public bool? SelectedVolunteersContacted { get; set; }
     public IEnumerable<SelectListItem> VolunteersContactedItems { get; set; } = SetVolunteersContactedItems();
 
-    private static IEnumerable<SelectListItem> SetVolunteersContactedItems()
+    public static IEnumerable<SelectListItem> SetVolunteersContactedItems()
     {
         var items = new List<SelectListItem>
         {
@@ -42,7 +45,7 @@ public class VolunteerFilterViewModel : IValidatableObject
     public bool? SelectedVolunteersRecruited { get; set; }
     public IEnumerable<SelectListItem> VolunteersRecruitedItems { get; set; } = SetVolunteersRecruitedItems();
 
-    private static IEnumerable<SelectListItem> SetVolunteersRecruitedItems()
+    public static IEnumerable<SelectListItem> SetVolunteersRecruitedItems()
     {
         var items = new List<SelectListItem>
         {
@@ -56,7 +59,7 @@ public class VolunteerFilterViewModel : IValidatableObject
 
     public IEnumerable<SelectListItem> VolunteersRegisteredInterestItems { get; set; } = SetVolunteersRegisteredInterestItems();
 
-    private static IEnumerable<SelectListItem> SetVolunteersRegisteredInterestItems()
+    public static IEnumerable<SelectListItem> SetVolunteersRegisteredInterestItems()
     {
         var items = new List<SelectListItem>
         {
@@ -72,7 +75,7 @@ public class VolunteerFilterViewModel : IValidatableObject
     public bool? SelectedVolunteersCompletedRegistration { get; set; }
     public IEnumerable<SelectListItem> VolunteersCompletedRegistrationItems { get; set; } = SetVolunteersCompletedRegistrationItems();
 
-    private static IEnumerable<SelectListItem> SetVolunteersCompletedRegistrationItems()
+    public static IEnumerable<SelectListItem> SetVolunteersCompletedRegistrationItems()
     {
         var items = new List<SelectListItem>
         {
@@ -84,48 +87,64 @@ public class VolunteerFilterViewModel : IValidatableObject
         return items;
     }
 
+    [Display(Name = "Volunteers preferred contact method", Order = 5)]
+    public int? SelectedVolunteersPreferredContact { get; set; }
+    public IEnumerable<SelectListItem> VolunteersPreferredContactItems { get; set; } = SetVolunteersPreferredContactItems();
+
+    public static IEnumerable<SelectListItem> SetVolunteersPreferredContactItems()
+    {
+        var items = new List<SelectListItem>
+    {
+        new SelectListItem { Value = string.Empty, Text = "No preference" },
+        new SelectListItem { Value = ((int)ContactMethods.Email).ToString(), Text = "Email" },
+        new SelectListItem { Value = ((int)ContactMethods.Letter).ToString(), Text = "Letter" }
+    };
+
+        return items;
+    }
+
     // Areas of research volunteers are interested in
-    [Display(Name = "Areas of research volunteers are interested in", Order = 5)]
+    [Display(Name = "Areas of research volunteers are interested in", Order = 6)]
     public List<int> SelectedAreasOfInterest { get; set; } = [];
 
     public bool IncludeNoAreasOfInterest { get; set; }
 
-    [Display(Name = "Date of volunteer registration (from)", Order = 6)]
-    public GovUkDate RegistrationFromDate { get; set; } = new ();
+    [Display(Name = "Date of volunteer registration (from)", Order = 7)]
+    public GovUkDate RegistrationFromDate { get; set; } = new();
 
-    [Display(Name = "Date of volunteer registration (to)", Order = 7)]
-    public GovUkDate RegistrationToDate { get; set; } = new ();
+    [Display(Name = "Date of volunteer registration (to)", Order = 8)]
+    public GovUkDate RegistrationToDate { get; set; } = new();
 
-    [Display(Order = 8)]
+    [Display(Order = 9)]
     public PostcodeSearchModel PostcodeSearch { get; set; } = new();
 
 
     // Demographic information
-    [Display(Name = "Age range", Description = "Please specify the age range you wish to filter. The minimum starting age is 18.", Order = 9)]
+    [Display(Name = "Age range", Description = "Please specify the age range you wish to filter. The minimum starting age is 18.", Order = 10)]
     public AgeRange AgeRange { get; set; } = new();
 
 
-    [Display(Name = "Male", Order = 10)]
+    [Display(Name = "Male", Order = 11)]
     public bool IsSexMale { get; set; }
 
-    [Display(Name = "Female", Order = 11)]
+    [Display(Name = "Female", Order = 12)]
     public bool IsSexFemale { get; set; }
 
-    [Display(Name = "Yes", Order = 12)]
+    [Display(Name = "Yes", Order = 13)]
     public bool IsGenderSameAsSexRegisteredAtBirth_Yes { get; set; }
-    [Display(Name = "No", Order = 13)]
+    [Display(Name = "No", Order = 14)]
     public bool IsGenderSameAsSexRegisteredAtBirth_No { get; set; }
-    [Display(Name = "Prefer Not To Say", Order = 14)]
+    [Display(Name = "Prefer Not To Say", Order = 15)]
     public bool IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay { get; set; }
-    [Display(Name = "Asian", Order = 15)]
+    [Display(Name = "Asian", Order = 16)]
     public bool Ethnicity_Asian { get; set; }
-    [Display(Name = "Black", Order = 16)]
+    [Display(Name = "Black", Order = 17)]
     public bool Ethnicity_Black { get; set; }
-    [Display(Name = "Mixed", Order = 17)]
+    [Display(Name = "Mixed", Order = 18)]
     public bool Ethnicity_Mixed { get; set; }
-    [Display(Name = "Other", Order = 18)]
+    [Display(Name = "Other", Order = 19)]
     public bool Ethnicity_Other { get; set; }
-    [Display(Name = "White", Order = 19)]
+    [Display(Name = "White", Order = 20)]
     public bool Ethnicity_White { get; set; }
     public int? VolunteerCount { get; set; }
 
@@ -148,6 +167,7 @@ public class VolunteerFilterViewModel : IValidatableObject
 
         return retval;
     }
+
 
     public ISet<bool?> GetGenderSameAsSexRegisteredAtBirthOptions()
     {

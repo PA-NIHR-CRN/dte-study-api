@@ -1,0 +1,56 @@
+@using BPOR.Rms.Models.Email
+@using BPOR.Domain.Enums;
+@model BPOR.Rms.Models.Email.EmailSuccessViewModel
+
+@{
+    ViewData["Title"] = $"{Model.ContactMethod} campaign success - Volunteer Registry - Be Part of Research";
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.StudyName))
+{
+    @if (Model.ContactMethod == ContactMethods.Email)
+    {
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-half-from-desktop">
+                <div class="govuk-panel govuk-panel--confirmation">
+                    <h1 class="govuk-panel__title">
+                        Request to send emails for @Html.DisplayFor(model => model.StudyName) has been submitted to GOV.UK Notify
+                    </h1>
+                </div>
+            </div>
+        </div>
+    }
+    @if (Model.ContactMethod == ContactMethods.Letter)
+    {
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-half-from-desktop">
+                <div class="govuk-panel govuk-panel--confirmation">
+                    <h1 class="govuk-panel__title">
+                        The letter campaign request for @Html.DisplayFor(model => model.StudyName) has been sent to GOV UK Notify
+                    </h1>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-one-half-from-desktop">
+            <div class="govuk-panel govuk-panel--confirmation">
+                <h1 class="govuk-panel__title">
+                    The @Model.ContactMethod.ToString().ToLower() campaign has been sent to GOV UK Notify
+                </h1>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-button-group">
+    @if (Model.StudyId is not null)
+    {
+        @Html.ActionLink("View study", "Details", "Study", new { id = Model.StudyId }, new { @class = "govuk-button", data_module = "govuk-button" })
+    }
+    @Html.ActionLink("All studies", "Index", "Study", null, new { @class = "govuk-button govuk-button--secondary", data_module = "govuk-button" })
+</div>
