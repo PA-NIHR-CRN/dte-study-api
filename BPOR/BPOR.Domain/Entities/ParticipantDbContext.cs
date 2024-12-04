@@ -38,6 +38,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<FilterCriteria> FilterCriterias { get; set; } = null!;
     public DbSet<EmailCampaign> EmailCampaigns { get; set; } = null!;
     public DbSet<ParticipantLocation> ParticipantLocation { get; set; } = null!;
+    public DbSet<ParticipantContactMethod> ParticipantContactMethod { get; set; } = null!;
     public DbSet<ParticipantAddress> ParticipantAddress { get; set; } = null!;
     public DbSet<FilterEthnicGroup> FilterEthnicGroup { get; set; } = null!;
     public DbSet<FilterPostcode> FilterPostcode { get; set; } = null!;
@@ -87,6 +88,8 @@ public static class ParticipantQueryableExtensions
             .Include(x => x.Address)
             .Include(x => x.HealthConditions)
             .Include(x => x.ParticipantIdentifiers)
+            .Include(x => x.ContactMethods)
+            .Include(x => x.ParticipantLocation)
             .Include(x => x.SourceReferences);
     }
 }

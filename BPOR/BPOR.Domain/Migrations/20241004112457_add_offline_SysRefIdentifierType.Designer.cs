@@ -4,6 +4,7 @@ using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
@@ -12,9 +13,11 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    partial class ParticipantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241004112457_add_offline_SysRefIdentifierType")]
+    partial class add_offline_SysRefIdentifierType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -492,32 +495,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.ToTable("ParticipantAddress");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.ParticipantContactMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ContactMethodId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("ParticipantId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContactMethodId");
-
-                    b.HasIndex("ParticipantId");
-
-                    b.ToTable("ParticipantContactMethod");
-                });
-
             modelBuilder.Entity("BPOR.Domain.Entities.ParticipantHealthCondition", b =>
                 {
                     b.Property<int>("Id")
@@ -657,47 +634,6 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 2,
                             Code = "cy-GB",
                             Description = "Welsh",
-                            IsDeleted = false
-                        });
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.RefData.ContactMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SysRefContactMethod");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "Email",
-                            Description = "Email",
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "Letter",
-                            Description = "Letter",
                             IsDeleted = false
                         });
                 });
@@ -10241,25 +10177,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("BPOR.Domain.Entities.ParticipantContactMethod", b =>
-                {
-                    b.HasOne("BPOR.Domain.Entities.RefData.ContactMethod", "contactMethod")
-                        .WithMany()
-                        .HasForeignKey("ContactMethodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
-                        .WithMany("ContactMethods")
-                        .HasForeignKey("ParticipantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Participant");
-
-                    b.Navigation("contactMethod");
-                });
-
             modelBuilder.Entity("BPOR.Domain.Entities.ParticipantHealthCondition", b =>
                 {
                     b.HasOne("BPOR.Domain.Entities.RefData.HealthCondition", "HealthCondition")
@@ -10411,8 +10328,6 @@ namespace Dynamo.Stream.Handler.Migrations
             modelBuilder.Entity("BPOR.Domain.Entities.Participant", b =>
                 {
                     b.Navigation("Address");
-
-                    b.Navigation("ContactMethods");
 
                     b.Navigation("EmailCampaignParticipants");
 

@@ -31,6 +31,13 @@ public class IdentifierTypeConfiguration : IEntityTypeConfiguration<IdentifierTy
                 Code = "Deleted",
                 Description = "Deleted",
                 IsDeleted = false
+            },
+            new IdentifierType
+            {
+                Id = (int)IdentifierTypes.Offline,
+                Code = "Offline",
+                Description = "Offline",
+                IsDeleted = false
             }
         );
     }

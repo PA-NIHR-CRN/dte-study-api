@@ -45,9 +45,9 @@ namespace BPOR.Rms.Models.Researcher
         [Display(Name = "What is the target population for the study?", Order = 10)]
         public string? TargetPopulation { get; set; }
         [Display(Order = 11)]
-        public GovUkDate RecruitmentStartDate { get; set; } = new();
+        public GovUkDate RecruitmentStartDate { get; set; } = new ();
         [Display(Order = 12)]
-        public GovUkDate RecruitmentEndDate { get; set; } = new();
+        public GovUkDate RecruitmentEndDate { get; set; } = new ();
 
         [Display(Name = "Will participants in the study be recruited as named individual volunteers?", Order = 13)]
         public bool? RecruitingIdentifiableVolunteers { get; set; }
