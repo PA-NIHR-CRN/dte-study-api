@@ -14,19 +14,15 @@ public class VolunteerFormViewModel : IValidatableObject
 {
 
     [Display(Name = "First name", Order = 1)]
-    [Required(ErrorMessage = "Enter a first name")]
-    public string FirstName { get; set; }
+    public string? FirstName { get; set; }
 
     [Display(Name = "Last name", Order = 2)]
-    [Required(ErrorMessage = "Enter a last name")]
     public string? LastName { get; set; }
 
     [Display(Name = "Date of birth", Order = 3, Description = "For example, 31 3 1980.\n\nMust be 18 or over")]
-    [Required(ErrorMessage = "Enter a Date of birth")]
     public GovUkDate? DateOfBirth { get; set; }
 
     [Display(Name = "Postcode", Order = 9)]
-    [Required(ErrorMessage = "Enter a postcode")]
     public Postcode? PostCode { get; set; }
 
     [Display(Name = "Select an address")]
@@ -48,7 +44,6 @@ public class VolunteerFormViewModel : IValidatableObject
     public string? Town { get; set; }
 
     [Display(Name = "Preferred contact method", Order = 10)]
-    [Required(ErrorMessage = "Select if the preferred contact method is email or letter")]
     public int? PreferredContactMethod { get; set; }
 
     [Display(Name = "Email address", Order = 11)]
@@ -64,15 +59,12 @@ public class VolunteerFormViewModel : IValidatableObject
 
 
     [Display(Name = "Sex registered at birth", Order = 14)]
-    [Required(ErrorMessage = "Select if the sex registered at birth is female or male")]
     public int? SexRegisteredAtBirth { get; set; }
 
     [Display(Name = "Gender identity same as sex registered at birth", Order = 15)]
-    [Required(ErrorMessage = "Select gender identity same as sex registered at birth")]
     public string? GenderIdentitySameAsBirth { get; set; }
 
     [Display(Name = "Ethnic group", Order = 16)]
-    [Required(ErrorMessage = "Select ethnic group")]
     public string? EthnicGroup { get; set; }
 
     [Display(Name = "Ethnic background", Order = 17)]
@@ -82,7 +74,6 @@ public class VolunteerFormViewModel : IValidatableObject
     public string? EthnicBackgroundOther { get; set; }
 
     [Display(Name = "Long-term conditions or illnesses and reduced ability to carry out daily activities", Order = 18)]
-    [Required(ErrorMessage = "Select long-term conditions or illnesses and reduced ability to carry out daily activities")]
     public int? LongTermConditionOrIllness { get; set; }
 
     [Display(Name = "Areas of research (optional)", Order = 19)]
@@ -91,14 +82,12 @@ public class VolunteerFormViewModel : IValidatableObject
     public bool ManualAddressEntry { get; set; }
     public string? lastAction { get; set; }
 
-    // todo CRNCC-2387 has these as enums that can be used.
     public List<ContactMethods> GetPrefferdContactMethodValues{
         get { 
         return Enum.GetValues<ContactMethods>().ToList();
         }
 
     }
-
 
 public List<Dictionary<string, string>> SexRegisteredAtBirthValues 
     {
@@ -124,6 +113,50 @@ public List<Dictionary<string, string>> SexRegisteredAtBirthValues
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+        if (String.IsNullOrEmpty(FirstName))
+        {
+            yield return new ValidationResult("Enter a first name", [nameof(FirstName)]);
+        }
+
+        if (String.IsNullOrEmpty(LastName))
+        {
+            yield return new ValidationResult("Enter a last name", [nameof(LastName)]);
+        }
+
+        if (DateOfBirth == null || !DateOfBirth.HasAnyDateComponent)
+        {
+            yield return new ValidationResult($"Enter a Date of Birth", ["DateOfBirth.Day"]);
+        }
+
+        if (PostCode == null || !PostCode.HasValue)
+        {
+            yield return new ValidationResult("Enter a postcode", [nameof(PostCode)]);
+        }
+
+        if (PreferredContactMethod == null)
+        {
+            yield return new ValidationResult("Select if the preferred contact method is email or letter", [nameof(PreferredContactMethod)]);
+        }
+
+        if (SexRegisteredAtBirth == null)
+        {
+            yield return new ValidationResult("Select if the sex registered at birth is female or male", [nameof(SexRegisteredAtBirth)]);
+        }
+
+        if (String.IsNullOrEmpty(GenderIdentitySameAsBirth))
+        {
+            yield return new ValidationResult("Select gender identity same as sex registered at birth", [nameof(GenderIdentitySameAsBirth)]);
+        }
+
+        if (String.IsNullOrEmpty(EthnicGroup))
+        {
+            yield return new ValidationResult("Select ethnic group", [nameof(EthnicGroup)]);
+        }
+
+        if (LongTermConditionOrIllness == null)
+        {
+            yield return new ValidationResult("Select long-term conditions or illnesses and reduced ability to carry out daily activities", [nameof(LongTermConditionOrIllness)]);
+        }
 
         if (String.IsNullOrEmpty(LandLine) && String.IsNullOrEmpty(Mobile))
         {
@@ -141,6 +174,7 @@ public List<Dictionary<string, string>> SexRegisteredAtBirthValues
         {
             yield return new ValidationResult("Email address cannot be blank", [nameof(EmailAddress)]);
         }
+
 
         if (ManualAddressEntry)
         {

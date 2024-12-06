@@ -39,10 +39,6 @@ public class GovUkDate : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (!HasAnyDateComponent) {
-            yield return new ValidationResult($"Enter a {validationContext.DisplayName}", [nameof(Day)]);
-            yield break;
-        }
 
         if (!Day.HasValue) {
             if(Month.HasValue && Year.HasValue)
