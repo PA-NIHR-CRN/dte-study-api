@@ -15,6 +15,10 @@ namespace Dynamo.Stream.Handler.Migrations
                 table: "EmailCampaignParticipants");
 
             migrationBuilder.DropForeignKey(
+                name: "FK_EmailCampaignParticipants_CampaignTypeId_CampaignId",
+                table: "EmailCampaignParticipants");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_EmailCampaignParticipants_Participants_ParticipantId",
                 table: "EmailCampaignParticipants");
 
@@ -89,6 +93,14 @@ namespace Dynamo.Stream.Handler.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_CampaignParticipants_CampaignTypeId_CampaignId",
+                table: "CampaignParticipants",
+                column: "CampaignTypeId",
+                principalTable: "SysRefContactMethod",
+                principalColumn: "Id"
+                );
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_CampaignParticipants_SysRefDeliveryStatus_DeliveryStatusId",
                 table: "CampaignParticipants",
                 column: "DeliveryStatusId",
@@ -109,6 +121,10 @@ namespace Dynamo.Stream.Handler.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_CampaignParticipants_Campaigns_CampaignId",
+                table: "CampaignParticipants");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_CampaignParticipants_CampaignTypeId_CampaignId",
                 table: "CampaignParticipants");
 
             migrationBuilder.DropForeignKey(
@@ -191,6 +207,14 @@ namespace Dynamo.Stream.Handler.Migrations
                 column: "DeliveryStatusId",
                 principalTable: "SysRefDeliveryStatus",
                 principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_EmailCampaignParticipants_CampaignTypeId_CampaignId",
+                table: "EmailCampaignParticipants",
+                column: "CampaignTypeId",
+                principalTable: "SysRefContactMethod",
+                principalColumn: "Id"
+                );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_EmailCampaigns_FilterCriterias_FilterCriteriaId",

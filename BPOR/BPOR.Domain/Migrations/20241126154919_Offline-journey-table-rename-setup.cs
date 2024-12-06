@@ -40,7 +40,7 @@ namespace Dynamo.Stream.Handler.Migrations
             migrationBuilder.RenameColumn(
                 name: "EmailCampaignId",
                 table: "EmailCampaignParticipants",
-                newName: "CampaignTypeId");
+                newName: "CampaignId");
 
             migrationBuilder.AddColumn<int>(
                 name: "ContactMethodId",
@@ -56,11 +56,25 @@ namespace Dynamo.Stream.Handler.Migrations
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
-                name: "CampaignId",
+                name: "CampaignTypeId",
                 table: "EmailCampaignParticipants",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
+
+            migrationBuilder.Sql(
+                @"UPDATE `dte`.`EmailCampaignParticipants`
+                SET
+                `CampaignTypeId` = 1
+                WHERE `CampaignTypeId` = 0;");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_EmailCampaignParticipants_CampaignTypeId_CampaignId",
+                table: "EmailCampaignParticipants",
+                column: "CampaignTypeId",
+                principalTable: "SysRefContactMethod",
+                principalColumn: "Id"
+                );
 
             migrationBuilder.CreateTable(
                 name: "FilterContactMethod",
@@ -150,6 +164,10 @@ namespace Dynamo.Stream.Handler.Migrations
                 name: "FK_EmailCampaignParticipants_SysRefDeliveryStatus_DeliveryStatu~",
                 table: "EmailCampaignParticipants");
 
+            migrationBuilder.DropForeignKey(
+                name: "FK_EmailCampaignParticipants_CampaignTypeId_CampaignId",
+                table: "EmailCampaignParticipants");
+
             migrationBuilder.DropTable(
                 name: "FilterContactMethod");
 
@@ -168,19 +186,19 @@ namespace Dynamo.Stream.Handler.Migrations
                 name: "TypeId",
                 table: "EmailCampaigns");
 
-            migrationBuilder.DropColumn(
+            migrationBuilder.RenameColumn(
                 name: "CampaignId",
-                table: "EmailCampaignParticipants");
+                table: "EmailCampaignParticipants",
+                newName: "EmailCampaignId");
 
             migrationBuilder.RenameColumn(
                 name: "TemplateId",
                 table: "EmailCampaigns",
                 newName: "EmailTemplateId");
 
-            migrationBuilder.RenameColumn(
+            migrationBuilder.DropColumn(
                 name: "CampaignTypeId",
-                table: "EmailCampaignParticipants",
-                newName: "EmailCampaignId");
+                table: "EmailCampaignParticipants");
 
             migrationBuilder.AddColumn<string>(
                 name: "ContactEmail",
