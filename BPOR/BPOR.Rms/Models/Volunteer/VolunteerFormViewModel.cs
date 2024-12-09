@@ -162,11 +162,11 @@ public List<Dictionary<string, string>> SexRegisteredAtBirthValues
         {
             yield return new ValidationResult( "Enter either a UK landline number or UK mobile number", [nameof(LandLine)]);
         }
-        if (!String.IsNullOrEmpty(LandLine) && !Regex.IsMatch(LandLine, @"^(01|02|03)\s*\d(\s*\d)*$"))
+        if (!String.IsNullOrEmpty(LandLine) && !Regex.IsMatch(LandLine, @"^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$"))
         {
             yield return new ValidationResult("Enter a landline phone number in the correct format, like 01632 960 001", [nameof(LandLine)]);
         }
-        if (!String.IsNullOrEmpty(Mobile) && !Regex.IsMatch(Mobile, @"^07\s*\d(\s*\d)*$"))
+        if (!String.IsNullOrEmpty(Mobile) && !Regex.IsMatch(Mobile, @"^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$"))
         {
             yield return new ValidationResult("Enter a mobile phone number in the correct format, like 07700 900 982", [nameof(Mobile)]);
         }

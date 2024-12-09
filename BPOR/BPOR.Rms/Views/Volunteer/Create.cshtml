@@ -71,7 +71,7 @@
                     }
                 </form-group>
 
-                <form-group for="AddressLine1">
+                <form-group for="AddressLine2">
                     @if (Html.ViewData.ModelState["AddressLine2"]?.Errors.Count > 0)
                     {
                         <input asp-for="AddressLine2" class="govuk-input govuk-input--error" id="AddressLine2" aria-describedby="AddressLine2-error" value="@(Model.AddressLine2)" />
@@ -104,7 +104,7 @@
                     }
                 </form-group>
 
-                <form-group for="AddressLine4">
+                <form-group for="Town">
                     @if (Html.ViewData.ModelState["Town"]?.Errors.Count > 0)
                     {
                         <input asp-for="Town" class="govuk-input  govuk-input--error" id="Town" aria-describedby="Town-error" value="@(Model.Town)" />
