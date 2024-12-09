@@ -68,6 +68,12 @@ namespace Dynamo.Stream.Handler.Migrations
                 `CampaignTypeId` = 1
                 WHERE `CampaignTypeId` = 0;");
 
+            migrationBuilder.Sql(
+                @"UPDATE `dte`.`EmailCampaigns`
+                SET
+                `TypeId` = 1
+                WHERE `TypeId` = 0;");
+
             migrationBuilder.AddForeignKey(
                 name: "FK_EmailCampaignParticipants_CampaignTypeId_CampaignId",
                 table: "EmailCampaignParticipants",
