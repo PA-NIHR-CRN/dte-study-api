@@ -19,7 +19,7 @@ public class VolunteerFormViewModel : IValidatableObject
     [Display(Name = "Last name", Order = 2)]
     public string? LastName { get; set; }
 
-    [Display(Name = "Date of birth", Order = 3, Description = "For example, 31 3 1980.\n\nMust be 18 or over")]
+    [Display(Name = "Date of birth", Order = 3, Description = "For example, 31 3 1980.<br/><br/>Must be 18 or over")]
     public GovUkDate? DateOfBirth { get; set; }
 
     [Display(Name = "Postcode", Order = 9)]
