@@ -147,7 +147,7 @@ jobs:
         env:
           ECS_SERVICE: crnccd-ecs-dev-bpor-rms-service
           ECS_CLUSTER: crnccd-ecs-dev-bpor-rms-cluster
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
@@ -272,7 +272,7 @@ jobs:
         env:
           ECS_SERVICE: crnccd-ecs-test-bpor-rms-service
           ECS_CLUSTER: crnccd-ecs-test-bpor-rms-cluster
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
@@ -397,7 +397,7 @@ jobs:
         env:
           ECS_SERVICE: crnccs-ecs-uat-bpor-rms-service
           ECS_CLUSTER: crnccs-ecs-uat-bpor-rms-cluster
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
@@ -522,7 +522,7 @@ jobs:
         env:
           ECS_SERVICE: crnccp-ecs-oat-bpor-rms-service
           ECS_CLUSTER: crnccp-ecs-oat-bpor-rms-cluster
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
@@ -647,7 +647,7 @@ jobs:
         env:
           ECS_SERVICE: crnccp-ecs-prod-bpor-rms-service
           ECS_CLUSTER: crnccp-ecs-prod-bpor-rms-cluster
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
