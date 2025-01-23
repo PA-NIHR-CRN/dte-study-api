@@ -1,0 +1,216 @@
+﻿@using Westwind.AspNetCore.Markdown
+@model CampaignPage
+@{
+    ViewData["BackToTop"] = Model.BackToTopLinkLabel;
+}
+
+@section Metadata {
+    @{
+        if (!string.IsNullOrEmpty(Model?.Description))
+        {
+            <meta name="description" content="@Model.Description" />
+        }
+
+        if (!string.IsNullOrEmpty(Model?.Keywords))
+        {
+            <meta name="keywords" content="@Model.Keywords" />
+        }
+    }
+}
+
+<!-- Be Part of Research -->
+<div class="hero my-2 even">
+    <div class="container">
+        <div class="align-items-center bg-overlay row">
+            <section class="col-xl-7 pt-2 pb-5 py-md-5 text">
+                <h1 class="display-1 hero">@Model.Hero.Title</h1>
+
+                <markdown markdown="Hero.Body" />
+
+                <a class="btn btn-lg btn-light register w-100 text-center w-lg-auto text-lg-left" href="@Model.Hero.Link.Url" aria-label="@Model.Hero.Link.AriaLabel" target="_blank">@Model.Hero.Link.Label</a>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Video -->
+<div class="odd video-section pb-3">
+    <div class="container">
+        <div class="row align-items-stretch">
+            <div class="col-xl-4 my-2 order-last order-xl-first">
+                <section class="video-info info-card">
+                    <h2>@Model.VideoSection.Heading</h2>
+
+                    <markdown markdown="VideoSection.Description" />
+                </section>
+            </div>
+            <div class="col-xl-8 my-2 video-wrapper d-flex justify-content-center">
+                <iframe src="@Model.VideoSection.VideoUrl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.VideoSection.Transcript))
+        {
+            <div class="row">
+                <div class="col">
+                    <p class="js-only text-right">
+                        <a class="" data-toggle="collapse" href="#video-transcript" role="button" aria-expanded="false" aria-controls="video-transcript" aria-label="@Model.VideoSection.Link.AriaLabel">
+                            @Model.VideoSection.Link.Label
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div class="row align-items-stretch collapse-with-js collapse my-3 mb-xl-5" id="video-transcript">
+                <div class="col">
+                    <section class="info-card">
+                        @{
+                            Model.VideoSection.Transcript = Model.VideoSection.Transcript.Replace("# ", "## ");
+                        }
+                        <markdown markdown="VideoSection.Transcript" />
+                    </section>
+                </div>
+            </div>
+        }
+
+
+        <div class="col d-flex d-xl-none embellishment justify-content-start">
+            <img src="/join/resources/img/yellow-aqua.svg" alt="" role="presentation" />
+        </div>
+    </div>
+</div>
+
+<!-- What is Be Part of Research? -->
+<div class="even what-is-bpor-section">
+    <div class="container">
+        <div class="row align-items-stretch">
+            <section class="col-lg-8 py-5">
+                <h2>@Model.TextSection1.Heading</h2>
+
+                <markdown markdown="TextSection1.Body" />
+            </section>
+        </div>
+    </div>
+</div>
+
+
+<!-- How does Be Part of Research work? -->
+<div class="odd how-does-bpor-work-section">
+    <div class="container">
+        <div class="row justify-content-end py-5">
+            <div class="col-lg-4">
+                <img src="/join/resources/img/green-aqua.svg" alt="" role="presentation" />
+            </div>
+            <section class="col-lg-8">
+                <h2>@Model.OrderListSection.Title</h2>
+                <markdown markdown="OrderListSection.Body" />
+
+                <ol>
+                    @foreach (var item in Model.OrderListSection.Items)
+                    {
+                        <li>
+                            <div class="line"></div>
+                            <div>
+                                <h3>@item.Heading</h3>
+                                <markdown>@item.Body</markdown>
+                            </div>
+                        </li>
+                    }
+                </ol>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Who can take part? -->
+<div class="even who-can-take-part-section">
+    <div class="container">
+        <div class="row align-items-stretch">
+            <section class="col-lg-8 py-5">
+                <h2>@Model.TextSection2.Heading</h2>
+
+                <markdown markdown="TextSection2.Body" />
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Meet our volunteers -->
+<div class="odd meet-out-volunteers-section">
+    <div class="container">
+        <div class="row">
+            <section class="col col-lg-9 py-3 py-md-5 ">
+                <h2>@Model.CarouselSection.Title</h2>
+                <markdown markdown="CarouselSection.Body" />
+                <div class="carousel d-flex flex-column flex-lg-column-reverse">
+                    <div class="splide" role="group" aria-label="Meet our volunteers carousel">
+                        <div class="splide__track">
+                            <ul class="splide__list">
+                                @foreach (var slide in Model.CarouselSection.Cards)
+                                {
+                                    <li class="splide__slide">
+                                        <div class="card @slide.Title.Replace(" ", "-").ToLowerInvariant()">
+                                            <div class="row no-gutters">
+                                                <div class="col-lg-4">
+                                                    <img src="@slide.Image.File.Url" class="card-img" alt="" role="presentation" />
+                                                </div>
+                                                <div class="col-lg-8">
+                                                    <div class="card-body">
+                                                        <h3>@slide.Title</h3>
+                                                        <markdown>@slide.Body</markdown>
+                                                        <a href="@slide.Link.Url" target="_blank" aria-label="@slide.Link.AriaLabel">@slide.Link.Label</a>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="carousel-controls mt-5 mt-lg-0 mb-lg-3 d-flex justify-content-center justify-content-lg-end"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Who runs Be Part of Research? -->
+<div class="even who-runs-bpor-section">
+    <div class="container">
+        <div class="row align-items-stretch">
+            <section class="col-lg-8 py-5">
+                <h2>@Model.TextSection3.Heading</h2>
+                <markdown markdown="TextSection3.Body" />
+            </section>
+            <div class="col d-flex d-lg-none embellishment justify-content-end">
+                <img src="/join/resources/img/purple-yellow.svg" alt="" role="presentation" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Information about taking part -->
+<div class="odd taking-part-section pt-4 pt-md-0">
+    <div class="container">
+        <div class="row align-items-stretch">
+            <section class="col pt-5 pb-3 pb-lg-4">
+                <h2 class="mb-4">@Model.CardSection.Title</h2>
+                <markdown></markdown>
+                <div class="row align-items-stretch px-0">
+                    @foreach (var card in Model.CardSection.Cards)
+                    {
+                        var firstOrLast = card == Model.CardSection.Cards.First() || card == Model.CardSection.Cards.Last();
+                        var classes = firstOrLast ? "col-lg p-3 " : "col-lg mx-0 mx-lg-4 my-4 my-lg-0 p-3";
+
+                        <div class="@classes info-card">
+                            <img src="@card.Image.File.Url" alt="" role="presentation" />
+                            <h3>@card.Title</h3>
+                            <markdown>@card.Body</markdown>
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+    </div>
+</div>

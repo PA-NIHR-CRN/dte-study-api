@@ -1,0 +1,637 @@
+@charset "UTF-8";
+
+body{
+    font-size: 20px;
+}
+
+.even {
+    background-color: #FEF7F6;
+}
+
+p {
+    line-height: 29px;
+    margin-bottom: 0.75em;
+}
+
+h1, h2 {
+    font-family: "Poppins", system-ui;
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: -0.25px;
+}
+
+h2 {
+    font-size: 36px;
+    line-height: 52px;
+}
+
+h3 {
+    font-size: 24px;
+    color: #0B0C0C;
+    margin-bottom: 32px;
+}
+
+.meet-out-volunteers-section h3 {
+    color: #193E72;
+    font-weight: 700;
+    font-size: 1.75em;
+}
+
+.display-1.hero {
+    font-style: normal;
+    font-weight: 700;
+    font-size: 48px;
+    line-height: 54px;
+    color: white;
+    margin-bottom: 0.5em;
+}
+
+div.hero {
+    background-color: #6667AD;
+    color: white;
+    background-image: url("../img/desktop-hero-left.svg"), url("../img/desktop-hero-right-min.png");
+    background-repeat: no-repeat, no-repeat;
+    background-position: left, right bottom;
+    background-size: 257px, 700px;
+}
+
+.hero p {
+    line-height: 34px;
+    font-size: 24px;
+    letter-spacing: 0.15px;
+}
+
+    .hero p a {
+        color: white;
+    }
+
+
+.btn.register {
+    font-size: 23px;
+    font-weight: 700;
+    padding-left: 2em !important;
+    padding-right: 2em !important;
+    padding-top: 0.5em !important;
+    padding-bottom: 0.5em !important;
+    border-radius: 4px;
+    color: #193E72;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+.info-card {
+    background-color: #eef2f3;
+    padding: 1em;
+    border-radius: 10px;
+}
+
+    .info-card > img {
+        height: 140px;
+        margin: 1em;
+    }
+
+
+
+.video-section {
+    background-image: url("../img/yellow-aqua.svg");
+    background-repeat: no-repeat;
+    background-position: 5% 90%;
+    background-size: 150px;
+}
+
+.what-is-bpor-section {
+    background-image: url("../img/purple-aqua.svg");
+    background-repeat: no-repeat;
+    background-position: right;
+    background-size: 575px;
+}
+
+.how-does-bpor-work-section {
+    overflow-x: clip;
+}
+
+    .how-does-bpor-work-section img {
+        position: relative;
+        width: 500px;
+        max-width: unset !important;
+        left: -200px;
+        top: 25%;
+    }
+
+.who-can-take-part-section {
+    background-image: url("../img/who-can-take-part.png");
+    background-repeat: no-repeat;
+    background-position: right;
+    background-size: 575px;
+}
+
+.who-runs-bpor-section {
+    background-image: url("../img/purple-yellow.svg");
+    background-repeat: no-repeat;
+    background-position: 85%;
+    background-size: 200px;
+}
+
+.taking-part-section {
+    h3, p
+
+{
+    color: #193E72;
+}
+
+}
+
+.taking-part-section .info-card {
+    text-align: center;
+}
+
+ol {
+    list-style: none;
+    counter-reset: item;
+}
+
+    ol li {
+        counter-increment: item;
+        display: flex;
+    }
+
+        ol li::before {
+            flex-shrink: 0;
+            flex-grow: 0;
+            font-size: 21px;
+            font-weight: 700;
+            color: #0B0C0C;
+            display: block;
+            content: counter(item);
+            margin-right: 1em;
+            margin-top: -3px;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            padding: 1px;
+            background: #fff;
+            border: 1px solid #B1B4B6;
+            text-align: center;
+        }
+
+        ol li div {
+            flex-shrink: 1;
+            flex-grow: 1;
+            border-bottom: 1px solid #B1B4B6;
+            margin-bottom: 1em;
+        }
+
+        ol li:first-child div {
+            border-top: 1px solid #B1B4B6;
+            padding-top: 1em;
+            margin-top: 1em;
+        }
+
+            ol li:first-child div.line {
+                margin-top: 2em;
+            }
+
+        ol li:first-child::before {
+            padding-top: 1px;
+            margin-top: 31px;
+        }
+
+        ol li div.line {
+            flex-shrink: 0;
+            flex-grow: 0;
+            border-left: 1px solid #B1B4B6;
+            position: relative;
+            left: -38px;
+            z-index: -1;
+        }
+
+.splide__slide .card,
+.splide__slide .row {
+    height: 100%;
+}
+
+.splide__slide {
+    opacity: 0.5;
+}
+
+    .splide__slide.is-active {
+        opacity: 1;
+    }
+
+.splide__arrow {
+    background: #193E72 !important;
+    opacity: 1 !important;
+}
+
+    .splide__arrow:disabled {
+        opacity: 0.6 !important;
+    }
+
+    .splide__arrow:focus-visible {
+        outline-color: #FED47A !important;
+    }
+
+.splide.is-focus-in .splide__pagination__page:focus {
+    outline-color: #FED47A !important;
+}
+
+.splide__arrow svg {
+    fill: white !important;
+    height: 2em !important;
+    width: 2em !important;
+}
+
+.splide__arrow {
+    height: 4em !important;
+    width: 4em !important;
+}
+
+@media(min-width:992px) {
+    .splide__arrow svg {
+        height: 1.5em !important;
+        width: 1.5em !important;
+    }
+
+    .splide__arrow {
+        height: 2.5em !important;
+        width: 2.5em !important;
+    }
+}
+
+.card .row img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+
+
+.splide__slide {
+    /*width: calc(75% - 1.5em) !important;*/
+}
+
+
+.meet-out-volunteers-section .splide__pagination {
+    position: unset;
+    margin-top: 1em;
+}
+
+.meet-out-volunteers-section .splide__pagination__page.is-active {
+    background: #193e72;
+}
+
+.carousel-controls {
+    /*margin-right:30% !important;*/
+}
+
+    .carousel-controls .splide__arrow {
+        display: inline-block;
+        position: relative;
+        top: 1em;
+        left: unset;
+        right: unset;
+        bottom: unset;
+    }
+
+    .carousel-controls .splide__arrow--next {
+        margin-left: 1em;
+    }
+
+.meet-out-volunteers-section .carousel-controls {
+    margin-top: -3em !important;
+}
+
+.card {
+    background-color: #eef2f3;
+    border-radius: 10px;
+    border: none;
+}
+
+    .card img {
+        border-radius: 0;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+@media(max-width:991.98px) {
+    .card img {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border-bottom-left-radius: 0;
+        height: 400px !important;
+        object-fit: contain;
+    }
+
+    .splide__slide {
+        margin-right: 0 !important;
+        width: 100% !important;
+    }
+
+    .card.fred img {
+        object-position: 100% 15%;
+    }
+}
+
+
+
+.noscript .meet-out-volunteers-section .splide {
+    visibility: visible;
+}
+
+    .noscript .meet-out-volunteers-section .splide .splide__slide {
+        opacity: 1;
+    }
+
+    .noscript .meet-out-volunteers-section .splide .splide__list {
+        display: block;
+    }
+
+    .noscript .meet-out-volunteers-section .splide .splide__slide {
+        margin-top: 2em;
+    }
+
+
+.back-to-top {
+    font-weight: 700;
+}
+
+    .back-to-top i {
+        font-size: 0.75em;
+    }
+
+
+.video-section .embellishment img {
+    width: 150px;
+    position: relative;
+    top: 3em;
+    left: -1em;
+    margin-top: -2em;
+}
+
+.who-runs-bpor-section .embellishment img {
+    width: 200px;
+    position: relative;
+    top: 3em;
+    margin-top: -7em;
+}
+
+@media (max-width: 1700px) {
+    .hero {
+        background-position-x: -5%, 110% !important;
+    }
+}
+
+@media (max-width: 1500px) {
+    .hero {
+        background-position-x: -10%, 130% !important;
+    }
+
+    .what-is-bpor-section {
+        background-size: 350px;
+    }
+
+    .who-can-take-part-section {
+        background-size: 450px;
+    }
+}
+
+@media (max-width: 1400px) {
+    .hero {
+        background-position-x: -25%, 135% !important;
+    }
+}
+
+@media (max-width: 1300px) {
+    .hero {
+        background-position-x: -25%, 150% !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    div.hero {
+        padding-top: 400px;
+        background-image: url("../img/Mobile-hero.png"), url("../img/desktop-hero-left.svg") !important;
+        background-position-x: right, left !important;
+        background-position-y: top, top !important;
+        background-size: 600px, 180px;
+    }
+
+    .who-can-take-part-section {
+        background-size: 350px;
+        background-position-y: 10%;
+    }
+
+    .video-section {
+        background-image: unset;
+    }
+}
+
+@media(max-width: 991.98px) {
+    .who-runs-bpor-section,
+    .what-is-bpor-section
+    {
+        background-image: unset;
+    }
+
+    .how-does-bpor-work-section img {
+        width: 500px;
+        position: relative;
+        top: 2em;
+        left: 18em;
+        margin-top: -7em;
+    }
+
+    .who-can-take-part-section {
+        padding-top: 300px;
+        background-position-y: 5%;
+        background-size: 575px;
+    }
+
+    .meet-out-volunteers-section .carousel-controls {
+        margin-top: 3em !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+
+    div.hero {
+        background-size: 540px, 0px;
+    }
+
+    .how-does-bpor-work-section img {
+        left: 2em;
+        top: 2em;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .who-can-take-part-section {
+        background-size: 450px;
+        padding-top: 250px;
+    }
+
+    .site-header
+    {
+        padding-top: 0 !important;
+    }
+
+    .langSelectionBar {
+        margin-top: -15px !important;
+    }
+}
+
+.video-section iframe {
+    width: 755px;
+    height: 425px;
+}
+
+
+.offset-custom {
+    /*margin-left: unset !important;*/
+}
+
+@media (min-width: 576px) {
+    .offset-custom {
+        width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+        max-width: 540px;
+    }
+}
+
+@media (min-width: 768px) {
+    .offset-custom {
+        width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+        max-width: 720px;
+    }
+}
+
+@media (min-width: 992px) {
+    .offset-custom {
+        margin-left: calc((100% - 960px) / 2);
+        max-width: unset;
+    }
+
+    .meet-out-volunteers-section {
+        overflow-x: hidden;
+        .splide__track
+
+{
+    overflow: unset;
+}
+
+}
+
+    .w-lg-auto{
+        width: auto !important;
+    }
+}
+
+@media (min-width: 1200px) {
+
+    .offset-custom {
+        margin-left: calc((100% - 1140px) / 2);
+        max-width: unset;
+    }
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+
+#NhsHeaderLogo {
+    height: 45px;
+    margin: 30px;
+}
+
+@media (max-width: 1000px) {
+
+    #NhsHeaderLogo {
+        height: 45px;
+        margin: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+
+    #NhsHeaderLogo {
+        height: 36px;
+        margin: 15px;
+    }
+}
+
+@media (max-width: 440px) {
+
+    #NhsHeaderLogo {
+        height: 30px;
+        margin: 15px;
+    }
+}
+
+.BPoRLogo {
+    padding-bottom: 8px;
+    padding-top: 8px;
+    max-height: 150px;
+    min-width: 40px;
+    min-height: 40px;
+    height: 100%;
+    width: 100%;
+}
+
+.header-logo {
+    margin: 10px;
+    width: 411px;
+}
+
+@media (max-width: 767px) {
+
+    .header-logo {
+        /*width:280px;*/
+        width: 350px;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .header-logo {
+        /*width:240px;*/
+        width: 280px;
+    }
+}
+
+@media (max-width: 440px) {
+
+    .header-logo {
+        width: 216px;
+    }
+}
+
+ul {
+    margin: revert;
+    padding: revert;
+}
+
+h4
+{
+    font-size: 20px !important;
+    margin-bottom: 1em;
+    margin-top: 2em;
+}
+
+.noscript .js-only{
+    display: none;
+}
+
+.noscript .collapse-with-js {
+    display: revert-layer;
+}

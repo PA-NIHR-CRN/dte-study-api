@@ -1,0 +1,31 @@
+﻿@using Microsoft.AspNetCore.Localization
+@{
+    var cultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var culture = cultureFeature?.RequestCulture?.Culture?.ToString() ?? "en-GB";
+
+    var followUs = culture == "cy-GB" ? "Dilynwch ni" : "Follow us";
+}
+
+<div class="bg-alt bg-alt--dark no-print socialMediaIcons-Bar">
+    <div class="socialMediaIcons-footer">
+        <div class="row justify-content-start justify-content-md-end socialMediaIcons">
+            <div class="social-media ds-6 d-flex p-3">
+                <span class="font-weight-bold mr-2">@followUs</span>
+                <div class="icon-holder">
+                    <a href="https://www.facebook.com/OfficialNIHR/" target="_blank" aria-label="NIHR Facebook profile, opens in a new tab" class="accessability-image icon"><i class="fab fa-facebook-f social-media__icon"></i></a>
+                </div>
+                <div class="icon-holder">
+                    <a href="https://twitter.com/NIHRtakepart" target="_blank" aria-label="NIHR Twitter profile, opens in a new tab" class="accessability-image icon"><i class="fab fa-twitter social-media__icon"></i></a>
+                </div>
+                <div class="icon-holder">
+                    <a href="https://www.youtube.com/user/NIHRtv" target="_blank" aria-label="NIHR Youtube channel, opens in a new tab" class="accessability-image icon"><i class="fab fa-youtube social-media__icon"></i></a>
+                </div>
+                <div class="icon-holder">
+                    <a href="https://www.linkedin.com/company/nihr-research" target="_blank" aria-label="NIHR LinkedIn profile, opens in a new tab" class="accessability-image icon">
+                        <i class="fab fa-linkedin social-media__icon"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
