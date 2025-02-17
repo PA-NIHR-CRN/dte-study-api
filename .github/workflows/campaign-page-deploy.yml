@@ -1,4 +1,4 @@
-name: Campign Page Deploy
+name: Deploy Campaign Page
 on:
   workflow_dispatch:
 
