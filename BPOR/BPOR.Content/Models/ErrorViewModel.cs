@@ -1,4 +1,4 @@
-namespace CRNCC_2391.Models
+namespace BPOR.Content.Models
 {
     public class ErrorViewModel
     {

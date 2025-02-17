@@ -1,8 +1,7 @@
 ﻿using Contentful.AspNetCore;
 using Contentful.Core.Configuration;
 using Contentful.Core;
-using CRNCC_2391;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using BPOR.Content;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
 using Westwind.AspNetCore.Markdown;

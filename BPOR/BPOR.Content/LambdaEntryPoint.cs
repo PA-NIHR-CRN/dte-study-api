@@ -5,7 +5,7 @@ using Amazon.Lambda.Core;
 using Amazon.SecretsManager;
 using NIHR.Infrastructure.Settings;
 
-namespace CRNCC_2391
+namespace BPOR.Content
 {
     public class LambdaEntryPoint : ApplicationLoadBalancerFunction
     {

@@ -1,4 +1,4 @@
-﻿namespace CRNCC_2391
+﻿namespace BPOR.Content
 {
     public class ContentSettings
     {

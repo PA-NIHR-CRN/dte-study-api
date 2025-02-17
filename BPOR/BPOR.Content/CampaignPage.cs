@@ -1,7 +1,6 @@
 ﻿using Contentful.Core.Models;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
-namespace CRNCC_2391
+namespace BPOR.Content
 {
     public class CampaignPage
     {

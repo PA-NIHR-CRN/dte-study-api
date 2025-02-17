@@ -1,13 +1,13 @@
+using BPOR.Content.Models;
 using Contentful.Core;
 using Contentful.Core.Search;
-using CRNCC_2391.Models;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace CRNCC_2391.Controllers
+namespace BPOR.Content.Controllers
 {
     public class HomeController : Controller
     {
