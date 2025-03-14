@@ -1,10 +1,9 @@
 using NIHR.Infrastructure.EntityFrameworkCore;
 using BPOR.Domain.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BPOR.Domain.Entities;
 
-public class Campaigns : IAudit, ISoftDelete
+public class Campaign : IAudit, ISoftDelete
 {
     public int Id { get; set; }
     public int FilterCriteriaId { get; set; }
@@ -19,7 +18,7 @@ public class Campaigns : IAudit, ISoftDelete
     public int CreatedById { get; set; }
     public int UpdatedById { get; set; }
     public bool IsDeleted { get; set; }
-    public ICollection<CampaignParticipants> Participants { get; set; } = new List<CampaignParticipants>();
+    public ICollection<CampaignParticipant> Participant { get; set; } = new List<CampaignParticipant>();
 
     public FilterCriteria FilterCriteria { get; set; } = null!;
 }
