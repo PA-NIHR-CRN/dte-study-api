@@ -33,7 +33,7 @@ public class CampaignController(
     : Controller
 {
     private const string _templateCacheKey = "Templates";
-    private string contentfulTemplateId;
+    private string templateId;
 
     public async Task<IActionResult> Setup(SetupCampaignViewModel model)
     {
@@ -124,17 +124,17 @@ public class CampaignController(
                     switch (campaign.TypeId)
                     {
                         case ContactMethodId.Email:
-                            contentfulTemplateId = "email-rms-campaign-sent";
+                            templateId = "email-rms-campaign-sent";
                             sendParams.Add("studyName", studyInfo.StudyName);
                             break;
 
                         case ContactMethodId.Letter:
-                            contentfulTemplateId = "letter-rms-campaign-sent";
+                            templateId = "letter-rms-campaign-sent";
                             sendParams.Add("letterTemplateFilename", selectedTemplate.name);
                             break;
                     }
 
-                    await transactionalEmailService.SendAsync(recipient, contentfulTemplateId, sendParams, cancellationToken);
+                    await transactionalEmailService.SendAsync(recipient, templateId, sendParams, cancellationToken);
                 }
             }
 
