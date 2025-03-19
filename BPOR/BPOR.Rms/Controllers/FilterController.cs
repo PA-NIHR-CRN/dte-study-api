@@ -191,18 +191,8 @@ public class FilterController(ParticipantDbContext context,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
             StudyName = model.StudyName,
+            ContactMethod = (ContactMethodId)model.SelectedVolunteersPreferredContact,
         };
-
-        switch (model.SelectedVolunteersPreferredContact)
-        {
-            case (int)ContactMethodId.Email:
-                campaignDetails.ContactMethod = ContactMethodId.Email;
-                break;
-
-            case (int)ContactMethodId.Letter:
-                campaignDetails.ContactMethod = ContactMethodId.Letter;
-                break;
-        }
 
         return RedirectToAction("Setup", "Campaign", campaignDetails);
     }
