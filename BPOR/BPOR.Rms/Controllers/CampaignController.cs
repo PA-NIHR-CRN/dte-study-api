@@ -150,8 +150,8 @@ public class CampaignController(
     CancellationToken cancellationToken = default)
     {
 
-        TemplateList templateList = await FetchTemplates(forceRefresh, cancellationToken);
-        model.Templates = templateList.templates.ToList();
+        List<TemplateResponse> templateList = await FetchTemplates(forceRefresh, cancellationToken);
+        model.Templates = templateList.ToList();
 
         if (model.StudyId is not null)
         {
@@ -244,19 +244,20 @@ public class CampaignController(
                                                email.Equals(address.Address,
                                                    StringComparison.InvariantCultureIgnoreCase);
 
-    private async Task<TemplateList> FetchTemplates(bool forceRefresh = false,
+    private async Task<List<TemplateResponse>> FetchTemplates(bool forceRefresh = false,
         CancellationToken cancellationToken = default)
+
     {
         var cachedData = await cache.GetAsync(_templateCacheKey, cancellationToken);
         if (cachedData != null && !forceRefresh)
         {
             var jsonData = Encoding.UTF8.GetString(cachedData);
-            return JsonConvert.DeserializeObject<TemplateList>(jsonData);
+            return JsonConvert.DeserializeObject<TemplateList>(jsonData).templates;
         }
 
         var templates = await notificationService.GetTemplatesAsync(cancellationToken);
         await CacheTemplates(templates, cancellationToken);
-        return templates;
+        return templates.templates;
     }
 
     private async Task CacheTemplates(TemplateList templates, CancellationToken cancellationToken = default)
