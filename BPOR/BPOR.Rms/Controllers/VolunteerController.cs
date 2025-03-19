@@ -47,7 +47,7 @@ public class VolunteerController(ParticipantDbContext context,
         return View(new VolunteerFormViewModel());
     }
 
-    private void clearAllErrorsExcept(string errorToNotClear)
+    private void ClearAllErrorsExcept(string errorToNotClear)
     {
         foreach (var key in ModelState.Keys)
         {
@@ -68,7 +68,7 @@ public class VolunteerController(ParticipantDbContext context,
         if (action == "AddressLookup")
         {
 
-            clearAllErrorsExcept("PostCode");
+            ClearAllErrorsExcept("PostCode");
             if (!model.PostCode.HasValue)
             {
                     ModelState.AddModelError("PostCode", "Enter a full UK postcode");
