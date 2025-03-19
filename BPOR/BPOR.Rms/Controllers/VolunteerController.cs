@@ -188,7 +188,7 @@ public class VolunteerController(ParticipantDbContext context,
                         Town = model.Town,
                         Postcode = model.PostCode.ToString()
                     },
-                    ContactMethods = new List<ParticipantContactMethod>()
+                    ContactMethodId = new List<ParticipantContactMethod>()
                     {
                         new ParticipantContactMethod
                         {

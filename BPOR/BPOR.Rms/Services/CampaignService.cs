@@ -264,12 +264,12 @@ public class CampaignService(
 
             switch (campaign.TypeId)
             {
-                case ContactMethods.Email:
+                case ContactMethodId.Email:
                     notification.PrimaryIdentifier = volunteer.Email;
                     notification.NotificationDatas.Add(new NotificationData { Key = "email", Value = volunteer.Email });
                     break;
 
-                case ContactMethods.Letter:
+                case ContactMethodId.Letter:
                     if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1) ||
                         string.IsNullOrWhiteSpace(volunteer.Address.Town) ||
                         string.IsNullOrWhiteSpace(volunteer.Address.Postcode))

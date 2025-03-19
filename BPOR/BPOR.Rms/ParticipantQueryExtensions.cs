@@ -25,7 +25,7 @@ public static class ParticipantQueryExtensions
         if (selectedVolunteersPreferredContact.HasValue)
         {
 
-            return query.Where(x => x.ContactMethods.Any(e => e.ContactMethodId == selectedVolunteersPreferredContact));
+            return query.Where(x => x.ContactMethodId.Any(e => e.ContactMethodId == selectedVolunteersPreferredContact));
         }
         return query;
     }

@@ -8,7 +8,7 @@ public class Campaign : IAudit, ISoftDelete
     public int Id { get; set; }
     public int FilterCriteriaId { get; set; }
     public Guid TemplateId { get; set; }
-    public ContactMethods TypeId { get; set; }
+    public ContactMethodId TypeId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? PreviewRecipients { get; set; }

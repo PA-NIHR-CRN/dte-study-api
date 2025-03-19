@@ -9,7 +9,7 @@ namespace BPOR.Rms.TagHelpers
 {
     public class TemplateSelectTagHelper : TagHelper
     {
-        public ContactMethods ContactMethod { get; set; }
+        public ContactMethodId ContactMethod { get; set; }
         public string SelectedTemplateId { get; set; }
         public List<TemplateResponse> Templates { get; set; } = new List<TemplateResponse>();
         public ModelExpression For { get; set; }
@@ -47,8 +47,8 @@ namespace BPOR.Rms.TagHelpers
                 new SelectListItem { Value = "", Text = "Select template", Disabled = true, Selected = true }
             };
             filteredTemplates.AddRange(Templates
-                .Where(t => (ContactMethod == ContactMethods.Email && t.@type == "email") ||
-                            (ContactMethod == ContactMethods.Letter && t.@type == "letter"))
+                .Where(t => (ContactMethod == ContactMethodId.Email && t.@type == "email") ||
+                            (ContactMethod == ContactMethodId.Letter && t.@type == "letter"))
                 .Select(t => new SelectListItem { Value = t.id.ToString(), Text = t.name })
             );
 

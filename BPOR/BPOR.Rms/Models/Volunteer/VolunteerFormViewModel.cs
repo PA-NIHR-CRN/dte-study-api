@@ -82,9 +82,9 @@ public class VolunteerFormViewModel : IValidatableObject
     public bool ManualAddressEntry { get; set; }
     public string? lastAction { get; set; }
 
-    public List<ContactMethods> GetPrefferdContactMethodValues{
+    public List<ContactMethodId> GetPrefferdContactMethodValues{
         get { 
-        return Enum.GetValues<ContactMethods>().ToList();
+        return Enum.GetValues<ContactMethodId>().ToList();
         }
 
     }
@@ -170,7 +170,7 @@ public List<Dictionary<string, string>> SexRegisteredAtBirthValues
         {
             yield return new ValidationResult("Enter a mobile phone number in the correct format, like 07700 900 982", [nameof(Mobile)]);
         }
-        if (PreferredContactMethod != null && PreferredContactMethod == (int)ContactMethods.Email && String.IsNullOrEmpty(EmailAddress))
+        if (PreferredContactMethod != null && PreferredContactMethod == (int)ContactMethodId.Email && String.IsNullOrEmpty(EmailAddress))
         {
             yield return new ValidationResult("Email address cannot be blank", [nameof(EmailAddress)]);
         }

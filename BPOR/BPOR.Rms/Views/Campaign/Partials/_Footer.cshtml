@@ -8,7 +8,7 @@
 @inject IOptions<RmsSettings> rmsOptions
 
 
-@if (Model.ContactMethod == ContactMethods.Email)
+@if (Model.ContactMethod == ContactMethodId.Email)
 {
     <div class="govuk-inset-text">
         <strong>Please note:</strong> GOV UK Notify has an email allowance of 250,000 per day. This includes all email
@@ -31,7 +31,7 @@
     </p>
 }
 
-@if (Model.ContactMethod == ContactMethods.Letter)
+@if (Model.ContactMethod == ContactMethodId.Letter)
 {
     <div class="govuk-inset-text">
         <strong>Please note:</strong> GOV UK Notify has a maximum daily limit of 20,000 letters. This includes all letter campaigns sent by our team.

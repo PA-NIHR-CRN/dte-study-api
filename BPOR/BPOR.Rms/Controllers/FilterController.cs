@@ -147,7 +147,7 @@ public class FilterController(ParticipantDbContext context,
     [HttpPost]
     public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
-        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Email) && !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Letter) && model.ShowPreferredContactFilter)
+        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Email) && !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Letter) && model.ShowPreferredContactFilter)
         {
             TempData["ContactMethodError"] = "Select if the volunteers preferred contact method is email or letter";
             return RedirectToAction("Index",model);
@@ -195,12 +195,12 @@ public class FilterController(ParticipantDbContext context,
 
         switch (model.SelectedVolunteersPreferredContact)
         {
-            case (int)ContactMethods.Email:
-                campaignDetails.ContactMethod = ContactMethods.Email;
+            case (int)ContactMethodId.Email:
+                campaignDetails.ContactMethod = ContactMethodId.Email;
                 break;
 
-            case (int)ContactMethods.Letter:
-                campaignDetails.ContactMethod = ContactMethods.Letter;
+            case (int)ContactMethodId.Letter:
+                campaignDetails.ContactMethod = ContactMethodId.Letter;
                 break;
         }
 
@@ -249,7 +249,7 @@ public class FilterController(ParticipantDbContext context,
                     HasRegistered = x.RegistrationConsentAtUtc,
                     EthnicGroup = x.EthnicGroup,
                     GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
-                    ContactMethod = x.ContactMethods.FirstOrDefault().ContactMethodId
+                    ContactMethod = x.ContactMethodId.FirstOrDefault().ContactMethodId
                 })
                 .OrderBy(x => x.Id)
                 .DeferredPage(paginationService);

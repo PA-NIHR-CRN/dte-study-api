@@ -13,14 +13,14 @@ public class ContactMethodConfiguration : IEntityTypeConfiguration<ContactMethod
         builder.HasData(
             new ContactMethod
             {
-                Id = (int)ContactMethods.Email,
+                Id = (int)ContactMethodId.Email,
                 Code = "Email",
                 Description = "Email",
                 IsDeleted = false
             },
             new ContactMethod
             {
-                Id = (int)ContactMethods.Letter,
+                Id = (int)ContactMethodId.Letter,
                 Code = "Letter",
                 Description = "Letter",
                 IsDeleted = false

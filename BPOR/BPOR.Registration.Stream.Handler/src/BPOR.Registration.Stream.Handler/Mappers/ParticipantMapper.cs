@@ -66,10 +66,10 @@ public class ParticipantMapper : IParticipantMapper
     }
     private void MapParticipantContactMethod(DynamoParticipant source, Participant participant)
     {
-        if (participant.ContactMethods.Count == 0) { 
-            participant.ContactMethods.Add(new ParticipantContactMethod()
+        if (participant.ContactMethodId.Count == 0) { 
+            participant.ContactMethodId.Add(new ParticipantContactMethod()
             {
-                ContactMethodId = (int)ContactMethods.Email,
+                ContactMethodId = (int)ContactMethodId.Email,
 
             });
         }

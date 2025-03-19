@@ -76,7 +76,7 @@ public class CampaignController(
             var selectedTemplate =
                 model.Templates.First(t => t.id == model.SelectedTemplateId);
 
-            if (!Enum.TryParse<ContactMethods>(selectedTemplate.type, true, out var contactMethod))
+            if (!Enum.TryParse<ContactMethodId>(selectedTemplate.type, true, out var contactMethod))
             {
                 throw new InvalidContactMethodException(selectedTemplate.type);
             }
@@ -123,12 +123,12 @@ public class CampaignController(
 
                     switch (campaign.TypeId)
                     {
-                        case ContactMethods.Email:
+                        case ContactMethodId.Email:
                             contentfulTemplateId = "email-rms-campaign-sent";
                             sendParams.Add("studyName", studyInfo.StudyName);
                             break;
 
-                        case ContactMethods.Letter:
+                        case ContactMethodId.Letter:
                             contentfulTemplateId = "letter-rms-campaign-sent";
                             sendParams.Add("letterTemplateFilename", selectedTemplate.name);
                             break;

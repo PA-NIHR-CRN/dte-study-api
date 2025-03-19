@@ -89,7 +89,7 @@ public static class ParticipantQueryableExtensions
             .Include(x => x.Address)
             .Include(x => x.HealthConditions)
             .Include(x => x.ParticipantIdentifiers)
-            .Include(x => x.ContactMethods)
+            .Include(x => x.ContactMethodId)
             .Include(x => x.ParticipantLocation)
             .Include(x => x.SourceReferences);
     }
