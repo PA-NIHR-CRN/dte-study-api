@@ -19,11 +19,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     [HttpPost]
     public IActionResult TermsAndConditions(ResearcherTermsAndConditionsViewModel model)
     {
-        if (!model.AgreedToTermsAndConditions)
-        {
-            ModelState.AddModelError("AgreedToTermsAndConditions", "Confirm that you have read and agree to the terms and conditions before applying");
-        }
-
         if (ModelState.IsValid)
         {
             return RedirectToAction("SubmitStudy", model);

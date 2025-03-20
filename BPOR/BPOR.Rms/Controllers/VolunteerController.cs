@@ -29,10 +29,6 @@ public class VolunteerController(ParticipantDbContext context,
     [HttpPost]
     public IActionResult Consent(VolunteerContactConsentViewModel model)
     {
-        if (!model.AgreedToContactConsent)
-        {
-            ModelState.AddModelError("AgreedToContactConsent", "Confirm that the Privacy and Data Sharing Policy has been read and understood before giving consent");
-        }
 
         if (ModelState.IsValid)
         {

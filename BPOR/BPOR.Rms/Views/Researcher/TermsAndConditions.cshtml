@@ -31,16 +31,29 @@
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
             <div class="govuk-form-group @(Html.ViewData.ModelState["AgreedToTermsAndConditions"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                <fieldset class="govuk-fieldset">
+                @{
+                    var AgreedToTermsAndConditionsHasError = ViewData.ModelState["AgreedToTermsAndConditions"]?.Errors.Any() == true;
+                    var ariaDescribedBy = AgreedToTermsAndConditionsHasError ? "AgreedToTermsAndConditions-error" : null;
+                }
+                <div class="govuk-form-group @(AgreedToTermsAndConditionsHasError ? "govuk-form-group--error" : "")">
+                    @if (AgreedToTermsAndConditionsHasError)
+                    {
+                        <p id="AgreedToTermsAndConditions-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error: </span>
+                            @ViewData.ModelState["AgreedToTermsAndConditions"].Errors[0].ErrorMessage
+                        </p>
+                    }
                     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
                         <div class="govuk-checkboxes__item">
-                            <input asp-for="AgreedToTermsAndConditions" class="govuk-checkboxes__input" id="AgreedToTermsAndConditions" type="checkbox" />
-                            <label class="govuk-label govuk-checkboxes__label" for="AgreedToTermsAndConditions">
+                            <input asp-for="AgreedToTermsAndConditions" class="govuk-checkboxes__input" id="AgreedToTermsAndConditions" type="checkbox"
+                                   aria-labelledby="AgreedToTermsAndConditions-label"
+                                   aria-describedby="@ariaDescribedBy" />
+                            <label id="AgreedToTermsAndConditions-label" class="govuk-label govuk-checkboxes__label" for="AgreedToTermsAndConditions">
                                 I confirm I have read and agree to the <a href="https://bepartofresearch.nihr.ac.uk/site-policies/terms-and-conditions/" target="_blank" aria-label="terms and conditions (Opens in a new tab)">terms and conditions</a>
                             </label>
                         </div>
                     </div>
-                </fieldset>
+                </div>
             </div>
         </div>
     </div>
