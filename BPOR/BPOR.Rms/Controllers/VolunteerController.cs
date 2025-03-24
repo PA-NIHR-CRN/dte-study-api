@@ -107,30 +107,31 @@ public class VolunteerController(ParticipantDbContext context,
                 await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode.ToString(), model.LastName, model.DateOfBirth, cancellationToken);
             }
 
-            if (ModelState.IsValid) { 
-
             if (!String.IsNullOrEmpty(model.EmailAddress))
             {
                 await DoesUserEmailExistInDatabaseAsync(model.EmailAddress);
             }
-            if (!model.ManualAddressEntry)
-            {
 
-                if (model.SelectedAddress != null)
+            if (ModelState.IsValid) { 
+
+                if (!model.ManualAddressEntry)
                 {
-                    var participantAddress =  JsonSerializer.Deserialize<PostcodeAddressModel>(model.SelectedAddress);
-                    var TempPostcode = new Postcode();
-                    model.Town = participantAddress.Town;
-                    model.AddressLine1 = participantAddress.AddressLine1;
-                    model.AddressLine2 = participantAddress.AddressLine2;
-                    model.AddressLine3 = participantAddress.AddressLine3;
-                    model.AddressLine4 = participantAddress.AddressLine4;
-                    if (Postcode.TryParse(participantAddress.Postcode, out TempPostcode))
+
+                    if (model.SelectedAddress != null)
                     {
-                        model.PostCode = TempPostcode;
-                    };
+                        var participantAddress =  JsonSerializer.Deserialize<PostcodeAddressModel>(model.SelectedAddress);
+                        var TempPostcode = new Postcode();
+                        model.Town = participantAddress.Town;
+                        model.AddressLine1 = participantAddress.AddressLine1;
+                        model.AddressLine2 = participantAddress.AddressLine2;
+                        model.AddressLine3 = participantAddress.AddressLine3;
+                        model.AddressLine4 = participantAddress.AddressLine4;
+                        if (Postcode.TryParse(participantAddress.Postcode, out TempPostcode))
+                        {
+                            model.PostCode = TempPostcode;
+                        };
+                    }
                 }
-            }
 
                 bool? hasLongTermIllness = null;
                 int? dailyLifeImpact= null;
