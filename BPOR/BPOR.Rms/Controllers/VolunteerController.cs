@@ -67,7 +67,6 @@ public class VolunteerController(ParticipantDbContext context,
 
         if (action == "AddressLookup")
         {
-
             ClearAllErrorsExcept("PostCode");
             if (!model.PostCode.HasValue)
             {
@@ -79,6 +78,7 @@ public class VolunteerController(ParticipantDbContext context,
                 model.ManualAddressEntry = false;
             }
             model.SelectedAddress = null;
+            ModelState.AddModelError("PostCode", "We cannot find a match for the postcode entered. Please try again or enter your address manually.");
         }
 
         if (action == "ManualAddress")
