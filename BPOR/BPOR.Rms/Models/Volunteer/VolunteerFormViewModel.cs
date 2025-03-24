@@ -229,7 +229,8 @@ public List<Dictionary<string, string>> SexRegisteredAtBirthValues
 
         if(EmailAddress != null)
         { 
-            string emailRegex = "^[^@]+@?[^@]+$";
+            string emailRegex = "^[^@] +@[a-zA - Z0 - 9.-]+\\.[a-zA - Z]{ 2,}$";
+           
             if (!Regex.IsMatch(EmailAddress, emailRegex))
             {
                 yield return new ValidationResult( "Enter an email address in the correct format, like name@example.com", [nameof(EmailAddress)]);
