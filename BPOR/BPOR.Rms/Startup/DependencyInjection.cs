@@ -56,6 +56,8 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserIdAccessor<int>, SimpleCurrentUserIdAccessor<int>>();
         services.AddScoped<ICurrentUserProvider<User>, CurrentUserProvider<User>>();
         services.AddTransient<IReferenceGenerator, ReferenceGenerator>();
+        services.AddTransient<IPostcodeValidator, PostcodeValidator>();
+
 
         services.AddTransient<IEmailService, EmailService>();
         services.AddTransient<ITransactionalEmailService, TransactionalEmailService>();
