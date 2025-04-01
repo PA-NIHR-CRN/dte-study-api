@@ -2,11 +2,10 @@
 using System.ComponentModel.DataAnnotations;
 using NIHR.Infrastructure.Models;
 using System.Text.RegularExpressions;
-using Microsoft.IdentityModel.Tokens;
 using Rbec.Postcodes;
-using System.ComponentModel;
 using BPOR.Domain.Enums;
-using Amazon.Runtime.Internal.Transform;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Models.Volunteer;
 
@@ -23,7 +22,10 @@ public class VolunteerFormViewModel : IValidatableObject
     public GovUkDate? DateOfBirth { get; set; }
 
     [Display(Name = "Postcode", Order = 9)]
+    [ModelBinder(BinderType = typeof(PostcodeModelBinder))]
     public Postcode? PostCode { get; set; }
+
+    public List<PostcodeAddressModel>? Addresses { get; set; }
 
     [Display(Name = "Select an address")]
     public string? SelectedAddress { get; set; }
@@ -89,7 +91,7 @@ public class VolunteerFormViewModel : IValidatableObject
 
     }
 
-public List<Dictionary<string, string>> SexRegisteredAtBirthValues 
+    public List<Dictionary<string, string>> SexRegisteredAtBirthValues 
     {
         get
         {
@@ -261,10 +263,44 @@ public List<Dictionary<string, string>> SexRegisteredAtBirthValues
             }
         }
 
-
-
-
     }
 
 }
 
+public class PostcodeModelBinder : IModelBinder
+{
+    public Task BindModelAsync(ModelBindingContext bindingContext)
+    {
+        var modelName = bindingContext.ModelName;
+        ValueProviderResult valueResult = bindingContext.ValueProvider.GetValue(modelName);
+
+        if (valueResult == ValueProviderResult.None)
+        {
+            bindingContext.Result = ModelBindingResult.Success(null);
+            return Task.CompletedTask;
+        }
+
+        string postcodeInput = valueResult.FirstValue ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(postcodeInput))
+        {
+            bindingContext.Result = ModelBindingResult.Success(null);
+            return Task.CompletedTask;
+        }
+
+        if (Postcode.TryParse(postcodeInput, out var parsedPostcode))
+        {
+            bindingContext.Result = ModelBindingResult.Success(parsedPostcode);
+        }
+        else
+        {
+            bindingContext.ModelState.AddModelError(
+                modelName,
+                "Enter a full UK postcode."
+            );
+            bindingContext.Result = ModelBindingResult.Failed();
+        }
+
+        return Task.CompletedTask;
+    }
+}

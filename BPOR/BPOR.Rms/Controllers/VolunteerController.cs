@@ -9,10 +9,8 @@ using System.Text.RegularExpressions;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.Models;
 using Rbec.Postcodes;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using BPOR.Rms.Constants;
 using System.Text.Json;
-using BPOR.Domain.Enums;
 
 namespace BPOR.Rms.Controllers;
 
@@ -68,9 +66,19 @@ public class VolunteerController(ParticipantDbContext context,
         if (action == "AddressLookup")
         {
             ClearAllErrorsExcept("PostCode");
-            if (!model.PostCode.HasValue)
+
+            if (model.PostCode.HasValue)
             {
-                    ModelState.AddModelError("PostCode", "Enter a full UK postcode");
+                var addresses = await locationApiClient.GetAddressesByPostcodeAsync(
+                    model.PostCode.ToString(),
+                    cancellationToken);
+
+                model.Addresses = addresses.ToList();
+
+                if (!model.Addresses.Any()) {
+                    ModelState.AddModelError("PostCode", "We cannot find a match for the postcode entered. Please try again or enter your address manually.");
+
+                }
             }
 
             if (model.ManualAddressEntry)
