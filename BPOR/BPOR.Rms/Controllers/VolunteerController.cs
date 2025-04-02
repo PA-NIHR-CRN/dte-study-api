@@ -67,20 +67,6 @@ public class VolunteerController(ParticipantDbContext context,
         {
             ClearAllErrorsExcept("PostCode");
 
-            if (model.PostCode.HasValue)
-            {
-                var addresses = await locationApiClient.GetAddressesByPostcodeAsync(
-                    model.PostCode.ToString(),
-                    cancellationToken);
-
-                model.Addresses = addresses.ToList();
-
-                if (!model.Addresses.Any()) {
-                    ModelState.AddModelError("PostCode", "We cannot find a match for the postcode entered. Please try again or enter your address manually.");
-
-                }
-            }
-
             if (model.ManualAddressEntry)
             {
                 model.ManualAddressEntry = false;
