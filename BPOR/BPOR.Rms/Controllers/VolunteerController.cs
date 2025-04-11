@@ -196,7 +196,7 @@ public class VolunteerController(ParticipantDbContext context,
                     //may need to save participant and update GUID
                     ParticipantIdentifiers = new List<ParticipantIdentifier> {
                         new ParticipantIdentifier() {
-                            IdentifierTypeId = 2,
+                            IdentifierTypeId = (int)IdentifierTypes.Offline,
                             Value = Guid.NewGuid()
                         }
                     },
