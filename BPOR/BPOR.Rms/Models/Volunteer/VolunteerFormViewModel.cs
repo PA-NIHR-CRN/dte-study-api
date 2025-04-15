@@ -74,7 +74,7 @@ public class VolunteerFormViewModel : IValidatableObject
     [Display(Name = "Ethnic background", Order = 17)]
     public string? EthnicBackground { get; set; }
 
-    [Display(Name = "How would you describe your background?", Order = 17)]
+    [Display(Name = "How would you describe your background? (optional)", Order = 17)]
     public string? EthnicBackgroundOther { get; set; }
 
     [Display(Name = "Long-term conditions or illnesses and reduced ability to carry out daily activities", Order = 18)]

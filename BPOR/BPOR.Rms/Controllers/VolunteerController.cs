@@ -77,11 +77,9 @@ public class VolunteerController(ParticipantDbContext context,
         if (action == "ManualAddress")
         {
             ModelState.Clear();
-            if (model.SelectedAddress != null)
-            {
-                model.SelectedAddress = null;
 
-            }
+            model.SelectedAddress = null;
+            model.PostCode = null;
             model.ManualAddressEntry = true;
         }
 
@@ -164,7 +162,7 @@ public class VolunteerController(ParticipantDbContext context,
                     UpdatedAt = DateTime.Now,
                     Email = model.EmailAddress == null ? "" : model.EmailAddress,
                     EthnicGroup = model.EthnicGroup,
-                    EthnicBackground = model.EthnicBackground == EthnicBackgrounds.CommonOther ? model.EthnicBackgroundOther : model.EthnicBackground,
+                    EthnicBackground = model.EthnicBackground,
                     DateOfBirth = model.DateOfBirth.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
                     HasLongTermCondition = hasLongTermIllness,
                     DailyLifeImpactId = dailyLifeImpact,
@@ -192,7 +190,7 @@ public class VolunteerController(ParticipantDbContext context,
                     //may need to save participant and update GUID
                     ParticipantIdentifiers = new List<ParticipantIdentifier> {
                         new ParticipantIdentifier() {
-                            IdentifierTypeId = 2,
+                            IdentifierTypeId = (int)IdentifierTypes.Offline,
                             Value = Guid.NewGuid()
                         }
                     },
