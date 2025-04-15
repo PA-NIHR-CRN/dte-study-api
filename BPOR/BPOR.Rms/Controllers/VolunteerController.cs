@@ -9,10 +9,8 @@ using System.Text.RegularExpressions;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.Models;
 using Rbec.Postcodes;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using BPOR.Rms.Constants;
 using System.Text.Json;
-using BPOR.Domain.Enums;
 
 namespace BPOR.Rms.Controllers;
 
@@ -67,12 +65,7 @@ public class VolunteerController(ParticipantDbContext context,
 
         if (action == "AddressLookup")
         {
-
             ClearAllErrorsExcept("PostCode");
-            if (!model.PostCode.HasValue)
-            {
-                    ModelState.AddModelError("PostCode", "Enter a full UK postcode");
-            }
 
             if (model.ManualAddressEntry)
             {
@@ -108,30 +101,31 @@ public class VolunteerController(ParticipantDbContext context,
                 await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode.ToString(), model.LastName, model.DateOfBirth, cancellationToken);
             }
 
-            if (ModelState.IsValid) { 
-
             if (!String.IsNullOrEmpty(model.EmailAddress))
             {
                 await DoesUserEmailExistInDatabaseAsync(model.EmailAddress);
             }
-            if (!model.ManualAddressEntry)
-            {
 
-                if (model.SelectedAddress != null)
+            if (ModelState.IsValid) { 
+
+                if (!model.ManualAddressEntry)
                 {
-                    var participantAddress =  JsonSerializer.Deserialize<PostcodeAddressModel>(model.SelectedAddress);
-                    var TempPostcode = new Postcode();
-                    model.Town = participantAddress.Town;
-                    model.AddressLine1 = participantAddress.AddressLine1;
-                    model.AddressLine2 = participantAddress.AddressLine2;
-                    model.AddressLine3 = participantAddress.AddressLine3;
-                    model.AddressLine4 = participantAddress.AddressLine4;
-                    if (Postcode.TryParse(participantAddress.Postcode, out TempPostcode))
+
+                    if (model.SelectedAddress != null)
                     {
-                        model.PostCode = TempPostcode;
-                    };
+                        var participantAddress =  JsonSerializer.Deserialize<PostcodeAddressModel>(model.SelectedAddress);
+                        var TempPostcode = new Postcode();
+                        model.Town = participantAddress.Town;
+                        model.AddressLine1 = participantAddress.AddressLine1;
+                        model.AddressLine2 = participantAddress.AddressLine2;
+                        model.AddressLine3 = participantAddress.AddressLine3;
+                        model.AddressLine4 = participantAddress.AddressLine4;
+                        if (Postcode.TryParse(participantAddress.Postcode, out TempPostcode))
+                        {
+                            model.PostCode = TempPostcode;
+                        };
+                    }
                 }
-            }
 
                 bool? hasLongTermIllness = null;
                 int? dailyLifeImpact= null;

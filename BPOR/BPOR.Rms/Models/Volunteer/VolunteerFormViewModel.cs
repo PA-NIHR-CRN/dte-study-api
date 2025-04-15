@@ -2,17 +2,17 @@
 using System.ComponentModel.DataAnnotations;
 using NIHR.Infrastructure.Models;
 using System.Text.RegularExpressions;
-using Microsoft.IdentityModel.Tokens;
 using Rbec.Postcodes;
-using System.ComponentModel;
 using BPOR.Domain.Enums;
-using Amazon.Runtime.Internal.Transform;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using NIHR.Infrastructure;
 
 namespace BPOR.Rms.Models.Volunteer;
 
 public class VolunteerFormViewModel : IValidatableObject
 {
-
     [Display(Name = "First name", Order = 1)]
     public string? FirstName { get; set; }
 
@@ -23,7 +23,11 @@ public class VolunteerFormViewModel : IValidatableObject
     public GovUkDate? DateOfBirth { get; set; }
 
     [Display(Name = "Postcode", Order = 9)]
+    [ModelBinder(BinderType = typeof(PostcodeModelBinder))]
     public Postcode? PostCode { get; set; }
+
+    [LookupAddresses(From = nameof(PostCode))]
+    public List<PostcodeAddressModel>? Addresses { get; set; }
 
     [Display(Name = "Select an address")]
     public string? SelectedAddress { get; set; }
@@ -89,7 +93,7 @@ public class VolunteerFormViewModel : IValidatableObject
 
     }
 
-public List<Dictionary<string, string>> SexRegisteredAtBirthValues 
+    public List<Dictionary<string, string>> SexRegisteredAtBirthValues 
     {
         get
         {
@@ -113,6 +117,7 @@ public List<Dictionary<string, string>> SexRegisteredAtBirthValues
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+
         if (String.IsNullOrEmpty(FirstName))
         {
             yield return new ValidationResult("Enter a first name", [nameof(FirstName)]);
@@ -203,6 +208,13 @@ public List<Dictionary<string, string>> SexRegisteredAtBirthValues
             }
         }
 
+        if (PostCode.HasValue && (Addresses != null && Addresses.Count == 0))
+        {
+            yield return new ValidationResult(
+                "We cannot find a match for the postcode entered. Please try again or enter your address manually",
+                new[] { nameof(PostCode) });
+        }
+
         if (LongTermConditionOrIllness == 0)
         {
             yield return new ValidationResult( "Select long-term conditions or illnesses and reduced ability to carry out daily activities", [nameof(LongTermConditionOrIllness)]);
@@ -229,7 +241,8 @@ public List<Dictionary<string, string>> SexRegisteredAtBirthValues
 
         if(EmailAddress != null)
         { 
-            string emailRegex = "^[^@]+@?[^@]+$";
+            string emailRegex = "^[^@]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+           
             if (!Regex.IsMatch(EmailAddress, emailRegex))
             {
                 yield return new ValidationResult( "Enter an email address in the correct format, like name@example.com", [nameof(EmailAddress)]);
@@ -260,10 +273,107 @@ public List<Dictionary<string, string>> SexRegisteredAtBirthValues
             }
         }
 
-
-
-
     }
 
+}
+
+public class PostcodeModelBinder : IModelBinder
+{
+    public Task BindModelAsync(ModelBindingContext bindingContext)
+    {
+        var modelName = bindingContext.ModelName;
+        ValueProviderResult valueResult = bindingContext.ValueProvider.GetValue(modelName);
+
+        if (valueResult == ValueProviderResult.None)
+        {
+            bindingContext.Result = ModelBindingResult.Success(null);
+            return Task.CompletedTask;
+        }
+
+        string postcodeInput = valueResult.FirstValue ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(postcodeInput))
+        {
+            bindingContext.Result = ModelBindingResult.Success(null);
+            return Task.CompletedTask;
+        }
+
+        if (Postcode.TryParse(postcodeInput, out var parsedPostcode))
+        {
+            bindingContext.Result = ModelBindingResult.Success(parsedPostcode);
+        }
+        else
+        {
+            bindingContext.ModelState.AddModelError(
+                modelName,
+                "Enter a full UK postcode."
+            );
+            bindingContext.Result = ModelBindingResult.Failed();
+        }
+
+        return Task.CompletedTask;
+    }
+}
+
+
+public class LookupAddressesAttribute : ModelBinderAttribute
+{
+    public LookupAddressesAttribute()
+    {
+        BinderType = typeof(LookupAddressesModelBinder);
+    }
+
+    public string From { get; set; }
+}
+
+public class LookupAddressesModelBinder : IModelBinder
+{
+    private readonly IPostcodeMapper _postcodeMapper;
+
+    public LookupAddressesModelBinder(IPostcodeMapper postcodeMapper)
+    {
+        _postcodeMapper = postcodeMapper;
+    }
+
+    public async Task BindModelAsync(ModelBindingContext bindingContext)
+    {
+        if (bindingContext.ModelMetadata is DefaultModelMetadata metadata)
+        {
+            var attribute = metadata.Attributes.PropertyAttributes
+                .OfType<LookupAddressesAttribute>()
+                .FirstOrDefault();
+            if (attribute == null)
+            {
+                bindingContext.Result = ModelBindingResult.Failed();
+                return;
+            }
+
+            // Reconstruct the key for the "From" property
+            // [LookupAddresses(From = nameof(PostCode))]
+            var parentPrefix = bindingContext.ModelName.Split('.')[..^1].Append(attribute.From);
+            var fromKey = string.Join('.', parentPrefix); // e.g. "VolunteerFormViewModel.PostCode"
+
+            // Get the user input for that key
+            var valueResult = bindingContext.ValueProvider.GetValue(fromKey);
+            var rawPostcode = valueResult.FirstValue ?? string.Empty;
+
+            // If there's a valid postcode, we do the lookup
+            if (Postcode.TryParse(rawPostcode, out var postcode))
+            {
+                var addresses = await _postcodeMapper.GetAddressesByPostcodeAsync(
+                    postcode.ToString(),
+                    bindingContext.HttpContext.RequestAborted
+                );
+
+                // Return success with the list
+                bindingContext.Result = ModelBindingResult.Success(addresses);
+            }
+            else
+            {
+                // If there's no valid postcode, addresses remain null or empty
+                bindingContext.Result = ModelBindingResult.Success(null);
+            }
+        }
+    }
 }
 
