@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Volunteer;
 using LuhnNet;
