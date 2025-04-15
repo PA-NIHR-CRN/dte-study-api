@@ -143,7 +143,11 @@
                 if (Model.SelectedAddress == null)
                 {
                     <form-group for="SelectedAddress">
-                        <address-lookup postcode="@(Model.PostCode)" for="SelectedAddress" auto-Focus="@(Model.lastAction=="AddressLookup")"></address-lookup>
+                        <address-lookup for="SelectedAddress"
+                                        addresses="@Model.Addresses"
+                                        postcode="@(Model.PostCode)"
+                                        auto-focus="@(Model.lastAction == "AddressLookup")">
+                        </address-lookup>
                     </form-group>
                 }
                 else

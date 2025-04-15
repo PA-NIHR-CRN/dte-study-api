@@ -87,7 +87,7 @@ public class GovUkDate : IValidatableObject
             
         if(Year.HasValue && (Year < 1000 || Year > 9999))               
         {
-            yield return new ValidationResult($"{validationContext.DisplayName} year must include 4 numbers", ["DateOfBirth.Year"]);
+            yield return new ValidationResult($"{validationContext.DisplayName} year must include 4 numbers", [nameof(Year)]);
         }
         
     }
