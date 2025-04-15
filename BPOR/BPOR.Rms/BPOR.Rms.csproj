@@ -25,7 +25,7 @@
       <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
       <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
       <ProjectReference Include="..\NIHR.NotificationService\NIHR.NotificationService.csproj" />
-      <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Domain.csproj" />
+      <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>
