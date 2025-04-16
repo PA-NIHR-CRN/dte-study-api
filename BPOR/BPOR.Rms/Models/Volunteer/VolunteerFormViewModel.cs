@@ -130,7 +130,7 @@ public class VolunteerFormViewModel : IValidatableObject
 
         if (DateOfBirth == null || !DateOfBirth.HasAnyDateComponent)
         {
-            yield return new ValidationResult($"Enter a Date of Birth", ["DateOfBirth.Day"]);
+            yield return new ValidationResult($"Enter a date of birth", ["DateOfBirth.Day"]);
         }
 
         if (PostCode == null || !PostCode.HasValue)
