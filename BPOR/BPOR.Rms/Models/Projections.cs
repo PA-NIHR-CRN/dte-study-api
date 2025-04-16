@@ -109,14 +109,14 @@ public static class Projections
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 
             Campaigns = s.FilterCriterias
-                .SelectMany(fc => fc.Campaigns)
+                .SelectMany(fc => fc.Campaign)
                 .Select(ec => new Campaign
                 {
                     TargetGroupSize = (int)ec.TargetGroupSize,
                     CreatedAt = ec.CreatedAt,
                     Name = ec.Name,
                     TypeId = ec.TypeId,
-                    CampaignParticipants = ec.Participants
+                    CampaignParticipants = ec.Participant
                         .Select(p => new CampaignParticipant
                         {
                             SentAt = p.SentAt,
@@ -126,7 +126,7 @@ public static class Projections
                         })
                         .ToList(),
                 }),
-            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaigns.Any())
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
         };
     }
 

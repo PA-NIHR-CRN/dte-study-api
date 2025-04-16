@@ -34,7 +34,7 @@ public class CampaignService(
 {
     public async Task SendCampaignAsync(CampaignServiceQueueItem item, CancellationToken cancellationToken = default)
     {
-        var campaign = await context.Campaigns
+        var campaign = await context.Campaign
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == item.Id, cancellationToken);
         var deliveryStatusId = GetDeliveryStatusId();
@@ -63,7 +63,7 @@ public class CampaignService(
                throw new InvalidOperationException("Campaign delivery status not found");
     }
 
-    private async Task<FilterCriteria?> GetFilterCriteriaAsync(Campaigns campaign,
+    private async Task<FilterCriteria?> GetFilterCriteriaAsync(Campaign campaign,
         CancellationToken cancellationToken)
     {
         return await context.FilterCriterias
@@ -94,7 +94,7 @@ public class CampaignService(
             .ToListAsync(cancellationToken);
     }
 
-    private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaigns campaign,
+    private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
@@ -107,7 +107,7 @@ public class CampaignService(
         await foreach (var processingResult in ProcessVolunteersAsync(volunteers, campaign, dbFilter,
                            deliveryStatusId, batchSize, cancellationToken))
         {
-            await context.CampaignParticipants.AddRangeAsync(processingResult.CampaignParticipants,
+            await context.CampaignParticipant.AddRangeAsync(processingResult.CampaignParticipant,
                 cancellationToken);
             await context.StudyParticipantEnrollment.AddRangeAsync(processingResult.StudyParticipantEnrollments,
                 cancellationToken);
@@ -159,7 +159,7 @@ public class CampaignService(
 
     private async IAsyncEnumerable<ProcessingResults> ProcessVolunteersAsync(
         List<CampaignParticipantDetails> volunteers,
-        Campaigns campaign,
+        Campaign campaign,
         FilterCriteria dbFilter,
         int deliveryStatusId,
         int batchSize,
@@ -181,10 +181,10 @@ public class CampaignService(
         }
     }
 
-    private void ProcessVolunteer(CampaignParticipantDetails volunteer, Campaigns campaign, FilterCriteria dbFilter,
+    private void ProcessVolunteer(CampaignParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int deliveryStatusId)
     {
-        processingResult.CampaignParticipants.Add(new CampaignParticipants
+        processingResult.CampaignParticipant.Add(new CampaignParticipant
         {
             CampaignId = campaign.Id,
             CampaignTypeId = campaign.TypeId,
@@ -217,12 +217,12 @@ public class CampaignService(
         }
     }
 
-    private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, Campaigns campaign,
+    private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         List<ProcessingResults> queue, string callback, CancellationToken cancellationToken)
     {
         foreach (var volunteer in volunteers)
         {
-            var campaignParticipant = queue.SelectMany(e => e.CampaignParticipants)
+            var campaignParticipant = queue.SelectMany(e => e.CampaignParticipant)
                 .FirstOrDefault(e => e.ParticipantId == volunteer.Id);
 
             if (campaignParticipant == null)
@@ -264,12 +264,12 @@ public class CampaignService(
 
             switch (campaign.TypeId)
             {
-                case ContactMethods.Email:
+                case ContactMethodId.Email:
                     notification.PrimaryIdentifier = volunteer.Email;
                     notification.NotificationDatas.Add(new NotificationData { Key = "email", Value = volunteer.Email });
                     break;
 
-                case ContactMethods.Letter:
+                case ContactMethodId.Letter:
                     if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1) ||
                         string.IsNullOrWhiteSpace(volunteer.Address.Town) ||
                         string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
@@ -330,6 +330,6 @@ internal static class DbContextExtensions
 
 internal class ProcessingResults
 {
-    public List<CampaignParticipants> CampaignParticipants { get; } = [];
+    public List<CampaignParticipant> CampaignParticipant { get; } = [];
     public List<StudyParticipantEnrollment> StudyParticipantEnrollments { get; } = [];
 }

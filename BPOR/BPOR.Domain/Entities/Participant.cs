@@ -48,8 +48,8 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
     public CommunicationLanguage CommunicationLanguage { get; set; }
     public Gender Gender { get; set; }
 
-    public ICollection<CampaignParticipants> CampaignParticipants { get; set; } =
-        new List<CampaignParticipants>();
+    public ICollection<CampaignParticipant> CampaignParticipant { get; set; } =
+        new List<CampaignParticipant>();
     public ICollection<ParticipantHealthCondition> HealthConditions { get; set; } =
         new List<ParticipantHealthCondition>();
 
@@ -63,7 +63,7 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
 
     public ICollection<SourceReference> SourceReferences { get; set; } = new List<SourceReference>();
     public ParticipantLocation? ParticipantLocation { get; set; }
-    public ICollection<ParticipantContactMethod> ContactMethods { get; set; } =
+    public ICollection<ParticipantContactMethod> ContactMethodId { get; set; } =
         new List<ParticipantContactMethod>();
 
     public void Anonymise()

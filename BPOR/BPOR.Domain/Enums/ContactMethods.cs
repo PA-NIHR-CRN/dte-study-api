@@ -1,6 +1,6 @@
 namespace BPOR.Domain.Enums;
 
-public enum ContactMethods
+public enum ContactMethodId
 {
     Email = 1,
     Letter = 2

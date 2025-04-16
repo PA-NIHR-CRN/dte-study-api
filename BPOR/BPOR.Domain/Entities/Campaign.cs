@@ -1,16 +1,16 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using BPOR.Domain.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BPOR.Domain.Entities;
 
 [Table("Campaign")]
-public class Campaigns : IAudit, ISoftDelete
+public class Campaign : IAudit, ISoftDelete
 {
     public int Id { get; set; }
     public int FilterCriteriaId { get; set; }
     public Guid TemplateId { get; set; }
-    public ContactMethods TypeId { get; set; }
+    public ContactMethodId TypeId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? PreviewRecipients { get; set; }
@@ -20,7 +20,7 @@ public class Campaigns : IAudit, ISoftDelete
     public int CreatedById { get; set; }
     public int UpdatedById { get; set; }
     public bool IsDeleted { get; set; }
-    public ICollection<CampaignParticipants> Participants { get; set; } = new List<CampaignParticipants>();
+    public ICollection<CampaignParticipant> Participant { get; set; } = new List<CampaignParticipant>();
 
     public FilterCriteria FilterCriteria { get; set; } = null!;
 }

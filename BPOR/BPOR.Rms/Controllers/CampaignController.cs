@@ -33,7 +33,7 @@ public class CampaignController(
     : Controller
 {
     private const string _templateCacheKey = "Templates";
-    private string contentfulTemplateId;
+    private string templateId;
 
     public async Task<IActionResult> Setup(SetupCampaignViewModel model)
     {
@@ -76,12 +76,12 @@ public class CampaignController(
             var selectedTemplate =
                 model.Templates.First(t => t.id == model.SelectedTemplateId);
 
-            if (!Enum.TryParse<ContactMethods>(selectedTemplate.type, true, out var contactMethod))
+            if (!Enum.TryParse<ContactMethodId>(selectedTemplate.type, true, out var contactMethod))
             {
                 throw new InvalidContactMethodException(selectedTemplate.type);
             }
 
-            var campaign = new Campaigns
+            var campaign = new Campaign
             {
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
@@ -123,18 +123,18 @@ public class CampaignController(
 
                     switch (campaign.TypeId)
                     {
-                        case ContactMethods.Email:
-                            contentfulTemplateId = "email-rms-campaign-sent";
+                        case ContactMethodId.Email:
+                            templateId = "email-rms-campaign-sent";
                             sendParams.Add("studyName", studyInfo.StudyName);
                             break;
 
-                        case ContactMethods.Letter:
-                            contentfulTemplateId = "letter-rms-campaign-sent";
+                        case ContactMethodId.Letter:
+                            templateId = "letter-rms-campaign-sent";
                             sendParams.Add("letterTemplateFilename", selectedTemplate.name);
                             break;
                     }
 
-                    await transactionalEmailService.SendAsync(recipient, contentfulTemplateId, sendParams, cancellationToken);
+                    await transactionalEmailService.SendAsync(recipient, templateId, sendParams, cancellationToken);
                 }
             }
 
@@ -150,8 +150,8 @@ public class CampaignController(
     CancellationToken cancellationToken = default)
     {
 
-        TemplateList templateList = await FetchTemplates(forceRefresh, cancellationToken);
-        model.Templates = templateList.templates.ToList();
+        List<TemplateResponse> templateList = await FetchTemplates(forceRefresh, cancellationToken);
+        model.Templates = templateList.ToList();
 
         if (model.StudyId is not null)
         {
@@ -244,19 +244,20 @@ public class CampaignController(
                                                email.Equals(address.Address,
                                                    StringComparison.InvariantCultureIgnoreCase);
 
-    private async Task<TemplateList> FetchTemplates(bool forceRefresh = false,
+    private async Task<List<TemplateResponse>> FetchTemplates(bool forceRefresh = false,
         CancellationToken cancellationToken = default)
+
     {
         var cachedData = await cache.GetAsync(_templateCacheKey, cancellationToken);
         if (cachedData != null && !forceRefresh)
         {
             var jsonData = Encoding.UTF8.GetString(cachedData);
-            return JsonConvert.DeserializeObject<TemplateList>(jsonData);
+            return JsonConvert.DeserializeObject<TemplateList>(jsonData).templates;
         }
 
         var templates = await notificationService.GetTemplatesAsync(cancellationToken);
         await CacheTemplates(templates, cancellationToken);
-        return templates;
+        return templates.templates;
     }
 
     private async Task CacheTemplates(TemplateList templates, CancellationToken cancellationToken = default)
@@ -267,9 +268,9 @@ public class CampaignController(
         await cache.SetAsync(_templateCacheKey, data, cancellationToken);
     }
 
-    private async Task AddCampaignToContextAsync(Campaigns campaign, CancellationToken cancellationToken)
+    private async Task AddCampaignToContextAsync(Campaign campaign, CancellationToken cancellationToken)
     {
-        await context.Campaigns.AddAsync(campaign, cancellationToken);
+        await context.Campaign.AddAsync(campaign, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 }

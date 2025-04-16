@@ -13,7 +13,7 @@ public static class ParticipantQueryExtensions
         if (selectedVolunteersContacted.HasValue)
         {
 
-            return query.Where(x => x.CampaignParticipants.Any(e => e.Campaign.FilterCriteria.StudyId == studyId) == selectedVolunteersContacted.Value);
+            return query.Where(x => x.CampaignParticipant.Any(e => e.Campaign.FilterCriteria.StudyId == studyId) == selectedVolunteersContacted.Value);
 
         }
 
@@ -25,7 +25,7 @@ public static class ParticipantQueryExtensions
         if (selectedVolunteersPreferredContact.HasValue)
         {
 
-            return query.Where(x => x.ContactMethods.Any(e => e.ContactMethodId == selectedVolunteersPreferredContact));
+            return query.Where(x => x.ContactMethodId.Any(e => e.ContactMethodId == selectedVolunteersPreferredContact));
         }
         return query;
     }
@@ -36,7 +36,7 @@ public static class ParticipantQueryExtensions
     {
         if (selectedVolunteersRegisteredInterest.HasValue)
         {
-            return query.Where(x => x.CampaignParticipants.Any(e => (e.RegisteredInterestAt != null) == selectedVolunteersRegisteredInterest.Value && e.Campaign.FilterCriteria.StudyId == studyId));
+            return query.Where(x => x.CampaignParticipant.Any(e => (e.RegisteredInterestAt != null) == selectedVolunteersRegisteredInterest.Value && e.Campaign.FilterCriteria.StudyId == studyId));
         }
 
         return query;

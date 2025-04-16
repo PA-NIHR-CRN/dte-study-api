@@ -10286,7 +10286,7 @@ namespace Dynamo.Stream.Handler.Migrations
                         .IsRequired();
 
                     b.HasOne("BPOR.Domain.Entities.Participant", "Participant")
-                        .WithMany("ContactMethods")
+                        .WithMany("ContactMethodId")
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -10450,7 +10450,7 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Navigation("CampaignParticipants");
 
-                    b.Navigation("ContactMethods");
+                    b.Navigation("ContactMethodId");
 
                     b.Navigation("HealthConditions");
 

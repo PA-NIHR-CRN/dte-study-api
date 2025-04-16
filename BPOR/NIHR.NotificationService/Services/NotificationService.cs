@@ -17,11 +17,11 @@ namespace NIHR.NotificationService.Services
         private readonly ILogger<NotificationService> _logger;
         private const int _rateLimitPerMinute = 3000;
 
-        private static readonly Dictionary<ContactMethods, int> _dailyCount = new();
-        private static readonly Dictionary<ContactMethods, int> _dailyLimit = new()
+        private static readonly Dictionary<ContactMethodId, int> _dailyCount = new();
+        private static readonly Dictionary<ContactMethodId, int> _dailyLimit = new()
         {
-            { ContactMethods.Email, 250000 },
-            { ContactMethods.Letter, 20000 }
+            { ContactMethodId.Email, 250000 },
+            { ContactMethodId.Letter, 20000 }
         };
 
         private static readonly SemaphoreSlim _semaphore = new(1, 1);
@@ -31,7 +31,7 @@ namespace NIHR.NotificationService.Services
             _client = client;
             _logger = logger;
 
-            foreach (var method in Enum.GetValues<ContactMethods>())
+            foreach (var method in Enum.GetValues<ContactMethodId>())
             {
                 _dailyCount[method] = 0;
             }
@@ -46,18 +46,18 @@ namespace NIHR.NotificationService.Services
             {
                 var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
 
-                var contactMethod = (ContactMethods)int.Parse(personalisation["campaignTypeId"]);
+                var contactMethod = (ContactMethodId)int.Parse(personalisation["campaignTypeId"]);
 
                 switch (contactMethod)
                 {
-                    case ContactMethods.Email:
+                    case ContactMethodId.Email:
                         await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation, request.Reference);
-                        await IncrementDailyCountAsync(ContactMethods.Email, 1);
+                        await IncrementDailyCountAsync(ContactMethodId.Email, 1);
                         break;
 
-                    case ContactMethods.Letter:
+                    case ContactMethodId.Letter:
                         await _client.SendLetterAsync(request.TemplateId, personalisation, request.Reference);
-                        await IncrementDailyCountAsync(ContactMethods.Letter, 1);
+                        await IncrementDailyCountAsync(ContactMethodId.Letter, 1);
                         break;
 
                     default:
@@ -181,21 +181,21 @@ namespace NIHR.NotificationService.Services
                 TemplateId = templateId,
                 Personalisation = personalisation,
                 Reference = reference,
-                ContactMethod = (ContactMethods)campaignTypeId
+                ContactMethod = (ContactMethodId)campaignTypeId
             };
 
-            var contactMethod = (ContactMethods)int.Parse(personalisation["campaignTypeId"]);
+            var contactMethod = (ContactMethodId)int.Parse(personalisation["campaignTypeId"]);
 
             switch (contactMethod)
             {
-                case ContactMethods.Email:
+                case ContactMethodId.Email:
                     if (string.IsNullOrWhiteSpace(request.EmailAddress))
                     {
                         throw new ArgumentException("EmailAddress is required for email notifications.");
                     }
                     break;
 
-                case ContactMethods.Letter:
+                case ContactMethodId.Letter:
                     if (!personalisation.TryGetValue("address_line_1", out var addressLine1) ||
                         !personalisation.TryGetValue("address_line_5", out var town) ||
                         !personalisation.TryGetValue("address_line_6", out var postcode))
@@ -226,7 +226,7 @@ namespace NIHR.NotificationService.Services
             return request;
         }
 
-        private async Task IncrementDailyCountAsync(ContactMethods contactMethod, int count)
+        private async Task IncrementDailyCountAsync(ContactMethodId contactMethod, int count)
         {
             var lockStopwatch = Stopwatch.StartNew();
             await _semaphore.WaitAsync();

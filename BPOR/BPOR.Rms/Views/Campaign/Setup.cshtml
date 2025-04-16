@@ -30,7 +30,7 @@
         <input type="hidden" asp-for="ContactMethod" />
         <partial name="Partials/_TemplateSelect" />
 
-        @if (Model.ContactMethod == ContactMethods.Email)
+        @if (Model.ContactMethod == ContactMethodId.Email)
         {
             <partial name="Partials/_Preview" />
         }

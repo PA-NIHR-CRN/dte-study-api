@@ -28,7 +28,6 @@ public class ParticipantAddress : IPersonalInformation, ISoftDelete
 
     public int ParticipantId { get; set; }
 
-    [Required]
     public Participant Participant { get; set; }
     public bool IsDeleted { get; set; }
 

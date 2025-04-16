@@ -45,15 +45,6 @@ public class FilterController(ParticipantDbContext context,
             model.Testing = new();
         }
 
-        if (activity == "FilterVolunteers")
-        {
-            results = await FilterVolunteersAsync(model, cancellationToken);
-        }
-        else if (activity == "ClearFilters")
-        {
-            model = ClearFilters(model);
-        }
-
         if (model.StudyId is not null)
         {
             var selectedStudy = await context.Studies
@@ -67,6 +58,15 @@ public class FilterController(ParticipantDbContext context,
 
             model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
             model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
+        }
+
+        if (activity == "FilterVolunteers")
+        {
+            results = await FilterVolunteersAsync(model, cancellationToken);
+        }
+        else if (activity == "ClearFilters")
+        {
+            model = ClearFilters(model);
         }
 
         model.VolunteerCount = results.Count?.Value;
@@ -147,7 +147,7 @@ public class FilterController(ParticipantDbContext context,
     [HttpPost]
     public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
-        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Email) && !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethods.Letter) && model.ShowPreferredContactFilter)
+        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Email) && !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Letter) && model.ShowPreferredContactFilter)
         {
             TempData["ContactMethodError"] = "Select if the volunteers preferred contact method is email or letter";
             return RedirectToAction("Index",model);
@@ -191,18 +191,8 @@ public class FilterController(ParticipantDbContext context,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
             StudyName = model.StudyName,
+            ContactMethod = (ContactMethodId)model.SelectedVolunteersPreferredContact,
         };
-
-        switch (model.SelectedVolunteersPreferredContact)
-        {
-            case (int)ContactMethods.Email:
-                campaignDetails.ContactMethod = ContactMethods.Email;
-                break;
-
-            case (int)ContactMethods.Letter:
-                campaignDetails.ContactMethod = ContactMethods.Letter;
-                break;
-        }
 
         return RedirectToAction("Setup", "Campaign", campaignDetails);
     }
@@ -249,7 +239,7 @@ public class FilterController(ParticipantDbContext context,
                     HasRegistered = x.RegistrationConsentAtUtc,
                     EthnicGroup = x.EthnicGroup,
                     GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
-                    ContactMethod = x.ContactMethods.FirstOrDefault().ContactMethodId
+                    ContactMethod = x.ContactMethodId.FirstOrDefault().ContactMethodId
                 })
                 .OrderBy(x => x.Id)
                 .DeferredPage(paginationService);

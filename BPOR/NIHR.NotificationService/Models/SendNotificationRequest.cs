@@ -8,7 +8,7 @@ public class SendNotificationRequest
     public Dictionary<string, string> Personalisation { get; set; } = new Dictionary<string, string>();
     public string TemplateId { get; set; } = string.Empty;
     public string? EmailAddress { get; set; }
-    public ContactMethods ContactMethod { get; set; }
+    public ContactMethodId ContactMethod { get; set; }
 
     public void Validate()
     {
@@ -20,14 +20,14 @@ public class SendNotificationRequest
 
         switch (ContactMethod)
         {
-            case ContactMethods.Email:
+            case ContactMethodId.Email:
                 if (string.IsNullOrWhiteSpace(EmailAddress))
                     throw new ArgumentException("EmailAddress is required for email notifications.");
                 if (string.IsNullOrWhiteSpace(TemplateId))
                     throw new ArgumentException("TemplateId is required for email notifications.");
                 break;
 
-            case ContactMethods.Letter:
+            case ContactMethodId.Letter:
                 if (!Personalisation.TryGetValue("address_line_1", out var addressLine1) || string.IsNullOrWhiteSpace(addressLine1))
                 {
                     throw new ArgumentException("Address line 1 is required for letter notifications.");

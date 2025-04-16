@@ -17,7 +17,7 @@ public class SetupCampaignViewModel
 
     public string? StudyName { get; set; }
     public string? EmailAddress { get; set; }
-    public ContactMethods ContactMethod { get; set; }
+    public ContactMethodId ContactMethod { get; set; }
 
     public int FilterCriteriaId { get; set; }
 
@@ -35,8 +35,8 @@ public class SetupCampaignViewModel
 
     public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries)?.Select(x => x.Trim()) ?? Enumerable.Empty<string>();
 
-    public string GetArticle(ContactMethods method)
+    public string GetArticle(ContactMethodId method)
     {
-        return (method == ContactMethods.Email) ? "an" : "a";
+        return (method == ContactMethodId.Email) ? "an" : "a";
     }
 }

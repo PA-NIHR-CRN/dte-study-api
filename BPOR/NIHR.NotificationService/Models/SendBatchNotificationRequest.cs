@@ -4,7 +4,7 @@ namespace NIHR.NotificationService.Models;
 
 public class SendBatchNotificationRequest
 {
-    public ContactMethods ContactMethod { get; set; }
+    public ContactMethodId ContactMethod { get; set; }
 
     // Common fields for all batch notifications
     public Dictionary<string, Dictionary<string, string>> PersonalisationData { get; set; } = new Dictionary<string, Dictionary<string, string>>();

@@ -10,7 +10,7 @@ public class ParticipantContactMethod : ISoftDelete
     public ParticipantContactMethod()
     {
         Participant = null!;
-        contactMethod = null!;
+        ContactMethod = null!;
 
     }
 
@@ -18,10 +18,8 @@ public class ParticipantContactMethod : ISoftDelete
     public int ParticipantId { get; set; }
     public int ContactMethodId { get; set; }
     
-
-    [Required]
     public Participant Participant { get; set; }
-    public ContactMethod contactMethod { get; set; }
+    public ContactMethod ContactMethod { get; set; }
     public bool IsDeleted { get; set; }
 
 }

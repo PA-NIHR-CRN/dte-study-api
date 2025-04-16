@@ -8,7 +8,7 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.StudyName))
 {
-    @if (Model.ContactMethod == ContactMethods.Email)
+    @if (Model.ContactMethod == ContactMethodId.Email)
     {
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-one-half-from-desktop">
@@ -20,7 +20,7 @@
             </div>
         </div>
     }
-    @if (Model.ContactMethod == ContactMethods.Letter)
+    @if (Model.ContactMethod == ContactMethodId.Letter)
     {
 
         <div class="govuk-grid-row">
