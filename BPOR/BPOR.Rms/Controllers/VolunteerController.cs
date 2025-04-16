@@ -65,6 +65,7 @@ public class VolunteerController(ParticipantDbContext context,
 
         if (action == "AddressLookup")
         {
+
             ClearAllErrorsExcept("PostCode");
 
             if (model.ManualAddressEntry)

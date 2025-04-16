@@ -45,15 +45,6 @@ public class FilterController(ParticipantDbContext context,
             model.Testing = new();
         }
 
-        if (activity == "FilterVolunteers")
-        {
-            results = await FilterVolunteersAsync(model, cancellationToken);
-        }
-        else if (activity == "ClearFilters")
-        {
-            model = ClearFilters(model);
-        }
-
         if (model.StudyId is not null)
         {
             var selectedStudy = await context.Studies
@@ -67,6 +58,15 @@ public class FilterController(ParticipantDbContext context,
 
             model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
             model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
+        }
+
+        if (activity == "FilterVolunteers")
+        {
+            results = await FilterVolunteersAsync(model, cancellationToken);
+        }
+        else if (activity == "ClearFilters")
+        {
+            model = ClearFilters(model);
         }
 
         model.VolunteerCount = results.Count?.Value;

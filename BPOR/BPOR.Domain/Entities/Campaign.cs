@@ -1,8 +1,10 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using BPOR.Domain.Enums;
 
 namespace BPOR.Domain.Entities;
 
+[Table("Campaign")]
 public class Campaign : IAudit, ISoftDelete
 {
     public int Id { get; set; }

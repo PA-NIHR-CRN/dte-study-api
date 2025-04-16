@@ -5,7 +5,7 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 
-
+[Table("CampaignParticipant")]
 public class CampaignParticipant : IAudit, ISoftDelete
 {
     public int Id { get; set; }
