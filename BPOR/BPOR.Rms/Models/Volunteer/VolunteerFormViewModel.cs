@@ -208,7 +208,7 @@ public class VolunteerFormViewModel : IValidatableObject
             }
         }
 
-        if (PostCode.HasValue && (Addresses != null && Addresses.Count == 0))
+        if (PostCode.HasValue && !ManualAddressEntry && (Addresses != null && Addresses.Count == 0))
         {
             yield return new ValidationResult(
                 "We cannot find a match for the postcode entered. Please try again or enter your address manually",
