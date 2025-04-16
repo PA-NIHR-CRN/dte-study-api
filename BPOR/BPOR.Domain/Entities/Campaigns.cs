@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BPOR.Domain.Entities;
 
+[Table("Campaigns")]
 public class Campaigns : IAudit, ISoftDelete
 {
     public int Id { get; set; }
