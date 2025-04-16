@@ -43,7 +43,7 @@ public class GovUkDate : IValidatableObject
         if (!Day.HasValue) {
             if(Month.HasValue && Year.HasValue)
             {
-                yield return new ValidationResult($"{validationContext.DisplayName} must include a day.", [nameof(Day)]);
+                yield return new ValidationResult($"{validationContext.DisplayName} must include a day", [nameof(Day)]);
             }
             if (Month.HasValue && !Year.HasValue)
             {
@@ -71,23 +71,23 @@ public class GovUkDate : IValidatableObject
         {
             if(Day.HasValue && Month.HasValue)
             {
-                yield return new ValidationResult($"{validationContext.DisplayName} must include a year.", [nameof(Year)]);
+                yield return new ValidationResult($"{validationContext.DisplayName} must include a year", [nameof(Year)]);
             }
         }
 
         if (Day.HasValue && (Day > 31 || Day < 1))
         {
-            yield return new ValidationResult($"Day must be between 1 and 31.", [nameof(Day)]);
+            yield return new ValidationResult($"Date of birth day must be a real day", [nameof(Day)]);
         }
 
         if (Month.HasValue && (Month > 12 || Month < 1))
         {
-            yield return new ValidationResult($"Month must be between 1 and 12", [nameof(Month)]);
+            yield return new ValidationResult($"Date of birth month must be a real month", [nameof(Month)]);
         }
             
         if(Year.HasValue && (Year < 1000 || Year > 9999))               
         {
-            yield return new ValidationResult($"{validationContext.DisplayName} year must include 4 numbers", [nameof(Year)]);
+            yield return new ValidationResult($"Date of birth year must include 4 numbers", [nameof(Year)]);
         }
         
     }
