@@ -189,10 +189,11 @@ namespace NIHR.NotificationService.Services
             switch (contactMethod)
             {
                 case ContactMethodId.Email:
-                    if (string.IsNullOrWhiteSpace(request.EmailAddress))
+                    if (!request.Personalisation.TryGetValue("email", out var email) || string.IsNullOrWhiteSpace(email))
                     {
-                        throw new ArgumentException("EmailAddress is required for email notifications.");
+                        throw new ArgumentException("EmailAddress is required in personalisation for email notifications.");
                     }
+                    request.EmailAddress = email;
                     break;
 
                 case ContactMethodId.Letter:
