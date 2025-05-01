@@ -1,9 +1,11 @@
+using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NIHR.NotificationService.Context;
 using NIHR.NotificationService.Interfaces;
+using BPOR.Domain.Enums;
 
 namespace NIHR.NotificationService.Services
 {
@@ -43,6 +45,7 @@ namespace NIHR.NotificationService.Services
         {
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
+            var participantDbContext = scope.ServiceProvider.GetRequiredService<ParticipantDbContext>();
 
             var notifications = await context.Notifications
                 .Where(n => !n.IsProcessed)
@@ -62,11 +65,16 @@ namespace NIHR.NotificationService.Services
 
                     foreach (var notification in notifications)
                     {
+                        await UpdateDeliveryStatusForLetterAsync(notification, participantDbContext);
+
                         // TODO are we marking as processed or deleting the notification?
-                        notification.IsProcessed = true; 
+                        notification.IsProcessed = true;
+                        
                     }
 
                     await context.SaveChangesAsync(stoppingToken);
+                    await participantDbContext.SaveChangesAsync(stoppingToken);
+
                 }
                 catch (Exception ex)
                 {
@@ -79,6 +87,29 @@ namespace NIHR.NotificationService.Services
         {
             _logger.LogInformation("Hosted Notification Queue Service is stopping");
             await base.StopAsync(stoppingToken);
+        }
+
+        private async Task UpdateDeliveryStatusForLetterAsync(Notification notification, ParticipantDbContext context)
+        {
+            var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
+
+            if (personalisation.TryGetValue("campaignTypeId", out var ctValue)
+                && int.TryParse(ctValue, out var campaignType)
+                && campaignType == (int)ContactMethodId.Letter)
+            {
+                if (!personalisation.TryGetValue("campaignParticipantId", out var campaignParticipantIdValue)
+                    || !int.TryParse(campaignParticipantIdValue, out var campaignParticipantId))
+                {
+                    throw new KeyNotFoundException("campaignParticipantId not found or invalid.");
+                }
+
+                var participant = await context.CampaignParticipant.FirstOrDefaultAsync(x => x.Id == campaignParticipantId);
+                if (participant != null)
+                {
+                    participant.DeliveredAt = DateTime.UtcNow;
+                    participant.DeliveryStatusId = (int)DeliveryStatus.Delivered;
+                }
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using NIHR.Infrastructure.EntityFrameworkCore;
+using DeliveryStatus = BPOR.Domain.Entities.RefData.DeliveryStatus;
 
 namespace BPOR.Domain.Entities;
 

@@ -59,7 +59,7 @@ public class CampaignService(
 
     private int GetDeliveryStatusId()
     {
-        return refDataService.GetDeliveryStatusId(DeliveryStatus.Pending) ??
+        return refDataService.GetDeliveryStatusId(DeliveryStatusNames.Pending) ??
                throw new InvalidOperationException("Campaign delivery status not found");
     }
 
