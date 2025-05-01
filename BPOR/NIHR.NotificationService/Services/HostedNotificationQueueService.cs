@@ -66,11 +66,9 @@ namespace NIHR.NotificationService.Services
                     foreach (var notification in notifications)
                     {
                         await UpdateDeliveryStatusForLetterAsync(notification, participantDbContext);
-
-                        // TODO are we marking as processed or deleting the notification?
                         notification.IsProcessed = true;
-                        
                     }
+
 
                     await context.SaveChangesAsync(stoppingToken);
                     await participantDbContext.SaveChangesAsync(stoppingToken);
@@ -93,23 +91,32 @@ namespace NIHR.NotificationService.Services
         {
             var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
 
-            if (personalisation.TryGetValue("campaignTypeId", out var ctValue)
-                && int.TryParse(ctValue, out var campaignType)
-                && campaignType == (int)ContactMethodId.Letter)
+            if (!personalisation.TryGetValue("campaignTypeId", out var ctValue)
+                || !int.TryParse(ctValue, out var campaignType)
+                || campaignType != (int)ContactMethodId.Letter)
             {
-                if (!personalisation.TryGetValue("campaignParticipantId", out var campaignParticipantIdValue)
-                    || !int.TryParse(campaignParticipantIdValue, out var campaignParticipantId))
-                {
-                    throw new KeyNotFoundException("campaignParticipantId not found or invalid.");
-                }
-
-                var participant = await context.CampaignParticipant.FirstOrDefaultAsync(x => x.Id == campaignParticipantId);
-                if (participant != null)
-                {
-                    participant.DeliveredAt = DateTime.UtcNow;
-                    participant.DeliveryStatusId = (int)DeliveryStatus.Delivered;
-                }
+                return;
             }
+
+            if (!personalisation.TryGetValue("campaignParticipantId", out var campaignParticipantIdValue)
+                || !int.TryParse(campaignParticipantIdValue, out var campaignParticipantId))
+            {
+                _logger.LogWarning(
+                    "Notification ID {NotificationId}: Missing or invalid campaignParticipantId: '{CampaignParticipantIdValue}'",
+                    notification.Id,
+                    campaignParticipantIdValue);
+                return;
+            }
+
+            var participant = await context.CampaignParticipant.FirstOrDefaultAsync(x => x.Id == campaignParticipantId);
+            if (participant == null)
+            {
+                _logger.LogWarning("Notification ID {NotificationId}: Participant ID {ParticipantId} not found", notification.Id, campaignParticipantId);
+                return;
+            }
+
+            participant.DeliveredAt = DateTime.UtcNow;
+            participant.DeliveryStatusId = (int)DeliveryStatus.Delivered;
         }
     }
 }
