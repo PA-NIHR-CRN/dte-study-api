@@ -104,39 +104,44 @@ public class CampaignController(
                                     .Select(x => new { x.StudyName, x.EmailAddress })
                                     .FirstOrDefaultAsync(cancellationToken);
 
+            var notificationRecipients = new List<string>();
+            var sendParams = new Dictionary<string, object>
+            {
+                { "numberOfVolunteers", model.TotalVolunteers }
+            };
+
             if (studyInfo is not null)
             {
-                IEnumerable<string> notificationRecipients = [rmsOptions.Value.CampaignNotificationEmailAddress, studyInfo.EmailAddress];
+                notificationRecipients.Add(rmsOptions.Value.CampaignNotificationEmailAddress);
+                notificationRecipients.Add(studyInfo.EmailAddress);
+                sendParams["studyName"] = studyInfo.StudyName;
+                templateId = "email-rms-campaign-sent"; // note: to be renamed in contentful after release as to not impact current production campaigns
+            }
+            else if (campaign.TypeId == ContactMethodId.Letter)
+            {
+                notificationRecipients.Add(rmsOptions.Value.CampaignNotificationEmailAddress);
+                sendParams["templateName"] = selectedTemplate.name;
+                templateId = "non-study-rms-campaign-sent";
+            }
+            else
+            {
+                notificationRecipients.Clear();
+            }
 
-                foreach (var recipient in notificationRecipients)
+            foreach (var recipient in notificationRecipients)
+            {
+                if (string.IsNullOrWhiteSpace(recipient))
                 {
-                    if (string.IsNullOrWhiteSpace(recipient))
-                    {
-                        logger.LogWarning("Empty notification email address for study ({studyId}) '{studyName}', campaign ({campaignId}).", model.StudyId, model.StudyName, campaign.Id);
-
-                        continue;
-                    }
-
-                    var sendParams = new Dictionary<string, object>
-                    {
-                        { "numberOfVolunteers", model.TotalVolunteers }
-                    };
-
-                    switch (campaign.TypeId)
-                    {
-                        case ContactMethodId.Email:
-                            templateId = "email-rms-campaign-sent";
-                            sendParams.Add("studyName", studyInfo.StudyName);
-                            break;
-
-                        case ContactMethodId.Letter:
-                            templateId = "letter-rms-campaign-sent";
-                            sendParams.Add("letterTemplateFilename", selectedTemplate.name);
-                            break;
-                    }
-
-                    await transactionalEmailService.SendAsync(recipient, templateId, sendParams, cancellationToken);
+                    logger.LogWarning(
+                        studyInfo is not null
+                            ? "Empty notification email address for study ({studyId}) '{studyName}', campaign ({campaignId})."
+                            : "Empty notification email address for campaign ({campaignId}).",
+                        model.StudyId, model.StudyName, campaign.Id
+                    );
+                    continue;
                 }
+
+                await transactionalEmailService.SendAsync(recipient, templateId, sendParams, cancellationToken);
             }
 
             return View("Success",
