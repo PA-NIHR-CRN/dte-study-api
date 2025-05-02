@@ -105,16 +105,16 @@ public class CampaignController(
 
             var notificationRecipients = new List<string>();
             var sendParams = new Dictionary<string, object>
-{
-    { "numberOfVolunteers", model.TotalVolunteers }
-};
+            {
+                { "numberOfVolunteers", model.TotalVolunteers }
+            };
 
             if (studyInfo is not null)
             {
                 notificationRecipients.Add(rmsOptions.Value.CampaignNotificationEmailAddress);
                 notificationRecipients.Add(studyInfo.EmailAddress);
                 sendParams["studyName"] = studyInfo.StudyName;
-                templateId = "email-rms-campaign-sent"; // needs to be refactored in contentful after release
+                templateId = "email-rms-campaign-sent"; // note: to be renamed in contentful after release as to not impact current production campaigns
             }
             else if (campaign.TypeId == ContactMethodId.Letter)
             {
@@ -124,13 +124,7 @@ public class CampaignController(
             }
             else
             {
-                // No notification to send for non-study email campaigns
-                return View("Success", new EmailSuccessViewModel
-                {
-                    StudyId = model.StudyId,
-                    StudyName = model.StudyName,
-                    ContactMethod = model.ContactMethod
-                });
+                notificationRecipients.Clear();
             }
 
             foreach (var recipient in notificationRecipients)
