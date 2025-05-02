@@ -8,6 +8,7 @@ using Notify.Models.Responses;
 using Polly;
 using Polly.RateLimit;
 using BPOR.Domain.Enums;
+using BPOR.Rms.Constants;
 
 namespace NIHR.NotificationService.Services
 {
@@ -16,7 +17,6 @@ namespace NIHR.NotificationService.Services
         private readonly NotificationClient _client;
         private readonly ILogger<NotificationService> _logger;
         private const int _rateLimitPerMinute = 3000;
-
         private static readonly Dictionary<ContactMethodId, int> _dailyCount = new();
         private static readonly Dictionary<ContactMethodId, int> _dailyLimit = new()
         {
@@ -46,17 +46,17 @@ namespace NIHR.NotificationService.Services
             {
                 var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
 
-                var contactMethod = (ContactMethodId)int.Parse(personalisation["campaignTypeId"]);
+                var contactMethod = (ContactMethodId)int.Parse(personalisation[PersonalisationKeys.CampaignTypeId]);
 
                 switch (contactMethod)
                 {
                     case ContactMethodId.Email:
-                        await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation, request.Reference);
+                        //await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation, request.Reference);
                         await IncrementDailyCountAsync(ContactMethodId.Email, 1);
                         break;
 
                     case ContactMethodId.Letter:
-                        await _client.SendLetterAsync(request.TemplateId, personalisation, request.Reference);
+                        var letterResponse = await _client.SendLetterAsync(request.TemplateId, personalisation, request.Reference);
                         await IncrementDailyCountAsync(ContactMethodId.Letter, 1);
                         break;
 
@@ -156,17 +156,17 @@ namespace NIHR.NotificationService.Services
 
         private static SendNotificationRequest CreateSendNotificationRequest(Dictionary<string, string> personalisation)
         {
-            if (!personalisation.TryGetValue("campaignParticipantId", out var reference))
+            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignParticipantId, out var reference))
             {
                 throw new KeyNotFoundException("campaignParticipantId not found in personalisation data.");
             }
 
-            if (!personalisation.TryGetValue("templateId", out var templateId))
+            if (!personalisation.TryGetValue(PersonalisationKeys.TemplateId, out var templateId))
             {
                 throw new KeyNotFoundException("templateId not found in personalisation data.");
             }
 
-            if (!personalisation.TryGetValue("campaignTypeId", out var campaignTypeIdStr))
+            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignTypeId, out var campaignTypeIdStr))
             {
                 throw new KeyNotFoundException("campaignTypeId not found in personalisation data.");
             }
@@ -184,7 +184,7 @@ namespace NIHR.NotificationService.Services
                 ContactMethod = (ContactMethodId)campaignTypeId
             };
 
-            var contactMethod = (ContactMethodId)int.Parse(personalisation["campaignTypeId"]);
+            var contactMethod = (ContactMethodId)int.Parse(personalisation[PersonalisationKeys.CampaignTypeId]);
 
             switch (contactMethod)
             {
