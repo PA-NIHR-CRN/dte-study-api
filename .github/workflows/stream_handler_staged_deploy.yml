@@ -42,7 +42,7 @@ jobs:
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler crnccd-lambda-dev-dte-participant-stream --function-role crnccd-iam-dev-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=DEV-${{ github.run_number }}-${{ github.run_id }};AwsSecretsManagerSettings__Region=eu-west-2;AwsSecretsManagerSettings__SecretName=crnccd-secret-dev-rds-aurora-mysql-dte-stream-s;AwsSecretsManagerSettings__Enabled=true" --function-publish true
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler crnccd-lambda-dev-dte-participant-stream --function-role crnccd-iam-dev-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=DEV-${{ github.run_number }}-${{ github.run_id }};AwsSecretsManagerSettings__Region=eu-west-2;AwsSecretsManagerSettings__SecretName=crnccd-secret-dev-bpor-rms-app-config" --function-publish true
 
       - name: Update alias to point to new version
         run: |
@@ -84,7 +84,7 @@ jobs:
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler crnccd-lambda-test-dte-participant-stream --function-role crnccd-iam-test-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=test-${{ github.run_number }}-${{ github.run_id }};AwsSecretsManagerSettings__Region=eu-west-2;AwsSecretsManagerSettings__SecretName=crnccd-secret-test-rds-aurora-mysql-dte-stream-s;AwsSecretsManagerSettings__Enabled=true" --function-publish true
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler crnccd-lambda-test-dte-participant-stream --function-role crnccd-iam-test-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=test-${{ github.run_number }}-${{ github.run_id }};AwsSecretsManagerSettings__Region=eu-west-2;AwsSecretsManagerSettings__SecretName=crnccd-secret-test-bpor-rms-app-config" --function-publish true
 
       - name: Update alias to point to new version
         run: |
