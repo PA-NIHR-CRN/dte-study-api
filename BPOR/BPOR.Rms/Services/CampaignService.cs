@@ -252,13 +252,13 @@ public class CampaignService(
             {
                 NotificationDatas = new List<NotificationData>
                 {
-                    new() { Key = "campaignParticipantId", Value = campaignParticipant.Id.ToString() },
-                    new() { Key = "campaignTypeId", Value = ((int)campaignParticipant.CampaignTypeId).ToString() },
-                    new() { Key = "firstName", Value = volunteer.FirstName },
-                    new() { Key = "lastName", Value = volunteer.LastName },
-                    new() { Key = "uniqueLink", Value = link },
-                    new() { Key = "templateId", Value = campaign.TemplateId.ToString() },
-                    new() { Key = "uniqueReference", Value = reference }
+                    new() { Key = PersonalisationKeys.CampaignParticipantId, Value = campaignParticipant.Id.ToString() },
+                    new() { Key = PersonalisationKeys.CampaignTypeId, Value = ((int)campaignParticipant.CampaignTypeId).ToString() },
+                    new() { Key = PersonalisationKeys.FirstName, Value = volunteer.FirstName },
+                    new() { Key = PersonalisationKeys.LastName, Value = volunteer.LastName },
+                    new() { Key = PersonalisationKeys.UniqueLink, Value = link },
+                    new() { Key = PersonalisationKeys.TemplateId, Value = campaign.TemplateId.ToString() },
+                    new() { Key = PersonalisationKeys.UniqueReference, Value = reference }
                 }
             };
 
@@ -266,7 +266,7 @@ public class CampaignService(
             {
                 case ContactMethodId.Email:
                     notification.PrimaryIdentifier = volunteer.Email;
-                    notification.NotificationDatas.Add(new NotificationData { Key = "email", Value = volunteer.Email });
+                    notification.NotificationDatas.Add(new NotificationData { Key = PersonalisationKeys.Email, Value = volunteer.Email });
                     break;
 
                 case ContactMethodId.Letter:

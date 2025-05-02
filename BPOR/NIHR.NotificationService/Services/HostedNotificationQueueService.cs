@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using NIHR.NotificationService.Context;
 using NIHR.NotificationService.Interfaces;
 using BPOR.Domain.Enums;
+using BPOR.Rms.Constants;
 
 namespace NIHR.NotificationService.Services
 {
@@ -91,14 +92,14 @@ namespace NIHR.NotificationService.Services
         {
             var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
 
-            if (!personalisation.TryGetValue("campaignTypeId", out var ctValue)
+            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignTypeId, out var ctValue)
                 || !int.TryParse(ctValue, out var campaignType)
                 || campaignType != (int)ContactMethodId.Letter)
             {
                 return;
             }
 
-            if (!personalisation.TryGetValue("campaignParticipantId", out var campaignParticipantIdValue)
+            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignParticipantId, out var campaignParticipantIdValue)
                 || !int.TryParse(campaignParticipantIdValue, out var campaignParticipantId))
             {
                 _logger.LogWarning(
