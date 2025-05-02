@@ -16,6 +16,7 @@ using NIHR.NotificationService.Models;
 using Notify.Exceptions;
 using Notify.Models.Responses;
 using BPOR.Rms.Exceptions;
+using BPOR.Rms.Constants;
 
 namespace BPOR.Rms.Controllers;
 
@@ -200,16 +201,16 @@ public class CampaignController(
                 email => email,
                 email => new Dictionary<string, string>
                 {
-                    { "email", email },
-                    { "campaignParticipantId", "PreviewEmailReference" },
-                    { "firstName", "John" },
-                    { "lastName", "Doe" },
+                    { PersonalisationKeys.Email, email },
+                    { PersonalisationKeys.CampaignParticipantId, "PreviewEmailReference" },
+                    { PersonalisationKeys.FirstName, "John" },
+                    { PersonalisationKeys.LastName, "Doe" },
                     {
-                        "uniqueLink",
+                        PersonalisationKeys.UniqueLink,
                         linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest),
                             new { reference = encryptionService.Encrypt("0123456789101112") }) ?? string.Empty
                     },
-                    { "uniqueReference", "0123456789101112" }
+                    { PersonalisationKeys.UniqueReference, "0123456789101112" }
                 });
 
             foreach (var email in emailAddresses)

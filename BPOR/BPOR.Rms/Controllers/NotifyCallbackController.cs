@@ -68,17 +68,17 @@ public class NotifyCallbackController(
             case "sending":
             case "pending":
             case "sent":
+            case "received":
                 break;
-            case "received": // Letter printed and posted
             case "delivered":
                 participantEmail.DeliveredAt = DateTime.UtcNow;
                 participantEmail.DeliveryStatusId =
-                    refDataService.GetDeliveryStatusId(DeliveryStatus.Delivered);
+                    refDataService.GetDeliveryStatusId(DeliveryStatusNames.Delivered);
                 break;
             case "temporary-failure":
             case "permanent-failure":
             case "technical-failure":
-                participantEmail.DeliveryStatusId = refDataService.GetDeliveryStatusId(DeliveryStatus.Failed);
+                participantEmail.DeliveryStatusId = refDataService.GetDeliveryStatusId(DeliveryStatusNames.Failed);
                 break;
             default:
                 return BadRequest("Invalid status.");
