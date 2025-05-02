@@ -16,6 +16,8 @@ namespace BPOR.Rms.TagHelpers
 
         public ModelExpression? ForNone { get; set; }
         public string formGroupMode { get; set; }
+        public string? LabelLevel { get; set; }
+
 
 
         public AreasOfResearchSelectListTagHelper(ParticipantDbContext dbContext, ICompositeViewEngine viewEngine, IViewBufferScope viewBufferScope, IHtmlGenerator generator) : base(viewEngine, viewBufferScope)
@@ -40,6 +42,9 @@ namespace BPOR.Rms.TagHelpers
             ViewContext.ViewData["__AreasOfResearch_Name"] = GetModelName(For);
 
             ViewContext.ViewData["__AreasOfResearch_formGroupMode"] = formGroupMode;
+
+            ViewContext.ViewData["__AreasOfResearch_labelLevel"] = LabelLevel;
+
 
             if (ForNone is not null)
             {
