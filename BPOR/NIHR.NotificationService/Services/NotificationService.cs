@@ -51,7 +51,7 @@ namespace NIHR.NotificationService.Services
                 switch (contactMethod)
                 {
                     case ContactMethodId.Email:
-                        //await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation, request.Reference);
+                        await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation, request.Reference);
                         await IncrementDailyCountAsync(ContactMethodId.Email, 1);
                         break;
 
