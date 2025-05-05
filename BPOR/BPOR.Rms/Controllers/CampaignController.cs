@@ -115,6 +115,7 @@ public class CampaignController(
                 notificationRecipients.Add(rmsOptions.Value.CampaignNotificationEmailAddress);
                 notificationRecipients.Add(studyInfo.EmailAddress);
                 sendParams["studyName"] = studyInfo.StudyName;
+                sendParams["contactMethod"] = campaign.TypeId;
                 templateId = "email-rms-campaign-sent"; // note: to be renamed in contentful after release as to not impact current production campaigns
             }
             else if (campaign.TypeId == ContactMethodId.Letter)
