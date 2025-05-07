@@ -29,8 +29,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="Entities\Configuration\HealthConditions.txt" />
-        <EmbeddedResource Include="Entities\Configuration\HealthConditions.txt">
+        <None Remove="Entities\Configuration\HealthConditions.csv" />
+        <EmbeddedResource Include="Entities\Configuration\HealthConditions.csv">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
     </ItemGroup>
