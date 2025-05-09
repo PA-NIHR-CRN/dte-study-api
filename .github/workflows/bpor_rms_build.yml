@@ -3,26 +3,19 @@ name: Deploy BPOR RMS Container
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: "Target environment (DEV, TEST, UAT, OAT, PROD, ALL)"
+      environments:
+        description: "Target environments (select one or more)"
         required: true
-        type: choice
+        type: multiselect
         options:
           - DEV
           - TEST
           - UAT
           - OAT
           - PROD
-          - ALL
 
 env:
   AWS_REGION: eu-west-2
-  SECRET_IDS: |
-    DEV=crnccd-secret-dev-bpor-rms-app-config
-    TEST=crnccd-secret-test-bpor-rms-app-config
-    UAT=crnccs-secret-uat-bpor-rms-app-config
-    OAT=crnccp-secret-oat-bpor-rms-app-config
-    PROD=crnccp-secret-prod-bpor-rms-app-config
 
 jobs:
   build:
@@ -41,25 +34,31 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Extract secret ID
-        id: secret
+      - name: Get ECR registry
+        id: get-registry
         run: |
-          echo "id=$(echo \"$SECRET_IDS\" | grep \"${{ github.event.inputs.environment == 'ALL' && 'DEV' || github.event.inputs.environment }}=\" | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          echo "registry=${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com" >> $GITHUB_OUTPUT
 
-      - name: Get secrets from Secrets Manager (build)
+      - name: Get secrets for build (DEV by default)
+        id: get-secrets
+        run: |
+          SECRET_ID=crnccd-secret-dev-bpor-rms-app-config
+          echo "id=$SECRET_ID" >> $GITHUB_OUTPUT
+
+      - name: Get Secrets from AWS
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
-          secret-ids: ${{ steps.secret.outputs.id }}
+          secret-ids: ${{ steps.get-secrets.outputs.id }}
           parse-json-secrets: true
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build and push image to ECR
         id: build-image
         env:
           ECR_REPOSITORY: ${{ env.EcrSettings__Repository }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.get-registry.outputs.registry }}
         run: |
           IMAGE_TAG=bpor-rms-${{ github.sha }}
           docker build -f BPOR/BPOR.Rms/Dockerfile \
@@ -73,93 +72,40 @@ jobs:
 
   deploy:
     needs: build
-    if: github.event.inputs.environment != 'ALL'
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Extract secret ID
-        id: secret
-        run: |
-          echo "id=$(echo \"$SECRET_IDS\" | grep \"${{ github.event.inputs.environment }}=\" | cut -d'=' -f2)" >> $GITHUB_OUTPUT
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID || secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
-          aws-secret-access-key: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET || secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Get secrets from Secrets Manager
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: ${{ steps.secret.outputs.id }}
-          parse-json-secrets: true
-
-      - name: Generate ECS task definition
-        run: |
-          aws ecs describe-task-definition \
-            --task-definition ${{ env.EcsSettings__TaskDefinition }} \
-            --query taskDefinition > task-definition.json
-          jq 'del(.taskDefinitionArn, .requiresAttributes, .compatibilities, .revision, .status, .registeredAt, .registeredBy)' task-definition.json > cleaned.json
-
-      - name: Fill in image in ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: cleaned.json
-          container-name: ${{ env.EcsSettings__ContainerName }}
-          image: ${{ needs.build.outputs.image }}
-          environment-variables: |
-            AwsSecretsManagerSettings__Region=${{ env.AWS_REGION }}
-            AwsSecretsManagerSettings__SecretName=${{ env.AwsSecretsManagerSettings__SecretName }}
-            AwsSecretsManagerSettings__Enabled=false
-            DbSettings__Port=${{ env.DbSettings__Port }}
-            DbSettings__Username=${{ env.DbSettings__Username }}
-            DbSettings__Password=${{ env.DbSettings__Password }}
-            DbSettings__Database=${{ env.DbSettings__Database }}
-            DbSettings__Host=${{ env.DbSettings__Host }}
-            AuthenticationSettings__Authority=${{ env.AuthenticationSettings__Authority }}
-            AuthenticationSettings__ClientId=${{ env.AuthenticationSettings__ClientId }}
-            AuthenticationSettings__ClientSecret=${{ env.AuthenticationSettings__ClientSecret }}
-            AuthenticationSettings__Bypass=${{ env.AuthenticationSettings__Bypass }}
-
-      - name: Deploy to Amazon ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.EcsSettings__Service }}
-          cluster: ${{ env.EcsSettings__Cluster }}
-          wait-for-service-stability: true
-
-  deploy-all:
-    needs: build
-    if: github.event.inputs.environment == 'ALL'
     strategy:
       matrix:
-        env: [DEV, TEST, UAT, OAT, PROD]
-    runs-on: ubuntu-latest
-    environment: ${{ matrix.env }}
+        environment: ${{ fromJson(toJson(github.event.inputs.environments)) }}
+    name: Deploy to ${{ matrix.environment }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Extract secret ID
-        id: secret
-        run: |
-          echo "id=$(echo \"$SECRET_IDS\" | grep \"${{ matrix.env }}=\" | cut -d'=' -f2)" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ matrix.env == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || matrix.env == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || matrix.env == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID || secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
-          aws-secret-access-key: ${{ matrix.env == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || matrix.env == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || matrix.env == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET || secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Get secrets from Secrets Manager
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get secret name
+        id: get-secret-id
+        run: |
+          declare -A secrets=(
+            [DEV]=crnccd-secret-dev-bpor-rms-app-config
+            [TEST]=crnccd-secret-test-bpor-rms-app-config
+            [UAT]=crnccs-secret-uat-bpor-rms-app-config
+            [OAT]=crnccp-secret-oat-bpor-rms-app-config
+            [PROD]=crnccp-secret-prod-bpor-rms-app-config
+          )
+          echo "id=${secrets[${{ matrix.environment }}]}" >> $GITHUB_OUTPUT
+
+      - name: Get secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
-          secret-ids: ${{ steps.secret.outputs.id }}
+          secret-ids: ${{ steps.get-secret-id.outputs.id }}
           parse-json-secrets: true
 
       - name: Generate ECS task definition
@@ -167,33 +113,36 @@ jobs:
           aws ecs describe-task-definition \
             --task-definition ${{ env.EcsSettings__TaskDefinition }} \
             --query taskDefinition > task-definition.json
-          jq 'del(.taskDefinitionArn, .requiresAttributes, .compatibilities, .revision, .status, .registeredAt, .registeredBy)' task-definition.json > cleaned.json
 
-      - name: Fill in image in ECS task definition
-        id: task-def
+          cat task-definition.json | jq 'del(
+            .taskDefinitionArn,
+            .requiresAttributes,
+            .compatibilities,
+            .revision,
+            .status,
+            .registeredAt,
+            .registeredBy,
+            .containerDefinitions[].environment
+          )' > task-definition.json
+
+      - name: Fill in new image ID
+        id: render-task
+        env:
+          IMAGE: ${{ needs.build.outputs.image }}
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: cleaned.json
+          task-definition: task-definition.json
           container-name: ${{ env.EcsSettings__ContainerName }}
-          image: ${{ needs.build.outputs.image }}
+          image: ${{ env.IMAGE }}
           environment-variables: |
             AwsSecretsManagerSettings__Region=${{ env.AWS_REGION }}
-            AwsSecretsManagerSettings__SecretName=${{ env.AwsSecretsManagerSettings__SecretName }}
-            AwsSecretsManagerSettings__Enabled=false
-            DbSettings__Port=${{ env.DbSettings__Port }}
-            DbSettings__Username=${{ env.DbSettings__Username }}
-            DbSettings__Password=${{ env.DbSettings__Password }}
-            DbSettings__Database=${{ env.DbSettings__Database }}
-            DbSettings__Host=${{ env.DbSettings__Host }}
-            AuthenticationSettings__Authority=${{ env.AuthenticationSettings__Authority }}
-            AuthenticationSettings__ClientId=${{ env.AuthenticationSettings__ClientId }}
-            AuthenticationSettings__ClientSecret=${{ env.AuthenticationSettings__ClientSecret }}
-            AuthenticationSettings__Bypass=${{ env.AuthenticationSettings__Bypass }}
+            AwsSecretsManagerSettings__SecretName=${{ steps.get-secret-id.outputs.id }}
+            AwsSecretsManagerSettings__Enabled=true
 
-      - name: Deploy to Amazon ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: ${{ steps.render-task.outputs.task-definition }}
           service: ${{ env.EcsSettings__Service }}
           cluster: ${{ env.EcsSettings__Cluster }}
           wait-for-service-stability: true
