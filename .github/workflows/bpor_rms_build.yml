@@ -3,16 +3,18 @@ name: Deploy BPOR RMS Container
 on:
   workflow_dispatch:
     inputs:
-      environments:
-        description: "Target environments (select one or more)"
+      environment:
+        description: "Target environment"
         required: true
-        type: multiselect
+        default: ALL
+        type: choice
         options:
           - DEV
           - TEST
           - UAT
           - OAT
           - PROD
+          - ALL
 
 env:
   AWS_REGION: eu-west-2
@@ -72,11 +74,9 @@ jobs:
 
   deploy:
     needs: build
+    if: github.event.inputs.environment != 'ALL'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: ${{ fromJson(toJson(github.event.inputs.environments)) }}
-    name: Deploy to ${{ matrix.environment }}
+    name: Deploy to ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
 
@@ -100,7 +100,7 @@ jobs:
             [OAT]=crnccp-secret-oat-bpor-rms-app-config
             [PROD]=crnccp-secret-prod-bpor-rms-app-config
           )
-          echo "id=${secrets[${{ matrix.environment }}]}" >> $GITHUB_OUTPUT
+          echo "id=${secrets[${{ github.event.inputs.environment }}]}" >> $GITHUB_OUTPUT
 
       - name: Get secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
