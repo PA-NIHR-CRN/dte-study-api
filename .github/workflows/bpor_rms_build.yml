@@ -56,6 +56,9 @@ jobs:
           secret-ids: ${{ steps.get-secrets.outputs.id }}
           parse-json-secrets: true
 
+      - name: Set ECR_REPOSITORY environment variable
+        run: echo "ECR_REPOSITORY=${{ env.EcrSettings__Repository }}" >> $GITHUB_ENV
+
       - name: Build and push image to ECR
         id: build-image
         env:
