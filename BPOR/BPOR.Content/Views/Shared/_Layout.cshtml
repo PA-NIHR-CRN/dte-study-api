@@ -34,25 +34,6 @@
 
     <link href="https://cdn.jsdelivr.net/npm/@@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
     <script src="/join/resources/js/cookies.min.js" asp-append-version="true"></script>
-
-    <!-- Facebook Pixel Code -->
-    <script>
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window,document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '593579423514426');
-        fbq('track', 'PageView');
-    </script>
-
-    <noscript>
-        <img height="1" width="1" src="https://www.facebook.com/tr?id=593579423514426&ev=PageView&noscript=1" />
-    </noscript>
-    <!-- End Facebook Pixel Code -->
 </head>
 
 <body class="noscript">
@@ -148,7 +129,7 @@
             Cookies.set("BPoRcookie", "BePartOfResearch")
             // remove existing cookies
             for (const cookie in Cookies.get()) {
-                if (cookie.includes("_g") || cookie.includes("_hj")) {
+                if (cookie.includes("_g") || cookie.includes("_hj") || cookie.includes("_fbp")) {
                     Cookies.remove(cookie, { path: '/', domain: '.nihr.ac.uk' })
                 }
             }
