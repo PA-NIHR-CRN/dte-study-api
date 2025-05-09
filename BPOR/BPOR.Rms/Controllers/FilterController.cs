@@ -120,6 +120,10 @@ public class FilterController(ParticipantDbContext context,
                 model.ShowRecruitedFilter = study.IsRecruitingIdentifiableParticipants;
                 model.ShowPreferredContactFilter = study.IsRecruitingIdentifiableParticipants;
 
+                if (!model.ShowPreferredContactFilter)
+                {
+                    model.SelectedVolunteersPreferredContact = (int)ContactMethodId.Email;
+                }
             }
         }
 
