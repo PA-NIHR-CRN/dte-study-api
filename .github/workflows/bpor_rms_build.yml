@@ -32,6 +32,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID || secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET || secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
