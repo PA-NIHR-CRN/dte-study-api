@@ -7,58 +7,104 @@
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
             @if (Model.HasStudy())
             {
-                @Html.LabelFor(m => m.SelectedVolunteersContacted, new { @class = "govuk-label exclusion_label" })
-                <div id="volunteers-contacted-hint" class="govuk-hint">
-                    Do you want to find volunteers who have already been contacted about this study?
-                </div>
-                @Html.DropDownListFor(
-                         m => m.SelectedVolunteersContacted,
-                         Model.VolunteersContactedItems,
-                         new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-contacted-hint" }
-                         )
-
-                @Html.LabelFor(m => m.SelectedVolunteersRegisteredInterest, new { @class = "govuk-label exclusion_label" })
-                <div id="volunteers-registered-hint" class="govuk-hint">
-                    Do you want to find volunteers who have registered an interest in participating in this study?
-                </div>
-                @Html.DropDownListFor(
-                         m => m.SelectedVolunteersRegisteredInterest,
-                         Model.VolunteersRegisteredInterestItems,
-                         new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-registered-hint" }
-                         )
-
-                @if (Model.ShowRecruitedFilter)
-                {
-                    @Html.LabelFor(m => m.SelectedVolunteersRecruited, new { @class = "govuk-label exclusion_label" })
-                    <div id="volunteers-recruited-hint" class="govuk-hint">
-                        Do you want to find volunteers who have been recruited to this study?
+                <div class="govuk-form-group">
+                    @Html.LabelFor(m => m.SelectedVolunteersContacted, new { @class = "govuk-label exclusion_label" })
+                    <div id="volunteers-contacted-hint" class="govuk-hint">
+                        Do you want to find volunteers who have already been contacted about this study?
                     </div>
                     @Html.DropDownListFor(
-                             m => m.SelectedVolunteersRecruited,
-                             Model.VolunteersRecruitedItems,
-                             new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-recruited-hint" }
+                             m => m.SelectedVolunteersContacted,
+                             Model.VolunteersContactedItems,
+                             new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-contacted-hint" }
                              )
-                }
-                else
-                {
-                    <div class="govuk-input_select__wrapper">
-                        <div class="govuk-label exclusion_label">Volunteers recruited</div>
-                        <div class="govuk-hint govuk-!-margin-top-4" style="margin-bottom: 12px;">
-                            Study uses anonymous recruitment
+                </div>
+
+                <div class="govuk-form-group">
+                    @Html.LabelFor(m => m.SelectedVolunteersRegisteredInterest, new { @class = "govuk-label exclusion_label" })
+                    <div id="volunteers-registered-hint" class="govuk-hint">
+                        Do you want to find volunteers who have registered an interest in participating in this study?
+                    </div>
+                    @Html.DropDownListFor(
+                             m => m.SelectedVolunteersRegisteredInterest,
+                             Model.VolunteersRegisteredInterestItems,
+                             new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-registered-hint" }
+                             )
+                </div>
+
+                <div class="govuk-form-group">
+                    @if (Model.ShowRecruitedFilter)
+                    {
+                        @Html.LabelFor(m => m.SelectedVolunteersRecruited, new { @class = "govuk-label exclusion_label" })
+                        <div id="volunteers-recruited-hint" class="govuk-hint">
+                            Do you want to find volunteers who have been recruited to this study?
                         </div>
-                    </div>            
-                }
+                        @Html.DropDownListFor(
+                                 m => m.SelectedVolunteersRecruited,
+                                 Model.VolunteersRecruitedItems,
+                                 new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-recruited-hint" }
+                                 )
+                    }
+                    else
+                    {
+                        <div class="govuk-input_select__wrapper">
+                            <div class="govuk-label exclusion_label">Volunteers recruited</div>
+                            <div class="govuk-hint govuk-!-margin-top-4" style="margin-bottom: 12px;">
+                                Study uses anonymous recruitment
+                            </div>
+                        </div>
+                    }
+                </div>
+
             }
 
-            @Html.LabelFor(m => m.SelectedVolunteersCompletedRegistration, new { @class = "govuk-label exclusion_label" })
-            <div id="volunteers-completed-registration-hint" class="govuk-hint">
-                Do you want to find volunteers who have completed the volunteer registration process?
+            <div class="govuk-form-group">
+                @Html.LabelFor(m => m.SelectedVolunteersCompletedRegistration, new { @class = "govuk-label exclusion_label" })
+                <div id="volunteers-completed-registration-hint" class="govuk-hint">
+                    Do you want to find volunteers who have completed the volunteer registration process?
+                </div>
+                @Html.DropDownListFor(
+                         m => m.SelectedVolunteersCompletedRegistration,
+                         Model.VolunteersCompletedRegistrationItems,
+                         new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-completed-registration-hint" }
+                         )
+
             </div>
-            @Html.DropDownListFor(
-                     m => m.SelectedVolunteersCompletedRegistration,
-                     Model.VolunteersCompletedRegistrationItems,
-                     new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-completed-registration-hint" }
-                     )
         </legend>
     </fieldset>
+
+    <h2 class="govuk-heading-l">Volunteers preferred contact method</h2>
+    <div class="govuk-form-group  @(Html.ViewData.ModelState["SelectedVolunteersPreferredContact"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+        @if (Model.ShowPreferredContactFilter)
+        {
+
+            @Html.LabelFor(m => m.SelectedVolunteersPreferredContact, new { @class = "govuk-label exclusion_label sr-only" })
+            <div id="volunteers-preferred-contact-hint" class="govuk-hint">
+                Do you want to find volunteers who have a specific preferred contact method?
+            </div>
+
+            @if (Html.ViewData.ModelState["SelectedVolunteersPreferredContact"]?.Errors.Count > 0)
+            {
+                <span id="SelectedVolunteersPreferredContact-error" class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @Html.ValidationMessageFor(model => model.SelectedVolunteersPreferredContact)
+                </span>
+            }
+
+            @Html.DropDownListFor(
+                    m => m.SelectedVolunteersPreferredContact,
+                    Model.VolunteersPreferredContactItems,
+                    new { @class = "govuk-select govuk-select-custom", ariaDescribedby = "volunteers-preferred-contact-hint" }
+                    )
+        }
+        else
+        {
+            <div class="govuk-input_select__wrapper">
+                <div class="govuk-label exclusion_label sr-only">Volunteers preferred contact method</div>
+                <div class="govuk-hint govuk-!-margin-top-4" style="margin-bottom: 12px;">
+                    Studies recruiting anonymous participants can only contact volunteers by email.
+                </div>
+            </div>
+        }
+    </div>
+
 </div>

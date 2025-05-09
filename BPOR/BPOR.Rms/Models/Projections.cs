@@ -4,8 +4,8 @@ using BPOR.Rms.Models.Researcher;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Models.Volunteer;
-using EmailCampaign = BPOR.Rms.Models.Study.EmailCampaign;
-using EmailCampaignParticipant = BPOR.Rms.Models.Study.EmailCampaignParticipant;
+using Campaign = BPOR.Rms.Models.Study.Campaign;
+using CampaignParticipant = BPOR.Rms.Models.Study.CampaignParticipant;
 
 namespace BPOR.Rms.Models;
 
@@ -20,15 +20,15 @@ public static class Projections
     public static IQueryable<EnrollmentDetails> AsEnrollmentDetails(this IQueryable<ManualEnrollment> source) =>
         source.Select(ManualEnrollmentToEnrollmentDetails());    
     
-    public static IQueryable<EmailParticipantDetails> AsEmailCampaignParticipant(this IQueryable<Participant> source) =>
-        source.Select(VolunteerToEmailParticipantDetails());
+    public static IQueryable<CampaignParticipantDetails> AsCampaignParticipant(this IQueryable<Participant> source) =>
+        source.Select(VolunteerToCampaignParticipantDetails());
 
     public static IQueryable<StudyFormViewModel> AsStudyFormViewModel(this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyFormViewModel());
-    
+
     public static IQueryable<ResearcherStudyFormViewModel> AsResearcherFormViewModel(
         this IQueryable<Domain.Entities.Study> source) =>
         source.Select(StudyAsResearcherFormViewModel());
-    
+
     public static Expression<Func<Domain.Entities.Study, ResearcherStudyFormViewModel>> StudyAsResearcherFormViewModel()
     {
         return r => new ResearcherStudyFormViewModel
@@ -40,8 +40,8 @@ public static class Projections
             FundingCode = r.FundingCode,
             UKRecruitmentTarget = r.RecruitmentTarget,
             TargetPopulation = r.TargetPopulation,
-            RecruitmentStartDate =  GovUkDate.FromDateTime(r.RecruitmentStartDate),
-            RecruitmentEndDate =  GovUkDate.FromDateTime(r.RecruitmentEndDate),
+            RecruitmentStartDate = GovUkDate.FromDateTime(r.RecruitmentStartDate),
+            RecruitmentEndDate = GovUkDate.FromDateTime(r.RecruitmentEndDate),
             ShortName = r.StudyName,
             CPMSId = r.CpmsId,
             RecruitingIdentifiableVolunteers = r.IsRecruitingIdentifiableParticipants,
@@ -103,22 +103,22 @@ public static class Projections
                 UKRecruitmentTarget = s.RecruitmentTarget,
                 TargetPopulation = s.TargetPopulation,
                 RecruitmentStartDate = GovUkDate.FromDateTime(s.RecruitmentStartDate).UKDisplayDate(),
-                RecruitmentEndDate =  GovUkDate.FromDateTime(s.RecruitmentEndDate).UKDisplayDate(),
+                RecruitmentEndDate = GovUkDate.FromDateTime(s.RecruitmentEndDate).UKDisplayDate(),
                 InformationUrl = s.InformationUrl,
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 
-            EmailCampaigns = s.FilterCriterias
-                .SelectMany(fc => fc.EmailCampaigns)
-                .Select(ec => new EmailCampaign
+            Campaigns = s.FilterCriterias
+                .SelectMany(fc => fc.Campaign)
+                .Select(ec => new Campaign
                 {
                     TargetGroupSize = (int)ec.TargetGroupSize,
                     CreatedAt = ec.CreatedAt,
                     Name = ec.Name,
-                    EmailCampaignParticipants = ec.Participants
-                        .Select(p => new EmailCampaignParticipant
+                    TypeId = ec.TypeId,
+                    CampaignParticipants = ec.Participant
+                        .Select(p => new CampaignParticipant
                         {
-                            ContactEmail = p.ContactEmail,
                             SentAt = p.SentAt,
                             RegisteredInterestAt = p.RegisteredInterestAt,
                             DeliveredAt = p.DeliveredAt,
@@ -126,7 +126,7 @@ public static class Projections
                         })
                         .ToList(),
                 }),
-            HasEmailCampaigns = s.FilterCriterias.Any(fc => fc.EmailCampaigns.Any())
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
         };
     }
 
@@ -163,14 +163,16 @@ public static class Projections
             }).AsEnumerable();
     }
     
-    private static Expression<Func<Participant, EmailParticipantDetails>> VolunteerToEmailParticipantDetails()
+    private static Expression<Func<Participant, CampaignParticipantDetails>> VolunteerToCampaignParticipantDetails()
     {
-        return v => new EmailParticipantDetails
+        return v => new CampaignParticipantDetails
         {
             Id = v.Id,
             Email = v.Email,
             FirstName = v.FirstName,
-            LastName = v.LastName
+            LastName = v.LastName,
+            Address = v.Address
         };
     }
+
 }

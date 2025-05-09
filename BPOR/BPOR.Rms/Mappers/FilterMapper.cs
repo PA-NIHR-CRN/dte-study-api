@@ -36,6 +36,7 @@ public class FilterMapper
                 From = criteria.AgeFrom,
                 To = criteria.AgeTo,
             },
+            SelectedVolunteersPreferredContact = criteria.ContactMethodId,
             IsSexMale = criteria.FilterGender.Any(fg => fg.GenderId == 1),
             IsSexFemale = criteria.FilterGender.Any(fg => fg.GenderId == 2),
 

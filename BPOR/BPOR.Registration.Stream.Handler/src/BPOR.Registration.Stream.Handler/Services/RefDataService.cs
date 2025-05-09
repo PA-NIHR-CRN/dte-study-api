@@ -15,7 +15,7 @@ public class RefDataService : IRefDataService
     private readonly Lazy<List<CommunicationLanguage>> _communicationLanguageRefData;
     private readonly Lazy<List<DailyLifeImpact>> _dailyLifeImpactRefData;
     private readonly Lazy<List<EthnicGroup>> _ethnicGroupRefData;
-    private readonly Lazy<List<EmailDeliveryStatus>> _emailDeliveryStatusRefData;
+    private readonly Lazy<List<DeliveryStatus>> _deliveryStatusRefData;
     private readonly object _lockObject = new object();
     private readonly ParticipantDbContext _participantDbContext;
 
@@ -64,11 +64,11 @@ public class RefDataService : IRefDataService
             }
         });
         
-        _emailDeliveryStatusRefData = new Lazy<List<EmailDeliveryStatus>>(() =>
+        _deliveryStatusRefData = new Lazy<List<DeliveryStatus>>(() =>
         {
             lock (_lockObject)
             {
-                return participantDbContext.EmailDeliveryStatus.IgnoreQueryFilters().AsNoTracking().ToList();
+                return participantDbContext.DeliveryStatus.IgnoreQueryFilters().AsNoTracking().ToList();
             }
         });
     }
@@ -95,8 +95,8 @@ public class RefDataService : IRefDataService
             case EthnicGroup ethnicGroup:
                 _ethnicGroupRefData.Value.Add(ethnicGroup);
                 break;
-            case EmailDeliveryStatus emailDeliveryStatus:
-                _emailDeliveryStatusRefData.Value.Add(emailDeliveryStatus);
+            case DeliveryStatus deliveryStatus:
+                _deliveryStatusRefData.Value.Add(deliveryStatus);
                 break;
             default:
                 throw new NotSupportedException($"Unknown reference data type '{typeof(T).Name}'.");
@@ -168,16 +168,16 @@ public class RefDataService : IRefDataService
         throw new NotImplementedException();
     }
 
-    public int? GetEmailDeliveryStatusId(string status)
+    public int? GetDeliveryStatusId(string status)
     {
-        using (_logger.BeginScope(nameof(GetEmailDeliveryStatusId)))
+        using (_logger.BeginScope(nameof(GetDeliveryStatusId)))
         {
             if (string.IsNullOrWhiteSpace(status))
             {
                 return null;
             }
 
-            return GetIdFromReferenceData(_emailDeliveryStatusRefData.Value, status);
+            return GetIdFromReferenceData(_deliveryStatusRefData.Value, status);
         }
     }
 

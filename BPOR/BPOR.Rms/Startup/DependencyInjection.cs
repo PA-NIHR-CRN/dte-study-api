@@ -49,7 +49,7 @@ public static class DependencyInjection
             });
         });
 
-        services.AddScoped<IEmailCampaignService, EmailCampaignService>();
+        services.AddScoped<ICampaignService, CampaignService>();
         services.AddTransient<IPostcodeMapper, LocationApiClient>();
         services.AddScoped<IRefDataService, RefDataService>();
         services.AddScoped<ICurrentUserIdProvider<int>, SimpleCurrentUserIdProvider<int>>();
@@ -119,7 +119,7 @@ public static class DependencyInjection
         });
 
         services.AddHostedService<HostedNotificationQueueService>();
-        services.AddHostedService<HostedEmailQueueService>();
+        services.AddHostedService<HostedCampaignQueueService>();
 
         var govNotifySettings = services.GetSectionAndValidate<NotificationServiceSettings>(configuration);
         services.AddSingleton(new NotificationClient(govNotifySettings.Value.ApiKey));

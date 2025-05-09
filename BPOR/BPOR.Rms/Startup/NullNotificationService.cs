@@ -7,19 +7,19 @@ namespace BPOR.Rms.Startup
 {
     public class NullNotificationService : INotificationService
     {
-        public Task SendEmailAsync(SendEmailRequest request, CancellationToken cancellationToken)
+        public Task SendEmailAsync(SendNotificationRequest request, CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
         }
 
-        public async Task SendPreviewEmailAsync(SendEmailRequest request, CancellationToken cancellationToken)
+        public async Task SendPreviewEmailAsync(SendNotificationRequest request, CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
         }
 
-        public async Task<EmailNotificationResponse> SendBatchEmailAsync(List<Notification> notifications, CancellationToken cancellationToken)
+        public async Task<NotificationResponse> SendBatchNotificationAsync(List<Notification> notifications, CancellationToken cancellationToken)
         {
-            return new EmailNotificationResponse();
+            return new NotificationResponse();
         }
 
         public Task<TemplateList> GetTemplatesAsync(CancellationToken cancellationToken)
