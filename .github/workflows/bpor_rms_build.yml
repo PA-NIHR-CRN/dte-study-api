@@ -6,7 +6,7 @@ on:
       environment:
         description: "Target environment"
         required: true
-        default: ALL
+        default: DEV
         type: choice
         options:
           - DEV
@@ -35,6 +35,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Get secret name
+        id: get-secret-id
+        run: |
+          declare -A secrets=(
+            [DEV]=crnccd-secret-dev-bpor-rms-app-config
+            [TEST]=crnccd-secret-test-bpor-rms-app-config
+            [UAT]=crnccs-secret-uat-bpor-rms-app-config
+            [OAT]=crnccp-secret-oat-bpor-rms-app-config
+            [PROD]=crnccp-secret-prod-bpor-rms-app-config
+          )
+          echo "id=${secrets[DEV]}" >> $GITHUB_OUTPUT
+
+      - name: Get Secrets from AWS
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: ${{ steps.get-secret-id.outputs.id }}
+          parse-json-secrets: true
+
+      - name: Set ECR_REPOSITORY environment variable
+        run: echo "ECR_REPOSITORY=${{ env.EcrSettings__Repository }}" >> $GITHUB_ENV
+
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
@@ -43,21 +64,6 @@ jobs:
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           echo "registry=${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com" >> $GITHUB_OUTPUT
-
-      - name: Get secrets for build (DEV by default)
-        id: get-secrets
-        run: |
-          SECRET_ID=crnccd-secret-dev-bpor-rms-app-config
-          echo "id=$SECRET_ID" >> $GITHUB_OUTPUT
-
-      - name: Get Secrets from AWS
-        uses: aws-actions/aws-secretsmanager-get-secrets@v2
-        with:
-          secret-ids: ${{ steps.get-secrets.outputs.id }}
-          parse-json-secrets: true
-
-      - name: Set ECR_REPOSITORY environment variable
-        run: echo "ECR_REPOSITORY=${{ env.EcrSettings__Repository }}" >> $GITHUB_ENV
 
       - name: Build and push image to ECR
         id: build-image
@@ -104,6 +110,84 @@ jobs:
             [PROD]=crnccp-secret-prod-bpor-rms-app-config
           )
           echo "id=${secrets[${{ github.event.inputs.environment }}]}" >> $GITHUB_OUTPUT
+
+      - name: Get secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: ${{ steps.get-secret-id.outputs.id }}
+          parse-json-secrets: true
+
+      - name: Generate ECS task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.EcsSettings__TaskDefinition }} \
+            --query taskDefinition > task-definition.json
+
+          cat task-definition.json | jq 'del(
+            .taskDefinitionArn,
+            .requiresAttributes,
+            .compatibilities,
+            .revision,
+            .status,
+            .registeredAt,
+            .registeredBy,
+            .containerDefinitions[].environment
+          )' > task-definition.json
+
+      - name: Fill in new image ID
+        id: render-task
+        env:
+          IMAGE: ${{ needs.build.outputs.image }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.EcsSettings__ContainerName }}
+          image: ${{ env.IMAGE }}
+          environment-variables: |
+            AwsSecretsManagerSettings__Region=${{ env.AWS_REGION }}
+            AwsSecretsManagerSettings__SecretName=${{ steps.get-secret-id.outputs.id }}
+            AwsSecretsManagerSettings__Enabled=true
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task.outputs.task-definition }}
+          service: ${{ env.EcsSettings__Service }}
+          cluster: ${{ env.EcsSettings__Cluster }}
+          wait-for-service-stability: true
+
+  deploy-all:
+    needs: build
+    if: github.event.inputs.environment == 'ALL'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [DEV, TEST, UAT, OAT, PROD]
+    name: Deploy to ${{ matrix.env }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get secret name
+        id: get-secret-id
+        run: |
+          declare -A secrets=(
+            [DEV]=crnccd-secret-dev-bpor-rms-app-config
+            [TEST]=crnccd-secret-test-bpor-rms-app-config
+            [UAT]=crnccs-secret-uat-bpor-rms-app-config
+            [OAT]=crnccp-secret-oat-bpor-rms-app-config
+            [PROD]=crnccp-secret-prod-bpor-rms-app-config
+          )
+          echo "id=${secrets[${{ matrix.env }}]}" >> $GITHUB_OUTPUT
 
       - name: Get secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
