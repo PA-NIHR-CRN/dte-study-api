@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.build-image.outputs.image }}
+      repo: ${{ steps.extract-repo.outputs.repo }}
     steps:
       - uses: actions/checkout@v4
 
@@ -54,21 +55,27 @@ jobs:
           secret-ids: ${{ steps.secret.outputs.id }}
           parse-json-secrets: true
 
+      - name: Extract ECR repository name
+        id: extract-repo
+        run: echo "repo=$EcrSettings__Repository" >> $GITHUB_OUTPUT
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
-        env:
-          ECR_REPOSITORY: ${{ env.EcrSettings__Repository }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           IMAGE_TAG=bpor-rms-${{ github.sha }}
+          echo "Using ECR registry: $ECR_REGISTRY"
+          echo "Using ECR repository: $EcrSettings__Repository"
+
           docker build -f BPOR/BPOR.Rms/Dockerfile \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:bpor-rms \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$EcrSettings__Repository:bpor-rms \
+            -t $ECR_REGISTRY/$EcrSettings__Repository:$IMAGE_TAG \
             --build-arg NUGET_PACKAGE_USERNAME=USERNAME \
             --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} .
 
-          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker push --all-tags $ECR_REGISTRY/$EcrSettings__Repository
+          echo "image=$ECR_REGISTRY/$EcrSettings__Repository:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
 
   deploy:
     needs: build
@@ -89,7 +96,7 @@ jobs:
           aws-secret-access-key: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET || secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Get secrets from Secrets Manager
+      - name: Get secrets from Secrets Manager (deploy)
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: ${{ steps.secret.outputs.id }}
@@ -98,7 +105,7 @@ jobs:
       - name: Generate ECS task definition
         run: |
           aws ecs describe-task-definition \
-            --task-definition ${{ env.EcsSettings__TaskDefinition }} \
+            --task-definition $EcsSettings__TaskDefinition \
             --query taskDefinition > task-definition.json
           jq 'del(.taskDefinitionArn, .requiresAttributes, .compatibilities, .revision, .status, .registeredAt, .registeredBy)' task-definition.json > cleaned.json
 
