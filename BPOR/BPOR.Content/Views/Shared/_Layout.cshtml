@@ -137,7 +137,7 @@
             Cookies.set("BPoRcookie", "BePartOfResearch")
             // remove existing cookies
             for (const cookie in Cookies.get()) {
-                if (cookie.includes("_g") || cookie.includes("_hj")) {
+                if (cookie.includes("_g") || cookie.includes("_hj") || cookie.includes("_fbp")) {
                     Cookies.remove(cookie, { path: '/', domain: '.nihr.ac.uk' })
                 }
             }
