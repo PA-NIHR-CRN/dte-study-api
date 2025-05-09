@@ -22,6 +22,11 @@ env:
     UAT=crnccs-secret-uat-bpor-rms-app-config
     OAT=crnccp-secret-oat-bpor-rms-app-config
     PROD=crnccp-secret-prod-bpor-rms-app-config
+  ECR_REPOSITORY_DEV: crnccd-ecr-dev-bpor-rms-repository
+  ECR_REPOSITORY_TEST: crnccd-ecr-test-bpor-rms-repository
+  ECR_REPOSITORY_UAT: crnccs-ecr-uat-bpor-rms-repository
+  ECR_REPOSITORY_OAT: crnccp-ecr-oat-bpor-rms-repository
+  ECR_REPOSITORY_PROD: crnccp-ecr-prod-bpor-rms-repository
 
 jobs:
   build:
@@ -29,7 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.build-image.outputs.image }}
-      repo: ${{ steps.extract-repo.outputs.repo }}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,25 +59,31 @@ jobs:
           secret-ids: ${{ steps.secret.outputs.id }}
           parse-json-secrets: true
 
-      - name: Extract ECR repository name
-        id: extract-repo
-        run: echo "repo=$EcrSettings__Repository" >> $GITHUB_OUTPUT
+      - name: Set ECR repository env var
+        run: |
+          case "${{ github.event.inputs.environment }}" in
+            DEV) echo "ECR_REPOSITORY=${{ env.ECR_REPOSITORY_DEV }}" >> $GITHUB_ENV ;;
+            TEST) echo "ECR_REPOSITORY=${{ env.ECR_REPOSITORY_TEST }}" >> $GITHUB_ENV ;;
+            UAT) echo "ECR_REPOSITORY=${{ env.ECR_REPOSITORY_UAT }}" >> $GITHUB_ENV ;;
+            OAT) echo "ECR_REPOSITORY=${{ env.ECR_REPOSITORY_OAT }}" >> $GITHUB_ENV ;;
+            PROD) echo "ECR_REPOSITORY=${{ env.ECR_REPOSITORY_PROD }}" >> $GITHUB_ENV ;;
+          esac
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         run: |
           IMAGE_TAG=bpor-rms-${{ github.sha }}
           echo "Using ECR registry: $ECR_REGISTRY"
-          echo "Using ECR repository: $EcrSettings__Repository"
+          echo "Using ECR repository: $ECR_REPOSITORY"
 
           docker build -f BPOR/BPOR.Rms/Dockerfile \
-            -t $ECR_REGISTRY/$EcrSettings__Repository:bpor-rms \
-            -t $ECR_REGISTRY/$EcrSettings__Repository:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:bpor-rms \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             --build-arg NUGET_PACKAGE_USERNAME=USERNAME \
             --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} .
 
-          docker push --all-tags $ECR_REGISTRY/$EcrSettings__Repository
-          echo "image=$ECR_REGISTRY/$EcrSettings__Repository:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
 
