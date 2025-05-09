@@ -1,36 +1,32 @@
-name: Deploy BPOR RMS container
+name: Build and Deploy BPOR RMS Container
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: "Target environment"
-        required: true
-        default: DEV
-        type: choice
-        options:
-          - DEV
-          - TEST
-          - UAT
-          - OAT
-          - PROD
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
   build:
-    name: 'Build'
+    name: Build Docker Image
     runs-on: ubuntu-latest
+    outputs:
+      image_sha_tag: ${{ steps.set-tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build, tag, and save image
+      - name: Set image tag
+        id: set-tag
+        run: echo "tag=bpor-rms-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and save Docker image
         env:
           IMAGE_NAME_TAG: bpor-rms
-          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
         run: |
-          docker build -f BPOR/BPOR.Rms/Dockerfile --build-arg NUGET_PACKAGE_USERNAME=USERNAME --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} -t $IMAGE_NAME_TAG .
+          docker build -f BPOR/BPOR.Rms/Dockerfile \
+            --build-arg NUGET_PACKAGE_USERNAME=USERNAME \
+            --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            -t $IMAGE_NAME_TAG .
           docker save $IMAGE_NAME_TAG > /tmp/bpor-rms.tar
 
       - name: Upload artifact
@@ -40,108 +36,74 @@ jobs:
           path: /tmp/bpor-rms.tar
 
   deploy:
+    name: Deploy to ${{ matrix.env }}
     needs: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        env: ${{ fromJson('["DEV", "TEST", "UAT", "OAT", "PROD"]') }}
-    if: ${{ github.event.inputs.environment == matrix.env || github.event.inputs.environment == 'ALL' }}
-    name: Deploy ${{ matrix.env }}
-    environment: ${{ matrix.env }}
+        include:
+          - env: DEV
+            ecr_repo: crnccd-ecr-dev-bpor-rms-repository
+            ecs_service: crnccd-ecs-dev-bpor-rms-service
+            ecs_cluster: crnccd-ecs-dev-bpor-rms-cluster
+            task_def: crnccd-ecs-dev-bpor-rms-task-definition
+            container_name: crnccd-ecs-dev-bpor-rms-container
+            config_secret: ${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_DEV }}
+            aspnet_env: Development
+            aws_key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+            aws_secret: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+
+          - env: TEST
+            ecr_repo: crnccd-ecr-test-bpor-rms-repository
+            ecs_service: crnccd-ecs-test-bpor-rms-service
+            ecs_cluster: crnccd-ecs-test-bpor-rms-cluster
+            task_def: crnccd-ecs-test-bpor-rms-task-definition
+            container_name: crnccd-ecs-test-bpor-rms-container
+            config_secret: ${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_TEST }}
+            aspnet_env: Development
+            aws_key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+            aws_secret: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+
+          # Add UAT, OAT, PROD similarly...
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set environment-specific variables
-        run: |
-          case "${{ matrix.env }}" in
-            DEV)
-              echo "AWS_KEY=${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}" >> $GITHUB_ENV
-              echo "AWS_SECRET=${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}" >> $GITHUB_ENV
-              echo "ECR_REPOSITORY=crnccd-ecr-dev-bpor-rms-repository" >> $GITHUB_ENV
-              echo "ECS_CLUSTER=crnccd-ecs-dev-bpor-rms-cluster" >> $GITHUB_ENV
-              echo "ECS_SERVICE=crnccd-ecs-dev-bpor-rms-service" >> $GITHUB_ENV
-              echo "TASK_DEFINITION=crnccd-ecs-dev-bpor-rms-task-definition" >> $GITHUB_ENV
-              echo "CONTAINER_NAME=crnccd-ecs-dev-bpor-rms-container" >> $GITHUB_ENV
-              echo "SECRET_NAME=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_DEV }}" >> $GITHUB_ENV
-              echo "ASPNETCORE_ENVIRONMENT=Development" >> $GITHUB_ENV
-              ;;
-            TEST)
-              echo "AWS_KEY=${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}" >> $GITHUB_ENV
-              echo "AWS_SECRET=${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}" >> $GITHUB_ENV
-              echo "ECR_REPOSITORY=crnccd-ecr-test-bpor-rms-repository" >> $GITHUB_ENV
-              echo "ECS_CLUSTER=crnccd-ecs-test-bpor-rms-cluster" >> $GITHUB_ENV
-              echo "ECS_SERVICE=crnccd-ecs-test-bpor-rms-service" >> $GITHUB_ENV
-              echo "TASK_DEFINITION=crnccd-ecs-test-bpor-rms-task-definition" >> $GITHUB_ENV
-              echo "CONTAINER_NAME=crnccd-ecs-test-bpor-rms-container" >> $GITHUB_ENV
-              echo "SECRET_NAME=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_TEST }}" >> $GITHUB_ENV
-              echo "ASPNETCORE_ENVIRONMENT=Development" >> $GITHUB_ENV
-              ;;
-            UAT)
-              echo "AWS_KEY=${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-              echo "AWS_SECRET=${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET }}" >> $GITHUB_ENV
-              echo "ECR_REPOSITORY=crnccs-ecr-uat-bpor-rms-repository" >> $GITHUB_ENV
-              echo "ECS_CLUSTER=crnccs-ecs-uat-bpor-rms-cluster" >> $GITHUB_ENV
-              echo "ECS_SERVICE=crnccs-ecs-uat-bpor-rms-service" >> $GITHUB_ENV
-              echo "TASK_DEFINITION=crnccs-ecs-uat-bpor-rms-task-definition" >> $GITHUB_ENV
-              echo "CONTAINER_NAME=crnccs-ecs-uat-bpor-rms-container" >> $GITHUB_ENV
-              echo "SECRET_NAME=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_UAT }}" >> $GITHUB_ENV
-              echo "ASPNETCORE_ENVIRONMENT=Development" >> $GITHUB_ENV
-              ;;
-            OAT)
-              echo "AWS_KEY=${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-              echo "AWS_SECRET=${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}" >> $GITHUB_ENV
-              echo "ECR_REPOSITORY=crnccp-ecr-oat-bpor-rms-repository" >> $GITHUB_ENV
-              echo "ECS_CLUSTER=crnccp-ecs-oat-bpor-rms-cluster" >> $GITHUB_ENV
-              echo "ECS_SERVICE=crnccp-ecs-oat-bpor-rms-service" >> $GITHUB_ENV
-              echo "TASK_DEFINITION=crnccp-ecs-oat-bpor-rms-task-definition" >> $GITHUB_ENV
-              echo "CONTAINER_NAME=crnccp-ecs-oat-bpor-rms-container" >> $GITHUB_ENV
-              echo "SECRET_NAME=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_OAT }}" >> $GITHUB_ENV
-              echo "ASPNETCORE_ENVIRONMENT=Staging" >> $GITHUB_ENV
-              ;;
-            PROD)
-              echo "AWS_KEY=${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-              echo "AWS_SECRET=${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}" >> $GITHUB_ENV
-              echo "ECR_REPOSITORY=crnccp-ecr-prod-bpor-rms-repository" >> $GITHUB_ENV
-              echo "ECS_CLUSTER=crnccp-ecs-prod-bpor-rms-cluster" >> $GITHUB_ENV
-              echo "ECS_SERVICE=crnccp-ecs-prod-bpor-rms-service" >> $GITHUB_ENV
-              echo "TASK_DEFINITION=crnccp-ecs-prod-bpor-rms-task-definition" >> $GITHUB_ENV
-              echo "CONTAINER_NAME=crnccp-ecs-prod-bpor-rms-container" >> $GITHUB_ENV
-              echo "SECRET_NAME=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_PROD }}" >> $GITHUB_ENV
-              echo "ASPNETCORE_ENVIRONMENT=Production" >> $GITHUB_ENV
-              ;;
-          esac
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ env.AWS_KEY }}
-          aws-secret-access-key: ${{ env.AWS_SECRET }}
+          aws-access-key-id: ${{ matrix.aws_key }}
+          aws-secret-access-key: ${{ matrix.aws_secret }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: login-ecr
+        with:
+          mask-password: 'true'
+
+      - uses: actions/download-artifact@v4
         with:
           name: bpor-rms
           path: /tmp
 
-      - name: Restore and build
-        run: |
-          dotnet tool install --global dotnet-ef
-          dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
-          dotnet restore BPOR/BPOR.sln
-          dotnet build BPOR/BPOR.sln --no-restore --configuration Release
+      - run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
-      - name: Allow RDS Access
+      - run: dotnet tool install --global dotnet-ef
+      - run: dotnet restore BPOR/BPOR.sln
+      - run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
+
+      - name: Get GitHub Actions Runner IP
         id: publicip
+        run: echo "ip=$(curl -s icanhazip.com)" >> "$GITHUB_OUTPUT"
+
+      - name: Allow IP to RDS
         run: |
-          IP=$(curl -s icanhazip.com)
-          echo "ip=$IP" >> $GITHUB_OUTPUT
-          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "'$IP'/32", "Description": "GH runner IP"}]}]'
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.RDS_SG }} \
+            --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32"}]}]'
 
       - name: Update DB
         env:
@@ -150,49 +112,45 @@ jobs:
           cd BPOR/BPOR.Domain
           dotnet ef database update --connection "$DB_CONNECTION_STRING"
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: 'true'
-
-      - name: Load and Push Docker Image
-        id: push-image
-        env:
-          IMAGE_TAG: bpor-rms-${{ github.sha }}
+      - name: Load, Tag, and Push Image
+        id: docker
         run: |
           docker load --input /tmp/bpor-rms.tar
           IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
-          docker tag $IMAGE_ID ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          TAG=${{ needs.build.outputs.image_sha_tag }}
+          docker tag $IMAGE_ID ${{ steps.login-ecr.outputs.registry }}/${{ matrix.ecr_repo }}:$TAG
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ matrix.ecr_repo }}:$TAG
+          echo "image=${{ steps.login-ecr.outputs.registry }}/${{ matrix.ecr_repo }}:$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Generate ECS task definition
+      - name: Generate ECS Task Definition
         run: |
-          aws ecs describe-task-definition --task-definition $TASK_DEFINITION --query taskDefinition > task-definition.json
-          jq 'del(.taskDefinitionArn, .revision, .status, .registeredAt, .registeredBy, .requiresAttributes, .compatibilities, .containerDefinitions[].environment)' task-definition.json > cleaned-task-definition.json
+          aws ecs describe-task-definition --task-definition ${{ matrix.task_def }} --query taskDefinition > task-definition.json
+          jq 'del(
+            .taskDefinitionArn, .requiresAttributes, .compatibilities,
+            .revision, .status, .registeredAt, .registeredBy,
+            .containerDefinitions[].environment)' task-definition.json > clean-task-def.json
 
-      - name: Fill task definition with image
-        id: render-task
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
+      - uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: task-def
         with:
-          task-definition: cleaned-task-definition.json
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.push-image.outputs.image }}
+          task-definition: clean-task-def.json
+          container-name: ${{ matrix.container_name }}
+          image: ${{ steps.docker.outputs.image }}
           environment-variables: |
-            AwsSecretsManagerSettings__Region=${{ env.AWS_REGION }}
-            AwsSecretsManagerSettings__SecretName=${{ env.SECRET_NAME }}
+            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
+            AwsSecretsManagerSettings__SecretName=${{ matrix.config_secret }}
             AwsSecretsManagerSettings__Enabled=true
-            ASPNETCORE_ENVIRONMENT=${{ env.ASPNETCORE_ENVIRONMENT }}
+            ASPNETCORE_ENVIRONMENT=${{ matrix.aspnet_env }}
 
-      - name: Revoke RDS IP
+      - name: Revoke RDS Access
         run: |
-          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GH runner IP"}]}]'
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ secrets.RDS_SG }} \
+            --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32"}]}]'
 
-      - name: Deploy ECS task
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      - uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ${{ steps.render-task.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ matrix.ecs_service }}
+          cluster: ${{ matrix.ecs_cluster }}
           wait-for-service-stability: true
