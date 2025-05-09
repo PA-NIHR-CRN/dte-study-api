@@ -98,6 +98,9 @@
         }
         else
         {
+            @Html.HiddenFor(m => m.ShowPreferredContactFilter)
+            @Html.HiddenFor(m => m.SelectedVolunteersPreferredContact)
+
             <div class="govuk-input_select__wrapper">
                 <div class="govuk-label exclusion_label sr-only">Volunteers preferred contact method</div>
                 <div class="govuk-hint govuk-!-margin-top-4" style="margin-bottom: 12px;">

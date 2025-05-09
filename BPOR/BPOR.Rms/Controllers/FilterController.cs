@@ -58,6 +58,10 @@ public class FilterController(ParticipantDbContext context,
 
             model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
             model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
+
+            if (!model.ShowPreferredContactFilter) {
+                model.SelectedVolunteersPreferredContact = (int)ContactMethodId.Email;
+            }
         }
 
         if (activity == "FilterVolunteers")
@@ -115,6 +119,11 @@ public class FilterController(ParticipantDbContext context,
                 model.StudyCpmsId = study.CpmsId;
                 model.ShowRecruitedFilter = study.IsRecruitingIdentifiableParticipants;
                 model.ShowPreferredContactFilter = study.IsRecruitingIdentifiableParticipants;
+
+                if (!model.ShowPreferredContactFilter)
+                {
+                    model.SelectedVolunteersPreferredContact = (int)ContactMethodId.Email;
+                }
             }
         }
 
