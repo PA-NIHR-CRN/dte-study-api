@@ -26,8 +26,10 @@
                 <h1 class="display-1 hero">@Model.Hero.Title</h1>
 
                 <markdown markdown="Hero.Body" />
-
-                <a class="btn btn-lg btn-light register w-100 text-center w-lg-auto text-lg-left" href="@Model.Hero.Link.Url" aria-label="@Model.Hero.Link.AriaLabel" target="_blank">@Model.Hero.Link.Label</a>
+                @{
+                    var VsLink = Model.Hero.Link.Url.Contains("?") ? Model.Hero.Link.Url + "&" + Context.Request.QueryString.ToString().Replace("?", "") : Model.Hero.Link.Url + Context.Request.QueryString;
+                }
+                <a class="btn btn-lg btn-light register w-100 text-center w-lg-auto text-lg-left" href="@VsLink" aria-label="@Model.Hero.Link.AriaLabel" target="_blank">@Model.Hero.Link.Label</a>
             </section>
         </div>
     </div>
