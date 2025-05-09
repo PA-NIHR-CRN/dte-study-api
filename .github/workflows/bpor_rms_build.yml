@@ -86,39 +86,50 @@ jobs:
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-
+          
   deploy:
     needs: build
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
-
+  
       - name: Extract secret ID
         id: secret
         run: |
           echo "id=$(echo \"$SECRET_IDS\" | grep \"${{ github.event.inputs.environment }}=\" | cut -d'=' -f2)" >> $GITHUB_OUTPUT
-
+  
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID || secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
           aws-secret-access-key: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET || secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
-
+  
       - name: Get secrets from Secrets Manager (deploy)
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: ${{ steps.secret.outputs.id }}
           parse-json-secrets: true
-
+  
+      - name: Debug ECS settings
+        run: |
+          echo "EcsSettings__TaskDefinition: $EcsSettings__TaskDefinition"
+          echo "EcsSettings__ContainerName: $EcsSettings__ContainerName"
+          echo "EcsSettings__Service: $EcsSettings__Service"
+          echo "EcsSettings__Cluster: $EcsSettings__Cluster"
+          if [ -z "$EcsSettings__TaskDefinition" ]; then
+            echo "ERROR: EcsSettings__TaskDefinition is not set!"
+            exit 1
+          fi
+  
       - name: Generate ECS task definition
         run: |
           aws ecs describe-task-definition \
-            --task-definition $EcsSettings__TaskDefinition \
+            --task-definition "$EcsSettings__TaskDefinition" \
             --query taskDefinition > task-definition.json
           jq 'del(.taskDefinitionArn, .requiresAttributes, .compatibilities, .revision, .status, .registeredAt, .registeredBy)' task-definition.json > cleaned.json
-
+  
       - name: Fill in image in ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -139,7 +150,7 @@ jobs:
             AuthenticationSettings__ClientId=${{ env.AuthenticationSettings__ClientId }}
             AuthenticationSettings__ClientSecret=${{ env.AuthenticationSettings__ClientSecret }}
             AuthenticationSettings__Bypass=${{ env.AuthenticationSettings__Bypass }}
-
+  
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
@@ -147,3 +158,4 @@ jobs:
           service: ${{ env.EcsSettings__Service }}
           cluster: ${{ env.EcsSettings__Cluster }}
           wait-for-service-stability: true
+
