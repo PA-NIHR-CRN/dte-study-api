@@ -13,7 +13,7 @@ namespace Dynamo.Stream.Handler.Migrations
     public partial class Offlinejourneytablerenamesetup : Migration
     {
 
-        private const string ScriptIdentifier = "20241126161327_Offline-journey-table-rename-setup";
+        private const string ScriptIdentifier = "20241126154919_Offline-journey-table-rename-setup";
 
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
