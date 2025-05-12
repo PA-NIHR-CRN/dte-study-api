@@ -67,7 +67,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IConfigurationBuilder AddNihrConfiguration(this IConfigurationBuilder configuration,
 IHostEnvironment hostEnvironment)
         {
-            if (hostEnvironment.IsDevelopment())
+            if (hostEnvironment.IsDevelopment() || Debugger.IsAttached)
             {
                 configuration.SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
@@ -106,7 +106,7 @@ IHostEnvironment hostEnvironment)
             return builder;
         }
 
-        private static void AddAwsSecretsManager(this IConfigurationBuilder configurationBuilder, string secretName,
+        public static void AddAwsSecretsManager(this IConfigurationBuilder configurationBuilder, string secretName,
             Func<IAmazonSecretsManager> secretsManagerClientFactory)
         {
             var configurationSource = new AwsSecretsManagerConfigurationSource(secretName, secretsManagerClientFactory);
@@ -159,7 +159,7 @@ IHostEnvironment hostEnvironment)
             return Options.Options.Create(settings);
         }
 
-        private static T BindFlatConfigurationKeys<T>(IConfiguration configuration, string sectionName) where T : class, new()
+        public static T BindFlatConfigurationKeys<T>(this IConfiguration configuration, string sectionName) where T : class, new()
         {
             var instance = new T();
             var properties = typeof(T).GetProperties();

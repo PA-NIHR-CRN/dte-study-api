@@ -1,0 +1,22 @@
+﻿@using Microsoft.AspNetCore.Localization
+@{
+    var cultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var culture = cultureFeature?.RequestCulture?.Culture?.ToString() ?? "en-GB";
+}
+
+<div class="container langSelectionBar justify-content-end">
+    <span class="languageSelection pt-0" id="fST">
+        @if (culture == "en-GB")
+        {
+            <text>English | <a href="?culture=cy-GB" class="languageButton elink" tabindex="0">Cymraeg</a></text>
+        }
+        else if (culture == "cy-GB")
+        {
+            <text><a href="?culture=en-GB" class="languageButton elink" tabindex="0">English</a> | Cymraeg</text>
+        }
+        else
+        {
+            <text><a href="?culture=en-GB" class="languageButton elink" tabindex="0">English</a> | <a href="?culture=cy-GB" class="languageButton elink" tabindex="0">Cymraeg</a></text>
+        }
+    </span>
+</div>
