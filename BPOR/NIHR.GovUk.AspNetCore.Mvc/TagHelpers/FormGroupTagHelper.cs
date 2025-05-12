@@ -75,7 +75,7 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
                 hintBuilder.AddCssClass("govuk-hint");
                 hintBuilder.GenerateId($"{For.Name}-hint", "-");
 
-                hintBuilder.InnerHtml.Append(For.Metadata.Description);
+                hintBuilder.InnerHtml.AppendHtml(For.Metadata.Description);
 
                 output.PreContent.AppendHtml(hintBuilder);
             }

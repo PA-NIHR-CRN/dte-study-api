@@ -1,0 +1,104 @@
+@model BPOR.Rms.Models.Study.StudyDetailsViewModel
+@using BPOR.Domain.Enums;
+
+<style>
+    /* Base styles for all tags */
+    .govuk-tag {
+        border-radius: 3px;
+        text-align: center;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 24px;
+        font-feature-settings: 'clig' off, 'liga' off;
+        display: flex;
+        height: 23px;
+        padding: 5px 8px 4px 8px;
+        justify-content: center;
+        align-items: center;
+        align-self: stretch;
+    }
+
+    /* Specific styles for orange tag */
+    .govuk-tag--orange {
+        background: #FDEBD8;
+        color: #494949;
+    }
+
+    /* Specific styles for green tag */
+    .govuk-tag--green {
+        background: #388555;
+        color: #FFFFFF;
+    }
+</style>
+
+
+<div>
+    <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Campaigns sent</h2>
+    <table class="govuk-table" style="width: 100%;">
+
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header ">Date/time sent</th>
+                <th scope="col" class="govuk-table__header ">Campaign type</th>
+                <th scope="col" class="govuk-table__header ">Template</th>
+                <th scope="col" class="govuk-table__header ">Number contacted</th>
+                <th scope="col" class="govuk-table__header ">Registered interest</th>
+                <th scope="col" class="govuk-table__header ">Bounced</th>
+                <th scope="col" class="govuk-table__header ">Status</th>
+            </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+        @foreach (var campaign in Model.Campaigns)
+            {
+            <tr class="govuk-table__row">
+                <td class="govuk-table__cell">
+                    @campaign.CreatedAt.ToString("dd/MM/yyyy, HH:mm")
+                </td>
+                <td class="govuk-table__cell">@campaign.TypeId.ToString()</td>
+                <td class="govuk-table__cell">@campaign.Name</td>
+                <td class="govuk-table__cell">@campaign.TotalCampaignNotificationsSent / @campaign.TargetGroupSize</td>
+
+
+                <td class="govuk-table__cell">
+                    @if (@campaign.TypeId == ContactMethodId.Letter)
+                    {
+                        @:Not applicable
+                    }
+                    else
+                    {
+                        @campaign.TotalCampaignRegisteredInterest
+                    }
+                            </td>
+
+
+                <td class="govuk-table__cell">
+                    @if (@campaign.TypeId == ContactMethodId.Letter)
+                    {
+                        @:Not applicable
+                    }
+                    else
+                    {
+                        @campaign.TotalContactAttemptsFailed
+                    }
+
+                </td>
+                <td class="govuk-table__cell">
+                    @if (campaign.TotalCampaignNotificationsSent < campaign.TargetGroupSize)
+                    {
+                        <strong class="govuk-tag govuk-tag--orange">
+                            In progress
+                        </strong>
+                    }
+                    else if (campaign.TotalCampaignNotificationsSent >= campaign.TargetGroupSize)
+                    {
+                        <strong class="govuk-tag govuk-tag--green">
+                            Sent
+                        </strong>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

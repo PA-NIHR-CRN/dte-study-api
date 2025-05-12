@@ -1,0 +1,67 @@
+@model BPOR.Rms.Models.Email.SetupCampaignViewModel
+@addTagHelper *, BPOR.Rms.TagHelpers
+
+
+<style>
+    /* Mobile devices */
+    @@media (max-width: 640px) {
+        .govuk-select {
+            width: 100%; /* Make input full width on mobile */
+        }
+    }
+
+    /* Desktop and larger devices - more than 1024px */
+    @@media (min-width: 641px) {
+        .govuk-select {
+            width: 70%; /* Make input 30% width on desktop */
+        }
+    }
+</style>
+
+<div class="govuk-form-group @(Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")" asp-for="SelectedTemplateId">
+    <label asp-for="SelectedTemplateId" class="govuk-label govuk-label--l" for="SelectedTemplateId">
+        Select @(Model.GetArticle(Model.ContactMethod)) @(Model.ContactMethod.ToString().ToLower()) template
+    </label>
+    <div id="SelectedTemplateId-hint" class="govuk-hint">
+        These templates are managed through your GOV UK Notify account
+    </div>
+    @if (Html.ViewData.ModelState["SelectedTemplateId"]?.Errors.Count > 0)
+    {
+        <span id="SelectedTemplateId-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Html.ValidationMessageFor(model => model.SelectedTemplateId)
+        </span>
+    }
+    @if (Model.Templates != null && Model.Templates.Any())
+    {
+        <template-select for="@Model.SelectedTemplateId"
+                         contact-method="@Model.ContactMethod"
+                         templates="@Model.Templates" />
+    }
+    else
+    {
+        <p>No templates available.</p>
+    }
+</div>
+
+<script>document.addEventListener('DOMContentLoaded', () => {
+        const templateSelect = document.getElementById('SelectedTemplateId');
+        const previewEmailsInput = document.getElementById('PreviewEmails');
+        const notificationBanner = document.getElementById('notification-banner');
+
+        // Function to remove the notification banner
+        const removeNotification = () => {
+            if (notificationBanner) {
+                notificationBanner.style.display = 'none';
+            }
+        };
+
+        // Event listeners to remove the banner when changes occur
+        templateSelect?.addEventListener('change', () => {
+            removeNotification();
+        });
+
+        previewEmailsInput?.addEventListener('input', () => {
+            removeNotification();
+        });
+    });</script>

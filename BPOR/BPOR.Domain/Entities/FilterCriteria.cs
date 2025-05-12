@@ -14,7 +14,9 @@ public class FilterCriteria
     public DateTime? RegistrationToDate { get; set; }
     public int? AgeFrom { get; set; }
     public int? AgeTo { get; set; }
-    public ICollection<EmailCampaign> EmailCampaigns { get; set; } = [];
+    public int? ContactMethodId { get; set; }
+
+    public ICollection<Campaign> Campaign { get; set; } = [];
     public ICollection<FilterAreaOfInterest> FilterAreaOfInterest { get; set; } = [];
     public ICollection<FilterPostcode> FilterPostcode { get; set; } = [];
     public ICollection<FilterGender> FilterGender { get; set; } = [];

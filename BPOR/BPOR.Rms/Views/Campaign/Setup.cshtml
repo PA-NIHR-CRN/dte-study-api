@@ -1,0 +1,41 @@
+@using BPOR.Rms.Models.Email
+@using BPOR.Domain.Enums;
+@model SetupCampaignViewModel
+
+@{
+    ViewData["Title"] = $"Set up {Model.GetArticle(Model.ContactMethod)} {Model.ContactMethod.ToString().ToLower()} campaign - Volunteer Registry - Be Part of Research";
+    ViewData.AddBreadcrumb("All studies", "/Study/Index");
+
+    if (Model.StudyId is not null)
+    {
+        ViewData.AddBreadcrumb($"Study", $"/Study/Details/{Model.StudyId}");
+        ViewData.AddBreadcrumb("Find volunteers", "/Filter?studyId=" + Model.StudyId);
+    }
+    else
+    {
+        ViewData.AddBreadcrumb("Find volunteers", "/Filter");
+    }
+
+    ViewData.AddBreadcrumb($"Set up {Model.GetArticle(Model.ContactMethod)} {Model.ContactMethod.ToString().ToLower()} campaign", "/Campaign/Setup");
+}
+
+<div class="govuk-grid-column-two-thirds govuk-!-margin-bottom-6">
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-0">Set up @Model.GetArticle(Model.ContactMethod) @Model.ContactMethod.ToString().ToLower() campaign</h1>
+    <p class="govuk-hint body-bold">@Html.DisplayFor(x => x.StudyName)</p>
+    <form method="post">
+
+        <input type="hidden" asp-for="StudyId" />
+        <input type="hidden" asp-for="MaxNumbers" />
+        <input type="hidden" asp-for="FilterCriteriaId" />
+        <input type="hidden" asp-for="ContactMethod" />
+        <partial name="Partials/_TemplateSelect" />
+
+        @if (Model.ContactMethod == ContactMethodId.Email)
+        {
+            <partial name="Partials/_Preview" />
+        }
+
+        <partial name="Partials/_TotalNumbers" />
+        <partial name="Partials/_Footer" />
+    </form>
+</div>

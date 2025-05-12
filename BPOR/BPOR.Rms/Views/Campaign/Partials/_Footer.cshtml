@@ -1,0 +1,59 @@
+@using BPOR.Rms.Startup
+@using BPOR.Domain.Entities
+@using Microsoft.Extensions.Options
+@using BPOR.Rms.Models.Email
+@using BPOR.Domain.Enums;
+
+@model SetupCampaignViewModel
+@inject IOptions<RmsSettings> rmsOptions
+
+
+@if (Model.ContactMethod == ContactMethodId.Email)
+{
+    <div class="govuk-inset-text">
+        <strong>Please note:</strong> GOV UK Notify has an email allowance of 250,000 per day. This includes all email
+        campaigns sent by our team. Your email may exceed this limit which means it may be sent out over multiple days.
+    </div>
+
+    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+    <p class="govuk-body text-secondary">
+        @if (!string.IsNullOrEmpty(Model.EmailAddress))
+        {
+            <span>Both</span>
+        }
+        @rmsOptions.Value.CampaignNotificationEmailAddress
+        @if (!string.IsNullOrEmpty(Model.EmailAddress))
+        {
+            <span> and @Model.EmailAddress</span>
+        }
+        will be notified by email that the email campaign has started sending and to how many recipients.
+    </p>
+}
+
+@if (Model.ContactMethod == ContactMethodId.Letter)
+{
+    <div class="govuk-inset-text">
+        <strong>Please note:</strong> GOV UK Notify has a maximum daily limit of 20,000 letters. This includes all letter campaigns sent by our team.
+        Your letter may exceed this limit which means it may be sent out over multiple days. Letters are printed at 5:30pm and dispatched the next working day
+        (Monday to Friday).
+    </div>
+
+    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+    <p class="govuk-body text-secondary">
+        @if (!string.IsNullOrEmpty(Model.EmailAddress))
+        {
+            <span>bepartofresearch-volunteerservice@nihr.ac.uk and @Model.EmailAddress</span>
+        }
+        else
+        {
+            <span>bepartofresearch-volunteerservice@nihr.ac.uk</span>
+        }
+        will be notified by email that the letter campaign request has been sent and to how many recipients.
+    </p>
+
+}
+
+
+<button type="submit" asp-action="Send" class="govuk-button" data_module="govuk-button">Send @Model.ContactMethod.ToString().ToLower()</button>
