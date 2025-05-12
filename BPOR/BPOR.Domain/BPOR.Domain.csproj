@@ -33,7 +33,9 @@
         <EmbeddedResource Include="Entities\Configuration\HealthConditions.txt">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
-        <None Remove="Constants\" />
+        <None Remove="Migrations\Scripts\" />
+        <None Remove="Migrations\Extensions\" />
+        <None Remove="Migrations\Scripts\20241126154919_Offline-journey-table-rename-setup\" />
     </ItemGroup>
 
     <ItemGroup>
@@ -45,6 +47,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Constants\" />
+      <Folder Include="Migrations\Scripts\" />
+      <Folder Include="Migrations\Extensions\" />
+      <Folder Include="Migrations\Scripts\20241126154919_Offline-journey-table-rename-setup\" />
     </ItemGroup>
 </Project>

@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using NIHR.CRN.CPMS.Database.Extensions;
+using static NIHR.CRN.CPMS.Database.Extensions.MigrationBuilderExtensions;
 
 #nullable disable
 
@@ -10,6 +12,9 @@ namespace Dynamo.Stream.Handler.Migrations
     /// <inheritdoc />
     public partial class Offlinejourneytablerenamesetup : Migration
     {
+
+        private const string ScriptIdentifier = "20241126161327_Offline-journey-table-rename";
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -62,17 +67,7 @@ namespace Dynamo.Stream.Handler.Migrations
                 nullable: false,
                 defaultValue: 0);
 
-            migrationBuilder.Sql(
-                @"UPDATE `dte`.`EmailCampaignParticipants`
-                SET
-                `CampaignTypeId` = 1
-                WHERE `CampaignTypeId` = 0;");
-
-            migrationBuilder.Sql(
-                @"UPDATE `dte`.`EmailCampaigns`
-                SET
-                `TypeId` = 1
-                WHERE `TypeId` = 0;");
+            migrationBuilder.SqlFromFile(ScriptIdentifier, MigrationDirection.Up);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_EmailCampaignParticipants_CampaignTypeId_CampaignId",
