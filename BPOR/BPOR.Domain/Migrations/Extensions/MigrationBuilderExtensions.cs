@@ -71,21 +71,17 @@ namespace NIHR.CRN.CPMS.Database.Extensions
                 : $"{scriptIdentifier}.{direction}.sql";
 
             var relativePath = Path.Combine("Migrations", "Scripts", scriptIdentifier, fileName);
-
             var baseDir = AppContext.BaseDirectory;
+
             var fullPath = Path.Combine(baseDir, relativePath);
+
             if (File.Exists(fullPath))
+            {
+                Console.WriteLine($"[EF MIGRATION] Using SQL from: {fullPath}");
                 return File.ReadAllText(fullPath);
+            }
 
-            var debugPath = Path.Combine(baseDir.Replace("Release", "Debug"), relativePath);
-            if (File.Exists(debugPath))
-                return File.ReadAllText(debugPath);
-
-            var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), relativePath);
-            if (File.Exists(sourcePath))
-                return File.ReadAllText(sourcePath);
-
-            throw new FileNotFoundException($"Could not find migration script. Paths tried:\n- {fullPath}\n- {debugPath}\n- {sourcePath}");
+            throw new FileNotFoundException($"Could not find migration script at {fullPath}");
         }
 
     }
