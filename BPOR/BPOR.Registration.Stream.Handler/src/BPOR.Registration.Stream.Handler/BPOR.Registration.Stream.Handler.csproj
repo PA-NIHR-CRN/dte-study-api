@@ -15,9 +15,11 @@
         <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.0" />
         <PackageReference Include="Amazon.Lambda.DynamoDBEvents" Version="2.3.0" />
         <PackageReference Include="Dte.Common" Version="1.7.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\BPOR.Domain\BPOR.Domain.csproj" />
+        <ProjectReference Include="..\..\..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
     </ItemGroup>
 </Project>

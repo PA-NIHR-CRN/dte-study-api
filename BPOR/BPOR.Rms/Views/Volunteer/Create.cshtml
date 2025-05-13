@@ -1,0 +1,391 @@
+@model BPOR.Rms.Models.Volunteer.VolunteerFormViewModel
+
+@{
+    ViewData["Title"] = "Add a volunteer";
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
+        <h1 class="govuk-heading-xl">Add a volunteer to the volunteer registry</h1>
+        <p class="govuk-body">All fields are mandatory unless specified otherwise</p>
+        <form asp-action="Create">
+
+            <form-group for="FirstName" label-level="h2">
+                @if (Html.ViewData.ModelState["FirstName"]?.Errors.Count > 0)
+                {
+                    <input asp-for="FirstName" class="govuk-input  govuk-input--error" id="FirstName" aria-describedby="FirstName-error" value="@(Model.FirstName)" />
+                }
+                else
+                {
+                    <input asp-for="FirstName" class=" govuk-input" id="FirstName" value="@(Model.FirstName)" />
+                }
+
+            </form-group>
+
+            <form-group for="LastName" label-level="h2">
+                @if (Html.ViewData.ModelState["LastName"]?.Errors.Count > 0)
+                {
+                    <input asp-for="LastName" class="govuk-input  govuk-input--error" id="LastName" aria-describedby="LastName-error" value="@(Model.LastName)" />
+                }
+                else
+                {
+                    <input asp-for="LastName" class=" govuk-input" id="LastName" value="@(Model.LastName)" />
+                }
+            </form-group>
+
+            <form-group for="DateOfBirth" label-level="h2" include-child-errors="true">
+
+                <div class="govuk-date-input" id="DateOfBirth">
+                    <!-- Day -->
+                    <div class="govuk-date-input__item">
+                        <label class="govuk-label govuk-label--n" asp-for="DateOfBirth.Day">@Html.DisplayNameFor(model => model.DateOfBirth.Day)</label>
+                        <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="DateOfBirth.Day" autocomplete="off" type="text" inputmode="numeric">
+                    </div>
+                    <!-- Month -->
+                    <div class="govuk-date-input__item">
+                        <label class="govuk-label govuk-label--n" asp-for="DateOfBirth.Month">@Html.DisplayNameFor(model => model.DateOfBirth.Month)</label>
+                        <input class="govuk-input govuk-date-input__input govuk-input--width-3" asp-for="DateOfBirth.Month" autocomplete="off" type="text" inputmode="numeric">
+                    </div>
+                    <!-- Year -->
+                    <div class="govuk-date-input__item">
+                        <label class="govuk-label govuk-label--n" asp-for="DateOfBirth.Year">@Html.DisplayNameFor(model => model.DateOfBirth.Year)</label>
+                        <input class="govuk-input govuk-date-input__input govuk-input--width-4" asp-for="DateOfBirth.Year" autocomplete="off" type="text" inputmode="numeric" />
+                    </div>
+                </div>
+
+            </form-group>
+
+
+            @if (Model.ManualAddressEntry)
+            {
+                <input asp-for="ManualAddressEntry" hidden value="@(Model.ManualAddressEntry)" type="checkbox" />
+
+                <form-group for="AddressLine1" label-level="h2">
+                    @if (Html.ViewData.ModelState["AddressLine1"]?.Errors.Count > 0)
+                    {
+                        <input asp-for="AddressLine1" class="govuk-input  govuk-input--error" id="AddressLine1" aria-describedby="AddressLine1-error" value="@(Model.AddressLine1)" />
+                    }
+                    else
+                    {
+                        <input asp-for="AddressLine1" class=" govuk-input" id="AddressLine1" value="@(Model.AddressLine1)" autofocus="@(Model.lastAction == "ManualAddress")" />
+                    }
+                </form-group>
+
+                <form-group for="AddressLine2" label-level="h2">
+                    @if (Html.ViewData.ModelState["AddressLine2"]?.Errors.Count > 0)
+                    {
+                        <input asp-for="AddressLine2" class="govuk-input govuk-input--error" id="AddressLine2" aria-describedby="AddressLine2-error" value="@(Model.AddressLine2)" />
+                    }
+                    else
+                    {
+                        <input asp-for="AddressLine2" class=" govuk-input" id="AddressLine2" value="@(Model.AddressLine2)" />
+                    }
+                </form-group>
+
+                <form-group for="AddressLine3" label-level="h2">
+                    @if (Html.ViewData.ModelState["AddressLine3"]?.Errors.Count > 0)
+                    {
+                        <input asp-for="AddressLine3" class="govuk-input govuk-input--error" id="AddressLine3" aria-describedby="AddressLine3-error" value="@(Model.AddressLine3)" />
+                    }
+                    else
+                    {
+                        <input asp-for="AddressLine3" class=" govuk-input" id="AddressLine3" value="@(Model.AddressLine3)" />
+                    }
+                </form-group>
+
+                <form-group for="AddressLine4" label-level="h2">
+                    @if (Html.ViewData.ModelState["AddressLine4"]?.Errors.Count > 0)
+                    {
+                        <input asp-for="AddressLine4" class="govuk-input govuk-input--error" id="AddressLine4" aria-describedby="AddressLine4-error" value="@(Model.AddressLine4)" />
+                    }
+                    else
+                    {
+                        <input asp-for="AddressLine4" class=" govuk-input" id="AddressLine4" value="@(Model.AddressLine4)" />
+                    }
+                </form-group>
+
+                <form-group for="Town" label-level="h2">
+                    @if (Html.ViewData.ModelState["Town"]?.Errors.Count > 0)
+                    {
+                        <input asp-for="Town" class="govuk-input  govuk-input--error" id="Town" aria-describedby="Town-error" value="@(Model.Town)" />
+                    }
+                    else
+                    {
+                        <input asp-for="Town" class=" govuk-input" id="Town" value="@(Model.Town)" />
+                    }
+                </form-group>
+            }
+
+            <form-group for="PostCode" label-level="h2">
+                @if (Html.ViewData.ModelState["PostCode"]?.Errors.Count > 0)
+                {
+                    <input asp-for="PostCode" class="govuk-input  govuk-input--error" id="PostCode" aria-describedby="PostCode-error" />
+                }
+                else
+                {
+                    <input asp-for="PostCode" class=" govuk-input" id="PostCode" />
+
+                }
+            </form-group>
+
+
+            <div class="govuk-form-group">
+                <button type="submit" name="action" value="AddressLookup" id="@(Model.lastAction != "AddressLookup" && Model.SelectedAddress == null ? "SelectedAddress" : "")" class="govuk-button" data_module="govuk-button">@(Model.ManualAddressEntry ? "Find an address by postcode" : "Find address")</button>
+                @if (!Model.ManualAddressEntry)
+                {
+                    <button type="submit" name="action" value="ManualAddress" class="govuk-button govuk-button--secondary" data_module="govuk-button">Enter address manually</button>
+                }
+            </div>
+
+
+            @if (!Model.ManualAddressEntry && Model.PostCode != null)
+            {
+                if (Model.SelectedAddress == null)
+                {
+                    <form-group for="SelectedAddress" label-level="h2">
+                        <address-lookup for="SelectedAddress"
+                                        addresses="@Model.Addresses"
+                                        postcode="@(Model.PostCode)"
+                                        auto-focus="@(Model.lastAction == "AddressLookup")">
+                        </address-lookup>
+                    </form-group>
+                }
+                else
+                {
+                    @if (Model.SelectedAddress != null)
+                    {
+
+                        <form-group for="SelectedAddress" label-level="h2">
+                            <input asp-for="SelectedAddress" class="govuk-input" id="SelectedAddress" value="@(TempData["selectedAddress"])" disabled />
+                            <input asp-for="SelectedAddress" class="govuk-input" id="SelectedAddress" value="@(Model.SelectedAddress)" hidden />
+                        </form-group>
+                    }
+
+                }
+            }
+            <div class="govuk-form-group @(Html.ViewData.ModelState["PreferredContactMethod"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset" id="PreferredContactMethodQuestion">
+                    <legend>
+                        <h2>@Html.DisplayNameFor(model => Model.PreferredContactMethod)</h2>
+                    </legend>
+                    @if (Html.ViewData.ModelState["PreferredContactMethod"]?.Errors.Count > 0)
+                    {
+                        <span id="LastName-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @Html.ValidationMessageFor(model => model.PreferredContactMethod)
+                        </span>
+                    }
+                <div class="govuk-radios" data-module="govuk-radios">
+                    @for (int i = 0; i < Model.GetPrefferdContactMethodValues.Count; i++)
+                    {
+                        <div class="govuk-radios__item">
+                            @Html.RadioButtonFor(m => m.PreferredContactMethod, (int)Model.GetPrefferdContactMethodValues[i], new { @class = "govuk-radios__input", id = "PreferredContactMethod" + (i == 0 ? "" : i) })
+                            @Html.Label("PreferredContactMethod" + (i == 0 ? "" : i), Model.GetPrefferdContactMethodValues[i].ToString(), new { @class = "govuk-label govuk-radios__label" })
+                        </div>
+                    }
+                </div>
+                </fieldset>
+            </div>
+
+
+            <form-group for="EmailAddress" label-level="h2">
+                @if (Html.ViewData.ModelState["EmailAddress"]?.Errors.Count > 0)
+                {
+                    <input asp-for="EmailAddress" class="govuk-input  govuk-input--error" id="EmailAddress" aria-describedby="EmailAddress-error" value="@(Model.EmailAddress)" type="text" />
+                }
+                else
+                {
+                    <input asp-for="EmailAddress" class=" govuk-input" id="EmailAddress" value="@(Model.EmailAddress)" type="text" />
+                }
+            </form-group>
+
+            <form-group for="LandLine" label-level="h2">
+                @if (Html.ViewData.ModelState["LandLine"]?.Errors.Count > 0)
+                {
+                    <input asp-for="LandLine" class="govuk-input  govuk-input--error" id="LandLine" aria-describedby="LandLine-error" value="@(Model.LandLine)" />
+                }
+                else
+                {
+                    <input asp-for="LandLine" class=" govuk-input" id="LandLine" value="@(Model.LandLine)" />
+                }
+            </form-group>
+
+            <form-group for="Mobile" label-level="h2">
+                @if (Html.ViewData.ModelState["Mobile"]?.Errors.Count > 0)
+                {
+                    <input asp-for="Mobile" class="govuk-input  govuk-input--error" id="Mobile" aria-describedby="Mobile-error" value="@(Model.Mobile)" />
+                }
+                else
+                {
+                    <input asp-for="Mobile" class=" govuk-input" id="Mobile" value="@(Model.Mobile)" />
+                }
+            </form-group>
+
+            <div class="govuk-form-group @(Html.ViewData.ModelState["SexRegisteredAtBirth"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset" id="SexRegisteredAtBirthQuestion">
+                    <legend>
+                        <h2>
+                            @Html.DisplayNameFor(model => Model.SexRegisteredAtBirth)
+                        </h2>
+                    </legend>
+                    @if (Html.ViewData.ModelState["SexRegisteredAtBirth"]?.Errors.Count > 0)
+                    {
+                        <span id="SexRegisteredAtBirth-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @Html.ValidationMessageFor(model => model.SexRegisteredAtBirth)
+                        </span>
+                    }
+                    <div class="govuk-radios" data-module="govuk-radios">
+                        @for (int i = 0; i < Model.SexRegisteredAtBirthValues.Count; i++)
+                        {
+                            <div class="govuk-radios__item" id="SexRegisteredAtBirth">
+                                @Html.RadioButtonFor(m => m.SexRegisteredAtBirth, Model.SexRegisteredAtBirthValues[i]["value"], new { @class = "govuk-radios__input", id = "SexRegisteredAtBirth" + (i == 0 ? "" : i) })
+                                @Html.Label("SexRegisteredAtBirth" + (i == 0 ? "" : i), Model.SexRegisteredAtBirthValues[i]["label"], new { @class = "govuk-label govuk-radios__label" })
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="govuk-form-group @(Html.ViewData.ModelState["GenderIdentitySameAsBirth"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+
+                <fieldset class="govuk-fieldset" id="GenderIdentitySameAsBirthQuestion">
+                    <legend>
+                        <h2>
+                            @Html.DisplayNameFor(model => Model.GenderIdentitySameAsBirth)
+                        </h2>
+                    </legend>
+                    @if (Html.ViewData.ModelState["GenderIdentitySameAsBirth"]?.Errors.Count > 0)
+                    {
+                        <span id="GenderIdentitySameAsBirth-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @Html.ValidationMessageFor(model => model.GenderIdentitySameAsBirth)
+                        </span>
+                    }
+                    <div class="govuk-radios" data-module="govuk-radios">
+                        <div class="govuk-radios__item">
+                            @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "Yes", new { @class = "govuk-radios__input", id = "GenderIdentitySameAsBirthYes" })
+                            @Html.Label("GenderIdentitySameAsBirthYes", "Yes", new { @class = "govuk-label govuk-radios__label" })
+                        </div>
+                        <div class="govuk-radios__item">
+                            @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "No", new { @class = "govuk-radios__input", id = "GenderIdentitySameAsBirthNo" })
+                            @Html.Label("GenderIdentitySameAsBirthNo", "No", new { @class = "govuk-label govuk-radios__label" })
+                        </div>
+                        <p class="govuk-body text-secondary radio-options-divider">or</p>
+                        <div class="govuk-radios__item">
+                            @Html.RadioButtonFor(m => m.GenderIdentitySameAsBirth, "Prefer", new { @class = "govuk-radios__input", id = "GenderIdentitySameAsBirthpreferNotToSay" })
+                            @Html.Label("GenderIdentitySameAsBirthpreferNotToSay", "Prefer not to say", new { @class = "govuk-label govuk-radios__label" })
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="govuk-form-group @(Html.ViewData.ModelState["EthnicGroup"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset" id="EthnicGroupQuestion">
+                    <legend>
+                        <h2>
+                            @Html.DisplayNameFor(model => Model.EthnicGroup)
+                        </h2>
+                    </legend>
+                    @if (Html.ViewData.ModelState["EthnicGroup"]?.Errors.Count > 0)
+                    {
+                        <span id="EthnicGroup-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @Html.ValidationMessageFor(model => model.EthnicGroup)
+                        </span>
+                    }
+                    <div class="govuk-radios" data-module="govuk-radios">
+                        @for (int i = 0; i < Model.EthnicGroupValues.Count; i++)
+                        {
+                            <div class="govuk-radios__item">
+                                @Html.RadioButtonFor(m => m.EthnicGroup, Model.EthnicGroupValues[i]["value"], new { @class = "govuk-radios__input", id = "EthnicGroup" + (i == 0 ? "" : i) })
+                                @Html.Label("EthnicGroup" + (i == 0 ? "" : i), Model.EthnicGroupValues[i]["label"], new { @class = "govuk-label govuk-radios__label" })
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="govuk-form-group">
+                <button type="submit" name="action" value="DisplayEthnicBackgrounds" id="@(Model.EthnicBackground == null ? "EthnicBackground":"")" class="govuk-button" data_module="govuk-button">Display ethnic backgrounds</button>
+            </div>
+
+            @if (Model.EthnicGroup != null)
+            {
+
+                <form-group for="EthnicBackground" label-level="h2">
+                    @Html.DropDownListFor(
+                             model => model.EthnicBackground,
+                             new SelectList(Model.EthnicBackgroundOptions(), "label", "value"),
+                             new
+                                  {
+                                      @class = "govuk-select govuk-select-custom",
+                                      @autofocus = Model.lastAction == "DisplayEthnicBackgrounds"
+                             })
+                </form-group>
+
+                <form-group for="EthnicBackgroundOther" label-level="h2">
+                    @if (Html.ViewData.ModelState["EthnicBackgroundOther"]?.Errors.Count > 0)
+                    {
+                        <input asp-for="EthnicBackgroundOther" class="govuk-input  govuk-input--error" id="EthnicBackgroundOther" aria-describedby="EthnicBackgroundOther-error" value="@(Model.EthnicBackgroundOther)" />
+                    }
+                    else
+                    {
+                        <input asp-for="EthnicBackgroundOther" class=" govuk-input" id="EthnicBackgroundOther" value="@(Model.EthnicBackgroundOther)" />
+                    }
+                </form-group>              
+            }
+
+
+            <div class="govuk-form-group @(Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset" id="LongTermConditionOrIllnessQuestion">
+                    <legend>
+                        <h2>
+                            @Html.DisplayNameFor(model => Model.LongTermConditionOrIllness)
+                        </h2>
+                    </legend>
+                    @if (Html.ViewData.ModelState["LongTermConditionOrIllness"]?.Errors.Count > 0)
+                    {
+                        <span id="LongTermConditionOrIllness-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @Html.ValidationMessageFor(model => model.LongTermConditionOrIllness)
+                        </span>
+                    }
+                    <div class="govuk-radios" data-module="govuk-radios">
+                        <div class="govuk-radios__item">
+                            @Html.RadioButtonFor(m => m.LongTermConditionOrIllness, "5", new { @class = "govuk-radios__input", id = "LongTermConditionOrIllnessYesALot" })
+                            @Html.Label("LongTermConditionOrIllnessYesALot", "Yes, a lot", new { @class = "govuk-label govuk-radios__label" })
+                        </div>
+                        <div class="govuk-radios__item">
+                            @Html.RadioButtonFor(m => m.LongTermConditionOrIllness, "4", new { @class = "govuk-radios__input", id = "LongTermConditionOrIllnessYesALittle" })
+                            @Html.Label("LongTermConditionOrIllnessYesALittle", "Yes, a little", new { @class = "govuk-label govuk-radios__label" })
+                        </div>
+                        <div class="govuk-radios__item">
+                            @Html.RadioButtonFor(m => m.LongTermConditionOrIllness, "3", new { @class = "govuk-radios__input", id = "LongTermConditionOrIllnessYesNotAtAll" })
+                            @Html.Label("LongTermConditionOrIllnessYesNotAtAll", "Yes, not at all", new { @class = "govuk-label govuk-radios__label" })
+                        </div>
+                        <div class="govuk-radios__item">
+                            @Html.RadioButtonFor(m => m.LongTermConditionOrIllness, "2", new { @class = "govuk-radios__input", id = "LongTermConditionOrIllnessNo" })
+                            @Html.Label("LongTermConditionOrIllnessNo", "No", new { @class = "govuk-label govuk-radios__label" })
+                        </div>
+                        <p class="govuk-body text-secondary radio-options-divider">or</p>
+                        <div class="govuk-radios__item">
+                            @Html.RadioButtonFor(m => m.LongTermConditionOrIllness, "1", new { @class = "govuk-radios__input", id = "LongTermConditionOrIllnesspreferNotToSay" })
+                            @Html.Label("LongTermConditionOrIllnesspreferNotToSay", "Prefer not to say", new { @class = "govuk-label govuk-radios__label" })
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            <areas-of-research-select-list for="AreasOfResearch" label-level="h2" form-group-mode="true"/>
+
+            <div class="govuk-button-group govuk-!-margin-bottom-0">
+                <button type="submit" name="action" value="Save" class="govuk-button" data_module="govuk-button">Save</button>
+                <a asp-action="Index" asp-controller="Study" class="govuk-link">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>

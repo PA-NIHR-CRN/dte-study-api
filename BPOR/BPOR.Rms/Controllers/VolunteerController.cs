@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Volunteer;
 using LuhnNet;
@@ -6,11 +7,254 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NIHR.GovUk.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
+using NIHR.Infrastructure;
+using NIHR.Infrastructure.Models;
+using Rbec.Postcodes;
+using System.Text.Json;
 
 namespace BPOR.Rms.Controllers;
 
-public class VolunteerController(ParticipantDbContext context) : Controller
+public class VolunteerController(ParticipantDbContext context,
+    ILogger<VolunteerController> logger,
+   IPostcodeMapper locationApiClient) : Controller
 {
+
+    public IActionResult Consent()
+    {
+        return View(new VolunteerContactConsentViewModel());
+    }
+
+    [HttpPost]
+    public IActionResult Consent(VolunteerContactConsentViewModel model)
+    {
+        if (!model.AgreedToContactConsent)
+        {
+            ModelState.AddModelError("AgreedToContactConsent", "Confirm that the Privacy and Data Sharing Policy has been read and understood before giving consent");
+        }
+
+        if (ModelState.IsValid)
+        {
+            return RedirectToAction("Create");
+        }
+
+        return View(model);
+    }
+
+    public IActionResult Create()
+    {
+        return View(new VolunteerFormViewModel());
+    }
+
+    private void ClearAllErrorsExcept(string errorToNotClear)
+    {
+        foreach (var key in ModelState.Keys)
+        {
+            if (key != errorToNotClear)
+                ModelState.Remove(key);
+            
+        }
+    }
+
+    // POST: Study/Create
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    // [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(VolunteerFormViewModel model, string action, CancellationToken cancellationToken)
+    {
+
+        if (action == "AddressLookup")
+        {
+
+            ClearAllErrorsExcept("PostCode");
+
+            if (model.ManualAddressEntry)
+            {
+                model.ManualAddressEntry = false;
+            }
+            model.SelectedAddress = null;
+        }
+
+        if (action == "ManualAddress")
+        {
+            ModelState.Clear();
+
+            model.SelectedAddress = null;
+            model.PostCode = null;
+            model.ManualAddressEntry = true;
+        }
+
+        if (action == "DisplayEthnicBackgrounds")
+        {
+            ModelState.Clear();
+            if (model.EthnicGroup == null)
+            {
+                ModelState.AddModelError("EthnicGroup", "Select an ethnic group");
+            }
+        }
+
+        if (action == "Save")
+        {
+            if (model.DateOfBirth.HasValue && model.PostCode.HasValue && !String.IsNullOrEmpty(model.LastName))
+            {
+                await DoesPostcodeSurnameDoBComboExistAsync(model.PostCode.ToString(), model.LastName, model.DateOfBirth, cancellationToken);
+            }
+
+            if (!String.IsNullOrEmpty(model.EmailAddress))
+            {
+                await DoesUserEmailExistInDatabaseAsync(model.EmailAddress);
+            }
+
+            if (ModelState.IsValid) { 
+
+                if (!model.ManualAddressEntry)
+                {
+
+                    if (model.SelectedAddress != null)
+                    {
+                        var participantAddress =  JsonSerializer.Deserialize<PostcodeAddressModel>(model.SelectedAddress);
+                        var TempPostcode = new Postcode();
+                        model.Town = participantAddress.Town;
+                        model.AddressLine1 = participantAddress.AddressLine1;
+                        model.AddressLine2 = participantAddress.AddressLine2;
+                        model.AddressLine3 = participantAddress.AddressLine3;
+                        model.AddressLine4 = participantAddress.AddressLine4;
+                        if (Postcode.TryParse(participantAddress.Postcode, out TempPostcode))
+                        {
+                            model.PostCode = TempPostcode;
+                        };
+                    }
+                }
+
+                bool? hasLongTermIllness = null;
+                int? dailyLifeImpact= null;
+                switch (model.LongTermConditionOrIllness)
+                {
+                    case 1:
+                        hasLongTermIllness = null;
+                        dailyLifeImpact = null;
+                        break;
+                    case 2:
+                        hasLongTermIllness = false;
+                        dailyLifeImpact = null;
+                        break;
+                    case 3:
+                        hasLongTermIllness = true;
+                        dailyLifeImpact = 3;
+                        break;
+                    case 4:
+                        hasLongTermIllness = true;
+                        dailyLifeImpact = 2;
+                        break;
+                    case 5:
+                        hasLongTermIllness = true;
+                        dailyLifeImpact = 1;
+                        break;
+                }
+
+                var participant = new Participant
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    RegistrationConsent = true,
+                    RegistrationConsentAtUtc = DateTime.Now,
+                    Stage2CompleteUtc = DateTime.Now,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    Email = model.EmailAddress == null ? "" : model.EmailAddress,
+                    EthnicGroup = model.EthnicGroup,
+                    EthnicBackground = model.EthnicBackground,
+                    DateOfBirth = model.DateOfBirth.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
+                    HasLongTermCondition = hasLongTermIllness,
+                    DailyLifeImpactId = dailyLifeImpact,
+                    GenderId = model.SexRegisteredAtBirth,
+                    GenderIsSameAsSexRegisteredAtBirth = model.GenderIdentitySameAsBirth == "Prefer" ? null : model.GenderIdentitySameAsBirth == "Yes",
+                    MobileNumber = model.Mobile,
+                    LandlineNumber = model.LandLine,
+                    CommunicationLanguageId = 1,
+                    Address = new ParticipantAddress
+                    {
+                        AddressLine1 = model.AddressLine1,
+                        AddressLine2 = model.AddressLine2,
+                        AddressLine3 = model.AddressLine3,
+                        AddressLine4 = model.AddressLine4,
+                        Town = model.Town,
+                        Postcode = model.PostCode.ToString()
+                    },
+                    ContactMethodId = new List<ParticipantContactMethod>()
+                    {
+                        new ParticipantContactMethod
+                        {
+                            ContactMethodId = (int) model.PreferredContactMethod
+                        }
+                    },
+                    //may need to save participant and update GUID
+                    ParticipantIdentifiers = new List<ParticipantIdentifier> {
+                        new ParticipantIdentifier() {
+                            IdentifierTypeId = (int)IdentifierTypes.Offline,
+                            Value = Guid.NewGuid()
+                        }
+                    },
+                    IsDeleted = false,
+                    HealthConditions = model.AreasOfResearch == null ? null : model.AreasOfResearch.Select(x => new ParticipantHealthCondition
+                    {
+                        HealthConditionId = x
+                    }).ToList()
+                };
+
+                context.Add(participant);
+                await context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(VolunteerController.AccountSuccess));
+            }
+        }
+
+
+        if (model.SelectedAddress != null)
+        {
+            TempData.Add("selectedAddress",JsonSerializer.Deserialize<PostcodeAddressModel>(model.SelectedAddress).FullAddress);
+        }
+        model.lastAction = action;
+        return View(model);
+    }
+
+
+    private async Task DoesPostcodeSurnameDoBComboExistAsync(string postCode, string lastName, GovUkDate dateOfBirth, CancellationToken cancellationToken)
+    {
+        DateTime? DoB = dateOfBirth.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
+
+        var user = await context.Participants
+            .Where(p => p.LastName == lastName &&
+                        p.DateOfBirth.HasValue &&
+                        p.DateOfBirth.Value.Date == DoB.Value.Date &&
+                        p.Address != null &&
+                        p.Address.Postcode == postCode)
+            .AnyAsync(cancellationToken);
+
+        if (user)
+        {
+            ModelState.AddModelError("LastName", "Combination of surname, date of birth and postcode already exists and cannot be used");
+        }
+    }
+
+    private async Task DoesUserEmailExistInDatabaseAsync(string email)
+    {
+        var user = await context.Participants
+            .Where(p => p.Email == email)
+            .FirstOrDefaultAsync();
+
+        if (user != null)
+        {
+            ModelState.AddModelError("EmailAddress", "Email address already exists and cannot be used");
+        }
+    }
+
+
+    public IActionResult AccountSuccess()
+    { 
+        return View();
+    }
+
     private async Task<UpdateAnonymousRecruitedViewModel?> GetStudyDetails(int studyId)
     {
         return await context.Studies
@@ -185,4 +429,20 @@ public class VolunteerController(ParticipantDbContext context) : Controller
 
         return RedirectToAction("UpdateAnonymousRecruited", model);
     }
+
+    public async Task<List<PostcodeAddressModel>?> GetAddresses(string postcode)
+    {
+        IEnumerable<PostcodeAddressModel> addressModels;
+        addressModels = await locationApiClient.GetAddressesByPostcodeAsync(postcode, new CancellationToken());
+
+        if (addressModels.Count() == 0)
+        {
+            return addressModels.ToList();
+        }
+        else
+        {
+            return new List<PostcodeAddressModel>();
+        }
+    }
+
 }
