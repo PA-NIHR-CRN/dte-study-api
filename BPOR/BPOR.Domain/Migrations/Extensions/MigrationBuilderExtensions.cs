@@ -64,21 +64,28 @@ namespace NIHR.CRN.CPMS.Database.Extensions
             return migrationBuilder.Sql(sql);
         }
 
-        private static string GetSqlFromFile(string scriptIdentifier, MigrationDirection direction, string stepIdentifier = null)
+        private static string GetSqlFromFile(string scriptIdentifier, MigrationDirection direction, string? stepIdentifier = null)
         {
             var fileName = !string.IsNullOrEmpty(stepIdentifier)
                 ? $"{scriptIdentifier}.{stepIdentifier}.{direction}.sql"
                 : $"{scriptIdentifier}.{direction}.sql";
 
+            var relativePath = Path.Combine("Migrations", "Scripts", scriptIdentifier, fileName);
+
             var baseDir = AppContext.BaseDirectory;
-            var fullPath = Path.Combine(baseDir, "Migrations", "Scripts", scriptIdentifier, fileName);
+            var fullPath = Path.Combine(baseDir, relativePath);
+            if (File.Exists(fullPath))
+                return File.ReadAllText(fullPath);
 
-            if (!File.Exists(fullPath))
-            {
-                throw new FileNotFoundException($"Could not find migration script at {fullPath}");
-            }
+            var debugPath = Path.Combine(baseDir.Replace("Release", "Debug"), relativePath);
+            if (File.Exists(debugPath))
+                return File.ReadAllText(debugPath);
 
-            return File.ReadAllText(fullPath);
+            var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), relativePath);
+            if (File.Exists(sourcePath))
+                return File.ReadAllText(sourcePath);
+
+            throw new FileNotFoundException($"Could not find migration script. Paths tried:\n- {fullPath}\n- {debugPath}\n- {sourcePath}");
         }
 
     }
