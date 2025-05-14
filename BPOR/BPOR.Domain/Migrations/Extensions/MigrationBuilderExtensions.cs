@@ -66,15 +66,15 @@ namespace NIHR.CRN.CPMS.Database.Extensions
 
         private static string GetSqlFromFile(string scriptIdentifier, MigrationDirection direction, string stepIdentifier = null)
         {
-            if (!string.IsNullOrEmpty(stepIdentifier))
-            {
-                return File.ReadAllText($@"Migrations/Scripts/{scriptIdentifier}/{scriptIdentifier}.{stepIdentifier}.{direction}.sql");
-            }
-            else
-            {
-                return File.ReadAllText($@"Migrations/Scripts/{scriptIdentifier}/{scriptIdentifier}.{direction}.sql");
-            }
+            string basePath = Path.Combine(AppContext.BaseDirectory, "Scripts", scriptIdentifier);
+            string fileName = !string.IsNullOrEmpty(stepIdentifier) 
+                ? $"{scriptIdentifier}.{stepIdentifier}.{direction}.sql" 
+                : $"{scriptIdentifier}.{direction}.sql";
+            string fullPath = Path.Combine(basePath, fileName);
+
+            return File.ReadAllText(fullPath);
         }
+
 
     }
 }
