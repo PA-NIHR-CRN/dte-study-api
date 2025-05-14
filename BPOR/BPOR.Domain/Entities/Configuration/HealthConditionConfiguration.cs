@@ -18,6 +18,10 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
         {
             throw new ArgumentException($"Health conditions csv contains non-unique conditions.");
         }
+        if (healthConditions.Where(healthCondition => String.IsNullOrEmpty(healthCondition.Condition)).Any())
+        {
+            throw new ArgumentException($"Health conditions csv contains empty conditions.");
+        }
 
         // get a list of all Id of conditions that have superseded another
         // and ensure they all point to a condtion that is not superseded.
