@@ -68,11 +68,11 @@ namespace NIHR.CRN.CPMS.Database.Extensions
         {
             if (!string.IsNullOrEmpty(stepIdentifier))
             {
-                return File.ReadAllText($@"Scripts/{scriptIdentifier}/{scriptIdentifier}.{stepIdentifier}.{direction}.sql");
+                return File.ReadAllText($@"Migrations/Scripts/{scriptIdentifier}/{scriptIdentifier}.{stepIdentifier}.{direction}.sql");
             }
             else
             {
-                return File.ReadAllText($@"Scripts/{scriptIdentifier}/{scriptIdentifier}.{direction}.sql");
+                return File.ReadAllText($@"Migrations/Scripts/{scriptIdentifier}/{scriptIdentifier}.{direction}.sql");
             }
         }
 
