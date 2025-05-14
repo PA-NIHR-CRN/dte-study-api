@@ -882,7 +882,7 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int?>("SupercededById")
+                    b.Property<int?>("SupersededById")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -924,7 +924,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Vestibular schwannoma",
                             Description = "Vestibular schwannoma",
                             IsDeleted = false,
-                            SupercededById = 4
+                            SupersededById = 4
                         },
                         new
                         {
@@ -939,7 +939,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Gigantism",
                             Description = "Gigantism",
                             IsDeleted = false,
-                            SupercededById = 6
+                            SupersededById = 6
                         },
                         new
                         {
@@ -961,7 +961,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Solar keratoses",
                             Description = "Solar keratoses",
                             IsDeleted = false,
-                            SupercededById = 9
+                            SupersededById = 9
                         },
                         new
                         {
@@ -983,7 +983,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Gallbladder pain",
                             Description = "Gallbladder pain",
                             IsDeleted = false,
-                            SupercededById = 12
+                            SupersededById = 12
                         },
                         new
                         {
@@ -991,7 +991,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Cholecystitis (acute)",
                             Description = "Cholecystitis (acute)",
                             IsDeleted = false,
-                            SupercededById = 12
+                            SupersededById = 12
                         },
                         new
                         {
@@ -999,7 +999,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "MND",
                             Description = "MND",
                             IsDeleted = false,
-                            SupercededById = 886
+                            SupersededById = 886
                         },
                         new
                         {
@@ -1035,7 +1035,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Decompression sickness",
                             Description = "Decompression sickness",
                             IsDeleted = false,
-                            SupercededById = 19
+                            SupersededById = 19
                         },
                         new
                         {
@@ -1050,7 +1050,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Alexander technique",
                             Description = "Alexander technique",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 556
                         },
                         new
                         {
@@ -1086,7 +1086,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Steroid misuse",
                             Description = "Steroid misuse",
                             IsDeleted = false,
-                            SupercededById = 26
+                            SupersededById = 26
                         },
                         new
                         {
@@ -1115,7 +1115,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Proctalgia",
                             Description = "Proctalgia",
                             IsDeleted = false,
-                            SupercededById = 30
+                            SupersededById = 30
                         },
                         new
                         {
@@ -1137,7 +1137,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Bite (animal or human)",
                             Description = "Bite (animal or human)",
                             IsDeleted = false,
-                            SupercededById = 33
+                            SupersededById = 33
                         },
                         new
                         {
@@ -1145,7 +1145,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Anosmia",
                             Description = "Anosmia",
                             IsDeleted = false,
-                            SupercededById = 1125
+                            SupersededById = 1125
                         },
                         new
                         {
@@ -1153,7 +1153,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Antacids",
                             Description = "Antacids",
                             IsDeleted = false,
-                            SupercededById = 769
+                            SupersededById = 770
                         },
                         new
                         {
@@ -1161,7 +1161,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Antihistamines",
                             Description = "Antihistamines",
                             IsDeleted = false,
-                            SupercededById = 520
+                            SupersededById = 520
                         },
                         new
                         {
@@ -1190,7 +1190,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Heart rhythm problems",
                             Description = "Heart rhythm problems",
                             IsDeleted = false,
-                            SupercededById = 40
+                            SupersededById = 40
                         },
                         new
                         {
@@ -1219,7 +1219,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Aspirin",
                             Description = "Aspirin",
                             IsDeleted = false,
-                            SupercededById = 1256
+                            SupersededById = 1256
                         },
                         new
                         {
@@ -1255,7 +1255,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Barium enema",
                             Description = "Barium enema",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -1263,7 +1263,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Bedbugs",
                             Description = "Bedbugs",
                             IsDeleted = false,
-                            SupercededById = 807
+                            SupersededById = 807
                         },
                         new
                         {
@@ -1271,7 +1271,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Beta blockers",
                             Description = "Beta blockers",
                             IsDeleted = false,
-                            SupercededById = 83
+                            SupersededById = 83
                         },
                         new
                         {
@@ -1279,7 +1279,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Black eye",
                             Description = "Black eye",
                             IsDeleted = false,
-                            SupercededById = 176
+                            SupersededById = 176
                         },
                         new
                         {
@@ -1315,7 +1315,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Blood pressure test",
                             Description = "Blood pressure test",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -1379,7 +1379,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Breast reduction on the NHS",
                             Description = "Breast reduction on the NHS",
                             IsDeleted = false,
-                            SupercededById = 1186
+                            SupersededById = 1186
                         },
                         new
                         {
@@ -1394,7 +1394,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Broken ankle",
                             Description = "Broken ankle",
                             IsDeleted = false,
-                            SupercededById = 1242
+                            SupersededById = 1242
                         },
                         new
                         {
@@ -1402,7 +1402,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Broken arm or wrist",
                             Description = "Broken arm or wrist",
                             IsDeleted = false,
-                            SupercededById = 1242
+                            SupersededById = 1242
                         },
                         new
                         {
@@ -1410,7 +1410,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Broken collarbone",
                             Description = "Broken collarbone",
                             IsDeleted = false,
-                            SupercededById = 1242
+                            SupersededById = 1242
                         },
                         new
                         {
@@ -1418,7 +1418,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Broken finger or thumb",
                             Description = "Broken finger or thumb",
                             IsDeleted = false,
-                            SupercededById = 1242
+                            SupersededById = 1242
                         },
                         new
                         {
@@ -1426,7 +1426,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Broken leg",
                             Description = "Broken leg",
                             IsDeleted = false,
-                            SupercededById = 1242
+                            SupersededById = 1242
                         },
                         new
                         {
@@ -1434,7 +1434,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Broken nose",
                             Description = "Broken nose",
                             IsDeleted = false,
-                            SupercededById = 1242
+                            SupersededById = 1242
                         },
                         new
                         {
@@ -1442,7 +1442,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Broken or bruised ribs",
                             Description = "Broken or bruised ribs",
                             IsDeleted = false,
-                            SupercededById = 1242
+                            SupersededById = 1242
                         },
                         new
                         {
@@ -1450,7 +1450,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Broken toe",
                             Description = "Broken toe",
                             IsDeleted = false,
-                            SupercededById = 1242
+                            SupersededById = 1242
                         },
                         new
                         {
@@ -1514,7 +1514,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Cataracts (age-related)",
                             Description = "Cataracts (age-related)",
                             IsDeleted = false,
-                            SupercededById = 84
+                            SupersededById = 84
                         },
                         new
                         {
@@ -1543,7 +1543,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Carcinoembryonic antigen (CEA) test",
                             Description = "Carcinoembryonic antigen (CEA) test",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -1551,7 +1551,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Cervical rib",
                             Description = "Cervical rib",
                             IsDeleted = false,
-                            SupercededById = 91
+                            SupersededById = 91
                         },
                         new
                         {
@@ -1587,7 +1587,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Heart pain",
                             Description = "Heart pain",
                             IsDeleted = false,
-                            SupercededById = 94
+                            SupersededById = 94
                         },
                         new
                         {
@@ -1609,7 +1609,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Chiropractic",
                             Description = "Chiropractic",
                             IsDeleted = false,
-                            SupercededById = 556
+                            SupersededById = 556
                         },
                         new
                         {
@@ -1666,7 +1666,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Coma",
                             Description = "Coma",
                             IsDeleted = false,
-                            SupercededById = 693
+                            SupersededById = 693
                         },
                         new
                         {
@@ -1695,7 +1695,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Confusion (sudden)",
                             Description = "Confusion (sudden)",
                             IsDeleted = false,
-                            SupercededById = 109
+                            SupersededById = 109
                         },
                         new
                         {
@@ -1703,7 +1703,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Delirium",
                             Description = "Delirium",
                             IsDeleted = false,
-                            SupercededById = 109
+                            SupersededById = 109
                         },
                         new
                         {
@@ -1739,7 +1739,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "CT scan",
                             Description = "CT scan",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -1747,7 +1747,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Cuts and grazes",
                             Description = "Cuts and grazes",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 719
                         },
                         new
                         {
@@ -1755,7 +1755,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Blue skin or lips (cyanosis)",
                             Description = "Blue skin or lips (cyanosis)",
                             IsDeleted = false,
-                            SupercededById = 119
+                            SupersededById = 119
                         },
                         new
                         {
@@ -1798,7 +1798,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Decongestants",
                             Description = "Decongestants",
                             IsDeleted = false,
-                            SupercededById = 646
+                            SupersededById = 646
                         },
                         new
                         {
@@ -1834,7 +1834,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Congenital hip dislocation",
                             Description = "Congenital hip dislocation",
                             IsDeleted = false,
-                            SupercededById = 128
+                            SupersededById = 128
                         },
                         new
                         {
@@ -1842,7 +1842,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hip dysplasia",
                             Description = "Hip dysplasia",
                             IsDeleted = false,
-                            SupercededById = 128
+                            SupersededById = 128
                         },
                         new
                         {
@@ -1899,7 +1899,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "intersex",
                             Description = "intersex",
                             IsDeleted = false,
-                            SupercededById = 137
+                            SupersededById = 137
                         },
                         new
                         {
@@ -1963,7 +1963,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Puberty (early or delayed)",
                             Description = "Puberty (early or delayed)",
                             IsDeleted = false,
-                            SupercededById = 146
+                            SupersededById = 146
                         },
                         new
                         {
@@ -1992,7 +1992,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Echocardiogram",
                             Description = "Echocardiogram",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -2028,7 +2028,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Premature ejaculation",
                             Description = "Premature ejaculation",
                             IsDeleted = false,
-                            SupercededById = 155
+                            SupersededById = 155
                         },
                         new
                         {
@@ -2057,7 +2057,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Electrolyte test",
                             Description = "Electrolyte test",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -2072,7 +2072,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Emollients",
                             Description = "Emollients",
                             IsDeleted = false,
-                            SupercededById = 818
+                            SupersededById = 818
                         },
                         new
                         {
@@ -2094,7 +2094,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Enhanced recovery",
                             Description = "Enhanced recovery",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1272
                         },
                         new
                         {
@@ -2137,7 +2137,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Euthanasia and assisted suicide",
                             Description = "Euthanasia and assisted suicide",
                             IsDeleted = false,
-                            SupercededById = 1153
+                            SupersededById = 1153
                         },
                         new
                         {
@@ -2159,7 +2159,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hypersomnia",
                             Description = "Hypersomnia",
                             IsDeleted = false,
-                            SupercededById = 173
+                            SupersededById = 173
                         },
                         new
                         {
@@ -2188,7 +2188,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Eye tests for children",
                             Description = "Eye tests for children",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1273
                         },
                         new
                         {
@@ -2203,7 +2203,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Face blindness",
                             Description = "Face blindness",
                             IsDeleted = false,
-                            SupercededById = 179
+                            SupersededById = 179
                         },
                         new
                         {
@@ -2218,7 +2218,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Fits (children with fever)",
                             Description = "Fits (children with fever)",
                             IsDeleted = false,
-                            SupercededById = 181
+                            SupersededById = 181
                         },
                         new
                         {
@@ -2226,7 +2226,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Seizures (children with fever)",
                             Description = "Seizures (children with fever)",
                             IsDeleted = false,
-                            SupercededById = 181
+                            SupersededById = 181
                         },
                         new
                         {
@@ -2248,7 +2248,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Fever in children",
                             Description = "Fever in children",
                             IsDeleted = false,
-                            SupercededById = 185
+                            SupersededById = 185
                         },
                         new
                         {
@@ -2263,7 +2263,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Fluoride",
                             Description = "Fluoride",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1274
                         },
                         new
                         {
@@ -2278,7 +2278,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Food colours and hyperactivity",
                             Description = "Food colours and hyperactivity",
                             IsDeleted = false,
-                            SupercededById = 551
+                            SupersededById = 551
                         },
                         new
                         {
@@ -2328,7 +2328,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "General anaesthesia",
                             Description = "General anaesthesia",
                             IsDeleted = false,
-                            SupercededById = 28
+                            SupersededById = 28
                         },
                         new
                         {
@@ -2385,7 +2385,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Leukaemia (hairy cell)",
                             Description = "Leukaemia (hairy cell)",
                             IsDeleted = false,
-                            SupercededById = 204
+                            SupersededById = 204
                         },
                         new
                         {
@@ -2400,7 +2400,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hearing voices",
                             Description = "Hearing voices",
                             IsDeleted = false,
-                            SupercededById = 206
+                            SupersededById = 206
                         },
                         new
                         {
@@ -2415,7 +2415,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hand foot and mouth disease",
                             Description = "Hand foot and mouth disease",
                             IsDeleted = false,
-                            SupercededById = 1243
+                            SupersededById = 1243
                         },
                         new
                         {
@@ -2430,7 +2430,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Health anxiety",
                             Description = "Health anxiety",
                             IsDeleted = false,
-                            SupercededById = 212
+                            SupersededById = 212
                         },
                         new
                         {
@@ -2445,7 +2445,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hearing tests for children",
                             Description = "Hearing tests for children",
                             IsDeleted = false,
-                            SupercededById = 766
+                            SupersededById = 766
                         },
                         new
                         {
@@ -2467,7 +2467,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Palpitations",
                             Description = "Palpitations",
                             IsDeleted = false,
-                            SupercededById = 215
+                            SupersededById = 215
                         },
                         new
                         {
@@ -2475,7 +2475,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Ectopic beats",
                             Description = "Ectopic beats",
                             IsDeleted = false,
-                            SupercededById = 215
+                            SupersededById = 215
                         },
                         new
                         {
@@ -2497,7 +2497,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Prickly heat",
                             Description = "Prickly heat",
                             IsDeleted = false,
-                            SupercededById = 219
+                            SupersededById = 219
                         },
                         new
                         {
@@ -2505,7 +2505,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Sweating (excessive)",
                             Description = "Sweating (excessive)",
                             IsDeleted = false,
-                            SupercededById = 710
+                            SupersededById = 710
                         },
                         new
                         {
@@ -2513,7 +2513,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "sweat rash",
                             Description = "sweat rash",
                             IsDeleted = false,
-                            SupercededById = 219
+                            SupersededById = 219
                         },
                         new
                         {
@@ -2535,7 +2535,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Herbal medicines",
                             Description = "Herbal medicines",
                             IsDeleted = false,
-                            SupercededById = 1152
+                            SupersededById = 1152
                         },
                         new
                         {
@@ -2543,7 +2543,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Herceptin (trastuzumab)",
                             Description = "Herceptin (trastuzumab)",
                             IsDeleted = false,
-                            SupercededById = 606
+                            SupersededById = 606
                         },
                         new
                         {
@@ -2586,7 +2586,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Eye infection (herpes)",
                             Description = "Eye infection (herpes)",
                             IsDeleted = false,
-                            SupercededById = 231
+                            SupersededById = 231
                         },
                         new
                         {
@@ -2601,7 +2601,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Whitlow finger",
                             Description = "Whitlow finger",
                             IsDeleted = false,
-                            SupercededById = 233
+                            SupersededById = 233
                         },
                         new
                         {
@@ -2651,7 +2651,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Homeopathy",
                             Description = "Homeopathy",
                             IsDeleted = false,
-                            SupercededById = 1152
+                            SupersededById = 1152
                         },
                         new
                         {
@@ -2659,7 +2659,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Home oxygen therapy",
                             Description = "Home oxygen therapy",
                             IsDeleted = false,
-                            SupercededById = 412
+                            SupersededById = 412
                         },
                         new
                         {
@@ -2667,7 +2667,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Oxygen therapy",
                             Description = "Oxygen therapy",
                             IsDeleted = false,
-                            SupercededById = 412
+                            SupersededById = 412
                         },
                         new
                         {
@@ -2737,8 +2737,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 253,
                             Code = "Intensive care",
                             Description = "Intensive care",
-                            IsDeleted = false,
-                            SupercededById = 0
+                            IsDeleted = false
                         },
                         new
                         {
@@ -2767,7 +2766,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Irritable hip",
                             Description = "Irritable hip",
                             IsDeleted = false,
-                            SupercededById = 256
+                            SupersededById = 256
                         },
                         new
                         {
@@ -2922,7 +2921,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hypoglycaemia (low blood sugar)",
                             Description = "Hypoglycaemia (low blood sugar)",
                             IsDeleted = false,
-                            SupercededById = 278
+                            SupersededById = 278
                         },
                         new
                         {
@@ -2937,7 +2936,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Sperm count (low)",
                             Description = "Sperm count (low)",
                             IsDeleted = false,
-                            SupercededById = 280
+                            SupersededById = 280
                         },
                         new
                         {
@@ -2980,7 +2979,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Male menopause",
                             Description = "Male menopause",
                             IsDeleted = false,
-                            SupercededById = 286
+                            SupersededById = 286
                         },
                         new
                         {
@@ -3016,7 +3015,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Medically unexplained symptoms",
                             Description = "Medically unexplained symptoms",
                             IsDeleted = false,
-                            SupercededById = 293
+                            SupersededById = 293
                         },
                         new
                         {
@@ -3066,7 +3065,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Heart valve problems",
                             Description = "Heart valve problems",
                             IsDeleted = false,
-                            SupercededById = 298
+                            SupersededById = 298
                         },
                         new
                         {
@@ -3158,7 +3157,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Nose cancer",
                             Description = "Nose cancer",
                             IsDeleted = false,
-                            SupercededById = 311
+                            SupersededById = 311
                         },
                         new
                         {
@@ -3166,7 +3165,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Sinus cancer",
                             Description = "Sinus cancer",
                             IsDeleted = false,
-                            SupercededById = 311
+                            SupersededById = 311
                         },
                         new
                         {
@@ -3202,7 +3201,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Herpes in babies",
                             Description = "Herpes in babies",
                             IsDeleted = false,
-                            SupercededById = 317
+                            SupersededById = 317
                         },
                         new
                         {
@@ -3245,7 +3244,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Sweating at night",
                             Description = "Sweating at night",
                             IsDeleted = false,
-                            SupercededById = 323
+                            SupersededById = 323
                         },
                         new
                         {
@@ -3281,7 +3280,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Vomiting bug",
                             Description = "Vomiting bug",
                             IsDeleted = false,
-                            SupercededById = 328
+                            SupersededById = 328
                         },
                         new
                         {
@@ -3289,7 +3288,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Winter vomiting bug",
                             Description = "Winter vomiting bug",
                             IsDeleted = false,
-                            SupercededById = 328
+                            SupersededById = 328
                         },
                         new
                         {
@@ -3297,7 +3296,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "NSAIDs",
                             Description = "NSAIDs",
                             IsDeleted = false,
-                            SupercededById = 1256
+                            SupersededById = 1256
                         },
                         new
                         {
@@ -3305,7 +3304,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Swollen ankles feet and legs (oedema)",
                             Description = "Swollen ankles feet and legs (oedema)",
                             IsDeleted = false,
-                            SupercededById = 1262
+                            SupersededById = 1262
                         },
                         new
                         {
@@ -3362,7 +3361,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Peak flow test",
                             Description = "Peak flow test",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -3384,7 +3383,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Period pain",
                             Description = "Period pain",
                             IsDeleted = false,
-                            SupercededById = 344
+                            SupersededById = 344
                         },
                         new
                         {
@@ -3420,7 +3419,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "PET scan",
                             Description = "PET scan",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -3442,7 +3441,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Tight foreskin (phimosis and paraphimosis)",
                             Description = "Tight foreskin (phimosis and paraphimosis)",
                             IsDeleted = false,
-                            SupercededById = 352
+                            SupersededById = 352
                         },
                         new
                         {
@@ -3471,7 +3470,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Superficial thrombophlebitis",
                             Description = "Superficial thrombophlebitis",
                             IsDeleted = false,
-                            SupercededById = 354
+                            SupersededById = 354
                         },
                         new
                         {
@@ -3479,7 +3478,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Phosphate test",
                             Description = "Phosphate test",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -3501,7 +3500,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "PIP breast implants",
                             Description = "PIP breast implants",
                             IsDeleted = false,
-                            SupercededById = 1186
+                            SupersededById = 1186
                         },
                         new
                         {
@@ -3530,7 +3529,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Brachycephaly and plagiocephaly",
                             Description = "Brachycephaly and plagiocephaly",
                             IsDeleted = false,
-                            SupercededById = 362
+                            SupersededById = 362
                         },
                         new
                         {
@@ -3538,7 +3537,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Flat head syndrome",
                             Description = "Flat head syndrome",
                             IsDeleted = false,
-                            SupercededById = 362
+                            SupersededById = 362
                         },
                         new
                         {
@@ -3588,7 +3587,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Bleeding after the menopause",
                             Description = "Bleeding after the menopause",
                             IsDeleted = false,
-                            SupercededById = 370
+                            SupersededById = 370
                         },
                         new
                         {
@@ -3596,7 +3595,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Post-mortem",
                             Description = "Post-mortem",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1277
                         },
                         new
                         {
@@ -3618,7 +3617,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Potassium test",
                             Description = "Potassium test",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -3626,7 +3625,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Predictive genetic tests for cancer risk genes",
                             Description = "Predictive genetic tests for cancer risk genes",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -3634,7 +3633,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Genetic test for cancer gene",
                             Description = "Genetic test for cancer gene",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -3642,7 +3641,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Probiotics",
                             Description = "Probiotics",
                             IsDeleted = false,
-                            SupercededById = 1223
+                            SupersededById = 1223
                         },
                         new
                         {
@@ -3657,7 +3656,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Swallowing pills",
                             Description = "Swallowing pills",
                             IsDeleted = false,
-                            SupercededById = 379
+                            SupersededById = 379
                         },
                         new
                         {
@@ -3742,7 +3741,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Reflux in babies",
                             Description = "Reflux in babies",
                             IsDeleted = false,
-                            SupercededById = 393
+                            SupersededById = 393
                         },
                         new
                         {
@@ -3834,7 +3833,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Bilharzia",
                             Description = "Bilharzia",
                             IsDeleted = false,
-                            SupercededById = 404
+                            SupersededById = 404
                         },
                         new
                         {
@@ -3877,7 +3876,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Shin pain (shin splints)",
                             Description = "Shin pain (shin splints)",
                             IsDeleted = false,
-                            SupercededById = 410
+                            SupersededById = 410
                         },
                         new
                         {
@@ -3948,7 +3947,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Urine (smelly)",
                             Description = "Urine (smelly)",
                             IsDeleted = false,
-                            SupercededById = 420
+                            SupersededById = 420
                         },
                         new
                         {
@@ -3984,7 +3983,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Sore lips",
                             Description = "Sore lips",
                             IsDeleted = false,
-                            SupercededById = 425
+                            SupersededById = 425
                         },
                         new
                         {
@@ -3992,7 +3991,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Dry lips",
                             Description = "Dry lips",
                             IsDeleted = false,
-                            SupercededById = 425
+                            SupersededById = 425
                         },
                         new
                         {
@@ -4000,7 +3999,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Lips (sore or dry)",
                             Description = "Lips (sore or dry)",
                             IsDeleted = false,
-                            SupercededById = 425
+                            SupersededById = 425
                         },
                         new
                         {
@@ -4015,7 +4014,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Tongue (sore or white)",
                             Description = "Tongue (sore or white)",
                             IsDeleted = false,
-                            SupercededById = 429
+                            SupersededById = 429
                         },
                         new
                         {
@@ -4030,7 +4029,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Throat (sore)",
                             Description = "Throat (sore)",
                             IsDeleted = false,
-                            SupercededById = 431
+                            SupersededById = 431
                         },
                         new
                         {
@@ -4038,7 +4037,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Spirometry",
                             Description = "Spirometry",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -4067,7 +4066,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Steroid inhalers",
                             Description = "Steroid inhalers",
                             IsDeleted = false,
-                            SupercededById = 545
+                            SupersededById = 545
                         },
                         new
                         {
@@ -4075,7 +4074,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Steroid injections",
                             Description = "Steroid injections",
                             IsDeleted = false,
-                            SupercededById = 440
+                            SupersededById = 440
                         },
                         new
                         {
@@ -4083,7 +4082,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Steroid nasal sprays",
                             Description = "Steroid nasal sprays",
                             IsDeleted = false,
-                            SupercededById = 440
+                            SupersededById = 440
                         },
                         new
                         {
@@ -4098,7 +4097,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Corticosteroids",
                             Description = "Corticosteroids",
                             IsDeleted = false,
-                            SupercededById = 440
+                            SupersededById = 440
                         },
                         new
                         {
@@ -4106,7 +4105,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Steroid tablets",
                             Description = "Steroid tablets",
                             IsDeleted = false,
-                            SupercededById = 440
+                            SupersededById = 440
                         },
                         new
                         {
@@ -4128,7 +4127,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Tummy ache",
                             Description = "Tummy ache",
                             IsDeleted = false,
-                            SupercededById = 444
+                            SupersededById = 444
                         },
                         new
                         {
@@ -4143,7 +4142,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Periods (stopped or missed)",
                             Description = "Periods (stopped or missed)",
                             IsDeleted = false,
-                            SupercededById = 446
+                            SupersededById = 446
                         },
                         new
                         {
@@ -4151,7 +4150,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Stop smoking treatments",
                             Description = "Stop smoking treatments",
                             IsDeleted = false,
-                            SupercededById = 1230
+                            SupersededById = 1230
                         },
                         new
                         {
@@ -4159,7 +4158,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Smoking (treatments to stop)",
                             Description = "Smoking (treatments to stop)",
                             IsDeleted = false,
-                            SupercededById = 1230
+                            SupersededById = 1230
                         },
                         new
                         {
@@ -4216,7 +4215,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Jaw pain",
                             Description = "Jaw pain",
                             IsDeleted = false,
-                            SupercededById = 456
+                            SupersededById = 456
                         },
                         new
                         {
@@ -4231,7 +4230,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Headaches (tension-type)",
                             Description = "Headaches (tension-type)",
                             IsDeleted = false,
-                            SupercededById = 458
+                            SupersededById = 458
                         },
                         new
                         {
@@ -4253,7 +4252,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Thirst (excessive)",
                             Description = "Thirst (excessive)",
                             IsDeleted = false,
-                            SupercededById = 461
+                            SupersededById = 461
                         },
                         new
                         {
@@ -4275,7 +4274,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Total iron-binding capacity (TIBC) and transferrin test",
                             Description = "Total iron-binding capacity (TIBC) and transferrin test",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -4290,7 +4289,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Toothache",
                             Description = "Toothache",
                             IsDeleted = false,
-                            SupercededById = 468
+                            SupersededById = 468
                         },
                         new
                         {
@@ -4319,7 +4318,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Steroid cream",
                             Description = "Steroid cream",
                             IsDeleted = false,
-                            SupercededById = 470
+                            SupersededById = 470
                         },
                         new
                         {
@@ -4327,7 +4326,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Corticosteroid cream",
                             Description = "Corticosteroid cream",
                             IsDeleted = false,
-                            SupercededById = 470
+                            SupersededById = 470
                         },
                         new
                         {
@@ -4335,7 +4334,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Total protein test",
                             Description = "Total protein test",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -4350,7 +4349,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "TENS (transcutaneous electrical nerve stimulation)",
                             Description = "TENS (transcutaneous electrical nerve stimulation)",
                             IsDeleted = false,
-                            SupercededById = 1256
+                            SupersededById = 1256
                         },
                         new
                         {
@@ -4372,7 +4371,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Ultrasound scan",
                             Description = "Ultrasound scan",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -4387,7 +4386,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Weight loss (unintentional)",
                             Description = "Weight loss (unintentional)",
                             IsDeleted = false,
-                            SupercededById = 479
+                            SupersededById = 479
                         },
                         new
                         {
@@ -4395,7 +4394,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Weight loss (unexpected)",
                             Description = "Weight loss (unexpected)",
                             IsDeleted = false,
-                            SupercededById = 479
+                            SupersededById = 479
                         },
                         new
                         {
@@ -4466,7 +4465,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Vaginal pain",
                             Description = "Vaginal pain",
                             IsDeleted = false,
-                            SupercededById = 490
+                            SupersededById = 490
                         },
                         new
                         {
@@ -4502,7 +4501,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "X-ray",
                             Description = "X-ray",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -4524,7 +4523,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "AAA",
                             Description = "AAA",
                             IsDeleted = false,
-                            SupercededById = 498
+                            SupersededById = 498
                         },
                         new
                         {
@@ -4532,7 +4531,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Aneurysm (abdominal aortic)",
                             Description = "Aneurysm (abdominal aortic)",
                             IsDeleted = false,
-                            SupercededById = 498
+                            SupersededById = 498
                         },
                         new
                         {
@@ -4540,7 +4539,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Abdominal aortic aneurysm screening",
                             Description = "Abdominal aortic aneurysm screening",
                             IsDeleted = false,
-                            SupercededById = 498
+                            SupersededById = 498
                         },
                         new
                         {
@@ -4548,7 +4547,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "AAA screening",
                             Description = "AAA screening",
                             IsDeleted = false,
-                            SupercededById = 498
+                            SupersededById = 498
                         },
                         new
                         {
@@ -4584,7 +4583,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Leukaemia (acute lymphoblastic)",
                             Description = "Leukaemia (acute lymphoblastic)",
                             IsDeleted = false,
-                            SupercededById = 506
+                            SupersededById = 506
                         },
                         new
                         {
@@ -4599,7 +4598,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Leukaemia (acute myeloid)",
                             Description = "Leukaemia (acute myeloid)",
                             IsDeleted = false,
-                            SupercededById = 508
+                            SupersededById = 508
                         },
                         new
                         {
@@ -4614,7 +4613,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Pancreatitis (acute)",
                             Description = "Pancreatitis (acute)",
                             IsDeleted = false,
-                            SupercededById = 510
+                            SupersededById = 510
                         },
                         new
                         {
@@ -4657,7 +4656,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Liver disease (alcohol-related)",
                             Description = "Liver disease (alcohol-related)",
                             IsDeleted = false,
-                            SupercededById = 516
+                            SupersededById = 516
                         },
                         new
                         {
@@ -4672,7 +4671,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Rhinitis (allergic)",
                             Description = "Rhinitis (allergic)",
                             IsDeleted = false,
-                            SupercededById = 518
+                            SupersededById = 518
                         },
                         new
                         {
@@ -4701,7 +4700,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Amniocentesis",
                             Description = "Amniocentesis",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1270
                         },
                         new
                         {
@@ -4751,7 +4750,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Angiography",
                             Description = "Angiography",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -4773,7 +4772,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Antibiotics",
                             Description = "Antibiotics",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1271
                         },
                         new
                         {
@@ -4781,7 +4780,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Anticoagulant medicines",
                             Description = "Anticoagulant medicines",
                             IsDeleted = false,
-                            SupercededById = 54
+                            SupersededById = 54
                         },
                         new
                         {
@@ -4789,7 +4788,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Antidepressants",
                             Description = "Antidepressants",
                             IsDeleted = false,
-                            SupercededById = 637
+                            SupersededById = 637
                         },
                         new
                         {
@@ -4804,7 +4803,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hughes syndrome",
                             Description = "Hughes syndrome",
                             IsDeleted = false,
-                            SupercededById = 536
+                            SupersededById = 536
                         },
                         new
                         {
@@ -4819,7 +4818,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Heart valve replacement",
                             Description = "Heart valve replacement",
                             IsDeleted = false,
-                            SupercededById = 538
+                            SupersededById = 538
                         },
                         new
                         {
@@ -4848,7 +4847,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Arthroscopy",
                             Description = "Arthroscopy",
                             IsDeleted = false,
-                            SupercededById = 259
+                            SupersededById = 259
                         },
                         new
                         {
@@ -4891,7 +4890,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Eczema (atopic)",
                             Description = "Eczema (atopic)",
                             IsDeleted = false,
-                            SupercededById = 548
+                            SupersededById = 548
                         },
                         new
                         {
@@ -4920,7 +4919,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Polycystic kidney disease (autosomal dominant)",
                             Description = "Polycystic kidney disease (autosomal dominant)",
                             IsDeleted = false,
-                            SupercededById = 552
+                            SupersededById = 552
                         },
                         new
                         {
@@ -4935,7 +4934,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Polycystic kidney disease (autosomal recessive)",
                             Description = "Polycystic kidney disease (autosomal recessive)",
                             IsDeleted = false,
-                            SupercededById = 554
+                            SupersededById = 554
                         },
                         new
                         {
@@ -4957,7 +4956,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Bad breath",
                             Description = "Bad breath",
                             IsDeleted = false,
-                            SupercededById = 559
+                            SupersededById = 559
                         },
                         new
                         {
@@ -4972,7 +4971,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Baker's cyst",
                             Description = "Baker's cyst",
                             IsDeleted = false,
-                            SupercededById = 561
+                            SupersededById = 561
                         },
                         new
                         {
@@ -5022,7 +5021,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Brain tumour (benign)",
                             Description = "Brain tumour (benign)",
                             IsDeleted = false,
-                            SupercededById = 566
+                            SupersededById = 566
                         },
                         new
                         {
@@ -5030,7 +5029,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Bile duct cancer (cholangiocarcinoma)",
                             Description = "Bile duct cancer (cholangiocarcinoma)",
                             IsDeleted = false,
-                            SupercededById = 569
+                            SupersededById = 569
                         },
                         new
                         {
@@ -5052,7 +5051,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Biopsy",
                             Description = "Biopsy",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -5088,7 +5087,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Bleeding from the bottom (rectal bleeding)",
                             Description = "Bleeding from the bottom (rectal bleeding)",
                             IsDeleted = false,
-                            SupercededById = 577
+                            SupersededById = 577
                         },
                         new
                         {
@@ -5110,7 +5109,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Blisters",
                             Description = "Blisters",
                             IsDeleted = false,
-                            SupercededById = 719
+                            SupersededById = 719
                         },
                         new
                         {
@@ -5118,7 +5117,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Blood tests",
                             Description = "Blood tests",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -5161,7 +5160,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Colon cancer",
                             Description = "Colon cancer",
                             IsDeleted = false,
-                            SupercededById = 585
+                            SupersededById = 585
                         },
                         new
                         {
@@ -5169,7 +5168,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Rectal cancer",
                             Description = "Rectal cancer",
                             IsDeleted = false,
-                            SupercededById = 585
+                            SupersededById = 585
                         },
                         new
                         {
@@ -5205,7 +5204,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Aneurysm (brain)",
                             Description = "Aneurysm (brain)",
                             IsDeleted = false,
-                            SupercededById = 591
+                            SupersededById = 591
                         },
                         new
                         {
@@ -5311,7 +5310,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Carotid endarterectomy",
                             Description = "Carotid endarterectomy",
                             IsDeleted = false,
-                            SupercededById = 46
+                            SupersededById = 46
                         },
                         new
                         {
@@ -5333,7 +5332,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Cataract surgery",
                             Description = "Cataract surgery",
                             IsDeleted = false,
-                            SupercededById = 1248
+                            SupersededById = 1248
                         },
                         new
                         {
@@ -5376,7 +5375,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Smear test",
                             Description = "Smear test",
                             IsDeleted = false,
-                            SupercededById = 615
+                            SupersededById = 615
                         },
                         new
                         {
@@ -5419,7 +5418,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Cataracts (children)",
                             Description = "Cataracts (children)",
                             IsDeleted = false,
-                            SupercededById = 621
+                            SupersededById = 621
                         },
                         new
                         {
@@ -5441,7 +5440,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Chorionic villus sampling",
                             Description = "Chorionic villus sampling",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1270
                         },
                         new
                         {
@@ -5456,7 +5455,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Chronic fatigue syndrome (ME/CFS)",
                             Description = "Chronic fatigue syndrome (ME/CFS)",
                             IsDeleted = false,
-                            SupercededById = 626
+                            SupersededById = 626
                         },
                         new
                         {
@@ -5471,7 +5470,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Leukaemia (chronic lymphocytic)",
                             Description = "Leukaemia (chronic lymphocytic)",
                             IsDeleted = false,
-                            SupercededById = 628
+                            SupersededById = 628
                         },
                         new
                         {
@@ -5486,7 +5485,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Leukaemia (chronic myeloid)",
                             Description = "Leukaemia (chronic myeloid)",
                             IsDeleted = false,
-                            SupercededById = 630
+                            SupersededById = 630
                         },
                         new
                         {
@@ -5508,7 +5507,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Pancreatitis (chronic)",
                             Description = "Pancreatitis (chronic)",
                             IsDeleted = false,
-                            SupercededById = 633
+                            SupersededById = 633
                         },
                         new
                         {
@@ -5537,7 +5536,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Depression",
                             Description = "Depression",
                             IsDeleted = false,
-                            SupercededById = 637
+                            SupersededById = 637
                         },
                         new
                         {
@@ -5545,7 +5544,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Clinical trials",
                             Description = "Clinical trials",
                             IsDeleted = false,
-                            SupercededById = 1244
+                            SupersededById = 1244
                         },
                         new
                         {
@@ -5588,7 +5587,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Colposcopy",
                             Description = "Colposcopy",
                             IsDeleted = false,
-                            SupercededById = 615
+                            SupersededById = 615
                         },
                         new
                         {
@@ -5624,7 +5623,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Consent to treatment",
                             Description = "Consent to treatment",
                             IsDeleted = false,
-                            SupercededById = 1244
+                            SupersededById = 1244
                         },
                         new
                         {
@@ -5646,7 +5645,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Eczema (contact dermatitis)",
                             Description = "Eczema (contact dermatitis)",
                             IsDeleted = false,
-                            SupercededById = 652
+                            SupersededById = 652
                         },
                         new
                         {
@@ -5668,7 +5667,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Cardiac catheterisation and coronary angiography",
                             Description = "Cardiac catheterisation and coronary angiography",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -5683,7 +5682,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Angioplasty",
                             Description = "Angioplasty",
                             IsDeleted = false,
-                            SupercededById = 657
+                            SupersededById = 657
                         },
                         new
                         {
@@ -5691,7 +5690,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Stent insertion",
                             Description = "Stent insertion",
                             IsDeleted = false,
-                            SupercededById = 657
+                            SupersededById = 657
                         },
                         new
                         {
@@ -5713,7 +5712,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "CABG",
                             Description = "CABG",
                             IsDeleted = false,
-                            SupercededById = 660
+                            SupersededById = 660
                         },
                         new
                         {
@@ -5728,7 +5727,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Heart disease (coronary)",
                             Description = "Heart disease (coronary)",
                             IsDeleted = false,
-                            SupercededById = 663
+                            SupersededById = 663
                         },
                         new
                         {
@@ -5764,7 +5763,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "CJD",
                             Description = "CJD",
                             IsDeleted = false,
-                            SupercededById = 668
+                            SupersededById = 668
                         },
                         new
                         {
@@ -5835,7 +5834,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "DVT",
                             Description = "DVT",
                             IsDeleted = false,
-                            SupercededById = 678
+                            SupersededById = 678
                         },
                         new
                         {
@@ -5871,7 +5870,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Dyspraxia in children",
                             Description = "Dyspraxia in children",
                             IsDeleted = false,
-                            SupercededById = 683
+                            SupersededById = 683
                         },
                         new
                         {
@@ -5879,7 +5878,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Bone density scan (DEXA scan)",
                             Description = "Bone density scan (DEXA scan)",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -5887,7 +5886,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "DEXA scan",
                             Description = "DEXA scan",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -5930,7 +5929,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Eczema (discoid)",
                             Description = "Eczema (discoid)",
                             IsDeleted = false,
-                            SupercededById = 691
+                            SupersededById = 691
                         },
                         new
                         {
@@ -5945,7 +5944,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Vegetative state",
                             Description = "Vegetative state",
                             IsDeleted = false,
-                            SupercededById = 693
+                            SupersededById = 693
                         },
                         new
                         {
@@ -6030,7 +6029,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Epidural",
                             Description = "Epidural",
                             IsDeleted = false,
-                            SupercededById = 1256
+                            SupersededById = 1256
                         },
                         new
                         {
@@ -6052,7 +6051,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Impotence",
                             Description = "Impotence",
                             IsDeleted = false,
-                            SupercededById = 708
+                            SupersededById = 708
                         },
                         new
                         {
@@ -6067,7 +6066,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hyperhidrosis",
                             Description = "Hyperhidrosis",
                             IsDeleted = false,
-                            SupercededById = 710
+                            SupersededById = 710
                         },
                         new
                         {
@@ -6103,7 +6102,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hernia (femoral)",
                             Description = "Hernia (femoral)",
                             IsDeleted = false,
-                            SupercededById = 715
+                            SupersededById = 715
                         },
                         new
                         {
@@ -6124,8 +6123,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 719,
                             Code = "First aid",
                             Description = "First aid",
-                            IsDeleted = false,
-                            SupercededById = 0
+                            IsDeleted = false
                         },
                         new
                         {
@@ -6140,7 +6138,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Flatulence",
                             Description = "Flatulence",
                             IsDeleted = false,
-                            SupercededById = 720
+                            SupersededById = 720
                         },
                         new
                         {
@@ -6148,7 +6146,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Wind",
                             Description = "Wind",
                             IsDeleted = false,
-                            SupercededById = 720
+                            SupersededById = 720
                         },
                         new
                         {
@@ -6163,7 +6161,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Influenza",
                             Description = "Influenza",
                             IsDeleted = false,
-                            SupercededById = 723
+                            SupersededById = 723
                         },
                         new
                         {
@@ -6192,7 +6190,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Dementia (frontotemporal)",
                             Description = "Dementia (frontotemporal)",
                             IsDeleted = false,
-                            SupercededById = 727
+                            SupersededById = 727
                         },
                         new
                         {
@@ -6221,7 +6219,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Nail fungal infection",
                             Description = "Nail fungal infection",
                             IsDeleted = false,
-                            SupercededById = 731
+                            SupersededById = 731
                         },
                         new
                         {
@@ -6278,7 +6276,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Anxiety disorder in adults",
                             Description = "Anxiety disorder in adults",
                             IsDeleted = false,
-                            SupercededById = 739
+                            SupersededById = 739
                         },
                         new
                         {
@@ -6293,7 +6291,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Herpes (genital)",
                             Description = "Herpes (genital)",
                             IsDeleted = false,
-                            SupercededById = 741
+                            SupersededById = 741
                         },
                         new
                         {
@@ -6315,7 +6313,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Diabetes in pregnancy",
                             Description = "Diabetes in pregnancy",
                             IsDeleted = false,
-                            SupercededById = 744
+                            SupersededById = 744
                         },
                         new
                         {
@@ -6421,7 +6419,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Having an operation (surgery)",
                             Description = "Having an operation (surgery)",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1272
                         },
                         new
                         {
@@ -6429,7 +6427,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Surgery (having an operation)",
                             Description = "Surgery (having an operation)",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1272
                         },
                         new
                         {
@@ -6458,7 +6456,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Deafness",
                             Description = "Deafness",
                             IsDeleted = false,
-                            SupercededById = 764
+                            SupersededById = 764
                         },
                         new
                         {
@@ -6487,7 +6485,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Heartburn and acid reflux",
                             Description = "Heartburn and acid reflux",
                             IsDeleted = false,
-                            SupercededById = 770
+                            SupersededById = 770
                         },
                         new
                         {
@@ -6523,7 +6521,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Periods (heavy)",
                             Description = "Periods (heavy)",
                             IsDeleted = false,
-                            SupercededById = 773
+                            SupersededById = 773
                         },
                         new
                         {
@@ -6559,7 +6557,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hernia (hiatus)",
                             Description = "Hernia (hiatus)",
                             IsDeleted = false,
-                            SupercededById = 778
+                            SupersededById = 778
                         },
                         new
                         {
@@ -6588,7 +6586,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Blood pressure (high)",
                             Description = "Blood pressure (high)",
                             IsDeleted = false,
-                            SupercededById = 781
+                            SupersededById = 781
                         },
                         new
                         {
@@ -6603,7 +6601,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Cholesterol (high)",
                             Description = "Cholesterol (high)",
                             IsDeleted = false,
-                            SupercededById = 784
+                            SupersededById = 784
                         },
                         new
                         {
@@ -6632,7 +6630,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "hirsutism",
                             Description = "hirsutism",
                             IsDeleted = false,
-                            SupercededById = 788
+                            SupersededById = 788
                         },
                         new
                         {
@@ -6668,7 +6666,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "HRT",
                             Description = "HRT",
                             IsDeleted = false,
-                            SupercededById = 793
+                            SupersededById = 793
                         },
                         new
                         {
@@ -6718,7 +6716,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Pulmonary fibrosis",
                             Description = "Pulmonary fibrosis",
                             IsDeleted = false,
-                            SupercededById = 800
+                            SupersededById = 800
                         },
                         new
                         {
@@ -6754,7 +6752,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hernia (inguinal)",
                             Description = "Hernia (inguinal)",
                             IsDeleted = false,
-                            SupercededById = 805
+                            SupersededById = 805
                         },
                         new
                         {
@@ -6769,7 +6767,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Sting or bite (insect)",
                             Description = "Sting or bite (insect)",
                             IsDeleted = false,
-                            SupercededById = 807
+                            SupersededById = 807
                         },
                         new
                         {
@@ -6791,7 +6789,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Anaemia (iron deficiency)",
                             Description = "Anaemia (iron deficiency)",
                             IsDeleted = false,
-                            SupercededById = 810
+                            SupersededById = 810
                         },
                         new
                         {
@@ -6806,7 +6804,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Periods (irregular)",
                             Description = "Periods (irregular)",
                             IsDeleted = false,
-                            SupercededById = 812
+                            SupersededById = 812
                         },
                         new
                         {
@@ -6821,7 +6819,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "IBS",
                             Description = "IBS",
                             IsDeleted = false,
-                            SupercededById = 814
+                            SupersededById = 814
                         },
                         new
                         {
@@ -6836,7 +6834,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Anus (itchy)",
                             Description = "Anus (itchy)",
                             IsDeleted = false,
-                            SupercededById = 816
+                            SupersededById = 816
                         },
                         new
                         {
@@ -6879,7 +6877,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Jaundice in newborns",
                             Description = "Jaundice in newborns",
                             IsDeleted = false,
-                            SupercededById = 822
+                            SupersededById = 822
                         },
                         new
                         {
@@ -6929,7 +6927,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Kidney failure",
                             Description = "Kidney failure",
                             IsDeleted = false,
-                            SupercededById = 829
+                            SupersededById = 829
                         },
                         new
                         {
@@ -6986,7 +6984,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Vestibular neuritis",
                             Description = "Vestibular neuritis",
                             IsDeleted = false,
-                            SupercededById = 837
+                            SupersededById = 837
                         },
                         new
                         {
@@ -7022,7 +7020,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Laxatives",
                             Description = "Laxatives",
                             IsDeleted = false,
-                            SupercededById = 651
+                            SupersededById = 651
                         },
                         new
                         {
@@ -7030,7 +7028,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Lazy eye",
                             Description = "Lazy eye",
                             IsDeleted = false,
-                            SupercededById = 845
+                            SupersededById = 845
                         },
                         new
                         {
@@ -7059,7 +7057,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Leg ulcer",
                             Description = "Leg ulcer",
                             IsDeleted = false,
-                            SupercededById = 847
+                            SupersededById = 847
                         },
                         new
                         {
@@ -7074,7 +7072,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Weil's disease",
                             Description = "Weil's disease",
                             IsDeleted = false,
-                            SupercededById = 849
+                            SupersededById = 849
                         },
                         new
                         {
@@ -7131,7 +7129,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Blood pressure (low)",
                             Description = "Blood pressure (low)",
                             IsDeleted = false,
-                            SupercededById = 857
+                            SupersededById = 857
                         },
                         new
                         {
@@ -7139,7 +7137,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hypotension",
                             Description = "Hypotension",
                             IsDeleted = false,
-                            SupercededById = 857
+                            SupersededById = 857
                         },
                         new
                         {
@@ -7196,7 +7194,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Macular degeneration (age-related)",
                             Description = "Macular degeneration (age-related)",
                             IsDeleted = false,
-                            SupercededById = 866
+                            SupersededById = 866
                         },
                         new
                         {
@@ -7211,7 +7209,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Malignant brain tumour (brain cancer)",
                             Description = "Malignant brain tumour (brain cancer)",
                             IsDeleted = false,
-                            SupercededById = 870
+                            SupersededById = 870
                         },
                         new
                         {
@@ -7240,7 +7238,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Mastectomy",
                             Description = "Mastectomy",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1275
                         },
                         new
                         {
@@ -7269,7 +7267,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Medicines information",
                             Description = "Medicines information",
                             IsDeleted = false,
-                            SupercededById = 1244
+                            SupersededById = 1244
                         },
                         new
                         {
@@ -7305,7 +7303,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Head injury and concussion",
                             Description = "Head injury and concussion",
                             IsDeleted = false,
-                            SupercededById = 108
+                            SupersededById = 108
                         },
                         new
                         {
@@ -7348,7 +7346,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Tongue cancer",
                             Description = "Tongue cancer",
                             IsDeleted = false,
-                            SupercededById = 887
+                            SupersededById = 887
                         },
                         new
                         {
@@ -7356,7 +7354,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "MRI scan",
                             Description = "MRI scan",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -7371,7 +7369,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Multiple myeloma",
                             Description = "Multiple myeloma",
                             IsDeleted = false,
-                            SupercededById = 892
+                            SupersededById = 892
                         },
                         new
                         {
@@ -7400,7 +7398,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Munchausen's syndrome",
                             Description = "Munchausen's syndrome",
                             IsDeleted = false,
-                            SupercededById = 1250
+                            SupersededById = 1250
                         },
                         new
                         {
@@ -7471,7 +7469,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Urethritis (NGU)",
                             Description = "Urethritis (NGU)",
                             IsDeleted = false,
-                            SupercededById = 904
+                            SupersededById = 904
                         },
                         new
                         {
@@ -7493,7 +7491,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Squamous cell carcinoma",
                             Description = "Squamous cell carcinoma",
                             IsDeleted = false,
-                            SupercededById = 907
+                            SupersededById = 907
                         },
                         new
                         {
@@ -7550,7 +7548,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Orthodontics",
                             Description = "Orthodontics",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1274
                         },
                         new
                         {
@@ -7572,7 +7570,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Osteopathy",
                             Description = "Osteopathy",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 259
                         },
                         new
                         {
@@ -7608,7 +7606,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hyperthyroidism",
                             Description = "Hyperthyroidism",
                             IsDeleted = false,
-                            SupercededById = 923
+                            SupersededById = 923
                         },
                         new
                         {
@@ -7616,7 +7614,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Pacemaker implantation",
                             Description = "Pacemaker implantation",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1276
                         },
                         new
                         {
@@ -7638,7 +7636,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Pancreas transplant",
                             Description = "Pancreas transplant",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1277
                         },
                         new
                         {
@@ -7681,7 +7679,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Prolapse (pelvic organ)",
                             Description = "Prolapse (pelvic organ)",
                             IsDeleted = false,
-                            SupercededById = 933
+                            SupersededById = 933
                         },
                         new
                         {
@@ -7703,7 +7701,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Eardrum (burst)",
                             Description = "Eardrum (burst)",
                             IsDeleted = false,
-                            SupercededById = 936
+                            SupersededById = 936
                         },
                         new
                         {
@@ -7760,7 +7758,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Piles",
                             Description = "Piles",
                             IsDeleted = false,
-                            SupercededById = 944
+                            SupersededById = 944
                         },
                         new
                         {
@@ -7908,7 +7906,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Prostate enlargement",
                             Description = "Prostate enlargement",
                             IsDeleted = false,
-                            SupercededById = 965
+                            SupersededById = 965
                         },
                         new
                         {
@@ -7951,7 +7949,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Radiotherapy",
                             Description = "Radiotherapy",
                             IsDeleted = false,
-                            SupercededById = 606
+                            SupersededById = 606
                         },
                         new
                         {
@@ -7973,7 +7971,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Rectal examination",
                             Description = "Rectal examination",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -8002,7 +8000,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Dwarfism",
                             Description = "Dwarfism",
                             IsDeleted = false,
-                            SupercededById = 978
+                            SupersededById = 978
                         },
                         new
                         {
@@ -8017,7 +8015,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Retinal detachment",
                             Description = "Retinal detachment",
                             IsDeleted = false,
-                            SupercededById = 980
+                            SupersededById = 980
                         },
                         new
                         {
@@ -8053,7 +8051,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Osteomalacia",
                             Description = "Osteomalacia",
                             IsDeleted = false,
-                            SupercededById = 985
+                            SupersededById = 985
                         },
                         new
                         {
@@ -8061,7 +8059,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Root canal treatment",
                             Description = "Root canal treatment",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1274
                         },
                         new
                         {
@@ -8111,7 +8109,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Buttock pain",
                             Description = "Buttock pain",
                             IsDeleted = false,
-                            SupercededById = 993
+                            SupersededById = 993
                         },
                         new
                         {
@@ -8175,7 +8173,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Myopia",
                             Description = "Myopia",
                             IsDeleted = false,
-                            SupercededById = 1002
+                            SupersededById = 1002
                         },
                         new
                         {
@@ -8225,7 +8223,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Bowel transplant",
                             Description = "Bowel transplant",
                             IsDeleted = false,
-                            SupercededById = 1009
+                            SupersededById = 1009
                         },
                         new
                         {
@@ -8275,7 +8273,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Selective serotonin reuptake inhibitors (SSRIs)",
                             Description = "Selective serotonin reuptake inhibitors (SSRIs)",
                             IsDeleted = false,
-                            SupercededById = 1193
+                            SupersededById = 1193
                         },
                         new
                         {
@@ -8290,7 +8288,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Stuttering",
                             Description = "Stuttering",
                             IsDeleted = false,
-                            SupercededById = 1018
+                            SupersededById = 1018
                         },
                         new
                         {
@@ -8340,7 +8338,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Subarachnoid haemorrhage",
                             Description = "Subarachnoid haemorrhage",
                             IsDeleted = false,
-                            SupercededById = 1027
+                            SupersededById = 1027
                         },
                         new
                         {
@@ -8362,7 +8360,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Help for suicidal thoughts",
                             Description = "Help for suicidal thoughts",
                             IsDeleted = false,
-                            SupercededById = 1030
+                            SupersededById = 1030
                         },
                         new
                         {
@@ -8391,7 +8389,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Swallowing problems",
                             Description = "Swallowing problems",
                             IsDeleted = false,
-                            SupercededById = 1032
+                            SupersededById = 1032
                         },
                         new
                         {
@@ -8427,7 +8425,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Bruxism",
                             Description = "Bruxism",
                             IsDeleted = false,
-                            SupercededById = 1037
+                            SupersededById = 1037
                         },
                         new
                         {
@@ -8512,7 +8510,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Quinsy",
                             Description = "Quinsy",
                             IsDeleted = false,
-                            SupercededById = 1049
+                            SupersededById = 1049
                         },
                         new
                         {
@@ -8555,7 +8553,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "TIA",
                             Description = "TIA",
                             IsDeleted = false,
-                            SupercededById = 727
+                            SupersededById = 727
                         },
                         new
                         {
@@ -8563,7 +8561,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Transurethral resection of the prostate (TURP)",
                             Description = "Transurethral resection of the prostate (TURP)",
                             IsDeleted = false,
-                            SupercededById = 966
+                            SupersededById = 965
                         },
                         new
                         {
@@ -8571,7 +8569,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Travel vaccinations",
                             Description = "Travel vaccinations",
                             IsDeleted = false,
-                            SupercededById = 1192
+                            SupersededById = 1192
                         },
                         new
                         {
@@ -8635,7 +8633,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Diabetes (type 2)",
                             Description = "Diabetes (type 2)",
                             IsDeleted = false,
-                            SupercededById = 1066
+                            SupersededById = 1066
                         },
                         new
                         {
@@ -8657,7 +8655,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Umbilical hernia repair",
                             Description = "Umbilical hernia repair",
                             IsDeleted = false,
-                            SupercededById = 230
+                            SupersededById = 230
                         },
                         new
                         {
@@ -8665,7 +8663,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hernia (umbilical)",
                             Description = "Hernia (umbilical)",
                             IsDeleted = false,
-                            SupercededById = 230
+                            SupersededById = 230
                         },
                         new
                         {
@@ -8680,7 +8678,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hypothyroidism",
                             Description = "Hypothyroidism",
                             IsDeleted = false,
-                            SupercededById = 1072
+                            SupersededById = 1072
                         },
                         new
                         {
@@ -8709,7 +8707,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Incontinence (urinary)",
                             Description = "Incontinence (urinary)",
                             IsDeleted = false,
-                            SupercededById = 1076
+                            SupersededById = 1076
                         },
                         new
                         {
@@ -8745,7 +8743,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Eczema (varicose)",
                             Description = "Eczema (varicose)",
                             IsDeleted = false,
-                            SupercededById = 1081
+                            SupersededById = 1081
                         },
                         new
                         {
@@ -8767,7 +8765,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Dementia (vascular)",
                             Description = "Dementia (vascular)",
                             IsDeleted = false,
-                            SupercededById = 1084
+                            SupersededById = 1084
                         },
                         new
                         {
@@ -8789,7 +8787,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Anaemia (vitamin B12 or folate deficiency)",
                             Description = "Anaemia (vitamin B12 or folate deficiency)",
                             IsDeleted = false,
-                            SupercededById = 1087
+                            SupersededById = 1087
                         },
                         new
                         {
@@ -8797,7 +8795,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Vitamins and minerals",
                             Description = "Vitamins and minerals",
                             IsDeleted = false,
-                            SupercededById = 1223
+                            SupersededById = 1223
                         },
                         new
                         {
@@ -8826,7 +8824,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Weight loss surgery",
                             Description = "Weight loss surgery",
                             IsDeleted = false,
-                            SupercededById = 912
+                            SupersededById = 912
                         },
                         new
                         {
@@ -8841,7 +8839,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Wisdom tooth removal",
                             Description = "Wisdom tooth removal",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1274
                         },
                         new
                         {
@@ -8856,7 +8854,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Uterine (womb) cancer",
                             Description = "Uterine (womb) cancer",
                             IsDeleted = false,
-                            SupercededById = 1096
+                            SupersededById = 1096
                         },
                         new
                         {
@@ -8864,7 +8862,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Endometrial cancer",
                             Description = "Endometrial cancer",
                             IsDeleted = false,
-                            SupercededById = 1096
+                            SupersededById = 1096
                         },
                         new
                         {
@@ -8893,7 +8891,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Avian flu",
                             Description = "Avian flu",
                             IsDeleted = false,
-                            SupercededById = 1101
+                            SupersededById = 1101
                         },
                         new
                         {
@@ -8901,7 +8899,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Antifungal medicines",
                             Description = "Antifungal medicines",
                             IsDeleted = false,
-                            SupercededById = 0
+                            SupersededById = 1271
                         },
                         new
                         {
@@ -8930,7 +8928,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Menopause (early)",
                             Description = "Menopause (early)",
                             IsDeleted = false,
-                            SupercededById = 1106
+                            SupersededById = 1106
                         },
                         new
                         {
@@ -8945,7 +8943,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Eye floaters",
                             Description = "Eye floaters",
                             IsDeleted = false,
-                            SupercededById = 1108
+                            SupersededById = 1108
                         },
                         new
                         {
@@ -8953,7 +8951,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Your contraception guide",
                             Description = "Your contraception guide",
                             IsDeleted = false,
-                            SupercededById = 1215
+                            SupersededById = 1215
                         },
                         new
                         {
@@ -8961,7 +8959,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Dementia guide",
                             Description = "Dementia guide",
                             IsDeleted = false,
-                            SupercededById = 1232
+                            SupersededById = 1232
                         },
                         new
                         {
@@ -8969,7 +8967,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Fitness Studio exercise videos",
                             Description = "Fitness Studio exercise videos",
                             IsDeleted = false,
-                            SupercededById = 1223
+                            SupersededById = 1223
                         },
                         new
                         {
@@ -8977,7 +8975,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "NHS Health Check",
                             Description = "NHS Health Check",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -8992,7 +8990,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Hookworm",
                             Description = "Hookworm",
                             IsDeleted = false,
-                            SupercededById = 1114
+                            SupersededById = 1114
                         },
                         new
                         {
@@ -9000,7 +8998,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Tapeworm",
                             Description = "Tapeworm",
                             IsDeleted = false,
-                            SupercededById = 1114
+                            SupersededById = 1114
                         },
                         new
                         {
@@ -9008,7 +9006,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Roundworm",
                             Description = "Roundworm",
                             IsDeleted = false,
-                            SupercededById = 1114
+                            SupersededById = 1114
                         },
                         new
                         {
@@ -9023,7 +9021,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "tremor",
                             Description = "tremor",
                             IsDeleted = false,
-                            SupercededById = 1118
+                            SupersededById = 1118
                         },
                         new
                         {
@@ -9031,7 +9029,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "essential tremor",
                             Description = "essential tremor",
                             IsDeleted = false,
-                            SupercededById = 1118
+                            SupersededById = 1118
                         },
                         new
                         {
@@ -9039,7 +9037,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "shaking",
                             Description = "shaking",
                             IsDeleted = false,
-                            SupercededById = 1118
+                            SupersededById = 1118
                         },
                         new
                         {
@@ -9054,7 +9052,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "White blood cell count (low)",
                             Description = "White blood cell count (low)",
                             IsDeleted = false,
-                            SupercededById = 1122
+                            SupersededById = 1122
                         },
                         new
                         {
@@ -9076,7 +9074,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Sense of smell (lost/changed)",
                             Description = "Sense of smell (lost/changed)",
                             IsDeleted = false,
-                            SupercededById = 1125
+                            SupersededById = 1125
                         },
                         new
                         {
@@ -9098,7 +9096,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Mouth thrush",
                             Description = "Mouth thrush",
                             IsDeleted = false,
-                            SupercededById = 1128
+                            SupersededById = 1128
                         },
                         new
                         {
@@ -9113,7 +9111,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Giant cell arteritis",
                             Description = "Giant cell arteritis",
                             IsDeleted = false,
-                            SupercededById = 1130
+                            SupersededById = 1130
                         },
                         new
                         {
@@ -9128,7 +9126,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Amnesia",
                             Description = "Amnesia",
                             IsDeleted = false,
-                            SupercededById = 1132
+                            SupersededById = 1132
                         },
                         new
                         {
@@ -9150,7 +9148,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Sinusitis",
                             Description = "Sinusitis",
                             IsDeleted = false,
-                            SupercededById = 1135
+                            SupersededById = 1135
                         },
                         new
                         {
@@ -9221,7 +9219,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "NHS screening",
                             Description = "NHS screening",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -9236,7 +9234,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Headaches (hormone)",
                             Description = "Headaches (hormone)",
                             IsDeleted = false,
-                            SupercededById = 1147
+                            SupersededById = 1147
                         },
                         new
                         {
@@ -9244,7 +9242,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "What to do if someone has a seizure (fit)",
                             Description = "What to do if someone has a seizure (fit)",
                             IsDeleted = false,
-                            SupercededById = 1150
+                            SupersededById = 1150
                         },
                         new
                         {
@@ -9259,7 +9257,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Fits (seizures)",
                             Description = "Fits (seizures)",
                             IsDeleted = false,
-                            SupercededById = 1150
+                            SupersededById = 1150
                         },
                         new
                         {
@@ -9288,7 +9286,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Tooth knocked out",
                             Description = "Tooth knocked out",
                             IsDeleted = false,
-                            SupercededById = 1154
+                            SupersededById = 1154
                         },
                         new
                         {
@@ -9296,7 +9294,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Chipped broken or cracked tooth",
                             Description = "Chipped broken or cracked tooth",
                             IsDeleted = false,
-                            SupercededById = 1239
+                            SupersededById = 1239
                         },
                         new
                         {
@@ -9304,7 +9302,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Tooth (chipped or broken)",
                             Description = "Tooth (chipped or broken)",
                             IsDeleted = false,
-                            SupercededById = 1239
+                            SupersededById = 1239
                         },
                         new
                         {
@@ -9319,7 +9317,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Tummy bug",
                             Description = "Tummy bug",
                             IsDeleted = false,
-                            SupercededById = 1158
+                            SupersededById = 1158
                         },
                         new
                         {
@@ -9327,7 +9325,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Vomiting",
                             Description = "Vomiting",
                             IsDeleted = false,
-                            SupercededById = 328
+                            SupersededById = 328
                         },
                         new
                         {
@@ -9335,7 +9333,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Stomach bug",
                             Description = "Stomach bug",
                             IsDeleted = false,
-                            SupercededById = 1158
+                            SupersededById = 1158
                         },
                         new
                         {
@@ -9343,7 +9341,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Gastroenteritis",
                             Description = "Gastroenteritis",
                             IsDeleted = false,
-                            SupercededById = 1158
+                            SupersededById = 1158
                         },
                         new
                         {
@@ -9351,7 +9349,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Diarrhoea",
                             Description = "Diarrhoea",
                             IsDeleted = false,
-                            SupercededById = 1158
+                            SupersededById = 1158
                         },
                         new
                         {
@@ -9359,7 +9357,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Being sick",
                             Description = "Being sick",
                             IsDeleted = false,
-                            SupercededById = 1158
+                            SupersededById = 1158
                         },
                         new
                         {
@@ -9381,7 +9379,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Nausea",
                             Description = "Nausea",
                             IsDeleted = false,
-                            SupercededById = 1166
+                            SupersededById = 1166
                         },
                         new
                         {
@@ -9396,7 +9394,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Diabetes (type 1)",
                             Description = "Diabetes (type 1)",
                             IsDeleted = false,
-                            SupercededById = 1168
+                            SupersededById = 1168
                         },
                         new
                         {
@@ -9404,7 +9402,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Social care and support guide",
                             Description = "Social care and support guide",
                             IsDeleted = false,
-                            SupercededById = 1222
+                            SupersededById = 1222
                         },
                         new
                         {
@@ -9426,7 +9424,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Diabetic eye screening 2",
                             Description = "Diabetic eye screening 2",
                             IsDeleted = false,
-                            SupercededById = 132
+                            SupersededById = 132
                         },
                         new
                         {
@@ -9441,7 +9439,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Cannabis oil (medical cannabis)",
                             Description = "Cannabis oil (medical cannabis)",
                             IsDeleted = false,
-                            SupercededById = 1174
+                            SupersededById = 1174
                         },
                         new
                         {
@@ -9449,7 +9447,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Diabetic eye screening 1",
                             Description = "Diabetic eye screening 1",
                             IsDeleted = false,
-                            SupercededById = 132
+                            SupersededById = 132
                         },
                         new
                         {
@@ -9485,7 +9483,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "heel pain",
                             Description = "heel pain",
                             IsDeleted = false,
-                            SupercededById = 1180
+                            SupersededById = 1180
                         },
                         new
                         {
@@ -9493,7 +9491,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Toe pain",
                             Description = "Toe pain",
                             IsDeleted = false,
-                            SupercededById = 1180
+                            SupersededById = 1180
                         },
                         new
                         {
@@ -9501,7 +9499,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "ankle pain",
                             Description = "ankle pain",
                             IsDeleted = false,
-                            SupercededById = 1180
+                            SupersededById = 1180
                         },
                         new
                         {
@@ -9516,7 +9514,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Asperger's",
                             Description = "Asperger's",
                             IsDeleted = false,
-                            SupercededById = 1184
+                            SupersededById = 1184
                         },
                         new
                         {
@@ -9552,7 +9550,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Genetic and genomic testing",
                             Description = "Genetic and genomic testing",
                             IsDeleted = false,
-                            SupercededById = 1266
+                            SupersededById = 1266
                         },
                         new
                         {
@@ -9588,7 +9586,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Fever in adults",
                             Description = "Fever in adults",
                             IsDeleted = false,
-                            SupercededById = 1194
+                            SupersededById = 1194
                         },
                         new
                         {
@@ -9603,7 +9601,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Baby",
                             Description = "Baby",
                             IsDeleted = false,
-                            SupercededById = 1227
+                            SupersededById = 1227
                         },
                         new
                         {
@@ -9611,7 +9609,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Do not attempt cardiopulmonary resuscitation (DNACPR) decisions",
                             Description = "Do not attempt cardiopulmonary resuscitation (DNACPR) decisions",
                             IsDeleted = false,
-                            SupercededById = 1153
+                            SupersededById = 1153
                         },
                         new
                         {
@@ -9626,7 +9624,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Pain in testicles",
                             Description = "Pain in testicles",
                             IsDeleted = false,
-                            SupercededById = 1199
+                            SupersededById = 1199
                         },
                         new
                         {
@@ -9753,7 +9751,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Exercise and sports",
                             Description = "Exercise and sports",
                             IsDeleted = false,
-                            SupercededById = 1223
+                            SupersededById = 1223
                         },
                         new
                         {
@@ -9775,7 +9773,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Healthy volunteers",
                             Description = "Healthy volunteers",
                             IsDeleted = false,
-                            SupercededById = 1244
+                            SupersededById = 1244
                         },
                         new
                         {
@@ -9888,7 +9886,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Breast Feeding",
                             Description = "Breast Feeding",
                             IsDeleted = false,
-                            SupercededById = 1210
+                            SupersededById = 1210
                         },
                         new
                         {
@@ -10029,7 +10027,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Personality disorders",
                             Description = "Personality disorders",
                             IsDeleted = false,
-                            SupercededById = 347
+                            SupersededById = 347
                         },
                         new
                         {
@@ -10114,7 +10112,63 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Vomiting blood",
                             Description = "Vomiting blood",
                             IsDeleted = false,
-                            SupercededById = 488
+                            SupersededById = 488
+                        },
+                        new
+                        {
+                            Id = 1270,
+                            Code = "Genetic testing in pregnancy",
+                            Description = "Genetic testing in pregnancy",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 1271,
+                            Code = "Treatments for infection",
+                            Description = "Treatments for infection",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 1272,
+                            Code = "General surgery and recovery",
+                            Description = "General surgery and recovery",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 1273,
+                            Code = "Eye Tests",
+                            Description = "Eye Tests",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 1274,
+                            Code = "Dental care and surgery",
+                            Description = "Dental care and surgery",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 1275,
+                            Code = "New - Breast cancer surgery",
+                            Description = "New - Breast cancer surgery",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 1276,
+                            Code = "Heart rhythm problems - ( also check arrhythmia)",
+                            Description = "Heart rhythm problems - ( also check arrhythmia)",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 1277,
+                            Code = "Transplants and organ donation",
+                            Description = "Transplants and organ donation",
+                            IsDeleted = false
                         });
                 });
 
