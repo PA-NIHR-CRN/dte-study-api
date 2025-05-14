@@ -64,24 +64,16 @@ namespace NIHR.CRN.CPMS.Database.Extensions
             return migrationBuilder.Sql(sql);
         }
 
-        private static string GetSqlFromFile(string scriptIdentifier, MigrationDirection direction, string? stepIdentifier = null)
+        private static string GetSqlFromFile(string scriptIdentifier, MigrationDirection direction, string stepIdentifier = null)
         {
-            var fileName = !string.IsNullOrEmpty(stepIdentifier)
-                ? $"{scriptIdentifier}.{stepIdentifier}.{direction}.sql"
-                : $"{scriptIdentifier}.{direction}.sql";
-
-            var relativePath = Path.Combine("Migrations", "Scripts", scriptIdentifier, fileName);
-            var baseDir = AppContext.BaseDirectory;
-
-            var fullPath = Path.Combine(baseDir, relativePath);
-
-            if (File.Exists(fullPath))
+            if (!string.IsNullOrEmpty(stepIdentifier))
             {
-                Console.WriteLine($"[EF MIGRATION] Using SQL from: {fullPath}");
-                return File.ReadAllText(fullPath);
+                return File.ReadAllText($@"Scripts/{scriptIdentifier}/{scriptIdentifier}.{stepIdentifier}.{direction}.sql");
             }
-
-            throw new FileNotFoundException($"Could not find migration script at {fullPath}");
+            else
+            {
+                return File.ReadAllText($@"Scripts/{scriptIdentifier}/{scriptIdentifier}.{direction}.sql");
+            }
         }
 
     }
