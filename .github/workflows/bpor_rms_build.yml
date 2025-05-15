@@ -76,8 +76,9 @@ jobs:
 
       - name: Debug SQL files in output
         run: |
-          echo "Listing all SQL files in bin/Release"
-          find BPOR/BPOR.Domain/bin/Release -name "*.sql" || echo "No .sql files found"
+          echo "Checking for SQL files in expected output location"
+          find BPOR/BPOR.Domain/bin/Release/net8.0/Migrations/Scripts -name "*.sql" || echo "No .sql files found in Release"
+          find BPOR/BPOR.Domain/bin/Debug/net8.0/Migrations/Scripts -name "*.sql" || echo "No .sql files found in Debug"
 
       - name: Get GitHub Actions Runner Public IP
         id: publicip
