@@ -66,8 +66,8 @@ namespace NIHR.CRN.CPMS.Database.Extensions
 
         private static string GetSqlFromFile(string scriptIdentifier, MigrationDirection direction, string stepIdentifier = null)
         {
-            string basePath = Path.Combine(AppContext.BaseDirectory, "Scripts", scriptIdentifier);
-            string fileName = !string.IsNullOrEmpty(stepIdentifier) 
+            string basePath = Path.Combine(AppContext.BaseDirectory, "Migrations", "Scripts", scriptIdentifier);
+            string fileName = !string.IsNullOrEmpty(stepIdentifier) 
                 ? $"{scriptIdentifier}.{stepIdentifier}.{direction}.sql" 
                 : $"{scriptIdentifier}.{direction}.sql";
             string fullPath = Path.Combine(basePath, fileName);
