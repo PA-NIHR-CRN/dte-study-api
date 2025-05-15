@@ -89,7 +89,7 @@ jobs:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
         run: |
           cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
+          dotnet ef database update --configuration Release --connection "${{ env.DB_CONNECTION_STRING }}"
 
       - name: Pull, tag, and push image to Amazon ECR
         id: build-image
@@ -214,7 +214,7 @@ jobs:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
         run: |
           cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
+          dotnet ef database update --configuration Release --connection "${{ env.DB_CONNECTION_STRING }}"
 
       - name: Load, tag, and push image to Amazon ECR
         id: build-image
@@ -339,7 +339,7 @@ jobs:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
         run: |
           cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
+          dotnet ef database update --configuration Release --connection "${{ env.DB_CONNECTION_STRING }}"
 
       - name: Load, tag, and push image to Amazon ECR
         id: build-image
@@ -464,7 +464,7 @@ jobs:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
         run: |
           cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
+          dotnet ef database update --configuration Release --connection "${{ env.DB_CONNECTION_STRING }}"
 
       - name: Load, tag, and push image to Amazon ECR
         id: build-image
@@ -589,7 +589,7 @@ jobs:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
         run: |
           cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
+          dotnet ef database update --configuration Release --connection "${{ env.DB_CONNECTION_STRING }}"
 
       - name: Load, tag, and push image to Amazon ECR
         id: build-image
