@@ -66,15 +66,31 @@ namespace NIHR.CRN.CPMS.Database.Extensions
 
         private static string GetSqlFromFile(string scriptIdentifier, MigrationDirection direction, string stepIdentifier = null)
         {
-            string basePath = Path.Combine(AppContext.BaseDirectory, "Migrations", "Scripts", scriptIdentifier.ToLowerInvariant());
+            string basePath = Path.Combine(AppContext.BaseDirectory, "Migrations", "Scripts", scriptIdentifier);
+            string directionSuffix = direction.ToString().ToLowerInvariant();
 
-            string fileName = !string.IsNullOrEmpty(stepIdentifier)
-                ? $"{scriptIdentifier}.{stepIdentifier}.{direction}".ToLowerInvariant() + ".sql"
-                : $"{scriptIdentifier}.{direction}".ToLowerInvariant() + ".sql";
 
-            string fullPath = Path.Combine(basePath, fileName);
+            var pattern = !string.IsNullOrEmpty(stepIdentifier)
+                ? $"{scriptIdentifier}.{stepIdentifier}.{directionSuffix}.sql"
+                : $"{scriptIdentifier}*.{directionSuffix}.sql";
 
-            return File.ReadAllText(fullPath);
+            var matchingFiles = Directory
+                .EnumerateFiles(basePath, "*.sql", SearchOption.TopDirectoryOnly)
+                .Where(f => Path.GetFileName(f).EndsWith($".{directionSuffix}.sql", StringComparison.Ordinal))
+                .Where(f => Path.GetFileName(f).StartsWith(scriptIdentifier))
+                .OrderBy(f => f)
+                .ToList();
+
+            if (!matchingFiles.Any())
+            {
+                return string.Empty;
+            }
+
+            var allSqlFiles = matchingFiles
+                .Select(File.ReadAllText)
+                .Aggregate((a, b) => a + Environment.NewLine + b);
+
+            return allSqlFiles;
         }
     }
 }

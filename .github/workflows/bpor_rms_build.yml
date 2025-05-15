@@ -74,12 +74,6 @@ jobs:
       - name: Build solution
         run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
 
-      - name: Debug SQL files in output
-        run: |
-          echo "Checking for SQL files in expected output location"
-          find BPOR/BPOR.Domain/bin/Release/net8.0/Migrations/Scripts -name "*.sql" || echo "No .sql files found in Release"
-          find BPOR/BPOR.Domain/bin/Debug/net8.0/Migrations/Scripts -name "*.sql" || echo "No .sql files found in Debug"
-
       - name: Get GitHub Actions Runner Public IP
         id: publicip
         run: |
@@ -90,6 +84,13 @@ jobs:
         run: |
           aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
  
+      - name: Confirm SQL migration files case sensitivity
+        run: |
+          if find BPOR/BPOR.Domain/Migrations/Scripts -name '*.Up.sql' -o -name '*.Down.sql' | grep -q .; then
+            echo "ERROR: Upper case in migration sql file name extension."
+            exit 1
+          fi
+        
       - name: Update Database
         env:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
