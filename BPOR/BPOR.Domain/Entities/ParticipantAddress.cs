@@ -24,6 +24,8 @@ public class ParticipantAddress : IPersonalInformation, ISoftDelete
     [MaxLength(255)]
     public string? Town { get; set; }
     [MaxLength(255)]
+    public string? CanonicalTown { get; set; }
+    [MaxLength(255)]
     public string? Postcode { get; set; }
 
     public int ParticipantId { get; set; }
@@ -48,6 +50,7 @@ public class ParticipantAddress : IPersonalInformation, ISoftDelete
         AddressLine3 = null;
         AddressLine4 = null;
         Town = null;
+        CanonicalTown = null;
         Postcode = GetOutcodeFromPostcode(Postcode);
     }
 }
