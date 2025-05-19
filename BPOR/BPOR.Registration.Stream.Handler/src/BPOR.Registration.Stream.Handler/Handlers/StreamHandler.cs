@@ -16,26 +16,25 @@ public class StreamHandler(
     IParticipantMapper participantMapper)
     : IStreamHandler
 {
-    public async Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(DynamoDBEvent dynamoDbEvent,
+    public async Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(
+        DynamoDBEvent dynamoDbEvent,
         CancellationToken cancellationToken)
     {
         participantDbContext.ThrowIfInMaintenanceMode();
 
         var failures = new List<BatchItemFailure>();
-        // TODO: how do we handle out of order events if they are indeed out of order?
-        string currentRecordSequenceNumber;
 
         foreach (var record in dynamoDbEvent.Records)
         {
-            currentRecordSequenceNumber = record.Dynamodb.SequenceNumber;
+            var sequenceNumber = record.Dynamodb.SequenceNumber;
 
-            using (logger.BeginScope("{EventId}, {SequenceNumber}", record.EventID, currentRecordSequenceNumber))
+            using (logger.BeginScope("{EventId}, {SequenceNumber}", record.EventID, sequenceNumber))
             {
                 try
                 {
                     logger.LogInformation(
                         "Processing record {SequenceNumber}, ApproximateCreationDateTime: {ApproximateCreationDateTime}",
-                        currentRecordSequenceNumber, record.Dynamodb.ApproximateCreationDateTime);
+                        sequenceNumber, record.Dynamodb.ApproximateCreationDateTime);
 
                     logger.LogDebug(
                         "AwsRegion: {AwsRegion}, EventID: {EventID}, EventName: {EventName}, EventSource: {EventSource}, EventSourceArn: {EventSourceArn}, EventVersion: {EventVersion}, UserIdentity: {@UserIdentity}, SizeBytes: {SizeBytes}, StreamViewType: {StreamViewType}",
@@ -47,29 +46,30 @@ public class StreamHandler(
                         record.EventVersion,
                         record.UserIdentity,
                         record.Dynamodb.SizeBytes,
-                        record.Dynamodb.StreamViewType
-                    );
+                        record.Dynamodb.StreamViewType);
 
-                    logger.LogTrace("{@Record}", record);
+                    logger.LogTrace("Full record: {@Record}", record);
+
+                    await using var tx = await participantDbContext.Database.BeginTransactionAsync(cancellationToken);
 
                     await ProcessRecordAsync(record, cancellationToken);
-
                     await participantDbContext.SaveChangesAsync(cancellationToken);
+                    await tx.CommitAsync(cancellationToken);
 
-                    logger.LogInformation("Record processing complete");
+                    logger.LogInformation("Record {SequenceNumber} committed successfully", sequenceNumber);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    logger.LogError(e, e.Message);
-                    failures.Add(new BatchItemFailure { ItemIdentifier = currentRecordSequenceNumber });
+                    logger.LogError(ex,
+                        "Error processing record {SequenceNumber}. PK={PartitionKey}",
+                        sequenceNumber,
+                        record.Dynamodb.Keys.TryGetValue("Pk", out var pk) ? pk.S : "N/A");
 
-                    // If there is one failure the whole batch is retried, exit early here.
-                    // Support 'Report batch item failures: Yes'
-                    // return failures;
+                    failures.Add(new BatchItemFailure
+                    {
+                        ItemIdentifier = sequenceNumber
+                    });
 
-                    // Do not support partial batch failure.
-                    // See 'Report batch item failures: No'
-                    throw;
                 }
             }
         }
@@ -135,7 +135,6 @@ public class StreamHandler(
         if (participant == null)
         {
             participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
-            await participantDbContext.SaveChangesAsync(cancellationToken);
         }
 
         await participantMapper.Map(record.Dynamodb.NewImage, participant, cancellationToken);
@@ -154,7 +153,6 @@ public class StreamHandler(
         if (participant == null)
         {
             participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
-            await participantDbContext.SaveChangesAsync(cancellationToken);
         }
 
         // Remove participant contact method record
