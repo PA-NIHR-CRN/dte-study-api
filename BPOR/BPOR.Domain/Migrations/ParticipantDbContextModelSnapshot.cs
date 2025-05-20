@@ -1153,7 +1153,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Antacids",
                             Description = "Antacids",
                             IsDeleted = false,
-                            SupersededById = 770
+                            SupersededById = 769
                         },
                         new
                         {
@@ -6484,15 +6484,15 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 769,
                             Code = "Heartburn and acid reflux",
                             Description = "Heartburn and acid reflux",
-                            IsDeleted = false,
-                            SupersededById = 770
+                            IsDeleted = false
                         },
                         new
                         {
                             Id = 770,
                             Code = "Gastro-oesophageal reflux disease (GORD)",
                             Description = "Gastro-oesophageal reflux disease (GORD)",
-                            IsDeleted = false
+                            IsDeleted = false,
+                            SupersededById = 769
                         },
                         new
                         {

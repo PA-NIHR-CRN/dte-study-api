@@ -268,7 +268,7 @@ namespace Dynamo.Stream.Handler.Migrations
                 keyColumn: "Id",
                 keyValue: 36,
                 column: "SupersededById",
-                value: 770);
+                value: 769);
 
             migrationBuilder.UpdateData(
                 table: "SysRefHealthCondition",
@@ -5399,14 +5399,14 @@ namespace Dynamo.Stream.Handler.Migrations
                 keyColumn: "Id",
                 keyValue: 769,
                 column: "SupersededById",
-                value: 770);
+                value: null);
 
             migrationBuilder.UpdateData(
                 table: "SysRefHealthCondition",
                 keyColumn: "Id",
                 keyValue: 770,
                 column: "SupersededById",
-                value: null);
+                value: 769);
 
             migrationBuilder.UpdateData(
                 table: "SysRefHealthCondition",
@@ -8687,8 +8687,7 @@ namespace Dynamo.Stream.Handler.Migrations
                     { 1276, "Heart rhythm problems - ( also check arrhythmia)", "Heart rhythm problems - ( also check arrhythmia)", false, null },
                     { 1277, "Transplants and organ donation", "Transplants and organ donation", false, null }
                 });
-
-                migrationBuilder.Sql(@"exec('
+            migrationBuilder.Sql(@"exec('
                 CREATE VIEW ParticipantActiveHealthCondition AS
                     SELECT
                         PHC.ParticipantId,

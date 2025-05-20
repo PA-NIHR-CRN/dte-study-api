@@ -13,7 +13,7 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20250514122120_BPoR-Data-Dashboard-data-transform-2-of-2-health-condition-data")]
+    [Migration("20250520102230_BPoR-Data-Dashboard-data-transform-2-of-2-health-condition-data")]
     partial class BPoRDataDashboarddatatransform2of2healthconditiondata
     {
         /// <inheritdoc />
@@ -1156,7 +1156,7 @@ namespace Dynamo.Stream.Handler.Migrations
                             Code = "Antacids",
                             Description = "Antacids",
                             IsDeleted = false,
-                            SupersededById = 770
+                            SupersededById = 769
                         },
                         new
                         {
@@ -6487,15 +6487,15 @@ namespace Dynamo.Stream.Handler.Migrations
                             Id = 769,
                             Code = "Heartburn and acid reflux",
                             Description = "Heartburn and acid reflux",
-                            IsDeleted = false,
-                            SupersededById = 770
+                            IsDeleted = false
                         },
                         new
                         {
                             Id = 770,
                             Code = "Gastro-oesophageal reflux disease (GORD)",
                             Description = "Gastro-oesophageal reflux disease (GORD)",
-                            IsDeleted = false
+                            IsDeleted = false,
+                            SupersededById = 769
                         },
                         new
                         {
