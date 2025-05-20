@@ -1,5 +1,5 @@
 Id,Condition,SupersededBy
-1,,1
+1,"Acanthosis nigricans",1
 2,Achalasia,2
 3,"Acid and chemical burns",3
 4,"Acoustic neuroma (vestibular schwannoma)",4
@@ -34,7 +34,7 @@ Id,Condition,SupersededBy
 33,"Animal and human bites",33
 34,"Bite (animal or human)",33
 35,Anosmia,1125
-36,Antacids,770
+36,Antacids,769
 37,Antihistamines,520
 38,"Antisocial personality disorder",38
 39,"Anxiety disorders in children",39
@@ -767,8 +767,8 @@ Id,Condition,SupersededBy
 766,"Hearing tests",766
 767,"Heart attack",767
 768,"Heart block",768
-769,"Heartburn and acid reflux",770
-770,"Gastro-oesophageal reflux disease (GORD)",770
+769,"Heartburn and acid reflux",769
+770,"Gastro-oesophageal reflux disease (GORD)",769
 771,"Heart failure",771
 772,"Heart transplant",772
 773,"Heavy periods",773

@@ -8688,7 +8688,7 @@ namespace Dynamo.Stream.Handler.Migrations
                     { 1277, "Transplants and organ donation", "Transplants and organ donation", false, null }
                 });
 
-                migrationBuilder.Sql(@"
+                migrationBuilder.Sql(@"exec('
                 CREATE VIEW ParticipantActiveHealthCondition AS
                     SELECT
                         PHC.ParticipantId,
@@ -8697,13 +8697,13 @@ namespace Dynamo.Stream.Handler.Migrations
                         dte.ParticipantHealthCondition PHC
                             INNER JOIN
                         SysRefHealthCondition RefA ON PHC.HealthConditionId = RefA.Id
-                ");
+                ');");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"DROP VIEW ParticipantActiveHealthCondition");
+            migrationBuilder.Sql(@"exec('DROP VIEW ParticipantActiveHealthCondition');");
 
             migrationBuilder.DeleteData(
                 table: "SysRefHealthCondition",
