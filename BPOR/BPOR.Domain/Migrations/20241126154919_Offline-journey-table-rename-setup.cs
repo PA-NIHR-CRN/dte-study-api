@@ -67,7 +67,7 @@ namespace Dynamo.Stream.Handler.Migrations
                 nullable: false,
                 defaultValue: 0);
 
-            migrationBuilder.SqlFromFile(ScriptIdentifier, MigrationDirection.Up);
+            migrationBuilder.RunCommonSql(ScriptIdentifier, MigrationDirection.Up);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_EmailCampaignParticipants_CampaignTypeId_CampaignId",

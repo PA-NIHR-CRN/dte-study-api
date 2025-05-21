@@ -45,7 +45,7 @@
 
     <ItemGroup>
       <Content Include="Migrations/Scripts/**/*.sql">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
 

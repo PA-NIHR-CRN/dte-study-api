@@ -1,10 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace NIHR.CRN.CPMS.Database.Extensions
 {
@@ -16,81 +11,106 @@ namespace NIHR.CRN.CPMS.Database.Extensions
             Down
         }
 
-
         /// <summary>
-        /// Builds an Microsoft.EntityFrameworkCore.Migrations.Operations.SqlOperation to
-        /// include raw SQL from the file identified by <paramref name="scriptIdentifier"/>.
-        /// 
-        /// Save the SQL content in 'Scripts/MigrationsSQL/{scriptIdentifier}/{scriptIdentifier}[.{stepIdentifier}].{direction}.sql'.
+        /// Runs a specific step script by index, based on file ordering.
         /// </summary>
-        /// <param name="scriptIdentifier">Identifer for the SQL file located in 'Scripts/MigrationsSQL/{scriptIdentifier}/{scriptIdentifier}[.{stepIdentifier}].{direction}.sql'.</param>
-        /// <param name="direction">Direction of the migration operation.</param>
-        /// <param name="stepIdentifier">Optional step identifer.</param>
-        /// <returns>A builder to allow annotations to be added to the operation.</returns>
-        public static OperationBuilder<SqlOperation> SqlFromFile(this MigrationBuilder migrationBuilder, string scriptIdentifier, MigrationDirection direction, string stepIdentifier = null)
+        public static void RunSqlStep(this MigrationBuilder migrationBuilder, string scriptIdentifier, MigrationDirection direction, int index)
         {
-            return migrationBuilder.Sql(GetSqlFromFile(scriptIdentifier, direction, stepIdentifier));
+            var orderedFiles = GetOrderedStepFiles(scriptIdentifier, direction).ToList();
+
+            CheckForDuplicateSteps(orderedFiles, scriptIdentifier, direction);
+
+            if (index < 0 || index >= orderedFiles.Count)
+                return;
+
+            var sql = ReadFileContents(orderedFiles[index]);
+            if (!string.IsNullOrWhiteSpace(sql))
+            {
+                migrationBuilder.Sql(sql);
+            }
         }
 
         /// <summary>
-        /// Builds an Microsoft.EntityFrameworkCore.Migrations.Operations.SqlOperation to
-        /// include SQL from the file identified by <paramref name="scriptIdentifier"/>.
-        /// SQL is included in the migration inside an EXECUTE() statement.
-        /// 
-        /// Use this method if the included SQL needs to be run in its own batch.
-        /// 
-        /// Save the SQL content in 'Scripts/MigrationsSQL/{scriptIdentifier}/{scriptIdentifier}[.{stepIdentifier}].{direction}.sql'.
+        /// Runs the common SQL file (e.g. 20240519_Migration.up.sql) if it exists.
         /// </summary>
-        /// <param name="scriptIdentifier">Identifer for the SQL file located in 'Scripts/MigrationsSQL/{scriptIdentifier}/{scriptIdentifier}[.{stepIdentifier}].{direction}.sql'.</param>
-        /// <param name="direction">Direction of the migration operation.</param>
-        /// <param name="stepIdentifier">Optional step identifer.</param>
-        /// <param name="preamble">Optional lines of 'preamble' SQL to run before EXECUTE(). Useful for setting toggles, e.g. SET QUOTED_IDENTIFIER ON, etc</param>
-        /// <returns>A builder to allow annotations to be added to the operation.</returns>
-        public static OperationBuilder<SqlOperation> SqlFromFileWithExecute(this MigrationBuilder migrationBuilder, string scriptIdentifier, MigrationDirection direction, string stepIdentifier = null, IList<string> preamble = null)
+        public static void RunCommonSql(this MigrationBuilder migrationBuilder, string scriptIdentifier, MigrationDirection direction)
         {
-            var sql = GetSqlFromFile(scriptIdentifier, direction, stepIdentifier);
-
-            sql = sql.Replace("'", "''"); // Escape embedded single quotes.
-
-            if (preamble?.Any() ?? false)
+            var sql = ReadFileContents(GetCommonSqlFilePath(scriptIdentifier, direction));
+            if (!string.IsNullOrWhiteSpace(sql))
             {
-                sql = string.Join(Environment.NewLine, preamble) + Environment.NewLine + $"EXECUTE('{sql}');";
+                migrationBuilder.Sql(sql);
             }
-            else
-            {
-                sql = $"EXECUTE('{sql}');";
-            }
-
-            return migrationBuilder.Sql(sql);
         }
 
-        private static string GetSqlFromFile(string scriptIdentifier, MigrationDirection direction, string stepIdentifier = null)
+        /// <summary>
+        /// Throws an error if duplicate step identifiers exist (e.g. .1.up.sql used more than once).
+        /// Call at the start of your migration method to prevent unsafe runs.
+        /// </summary>
+        public static void CheckForDuplicateSteps(string scriptIdentifier, MigrationDirection direction)
         {
-            string basePath = Path.Combine(AppContext.BaseDirectory, "Migrations", "Scripts", scriptIdentifier);
-            string directionSuffix = direction.ToString().ToLowerInvariant();
+            var files = GetOrderedStepFiles(scriptIdentifier, direction).ToList();
+            CheckForDuplicateSteps(files, scriptIdentifier, direction);
+        }
 
+        private static void CheckForDuplicateSteps(IEnumerable<string> files, string scriptIdentifier, MigrationDirection direction)
+        {
+            var suffix = GetDirectionSuffix(direction);
+            var pattern = $@"^{Regex.Escape(scriptIdentifier)}\.(.+?)\.{suffix}\.sql$";
 
-            var pattern = !string.IsNullOrEmpty(stepIdentifier)
-                ? $"{scriptIdentifier}.{stepIdentifier}.{directionSuffix}.sql"
-                : $"{scriptIdentifier}*.{directionSuffix}.sql";
-
-            var matchingFiles = Directory
-                .EnumerateFiles(basePath, "*.sql", SearchOption.TopDirectoryOnly)
-                .Where(f => Path.GetFileName(f).EndsWith($".{directionSuffix}.sql", StringComparison.Ordinal))
-                .Where(f => Path.GetFileName(f).StartsWith(scriptIdentifier))
-                .OrderBy(f => f)
+            var duplicates = files
+                .Select(Path.GetFileName)
+                .Select(name => Regex.Match(name, pattern, RegexOptions.IgnoreCase))
+                .Where(m => m.Success)
+                .GroupBy(m => m.Groups[1].Value.ToLowerInvariant())
+                .Where(g => g.Count() > 1)
                 .ToList();
 
-            if (!matchingFiles.Any())
+            if (duplicates.Any())
             {
-                return string.Empty;
+                var steps = string.Join(", ", duplicates.Select(g => g.Key));
+                throw new InvalidOperationException(
+                    $"Migration error: Duplicate SQL step identifiers found for '{scriptIdentifier}.{direction}'");
             }
+        }
 
-            var allSqlFiles = matchingFiles
-                .Select(File.ReadAllText)
-                .Aggregate((a, b) => a + Environment.NewLine + b);
+        private static string GetScriptsDirectory(string scriptIdentifier)
+        {
+            var projectRoot = Directory.GetCurrentDirectory();
+            return Path.Combine(projectRoot, "Migrations", "Scripts", scriptIdentifier);
+        }
 
-            return allSqlFiles;
+        private static string GetDirectionSuffix(MigrationDirection direction) =>
+            direction.ToString().ToLowerInvariant();
+
+        private static string GetCommonSqlFilePath(string scriptIdentifier, MigrationDirection direction)
+        {
+            var dir = GetScriptsDirectory(scriptIdentifier);
+            var file = $"{scriptIdentifier}.{GetDirectionSuffix(direction)}.sql";
+            return Path.Combine(dir, file);
+        }
+
+        private static string ReadFileContents(string path) =>
+            File.Exists(path) ? File.ReadAllText(path) : string.Empty;
+
+        private static IEnumerable<string> GetOrderedStepFiles(string scriptIdentifier, MigrationDirection direction)
+        {
+            var basePath = GetScriptsDirectory(scriptIdentifier);
+            if (!Directory.Exists(basePath))
+                return Enumerable.Empty<string>();
+
+            var suffix = GetDirectionSuffix(direction);
+            var pattern = $@"^{Regex.Escape(scriptIdentifier)}\.(.+?)\.{suffix}\.sql$";
+
+            return Directory
+                .EnumerateFiles(basePath, $"*.{suffix}.sql", SearchOption.TopDirectoryOnly)
+                .Select(f => new
+                {
+                    Path = f,
+                    Match = Regex.Match(Path.GetFileName(f), pattern, RegexOptions.IgnoreCase)
+                })
+                .Where(x => x.Match.Success && !x.Match.Groups[1].Value.Equals(suffix, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(x => x.Match.Groups[1].Value, StringComparer.OrdinalIgnoreCase)
+                .Select(x => x.Path);
         }
     }
 }
