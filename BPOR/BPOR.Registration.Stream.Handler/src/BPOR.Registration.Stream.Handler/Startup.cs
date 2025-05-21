@@ -46,9 +46,12 @@ public static class Startup
         services.AddTransient<IParticipantMapper, ParticipantMapper>();
         services.AddTransient<IPostcodeMapper, LocationApiClient>();
 
+        services.ConfigureNihrLogging(configuration);
+
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("BPOR.Registration.Stream.Handler");
 
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
+        
         if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
             throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
@@ -57,6 +60,5 @@ public static class Startup
         services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
             logger);
 
-        services.ConfigureNihrLogging(configuration);
     }
 }
