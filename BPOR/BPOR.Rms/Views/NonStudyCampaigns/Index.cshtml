@@ -1,0 +1,14 @@
+﻿@using BPOR.Rms.Models.Email
+@using BPOR.Domain.Enums;
+
+@{
+    ViewData["Title"] = $"View email campaigns not associated with a study - Be Part of Research";
+    ViewData.AddBreadcrumb("All studies", "/Study/Index");
+    ViewData.AddBreadcrumb("View Non Study Emails", "/NonStudyCampaigns");
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+        <partial name="Partials/_CampaignTable" />
+    </div>
+</div>
