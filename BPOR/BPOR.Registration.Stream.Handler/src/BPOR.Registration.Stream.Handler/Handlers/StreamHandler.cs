@@ -15,8 +15,7 @@ namespace BPOR.Registration.Stream.Handler.Handlers;
 public class StreamHandler(
     ParticipantDbContext participantDbContext,
     ILogger<StreamHandler> logger,
-    IParticipantMapper participantMapper,
-    IPostcodeMapper locationApiClient)
+    IParticipantMapper participantMapper)
     : IStreamHandler
 {
     public async Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(DynamoDBEvent dynamoDbEvent,
@@ -124,17 +123,6 @@ public class StreamHandler(
             targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
         }
 
-        if (targetParticipant.Address is not null && !String.IsNullOrWhiteSpace(targetParticipant.Address.Postcode))
-        {
-            IEnumerable<PostcodeAddressModel> addressModels;
-            addressModels = await locationApiClient.GetAddressesByPostcodeAsync(targetParticipant.Address.Postcode, new CancellationToken());
-
-            if (addressModels.Any())
-            {
-                targetParticipant.Address.CanonicalTown = addressModels.First().Town;
-            }
-        }
-
         return await participantMapper.Map(image, targetParticipant, cancellationToken);
     }
 
@@ -150,17 +138,6 @@ public class StreamHandler(
         {
             participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
             await participantDbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        if (participant.Address is not null && !String.IsNullOrWhiteSpace(participant.Address.Postcode))
-        {
-            IEnumerable<PostcodeAddressModel> addressModels;
-            addressModels = await locationApiClient.GetAddressesByPostcodeAsync(participant.Address.Postcode, new CancellationToken());
-
-            if (addressModels.Any())
-            {
-                participant.Address.CanonicalTown = addressModels.First().Town;
-            }
         }
 
         await participantMapper.Map(record.Dynamodb.NewImage, participant, cancellationToken);

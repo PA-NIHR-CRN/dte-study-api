@@ -8,10 +8,12 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
+using BPOR.Infrastructure.Clients;
 using BPOR.Registration.Stream.Handler.Services;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure;
+using NIHR.Infrastructure.Models;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace BPOR.Registration.Stream.Handler.Mappers;
@@ -157,14 +159,25 @@ public class ParticipantMapper : IParticipantMapper
         if(source.Address != null) { 
             ParticipantAddressMapper.Map(source.Address, destination);
 
-            var coordinates =
-                await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
-
-            if (coordinates != null)
+            if (destination.Address != null && !String.IsNullOrWhiteSpace(destination.Address.Postcode))
             {
-                destination.ParticipantLocation ??= new ParticipantLocation();
-                destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
-                { SRID = ParticipantLocationConfiguration.LocationSrid };
+                var coordinates =
+                    await _locationApiClient.GetCoordinatesFromPostcodeAsync(destination.Address.Postcode, cancellationToken);
+
+                if (coordinates != null)
+                {
+                    destination.ParticipantLocation ??= new ParticipantLocation();
+                    destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+                    { SRID = ParticipantLocationConfiguration.LocationSrid };
+                }
+
+                IEnumerable<PostcodeAddressModel> addressModels;
+                addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(destination.Address.Postcode, cancellationToken);
+
+                if (addressModels.Any())
+                {
+                    destination.Address.CanonicalTown = addressModels.First().Town;
+                }
             }
         }
 
