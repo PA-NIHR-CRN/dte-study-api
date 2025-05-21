@@ -6,8 +6,6 @@ using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using NIHR.Infrastructure;
-using NIHR.Infrastructure.Models;
 using static Amazon.Lambda.DynamoDBEvents.StreamsEventResponse;
 
 namespace BPOR.Registration.Stream.Handler.Handlers;
