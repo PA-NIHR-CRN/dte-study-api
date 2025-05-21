@@ -83,7 +83,7 @@ jobs:
       - name: Add Github Actions IP to RDS security group (Dev)
         run: |
           aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
- 
+        
       - name: Update Database
         env:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}

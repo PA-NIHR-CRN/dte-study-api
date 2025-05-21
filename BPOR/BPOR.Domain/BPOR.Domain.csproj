@@ -33,7 +33,6 @@
         <EmbeddedResource Include="Entities\Configuration\HealthConditions.txt">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
-        <None Remove="Constants\" />
     </ItemGroup>
 
     <ItemGroup>
@@ -45,6 +44,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Constants\" />
+      <Content Include="Migrations/Scripts/**/*.sql">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
+
 </Project>
