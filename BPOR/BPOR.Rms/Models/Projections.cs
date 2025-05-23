@@ -29,6 +29,9 @@ public static class Projections
         this IQueryable<Domain.Entities.Study> source) =>
         source.Select(StudyAsResearcherFormViewModel());
 
+    public static IQueryable<Campaign> AsCampaign(this IQueryable<Domain.Entities.Campaign> source) =>
+        source.Select(CampaignAsCampaignModel());
+
     public static Expression<Func<Domain.Entities.Study, ResearcherStudyFormViewModel>> StudyAsResearcherFormViewModel()
     {
         return r => new ResearcherStudyFormViewModel
@@ -82,6 +85,26 @@ public static class Projections
         };
     }
 
+    public static Expression<Func<Domain.Entities.Campaign, Campaign>> CampaignAsCampaignModel()
+    {
+        return ec => new Campaign
+        {
+            TargetGroupSize = (int)ec.TargetGroupSize,
+            CreatedAt = ec.CreatedAt,
+            Name = ec.Name,
+            TypeId = ec.TypeId,
+            CampaignParticipants = ec.Participant
+                .Select(p => new CampaignParticipant
+                {
+                    SentAt = p.SentAt,
+                    RegisteredInterestAt = p.RegisteredInterestAt,
+                    DeliveredAt = p.DeliveredAt,
+                    DeliveryStatusId = p.DeliveryStatusId
+                })
+                .ToList(),
+        };
+    }
+
     public static Expression<Func<Domain.Entities.Study, StudyDetailsViewModel>> StudyAsStudyDetailsViewModel()
     {
         return s => new StudyDetailsViewModel
@@ -111,12 +134,12 @@ public static class Projections
             Campaigns = s.FilterCriterias
                 .SelectMany(fc => fc.Campaign)
                 .Select(ec => new Campaign
-                {
-                    TargetGroupSize = (int)ec.TargetGroupSize,
-                    CreatedAt = ec.CreatedAt,
-                    Name = ec.Name,
-                    TypeId = ec.TypeId,
-                    CampaignParticipants = ec.Participant
+                    {
+                        TargetGroupSize = (int)ec.TargetGroupSize,
+                        CreatedAt = ec.CreatedAt,
+                        Name = ec.Name,
+                        TypeId = ec.TypeId,
+                        CampaignParticipants = ec.Participant
                         .Select(p => new CampaignParticipant
                         {
                             SentAt = p.SentAt,

@@ -1,40 +1,17 @@
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 @using BPOR.Domain.Enums;
 
-<style>
-    /* Base styles for all tags */
-    .govuk-tag {
-        border-radius: 3px;
-        text-align: center;
-        font-size: 14px;
-        font-style: normal;
-        font-weight: 700;
-        line-height: 24px;
-        font-feature-settings: 'clig' off, 'liga' off;
-        display: flex;
-        height: 23px;
-        padding: 5px 8px 4px 8px;
-        justify-content: center;
-        align-items: center;
-        align-self: stretch;
-    }
-
-    /* Specific styles for orange tag */
-    .govuk-tag--orange {
-        background: #FDEBD8;
-        color: #494949;
-    }
-
-    /* Specific styles for green tag */
-    .govuk-tag--green {
-        background: #388555;
-        color: #FFFFFF;
-    }
-</style>
-
-
 <div>
-    <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Campaigns sent</h2>
+    @if (Model.Study is null)
+    {
+        <h2 class="govuk-heading-l govuk-!-margin-bottom-4">
+            Emails sent</h2>
+    }
+    else
+    {
+        <h2 class="govuk-heading-l govuk-!-margin-bottom-4">
+            Campaigns sent</h2>
+    }
     <table class="govuk-table" style="width: 100%;">
 
         <thead class="govuk-table__head">
@@ -55,7 +32,10 @@
                 <td class="govuk-table__cell">
                     @campaign.CreatedAt.ToString("dd/MM/yyyy, HH:mm")
                 </td>
-                <td class="govuk-table__cell">@campaign.TypeId.ToString()</td>
+                @if (Model.Study is not null)
+                {
+                    <td class="govuk-table__cell">@campaign.TypeId.ToString()</td>
+                }
                 <td class="govuk-table__cell">@campaign.Name</td>
                 <td class="govuk-table__cell">@campaign.TotalCampaignNotificationsSent / @campaign.TargetGroupSize</td>
 
@@ -101,4 +81,9 @@
         }
         </tbody>
     </table>
+
+    @if (Model.Study is null)
+    {
+        <pagination for="Campaigns" />
+    }    
 </div>

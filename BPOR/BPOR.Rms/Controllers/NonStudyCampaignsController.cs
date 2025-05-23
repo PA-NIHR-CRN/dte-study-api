@@ -18,39 +18,17 @@ public class NonStudyCampaignsController(
     [HttpGet]
     public IActionResult Index()
     {
-        var nonStudyCampaignsViewModel = new NonStudyCampaignsViewModel();
-
-        var campaignList = context.FilterCriterias
-            .Where(fc => fc.StudyId == null)
-            .SelectMany(fc => fc.Campaign)
-            .Where(cp => cp.TypeId == ContactMethodId.Email);
-
-        if (campaignList != null && campaignList.Any())
+        var nonStudyCampaignsViewModel = new StudyDetailsViewModel
         {
-            var pagedData = campaignList
-                .Select(ec => new Models.Study.Campaign
-                {
-                    TargetGroupSize = (int)ec.TargetGroupSize,
-                    CreatedAt = ec.CreatedAt,
-                    Name = ec.Name,
-                    TypeId = ec.TypeId,
-                    CampaignParticipants = ec.Participant
-                            .Select(p => new Models.Study.CampaignParticipant
-                            {
-                                SentAt = p.SentAt,
-                                RegisteredInterestAt = p.RegisteredInterestAt,
-                                DeliveredAt = p.DeliveredAt,
-                                DeliveryStatusId = p.DeliveryStatusId
-                            })
-                            .ToList(),
-                }).OrderByDescending(ec => ec.CreatedAt)
-                .DeferredPage(paginationService);
-
-            nonStudyCampaignsViewModel.Campaigns = pagedData.Value;
-        } else
-        {
-            nonStudyCampaignsViewModel.Campaigns = new List<Models.Study.Campaign>();
-        }
+            Campaigns = context.FilterCriterias
+                .Where(fc => fc.StudyId == null)
+                .SelectMany(fc => fc.Campaign)
+                .Where(cp => cp.TypeId == ContactMethodId.Email)
+                .AsCampaign()
+                .OrderByDescending(ec => ec.CreatedAt)
+                .DeferredPage(paginationService)
+                .Value
+        };
 
         return View(nonStudyCampaignsViewModel);
     }
