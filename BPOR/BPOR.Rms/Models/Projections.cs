@@ -29,7 +29,7 @@ public static class Projections
         this IQueryable<Domain.Entities.Study> source) =>
         source.Select(StudyAsResearcherFormViewModel());
 
-    public static IQueryable<Campaign> AsCampaign(this IQueryable<Domain.Entities.Campaign> source) =>
+    public static IQueryable<Campaign> AsCampaignModel(this IQueryable<Domain.Entities.Campaign> source) =>
         source.Select(CampaignAsCampaignModel());
 
     public static Expression<Func<Domain.Entities.Study, ResearcherStudyFormViewModel>> StudyAsResearcherFormViewModel()

@@ -1,10 +1,6 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using BPOR.Rms.Models;
-using Microsoft.AspNetCore.Authorization;
 using BPOR.Domain.Entities;
-using BPOR.Rms.Models.Study;
-using BPOR.Rms.Models.Email;
 using BPOR.Domain.Enums;
 using NIHR.Infrastructure.Paging;
 
@@ -16,20 +12,16 @@ public class NonStudyCampaignsController(
 ) : Controller
 {
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> IndexAsync(CancellationToken cancellationToken)
     {
-        var nonStudyCampaignsViewModel = new StudyDetailsViewModel
-        {
-            Campaigns = context.FilterCriterias
-                .Where(fc => fc.StudyId == null)
-                .SelectMany(fc => fc.Campaign)
-                .Where(cp => cp.TypeId == ContactMethodId.Email)
-                .AsCampaign()
-                .OrderByDescending(ec => ec.CreatedAt)
-                .DeferredPage(paginationService)
-                .Value
-        };
+        var campaigns = await context.FilterCriterias
+            .Where(fc => fc.StudyId == null)
+            .SelectMany(fc => fc.Campaign)
+            .Where(cp => cp.TypeId == ContactMethodId.Email)
+            .AsCampaignModel()
+            .OrderByDescending(ec => ec.CreatedAt)
+            .PageAsync(paginationService, cancellationToken);
 
-        return View(nonStudyCampaignsViewModel);
+        return View(campaigns);
     }
 }
