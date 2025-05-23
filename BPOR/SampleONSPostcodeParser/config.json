@@ -1,0 +1,39 @@
+{
+    "OutputFilePath": "C:\\Users\\Joe\\Downloads\\NHSPD_FEB_2025_UK_FULL\\Data\\output.csv",
+    "DebugMode": false,
+    "DebugRowLimit": 2000,
+
+    "NhsPostcodeURL": "https://geoportal.statistics.gov.uk/datasets/651c3738702a4c41bc1dbb8ef20ebab9/about",
+    "NhsPostcodeFilePath": "C:\\Users\\Joe\\Downloads\\NHSPD_FEB_2025_UK_FULL\\Data\\nhg25feb.csv",
+    "PostcodeColumnNo": 0,
+    "StandardisedPostcodeColumnNo": 1,
+    "IcbCodeColumnNo": 42,
+    "LadCodeColumnNo": 8,
+
+
+    "IcbURL": "https://geoportal.statistics.gov.uk/datasets/0f0823d7708d4d0e8315092890564470_0/explore",
+    "IcbReferenceFilePath": "C:\\Users\\Joe\\Downloads\\Integrated_Care_Boards_(December_2024)_Names_and_Codes_in_EN.csv",
+    "IcbLookupCodeColumnNo": 1,
+    "IcbLookupNameColumnNo": 2,
+    "FallbackIcbCodes": {
+        "W92": "Wales",
+        "S92": "Scotland",
+        "N92": "Northern Ireland",
+        "L93": "Channel Islands",
+        "M83": "Isle of Man"
+    },
+
+    "LadURL": "https://geoportal.statistics.gov.uk/datasets/ons::local-authority-districts-april-2023-names-and-codes-in-the-uk/explore?showTable=true",
+    "LadReferenceFilePath": "C:\\Users\\Joe\\Downloads\\Local_Authority_Districts_(April_2023)_Names_and_Codes_in_the_United_Kingdom.csv",
+    "LadLookupCodeColumnNo": 0,
+    "LadLookupNameColumnNo": 1,
+    "FallbackLadCodes": {
+        "L99999999": "Channel Islands",
+        "M99999999": "Isle of Man"
+    },
+
+    "ConstituencyURL": "https://geoportal.statistics.gov.uk/datasets/6f2f35a9a0b94e7e949eeba7785911d4/about",
+    "ConstituencyReferenceFilePath": "C:\\Users\\Joe\\Downloads\\pcd_pcon_uk_lu_may_24\\pcd_pcon_uk_lu_may_24.csv",
+    "ConstituencyLookupPostcodeColumnNo": 0,
+    "ConstituencyLookupNameColumnNo": 4
+}
