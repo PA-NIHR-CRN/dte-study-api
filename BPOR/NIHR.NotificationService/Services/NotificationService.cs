@@ -9,13 +9,18 @@ using Polly;
 using Polly.RateLimit;
 using BPOR.Domain.Enums;
 using BPOR.Rms.Constants;
+using BPOR.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Notify.Interfaces;
 
 namespace NIHR.NotificationService.Services
 {
     public class NotificationService : INotificationService
     {
-        private readonly NotificationClient _client;
+        private readonly IAsyncNotificationClient _client;
         private readonly ILogger<NotificationService> _logger;
+        private readonly NotificationDbContext _notificationDbContext;
+        private readonly ParticipantDbContext _participantDbContext;
         private const int _rateLimitPerMinute = 3000;
         private static readonly Dictionary<ContactMethodId, int> _dailyCount = new();
         private static readonly Dictionary<ContactMethodId, int> _dailyLimit = new()
@@ -26,15 +31,84 @@ namespace NIHR.NotificationService.Services
 
         private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
-        public NotificationService(NotificationClient client, ILogger<NotificationService> logger)
+        public NotificationService(IAsyncNotificationClient client, ILogger<NotificationService> logger,
+            NotificationDbContext notificationDbContext, ParticipantDbContext participantDbContext)
         {
             _client = client;
             _logger = logger;
+            _notificationDbContext = notificationDbContext;
+            _participantDbContext = participantDbContext;
 
             foreach (var method in Enum.GetValues<ContactMethodId>())
             {
                 _dailyCount[method] = 0;
             }
+        }
+
+        public async Task ProcessNextNotificationBatchAsync(CancellationToken stoppingToken)
+        {
+            var notifications = await _notificationDbContext.Notifications
+                .Where(n => !n.IsProcessed)
+                .OrderBy(n => n.Id)
+                .Take(1000).Include(n => n.NotificationDatas)
+                .ToListAsync(stoppingToken);
+
+            if (notifications.Count > 0)
+            {
+                _logger.LogInformation("Processing {NotificationsCount} notifications", notifications.Count);
+
+                try
+                {
+                    await SendBatchNotificationAsync(notifications, stoppingToken);
+
+                    foreach (var notification in notifications)
+                    {
+                        await UpdateDeliveryStatusForLetterAsync(notification);
+                        notification.IsProcessed = true;
+                    }
+
+
+                    await _notificationDbContext.SaveChangesAsync(stoppingToken);
+                    await _participantDbContext.SaveChangesAsync(stoppingToken);
+
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while sending notification emails");
+                }
+            }
+        }
+
+        private async Task UpdateDeliveryStatusForLetterAsync(Notification notification)
+        {
+            var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
+
+            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignTypeId, out var ctValue)
+                || !int.TryParse(ctValue, out var campaignType)
+                || campaignType != (int)ContactMethodId.Letter)
+            {
+                return;
+            }
+
+            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignParticipantId, out var campaignParticipantIdValue)
+                || !int.TryParse(campaignParticipantIdValue, out var campaignParticipantId))
+            {
+                _logger.LogWarning(
+                    "Notification ID {NotificationId}: Missing or invalid campaignParticipantId: '{CampaignParticipantIdValue}'",
+                    notification.Id,
+                    campaignParticipantIdValue);
+                return;
+            }
+
+            var participant = await _participantDbContext.CampaignParticipant.FirstOrDefaultAsync(x => x.Id == campaignParticipantId);
+            if (participant == null)
+            {
+                _logger.LogWarning("Notification ID {NotificationId}: Participant ID {ParticipantId} not found", notification.Id, campaignParticipantId);
+                return;
+            }
+
+            participant.DeliveredAt = DateTime.UtcNow;
+            participant.DeliveryStatusId = (int)DeliveryStatus.Delivered;
         }
 
         public async Task SendNotificationAsync(SendNotificationRequest request, CancellationToken cancellationToken)

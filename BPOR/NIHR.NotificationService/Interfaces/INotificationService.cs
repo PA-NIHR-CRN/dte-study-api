@@ -14,4 +14,5 @@ public interface INotificationService
         CancellationToken cancellationToken);
 
     Task<TemplateList> GetTemplatesAsync(CancellationToken cancellationToken);
+    Task ProcessNextNotificationBatchAsync(CancellationToken stoppingToken);
 }

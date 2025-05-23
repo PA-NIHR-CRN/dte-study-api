@@ -30,7 +30,9 @@ namespace NIHR.NotificationService.Services
             {
                 try
                 {
-                    await ProcessNotificationsAsync(stoppingToken);
+                    using var scope = _serviceProvider.CreateScope();
+                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    await notificationService.ProcessNextNotificationBatchAsync(stoppingToken);
                 }
                 catch (Exception ex)
                 {
@@ -42,82 +44,12 @@ namespace NIHR.NotificationService.Services
             }
         }
 
-        private async Task ProcessNotificationsAsync(CancellationToken stoppingToken)
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
-            var participantDbContext = scope.ServiceProvider.GetRequiredService<ParticipantDbContext>();
 
-            var notifications = await context.Notifications
-                .Where(n => !n.IsProcessed)
-                .OrderBy(n => n.Id)
-                .Take(1000).Include(n => n.NotificationDatas)
-                .ToListAsync(stoppingToken);
-
-            if (notifications.Count > 0)
-            {
-                _logger.LogInformation("Processing {NotificationsCount} notifications", notifications.Count);
-
-                var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-
-                try
-                {
-                    await notificationService.SendBatchNotificationAsync(notifications, stoppingToken);
-
-                    foreach (var notification in notifications)
-                    {
-                        await UpdateDeliveryStatusForLetterAsync(notification, participantDbContext);
-                        notification.IsProcessed = true;
-                    }
-
-
-                    await context.SaveChangesAsync(stoppingToken);
-                    await participantDbContext.SaveChangesAsync(stoppingToken);
-
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error occurred while sending notification emails");
-                }
-            }
-        }
 
         public override async Task StopAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Hosted Notification Queue Service is stopping");
             await base.StopAsync(stoppingToken);
-        }
-
-        private async Task UpdateDeliveryStatusForLetterAsync(Notification notification, ParticipantDbContext context)
-        {
-            var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
-
-            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignTypeId, out var ctValue)
-                || !int.TryParse(ctValue, out var campaignType)
-                || campaignType != (int)ContactMethodId.Letter)
-            {
-                return;
-            }
-
-            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignParticipantId, out var campaignParticipantIdValue)
-                || !int.TryParse(campaignParticipantIdValue, out var campaignParticipantId))
-            {
-                _logger.LogWarning(
-                    "Notification ID {NotificationId}: Missing or invalid campaignParticipantId: '{CampaignParticipantIdValue}'",
-                    notification.Id,
-                    campaignParticipantIdValue);
-                return;
-            }
-
-            var participant = await context.CampaignParticipant.FirstOrDefaultAsync(x => x.Id == campaignParticipantId);
-            if (participant == null)
-            {
-                _logger.LogWarning("Notification ID {NotificationId}: Participant ID {ParticipantId} not found", notification.Id, campaignParticipantId);
-                return;
-            }
-
-            participant.DeliveredAt = DateTime.UtcNow;
-            participant.DeliveryStatusId = (int)DeliveryStatus.Delivered;
         }
     }
 }
