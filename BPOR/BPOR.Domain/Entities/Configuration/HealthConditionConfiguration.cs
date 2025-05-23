@@ -31,15 +31,22 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
                 errorsList.Add(new ArgumentException($"Health condition at {csvResult.Id} is empty"));
             }
 
-            var tempSupersededBy = healthConditionsDict[csvResult.SupersededBy];
-            if(tempSupersededBy == null)
+            if (csvResult.SupersededBy != null)
             {
-                errorsList.Add(new ArgumentException($"Health condition {csvResult.Condition} at {csvResult.Id} has a superseded value that does not appear in the csv"));
-            }
-            // for conditions that are not superseded the supersededid = id
-            if (tempSupersededBy != null &&  tempSupersededBy.Id != tempSupersededBy.SupersededBy)
-            {
-                errorsList.Add(new ArgumentException($"Health Condition {csvResult.Condition} is superseded by Health Condition {tempSupersededBy.Condition} which is itself superseded"));
+                var tempSupersededBy = healthConditionsDict[(int)csvResult.SupersededBy];
+
+                if (tempSupersededBy == null)
+                {
+                    errorsList.Add(new ArgumentException($"Health condition {csvResult.Condition} at {csvResult.Id} has a superseded value that does not appear in the csv"));
+                }
+                else
+                {
+                    // for conditions that are not superseded the supersededid = id
+                    if (tempSupersededBy != null && tempSupersededBy.Id != tempSupersededBy.SupersededBy)
+                    {
+                        errorsList.Add(new ArgumentException($"Health Condition {csvResult.Condition} is superseded by Health Condition {tempSupersededBy.Condition} which is itself superseded"));
+                    }
+                }
             }
         };
         if (errorsList.Any())
@@ -84,8 +91,8 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
     {
 
         public int Id { get; set; }
-        public String Condition { get; set; }
-        public int SupersededBy { get; set; }
+        public string Condition { get; set; }
+        public int? SupersededBy { get; set; }
 
     }
 }
