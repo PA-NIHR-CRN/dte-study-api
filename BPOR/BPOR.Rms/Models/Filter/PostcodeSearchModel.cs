@@ -99,6 +99,12 @@ namespace BPOR.Rms.Models.Filter
                 yield return new ValidationResult(
                             $"{validationContext.GetMemberDisplayName(nameof(SearchRadiusMiles))} must be greater than 0", [nameof(SearchRadiusMiles)]);
             }
+
+            if (FullPostcode.HasValue && Location is null)
+            {
+                yield return new ValidationResult(
+                            "A location for the entered postcode could not be found", [nameof(FullPostcode)]);
+            }
         }
     }
 
@@ -136,7 +142,14 @@ namespace BPOR.Rms.Models.Filter
                 {
                     var location = await _postcodeMapper.GetCoordinatesFromPostcodeAsync(postcode.ToString(), bindingContext.HttpContext.RequestAborted);
 
-                    bindingContext.Result = ModelBindingResult.Success(new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid });
+                    if (location is null)
+                    {
+                        bindingContext.Result = ModelBindingResult.Failed();
+                    }
+                    else
+                    {
+                        bindingContext.Result = ModelBindingResult.Success(new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid });
+                    }
                 }
             }
         }
