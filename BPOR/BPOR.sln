@@ -35,6 +35,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImportGeocodeData", "Import
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.GovUk.AspNetCore.Mvc", "NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj", "{310FC69F-836B-4940-9634-EE74BA4F219C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoDBupdate", "BPOR.Geolocation\DynamoDBupdate\DynamoDBupdate.csproj", "{980F4FD5-7C4B-4027-8D91-E9C0D0DA39B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +106,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5ED83769-29C7-4504-94C3-C8962CB62500} = {7D035B4F-4ECD-4D3F-B31E-0908D729085E}
 		{DB8E1DBE-FBB1-4A1F-B2D6-D75F02898EFE} = {94C3A807-9598-40BE-8D1A-D6C6B79100F8}
+		{980F4FD5-7C4B-4027-8D91-E9C0D0DA39B6} = {7D035B4F-4ECD-4D3F-B31E-0908D729085E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4E45AB36-07F2-4CE9-8685-CFE1BBD4AC3E}

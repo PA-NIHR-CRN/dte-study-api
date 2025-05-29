@@ -1,0 +1,73 @@
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+using BPOR.Domain.Entities;
+using BPOR.Domain.Interfaces;
+using BPOR.Domain.Repositories;
+using BPOR.Domain.Settings;
+using DynamoDBupdate.CRNCC2563Stage2Backfill;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NIHR.Infrastructure.EntityFrameworkCore;
+
+namespace DynamoBDupdate.Startup;
+
+public static class DependencyInjection
+{
+
+    public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration,
+        IHostEnvironment hostEnvironment)
+    {
+        services.AddDistributedMemoryCache();
+
+
+        var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
+        var connectionString = dbSettings.Value.BuildConnectionString();
+
+        services.AddDbContext<ParticipantDbContext>(options =>
+            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+                x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery).UseNetTopologySuite()));
+
+        services.ConfigureAwsServices(configuration);
+
+        services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
+
+        services.AddTransient<IStage2Backfill, Stage2Backfill>();
+
+
+        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
+            .CreateLogger("DynamoDBupdate");
+
+        return services;
+    }
+
+
+
+    private static void ConfigureAwsServices(this IServiceCollection services, IConfiguration configuration)
+    {
+
+        var awsSettings = services.GetSectionAndValidate<AwsSettings>(configuration).Value;
+
+        // Configure Amazon DynamoDB
+        var dynamoDbConfig = new AmazonDynamoDBConfig();
+        if (!string.IsNullOrWhiteSpace(awsSettings.ServiceUrl))
+        {
+            dynamoDbConfig.ServiceURL = awsSettings.ServiceUrl;
+        }
+        var dynamoDbClient = new AmazonDynamoDBClient(dynamoDbConfig);
+        services.AddSingleton<IAmazonDynamoDB>(dynamoDbClient);
+        services.AddSingleton<IDynamoDBContext, DynamoDBContext>(_ => new DynamoDBContext(dynamoDbClient));
+
+
+        // DynamoDB Operation Configuration
+        services.AddSingleton(new DynamoDBOperationConfig
+        {
+            OverrideTableName = awsSettings.ParticipantRegistrationDynamoDbTableName
+        });
+
+        // Configure AWS Options globally if needed
+        services.AddDefaultAWSOptions(configuration.GetAWSOptions());
+    }
+}
