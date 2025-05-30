@@ -127,9 +127,6 @@ public class VolunteerController(ParticipantDbContext context,
                                 canonicalTown = possibleAddresses.First().Town;
                             }
                         };
-
-
-
                     }
                 }
                 else
