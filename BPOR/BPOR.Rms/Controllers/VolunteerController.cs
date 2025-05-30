@@ -105,11 +105,11 @@ public class VolunteerController(ParticipantDbContext context,
                 await DoesUserEmailExistInDatabaseAsync(model.EmailAddress);
             }
 
+            string canonicalTown = null;
             if (ModelState.IsValid) { 
 
                 if (!model.ManualAddressEntry)
-                {
-
+                { 
                     if (model.SelectedAddress != null)
                     {
                         var participantAddress =  JsonSerializer.Deserialize<PostcodeAddressModel>(model.SelectedAddress);
@@ -122,7 +122,22 @@ public class VolunteerController(ParticipantDbContext context,
                         if (Postcode.TryParse(participantAddress.Postcode, out TempPostcode))
                         {
                             model.PostCode = TempPostcode;
+                            List<PostcodeAddressModel> possibleAddresses = await GetAddresses(TempPostcode.ToString());
+                            if (possibleAddresses.Count > 0) {
+                                canonicalTown = possibleAddresses.First().Town;
+                            }
                         };
+
+
+
+                    }
+                }
+                else
+                {
+                    // address has been selected from lookup already
+                    if(model.Town != null)
+                    {
+                        canonicalTown = model.Town;
                     }
                 }
 
@@ -179,7 +194,8 @@ public class VolunteerController(ParticipantDbContext context,
                         AddressLine3 = model.AddressLine3,
                         AddressLine4 = model.AddressLine4,
                         Town = model.Town,
-                        Postcode = model.PostCode.ToString()
+                        Postcode = model.PostCode.ToString(),
+                        CanonicalTown = canonicalTown
                     },
                     ContactMethodId = new List<ParticipantContactMethod>()
                     {
