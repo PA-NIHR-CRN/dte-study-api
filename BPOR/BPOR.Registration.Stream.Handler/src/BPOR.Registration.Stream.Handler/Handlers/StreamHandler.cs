@@ -1,7 +1,7 @@
-using System.Collections.Generic;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.DynamoDBEvents;
+using BPOR.Rms.Utilities.Interfaces;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Mappers;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +13,14 @@ namespace BPOR.Registration.Stream.Handler.Handlers;
 public class StreamHandler(
     ParticipantDbContext participantDbContext,
     ILogger<StreamHandler> logger,
-    IParticipantMapper participantMapper)
+    IParticipantMapper participantMapper,
+    IDbExceptionHelper dbExceptionHelper
+    )
     : IStreamHandler
 {
     public async Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(
-        DynamoDBEvent dynamoDbEvent,
-        CancellationToken cancellationToken)
+    DynamoDBEvent dynamoDbEvent,
+    CancellationToken cancellationToken)
     {
         participantDbContext.ThrowIfInMaintenanceMode();
 
@@ -26,6 +28,27 @@ public class StreamHandler(
 
         foreach (var record in dynamoDbEvent.Records)
         {
+            var streamEventId = record.EventID;
+            StreamEvent streamEvent;
+
+            try
+            {
+                streamEvent = new StreamEvent
+                {
+                    Id = streamEventId,
+                    IsProcessing = true,
+                    StartedAt = DateTime.UtcNow
+                };
+
+                participantDbContext.StreamEvent.Add(streamEvent);
+                await participantDbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException ex) when (dbExceptionHelper.IsUniqueConstraintViolation(ex))
+            {
+                logger.LogInformation("Skipping - streamEventId with key {StreamEventId} already exists", streamEventId);
+                continue;
+            }
+
             var sequenceNumber = record.Dynamodb.SequenceNumber;
 
             using (logger.BeginScope("{EventId}, {SequenceNumber}", record.EventID, sequenceNumber))
@@ -57,6 +80,11 @@ public class StreamHandler(
                     await tx.CommitAsync(cancellationToken);
 
                     logger.LogInformation("Record {SequenceNumber} committed successfully", sequenceNumber);
+
+                    streamEvent.IsProcessing = false;
+                    streamEvent.ProcessedAt = DateTime.UtcNow;
+
+                    await participantDbContext.SaveChangesAsync(cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -69,7 +97,6 @@ public class StreamHandler(
                     {
                         ItemIdentifier = sequenceNumber
                     });
-
                 }
             }
         }

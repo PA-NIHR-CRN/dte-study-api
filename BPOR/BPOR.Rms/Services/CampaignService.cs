@@ -28,7 +28,8 @@ public class CampaignService(
     IReferenceGenerator referenceGenerator,
     NotificationDbContext notificationContext,
     IPostcodeMapper locationApiClient,
-    TimeProvider timeProvider
+    TimeProvider timeProvider,
+    IDbExceptionHelper dbExceptionHelper
     )
     : ICampaignService
 {
@@ -127,7 +128,7 @@ public class CampaignService(
         CancellationToken cancellationToken)
     {
         var retryPolicy = Policy
-            .Handle<DbUpdateException>(IsUniqueConstraintViolation)
+            .Handle<DbUpdateException>(dbExceptionHelper.IsUniqueConstraintViolation)
             .RetryAsync(3, onRetry: (exception, retryCount) =>
             {
                 logger.LogError(exception, "Error saving email campaign participants, attempt {Attempt}", retryCount);
@@ -150,11 +151,6 @@ public class CampaignService(
                 UpdateProcessingResultReferences(processingResult, participant.Entity.ParticipantId, newReference);
             }
         }
-    }
-
-    private static bool IsUniqueConstraintViolation(DbUpdateException ex)
-    {
-        return ex.InnerException != null && ex.InnerException.Message.Contains("UNIQUE constraint failed");
     }
 
     private async IAsyncEnumerable<ProcessingResults> ProcessVolunteersAsync(
