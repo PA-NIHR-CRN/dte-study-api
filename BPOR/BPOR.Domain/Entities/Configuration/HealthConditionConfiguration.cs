@@ -31,9 +31,9 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
                 errorsList.Add(new ArgumentException($"Health condition at {csvResult.Id} is empty"));
             }
 
-            if (csvResult.SupersededBy != null)
+            if (csvResult.SupersededById != null)
             {
-                var tempSupersededBy = healthConditionsDict[(int)csvResult.SupersededBy];
+                var tempSupersededBy = healthConditionsDict[(int)csvResult.SupersededById];
 
                 if (tempSupersededBy == null)
                 {
@@ -42,7 +42,7 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
                 else
                 {
                     // for conditions that are not superseded the supersededid = id
-                    if (tempSupersededBy != null && tempSupersededBy.Id != tempSupersededBy.SupersededBy)
+                    if (tempSupersededBy != null && tempSupersededBy.Id != tempSupersededBy.SupersededById)
                     {
                         errorsList.Add(new ArgumentException($"Health Condition {csvResult.Condition} is superseded by Health Condition {tempSupersededBy.Condition} which is itself superseded"));
                     }
@@ -62,7 +62,7 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
                 Description = healthCondition.Condition,
                 IsDeleted = false,
                 // sheet is provided with all superseded values filled in, so when a superseded value = current id, condition is not superseded
-                SupersededById = healthCondition.Id == healthCondition.SupersededBy ? null : healthCondition.SupersededBy
+                SupersededById = healthCondition.Id == healthCondition.SupersededById ? null : healthCondition.SupersededById
             }));
     }
 
@@ -92,7 +92,8 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
 
         public int Id { get; set; }
         public string Condition { get; set; }
-        public int? SupersededBy { get; set; }
+        public int SupersededById { get; set; }
+        public string SupersededbyCondition { get; set; }
 
     }
 }

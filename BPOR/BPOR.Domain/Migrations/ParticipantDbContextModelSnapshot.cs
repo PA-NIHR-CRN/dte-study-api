@@ -10152,8 +10152,8 @@ namespace Dynamo.Stream.Handler.Migrations
                         new
                         {
                             Id = 1275,
-                            Code = "New - Breast cancer surgery",
-                            Description = "New - Breast cancer surgery",
+                            Code = "Breast cancer surgery",
+                            Description = "Breast cancer surgery",
                             IsDeleted = false
                         },
                         new

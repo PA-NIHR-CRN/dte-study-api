@@ -8683,10 +8683,11 @@ namespace Dynamo.Stream.Handler.Migrations
                     { 1272, "General surgery and recovery", "General surgery and recovery", false, null },
                     { 1273, "Eye Tests", "Eye Tests", false, null },
                     { 1274, "Dental care and surgery", "Dental care and surgery", false, null },
-                    { 1275, "New - Breast cancer surgery", "New - Breast cancer surgery", false, null },
+                    { 1275, "Breast cancer surgery", "Breast cancer surgery", false, null },
                     { 1276, "Heart rhythm problems - ( also check arrhythmia)", "Heart rhythm problems - ( also check arrhythmia)", false, null },
                     { 1277, "Transplants and organ donation", "Transplants and organ donation", false, null }
                 });
+
             migrationBuilder.Sql(@"exec('
                 CREATE VIEW ParticipantActiveHealthCondition AS
                     SELECT
@@ -8702,6 +8703,7 @@ namespace Dynamo.Stream.Handler.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+
             migrationBuilder.Sql(@"exec('DROP VIEW ParticipantActiveHealthCondition');");
 
             migrationBuilder.DeleteData(

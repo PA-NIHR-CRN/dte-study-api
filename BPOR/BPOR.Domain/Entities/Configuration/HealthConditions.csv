@@ -1,1278 +1,1278 @@
-Id,Condition,SupersededBy
-1,"Acanthosis nigricans",1
-2,Achalasia,2
-3,"Acid and chemical burns",3
-4,"Acoustic neuroma (vestibular schwannoma)",4
-5,"Vestibular schwannoma",4
-6,Acromegaly,6
-7,Gigantism,6
-8,"Urine albumin to creatinine ratio (ACR)",8
-9,"Actinic keratoses (solar keratoses)",9
-10,"Solar keratoses",9
-11,Acupuncture,11
-12,"Acute cholecystitis",12
-13,"Gallbladder pain",12
-14,"Cholecystitis (acute)",12
-15,MND,886
-16,"Acute kidney injury",16
-17,"Acute respiratory distress syndrome",17
-18,Adenoidectomy,18
-19,"Air or gas embolism",19
-20,"Decompression sickness",19
-21,"Alcohol poisoning",21
-22,"Alexander technique",556
-23,Alkaptonuria,23
-24,Amputation,24
-25,Amyloidosis,25
-26,"Anabolic steroid misuse",26
-27,"Steroid misuse",26
-28,Anaesthesia,28
-29,"Anal cancer",29
-30,"Anal pain",30
-31,Proctalgia,30
-32,"Angelman syndrome",32
-33,"Animal and human bites",33
-34,"Bite (animal or human)",33
-35,Anosmia,1125
-36,Antacids,769
-37,Antihistamines,520
-38,"Antisocial personality disorder",38
-39,"Anxiety disorders in children",39
-40,Arrhythmia,40
-41,"Heart rhythm problems",40
-42,"Arterial thrombosis",42
-43,"Intrauterine insemination (IUI)",43
-44,Asbestosis,44
-45,Aspirin,1256
-46,"Atherosclerosis (arteriosclerosis)",46
-47,"Athlete's foot",47
-48,"Auditory processing disorder (APD)",48
-49,Balanitis,49
-50,"Barium enema",1266
-51,Bedbugs,807
-52,"Beta blockers",83
-53,"Black eye",176
-54,"Blood clots",54
-55,"Blood groups",55
-56,"Blood in semen (haematospermia)",56
-57,"Blood in urine",57
-58,"Blood pressure test",1266
-59,"Body dysmorphic disorder (BDD)",59
-60,"Infected piercings",60
-61,Boils,61
-62,Botulism,62
-63,"Bowel polyps",63
-64,"Bowen's disease",64
-65,"Brain tumours",65
-66,"Breast pain",66
-67,"Breast reduction on the NHS",1186
-68,"Breath-holding in babies and children",68
-69,"Broken ankle",1242
-70,"Broken arm or wrist",1242
-71,"Broken collarbone",1242
-72,"Broken finger or thumb",1242
-73,"Broken leg",1242
-74,"Broken nose",1242
-75,"Broken or bruised ribs",1242
-76,"Broken toe",1242
-77,Bronchitis,77
-78,Brucellosis,78
-79,"Brugada syndrome",79
-80,"Carbon monoxide poisoning",80
-81,"Neuroendocrine tumours and carcinoid syndrome",81
-82,Cardiomyopathy,82
-83,"Cardiovascular disease",83
-84,"Age-related cataracts",84
-85,"Cataracts (age-related)",84
-86,Catarrh,86
-87,Cavernoma,87
-88,"Clostridium difficile (C. diff) infection",88
-89,"Carcinoembryonic antigen (CEA) test",1266
-90,"Cervical rib",91
-91,"Thoracic outlet syndrome",91
-92,"Charles Bonnet syndrome",92
-93,"Chest infection",93
-94,"Chest pain",94
-95,"Heart pain",94
-96,"Chiari malformation",96
-97,Chilblains,97
-98,Chiropractic,556
-99,Cholesteatoma,99
-100,"Chronic traumatic encephalopathy",100
-101,"Circumcision in boys",101
-102,"Circumcision in men",102
-103,Claustrophobia,103
-104,"Cluster headaches",104
-105,"Colour vision deficiency (colour blindness)",105
-106,Coma,693
-107,"Compartment syndrome",107
-108,Concussion,108
-109,"Sudden confusion (delirium)",109
-110,"Confusion (sudden)",109
-111,Delirium,109
-112,Costochondritis,112
-113,Cough,113
-114,"Coughing up blood (blood in phlegm)",114
-115,"Cradle cap",115
-116,"CT scan",1266
-117,"Cuts and grazes",719
-118,"Blue skin or lips (cyanosis)",119
-119,Cyanosis,119
-120,"Cyclical vomiting syndrome",120
-121,Cyclospora,121
-122,Cyclothymia,122
-123,Dandruff,123
-124,Decongestants,646
-125,"Dental abscess",125
-126,"Dentures (false teeth)",126
-127,"Dyspraxia (developmental co-ordination disorder) in adults",127
-128,"Developmental dysplasia of the hip",128
-129,"Congenital hip dislocation",128
-130,"Hip dysplasia",128
-131,Diabetes,131
-132,"Diabetic eye screening",132
-133,"Diabetic ketoacidosis",133
-134,"DiGeorge syndrome (22q11 deletion)",134
-135,"Dislocated kneecap",135
-136,"Dislocated shoulder",136
-137,"Differences in sex development",137
-138,intersex,137
-139,"Dissociative disorders",139
-140,"Diverticular disease and diverticulitis",140
-141,Dizziness,141
-142,"Dry mouth",142
-143,"Dysarthria (difficulty speaking)",143
-144,Dysentery,144
-145,Earache,145
-146,"Early or delayed puberty",146
-147,"Puberty (early or delayed)",146
-148,"Earwax build-up",148
-149,"Eating disorders",149
-150,"Ebola virus disease",150
-151,Echocardiogram,1266
-152,Ectropion,152
-153,"Edwards' syndrome (trisomy 18)",153
-154,"Ehlers-Danlos syndromes",154
-155,"Ejaculation problems",155
-156,"Premature ejaculation",155
-157,"Elbow and arm pain",157
-158,"Electrocardiogram (ECG)",158
-159,"Electroencephalogram (EEG)",159
-160,"Electrolyte test",1266
-161,Embolism,161
-162,Emollients,818
-163,Empyema,163
-164,Endoscopy,164
-165,"Enhanced recovery",1272
-166,Epididymitis,166
-167,Epiglottitis,167
-168,"Erythema multiforme",168
-169,"Erythema nodosum",169
-170,Erythromelalgia,170
-171,"Euthanasia and assisted suicide",1153
-172,"Ewing sarcoma",172
-173,"Excessive daytime sleepiness (hypersomnia)",173
-174,Hypersomnia,173
-175,"Eye cancer",175
-176,"Eye injuries",176
-177,"Eyelid problems",177
-178,"Eye tests for children",1273
-179,"Prosopagnosia (face blindness)",179
-180,"Face blindness",179
-181,"Febrile seizures",181
-182,"Fits (children with fever)",181
-183,"Seizures (children with fever)",181
-184,"Female genital mutilation (FGM)",184
-185,"High temperature (fever) in children",185
-186,"Fever in children",185
-187,"Flat feet",187
-188,Fluoride,1274
-189,"Foetal alcohol spectrum disorder",189
-190,"Food colours and hyperactivity",551
-191,"Food intolerance",191
-192,"Foot drop",192
-193,"Gallbladder cancer",193
-194,"Ganglion cyst",194
-195,Gastritis,195
-196,Gastroparesis,196
-197,"General anaesthesia",28
-198,"Gilbert's syndrome",198
-199,"Glutaric aciduria type 1",199
-200,"Granuloma annulare",200
-201,"Granulomatosis with polyangiitis",201
-202,"Growing pains",202
-203,"Hair dye reactions",203
-204,"Hairy cell leukaemia",204
-205,"Leukaemia (hairy cell)",204
-206,"Hallucinations and hearing voices",206
-207,"Hearing voices",206
-208,"Hamstring injury",208
-209,"Hand foot and mouth disease",1243
-210,"Head and neck cancer",210
-211,"Health anxiety",212
-212,Hypochondria,212
-213,"Hearing tests for children",766
-214,"Heart-lung transplant",214
-215,"Heart palpitations and ectopic beats",215
-216,Palpitations,215
-217,"Ectopic beats",215
-218,"Heat exhaustion and heatstroke",218
-219,"Heat rash (prickly heat)",219
-220,"Prickly heat",219
-221,"Sweating (excessive)",710
-222,"sweat rash",219
-223,"Henoch-Schönlein purpura (HSP)",223
-224,Hepatitis,224
-225,"Herbal medicines",1152
-226,"Herceptin (trastuzumab)",606
-227,"Hereditary haemorrhagic telangiectasia (HHT)",227
-228,"Hereditary neuropathy with pressure palsies (HNPP)",228
-229,"Hereditary spastic paraplegia",229
-230,Hernia,230
-231,"Herpes simplex eye infections",231
-232,"Eye infection (herpes)",231
-233,"Herpetic whitlow (whitlow finger)",233
-234,"Whitlow finger",233
-235,"Haemophilus influenzae type b (Hib)",235
-236,"Hidradenitis suppurativa (HS)",236
-237,"Hyperglycaemia (high blood sugar)",237
-238,"Hip pain in adults",238
-239,"Hirschsprung's disease",239
-240,"Hoarding disorder",240
-241,Homeopathy,1152
-242,"Home oxygen therapy",412
-243,"Oxygen therapy",412
-244,Homocystinuria,244
-245,"Noise sensitivity (hyperacusis)",245
-246,Hypnotherapy,246
-247,Hypothermia,247
-248,Ichthyosis,248
-249,Indigestion,249
-250,"Inflammatory bowel disease",250
-251,"Ingrown hairs",251
-252,"Ingrown toenail",252
-253,"Intensive care",253
-254,"Interstitial cystitis",254
-255,"Intracranial hypertension",255
-256,"Hip pain in children (irritable hip)",256
-257,"Irritable hip",256
-258,"Isovaleric acidaemia",258
-259,"Joint pain",259
-260,"Kaposi's sarcoma",260
-261,"Keratosis pilaris",261
-262,"Klinefelter syndrome",262
-263,"Knee pain",263
-264,"Knock knees",264
-265,Kwashiorkor,265
-266,"Labial fusion",266
-267,"Lambert-Eaton myasthenic syndrome",267
-268,"Lactate dehydrogenase (LDH) test",268
-269,"Legionnaires' disease",269
-270,"Lichen sclerosus",270
-271,"Limping in children",271
-272,Lipoedema,272
-273,Lipoma,273
-274,"Liver disease",274
-275,"Local anaesthesia",275
-276,"Long QT syndrome",276
-277,"Loss of libido (reduced sex drive)",277
-278,"Low blood sugar (hypoglycaemia)",278
-279,"Hypoglycaemia (low blood sugar)",278
-280,"Low sperm count",280
-281,"Sperm count (low)",280
-282,Lumps,282
-283,"Lyme disease",283
-284,"Macular hole",284
-285,"Magnesium test",285
-286,"The 'male menopause'",286
-287,"Male menopause",286
-288,"Mallet finger",288
-289,"Maple syrup urine disease",289
-290,Mastoiditis,290
-291,MCADD,291
-292,"Medically unexplained symptoms",293
-293,"Functional neurological disorder",293
-294,"Ménière's disease",294
-295,Mesothelioma,295
-296,"Metabolic syndrome",296
-297,"Metallic taste",297
-298,"Mitral valve problems",298
-299,"Heart valve problems",298
-300,"Molar pregnancy",300
-301,"Morton's neuroma",301
-302,"Motion sickness",302
-303,"Mouth ulcers",303
-304,MRSA,304
-305,"Multiple system atrophy",305
-306,"Mycobacterium chimaera infection",306
-307,"Myelodysplastic syndrome (myelodysplasia)",307
-308,"Myositis (polymyositis and dermatomyositis)",308
-309,"Nail patella syndrome",309
-310,"Nail problems",310
-311,"Nasal and sinus cancer",311
-312,"Nose cancer",311
-313,"Sinus cancer",311
-314,"Nasopharyngeal cancer",314
-315,"Neck pain",315
-316,"Necrotising fasciitis",316
-317,"Neonatal herpes (herpes in a baby)",317
-318,"Herpes in babies",317
-319,"Nephrotic syndrome in children",319
-320,Neuroblastoma,320
-321,"Neuroendocrine tumours",321
-322,"Neuromyelitis optica",322
-323,"Night sweats",323
-324,"Sweating at night",323
-325,"Night terrors and nightmares",325
-326,"Nipple discharge",326
-327,"Non-alcoholic fatty liver disease (NAFLD)",327
-328,"Norovirus (vomiting bug)",328
-329,"Vomiting bug",328
-330,"Winter vomiting bug",328
-331,NSAIDs,1256
-332,"Swollen ankles feet and legs (oedema)",1262
-333,"Oesophageal atresia and tracheo-oesophageal fistula",333
-334,Orf,334
-335,"Osteophyte (bone spur)",335
-336,Otosclerosis,336
-337,"Ovulation pain",337
-338,"Panic disorder",338
-339,"Patau's syndrome",339
-340,"Peak flow test",1266
-341,"Pelvic pain",341
-342,"Penile cancer",342
-343,"Period pain",344
-344,"Menstrual pain",344
-345,Periods,345
-346,"Persistent trophoblastic disease and choriocarcinoma",346
-347,"Personality disorder",347
-348,"PET scan",1266
-349,Phaeochromocytoma,349
-350,Phenylketonuria,350
-351,"Tight foreskin (phimosis and paraphimosis)",352
-352,"Foreskin problems",352
-353,Phimosis,353
-354,"Phlebitis (superficial thrombophlebitis)",354
-355,"Superficial thrombophlebitis",354
-356,"Phosphate test",1266
-357,"Photodynamic therapy (PDT)",357
-358,"Pins and needles",358
-359,"PIP breast implants",1186
-360,"Pityriasis rosea",360
-361,"Pityriasis versicolor",361
-362,"Plagiocephaly and brachycephaly (flat head syndrome)",362
-363,"Brachycephaly and plagiocephaly",362
-364,"Flat head syndrome",362
-365,Pleurisy,365
-366,Polio,366
-367,"Polyhydramnios (too much amniotic fluid)",367
-368,"Polymorphic light eruption",368
-369,"Pompholyx (dyshidrotic eczema)",369
-370,"Postmenopausal bleeding",370
-371,"Bleeding after the menopause",370
-372,Post-mortem,1277
-373,"Postpartum psychosis",373
-374,"Postural tachycardia syndrome (PoTS)",374
-375,"Potassium test",1266
-376,"Predictive genetic tests for cancer risk genes",1266
-377,"Genetic test for cancer gene",1266
-378,Probiotics,1223
-379,"Problems swallowing pills",379
-380,"Swallowing pills",379
-381,"Prostate problems",381
-382,Prostatitis,382
-383,"Psoriatic arthritis",383
-384,Psychiatry,384
-385,"Pubic lice",385
-386,"Pudendal neuralgia",386
-387,"Pyoderma gangrenosum",387
-388,"Q fever",388
-389,"Rashes in babies and children",389
-390,"Red blood cell count",390
-391,"Red eye",391
-392,"Reflux in babies",393
-393,"Acid reflux in babies",393
-394,"Respiratory tract infections (RTIs)",394
-395,"Retinal migraine",395
-396,"Retinoblastoma (eye cancer in children)",396
-397,"Rett syndrome",397
-398,"Reye's syndrome",398
-399,Roseola,399
-400,"Salivary gland stones",400
-401,Sarcoidosis,401
-402,"SARS (severe acute respiratory syndrome)",402
-403,"Scarlet fever",403
-404,"Schistosomiasis (bilharzia)",404
-405,Bilharzia,404
-406,Scleroderma,406
-407,"Selective mutism",407
-408,"Septic arthritis",408
-409,"Sexually transmitted infections (STIs)",409
-410,"Shin splints",410
-411,"Shin pain (shin splints)",410
-412,"Shortness of breath",412
-413,"Shoulder impingement",413
-414,"Sick building syndrome",414
-415,Silicosis,415
-416,"Skin cyst",416
-417,"Skin tags",417
-418,"Slapped cheek syndrome",418
-419,Sleepwalking,419
-420,"Smelly urine",420
-421,"Urine (smelly)",420
-422,"Snake bites",422
-423,"Social anxiety (social phobia)",423
-424,"Soft tissue sarcomas",424
-425,"Sore or dry lips",425
-426,"Sore lips",425
-427,"Dry lips",425
-428,"Lips (sore or dry)",425
-429,"Sore or white tongue",429
-430,"Tongue (sore or white)",429
-431,"Sore throat",431
-432,"Throat (sore)",431
-433,Spirometry,1266
-434,"Spleen problems and spleen removal",434
-435,Spondylolisthesis,435
-436,"Staph infection",436
-437,"Steroid inhalers",545
-438,"Steroid injections",440
-439,"Steroid nasal sprays",440
-440,Steroids,440
-441,Corticosteroids,440
-442,"Steroid tablets",440
-443,"Stevens-Johnson syndrome",443
-444,"Stomach ache",444
-445,"Tummy ache",444
-446,"Stopped or missed periods",446
-447,"Periods (stopped or missed)",446
-448,"Stop smoking treatments",1230
-449,"Smoking (treatments to stop)",1230
-450,"Stretch marks",450
-451,Stye,451
-452,"Sudden infant death syndrome (SIDS)",452
-453,Sunburn,453
-454,"Swine flu (H1N1)",454
-455,"Swollen glands",455
-456,"Temporomandibular disorder (TMD)",456
-457,"Jaw pain",456
-458,"Tension-type headaches",458
-459,"Headaches (tension-type)",458
-460,Tetanus,460
-461,"Excessive thirst",461
-462,"Thirst (excessive)",461
-463,Thrombophilia,463
-464,Thyroiditis,464
-465,"Total iron-binding capacity (TIBC) and transferrin test",1266
-466,Tongue-tie,466
-467,Toothache,468
-468,"Dental pain",468
-469,"Tooth decay",469
-470,"Topical corticosteroids",470
-471,"Steroid cream",470
-472,"Corticosteroid cream",470
-473,"Total protein test",1266
-474,"Toxic shock syndrome",474
-475,"TENS (transcutaneous electrical nerve stimulation)",1256
-476,"Trimethylaminuria ('fish odour syndrome')",476
-477,Typhus,477
-478,"Ultrasound scan",1266
-479,"Unintentional weight loss",479
-480,"Weight loss (unintentional)",479
-481,"Weight loss (unexpected)",479
-482,"Urinary tract infections (UTIs)",482
-483,"Vaginal discharge",483
-484,"Vaginal dryness",484
-485,Vaginitis,485
-486,Vasculitis,486
-487,"Blindness and vision loss",487
-488,"Vomiting blood (haematemesis)",488
-489,"Von Willebrand disease",489
-490,"Vulvodynia (vulval pain)",490
-491,"Vaginal pain",490
-492,"Warts and verrucas",492
-493,"West Nile virus",493
-494,"Whooping cough",494
-495,"Wolff-Parkinson-White syndrome",495
-496,X-ray,1266
-497,"Zika virus",497
-498,"Abdominal aortic aneurysm",498
-499,AAA,498
-500,"Aneurysm (abdominal aortic)",498
-501,"Abdominal aortic aneurysm screening",498
-502,"AAA screening",498
-503,Abscess,503
-504,Acne,504
-505,Actinomycosis,505
-506,"Acute lymphoblastic leukaemia",506
-507,"Leukaemia (acute lymphoblastic)",506
-508,"Acute myeloid leukaemia",508
-509,"Leukaemia (acute myeloid)",508
-510,"Acute pancreatitis",510
-511,"Pancreatitis (acute)",510
-512,"Addison's disease",512
-513,Agoraphobia,513
-514,Albinism,514
-515,"Alcohol misuse",515
-516,"Alcohol-related liver disease",516
-517,"Liver disease (alcohol-related)",516
-518,"Allergic rhinitis",518
-519,"Rhinitis (allergic)",518
-520,Allergies,520
-521,"Altitude sickness",521
-522,"Alzheimer's disease",522
-523,Amniocentesis,1270
-524,"Anal fissure",524
-525,"Anal fistula",525
-526,Anaphylaxis,526
-527,"Androgen insensitivity syndrome",527
-528,Angina,528
-529,Angioedema,529
-530,Angiography,1266
-531,"Ankylosing spondylitis",531
-532,"Anorexia nervosa",532
-533,Antibiotics,1271
-534,"Anticoagulant medicines",54
-535,Antidepressants,637
-536,"Antiphospholipid syndrome (APS)",536
-537,"Hughes syndrome",536
-538,"Aortic valve replacement",538
-539,"Heart valve replacement",538
-540,Aphasia,540
-541,Appendicitis,541
-542,Arthritis,542
-543,Arthroscopy,259
-544,Aspergillosis,544
-545,Asthma,545
-546,Astigmatism,546
-547,Ataxia,547
-548,"Atopic eczema",548
-549,"Eczema (atopic)",548
-550,"Atrial fibrillation",550
-551,"Attention deficit hyperactivity disorder (ADHD)",551
-552,"Autosomal dominant polycystic kidney disease",552
-553,"Polycystic kidney disease (autosomal dominant)",552
-554,"Autosomal recessive polycystic kidney disease",554
-555,"Polycystic kidney disease (autosomal recessive)",554
-556,"Back pain",556
-557,"Bacterial vaginosis",557
-558,"Bad breath",559
-559,Halitosis,559
-560,"Baker's cyst",561
-561,"Popliteal cyst",561
-562,"Bartholin's cyst",562
-563,"Bedwetting in children",563
-564,"Behçet's disease",564
-565,"Bell's palsy",565
-566,"Benign brain tumour (non-cancerous)",566
-567,"Brain tumour (benign)",566
-568,"Bile duct cancer (cholangiocarcinoma)",569
-569,Cholangiocarcinoma,569
-570,"Binge eating disorder",570
-571,Biopsy,1266
-572,"Bipolar disorder",572
-573,Birthmarks,573
-574,"Bladder cancer",574
-575,"Bladder stones",575
-576,"Bleeding from the bottom (rectal bleeding)",577
-577,"Rectal bleeding",577
-578,Blepharitis,578
-579,Blisters,719
-580,"Blood tests",1266
-581,Blushing,581
-582,"Bone cancer",582
-583,"Bone cyst",583
-584,"Borderline personality disorder",584
-585,"Bowel cancer",585
-586,"Colon cancer",585
-587,"Rectal cancer",585
-588,"Bowel cancer screening",588
-589,"Bowel incontinence",589
-590,"Brain abscess",590
-591,"Brain aneurysm",591
-592,"Aneurysm (brain)",591
-593,"Brain death",593
-594,"Breast abscess",594
-595,"Breast cancer in women",595
-596,"Breast cancer in men",596
-597,"Breast lumps",597
-598,Bronchiectasis,598
-599,Bronchiolitis,599
-600,Bronchodilators,600
-601,"Exophthalmos (bulging eyes)",601
-602,Bulimia,602
-603,"Burns and scalds",603
-604,Bursitis,604
-605,"Caesarean section",605
-606,Cancer,606
-607,"Carotid endarterectomy",46
-608,"Carpal tunnel syndrome",608
-609,"Cartilage damage",609
-610,"Cataract surgery",1248
-611,"Cavernous sinus thrombosis",611
-612,Cellulitis,612
-613,"Cerebral palsy",613
-614,"Cervical cancer",614
-615,"Cervical screening",615
-616,"Smear test",615
-617,"Cervical spondylosis",617
-618,"Charcot-Marie-Tooth disease",618
-619,Chemotherapy,619
-620,Chickenpox,620
-621,"Childhood cataracts",621
-622,"Cataracts (children)",621
-623,Chlamydia,623
-624,Cholera,624
-625,"Chorionic villus sampling",1270
-626,"Myalgic encephalomyelitis or chronic fatigue syndrome (ME/CFS)",626
-627,"Chronic fatigue syndrome (ME/CFS)",626
-628,"Chronic lymphocytic leukaemia",628
-629,"Leukaemia (chronic lymphocytic)",628
-630,"Chronic myeloid leukaemia",630
-631,"Leukaemia (chronic myeloid)",630
-632,"Chronic obstructive pulmonary disease (COPD)",632
-633,"Chronic pancreatitis",633
-634,"Pancreatitis (chronic)",633
-635,Cirrhosis,635
-636,"Cleft lip and palate",636
-637,"Clinical depression",637
-638,Depression,637
-639,"Clinical trials",1244
-640,"Club foot",640
-641,"Coeliac disease",641
-642,"Cognitive behavioural therapy (CBT)",642
-643,Colic,643
-644,Colostomy,644
-645,Colposcopy,615
-646,"Common cold",646
-647,"Complex regional pain syndrome",647
-648,"Congenital heart disease",648
-649,Conjunctivitis,649
-650,"Consent to treatment",1244
-651,Constipation,651
-652,"Contact dermatitis",652
-653,"Eczema (contact dermatitis)",652
-654,"Cornea transplant",654
-655,"Corns and calluses",655
-656,"Cardiac catheterisation and coronary angiography",1266
-657,"Coronary angioplasty and stent insertion",657
-658,Angioplasty,657
-659,"Stent insertion",657
-660,"Coronary artery bypass graft",660
-661,"Heart bypass",661
-662,CABG,660
-663,"Coronary heart disease",663
-664,"Heart disease (coronary)",663
-665,"Corticobasal degeneration",665
-666,Counselling,666
-667,Craniosynostosis,667
-668,"Creutzfeldt-Jakob disease",668
-669,CJD,668
-670,"Crohn's disease",670
-671,Croup,671
-672,"Cushing's syndrome",672
-673,"Cystic fibrosis",673
-674,Cystitis,674
-675,Cystoscopy,675
-676,"Cytomegalovirus (CMV)",676
-677,Deafblindness,677
-678,"DVT (deep vein thrombosis)",678
-679,DVT,678
-680,Dehydration,680
-681,"Dementia with Lewy bodies",681
-682,Dengue,682
-683,"Developmental co-ordination disorder (dyspraxia) in children",683
-684,"Dyspraxia in children",683
-685,"Bone density scan (DEXA scan)",1266
-686,"DEXA scan",1266
-687,"Diabetes insipidus",687
-688,"Diabetic retinopathy",688
-689,Dialysis,689
-690,Diphtheria,690
-691,"Discoid eczema",691
-692,"Eczema (discoid)",691
-693,"Disorders of consciousness",693
-694,"Vegetative state",693
-695,"Double vision",695
-696,"Down's syndrome",696
-697,"Dry eyes",697
-698,"Dupuytren's contracture",698
-699,Dyslexia,699
-700,Dystonia,700
-701,"Ectopic pregnancy",701
-702,Encephalitis,702
-703,Endocarditis,703
-704,Endometriosis,704
-705,"Epidermolysis bullosa",705
-706,Epidural,1256
-707,Epilepsy,707
-708,"Erectile dysfunction (impotence)",708
-709,Impotence,708
-710,"Excessive sweating (hyperhidrosis)",710
-711,Hyperhidrosis,710
-712,"Fabricated or induced illness",712
-713,Fainting,713
-714,Falls,714
-715,"Femoral hernia repair",715
-716,"Hernia (femoral)",715
-717,Fibroids,717
-718,Fibromyalgia,718
-719,"First aid",719
-720,"Farting (flatulence)",720
-721,Flatulence,720
-722,Wind,720
-723,Flu,723
-724,Influenza,723
-725,"Food allergy",725
-726,"Food poisoning",726
-727,"Frontotemporal dementia",727
-728,"Dementia (frontotemporal)",727
-729,Frostbite,729
-730,"Frozen shoulder",730
-731,"Fungal nail infection",731
-732,"Nail fungal infection",731
-733,"Gallbladder removal",733
-734,Gallstones,734
-735,Gangrene,735
-736,Gastrectomy,736
-737,Gastroscopy,737
-738,"Gender dysphoria",738
-739,"Generalised anxiety disorder in adults",739
-740,"Anxiety disorder in adults",739
-741,"Genital herpes",741
-742,"Herpes (genital)",741
-743,"Genital warts",743
-744,"Gestational diabetes",744
-745,"Diabetes in pregnancy",744
-746,Giardiasis,746
-747,"Glandular fever",747
-748,Glaucoma,748
-749,Glomerulonephritis,749
-750,"Glue ear",750
-751,Goitre,751
-752,Gonorrhoea,752
-753,Gout,753
-754,"Guillain-Barré syndrome",754
-755,"Gum disease",755
-756,Haemochromatosis,756
-757,Haemophilia,757
-758,"Hair loss",758
-759,"Hand tendon repair",759
-760,"Having an operation (surgery)",1272
-761,"Surgery (having an operation)",1272
-762,"Hay fever",762
-763,"Head lice and nits",763
-764,"Hearing loss",764
-765,Deafness,764
-766,"Hearing tests",766
-767,"Heart attack",767
-768,"Heart block",768
-769,"Heartburn and acid reflux",769
-770,"Gastro-oesophageal reflux disease (GORD)",769
-771,"Heart failure",771
-772,"Heart transplant",772
-773,"Heavy periods",773
-774,"Periods (heavy)",773
-775,"Hepatitis A",775
-776,"Hepatitis B",776
-777,"Hepatitis C",777
-778,"Hiatus hernia",778
-779,"Hernia (hiatus)",778
-780,Hiccups,780
-781,"High blood pressure (hypertension)",781
-782,Hypertension,782
-783,"Blood pressure (high)",781
-784,"High cholesterol",784
-785,"Cholesterol (high)",784
-786,"Hip fracture",786
-787,"Hip replacement",787
-788,"Excessive hair growth (hirsutism)",788
-789,hirsutism,788
-790,"HIV and AIDS",790
-791,Hives,791
-792,"Hodgkin lymphoma",792
-793,"Hormone replacement therapy (HRT)",793
-794,HRT,793
-795,"Huntington's disease",795
-796,Hydrocephalus,796
-797,Hydronephrosis,797
-798,Hysterectomy,798
-799,Hysteroscopy,799
-800,"Idiopathic pulmonary fibrosis",800
-801,"Pulmonary fibrosis",800
-802,Ileostomy,802
-803,Impetigo,803
-804,Infertility,804
-805,"Inguinal hernia repair",805
-806,"Hernia (inguinal)",805
-807,"Insect bites and stings",807
-808,"Sting or bite (insect)",807
-809,Insomnia,809
-810,"Iron deficiency anaemia",810
-811,"Anaemia (iron deficiency)",810
-812,"Irregular periods",812
-813,"Periods (irregular)",812
-814,"Irritable bowel syndrome (IBS)",814
-815,IBS,814
-816,"Itchy bottom",816
-817,"Anus (itchy)",816
-818,"Itchy skin",818
-819,IVF,819
-820,"Japanese encephalitis",820
-821,Jaundice,821
-822,"Newborn jaundice",822
-823,"Jaundice in newborns",822
-824,"Jellyfish and other sea creature stings",824
-825,"Jet lag",825
-826,"Joint hypermobility syndrome",826
-827,"Kawasaki disease",827
-828,"Kidney cancer",828
-829,"Chronic kidney disease",829
-830,"Kidney failure",829
-831,"Kidney infection",831
-832,"Kidney stones",832
-833,"Kidney transplant",833
-834,"Knee ligament surgery",834
-835,"Knee replacement",835
-836,Kyphosis,836
-837,"Labyrinthitis and vestibular neuritis",837
-838,"Vestibular neuritis",837
-839,"Lactose intolerance",839
-840,"Laparoscopy (keyhole surgery)",840
-841,"Laryngeal (larynx) cancer",841
-842,Laryngitis,842
-843,Laxatives,651
-844,"Lazy eye",845
-845,Amblyopia,845
-846,"Leg cramps",846
-847,"Venous leg ulcer",847
-848,"Leg ulcer",847
-849,"Leptospirosis (Weil's disease)",849
-850,"Weil's disease",849
-851,Leukoplakia,851
-852,"Lichen planus",852
-853,Listeriosis,853
-854,"Liver cancer",854
-855,"Liver transplant",855
-856,Long-sightedness,856
-857,"Low blood pressure (hypotension)",857
-858,"Blood pressure (low)",857
-859,Hypotension,857
-860,"Lumbar decompression surgery",860
-861,"Lumbar puncture",861
-862,"Lung cancer",862
-863,"Lung transplant",863
-864,Lupus,864
-865,Lymphoedema,865
-866,"Age-related macular degeneration (AMD)",866
-867,"Macular degeneration (age-related)",866
-868,Malaria,868
-869,"Malignant brain tumour (brain cancer)",870
-870,"Brain tumour (malignant)",870
-871,Malnutrition,871
-872,"Marfan syndrome",872
-873,Mastectomy,1275
-874,Mastitis,874
-875,Mastocytosis,875
-876,Measles,876
-877,"Medicines information",1244
-878,"Skin cancer (melanoma)",878
-879,Meningitis,879
-880,Menopause,880
-881,Migraine,881
-882,"Head injury and concussion",108
-883,Miscarriage,883
-884,Moles,884
-885,"Molluscum contagiosum",885
-886,"Motor neurone disease",886
-887,"Mouth cancer",887
-888,"Tongue cancer",887
-889,"MRI scan",1266
-890,Mucositis,890
-891,"Multiple myeloma",892
-892,Myeloma,892
-893,"Multiple sclerosis",893
-894,Mumps,894
-895,"Munchausen's syndrome",1250
-896,"Muscular dystrophy",896
-897,"Myasthenia gravis",897
-898,Narcolepsy,898
-899,"Nasal polyps",899
-900,"Newborn respiratory distress syndrome",900
-901,"Neurofibromatosis type 1",901
-902,"Neurofibromatosis type 2",902
-903,"Non-allergic rhinitis",903
-904,"Non-gonococcal urethritis",904
-905,"Urethritis (NGU)",904
-906,"Non-Hodgkin lymphoma",906
-907,"Skin cancer (non-melanoma)",907
-908,"Squamous cell carcinoma",907
-909,"Basal cell carcinoma",909
-910,"Noonan syndrome",910
-911,Nosebleed,911
-912,Obesity,912
-913,"Obsessive compulsive disorder (OCD)",913
-914,"Occupational therapy",914
-915,"Oesophageal cancer",915
-916,Orthodontics,1274
-917,Osteoarthritis,917
-918,Osteomyelitis,918
-919,Osteopathy,259
-920,Osteoporosis,920
-921,"Ovarian cancer",921
-922,"Ovarian cyst",922
-923,"Overactive thyroid (hyperthyroidism)",923
-924,Hyperthyroidism,923
-925,"Pacemaker implantation",1276
-926,"Paget's disease of bone",926
-927,"Paget's disease of the nipple",927
-928,"Pancreas transplant",1277
-929,"Pancreatic cancer",929
-930,Paralysis,930
-931,"Parkinson's disease",931
-932,"Pelvic inflammatory disease",932
-933,"Pelvic organ prolapse",933
-934,"Prolapse (pelvic organ)",933
-935,"Pemphigus vulgaris",935
-936,"Perforated eardrum",936
-937,"Eardrum (burst)",936
-938,Pericarditis,938
-939,"Peripheral arterial disease (PAD)",939
-940,"Peripheral neuropathy",940
-941,Peritonitis,941
-942,Phobias,942
-943,Physiotherapy,943
-944,"Piles (haemorrhoids)",944
-945,Piles,944
-946,"Pilonidal sinus",946
-947,"Plastic surgery",947
-948,Pneumonia,948
-949,Poisoning,949
-950,"Polycystic ovary syndrome",950
-951,Polycythaemia,951
-952,"Polymyalgia rheumatica",952
-953,"Post-herpetic neuralgia",953
-954,"Postnatal depression",954
-955,"Post-polio syndrome",955
-956,"Post-traumatic stress disorder (PTSD)",956
-957,"Prader-Willi syndrome",957
-958,Pre-eclampsia,958
-959,"PMS (premenstrual syndrome)",959
-960,"Pressure ulcers (pressure sores)",960
-961,"Priapism (painful erections)",961
-962,"Primary biliary cholangitis (primary biliary cirrhosis)",962
-963,"Progressive supranuclear palsy",963
-964,"Prostate cancer",964
-965,"Benign prostate enlargement",965
-966,"Prostate enlargement",965
-967,Psoriasis,967
-968,Psychosis,968
-969,"Pulmonary embolism",969
-970,"Pulmonary hypertension",970
-971,Rabies,971
-972,Radiotherapy,606
-973,Raynaud's,973
-974,"Reactive arthritis",974
-975,"Rectal examination",1266
-976,"Repetitive strain injury (RSI)",976
-977,"Restless legs syndrome",977
-978,"Restricted growth (dwarfism)",978
-979,Dwarfism,978
-980,"Detached retina (retinal detachment)",980
-981,"Retinal detachment",980
-982,"Rhesus disease",982
-983,"Rheumatic fever",983
-984,"Rheumatoid arthritis",984
-985,"Rickets and osteomalacia",985
-986,Osteomalacia,985
-987,"Root canal treatment",1274
-988,Rosacea,988
-989,"Rubella (german measles)",989
-990,Scabies,990
-991,Scars,991
-992,Schizophrenia,992
-993,Sciatica,993
-994,"Buttock pain",993
-995,Scoliosis,995
-996,Scurvy,996
-997,"Seasonal affective disorder (SAD)",997
-998,Self-harm,998
-999,Sepsis,999
-1000,"Severe head injury",1000
-1001,Shingles,1001
-1002,"Short-sightedness (myopia)",1002
-1003,Myopia,1002
-1004,"Shoulder pain",1004
-1005,"Sickle cell disease",1005
-1006,"Sjögren's syndrome",1006
-1007,"Sleep paralysis",1007
-1008,"Slipped disc",1008
-1009,"Small bowel transplant",1009
-1010,"Bowel transplant",1009
-1011,Snoring,1011
-1012,"Spina bifida",1012
-1013,"Spinal muscular atrophy",1013
-1014,"Sports injuries",1014
-1015,"Sprains and strains",1015
-1016,Squint,1016
-1017,"Selective serotonin reuptake inhibitors (SSRIs)",1193
-1018,Stammering,1018
-1019,Stuttering,1018
-1020,Statins,1020
-1021,"Stem cell and bone marrow transplants",1021
-1022,Stillbirth,1022
-1023,"Stomach cancer",1023
-1024,"Stomach ulcer",1024
-1025,Stroke,1025
-1026,"Subarachnoid haemorrhage",1027
-1027,"Brain haemorrhage",1027
-1028,"Subdural haematoma",1028
-1029,"Help for suicidal thoughts",1030
-1030,"Suicidal thoughts",1030
-1031,"Supraventricular tachycardia (SVT)",1031
-1032,"Dysphagia (swallowing problems)",1032
-1033,"Swallowing problems",1032
-1034,Syphilis,1034
-1035,"Coccydynia (tailbone pain)",1035
-1036,"Tay-Sachs disease",1036
-1037,"Teeth grinding (bruxism)",1037
-1038,Bruxism,1037
-1039,Tendonitis,1039
-1040,"Tennis elbow",1040
-1041,"Testicle lumps and swellings",1041
-1042,"Testicular cancer",1042
-1043,Thalassaemia,1043
-1044,Threadworms,1044
-1045,"Thyroid cancer",1045
-1046,"Tick-borne encephalitis (TBE)",1046
-1047,Tics,1047
-1048,Tinnitus,1048
-1049,Tonsillitis,1049
-1050,Quinsy,1049
-1051,"Tourette's syndrome",1051
-1052,Toxocariasis,1052
-1053,Toxoplasmosis,1053
-1054,Tracheostomy,1054
-1055,"Transient ischaemic attack (TIA)",1055
-1056,TIA,727
-1057,"Transurethral resection of the prostate (TURP)",965
-1058,"Travel vaccinations",1192
-1059,Trichomoniasis,1059
-1060,"Trichotillomania (hair pulling disorder)",1060
-1061,"Trigeminal neuralgia",1061
-1062,"Trigger finger",1062
-1063,"Tuberculosis (TB)",1063
-1064,"Tuberous sclerosis",1064
-1065,"Turner syndrome",1065
-1066,"Type 2 diabetes",1066
-1067,"Diabetes (type 2)",1066
-1068,"Typhoid fever",1068
-1069,"Ulcerative colitis",1069
-1070,"Umbilical hernia repair",230
-1071,"Hernia (umbilical)",230
-1072,"Underactive thyroid (hypothyroidism)",1072
-1073,Hypothyroidism,1072
-1074,"Undescended testicles",1074
-1075,"Urinary catheter",1075
-1076,"Urinary incontinence",1076
-1077,"Incontinence (urinary)",1076
-1078,Uveitis,1078
-1079,"Vaginal cancer",1079
-1080,Vaginismus,1080
-1081,"Varicose eczema",1081
-1082,"Eczema (varicose)",1081
-1083,"Varicose veins",1083
-1084,"Vascular dementia",1084
-1085,"Dementia (vascular)",1084
-1086,Vertigo,1086
-1087,"Vitamin B12 or folate deficiency anaemia",1087
-1088,"Anaemia (vitamin B12 or folate deficiency)",1087
-1089,"Vitamins and minerals",1223
-1090,Vitiligo,1090
-1091,"Vulval cancer",1091
-1092,"Watering eyes",1092
-1093,"Weight loss surgery",912
-1094,Whiplash,1094
-1095,"Wisdom tooth removal",1274
-1096,"Womb (uterus) cancer",1096
-1097,"Uterine (womb) cancer",1096
-1098,"Endometrial cancer",1096
-1099,"Yellow fever",1099
-1100,Abortion,1100
-1101,"Bird flu",1101
-1102,"Avian flu",1101
-1103,"Antifungal medicines",1271
-1104,"Blood transfusion",1104
-1105,Ringworm,1105
-1106,"Early menopause",1106
-1107,"Menopause (early)",1106
-1108,"Floaters and flashes in the eyes",1108
-1109,"Eye floaters",1108
-1110,"Your contraception guide",1215
-1111,"Dementia guide",1232
-1112,"Fitness Studio exercise videos",1223
-1113,"NHS Health Check",1266
-1114,"Worms in humans",1114
-1115,Hookworm,1114
-1116,Tapeworm,1114
-1117,Roundworm,1114
-1118,"Tremor or shaking hands",1118
-1119,tremor,1118
-1120,"essential tremor",1118
-1121,shaking,1118
-1122,"Low white blood cell count",1122
-1123,"White blood cell count (low)",1122
-1124,Bunions,1124
-1125,"Lost or changed sense of smell",1125
-1126,"Sense of smell (lost/changed)",1125
-1127,"Soiling (child pooing their pants)",1127
-1128,"Oral thrush (mouth thrush)",1128
-1129,"Mouth thrush",1128
-1130,"Temporal arteritis",1130
-1131,"Giant cell arteritis",1130
-1132,"Memory loss (amnesia)",1132
-1133,Amnesia,1132
-1134,Headaches,1134
-1135,"Sinusitis (sinus infection)",1135
-1136,Sinusitis,1135
-1137,"Thrush in men and women",1137
-1138,"Cold sores",1138
-1139,"Group B strep",1139
-1140,"Skin picking disorder",1140
-1141,Hyperparathyroidism,1141
-1142,Hypoparathyroidism,1142
-1143,"Ear infections",1143
-1144,"Twitching eyes and muscles",1144
-1145,"Learning disabilities",1145
-1146,"NHS screening",1266
-1147,"Hormone headaches",1147
-1148,"Headaches (hormone)",1147
-1149,"What to do if someone has a seizure (fit)",1150
-1150,"Seizures (fits)",1150
-1151,"Fits (seizures)",1150
-1152,"Complementary and alternative medicine",1152
-1153,"End of life care",1153
-1154,"Knocked-out tooth",1154
-1155,"Tooth knocked out",1154
-1156,"Chipped broken or cracked tooth",1239
-1157,"Tooth (chipped or broken)",1239
-1158,"Diarrhoea and vomiting",1158
-1159,"Tummy bug",1158
-1160,Vomiting,328
-1161,"Stomach bug",1158
-1162,Gastroenteritis,1158
-1163,Diarrhoea,1158
-1164,"Being sick",1158
-1165,"Bullous pemphigoid",1165
-1166,"Feeling sick (nausea)",1166
-1167,Nausea,1166
-1168,"Type 1 diabetes",1168
-1169,"Diabetes (type 1)",1168
-1170,"Social care and support guide",1222
-1171,"Middle East respiratory syndrome (MERS)",1171
-1172,Monkeypox,1172
-1173,"Diabetic eye screening 2",132
-1174,"Medical cannabis (and cannabis oils)",1174
-1175,"Cannabis oil (medical cannabis)",1174
-1176,"Diabetic eye screening 1",132
-1177,"Body odour (BO)",1177
-1178,"Human papillomavirus (HPV)",1178
-1179,"Plantar fasciitis",1179
-1180,"Foot pain",1180
-1181,"heel pain",1180
-1182,"Toe pain",1180
-1183,"ankle pain",1180
-1184,Autism,1184
-1185,Asperger's,1184
-1186,"Cosmetic procedures",1186
-1187,"Hand pain",1187
-1188,"Swollen arms and hands (oedema)",1188
-1189,Colonoscopy,1189
-1190,"Genetic and genomic testing",1266
-1191,"Sleep apnoea",1191
-1192,Vaccinations,1192
-1193,"Mental health and wellbeing",1193
-1194,"High temperature (fever) in adults",1194
-1195,"Fever in adults",1194
-1196,"Coronavirus (COVID-19)",1196
-1197,Baby,1227
-1198,"Do not attempt cardiopulmonary resuscitation (DNACPR) decisions",1153
-1199,"Testicle pain",1199
-1200,"Pain in testicles",1199
-1201,"Hearing aids and implants",1201
-1202,"Breast screening (mammogram)",1202
-1203,"Smelly feet",1203
-1204,"Academic attainment",1204
-1205,Ageing,1205
-1206,Aggression,1206
-1207,"Antenatal care",1207
-1208,"Blood donation",1208
-1209,"Body image",1209
-1210,Breastfeeding,1210
-1211,"Care homes",1211
-1212,Carers,1212
-1213,"Child development",1213
-1214,"Complementary therapies",1214
-1215,Contraception,1215
-1216,"Domestic violence",1216
-1217,"Eating well",1217
-1218,"Exercise and sports",1223
-1219,"General wellbeing",1219
-1220,"Genetic screening",1220
-1221,"Healthy volunteers",1244
-1222,"Improving care and services",1222
-1223,"Healthy lifestyle",1223
-1224,"Long COVID",1224
-1225,"Obesity risk",1225
-1226,"Occupational health",1226
-1227,Parenting,1227
-1228,"Public health",1228
-1229,"Sleeping well",1229
-1230,Smoking,1230
-1231,Supplements,1231
-1232,"Dementia (all)",1232
-1233,"Wrist pain",1233
-1234,Bereavement,1234
-1235,Bloating,1235
-1236,"Blood in semen",1236
-1237,"Breast Feeding",1210
-1238,"Bulging eyes (exophthalmos)",1238
-1239,"Chipped, broken or cracked tooth",1239
-1240,"Fertility issues",1240
-1241,"Finger pain",1241
-1242,"Fractures, sprains and broken bones",1242
-1243,"Hand, foot and mouth disease",1243
-1244,"Healthy volunteer",1244
-1245,"Heart palpitations",1245
-1246,"High blood sugar (hyperglycaemia)",1246
-1247,"Keloid scars",1247
-1248,"Laser eye surgery and lens surgery",1248
-1249,"Low sex drive (loss of libido)",1249
-1250,"Munchausen syndrome",1250
-1251,"Pain in the back of the hand",1251
-1252,"Pain in the ball of the foot",1252
-1253,"Pain in the bottom of the foot",1253
-1254,"Pain in the palm of the hand",1254
-1255,"Pain in the top of the foot",1255
-1256,"Pain relief",1256
-1257,"Personality disorders",347
-1258,Pregnancy,1258
-1259,"Prolonged grief disorder",1259
-1260,"Psychotic depression",1260
-1261,"Respiratory syncytial virus (RSV)",1261
-1262,"Swollen ankles, feet and legs (oedema)",1262
-1263,"Tailbone (coccyx) pain",1263
-1264,"Teeth whitening",1264
-1265,"Tension headaches",1265
-1266,"Tests, scans and screening",1266
-1267,"Thumb pain",1267
-1268,"Tight foreskin (phimosis)",1268
-1269,"Vomiting blood",488
-1270,"Genetic testing in pregnancy",1270
-1271,"Treatments for infection",1271
-1272,"General surgery and recovery",1272
-1273,"Eye Tests",1273
-1274,"Dental care and surgery",1274
-1275,"New - Breast cancer surgery",1275
-1276,"Heart rhythm problems - ( also check arrhythmia)",1276
-1277,"Transplants and organ donation",1277
+Id,Condition,SupersededById,SupersededbyCondition
+1,Acanthosis nigricans,1,Acanthosis nigricans
+2,Achalasia,2,Achalasia
+3,Acid and chemical burns,3,Acid and chemical burns
+4,Acoustic neuroma (vestibular schwannoma),4,Acoustic neuroma (vestibular schwannoma)
+5,Vestibular schwannoma,4,Acoustic neuroma (vestibular schwannoma)
+6,Acromegaly,6,Acromegaly
+7,Gigantism,6,Acromegaly
+8,Urine albumin to creatinine ratio (ACR),8,Urine albumin to creatinine ratio (ACR)
+9,Actinic keratoses (solar keratoses),9,Actinic keratoses (solar keratoses)
+10,Solar keratoses,9,Actinic keratoses (solar keratoses)
+11,Acupuncture,11,Acupuncture
+12,Acute cholecystitis,12,Acute cholecystitis
+13,Gallbladder pain,12,Acute cholecystitis
+14,Cholecystitis (acute),12,Acute cholecystitis
+15,MND,886,Motor neurone disease
+16,Acute kidney injury,16,Acute kidney injury
+17,Acute respiratory distress syndrome,17,Acute respiratory distress syndrome
+18,Adenoidectomy,18,Adenoidectomy
+19,Air or gas embolism,19,Air or gas embolism
+20,Decompression sickness,19,Air or gas embolism
+21,Alcohol poisoning,21,Alcohol poisoning
+22,Alexander technique,556,Back pain
+23,Alkaptonuria,23,Alkaptonuria
+24,Amputation,24,Amputation
+25,Amyloidosis,25,Amyloidosis
+26,Anabolic steroid misuse,26,Anabolic steroid misuse
+27,Steroid misuse,26,Anabolic steroid misuse
+28,Anaesthesia,28,Anaesthesia
+29,Anal cancer,29,Anal cancer
+30,Anal pain,30,Anal pain
+31,Proctalgia,30,Anal pain
+32,Angelman syndrome,32,Angelman syndrome
+33,Animal and human bites,33,Animal and human bites
+34,Bite (animal or human),33,Animal and human bites
+35,Anosmia,1125,Lost or changed sense of smell
+36,Antacids,769,Heartburn and acid reflux
+37,Antihistamines,520,Allergies
+38,Antisocial personality disorder,38,Antisocial personality disorder
+39,Anxiety disorders in children,39,Anxiety disorders in children
+40,Arrhythmia,40,Arrhythmia
+41,Heart rhythm problems,40,Arrhythmia
+42,Arterial thrombosis,42,Arterial thrombosis
+43,Intrauterine insemination (IUI),43,Intrauterine insemination (IUI)
+44,Asbestosis,44,Asbestosis
+45,Aspirin,1256,Pain relief
+46,Atherosclerosis (arteriosclerosis),46,Atherosclerosis (arteriosclerosis)
+47,Athlete's foot,47,Athlete's foot
+48,Auditory processing disorder (APD),48,Auditory processing disorder (APD)
+49,Balanitis,49,Balanitis
+50,Barium enema,1266,"Tests, scans and screening"
+51,Bedbugs,807,Insect bites and stings
+52,Beta blockers,83,Cardiovascular disease
+53,Black eye,176,Eye injuries
+54,Blood clots,54,Blood clots
+55,Blood groups,55,Blood groups
+56,Blood in semen (haematospermia),56,Blood in semen (haematospermia)
+57,Blood in urine,57,Blood in urine
+58,Blood pressure test,1266,"Tests, scans and screening"
+59,Body dysmorphic disorder (BDD),59,Body dysmorphic disorder (BDD)
+60,Infected piercings,60,Infected piercings
+61,Boils,61,Boils
+62,Botulism,62,Botulism
+63,Bowel polyps,63,Bowel polyps
+64,Bowen's disease,64,Bowen's disease
+65,Brain tumours,65,Brain tumours
+66,Breast pain,66,Breast pain
+67,Breast reduction on the NHS,1186,Cosmetic procedures
+68,Breath-holding in babies and children,68,Breath-holding in babies and children
+69,Broken ankle,1242,"Fractures, sprains and broken bones"
+70,Broken arm or wrist,1242,"Fractures, sprains and broken bones"
+71,Broken collarbone,1242,"Fractures, sprains and broken bones"
+72,Broken finger or thumb,1242,"Fractures, sprains and broken bones"
+73,Broken leg,1242,"Fractures, sprains and broken bones"
+74,Broken nose,1242,"Fractures, sprains and broken bones"
+75,Broken or bruised ribs,1242,"Fractures, sprains and broken bones"
+76,Broken toe,1242,"Fractures, sprains and broken bones"
+77,Bronchitis,77,Bronchitis
+78,Brucellosis,78,Brucellosis
+79,Brugada syndrome,79,Brugada syndrome
+80,Carbon monoxide poisoning,80,Carbon monoxide poisoning
+81,Neuroendocrine tumours and carcinoid syndrome,81,Neuroendocrine tumours and carcinoid syndrome
+82,Cardiomyopathy,82,Cardiomyopathy
+83,Cardiovascular disease,83,Cardiovascular disease
+84,Age-related cataracts,84,Age-related cataracts
+85,Cataracts (age-related),84,Age-related cataracts
+86,Catarrh,86,Catarrh
+87,Cavernoma,87,Cavernoma
+88,Clostridium difficile (C. diff) infection,88,Clostridium difficile (C. diff) infection
+89,Carcinoembryonic antigen (CEA) test,1266,"Tests, scans and screening"
+90,Cervical rib,91,Thoracic outlet syndrome
+91,Thoracic outlet syndrome,91,Thoracic outlet syndrome
+92,Charles Bonnet syndrome,92,Charles Bonnet syndrome
+93,Chest infection,93,Chest infection
+94,Chest pain,94,Chest pain
+95,Heart pain,94,Chest pain
+96,Chiari malformation,96,Chiari malformation
+97,Chilblains,97,Chilblains
+98,Chiropractic,556,Back pain
+99,Cholesteatoma,99,Cholesteatoma
+100,Chronic traumatic encephalopathy,100,Chronic traumatic encephalopathy
+101,Circumcision in boys,101,Circumcision in boys
+102,Circumcision in men,102,Circumcision in men
+103,Claustrophobia,103,Claustrophobia
+104,Cluster headaches,104,Cluster headaches
+105,Colour vision deficiency (colour blindness),105,Colour vision deficiency (colour blindness)
+106,Coma,693,Disorders of consciousness
+107,Compartment syndrome,107,Compartment syndrome
+108,Concussion,108,Concussion
+109,Sudden confusion (delirium),109,Sudden confusion (delirium)
+110,Confusion (sudden),109,Sudden confusion (delirium)
+111,Delirium,109,Sudden confusion (delirium)
+112,Costochondritis,112,Costochondritis
+113,Cough,113,Cough
+114,Coughing up blood (blood in phlegm),114,Coughing up blood (blood in phlegm)
+115,Cradle cap,115,Cradle cap
+116,CT scan,1266,"Tests, scans and screening"
+117,Cuts and grazes,719,First aid
+118,Blue skin or lips (cyanosis),119,Cyanosis
+119,Cyanosis,119,Cyanosis
+120,Cyclical vomiting syndrome,120,Cyclical vomiting syndrome
+121,Cyclospora,121,Cyclospora
+122,Cyclothymia,122,Cyclothymia
+123,Dandruff,123,Dandruff
+124,Decongestants,646,Common cold
+125,Dental abscess,125,Dental abscess
+126,Dentures (false teeth),126,Dentures (false teeth)
+127,Dyspraxia (developmental co-ordination disorder) in adults,127,Dyspraxia (developmental co-ordination disorder) in adults
+128,Developmental dysplasia of the hip,128,Developmental dysplasia of the hip
+129,Congenital hip dislocation,128,Developmental dysplasia of the hip
+130,Hip dysplasia,128,Developmental dysplasia of the hip
+131,Diabetes,131,Diabetes
+132,Diabetic eye screening,132,Diabetic eye screening
+133,Diabetic ketoacidosis,133,Diabetic ketoacidosis
+134,DiGeorge syndrome (22q11 deletion),134,DiGeorge syndrome (22q11 deletion)
+135,Dislocated kneecap,135,Dislocated kneecap
+136,Dislocated shoulder,136,Dislocated shoulder
+137,Differences in sex development,137,Differences in sex development
+138,intersex,137,Differences in sex development
+139,Dissociative disorders,139,Dissociative disorders
+140,Diverticular disease and diverticulitis,140,Diverticular disease and diverticulitis
+141,Dizziness,141,Dizziness
+142,Dry mouth,142,Dry mouth
+143,Dysarthria (difficulty speaking),143,Dysarthria (difficulty speaking)
+144,Dysentery,144,Dysentery
+145,Earache,145,Earache
+146,Early or delayed puberty,146,Early or delayed puberty
+147,Puberty (early or delayed),146,Early or delayed puberty
+148,Earwax build-up,148,Earwax build-up
+149,Eating disorders,149,Eating disorders
+150,Ebola virus disease,150,Ebola virus disease
+151,Echocardiogram,1266,"Tests, scans and screening"
+152,Ectropion,152,Ectropion
+153,Edwards' syndrome (trisomy 18),153,Edwards' syndrome (trisomy 18)
+154,Ehlers-Danlos syndromes,154,Ehlers-Danlos syndromes
+155,Ejaculation problems,155,Ejaculation problems
+156,Premature ejaculation,155,Ejaculation problems
+157,Elbow and arm pain,157,Elbow and arm pain
+158,Electrocardiogram (ECG),158,Electrocardiogram (ECG)
+159,Electroencephalogram (EEG),159,Electroencephalogram (EEG)
+160,Electrolyte test,1266,"Tests, scans and screening"
+161,Embolism,161,Embolism
+162,Emollients,818,Itchy skin
+163,Empyema,163,Empyema
+164,Endoscopy,164,Endoscopy
+165,Enhanced recovery,1272,General surgery and recovery
+166,Epididymitis,166,Epididymitis
+167,Epiglottitis,167,Epiglottitis
+168,Erythema multiforme,168,Erythema multiforme
+169,Erythema nodosum,169,Erythema nodosum
+170,Erythromelalgia,170,Erythromelalgia
+171,Euthanasia and assisted suicide,1153,End of life care
+172,Ewing sarcoma,172,Ewing sarcoma
+173,Excessive daytime sleepiness (hypersomnia),173,Excessive daytime sleepiness (hypersomnia)
+174,Hypersomnia,173,Excessive daytime sleepiness (hypersomnia)
+175,Eye cancer,175,Eye cancer
+176,Eye injuries,176,Eye injuries
+177,Eyelid problems,177,Eyelid problems
+178,Eye tests for children,1273,Eye Tests
+179,Prosopagnosia (face blindness),179,Prosopagnosia (face blindness)
+180,Face blindness,179,Prosopagnosia (face blindness)
+181,Febrile seizures,181,Febrile seizures
+182,Fits (children with fever),181,Febrile seizures
+183,Seizures (children with fever),181,Febrile seizures
+184,Female genital mutilation (FGM),184,Female genital mutilation (FGM)
+185,High temperature (fever) in children,185,High temperature (fever) in children
+186,Fever in children,185,High temperature (fever) in children
+187,Flat feet,187,Flat feet
+188,Fluoride,1274,Dental care and surgery
+189,Foetal alcohol spectrum disorder,189,Foetal alcohol spectrum disorder
+190,Food colours and hyperactivity,551,Attention deficit hyperactivity disorder (ADHD)
+191,Food intolerance,191,Food intolerance
+192,Foot drop,192,Foot drop
+193,Gallbladder cancer,193,Gallbladder cancer
+194,Ganglion cyst,194,Ganglion cyst
+195,Gastritis,195,Gastritis
+196,Gastroparesis,196,Gastroparesis
+197,General anaesthesia,28,Anaesthesia
+198,Gilbert's syndrome,198,Gilbert's syndrome
+199,Glutaric aciduria type 1,199,Glutaric aciduria type 1
+200,Granuloma annulare,200,Granuloma annulare
+201,Granulomatosis with polyangiitis,201,Granulomatosis with polyangiitis
+202,Growing pains,202,Growing pains
+203,Hair dye reactions,203,Hair dye reactions
+204,Hairy cell leukaemia,204,Hairy cell leukaemia
+205,Leukaemia (hairy cell),204,Hairy cell leukaemia
+206,Hallucinations and hearing voices,206,Hallucinations and hearing voices
+207,Hearing voices,206,Hallucinations and hearing voices
+208,Hamstring injury,208,Hamstring injury
+209,Hand foot and mouth disease,1243,"Hand, foot and mouth disease"
+210,Head and neck cancer,210,Head and neck cancer
+211,Health anxiety,212,Hypochondria
+212,Hypochondria,212,Hypochondria
+213,Hearing tests for children,766,Hearing tests
+214,Heart-lung transplant,214,Heart-lung transplant
+215,Heart palpitations and ectopic beats,215,Heart palpitations and ectopic beats
+216,Palpitations,215,Heart palpitations and ectopic beats
+217,Ectopic beats,215,Heart palpitations and ectopic beats
+218,Heat exhaustion and heatstroke,218,Heat exhaustion and heatstroke
+219,Heat rash (prickly heat),219,Heat rash (prickly heat)
+220,Prickly heat,219,Heat rash (prickly heat)
+221,Sweating (excessive),710,Excessive sweating (hyperhidrosis)
+222,sweat rash,219,Heat rash (prickly heat)
+223,Henoch-Schönlein purpura (HSP),223,Henoch-Schönlein purpura (HSP)
+224,Hepatitis,224,Hepatitis
+225,Herbal medicines,1152,Complementary and alternative medicine
+226,Herceptin (trastuzumab),606,Cancer
+227,Hereditary haemorrhagic telangiectasia (HHT),227,Hereditary haemorrhagic telangiectasia (HHT)
+228,Hereditary neuropathy with pressure palsies (HNPP),228,Hereditary neuropathy with pressure palsies (HNPP)
+229,Hereditary spastic paraplegia,229,Hereditary spastic paraplegia
+230,Hernia,230,Hernia
+231,Herpes simplex eye infections,231,Herpes simplex eye infections
+232,Eye infection (herpes),231,Herpes simplex eye infections
+233,Herpetic whitlow (whitlow finger),233,Herpetic whitlow (whitlow finger)
+234,Whitlow finger,233,Herpetic whitlow (whitlow finger)
+235,Haemophilus influenzae type b (Hib),235,Haemophilus influenzae type b (Hib)
+236,Hidradenitis suppurativa (HS),236,Hidradenitis suppurativa (HS)
+237,Hyperglycaemia (high blood sugar),237,Hyperglycaemia (high blood sugar)
+238,Hip pain in adults,238,Hip pain in adults
+239,Hirschsprung's disease,239,Hirschsprung's disease
+240,Hoarding disorder,240,Hoarding disorder
+241,Homeopathy,1152,Complementary and alternative medicine
+242,Home oxygen therapy,412,Shortness of breath
+243,Oxygen therapy,412,Shortness of breath
+244,Homocystinuria,244,Homocystinuria
+245,Noise sensitivity (hyperacusis),245,Noise sensitivity (hyperacusis)
+246,Hypnotherapy,246,Hypnotherapy
+247,Hypothermia,247,Hypothermia
+248,Ichthyosis,248,Ichthyosis
+249,Indigestion,249,Indigestion
+250,Inflammatory bowel disease,250,Inflammatory bowel disease
+251,Ingrown hairs,251,Ingrown hairs
+252,Ingrown toenail,252,Ingrown toenail
+253,Intensive care,253,Intensive care
+254,Interstitial cystitis,254,Interstitial cystitis
+255,Intracranial hypertension,255,Intracranial hypertension
+256,Hip pain in children (irritable hip),256,Hip pain in children (irritable hip)
+257,Irritable hip,256,Hip pain in children (irritable hip)
+258,Isovaleric acidaemia,258,Isovaleric acidaemia
+259,Joint pain,259,Joint pain
+260,Kaposi's sarcoma,260,Kaposi's sarcoma
+261,Keratosis pilaris,261,Keratosis pilaris
+262,Klinefelter syndrome,262,Klinefelter syndrome
+263,Knee pain,263,Knee pain
+264,Knock knees,264,Knock knees
+265,Kwashiorkor,265,Kwashiorkor
+266,Labial fusion,266,Labial fusion
+267,Lambert-Eaton myasthenic syndrome,267,Lambert-Eaton myasthenic syndrome
+268,Lactate dehydrogenase (LDH) test,268,Lactate dehydrogenase (LDH) test
+269,Legionnaires' disease,269,Legionnaires' disease
+270,Lichen sclerosus,270,Lichen sclerosus
+271,Limping in children,271,Limping in children
+272,Lipoedema,272,Lipoedema
+273,Lipoma,273,Lipoma
+274,Liver disease,274,Liver disease
+275,Local anaesthesia,275,Local anaesthesia
+276,Long QT syndrome,276,Long QT syndrome
+277,Loss of libido (reduced sex drive),277,Loss of libido (reduced sex drive)
+278,Low blood sugar (hypoglycaemia),278,Low blood sugar (hypoglycaemia)
+279,Hypoglycaemia (low blood sugar),278,Low blood sugar (hypoglycaemia)
+280,Low sperm count,280,Low sperm count
+281,Sperm count (low),280,Low sperm count
+282,Lumps,282,Lumps
+283,Lyme disease,283,Lyme disease
+284,Macular hole,284,Macular hole
+285,Magnesium test,285,Magnesium test
+286,The 'male menopause',286,The 'male menopause'
+287,Male menopause,286,The 'male menopause'
+288,Mallet finger,288,Mallet finger
+289,Maple syrup urine disease,289,Maple syrup urine disease
+290,Mastoiditis,290,Mastoiditis
+291,MCADD,291,MCADD
+292,Medically unexplained symptoms,293,Functional neurological disorder
+293,Functional neurological disorder,293,Functional neurological disorder
+294,Ménière's disease,294,Ménière's disease
+295,Mesothelioma,295,Mesothelioma
+296,Metabolic syndrome,296,Metabolic syndrome
+297,Metallic taste,297,Metallic taste
+298,Mitral valve problems,298,Mitral valve problems
+299,Heart valve problems,298,Mitral valve problems
+300,Molar pregnancy,300,Molar pregnancy
+301,Morton's neuroma,301,Morton's neuroma
+302,Motion sickness,302,Motion sickness
+303,Mouth ulcers,303,Mouth ulcers
+304,MRSA,304,MRSA
+305,Multiple system atrophy,305,Multiple system atrophy
+306,Mycobacterium chimaera infection,306,Mycobacterium chimaera infection
+307,Myelodysplastic syndrome (myelodysplasia),307,Myelodysplastic syndrome (myelodysplasia)
+308,Myositis (polymyositis and dermatomyositis),308,Myositis (polymyositis and dermatomyositis)
+309,Nail patella syndrome,309,Nail patella syndrome
+310,Nail problems,310,Nail problems
+311,Nasal and sinus cancer,311,Nasal and sinus cancer
+312,Nose cancer,311,Nasal and sinus cancer
+313,Sinus cancer,311,Nasal and sinus cancer
+314,Nasopharyngeal cancer,314,Nasopharyngeal cancer
+315,Neck pain,315,Neck pain
+316,Necrotising fasciitis,316,Necrotising fasciitis
+317,Neonatal herpes (herpes in a baby),317,Neonatal herpes (herpes in a baby)
+318,Herpes in babies,317,Neonatal herpes (herpes in a baby)
+319,Nephrotic syndrome in children,319,Nephrotic syndrome in children
+320,Neuroblastoma,320,Neuroblastoma
+321,Neuroendocrine tumours,321,Neuroendocrine tumours
+322,Neuromyelitis optica,322,Neuromyelitis optica
+323,Night sweats,323,Night sweats
+324,Sweating at night,323,Night sweats
+325,Night terrors and nightmares,325,Night terrors and nightmares
+326,Nipple discharge,326,Nipple discharge
+327,Non-alcoholic fatty liver disease (NAFLD),327,Non-alcoholic fatty liver disease (NAFLD)
+328,Norovirus (vomiting bug),328,Norovirus (vomiting bug)
+329,Vomiting bug,328,Norovirus (vomiting bug)
+330,Winter vomiting bug,328,Norovirus (vomiting bug)
+331,NSAIDs,1256,Pain relief
+332,Swollen ankles feet and legs (oedema),1262,"Swollen ankles, feet and legs (oedema)"
+333,Oesophageal atresia and tracheo-oesophageal fistula,333,Oesophageal atresia and tracheo-oesophageal fistula
+334,Orf,334,Orf
+335,Osteophyte (bone spur),335,Osteophyte (bone spur)
+336,Otosclerosis,336,Otosclerosis
+337,Ovulation pain,337,Ovulation pain
+338,Panic disorder,338,Panic disorder
+339,Patau's syndrome,339,Patau's syndrome
+340,Peak flow test,1266,"Tests, scans and screening"
+341,Pelvic pain,341,Pelvic pain
+342,Penile cancer,342,Penile cancer
+343,Period pain,344,Menstrual pain
+344,Menstrual pain,344,Menstrual pain
+345,Periods,345,Periods
+346,Persistent trophoblastic disease and choriocarcinoma,346,Persistent trophoblastic disease and choriocarcinoma
+347,Personality disorder,347,Personality disorder
+348,PET scan,1266,"Tests, scans and screening"
+349,Phaeochromocytoma,349,Phaeochromocytoma
+350,Phenylketonuria,350,Phenylketonuria
+351,Tight foreskin (phimosis and paraphimosis),352,Foreskin problems
+352,Foreskin problems,352,Foreskin problems
+353,Phimosis,353,Phimosis
+354,Phlebitis (superficial thrombophlebitis),354,Phlebitis (superficial thrombophlebitis)
+355,Superficial thrombophlebitis,354,Phlebitis (superficial thrombophlebitis)
+356,Phosphate test,1266,"Tests, scans and screening"
+357,Photodynamic therapy (PDT),357,Photodynamic therapy (PDT)
+358,Pins and needles,358,Pins and needles
+359,PIP breast implants,1186,Cosmetic procedures
+360,Pityriasis rosea,360,Pityriasis rosea
+361,Pityriasis versicolor,361,Pityriasis versicolor
+362,Plagiocephaly and brachycephaly (flat head syndrome),362,Plagiocephaly and brachycephaly (flat head syndrome)
+363,Brachycephaly and plagiocephaly,362,Plagiocephaly and brachycephaly (flat head syndrome)
+364,Flat head syndrome,362,Plagiocephaly and brachycephaly (flat head syndrome)
+365,Pleurisy,365,Pleurisy
+366,Polio,366,Polio
+367,Polyhydramnios (too much amniotic fluid),367,Polyhydramnios (too much amniotic fluid)
+368,Polymorphic light eruption,368,Polymorphic light eruption
+369,Pompholyx (dyshidrotic eczema),369,Pompholyx (dyshidrotic eczema)
+370,Postmenopausal bleeding,370,Postmenopausal bleeding
+371,Bleeding after the menopause,370,Postmenopausal bleeding
+372,Post-mortem,1277,Transplants and organ donation
+373,Postpartum psychosis,373,Postpartum psychosis
+374,Postural tachycardia syndrome (PoTS),374,Postural tachycardia syndrome (PoTS)
+375,Potassium test,1266,"Tests, scans and screening"
+376,Predictive genetic tests for cancer risk genes,1266,"Tests, scans and screening"
+377,Genetic test for cancer gene,1266,"Tests, scans and screening"
+378,Probiotics,1223,Healthy lifestyle
+379,Problems swallowing pills,379,Problems swallowing pills
+380,Swallowing pills,379,Problems swallowing pills
+381,Prostate problems,381,Prostate problems
+382,Prostatitis,382,Prostatitis
+383,Psoriatic arthritis,383,Psoriatic arthritis
+384,Psychiatry,384,Psychiatry
+385,Pubic lice,385,Pubic lice
+386,Pudendal neuralgia,386,Pudendal neuralgia
+387,Pyoderma gangrenosum,387,Pyoderma gangrenosum
+388,Q fever,388,Q fever
+389,Rashes in babies and children,389,Rashes in babies and children
+390,Red blood cell count,390,Red blood cell count
+391,Red eye,391,Red eye
+392,Reflux in babies,393,Acid reflux in babies
+393,Acid reflux in babies,393,Acid reflux in babies
+394,Respiratory tract infections (RTIs),394,Respiratory tract infections (RTIs)
+395,Retinal migraine,395,Retinal migraine
+396,Retinoblastoma (eye cancer in children),396,Retinoblastoma (eye cancer in children)
+397,Rett syndrome,397,Rett syndrome
+398,Reye's syndrome,398,Reye's syndrome
+399,Roseola,399,Roseola
+400,Salivary gland stones,400,Salivary gland stones
+401,Sarcoidosis,401,Sarcoidosis
+402,SARS (severe acute respiratory syndrome),402,SARS (severe acute respiratory syndrome)
+403,Scarlet fever,403,Scarlet fever
+404,Schistosomiasis (bilharzia),404,Schistosomiasis (bilharzia)
+405,Bilharzia,404,Schistosomiasis (bilharzia)
+406,Scleroderma,406,Scleroderma
+407,Selective mutism,407,Selective mutism
+408,Septic arthritis,408,Septic arthritis
+409,Sexually transmitted infections (STIs),409,Sexually transmitted infections (STIs)
+410,Shin splints,410,Shin splints
+411,Shin pain (shin splints),410,Shin splints
+412,Shortness of breath,412,Shortness of breath
+413,Shoulder impingement,413,Shoulder impingement
+414,Sick building syndrome,414,Sick building syndrome
+415,Silicosis,415,Silicosis
+416,Skin cyst,416,Skin cyst
+417,Skin tags,417,Skin tags
+418,Slapped cheek syndrome,418,Slapped cheek syndrome
+419,Sleepwalking,419,Sleepwalking
+420,Smelly urine,420,Smelly urine
+421,Urine (smelly),420,Smelly urine
+422,Snake bites,422,Snake bites
+423,Social anxiety (social phobia),423,Social anxiety (social phobia)
+424,Soft tissue sarcomas,424,Soft tissue sarcomas
+425,Sore or dry lips,425,Sore or dry lips
+426,Sore lips,425,Sore or dry lips
+427,Dry lips,425,Sore or dry lips
+428,Lips (sore or dry),425,Sore or dry lips
+429,Sore or white tongue,429,Sore or white tongue
+430,Tongue (sore or white),429,Sore or white tongue
+431,Sore throat,431,Sore throat
+432,Throat (sore),431,Sore throat
+433,Spirometry,1266,"Tests, scans and screening"
+434,Spleen problems and spleen removal,434,Spleen problems and spleen removal
+435,Spondylolisthesis,435,Spondylolisthesis
+436,Staph infection,436,Staph infection
+437,Steroid inhalers,545,Asthma
+438,Steroid injections,440,Steroids
+439,Steroid nasal sprays,440,Steroids
+440,Steroids,440,Steroids
+441,Corticosteroids,440,Steroids
+442,Steroid tablets,440,Steroids
+443,Stevens-Johnson syndrome,443,Stevens-Johnson syndrome
+444,Stomach ache,444,Stomach ache
+445,Tummy ache,444,Stomach ache
+446,Stopped or missed periods,446,Stopped or missed periods
+447,Periods (stopped or missed),446,Stopped or missed periods
+448,Stop smoking treatments,1230,Smoking
+449,Smoking (treatments to stop),1230,Smoking
+450,Stretch marks,450,Stretch marks
+451,Stye,451,Stye
+452,Sudden infant death syndrome (SIDS),452,Sudden infant death syndrome (SIDS)
+453,Sunburn,453,Sunburn
+454,Swine flu (H1N1),454,Swine flu (H1N1)
+455,Swollen glands,455,Swollen glands
+456,Temporomandibular disorder (TMD),456,Temporomandibular disorder (TMD)
+457,Jaw pain,456,Temporomandibular disorder (TMD)
+458,Tension-type headaches,458,Tension-type headaches
+459,Headaches (tension-type),458,Tension-type headaches
+460,Tetanus,460,Tetanus
+461,Excessive thirst,461,Excessive thirst
+462,Thirst (excessive),461,Excessive thirst
+463,Thrombophilia,463,Thrombophilia
+464,Thyroiditis,464,Thyroiditis
+465,Total iron-binding capacity (TIBC) and transferrin test,1266,"Tests, scans and screening"
+466,Tongue-tie,466,Tongue-tie
+467,Toothache,468,Dental pain
+468,Dental pain,468,Dental pain
+469,Tooth decay,469,Tooth decay
+470,Topical corticosteroids,470,Topical corticosteroids
+471,Steroid cream,470,Topical corticosteroids
+472,Corticosteroid cream,470,Topical corticosteroids
+473,Total protein test,1266,"Tests, scans and screening"
+474,Toxic shock syndrome,474,Toxic shock syndrome
+475,TENS (transcutaneous electrical nerve stimulation),1256,Pain relief
+476,Trimethylaminuria ('fish odour syndrome'),476,Trimethylaminuria ('fish odour syndrome')
+477,Typhus,477,Typhus
+478,Ultrasound scan,1266,"Tests, scans and screening"
+479,Unintentional weight loss,479,Unintentional weight loss
+480,Weight loss (unintentional),479,Unintentional weight loss
+481,Weight loss (unexpected),479,Unintentional weight loss
+482,Urinary tract infections (UTIs),482,Urinary tract infections (UTIs)
+483,Vaginal discharge,483,Vaginal discharge
+484,Vaginal dryness,484,Vaginal dryness
+485,Vaginitis,485,Vaginitis
+486,Vasculitis,486,Vasculitis
+487,Blindness and vision loss,487,Blindness and vision loss
+488,Vomiting blood (haematemesis),488,Vomiting blood (haematemesis)
+489,Von Willebrand disease,489,Von Willebrand disease
+490,Vulvodynia (vulval pain),490,Vulvodynia (vulval pain)
+491,Vaginal pain,490,Vulvodynia (vulval pain)
+492,Warts and verrucas,492,Warts and verrucas
+493,West Nile virus,493,West Nile virus
+494,Whooping cough,494,Whooping cough
+495,Wolff-Parkinson-White syndrome,495,Wolff-Parkinson-White syndrome
+496,X-ray,1266,"Tests, scans and screening"
+497,Zika virus,497,Zika virus
+498,Abdominal aortic aneurysm,498,Abdominal aortic aneurysm
+499,AAA,498,Abdominal aortic aneurysm
+500,Aneurysm (abdominal aortic),498,Abdominal aortic aneurysm
+501,Abdominal aortic aneurysm screening,498,Abdominal aortic aneurysm
+502,AAA screening,498,Abdominal aortic aneurysm
+503,Abscess,503,Abscess
+504,Acne,504,Acne
+505,Actinomycosis,505,Actinomycosis
+506,Acute lymphoblastic leukaemia,506,Acute lymphoblastic leukaemia
+507,Leukaemia (acute lymphoblastic),506,Acute lymphoblastic leukaemia
+508,Acute myeloid leukaemia,508,Acute myeloid leukaemia
+509,Leukaemia (acute myeloid),508,Acute myeloid leukaemia
+510,Acute pancreatitis,510,Acute pancreatitis
+511,Pancreatitis (acute),510,Acute pancreatitis
+512,Addison's disease,512,Addison's disease
+513,Agoraphobia,513,Agoraphobia
+514,Albinism,514,Albinism
+515,Alcohol misuse,515,Alcohol misuse
+516,Alcohol-related liver disease,516,Alcohol-related liver disease
+517,Liver disease (alcohol-related),516,Alcohol-related liver disease
+518,Allergic rhinitis,518,Allergic rhinitis
+519,Rhinitis (allergic),518,Allergic rhinitis
+520,Allergies,520,Allergies
+521,Altitude sickness,521,Altitude sickness
+522,Alzheimer's disease,522,Alzheimer's disease
+523,Amniocentesis,1270,Genetic testing in pregnancy
+524,Anal fissure,524,Anal fissure
+525,Anal fistula,525,Anal fistula
+526,Anaphylaxis,526,Anaphylaxis
+527,Androgen insensitivity syndrome,527,Androgen insensitivity syndrome
+528,Angina,528,Angina
+529,Angioedema,529,Angioedema
+530,Angiography,1266,"Tests, scans and screening"
+531,Ankylosing spondylitis,531,Ankylosing spondylitis
+532,Anorexia nervosa,532,Anorexia nervosa
+533,Antibiotics,1271,Treatments for infection
+534,Anticoagulant medicines,54,Blood clots
+535,Antidepressants,637,Clinical depression
+536,Antiphospholipid syndrome (APS),536,Antiphospholipid syndrome (APS)
+537,Hughes syndrome,536,Antiphospholipid syndrome (APS)
+538,Aortic valve replacement,538,Aortic valve replacement
+539,Heart valve replacement,538,Aortic valve replacement
+540,Aphasia,540,Aphasia
+541,Appendicitis,541,Appendicitis
+542,Arthritis,542,Arthritis
+543,Arthroscopy,259,Joint pain
+544,Aspergillosis,544,Aspergillosis
+545,Asthma,545,Asthma
+546,Astigmatism,546,Astigmatism
+547,Ataxia,547,Ataxia
+548,Atopic eczema,548,Atopic eczema
+549,Eczema (atopic),548,Atopic eczema
+550,Atrial fibrillation,550,Atrial fibrillation
+551,Attention deficit hyperactivity disorder (ADHD),551,Attention deficit hyperactivity disorder (ADHD)
+552,Autosomal dominant polycystic kidney disease,552,Autosomal dominant polycystic kidney disease
+553,Polycystic kidney disease (autosomal dominant),552,Autosomal dominant polycystic kidney disease
+554,Autosomal recessive polycystic kidney disease,554,Autosomal recessive polycystic kidney disease
+555,Polycystic kidney disease (autosomal recessive),554,Autosomal recessive polycystic kidney disease
+556,Back pain,556,Back pain
+557,Bacterial vaginosis,557,Bacterial vaginosis
+558,Bad breath,559,Halitosis
+559,Halitosis,559,Halitosis
+560,Baker's cyst,561,Popliteal cyst
+561,Popliteal cyst,561,Popliteal cyst
+562,Bartholin's cyst,562,Bartholin's cyst
+563,Bedwetting in children,563,Bedwetting in children
+564,Behçet's disease,564,Behçet's disease
+565,Bell's palsy,565,Bell's palsy
+566,Benign brain tumour (non-cancerous),566,Benign brain tumour (non-cancerous)
+567,Brain tumour (benign),566,Benign brain tumour (non-cancerous)
+568,Bile duct cancer (cholangiocarcinoma),569,Cholangiocarcinoma
+569,Cholangiocarcinoma,569,Cholangiocarcinoma
+570,Binge eating disorder,570,Binge eating disorder
+571,Biopsy,1266,"Tests, scans and screening"
+572,Bipolar disorder,572,Bipolar disorder
+573,Birthmarks,573,Birthmarks
+574,Bladder cancer,574,Bladder cancer
+575,Bladder stones,575,Bladder stones
+576,Bleeding from the bottom (rectal bleeding),577,Rectal bleeding
+577,Rectal bleeding,577,Rectal bleeding
+578,Blepharitis,578,Blepharitis
+579,Blisters,719,First aid
+580,Blood tests,1266,"Tests, scans and screening"
+581,Blushing,581,Blushing
+582,Bone cancer,582,Bone cancer
+583,Bone cyst,583,Bone cyst
+584,Borderline personality disorder,584,Borderline personality disorder
+585,Bowel cancer,585,Bowel cancer
+586,Colon cancer,585,Bowel cancer
+587,Rectal cancer,585,Bowel cancer
+588,Bowel cancer screening,588,Bowel cancer screening
+589,Bowel incontinence,589,Bowel incontinence
+590,Brain abscess,590,Brain abscess
+591,Brain aneurysm,591,Brain aneurysm
+592,Aneurysm (brain),591,Brain aneurysm
+593,Brain death,593,Brain death
+594,Breast abscess,594,Breast abscess
+595,Breast cancer in women,595,Breast cancer in women
+596,Breast cancer in men,596,Breast cancer in men
+597,Breast lumps,597,Breast lumps
+598,Bronchiectasis,598,Bronchiectasis
+599,Bronchiolitis,599,Bronchiolitis
+600,Bronchodilators,600,Bronchodilators
+601,Exophthalmos (bulging eyes),601,Exophthalmos (bulging eyes)
+602,Bulimia,602,Bulimia
+603,Burns and scalds,603,Burns and scalds
+604,Bursitis,604,Bursitis
+605,Caesarean section,605,Caesarean section
+606,Cancer,606,Cancer
+607,Carotid endarterectomy,46,Atherosclerosis (arteriosclerosis)
+608,Carpal tunnel syndrome,608,Carpal tunnel syndrome
+609,Cartilage damage,609,Cartilage damage
+610,Cataract surgery,1248,Laser eye surgery and lens surgery
+611,Cavernous sinus thrombosis,611,Cavernous sinus thrombosis
+612,Cellulitis,612,Cellulitis
+613,Cerebral palsy,613,Cerebral palsy
+614,Cervical cancer,614,Cervical cancer
+615,Cervical screening,615,Cervical screening
+616,Smear test,615,Cervical screening
+617,Cervical spondylosis,617,Cervical spondylosis
+618,Charcot-Marie-Tooth disease,618,Charcot-Marie-Tooth disease
+619,Chemotherapy,619,Chemotherapy
+620,Chickenpox,620,Chickenpox
+621,Childhood cataracts,621,Childhood cataracts
+622,Cataracts (children),621,Childhood cataracts
+623,Chlamydia,623,Chlamydia
+624,Cholera,624,Cholera
+625,Chorionic villus sampling,1270,Genetic testing in pregnancy
+626,Myalgic encephalomyelitis or chronic fatigue syndrome (ME/CFS),626,Myalgic encephalomyelitis or chronic fatigue syndrome (ME/CFS)
+627,Chronic fatigue syndrome (ME/CFS),626,Myalgic encephalomyelitis or chronic fatigue syndrome (ME/CFS)
+628,Chronic lymphocytic leukaemia,628,Chronic lymphocytic leukaemia
+629,Leukaemia (chronic lymphocytic),628,Chronic lymphocytic leukaemia
+630,Chronic myeloid leukaemia,630,Chronic myeloid leukaemia
+631,Leukaemia (chronic myeloid),630,Chronic myeloid leukaemia
+632,Chronic obstructive pulmonary disease (COPD),632,Chronic obstructive pulmonary disease (COPD)
+633,Chronic pancreatitis,633,Chronic pancreatitis
+634,Pancreatitis (chronic),633,Chronic pancreatitis
+635,Cirrhosis,635,Cirrhosis
+636,Cleft lip and palate,636,Cleft lip and palate
+637,Clinical depression,637,Clinical depression
+638,Depression,637,Clinical depression
+639,Clinical trials,1244,Healthy volunteer
+640,Club foot,640,Club foot
+641,Coeliac disease,641,Coeliac disease
+642,Cognitive behavioural therapy (CBT),642,Cognitive behavioural therapy (CBT)
+643,Colic,643,Colic
+644,Colostomy,644,Colostomy
+645,Colposcopy,615,Cervical screening
+646,Common cold,646,Common cold
+647,Complex regional pain syndrome,647,Complex regional pain syndrome
+648,Congenital heart disease,648,Congenital heart disease
+649,Conjunctivitis,649,Conjunctivitis
+650,Consent to treatment,1244,Healthy volunteer
+651,Constipation,651,Constipation
+652,Contact dermatitis,652,Contact dermatitis
+653,Eczema (contact dermatitis),652,Contact dermatitis
+654,Cornea transplant,654,Cornea transplant
+655,Corns and calluses,655,Corns and calluses
+656,Cardiac catheterisation and coronary angiography,1266,"Tests, scans and screening"
+657,Coronary angioplasty and stent insertion,657,Coronary angioplasty and stent insertion
+658,Angioplasty,657,Coronary angioplasty and stent insertion
+659,Stent insertion,657,Coronary angioplasty and stent insertion
+660,Coronary artery bypass graft,660,Coronary artery bypass graft
+661,Heart bypass,661,Heart bypass
+662,CABG,660,Coronary artery bypass graft
+663,Coronary heart disease,663,Coronary heart disease
+664,Heart disease (coronary),663,Coronary heart disease
+665,Corticobasal degeneration,665,Corticobasal degeneration
+666,Counselling,666,Counselling
+667,Craniosynostosis,667,Craniosynostosis
+668,Creutzfeldt-Jakob disease,668,Creutzfeldt-Jakob disease
+669,CJD,668,Creutzfeldt-Jakob disease
+670,Crohn's disease,670,Crohn's disease
+671,Croup,671,Croup
+672,Cushing's syndrome,672,Cushing's syndrome
+673,Cystic fibrosis,673,Cystic fibrosis
+674,Cystitis,674,Cystitis
+675,Cystoscopy,675,Cystoscopy
+676,Cytomegalovirus (CMV),676,Cytomegalovirus (CMV)
+677,Deafblindness,677,Deafblindness
+678,DVT (deep vein thrombosis),678,DVT (deep vein thrombosis)
+679,DVT,678,DVT (deep vein thrombosis)
+680,Dehydration,680,Dehydration
+681,Dementia with Lewy bodies,681,Dementia with Lewy bodies
+682,Dengue,682,Dengue
+683,Developmental co-ordination disorder (dyspraxia) in children,683,Developmental co-ordination disorder (dyspraxia) in children
+684,Dyspraxia in children,683,Developmental co-ordination disorder (dyspraxia) in children
+685,Bone density scan (DEXA scan),1266,"Tests, scans and screening"
+686,DEXA scan,1266,"Tests, scans and screening"
+687,Diabetes insipidus,687,Diabetes insipidus
+688,Diabetic retinopathy,688,Diabetic retinopathy
+689,Dialysis,689,Dialysis
+690,Diphtheria,690,Diphtheria
+691,Discoid eczema,691,Discoid eczema
+692,Eczema (discoid),691,Discoid eczema
+693,Disorders of consciousness,693,Disorders of consciousness
+694,Vegetative state,693,Disorders of consciousness
+695,Double vision,695,Double vision
+696,Down's syndrome,696,Down's syndrome
+697,Dry eyes,697,Dry eyes
+698,Dupuytren's contracture,698,Dupuytren's contracture
+699,Dyslexia,699,Dyslexia
+700,Dystonia,700,Dystonia
+701,Ectopic pregnancy,701,Ectopic pregnancy
+702,Encephalitis,702,Encephalitis
+703,Endocarditis,703,Endocarditis
+704,Endometriosis,704,Endometriosis
+705,Epidermolysis bullosa,705,Epidermolysis bullosa
+706,Epidural,1256,Pain relief
+707,Epilepsy,707,Epilepsy
+708,Erectile dysfunction (impotence),708,Erectile dysfunction (impotence)
+709,Impotence,708,Erectile dysfunction (impotence)
+710,Excessive sweating (hyperhidrosis),710,Excessive sweating (hyperhidrosis)
+711,Hyperhidrosis,710,Excessive sweating (hyperhidrosis)
+712,Fabricated or induced illness,712,Fabricated or induced illness
+713,Fainting,713,Fainting
+714,Falls,714,Falls
+715,Femoral hernia repair,715,Femoral hernia repair
+716,Hernia (femoral),715,Femoral hernia repair
+717,Fibroids,717,Fibroids
+718,Fibromyalgia,718,Fibromyalgia
+719,First aid,719,First aid
+720,Farting (flatulence),720,Farting (flatulence)
+721,Flatulence,720,Farting (flatulence)
+722,Wind,720,Farting (flatulence)
+723,Flu,723,Flu
+724,Influenza,723,Flu
+725,Food allergy,725,Food allergy
+726,Food poisoning,726,Food poisoning
+727,Frontotemporal dementia,727,Frontotemporal dementia
+728,Dementia (frontotemporal),727,Frontotemporal dementia
+729,Frostbite,729,Frostbite
+730,Frozen shoulder,730,Frozen shoulder
+731,Fungal nail infection,731,Fungal nail infection
+732,Nail fungal infection,731,Fungal nail infection
+733,Gallbladder removal,733,Gallbladder removal
+734,Gallstones,734,Gallstones
+735,Gangrene,735,Gangrene
+736,Gastrectomy,736,Gastrectomy
+737,Gastroscopy,737,Gastroscopy
+738,Gender dysphoria,738,Gender dysphoria
+739,Generalised anxiety disorder in adults,739,Generalised anxiety disorder in adults
+740,Anxiety disorder in adults,739,Generalised anxiety disorder in adults
+741,Genital herpes,741,Genital herpes
+742,Herpes (genital),741,Genital herpes
+743,Genital warts,743,Genital warts
+744,Gestational diabetes,744,Gestational diabetes
+745,Diabetes in pregnancy,744,Gestational diabetes
+746,Giardiasis,746,Giardiasis
+747,Glandular fever,747,Glandular fever
+748,Glaucoma,748,Glaucoma
+749,Glomerulonephritis,749,Glomerulonephritis
+750,Glue ear,750,Glue ear
+751,Goitre,751,Goitre
+752,Gonorrhoea,752,Gonorrhoea
+753,Gout,753,Gout
+754,Guillain-Barré syndrome,754,Guillain-Barré syndrome
+755,Gum disease,755,Gum disease
+756,Haemochromatosis,756,Haemochromatosis
+757,Haemophilia,757,Haemophilia
+758,Hair loss,758,Hair loss
+759,Hand tendon repair,759,Hand tendon repair
+760,Having an operation (surgery),1272,General surgery and recovery
+761,Surgery (having an operation),1272,General surgery and recovery
+762,Hay fever,762,Hay fever
+763,Head lice and nits,763,Head lice and nits
+764,Hearing loss,764,Hearing loss
+765,Deafness,764,Hearing loss
+766,Hearing tests,766,Hearing tests
+767,Heart attack,767,Heart attack
+768,Heart block,768,Heart block
+769,Heartburn and acid reflux,769,Heartburn and acid reflux
+770,Gastro-oesophageal reflux disease (GORD),769,Heartburn and acid reflux
+771,Heart failure,771,Heart failure
+772,Heart transplant,772,Heart transplant
+773,Heavy periods,773,Heavy periods
+774,Periods (heavy),773,Heavy periods
+775,Hepatitis A,775,Hepatitis A
+776,Hepatitis B,776,Hepatitis B
+777,Hepatitis C,777,Hepatitis C
+778,Hiatus hernia,778,Hiatus hernia
+779,Hernia (hiatus),778,Hiatus hernia
+780,Hiccups,780,Hiccups
+781,High blood pressure (hypertension),781,High blood pressure (hypertension)
+782,Hypertension,782,Hypertension
+783,Blood pressure (high),781,High blood pressure (hypertension)
+784,High cholesterol,784,High cholesterol
+785,Cholesterol (high),784,High cholesterol
+786,Hip fracture,786,Hip fracture
+787,Hip replacement,787,Hip replacement
+788,Excessive hair growth (hirsutism),788,Excessive hair growth (hirsutism)
+789,hirsutism,788,Excessive hair growth (hirsutism)
+790,HIV and AIDS,790,HIV and AIDS
+791,Hives,791,Hives
+792,Hodgkin lymphoma,792,Hodgkin lymphoma
+793,Hormone replacement therapy (HRT),793,Hormone replacement therapy (HRT)
+794,HRT,793,Hormone replacement therapy (HRT)
+795,Huntington's disease,795,Huntington's disease
+796,Hydrocephalus,796,Hydrocephalus
+797,Hydronephrosis,797,Hydronephrosis
+798,Hysterectomy,798,Hysterectomy
+799,Hysteroscopy,799,Hysteroscopy
+800,Idiopathic pulmonary fibrosis,800,Idiopathic pulmonary fibrosis
+801,Pulmonary fibrosis,800,Idiopathic pulmonary fibrosis
+802,Ileostomy,802,Ileostomy
+803,Impetigo,803,Impetigo
+804,Infertility,804,Infertility
+805,Inguinal hernia repair,805,Inguinal hernia repair
+806,Hernia (inguinal),805,Inguinal hernia repair
+807,Insect bites and stings,807,Insect bites and stings
+808,Sting or bite (insect),807,Insect bites and stings
+809,Insomnia,809,Insomnia
+810,Iron deficiency anaemia,810,Iron deficiency anaemia
+811,Anaemia (iron deficiency),810,Iron deficiency anaemia
+812,Irregular periods,812,Irregular periods
+813,Periods (irregular),812,Irregular periods
+814,Irritable bowel syndrome (IBS),814,Irritable bowel syndrome (IBS)
+815,IBS,814,Irritable bowel syndrome (IBS)
+816,Itchy bottom,816,Itchy bottom
+817,Anus (itchy),816,Itchy bottom
+818,Itchy skin,818,Itchy skin
+819,IVF,819,IVF
+820,Japanese encephalitis,820,Japanese encephalitis
+821,Jaundice,821,Jaundice
+822,Newborn jaundice,822,Newborn jaundice
+823,Jaundice in newborns,822,Newborn jaundice
+824,Jellyfish and other sea creature stings,824,Jellyfish and other sea creature stings
+825,Jet lag,825,Jet lag
+826,Joint hypermobility syndrome,826,Joint hypermobility syndrome
+827,Kawasaki disease,827,Kawasaki disease
+828,Kidney cancer,828,Kidney cancer
+829,Chronic kidney disease,829,Chronic kidney disease
+830,Kidney failure,829,Chronic kidney disease
+831,Kidney infection,831,Kidney infection
+832,Kidney stones,832,Kidney stones
+833,Kidney transplant,833,Kidney transplant
+834,Knee ligament surgery,834,Knee ligament surgery
+835,Knee replacement,835,Knee replacement
+836,Kyphosis,836,Kyphosis
+837,Labyrinthitis and vestibular neuritis,837,Labyrinthitis and vestibular neuritis
+838,Vestibular neuritis,837,Labyrinthitis and vestibular neuritis
+839,Lactose intolerance,839,Lactose intolerance
+840,Laparoscopy (keyhole surgery),840,Laparoscopy (keyhole surgery)
+841,Laryngeal (larynx) cancer,841,Laryngeal (larynx) cancer
+842,Laryngitis,842,Laryngitis
+843,Laxatives,651,Constipation
+844,Lazy eye,845,Amblyopia
+845,Amblyopia,845,Amblyopia
+846,Leg cramps,846,Leg cramps
+847,Venous leg ulcer,847,Venous leg ulcer
+848,Leg ulcer,847,Venous leg ulcer
+849,Leptospirosis (Weil's disease),849,Leptospirosis (Weil's disease)
+850,Weil's disease,849,Leptospirosis (Weil's disease)
+851,Leukoplakia,851,Leukoplakia
+852,Lichen planus,852,Lichen planus
+853,Listeriosis,853,Listeriosis
+854,Liver cancer,854,Liver cancer
+855,Liver transplant,855,Liver transplant
+856,Long-sightedness,856,Long-sightedness
+857,Low blood pressure (hypotension),857,Low blood pressure (hypotension)
+858,Blood pressure (low),857,Low blood pressure (hypotension)
+859,Hypotension,857,Low blood pressure (hypotension)
+860,Lumbar decompression surgery,860,Lumbar decompression surgery
+861,Lumbar puncture,861,Lumbar puncture
+862,Lung cancer,862,Lung cancer
+863,Lung transplant,863,Lung transplant
+864,Lupus,864,Lupus
+865,Lymphoedema,865,Lymphoedema
+866,Age-related macular degeneration (AMD),866,Age-related macular degeneration (AMD)
+867,Macular degeneration (age-related),866,Age-related macular degeneration (AMD)
+868,Malaria,868,Malaria
+869,Malignant brain tumour (brain cancer),870,Brain tumour (malignant)
+870,Brain tumour (malignant),870,Brain tumour (malignant)
+871,Malnutrition,871,Malnutrition
+872,Marfan syndrome,872,Marfan syndrome
+873,Mastectomy,1275,Breast Cancer Surgery
+874,Mastitis,874,Mastitis
+875,Mastocytosis,875,Mastocytosis
+876,Measles,876,Measles
+877,Medicines information,1244,Healthy volunteer
+878,Skin cancer (melanoma),878,Skin cancer (melanoma)
+879,Meningitis,879,Meningitis
+880,Menopause,880,Menopause
+881,Migraine,881,Migraine
+882,Head injury and concussion,108,Concussion
+883,Miscarriage,883,Miscarriage
+884,Moles,884,Moles
+885,Molluscum contagiosum,885,Molluscum contagiosum
+886,Motor neurone disease,886,Motor neurone disease
+887,Mouth cancer,887,Mouth cancer
+888,Tongue cancer,887,Mouth cancer
+889,MRI scan,1266,"Tests, scans and screening"
+890,Mucositis,890,Mucositis
+891,Multiple myeloma,892,Myeloma
+892,Myeloma,892,Myeloma
+893,Multiple sclerosis,893,Multiple sclerosis
+894,Mumps,894,Mumps
+895,Munchausen's syndrome,1250,Munchausen syndrome
+896,Muscular dystrophy,896,Muscular dystrophy
+897,Myasthenia gravis,897,Myasthenia gravis
+898,Narcolepsy,898,Narcolepsy
+899,Nasal polyps,899,Nasal polyps
+900,Newborn respiratory distress syndrome,900,Newborn respiratory distress syndrome
+901,Neurofibromatosis type 1,901,Neurofibromatosis type 1
+902,Neurofibromatosis type 2,902,Neurofibromatosis type 2
+903,Non-allergic rhinitis,903,Non-allergic rhinitis
+904,Non-gonococcal urethritis,904,Non-gonococcal urethritis
+905,Urethritis (NGU),904,Non-gonococcal urethritis
+906,Non-Hodgkin lymphoma,906,Non-Hodgkin lymphoma
+907,Skin cancer (non-melanoma),907,Skin cancer (non-melanoma)
+908,Squamous cell carcinoma,907,Skin cancer (non-melanoma)
+909,Basal cell carcinoma,909,Basal cell carcinoma
+910,Noonan syndrome,910,Noonan syndrome
+911,Nosebleed,911,Nosebleed
+912,Obesity,912,Obesity
+913,Obsessive compulsive disorder (OCD),913,Obsessive compulsive disorder (OCD)
+914,Occupational therapy,914,Occupational therapy
+915,Oesophageal cancer,915,Oesophageal cancer
+916,Orthodontics,1274,Dental care and surgery
+917,Osteoarthritis,917,Osteoarthritis
+918,Osteomyelitis,918,Osteomyelitis
+919,Osteopathy,259,Joint pain
+920,Osteoporosis,920,Osteoporosis
+921,Ovarian cancer,921,Ovarian cancer
+922,Ovarian cyst,922,Ovarian cyst
+923,Overactive thyroid (hyperthyroidism),923,Overactive thyroid (hyperthyroidism)
+924,Hyperthyroidism,923,Overactive thyroid (hyperthyroidism)
+925,Pacemaker implantation,1276,Heart rhythm problems - ( also check arrhythmia)
+926,Paget's disease of bone,926,Paget's disease of bone
+927,Paget's disease of the nipple,927,Paget's disease of the nipple
+928,Pancreas transplant,1277,Transplants and organ donation
+929,Pancreatic cancer,929,Pancreatic cancer
+930,Paralysis,930,Paralysis
+931,Parkinson's disease,931,Parkinson's disease
+932,Pelvic inflammatory disease,932,Pelvic inflammatory disease
+933,Pelvic organ prolapse,933,Pelvic organ prolapse
+934,Prolapse (pelvic organ),933,Pelvic organ prolapse
+935,Pemphigus vulgaris,935,Pemphigus vulgaris
+936,Perforated eardrum,936,Perforated eardrum
+937,Eardrum (burst),936,Perforated eardrum
+938,Pericarditis,938,Pericarditis
+939,Peripheral arterial disease (PAD),939,Peripheral arterial disease (PAD)
+940,Peripheral neuropathy,940,Peripheral neuropathy
+941,Peritonitis,941,Peritonitis
+942,Phobias,942,Phobias
+943,Physiotherapy,943,Physiotherapy
+944,Piles (haemorrhoids),944,Piles (haemorrhoids)
+945,Piles,944,Piles (haemorrhoids)
+946,Pilonidal sinus,946,Pilonidal sinus
+947,Plastic surgery,947,Plastic surgery
+948,Pneumonia,948,Pneumonia
+949,Poisoning,949,Poisoning
+950,Polycystic ovary syndrome,950,Polycystic ovary syndrome
+951,Polycythaemia,951,Polycythaemia
+952,Polymyalgia rheumatica,952,Polymyalgia rheumatica
+953,Post-herpetic neuralgia,953,Post-herpetic neuralgia
+954,Postnatal depression,954,Postnatal depression
+955,Post-polio syndrome,955,Post-polio syndrome
+956,Post-traumatic stress disorder (PTSD),956,Post-traumatic stress disorder (PTSD)
+957,Prader-Willi syndrome,957,Prader-Willi syndrome
+958,Pre-eclampsia,958,Pre-eclampsia
+959,PMS (premenstrual syndrome),959,PMS (premenstrual syndrome)
+960,Pressure ulcers (pressure sores),960,Pressure ulcers (pressure sores)
+961,Priapism (painful erections),961,Priapism (painful erections)
+962,Primary biliary cholangitis (primary biliary cirrhosis),962,Primary biliary cholangitis (primary biliary cirrhosis)
+963,Progressive supranuclear palsy,963,Progressive supranuclear palsy
+964,Prostate cancer,964,Prostate cancer
+965,Benign prostate enlargement,965,Benign prostate enlargement
+966,Prostate enlargement,965,Benign prostate enlargement
+967,Psoriasis,967,Psoriasis
+968,Psychosis,968,Psychosis
+969,Pulmonary embolism,969,Pulmonary embolism
+970,Pulmonary hypertension,970,Pulmonary hypertension
+971,Rabies,971,Rabies
+972,Radiotherapy,606,Cancer
+973,Raynaud's,973,Raynaud's
+974,Reactive arthritis,974,Reactive arthritis
+975,Rectal examination,1266,"Tests, scans and screening"
+976,Repetitive strain injury (RSI),976,Repetitive strain injury (RSI)
+977,Restless legs syndrome,977,Restless legs syndrome
+978,Restricted growth (dwarfism),978,Restricted growth (dwarfism)
+979,Dwarfism,978,Restricted growth (dwarfism)
+980,Detached retina (retinal detachment),980,Detached retina (retinal detachment)
+981,Retinal detachment,980,Detached retina (retinal detachment)
+982,Rhesus disease,982,Rhesus disease
+983,Rheumatic fever,983,Rheumatic fever
+984,Rheumatoid arthritis,984,Rheumatoid arthritis
+985,Rickets and osteomalacia,985,Rickets and osteomalacia
+986,Osteomalacia,985,Rickets and osteomalacia
+987,Root canal treatment,1274,Dental care and surgery
+988,Rosacea,988,Rosacea
+989,Rubella (german measles),989,Rubella (german measles)
+990,Scabies,990,Scabies
+991,Scars,991,Scars
+992,Schizophrenia,992,Schizophrenia
+993,Sciatica,993,Sciatica
+994,Buttock pain,993,Sciatica
+995,Scoliosis,995,Scoliosis
+996,Scurvy,996,Scurvy
+997,Seasonal affective disorder (SAD),997,Seasonal affective disorder (SAD)
+998,Self-harm,998,Self-harm
+999,Sepsis,999,Sepsis
+1000,Severe head injury,1000,Severe head injury
+1001,Shingles,1001,Shingles
+1002,Short-sightedness (myopia),1002,Short-sightedness (myopia)
+1003,Myopia,1002,Short-sightedness (myopia)
+1004,Shoulder pain,1004,Shoulder pain
+1005,Sickle cell disease,1005,Sickle cell disease
+1006,Sjögren's syndrome,1006,Sjögren's syndrome
+1007,Sleep paralysis,1007,Sleep paralysis
+1008,Slipped disc,1008,Slipped disc
+1009,Small bowel transplant,1009,Small bowel transplant
+1010,Bowel transplant,1009,Small bowel transplant
+1011,Snoring,1011,Snoring
+1012,Spina bifida,1012,Spina bifida
+1013,Spinal muscular atrophy,1013,Spinal muscular atrophy
+1014,Sports injuries,1014,Sports injuries
+1015,Sprains and strains,1015,Sprains and strains
+1016,Squint,1016,Squint
+1017,Selective serotonin reuptake inhibitors (SSRIs),1193,Mental health and wellbeing
+1018,Stammering,1018,Stammering
+1019,Stuttering,1018,Stammering
+1020,Statins,1020,Statins
+1021,Stem cell and bone marrow transplants,1021,Stem cell and bone marrow transplants
+1022,Stillbirth,1022,Stillbirth
+1023,Stomach cancer,1023,Stomach cancer
+1024,Stomach ulcer,1024,Stomach ulcer
+1025,Stroke,1025,Stroke
+1026,Subarachnoid haemorrhage,1027,Brain haemorrhage
+1027,Brain haemorrhage,1027,Brain haemorrhage
+1028,Subdural haematoma,1028,Subdural haematoma
+1029,Help for suicidal thoughts,1030,Suicidal thoughts
+1030,Suicidal thoughts,1030,Suicidal thoughts
+1031,Supraventricular tachycardia (SVT),1031,Supraventricular tachycardia (SVT)
+1032,Dysphagia (swallowing problems),1032,Dysphagia (swallowing problems)
+1033,Swallowing problems,1032,Dysphagia (swallowing problems)
+1034,Syphilis,1034,Syphilis
+1035,Coccydynia (tailbone pain),1035,Coccydynia (tailbone pain)
+1036,Tay-Sachs disease,1036,Tay-Sachs disease
+1037,Teeth grinding (bruxism),1037,Teeth grinding (bruxism)
+1038,Bruxism,1037,Teeth grinding (bruxism)
+1039,Tendonitis,1039,Tendonitis
+1040,Tennis elbow,1040,Tennis elbow
+1041,Testicle lumps and swellings,1041,Testicle lumps and swellings
+1042,Testicular cancer,1042,Testicular cancer
+1043,Thalassaemia,1043,Thalassaemia
+1044,Threadworms,1044,Threadworms
+1045,Thyroid cancer,1045,Thyroid cancer
+1046,Tick-borne encephalitis (TBE),1046,Tick-borne encephalitis (TBE)
+1047,Tics,1047,Tics
+1048,Tinnitus,1048,Tinnitus
+1049,Tonsillitis,1049,Tonsillitis
+1050,Quinsy,1049,Tonsillitis
+1051,Tourette's syndrome,1051,Tourette's syndrome
+1052,Toxocariasis,1052,Toxocariasis
+1053,Toxoplasmosis,1053,Toxoplasmosis
+1054,Tracheostomy,1054,Tracheostomy
+1055,Transient ischaemic attack (TIA),1055,Transient ischaemic attack (TIA)
+1056,TIA,727,Frontotemporal dementia
+1057,Transurethral resection of the prostate (TURP),965,Benign prostate enlargement
+1058,Travel vaccinations,1192,Vaccinations
+1059,Trichomoniasis,1059,Trichomoniasis
+1060,Trichotillomania (hair pulling disorder),1060,Trichotillomania (hair pulling disorder)
+1061,Trigeminal neuralgia,1061,Trigeminal neuralgia
+1062,Trigger finger,1062,Trigger finger
+1063,Tuberculosis (TB),1063,Tuberculosis (TB)
+1064,Tuberous sclerosis,1064,Tuberous sclerosis
+1065,Turner syndrome,1065,Turner syndrome
+1066,Type 2 diabetes,1066,Type 2 diabetes
+1067,Diabetes (type 2),1066,Type 2 diabetes
+1068,Typhoid fever,1068,Typhoid fever
+1069,Ulcerative colitis,1069,Ulcerative colitis
+1070,Umbilical hernia repair,230,Hernia
+1071,Hernia (umbilical),230,Hernia
+1072,Underactive thyroid (hypothyroidism),1072,Underactive thyroid (hypothyroidism)
+1073,Hypothyroidism,1072,Underactive thyroid (hypothyroidism)
+1074,Undescended testicles,1074,Undescended testicles
+1075,Urinary catheter,1075,Urinary catheter
+1076,Urinary incontinence,1076,Urinary incontinence
+1077,Incontinence (urinary),1076,Urinary incontinence
+1078,Uveitis,1078,Uveitis
+1079,Vaginal cancer,1079,Vaginal cancer
+1080,Vaginismus,1080,Vaginismus
+1081,Varicose eczema,1081,Varicose eczema
+1082,Eczema (varicose),1081,Varicose eczema
+1083,Varicose veins,1083,Varicose veins
+1084,Vascular dementia,1084,Vascular dementia
+1085,Dementia (vascular),1084,Vascular dementia
+1086,Vertigo,1086,Vertigo
+1087,Vitamin B12 or folate deficiency anaemia,1087,Vitamin B12 or folate deficiency anaemia
+1088,Anaemia (vitamin B12 or folate deficiency),1087,Vitamin B12 or folate deficiency anaemia
+1089,Vitamins and minerals,1223,Healthy lifestyle
+1090,Vitiligo,1090,Vitiligo
+1091,Vulval cancer,1091,Vulval cancer
+1092,Watering eyes,1092,Watering eyes
+1093,Weight loss surgery,912,Obesity
+1094,Whiplash,1094,Whiplash
+1095,Wisdom tooth removal,1274,Dental care and surgery
+1096,Womb (uterus) cancer,1096,Womb (uterus) cancer
+1097,Uterine (womb) cancer,1096,Womb (uterus) cancer
+1098,Endometrial cancer,1096,Womb (uterus) cancer
+1099,Yellow fever,1099,Yellow fever
+1100,Abortion,1100,Abortion
+1101,Bird flu,1101,Bird flu
+1102,Avian flu,1101,Bird flu
+1103,Antifungal medicines,1271,Treatments for infection
+1104,Blood transfusion,1104,Blood transfusion
+1105,Ringworm,1105,Ringworm
+1106,Early menopause,1106,Early menopause
+1107,Menopause (early),1106,Early menopause
+1108,Floaters and flashes in the eyes,1108,Floaters and flashes in the eyes
+1109,Eye floaters,1108,Floaters and flashes in the eyes
+1110,Your contraception guide,1215,Contraception
+1111,Dementia guide,1232,Dementia (all)
+1112,Fitness Studio exercise videos,1223,Healthy lifestyle
+1113,NHS Health Check,1266,"Tests, scans and screening"
+1114,Worms in humans,1114,Worms in humans
+1115,Hookworm,1114,Worms in humans
+1116,Tapeworm,1114,Worms in humans
+1117,Roundworm,1114,Worms in humans
+1118,Tremor or shaking hands,1118,Tremor or shaking hands
+1119,tremor,1118,Tremor or shaking hands
+1120,essential tremor,1118,Tremor or shaking hands
+1121,shaking,1118,Tremor or shaking hands
+1122,Low white blood cell count,1122,Low white blood cell count
+1123,White blood cell count (low),1122,Low white blood cell count
+1124,Bunions,1124,Bunions
+1125,Lost or changed sense of smell,1125,Lost or changed sense of smell
+1126,Sense of smell (lost/changed),1125,Lost or changed sense of smell
+1127,Soiling (child pooing their pants),1127,Soiling (child pooing their pants)
+1128,Oral thrush (mouth thrush),1128,Oral thrush (mouth thrush)
+1129,Mouth thrush,1128,Oral thrush (mouth thrush)
+1130,Temporal arteritis,1130,Temporal arteritis
+1131,Giant cell arteritis,1130,Temporal arteritis
+1132,Memory loss (amnesia),1132,Memory loss (amnesia)
+1133,Amnesia,1132,Memory loss (amnesia)
+1134,Headaches,1134,Headaches
+1135,Sinusitis (sinus infection),1135,Sinusitis (sinus infection)
+1136,Sinusitis,1135,Sinusitis (sinus infection)
+1137,Thrush in men and women,1137,Thrush in men and women
+1138,Cold sores,1138,Cold sores
+1139,Group B strep,1139,Group B strep
+1140,Skin picking disorder,1140,Skin picking disorder
+1141,Hyperparathyroidism,1141,Hyperparathyroidism
+1142,Hypoparathyroidism,1142,Hypoparathyroidism
+1143,Ear infections,1143,Ear infections
+1144,Twitching eyes and muscles,1144,Twitching eyes and muscles
+1145,Learning disabilities,1145,Learning disabilities
+1146,NHS screening,1266,"Tests, scans and screening"
+1147,Hormone headaches,1147,Hormone headaches
+1148,Headaches (hormone),1147,Hormone headaches
+1149,What to do if someone has a seizure (fit),1150,Seizures (fits)
+1150,Seizures (fits),1150,Seizures (fits)
+1151,Fits (seizures),1150,Seizures (fits)
+1152,Complementary and alternative medicine,1152,Complementary and alternative medicine
+1153,End of life care,1153,End of life care
+1154,Knocked-out tooth,1154,Knocked-out tooth
+1155,Tooth knocked out,1154,Knocked-out tooth
+1156,Chipped broken or cracked tooth,1239,"Chipped, broken or cracked tooth"
+1157,Tooth (chipped or broken),1239,"Chipped, broken or cracked tooth"
+1158,Diarrhoea and vomiting,1158,Diarrhoea and vomiting
+1159,Tummy bug,1158,Diarrhoea and vomiting
+1160,Vomiting,328,Norovirus (vomiting bug)
+1161,Stomach bug,1158,Diarrhoea and vomiting
+1162,Gastroenteritis,1158,Diarrhoea and vomiting
+1163,Diarrhoea,1158,Diarrhoea and vomiting
+1164,Being sick,1158,Diarrhoea and vomiting
+1165,Bullous pemphigoid,1165,Bullous pemphigoid
+1166,Feeling sick (nausea),1166,Feeling sick (nausea)
+1167,Nausea,1166,Feeling sick (nausea)
+1168,Type 1 diabetes,1168,Type 1 diabetes
+1169,Diabetes (type 1),1168,Type 1 diabetes
+1170,Social care and support guide,1222,Improving care and services
+1171,Middle East respiratory syndrome (MERS),1171,Middle East respiratory syndrome (MERS)
+1172,Monkeypox,1172,Monkeypox
+1173,Diabetic eye screening 2,132,Diabetic eye screening
+1174,Medical cannabis (and cannabis oils),1174,Medical cannabis (and cannabis oils)
+1175,Cannabis oil (medical cannabis),1174,Medical cannabis (and cannabis oils)
+1176,Diabetic eye screening 1,132,Diabetic eye screening
+1177,Body odour (BO),1177,Body odour (BO)
+1178,Human papillomavirus (HPV),1178,Human papillomavirus (HPV)
+1179,Plantar fasciitis,1179,Plantar fasciitis
+1180,Foot pain,1180,Foot pain
+1181,heel pain,1180,Foot pain
+1182,Toe pain,1180,Foot pain
+1183,ankle pain,1180,Foot pain
+1184,Autism,1184,Autism
+1185,Asperger's,1184,Autism
+1186,Cosmetic procedures,1186,Cosmetic procedures
+1187,Hand pain,1187,Hand pain
+1188,Swollen arms and hands (oedema),1188,Swollen arms and hands (oedema)
+1189,Colonoscopy,1189,Colonoscopy
+1190,Genetic and genomic testing,1266,"Tests, scans and screening"
+1191,Sleep apnoea,1191,Sleep apnoea
+1192,Vaccinations,1192,Vaccinations
+1193,Mental health and wellbeing,1193,Mental health and wellbeing
+1194,High temperature (fever) in adults,1194,High temperature (fever) in adults
+1195,Fever in adults,1194,High temperature (fever) in adults
+1196,Coronavirus (COVID-19),1196,Coronavirus (COVID-19)
+1197,Baby,1227,Parenting
+1198,Do not attempt cardiopulmonary resuscitation (DNACPR) decisions,1153,End of life care
+1199,Testicle pain,1199,Testicle pain
+1200,Pain in testicles,1199,Testicle pain
+1201,Hearing aids and implants,1201,Hearing aids and implants
+1202,Breast screening (mammogram),1202,Breast screening (mammogram)
+1203,Smelly feet,1203,Smelly feet
+1204,Academic attainment,1204,Academic attainment
+1205,Ageing,1205,Ageing
+1206,Aggression,1206,Aggression
+1207,Antenatal care,1207,Antenatal care
+1208,Blood donation,1208,Blood donation
+1209,Body image,1209,Body image
+1210,Breastfeeding,1210,Breastfeeding
+1211,Care homes,1211,Care homes
+1212,Carers,1212,Carers
+1213,Child development,1213,Child development
+1214,Complementary therapies,1214,Complementary therapies
+1215,Contraception,1215,Contraception
+1216,Domestic violence,1216,Domestic violence
+1217,Eating well,1217,Eating well
+1218,Exercise and sports,1223,Healthy lifestyle
+1219,General wellbeing,1219,General wellbeing
+1220,Genetic screening,1220,Genetic screening
+1221,Healthy volunteers,1244,Healthy volunteer
+1222,Improving care and services,1222,Improving care and services
+1223,Healthy lifestyle,1223,Healthy lifestyle
+1224,Long COVID,1224,Long COVID
+1225,Obesity risk,1225,Obesity risk
+1226,Occupational health,1226,Occupational health
+1227,Parenting,1227,Parenting
+1228,Public health,1228,Public health
+1229,Sleeping well,1229,Sleeping well
+1230,Smoking,1230,Smoking
+1231,Supplements,1231,Supplements
+1232,Dementia (all),1232,Dementia (all)
+1233,Wrist pain,1233,Wrist pain
+1234,Bereavement,1234,Bereavement
+1235,Bloating,1235,Bloating
+1236,Blood in semen,1236,Blood in semen
+1237,Breast Feeding,1210,Breastfeeding
+1238,Bulging eyes (exophthalmos),1238,Bulging eyes (exophthalmos)
+1239,"Chipped, broken or cracked tooth",1239,"Chipped, broken or cracked tooth"
+1240,Fertility issues,1240,Fertility issues
+1241,Finger pain,1241,Finger pain
+1242,"Fractures, sprains and broken bones",1242,"Fractures, sprains and broken bones"
+1243,"Hand, foot and mouth disease",1243,"Hand, foot and mouth disease"
+1244,Healthy volunteer,1244,Healthy volunteer
+1245,Heart palpitations,1245,Heart palpitations
+1246,High blood sugar (hyperglycaemia),1246,High blood sugar (hyperglycaemia)
+1247,Keloid scars,1247,Keloid scars
+1248,Laser eye surgery and lens surgery,1248,Laser eye surgery and lens surgery
+1249,Low sex drive (loss of libido),1249,Low sex drive (loss of libido)
+1250,Munchausen syndrome,1250,Munchausen syndrome
+1251,Pain in the back of the hand,1251,Pain in the back of the hand
+1252,Pain in the ball of the foot,1252,Pain in the ball of the foot
+1253,Pain in the bottom of the foot,1253,Pain in the bottom of the foot
+1254,Pain in the palm of the hand,1254,Pain in the palm of the hand
+1255,Pain in the top of the foot,1255,Pain in the top of the foot
+1256,Pain relief,1256,Pain relief
+1257,Personality disorders,347,Personality disorder
+1258,Pregnancy,1258,Pregnancy
+1259,Prolonged grief disorder,1259,Prolonged grief disorder
+1260,Psychotic depression,1260,Psychotic depression
+1261,Respiratory syncytial virus (RSV),1261,Respiratory syncytial virus (RSV)
+1262,"Swollen ankles, feet and legs (oedema)",1262,"Swollen ankles, feet and legs (oedema)"
+1263,Tailbone (coccyx) pain,1263,Tailbone (coccyx) pain
+1264,Teeth whitening,1264,Teeth whitening
+1265,Tension headaches,1265,Tension headaches
+1266,"Tests, scans and screening",1266,"Tests, scans and screening"
+1267,Thumb pain,1267,Thumb pain
+1268,Tight foreskin (phimosis),1268,Tight foreskin (phimosis)
+1269,Vomiting blood,488,Vomiting blood (haematemesis)
+1270,Genetic testing in pregnancy,1270,Genetic testing in pregnancy
+1271,Treatments for infection,1271,Treatments for infection
+1272,General surgery and recovery,1272,General surgery and recovery
+1273,Eye Tests,1273,Eye Tests
+1274,Dental care and surgery,1274,Dental care and surgery
+1275,Breast cancer surgery,1275,Breast Cancer Surgery
+1276,Heart rhythm problems - ( also check arrhythmia),1276,Heart rhythm problems - ( also check arrhythmia)
+1277,Transplants and organ donation,1277,Transplants and organ donation

@@ -13,7 +13,7 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20250520102230_BPoR-Data-Dashboard-data-transform-2-of-2-health-condition-data")]
+    [Migration("20250602152100_BPoR-Data-Dashboard-data-transform-2-of-2-health-condition-data")]
     partial class BPoRDataDashboarddatatransform2of2healthconditiondata
     {
         /// <inheritdoc />
@@ -10155,8 +10155,8 @@ namespace Dynamo.Stream.Handler.Migrations
                         new
                         {
                             Id = 1275,
-                            Code = "New - Breast cancer surgery",
-                            Description = "New - Breast cancer surgery",
+                            Code = "Breast cancer surgery",
+                            Description = "Breast cancer surgery",
                             IsDeleted = false
                         },
                         new
