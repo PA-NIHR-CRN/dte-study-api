@@ -111,6 +111,10 @@
             if (Cookies.get("cookiesAccepted")) {
                 closeCookieBanner();
             }
+            if (Cookies.get("cookiesAccepted").includes("true")) {
+                cookiesAlreadyPresent();
+            }
+
         });
 
 
@@ -118,6 +122,12 @@
             Cookies.set("cookiesAccepted", "true-" + "20221221", { expires: 180, secure: true, domain: cookieDomain })
             Cookies.set("BPoRcookie", "BePartOfResearch")
             confirmation("accepted")
+            @if (!string.IsNullOrWhiteSpace(gtm)) {
+            <text>tagManager(window, document, 'script', 'dataLayer', @Json.Serialize(gtm))</text>
+            }
+        }
+
+        function cookiesAlreadyPresent() {
             @if (!string.IsNullOrWhiteSpace(gtm)) {
             <text>tagManager(window, document, 'script', 'dataLayer', @Json.Serialize(gtm))</text>
             }
