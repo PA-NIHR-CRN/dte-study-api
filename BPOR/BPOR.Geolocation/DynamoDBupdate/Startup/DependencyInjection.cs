@@ -34,7 +34,7 @@ public static class DependencyInjection
 
         services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
 
-        services.AddTransient<IStage2Backfill, Stage2Backfill>();
+        services.AddTransient<Stage2Backfill>();
 
 
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()

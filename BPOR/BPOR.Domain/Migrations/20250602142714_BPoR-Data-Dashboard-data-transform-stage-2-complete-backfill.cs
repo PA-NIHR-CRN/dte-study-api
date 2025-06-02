@@ -14,7 +14,8 @@ namespace Dynamo.Stream.Handler.Migrations
                 name: "IsStage2CompleteUtcBackfilled",
                 table: "Participants",
                 type: "tinyint(1)",
-                nullable: true);
+                nullable: false,
+                defaultValue: false);
         }
 
         /// <inheritdoc />

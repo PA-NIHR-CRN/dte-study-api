@@ -427,7 +427,7 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool?>("IsStage2CompleteUtcBackfilled")
+                    b.Property<bool>("IsStage2CompleteUtcBackfilled")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("LandlineNumber")

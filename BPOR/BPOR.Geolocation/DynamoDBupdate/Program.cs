@@ -10,7 +10,9 @@ builder.Services.RegisterServices(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
+var cts = new CancellationTokenSource();
+
 using (var scope = app.Services.CreateScope())
 {
-    await scope.ServiceProvider.GetRequiredService<IStage2Backfill>().RunAsync();
+    await scope.ServiceProvider.GetRequiredService<Stage2Backfill>().RunAsync(cts.Token);
 }

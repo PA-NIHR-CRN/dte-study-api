@@ -13,7 +13,7 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20250526092118_BPoR-Data-Dashboard-data-transform-stage-2-complete-backfill")]
+    [Migration("20250602142714_BPoR-Data-Dashboard-data-transform-stage-2-complete-backfill")]
     partial class BPoRDataDashboarddatatransformstage2completebackfill
     {
         /// <inheritdoc />
@@ -430,7 +430,7 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool?>("IsStage2CompleteUtcBackfilled")
+                    b.Property<bool>("IsStage2CompleteUtcBackfilled")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("LandlineNumber")
