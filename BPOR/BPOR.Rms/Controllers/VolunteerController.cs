@@ -122,19 +122,15 @@ public class VolunteerController(ParticipantDbContext context,
                         if (Postcode.TryParse(participantAddress.Postcode, out TempPostcode))
                         {
                             model.PostCode = TempPostcode;
-                            List<PostcodeAddressModel> possibleAddresses = await GetAddresses(TempPostcode.ToString());
-                            if (possibleAddresses.Count > 0) {
-                                canonicalTown = possibleAddresses.First().Town;
-                            }
                         };
+                        canonicalTown = model.Town;
                     }
                 }
                 else
                 {
-                    // address has been selected from lookup already
-                    if(model.Town != null)
-                    {
-                        canonicalTown = model.Town;
+                    List<PostcodeAddressModel> possibleAddresses = await GetAddresses(TempPostcode.ToString());
+                    if (possibleAddresses.Count > 0) {
+                        canonicalTown = possibleAddresses.First().Town;
                     }
                 }
 
