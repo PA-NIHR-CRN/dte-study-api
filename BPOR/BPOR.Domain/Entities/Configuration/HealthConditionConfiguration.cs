@@ -19,32 +19,32 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
         var healthConditionsDict = healthConditions.ToDictionary(healthConditions => healthConditions.Id, healthConditions => healthConditions);
 
         // Validation
-        foreach (HealthconditionCsvResult csvResult in healthConditions)
+        foreach (HealthConditionRow healthConditionRow in healthConditions)
         {
 
-            if (!distinctConditions.Add(csvResult.Condition))
+            if (!distinctConditions.Add(healthConditionRow.Condition))
             {
-                errorsList.Add(new ArgumentException($"Health conditions {csvResult.Condition}, at {csvResult.Id} is a duplicate value"));
+                errorsList.Add(new ArgumentException($"Health conditions {healthConditionRow.Condition}, at {healthConditionRow.Id} is a duplicate value"));
             }
-            if (String.IsNullOrWhiteSpace(csvResult.Condition))
+            if (String.IsNullOrWhiteSpace(healthConditionRow.Condition))
             {
-                errorsList.Add(new ArgumentException($"Health condition at {csvResult.Id} is empty"));
+                errorsList.Add(new ArgumentException($"Health condition at {healthConditionRow.Id} is empty"));
             }
 
-            if (csvResult.SupersededById != null)
+            if (healthConditionRow.SupersededById != null)
             {
-                var tempSupersededBy = healthConditionsDict[(int)csvResult.SupersededById];
+                var tempSupersededBy = healthConditionsDict[(int)healthConditionRow.SupersededById];
 
                 if (tempSupersededBy == null)
                 {
-                    errorsList.Add(new ArgumentException($"Health condition {csvResult.Condition} at {csvResult.Id} has a superseded value that does not appear in the csv"));
+                    errorsList.Add(new ArgumentException($"Health condition {healthConditionRow.Condition} at {healthConditionRow.Id} has a superseded value that does not appear in the csv"));
                 }
                 else
                 {
                     // for conditions that are not superseded the supersededid = id
                     if (tempSupersededBy != null && tempSupersededBy.Id != tempSupersededBy.SupersededById)
                     {
-                        errorsList.Add(new ArgumentException($"Health Condition {csvResult.Condition} is superseded by Health Condition {tempSupersededBy.Condition} which is itself superseded"));
+                        errorsList.Add(new ArgumentException($"Health Condition {healthConditionRow.Condition} is superseded by Health Condition {tempSupersededBy.Condition} which is itself superseded"));
                     }
                 }
             }
@@ -66,7 +66,7 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
             }));
     }
 
-    private static List<HealthconditionCsvResult> LoadHealthConditionArrayFromResource()
+    private static List<HealthConditionRow> LoadHealthConditionArrayFromResource()
     {
         var assembly = Assembly.GetExecutingAssembly();
 
@@ -80,14 +80,14 @@ public class HealthConditionConfiguration : IEntityTypeConfiguration<HealthCondi
         using var reader = new StreamReader(stream);
         using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
         {
-           var HealthCondiitonrecords = csv.GetRecords<HealthconditionCsvResult>().ToList();
+           var healthConditionRecords = csv.GetRecords<HealthConditionRow>().ToList();
 
-            return HealthCondiitonrecords;
+            return healthConditionRecords;
         }
 
     }
 
-    private class HealthconditionCsvResult
+    private class HealthConditionRow
     {
 
         public int Id { get; set; }
