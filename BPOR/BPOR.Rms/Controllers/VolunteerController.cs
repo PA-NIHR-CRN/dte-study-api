@@ -128,7 +128,7 @@ public class VolunteerController(ParticipantDbContext context,
                 }
                 else
                 {
-                    List<PostcodeAddressModel> possibleAddresses = await GetAddresses(model.PostCode.toString());
+                    List<PostcodeAddressModel> possibleAddresses = await GetAddresses(model.PostCode.ToString());
                     if (possibleAddresses.Count > 0) {
                         canonicalTown = possibleAddresses.First().Town;
                     }
@@ -444,7 +444,7 @@ public class VolunteerController(ParticipantDbContext context,
         IEnumerable<PostcodeAddressModel> addressModels;
         addressModels = await locationApiClient.GetAddressesByPostcodeAsync(postcode, new CancellationToken());
 
-        if (addressModels.Count() == 0)
+        if (addressModels.Count() > 0)
         {
             return addressModels.ToList();
         }
