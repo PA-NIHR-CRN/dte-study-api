@@ -40,6 +40,7 @@ namespace DynamoDBupdate.Backfills
                     ParticipantIdentifiers = x.SourceReferences.Select(y => y.Pk),
                     Postcode = x.Address.Postcode
                 })
+                .Take(1) // // TODO: remove after testing
                 .ToListAsync(cancellationToken);
 
             int totalRecords = participantsToBeUpdated.Count;
@@ -84,7 +85,7 @@ namespace DynamoDBupdate.Backfills
                         continue;
                     }
 
-                    participant.CanonicalTown = canonicalTown;
+                    participant.Address.CanonicalTown = canonicalTown;
                     participant.IsCanonicalTownBackfilled = true;
 
                     await _dynamoContext.SaveAsync(participant, _config, cancellationToken);
