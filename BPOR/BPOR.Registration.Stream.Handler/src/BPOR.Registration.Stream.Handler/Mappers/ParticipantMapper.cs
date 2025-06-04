@@ -151,7 +151,6 @@ public class ParticipantMapper : IParticipantMapper
         destination.UpdatedAt = source.UpdatedAtUtc.HasValue ? source.UpdatedAtUtc.Value : source.CreatedAtUtc;
         destination.Stage2CompleteUtc = source.Stage2CompleteUtc;
         destination.IsStage2CompleteUtcBackfilled = source.IsStage2CompleteUtcBackfilled ?? false;
-        destination.CanonicalTown = source.CanonicalTown;
         destination.IsCanonicalTownBackfilled = source.IsCanonicalTownBackfilled ?? false;
 
         if (!destination.SourceReferences.Any(x => x.Pk == record.PK()))

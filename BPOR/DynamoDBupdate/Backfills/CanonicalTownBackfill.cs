@@ -84,7 +84,7 @@ namespace DynamoDBupdate.Backfills
                         continue;
                     }
 
-                    participant.CanonicalTown = canonicalTown;
+                    participant.Address.CanonicalTown = canonicalTown;
                     participant.IsCanonicalTownBackfilled = true;
 
                     await _dynamoContext.SaveAsync(participant, _config, cancellationToken);
