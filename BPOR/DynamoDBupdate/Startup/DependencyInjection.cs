@@ -4,13 +4,13 @@ using BPOR.Domain.Entities;
 using BPOR.Domain.Interfaces;
 using BPOR.Domain.Repositories;
 using BPOR.Domain.Settings;
-using DynamoDBupdate.CRNCC2563Stage2Backfill;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure.EntityFrameworkCore;
+using DynamoDBupdate.Backfills;
 
 namespace DynamoBDupdate.Startup;
 
@@ -34,8 +34,9 @@ public static class DependencyInjection
 
         services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
 
-        services.AddTransient<Stage2Backfill>();
-
+        services.AddScoped<Backfill>();
+        services.AddScoped<Stage2Backfill>();
+        services.AddScoped<CanonicalTownBackfill>();
 
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
             .CreateLogger("DynamoDBupdate");

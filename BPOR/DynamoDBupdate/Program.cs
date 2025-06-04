@@ -1,7 +1,8 @@
 ﻿using DynamoBDupdate.Startup;
-using DynamoDBupdate.CRNCC2563Stage2Backfill;
+using DynamoDBupdate.Backfills;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,5 +15,7 @@ var cts = new CancellationTokenSource();
 
 using (var scope = app.Services.CreateScope())
 {
-    await scope.ServiceProvider.GetRequiredService<Stage2Backfill>().RunAsync(cts.Token);
+    var backfill = scope.ServiceProvider.GetRequiredService<Backfill>();
+
+    await backfill.RunAsync(true, true, cts.Token);
 }

@@ -44,6 +44,8 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
     public int? CommunicationLanguageId { get; set; }
     public int? GenderId { get; set; }
     public bool IsStage2CompleteUtcBackfilled { get; set; } = false;
+    public bool IsCanonicalTownBackfilled { get; set; } = false;
+
 
     public DailyLifeImpact DailyLifeImpact { get; set; }
     public CommunicationLanguage CommunicationLanguage { get; set; }
@@ -61,6 +63,7 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
         new List<StudyParticipantEnrollment>();
 
     public ParticipantAddress? Address { get; set; }
+    [MaxLength(255)] public string? CanonicalTown { get; set; }
 
     public ICollection<SourceReference> SourceReferences { get; set; } = new List<SourceReference>();
     public ParticipantLocation? ParticipantLocation { get; set; }

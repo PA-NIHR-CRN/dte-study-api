@@ -47,6 +47,9 @@ public class DynamoParticipant
     [DynamoDBProperty] public string SelectedLocale { get; set; }
     [DynamoDBProperty] public List<string> HealthConditionInterests { get; set; }
     [DynamoDBProperty] public bool? IsStage2CompleteUtcBackfilled { get; set; }
+    [DynamoDBProperty] public string CanonicalTown { get; set; }
+    [DynamoDBProperty] public bool? IsCanonicalTownBackfilled { get; set; }
+
 
     public bool HasDemographics => SexRegisteredAtBirth != null;
 }
