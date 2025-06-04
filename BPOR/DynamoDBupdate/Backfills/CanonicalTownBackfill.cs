@@ -40,6 +40,7 @@ namespace DynamoDBupdate.Backfills
                     ParticipantIdentifiers = x.SourceReferences.Select(y => y.Pk),
                     Postcode = x.Address.Postcode
                 })
+                .Take(1) // // TODO: remove after testing
                 .ToListAsync(cancellationToken);
 
             int totalRecords = participantsToBeUpdated.Count;

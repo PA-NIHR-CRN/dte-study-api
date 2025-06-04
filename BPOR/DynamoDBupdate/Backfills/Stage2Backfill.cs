@@ -24,25 +24,30 @@ namespace DynamoDBupdate.Backfills
 
         public async Task RunAsync(CancellationToken cancellationToken)
         {
-            var participantstoBeUpdated = await _participantDbContext.Participants.Where(x => x.Stage2CompleteUtc == null
-            && x.FirstName != null
-            && x.LastName != null
-            && x.IsDeleted == false
-            && x.RegistrationConsent == true
-            && (
-            x.Address.Postcode != null
-            || x.EthnicBackground != null
-            || x.EthnicGroup != null
-            || x.HasLongTermCondition != null
-            || x.GenderId != null
-            )
-            ).Include(x => x.SourceReferences).Select(x => new
-            {
-                Id = x.Id,
-                ParticipantIdentifiers = x.SourceReferences.Select(y => y.Pk),
-                CreatedAt = x.CreatedAt
-            }
-            ).ToListAsync(cancellationToken);
+            var participantsToBeUpdated = await _participantDbContext.Participants
+                .Where(x =>
+                    x.Stage2CompleteUtc == null &&
+                    x.FirstName != null &&
+                    x.LastName != null &&
+                    !x.IsDeleted &&
+                    x.RegistrationConsent == true &&
+                    (
+                        x.Address.Postcode != null ||
+                        x.EthnicBackground != null ||
+                        x.EthnicGroup != null ||
+                        x.HasLongTermCondition != null ||
+                        x.GenderId != null
+                    )
+                )
+                .Include(x => x.SourceReferences)
+                .Select(x => new
+                {
+                    Id = x.Id,
+                    ParticipantIdentifiers = x.SourceReferences.Select(y => y.Pk),
+                    CreatedAt = x.CreatedAt
+                })
+                .Take(1) // // TODO: remove after testing
+                .ToListAsync(cancellationToken);
 
             int totalRecords = participantstoBeUpdated.Count;
             int currentRecordNum = 1;
