@@ -8692,7 +8692,7 @@ namespace Dynamo.Stream.Handler.Migrations
                 CREATE VIEW ParticipantActiveHealthCondition AS
                     SELECT
                         PHC.ParticipantId,
-                        ISNULL(RefA.SupercededById, RefA.Id) AS 'Active Health Condition'
+                        IFNULL(RefA.SupersededById, RefA.Id) AS ActiveHealthConditionId
                     FROM
                         dte.ParticipantHealthCondition PHC
                             INNER JOIN
