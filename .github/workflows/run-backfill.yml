@@ -28,11 +28,13 @@ jobs:
           mask-password: true
 
       - name: Build Docker image for DynamoDB backfill
+        id: build-image
         env:
           IMAGE_NAME_TAG: bpor-backfill
           IMAGE_SHA_TAG: bpor-backfill-${{ github.sha }}
           ECR_REPOSITORY: crnccd-ecr-dev-bpor-rms-repository
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          
         run: |
           docker build -f BPOR/DynamoDBupdate/Dockerfile \
             --build-arg NUGET_PACKAGE_USERNAME=USERNAME \
@@ -41,39 +43,43 @@ jobs:
           IMAGE_ID=$(docker images | awk '/bpor-backfill/{print $3}')
           docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Create ECS task definition JSON
-        env:
-          IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:bpor-backfill-${{ github.sha }}
-          EXECUTION_ROLE_ARN: ${{ secrets.ECS_EXECUTION_ROLE_ARN }}
-          AWS_REGION: ${{ env.AWS_REGION }}
+      - name: Get existing task definition (template)
         run: |
-          jq -n \
-          --arg image "$IMAGE" \
-          --arg execRole "$EXECUTION_ROLE_ARN" \
-          --arg region "$AWS_REGION" \
-          --arg timestamp "$(date +%s)" \
-          '{
-            family: "bpor-backfill-task-\($timestamp)",
-            containerDefinitions: [
-              {
-                name: "bpor-backfill",
-                image: $image,
-                essential: true
-              }
-            ],
-            requiresCompatibilities: ["FARGATE"],
-            networkMode: "awsvpc",
-            cpu: "256",
-            memory: "512",
-            executionRoleArn: $execRole
-          }' > task-def.json
+          aws ecs describe-task-definition \
+            --task-definition crnccd-ecs-dev-bpor-rms-task-definition \
+            --query taskDefinition > task-definition.json
+
+      - name: Strip unneeded ECS task definition fields
+        run: |
+          jq 'del(
+            .taskDefinitionArn,
+            .revision,
+            .status,
+            .requiresAttributes,
+            .compatibilities,
+            .registeredAt,
+            .registeredBy,
+            .containerDefinitions[].environment
+          )' task-definition.json > task-def.json
+
+      - name: Fill in the new image ID in the task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-def.json
+          container-name: crnccd-ecs-dev-bpor-rms-container
+          image: ${{ steps.build-image.outputs.image }}
 
       - name: Register ECS task definition
         id: register-task
         run: |
-          TASK_ARN=$(aws ecs register-task-definition --cli-input-json file://task-def.json --query 'taskDefinition.taskDefinitionArn' --output text)
-          echo "::set-output name=task_arn::$TASK_ARN"
+          TASK_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://${{ steps.task-def.outputs.task-definition }} \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
 
       - name: Run ECS task (one-off)
         env:
