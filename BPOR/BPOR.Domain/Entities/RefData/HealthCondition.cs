@@ -4,5 +4,5 @@ namespace BPOR.Domain.Entities.RefData;
 
 public class HealthCondition : ReferenceData
 {
-    
+    public int? SupersededById { get; set; }
 }
