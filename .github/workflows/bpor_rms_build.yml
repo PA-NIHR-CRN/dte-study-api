@@ -13,8 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-image
+      - name: Build, tag, and push RMS Docker image
+        id: build-image-rms
         env:
           IMAGE_NAME_TAG: bpor-rms
           IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
@@ -22,6 +22,21 @@ jobs:
           echo "Build and Output Docker image"
           docker build -f BPOR/BPOR.Rms/Dockerfile --build-arg NUGET_PACKAGE_USERNAME=USERNAME --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} -t $IMAGE_NAME_TAG .
           docker save $IMAGE_NAME_TAG > /tmp/bpor-rms.tar
+
+      - name: Build and push backfill Docker image
+        id: build-image-backfill
+        env:
+          IMAGE_NAME_TAG: bpor-backfill
+          IMAGE_SHA_TAG: bpor-backfill-${{ github.sha }}
+          ECR_REPOSITORY: crnccd-ecr-dev-bpor-rms-repository
+        run: |
+          docker build -f BPOR/DynamoDBupdate/Dockerfile \
+            --build-arg NUGET_PACKAGE_USERNAME=USERNAME \
+            --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            -t $IMAGE_NAME_TAG .
+          IMAGE_ID=$(docker images | awk '/bpor-backfill/{print $3}')
+          docker tag $IMAGE_ID ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_SHA_TAG
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_SHA_TAG
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -83,7 +98,7 @@ jobs:
       - name: Add Github Actions IP to RDS security group (Dev)
         run: |
           aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
- 
+
       - name: Update Database
         env:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
@@ -91,8 +106,8 @@ jobs:
           cd BPOR/BPOR.Domain
           dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
 
-      - name: Pull, tag, and push image to Amazon ECR
-        id: build-image
+      - name: Pull, tag, and push RMS image to Amazon ECR
+        id: push-rms-image
         env:
           ECR_REPOSITORY: crnccd-ecr-dev-bpor-rms-repository
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -101,16 +116,15 @@ jobs:
         run: |
           echo "Load artifact"
           docker load --input /tmp/bpor-rms.tar
-          
-          # Extract the image ID from the list of images
+
           IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
 
-          echo "Using registry ${{ env.ECR_REGISTRY }}"
+          echo "Using registry $ECR_REGISTRY"
           docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Generate task definition file from container
+      - name: Generate RMS task definition file from container
         run: |
           aws ecs describe-task-definition --task-definition crnccd-ecs-dev-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
           echo $(cat ./task-definition.json | jq 'del(
@@ -123,8 +137,9 @@ jobs:
                   .registeredBy,
                   .containerDefinitions[].environment
               )') > ./task-definition.json
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
+
+      - name: Fill in the new RMS image ID in the Amazon ECS task definition
+        id: task-def-rms
         env:
           ECS_TASK_DEFINITION: ./task-definition.json
           CONTAINER_NAME: crnccd-ecs-dev-bpor-rms-container
@@ -132,7 +147,7 @@ jobs:
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
+          image: ${{ steps.push-rms-image.outputs.image }}
           environment-variables: |
             AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
             AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_DEV }}
@@ -143,16 +158,49 @@ jobs:
         run: |
           aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
 
-      - name: Deploy Amazon ECS task definition
+      - name: Deploy RMS Amazon ECS task definition to service
         env:
           ECS_SERVICE: crnccd-ecs-dev-bpor-rms-service
           ECS_CLUSTER: crnccd-ecs-dev-bpor-rms-cluster
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: ${{ steps.task-def-rms.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+
+      - name: Create backfill ECS task definition JSON from RMS task
+        env:
+          BACKFILL_IMAGE: ${{ steps.login-ecr.outputs.registry }}/crnccd-ecr-dev-bpor-rms-repository:bpor-backfill-${{ github.sha }}
+        run: |
+          aws ecs describe-task-definition --task-definition crnccd-ecs-dev-bpor-rms-task-definition --query taskDefinition > task-def-base.json
+          cat task-def-base.json | jq \
+            --arg image "$BACKFILL_IMAGE" \
+            'del(
+              .taskDefinitionArn,
+              .revision,
+              .status,
+              .registeredAt,
+              .registeredBy
+            ) |
+            (.containerDefinitions[0].image = $image) |
+            (.family = "bpor-backfill-task")' > task-def-backfill.json
+
+      - name: Register backfill ECS task definition
+        id: register-backfill-task
+        run: |
+          TASK_ARN=$(aws ecs register-task-definition --cli-input-json file://task-def-backfill.json --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "::set-output name=task_arn::$TASK_ARN"
+
+      - name: Run backfill ECS task (one-off)
+        env:
+          ECS_CLUSTER: crnccd-ecs-dev-bpor-rms-cluster
+        run: |
+          aws ecs run-task \
+            --cluster $ECS_CLUSTER \
+            --launch-type FARGATE \
+            --task-definition ${{ steps.register-backfill-task.outputs.task_arn }} \
+            --count 1
 
   deploy-test:
     needs: [deploy-dev]
