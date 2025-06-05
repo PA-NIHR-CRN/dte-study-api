@@ -49,12 +49,12 @@ namespace DynamoDBupdate.Backfills
                 .Take(1) // // TODO: remove after testing
                 .ToListAsync(cancellationToken);
 
-            int totalRecords = participantstoBeUpdated.Count;
+            int totalRecords = participantsToBeUpdated.Count;
             int currentRecordNum = 1;
             int recordsInError = 0;
-            _logger.LogInformation("Total number of accounts to be updated: {Count}", participantstoBeUpdated.Count);
+            _logger.LogInformation("Total number of accounts to be updated: {Count}", participantsToBeUpdated.Count);
 
-            foreach (var toBeUpdated in participantstoBeUpdated)
+            foreach (var toBeUpdated in participantsToBeUpdated)
             {
                 if (toBeUpdated.ParticipantIdentifiers == null)
                 {
@@ -135,7 +135,7 @@ namespace DynamoDBupdate.Backfills
         
         public async Task RollBack(CancellationToken cancellationToken)
         {
-            var participantstoBeUpdated = await  _participantDbContext.Participants.Where(x => x.IsStage2CompleteUtcBackfilled == true
+            var participantsToBeUpdated = await  _participantDbContext.Participants.Where(x => x.IsStage2CompleteUtcBackfilled == true
               ).Include(x => x.ParticipantIdentifiers).Select(x => new
               {
                   Id = x.Id,
@@ -144,11 +144,11 @@ namespace DynamoDBupdate.Backfills
               }
               ).ToListAsync(cancellationToken);
 
-            int totalRecords = participantstoBeUpdated.Count;
+            int totalRecords = participantsToBeUpdated.Count;
             int currentRecordNum = 1;
             int recordsInError = 0;
 
-            foreach (var toBeUpdated in participantstoBeUpdated)
+            foreach (var toBeUpdated in participantsToBeUpdated)
             {
                 if (toBeUpdated.ParticipantIdentifiers == null)
                 {
