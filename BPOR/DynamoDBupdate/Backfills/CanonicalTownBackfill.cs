@@ -32,7 +32,7 @@ namespace DynamoDBupdate.Backfills
         public async Task RunAsync(CancellationToken cancellationToken)
         {
             var participantsToBeUpdated = await _participantDbContext.Participants
-                .Where(x => x.CanonicalTown == null && x.Address.Postcode != null && !x.IsDeleted)
+                .Where(x => x.Address.CanonicalTown == null && x.Address.Postcode != null && !x.IsDeleted)
                 .Include(x => x.SourceReferences)
                 .Select(x => new
                 {
@@ -141,7 +141,7 @@ namespace DynamoDBupdate.Backfills
                         continue;
                     }
 
-                    participant.CanonicalTown = null;
+                    participant.Address.CanonicalTown = null;
                     participant.IsCanonicalTownBackfilled = false;
 
                     await _dynamoContext.SaveAsync(participant, _config, cancellationToken);
