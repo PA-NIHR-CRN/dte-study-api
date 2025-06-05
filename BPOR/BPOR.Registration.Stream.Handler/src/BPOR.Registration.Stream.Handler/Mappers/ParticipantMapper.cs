@@ -183,7 +183,7 @@ public class ParticipantMapper : IParticipantMapper
         MapIdentifiers(source, destination);
         MapParticipantContactMethod(source, destination);
 
-        _logger.LogWarning("Map returned desintation {destination}, {canonicalTown}", destination, destination.Address.CanonicalTown);
+        _logger.LogInformation("Map returned desintation {postcode}, {canonicalTown}", destination.Address.Postcode, destination.Address.CanonicalTown);
 
         return destination;
     }
