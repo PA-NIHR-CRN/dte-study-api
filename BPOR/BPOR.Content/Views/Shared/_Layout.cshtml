@@ -124,7 +124,7 @@
 
         function handleAcceptedCookies() {
             if (Cookies.get("cookiesAccepted").includes("true")) {
-                if (!string.IsNullOrWhiteSpace(gtm)) {
+                @if (!string.IsNullOrWhiteSpace(gtm)) {
                   <text>tagManager(window, document, 'script', 'dataLayer', @Json.Serialize(gtm))</text>
                 }
             }
