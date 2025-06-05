@@ -163,8 +163,6 @@ public class ParticipantMapper : IParticipantMapper
 
             if (destination.Address != null && !String.IsNullOrWhiteSpace(destination.Address.Postcode))
             {
-                _logger.LogInformation("Before GetCoordinatesFromPostcodeAsync {postcode}, {canonicalTown}", destination.Address.Postcode, destination.Address.CanonicalTown);
-
                 var coordinates =
                     await _locationApiClient.GetCoordinatesFromPostcodeAsync(destination.Address.Postcode, cancellationToken);
 
@@ -175,15 +173,11 @@ public class ParticipantMapper : IParticipantMapper
                     { SRID = ParticipantLocationConfiguration.LocationSrid };
                 }
 
-                _logger.LogInformation("After GetCoordinatesFromPostcodeAsync {postcode}, {canonicalTown}", destination.Address.Postcode, destination.Address.CanonicalTown);
-
                 IEnumerable<PostcodeAddressModel> addressModels;
                 addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(destination.Address.Postcode, cancellationToken);
 
                 if (addressModels.Any())
                 {
-                    _logger.LogInformation("Inside addressModels.Any() {postcode}, {canonicalTown}, {anyAddresses}", destination.Address.Postcode, destination.Address.CanonicalTown, addressModels.Any());
-
                     destination.Address.CanonicalTown = addressModels.First().Town;
                 }
             }
@@ -192,8 +186,6 @@ public class ParticipantMapper : IParticipantMapper
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);
         MapParticipantContactMethod(source, destination);
-
-        _logger.LogInformation("Map returned desintation {postcode}, {canonicalTown}", destination.Address.Postcode, destination.Address.CanonicalTown);
 
         return destination;
     }

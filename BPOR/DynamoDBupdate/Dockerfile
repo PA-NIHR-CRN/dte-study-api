@@ -1,22 +1,31 @@
-﻿# Stage 1: Build
+﻿# Use the official .NET 8 SDK image for build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+ARG NUGET_PACKAGE_USERNAME
+ARG NUGET_PACKAGE_TOKEN
+ARG BUILD_CONFIGURATION=Release
+
 WORKDIR /src
 
-COPY ["BPOR/DynamoDBupdate/DynamoDBupdate.csproj", "BPOR/DynamoDBupdate/"]
+# Copy project files
+COPY ["BPOR/DynamoDBupdate/DynamoDBupdate.csproj", "DynamoDBupdate/"]
 
-RUN dotnet restore "BPOR/DynamoDBupdate/DynamoDBupdate.csproj"
+# Add your private NuGet source for restore
+RUN dotnet nuget add source --username $NUGET_PACKAGE_USERNAME --password $NUGET_PACKAGE_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
-COPY BPOR/DynamoDBupdate/. BPOR/DynamoDBupdate/
+# Restore dependencies
+RUN dotnet restore "DynamoDBupdate/DynamoDBupdate.csproj"
 
-WORKDIR "/src/BPOR/DynamoDBupdate"
+# Copy rest of the source code
+COPY BPOR/DynamoDBupdate/ DynamoDBupdate/
 
-RUN dotnet publish "DynamoDBupdate.csproj" -c Release -o /app/publish /p:UseAppHost=false
+# Build and publish
+RUN dotnet publish "DynamoDBupdate/DynamoDBupdate.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+# Final runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+
 WORKDIR /app
-
-USER $APP_UID
-
 COPY --from=build /app/publish .
 
 ENTRYPOINT ["dotnet", "DynamoDBupdate.dll"]
