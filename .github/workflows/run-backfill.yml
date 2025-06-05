@@ -1,0 +1,83 @@
+name: Run BPOR DynamoDB Backfill Once
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  build-and-run-backfill:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Login to AWS ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          region: ${{ env.AWS_REGION }}
+
+      - name: Build Docker image for DynamoDB backfill
+        env:
+          IMAGE_NAME_TAG: bpor-backfill
+          IMAGE_SHA_TAG: bpor-backfill-${{ github.sha }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -f BPOR/DynamoDBupdate/Dockerfile \
+            --build-arg NUGET_PACKAGE_USERNAME=USERNAME \
+            --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+            -t $IMAGE_NAME_TAG .
+          IMAGE_ID=$(docker images | awk '/bpor-backfill/{print $3}')
+          docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
+
+      - name: Create ECS task definition JSON
+        env:
+          IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:bpor-backfill-${{ github.sha }}
+          EXECUTION_ROLE_ARN: ${{ secrets.ECS_EXECUTION_ROLE_ARN }}
+        run: |
+          jq -n --arg image "$IMAGE" --arg execRole "$EXECUTION_ROLE_ARN" '{
+            family: "bpor-backfill-task-" + (now|tostring),
+            networkMode: "awsvpc",
+            requiresCompatibilities: ["FARGATE"],
+            cpu: "256",
+            memory: "512",
+            executionRoleArn: $execRole,
+            containerDefinitions: [{
+              name: "bpor-backfill-container",
+              image: $image,
+              essential: true,
+              cpu: 256,
+              memory: 512,
+              logConfiguration: {
+                logDriver: "awslogs",
+                options: {
+                  "awslogs-group": "/ecs/bpor-backfill",
+                  "awslogs-region": "'${{ env.AWS_REGION }}'",
+                  "awslogs-stream-prefix": "ecs"
+                }
+              }
+            }]
+          }' > task-def.json
+
+      - name: Register ECS task definition
+        id: register-task
+        run: |
+          TASK_ARN=$(aws ecs register-task-definition --cli-input-json file://task-def.json --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "::set-output name=task_arn::$TASK_ARN"
+
+      - name: Run ECS task (one-off)
+        env:
+          CLUSTER: ${{ secrets.ECS_CLUSTER }}
+          SUBNET_ID: ${{ secrets.SUBNET_ID }}
+          SECURITY_GROUP: ${{ secrets.RDS_SG }}
+        run: |
+          aws ecs run-task \
+            --cluster $CLUSTER \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$SUBNET_ID],securityGroups=[$SECURITY_GROUP],assignPublicIp=ENABLED}" \
+            --task-definition ${{ steps.register-task.outputs.task_arn }} \
+            --count 1
