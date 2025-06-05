@@ -48,28 +48,25 @@ jobs:
           EXECUTION_ROLE_ARN: ${{ secrets.ECS_EXECUTION_ROLE_ARN }}
           AWS_REGION: ${{ env.AWS_REGION }}
         run: |
-          jq -n --arg image "$IMAGE" --arg execRole "$EXECUTION_ROLE_ARN" --arg region "$AWS_REGION" '{
-            family: "bpor-backfill-task-" + (now|tostring),
-            networkMode: "awsvpc",
+          jq -n \
+          --arg image "$IMAGE" \
+          --arg execRole "$EXECUTION_ROLE_ARN" \
+          --arg region "$AWS_REGION" \
+          --arg timestamp "$(date +%s)" \
+          '{
+            family: "bpor-backfill-task-\($timestamp)",
+            containerDefinitions: [
+              {
+                name: "bpor-backfill",
+                image: $image,
+                essential: true
+              }
+            ],
             requiresCompatibilities: ["FARGATE"],
+            networkMode: "awsvpc",
             cpu: "256",
             memory: "512",
-            executionRoleArn: $execRole,
-            containerDefinitions: [{
-              name: "bpor-backfill-container",
-              image: $image,
-              essential: true,
-              cpu: 256,
-              memory: 512,
-              logConfiguration: {
-                logDriver: "awslogs",
-                options: {
-                  "awslogs-group": "/ecs/bpor-backfill",
-                  "awslogs-region": $region,
-                  "awslogs-stream-prefix": "ecs"
-                }
-              }
-            }]
+            executionRoleArn: $execRole
           }' > task-def.json
 
       - name: Register ECS task definition
