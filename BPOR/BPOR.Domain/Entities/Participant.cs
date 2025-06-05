@@ -63,7 +63,6 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
         new List<StudyParticipantEnrollment>();
 
     public ParticipantAddress? Address { get; set; }
-    [MaxLength(255)] public string? CanonicalTown { get; set; }
 
     public ICollection<SourceReference> SourceReferences { get; set; } = new List<SourceReference>();
     public ParticipantLocation? ParticipantLocation { get; set; }
