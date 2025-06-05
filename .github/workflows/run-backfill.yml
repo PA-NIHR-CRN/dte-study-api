@@ -14,10 +14,18 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Login to AWS ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
-          region: ${{ env.AWS_REGION }}
+          mask-password: true
 
       - name: Build Docker image for DynamoDB backfill
         env:
@@ -38,8 +46,9 @@ jobs:
         env:
           IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:bpor-backfill-${{ github.sha }}
           EXECUTION_ROLE_ARN: ${{ secrets.ECS_EXECUTION_ROLE_ARN }}
+          AWS_REGION: ${{ env.AWS_REGION }}
         run: |
-          jq -n --arg image "$IMAGE" --arg execRole "$EXECUTION_ROLE_ARN" '{
+          jq -n --arg image "$IMAGE" --arg execRole "$EXECUTION_ROLE_ARN" --arg region "$AWS_REGION" '{
             family: "bpor-backfill-task-" + (now|tostring),
             networkMode: "awsvpc",
             requiresCompatibilities: ["FARGATE"],
@@ -56,7 +65,7 @@ jobs:
                 logDriver: "awslogs",
                 options: {
                   "awslogs-group": "/ecs/bpor-backfill",
-                  "awslogs-region": "'${{ env.AWS_REGION }}'",
+                  "awslogs-region": $region,
                   "awslogs-stream-prefix": "ecs"
                 }
               }
