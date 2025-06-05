@@ -1,16 +1,20 @@
+using System.Text.Json;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
+using Amazon.Runtime.Internal.Util;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
+using BPOR.Infrastructure.Clients;
 using BPOR.Registration.Stream.Handler.Services;
-using Contentful.Core.Models;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BPOR.Registration.Stream.Handler.Mappers;
 
