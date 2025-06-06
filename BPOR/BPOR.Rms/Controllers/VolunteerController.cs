@@ -105,11 +105,11 @@ public class VolunteerController(ParticipantDbContext context,
                 await DoesUserEmailExistInDatabaseAsync(model.EmailAddress);
             }
 
+            string canonicalTown = null;
             if (ModelState.IsValid) { 
 
                 if (!model.ManualAddressEntry)
-                {
-
+                { 
                     if (model.SelectedAddress != null)
                     {
                         var participantAddress =  JsonSerializer.Deserialize<PostcodeAddressModel>(model.SelectedAddress);
@@ -123,6 +123,14 @@ public class VolunteerController(ParticipantDbContext context,
                         {
                             model.PostCode = TempPostcode;
                         };
+                        canonicalTown = model.Town;
+                    }
+                }
+                else
+                {
+                    List<PostcodeAddressModel> possibleAddresses = await GetAddresses(model.PostCode.ToString());
+                    if (possibleAddresses.Count > 0) {
+                        canonicalTown = possibleAddresses.First().Town;
                     }
                 }
 
@@ -179,7 +187,8 @@ public class VolunteerController(ParticipantDbContext context,
                         AddressLine3 = model.AddressLine3,
                         AddressLine4 = model.AddressLine4,
                         Town = model.Town,
-                        Postcode = model.PostCode.ToString()
+                        Postcode = model.PostCode.ToString(),
+                        CanonicalTown = canonicalTown
                     },
                     ContactMethodId = new List<ParticipantContactMethod>()
                     {
@@ -435,7 +444,7 @@ public class VolunteerController(ParticipantDbContext context,
         IEnumerable<PostcodeAddressModel> addressModels;
         addressModels = await locationApiClient.GetAddressesByPostcodeAsync(postcode, new CancellationToken());
 
-        if (addressModels.Count() == 0)
+        if (addressModels.Count() > 0)
         {
             return addressModels.ToList();
         }
