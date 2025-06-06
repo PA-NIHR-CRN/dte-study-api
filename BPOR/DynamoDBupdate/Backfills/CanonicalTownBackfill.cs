@@ -4,6 +4,7 @@ using BPOR.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure;
+using NIHR.Infrastructure.Interfaces;
 
 namespace DynamoDBupdate.Backfills
 {
