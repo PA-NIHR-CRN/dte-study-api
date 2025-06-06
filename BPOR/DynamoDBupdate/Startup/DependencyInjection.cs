@@ -44,8 +44,6 @@ public static class DependencyInjection
         return services;
     }
 
-
-
     private static void ConfigureAwsServices(this IServiceCollection services, IConfiguration configuration)
     {
 
@@ -60,13 +58,6 @@ public static class DependencyInjection
         var dynamoDbClient = new AmazonDynamoDBClient(dynamoDbConfig);
         services.AddSingleton<IAmazonDynamoDB>(dynamoDbClient);
         services.AddSingleton<IDynamoDBContext, DynamoDBContext>(_ => new DynamoDBContext(dynamoDbClient));
-
-
-        // DynamoDB Operation Configuration
-        services.AddSingleton(new DynamoDBOperationConfig
-        {
-            OverrideTableName = awsSettings.ParticipantRegistrationDynamoDbTableName
-        });
 
         // Configure AWS Options globally if needed
         services.AddDefaultAWSOptions(configuration.GetAWSOptions());
