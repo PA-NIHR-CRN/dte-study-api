@@ -38,9 +38,6 @@ public static class DependencyInjection
         services.AddScoped<Stage2Backfill>();
         services.AddScoped<CanonicalTownBackfill>();
 
-        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
-            .CreateLogger("DynamoDBupdate");
-
         return services;
     }
 
