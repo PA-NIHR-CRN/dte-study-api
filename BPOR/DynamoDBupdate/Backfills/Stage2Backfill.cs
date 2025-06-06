@@ -37,7 +37,8 @@ namespace DynamoDBupdate.Backfills
                         x.EthnicGroup != null ||
                         x.HasLongTermCondition != null ||
                         x.GenderId != null
-                    )
+                    ) &&
+                    x.Id = 1 // get ParticipantId 1, to be removed.
                 )
                 .Include(x => x.SourceReferences)
                 .Select(x => new
@@ -46,7 +47,6 @@ namespace DynamoDBupdate.Backfills
                     ParticipantIdentifiers = x.SourceReferences.Select(y => y.Pk),
                     CreatedAt = x.CreatedAt
                 })
-                .Take(1) // // TODO: remove after testing
                 .ToListAsync(cancellationToken);
 
             int totalRecords = participantsToBeUpdated.Count;

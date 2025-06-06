@@ -32,7 +32,9 @@ namespace DynamoDBupdate.Backfills
         public async Task RunAsync(CancellationToken cancellationToken)
         {
             var participantsToBeUpdated = await _participantDbContext.Participants
-                .Where(x => x.Address.CanonicalTown == null && x.Address.Postcode != null && !x.IsDeleted)
+                .Where(x => x.Address.CanonicalTown == null && x.Address.Postcode != null && !x.IsDeleted &&
+                x.Id = 4 // get ParticipantId 4. to be removed.
+                )
                 .Include(x => x.SourceReferences)
                 .Select(x => new
                 {
@@ -40,7 +42,6 @@ namespace DynamoDBupdate.Backfills
                     ParticipantIdentifiers = x.SourceReferences.Select(y => y.Pk),
                     Postcode = x.Address.Postcode
                 })
-                .Take(1) // // TODO: remove after testing
                 .ToListAsync(cancellationToken);
 
             int totalRecords = participantsToBeUpdated.Count;
