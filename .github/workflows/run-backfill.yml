@@ -52,24 +52,11 @@ jobs:
             --task-definition crnccd-ecs-dev-bpor-rms-task-definition \
             --query taskDefinition > task-definition.json
 
-      - name: Strip unneeded ECS task definition fields
-        run: |
-          jq 'del(
-            .taskDefinitionArn,
-            .revision,
-            .status,
-            .requiresAttributes,
-            .compatibilities,
-            .registeredAt,
-            .registeredBy,
-            .containerDefinitions[].environment
-          )' task-definition.json > cleaned-task-def.json
-
       - name: Inject new image into task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: cleaned-task-def.json
+          task-definition: task-definition.json
           container-name: crnccd-ecs-dev-bpor-rms-container
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
