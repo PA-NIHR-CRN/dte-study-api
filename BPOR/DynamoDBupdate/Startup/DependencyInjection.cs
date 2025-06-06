@@ -30,10 +30,23 @@ public static class DependencyInjection
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
                 x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery).UseNetTopologySuite()));
 
+        services.AddTransient<IPostcodeMapper, LocationApiClient>();
+
+        var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
+        if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
+        {
+            throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
+        }
+
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(
+            clientsSettings.Value.LocationService,
+            retryCount: 2,
+            logger: services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("DynamoBDupdate")
+        );
+
         services.ConfigureAwsServices(configuration);
 
         services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
-        services.AddTransient<IPostcodeMapper, LocationApiClient>();
         services.AddScoped<Backfill>();
         services.AddScoped<Stage2Backfill>();
         services.AddScoped<CanonicalTownBackfill>();
