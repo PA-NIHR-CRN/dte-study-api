@@ -62,11 +62,20 @@ jobs:
           environment-variables: |
             ASPNETCORE_ENVIRONMENT=Development
 
+      - name: Register new task definition
+        id: register-task
+        run: |
+          TASK_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://${{ steps.task-def.outputs.task-definition }} \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "task_definition_arn=$TASK_ARN" >> $GITHUB_OUTPUT
+
       - name: Run ECS task once
         run: |
           aws ecs run-task \
             --cluster crnccd-ecs-dev-bpor-rms-cluster \
             --launch-type FARGATE \
             --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.BPOR_RMS_DEV_SUBNET_ID }}],securityGroups=[${{ secrets.RDS_SG }}],assignPublicIp=ENABLED}" \
-            --task-definition ${{ steps.task-def.outputs.task-definition }} \
+            --task-definition ${{ steps.register-task.outputs.task_definition_arn }} \
             --count 1
