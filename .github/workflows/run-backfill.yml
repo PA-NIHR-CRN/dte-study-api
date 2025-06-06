@@ -60,6 +60,9 @@ jobs:
           container-name: crnccd-ecs-dev-bpor-rms-container
           image: ${{ steps.build-image.outputs.image }}
           environment-variables: |
+            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
+            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_DEV }}
+            AwsSecretsManagerSettings__Enabled=true
             ASPNETCORE_ENVIRONMENT=Development
 
       - name: Register new task definition
