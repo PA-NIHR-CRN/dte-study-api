@@ -1,8 +1,10 @@
 using System.Text.Json;
+using System.Threading;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime.Internal.Util;
+using AngleSharp.Text;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Entities.RefData;
@@ -125,7 +127,6 @@ public class ParticipantMapper : IParticipantMapper
     public async Task<Participant> Map(Dictionary<string, AttributeValue> record, Participant destination,
         CancellationToken cancellationToken)
     {
-
         var doc = Document.FromAttributeMap(record);
 
         var source = _context.FromDocument<DynamoParticipant>(doc);
@@ -156,29 +157,9 @@ public class ParticipantMapper : IParticipantMapper
             destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
         }
 
-        if(source.Address != null) { 
-            ParticipantAddressMapper.Map(source.Address, destination);
-
-            if (destination.Address != null && !String.IsNullOrWhiteSpace(destination.Address.Postcode))
-            {
-                var coordinates =
-                    await _locationApiClient.GetCoordinatesFromPostcodeAsync(destination.Address.Postcode, cancellationToken);
-
-                if (coordinates != null)
-                {
-                    destination.ParticipantLocation ??= new ParticipantLocation();
-                    destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
-                    { SRID = ParticipantLocationConfiguration.LocationSrid };
-                }
-
-                IEnumerable<PostcodeAddressModel> addressModels;
-                addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(destination.Address.Postcode, cancellationToken);
-
-                if (addressModels.Any())
-                {
-                    destination.Address.CanonicalTown = addressModels.First().Town;
-                }
-            }
+        if (source.Address != null)
+        {
+            await MapAddress(source.Address, destination, cancellationToken);
         }
 
         MapHealthConditions(source, destination);
@@ -187,6 +168,41 @@ public class ParticipantMapper : IParticipantMapper
 
         return destination;
     }
+
+    public async Task MapAddress(DynamoParticipantAddress source, Participant destination, CancellationToken cancellationToken)
+    {
+        if (destination.Address == null)
+        {
+            destination.Address = new ParticipantAddress();
+        }
+
+        bool postcodeHasChanged = !(new PostcodeStringEqualityComparer().Equals(source.Postcode, destination.Address.Postcode));
+
+        destination.Address.AddressLine1 = source.AddressLine1;
+        destination.Address.AddressLine2 = source.AddressLine2;
+        destination.Address.AddressLine3 = source.AddressLine3;
+        destination.Address.AddressLine4 = source.AddressLine4;
+        destination.Address.Postcode = source.Postcode;
+        destination.Address.Town = source.Town;
+
+        if (postcodeHasChanged)
+        {
+            var coordinates = await _locationApiClient.GetCoordinatesFromPostcodeAsync(destination.Address.Postcode, cancellationToken);
+
+            if (coordinates != null)
+            {
+                destination.ParticipantLocation ??= new ParticipantLocation();
+                destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+                { SRID = ParticipantLocationConfiguration.LocationSrid };
+            }
+
+            IEnumerable<PostcodeAddressModel> addressModels  =
+                await _locationApiClient.GetAddressesByPostcodeAsync(destination.Address.Postcode, cancellationToken);
+
+            destination.Address.CanonicalTown = addressModels.FirstOrDefault()?.Town;
+        }
+    }
+
 
     public List<Identifier> ExtractIdentifiers(Dictionary<string, AttributeValue> newImage)
     {
