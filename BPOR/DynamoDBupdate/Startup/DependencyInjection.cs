@@ -33,7 +33,7 @@ public static class DependencyInjection
         services.ConfigureAwsServices(configuration);
 
         services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
-
+        services.AddTransient<IPostcodeMapper, LocationApiClient>();
         services.AddScoped<Backfill>();
         services.AddScoped<Stage2Backfill>();
         services.AddScoped<CanonicalTownBackfill>();
