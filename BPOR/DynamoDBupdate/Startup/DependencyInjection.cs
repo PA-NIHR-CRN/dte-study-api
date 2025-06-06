@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using DynamoDBupdate.Backfills;
+using NIHR.Infrastructure.Interfaces;
 
 namespace DynamoBDupdate.Startup;
 
