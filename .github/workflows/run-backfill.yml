@@ -1,4 +1,4 @@
-name: Run BPOR DynamoDB Backfill Once
+name: Run BPOR Backfill Task Once
 
 on:
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
         with:
           mask-password: true
 
-      - name: Build Docker image for Backfill
+      - name: Build and push Docker image
         id: build-image
         env:
           IMAGE_NAME_TAG: bpor-backfill
@@ -65,7 +65,7 @@ jobs:
             .containerDefinitions[].environment
           )' task-definition.json > cleaned-task-def.json
 
-      - name: Fill in new image in ECS task definition
+      - name: Inject new image into task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
@@ -75,15 +75,11 @@ jobs:
           environment-variables: |
             ASPNETCORE_ENVIRONMENT=Development
 
-      - name: Run ECS task once (backfill)
-        env:
-          CLUSTER: crnccd-ecs-dev-bpor-rms-cluster
-          SUBNET_ID: ${{ secrets.BPOR_RMS_DEV_SUBNET_ID }}
-          SECURITY_GROUP: ${{ secrets.RDS_SG }}
+      - name: Run ECS task once
         run: |
           aws ecs run-task \
-            --cluster $CLUSTER \
+            --cluster crnccd-ecs-dev-bpor-rms-cluster \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$SUBNET_ID],securityGroups=[$SECURITY_GROUP],assignPublicIp=ENABLED}" \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.BPOR_RMS_DEV_SUBNET_ID }}],securityGroups=[${{ secrets.RDS_SG }}],assignPublicIp=ENABLED}" \
             --task-definition ${{ steps.task-def.outputs.task-definition }} \
             --count 1
