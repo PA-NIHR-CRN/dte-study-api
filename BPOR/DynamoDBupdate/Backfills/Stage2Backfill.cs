@@ -38,7 +38,7 @@ namespace DynamoDBupdate.Backfills
                         x.HasLongTermCondition != null ||
                         x.GenderId != null
                     ) &&
-                    x.Id = 1 // get ParticipantId 1, to be removed.
+                    x.Id == 1 // get ParticipantId 1, to be removed.
                 )
                 .Include(x => x.SourceReferences)
                 .Select(x => new
