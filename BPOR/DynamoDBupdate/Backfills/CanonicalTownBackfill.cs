@@ -33,7 +33,7 @@ namespace DynamoDBupdate.Backfills
         {
             var participantsToBeUpdated = await _participantDbContext.Participants
                 .Where(x => x.Address.CanonicalTown == null && x.Address.Postcode != null && !x.IsDeleted &&
-                x.Id = 4 // get ParticipantId 4. to be removed.
+                x.Id == 4 // get ParticipantId 4. to be removed.
                 )
                 .Include(x => x.SourceReferences)
                 .Select(x => new
