@@ -1,5 +1,4 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 
@@ -13,13 +12,13 @@ WORKDIR /src
 # Add NuGet source
 RUN dotnet nuget add source --username $NUGET_PACKAGE_USERNAME --password $NUGET_PACKAGE_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
-# Copy the main csproj file
+# Copy project files
 COPY ["BPOR/DynamoDBupdate/DynamoDBupdate.csproj", "DynamoDBupdate/"]
 
 # Restore dependencies
 RUN dotnet restore "DynamoDBupdate/DynamoDBupdate.csproj"
 
-# Copy all required projects to resolve project references
+# Copy supporting projects (to resolve references)
 COPY "BPOR/BPOR.Infrastructure" "BPOR.Infrastructure"
 COPY "BPOR/BPOR.Domain" "BPOR.Domain"
 COPY "BPOR/DynamoDBupdate" "DynamoDBupdate"
@@ -30,14 +29,11 @@ COPY "BPOR/NIHR.Infrastructure.EntityFrameworkCore.MySql" "NIHR.Infrastructure.E
 
 WORKDIR "/src/DynamoDBupdate"
 
-# Build
-RUN dotnet build "DynamoDBupdate.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
+# Publish the app (builds and outputs self-contained)
 RUN dotnet publish "DynamoDBupdate.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
+
 ENTRYPOINT ["dotnet", "DynamoDBupdate.dll"]

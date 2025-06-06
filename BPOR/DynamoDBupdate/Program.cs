@@ -2,32 +2,42 @@
 using DynamoDBupdate.Backfills;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-var builder = WebApplication.CreateBuilder(args);
+Console.WriteLine("Backfill starting up...");
 
-builder.Configuration.AddNihrConfiguration(builder.Services, builder.Environment);
-builder.Services.RegisterServices(builder.Configuration, builder.Environment);
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+builder.Configuration.AddNihrConfiguration(builder.Services, builder.Environment);
+builder.Services.RegisterServices(builder.Configuration, builder.Environment);
+
 var app = builder.Build();
 
-var cts = new CancellationTokenSource();
+using var scope = app.Services.CreateScope();
+var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-using (var scope = app.Services.CreateScope())
+logger.LogInformation("Program.cs: Logger initialized.");
+Console.WriteLine("Program.cs: Logger initialized.");
+
+try
 {
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-
-    logger.LogInformation("Starting backfill RunAsync call.");
-
     var backfill = scope.ServiceProvider.GetRequiredService<Backfill>();
+    logger.LogInformation("Backfill.RunAsync starting...");
+    Console.WriteLine("Calling Backfill.RunAsync...");
 
-    await backfill.RunAsync(true, true, cts.Token);
+    await backfill.RunAsync(true, true, CancellationToken.None);
 
-    logger.LogInformation("Completed backfill RunAsync call.");
+    logger.LogInformation("Backfill.RunAsync completed.");
+    Console.WriteLine("Backfill.RunAsync completed.");
+}
+catch (Exception ex)
+{
+    logger.LogError(ex, "Backfill failed with an exception.");
+    Console.WriteLine($"Exception: {ex.Message}");
 }
 
 app.Run();
