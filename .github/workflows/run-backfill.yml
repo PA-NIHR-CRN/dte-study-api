@@ -81,10 +81,10 @@ jobs:
             --output text)
           echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
 
-      - name: Run ECS task (one-off)
+      - name: Run task once in ECS
         env:
-          CLUSTER: ${{ secrets.ECS_CLUSTER }}
-          SUBNET_ID: ${{ secrets.SUBNET_ID }}
+          CLUSTER: crnccd-ecs-dev-bpor-rms-cluster
+          SUBNET_ID: ${{ secrets.BPOR_RMS_DEV_SUBNET_ID }}
           SECURITY_GROUP: ${{ secrets.RDS_SG }}
         run: |
           aws ecs run-task \
