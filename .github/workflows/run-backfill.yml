@@ -7,8 +7,9 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
-  build-and-run-backfill:
+  backfill:
     runs-on: ubuntu-latest
+    name: Run Backfill Job
 
     steps:
       - name: Checkout repo
@@ -21,31 +22,31 @@ jobs:
           aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to AWS ECR
+      - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: true
 
-      - name: Build Docker image for DynamoDB backfill
+      - name: Build Docker image for Backfill
         id: build-image
         env:
           IMAGE_NAME_TAG: bpor-backfill
           IMAGE_SHA_TAG: bpor-backfill-${{ github.sha }}
           ECR_REPOSITORY: crnccd-ecr-dev-bpor-rms-repository
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          
         run: |
           docker build -f BPOR/DynamoDBupdate/Dockerfile \
             --build-arg NUGET_PACKAGE_USERNAME=USERNAME \
             --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             -t $IMAGE_NAME_TAG .
+
           IMAGE_ID=$(docker images | awk '/bpor-backfill/{print $3}')
           docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Get existing task definition (template)
+      - name: Get base ECS task definition
         run: |
           aws ecs describe-task-definition \
             --task-definition crnccd-ecs-dev-bpor-rms-task-definition \
@@ -62,26 +63,19 @@ jobs:
             .registeredAt,
             .registeredBy,
             .containerDefinitions[].environment
-          )' task-definition.json > task-def.json
+          )' task-definition.json > cleaned-task-def.json
 
-      - name: Fill in the new image ID in the task definition
+      - name: Fill in new image in ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: task-def.json
+          task-definition: cleaned-task-def.json
           container-name: crnccd-ecs-dev-bpor-rms-container
           image: ${{ steps.build-image.outputs.image }}
+          environment-variables: |
+            ASPNETCORE_ENVIRONMENT=Development
 
-      - name: Register ECS task definition
-        id: register-task
-        run: |
-          TASK_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://${{ steps.task-def.outputs.task-definition }} \
-            --query 'taskDefinition.taskDefinitionArn' \
-            --output text)
-          echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
-
-      - name: Run task once in ECS
+      - name: Run ECS task once (backfill)
         env:
           CLUSTER: crnccd-ecs-dev-bpor-rms-cluster
           SUBNET_ID: ${{ secrets.BPOR_RMS_DEV_SUBNET_ID }}
@@ -91,5 +85,5 @@ jobs:
             --cluster $CLUSTER \
             --launch-type FARGATE \
             --network-configuration "awsvpcConfiguration={subnets=[$SUBNET_ID],securityGroups=[$SECURITY_GROUP],assignPublicIp=ENABLED}" \
-            --task-definition ${{ steps.register-task.outputs.task_arn }} \
+            --task-definition ${{ steps.task-def.outputs.task-definition }} \
             --count 1
