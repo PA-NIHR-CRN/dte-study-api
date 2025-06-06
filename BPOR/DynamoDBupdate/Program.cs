@@ -19,3 +19,5 @@ using (var scope = app.Services.CreateScope())
 
     await backfill.RunAsync(true, true, cts.Token);
 }
+
+app.Run();
