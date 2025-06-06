@@ -297,6 +297,9 @@ ol {
         margin-left: 1em;
     }
 
+.meet-out-volunteers-section .carousel-controls {
+    margin-top: -3em !important;
+}
 
 .card {
     background-color: #eef2f3;
@@ -444,6 +447,9 @@ ol {
         background-size: 575px;
     }
 
+    .meet-out-volunteers-section .carousel-controls {
+        margin-top: 3em !important;
+    }
 }
 
 @media (max-width: 767.98px) {

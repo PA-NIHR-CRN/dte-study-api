@@ -64,15 +64,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const splide = new Splide(
-                '.splide',
-                {
-                    gap: '3em',
-                    pagination: false,
-                    live: true,
-                    keyboard: true
-                }
-            );
+            const splide = new Splide('.splide', { gap: '3em' });
 
             splide.on('ready', function () {
                 const splideArrows = document.getElementsByClassName("splide__arrows")[0];
