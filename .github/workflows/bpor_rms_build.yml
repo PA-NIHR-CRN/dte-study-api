@@ -1,655 +1,161 @@
-name: Deploy BPOR RMS container
+name: Deploy BPOR RMS Container
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment (DEV, TEST, UAT, OAT, PROD)"
+        required: true
+        type: choice
+        options:
+          - DEV
+          - TEST
+          - UAT
+          - OAT
+          - PROD
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_REGION: eu-west-2
+  SECRET_IDS: |
+    DEV=crnccd-secret-dev-bpor-rms-app-config
+    TEST=crnccd-secret-test-bpor-rms-app-config
+    UAT=crnccs-secret-uat-bpor-rms-app-config
+    OAT=crnccp-secret-oat-bpor-rms-app-config
+    PROD=crnccp-secret-prod-bpor-rms-app-config
+  ECR_REPOSITORY_DEV: crnccd-ecr-dev-bpor-rms-repository
+  ECR_REPOSITORY_TEST: crnccd-ecr-test-bpor-rms-repository
+  ECR_REPOSITORY_UAT: crnccs-ecr-uat-bpor-rms-repository
+  ECR_REPOSITORY_OAT: crnccp-ecr-oat-bpor-rms-repository
+  ECR_REPOSITORY_PROD: crnccp-ecr-prod-bpor-rms-repository
 
 jobs:
   build:
-    name: 'Build'
+    name: Build
     runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID || secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET || secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Extract secret ID
+        id: secret
+        run: |
+          echo "id=$(echo \"$SECRET_IDS\" | grep \"${{ github.event.inputs.environment }}=\" | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+
+      - name: Get secrets from Secrets Manager (build)
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: ${{ steps.secret.outputs.id }}
+          parse-json-secrets: true
+
+      - name: Set ECR repository env var
+        run: |
+          case "${{ github.event.inputs.environment }}" in
+            DEV) echo "ECR_REPOSITORY=${{ env.ECR_REPOSITORY_DEV }}" >> $GITHUB_ENV ;;
+            TEST) echo "ECR_REPOSITORY=${{ env.ECR_REPOSITORY_TEST }}" >> $GITHUB_ENV ;;
+            UAT) echo "ECR_REPOSITORY=${{ env.ECR_REPOSITORY_UAT }}" >> $GITHUB_ENV ;;
+            OAT) echo "ECR_REPOSITORY=${{ env.ECR_REPOSITORY_OAT }}" >> $GITHUB_ENV ;;
+            PROD) echo "ECR_REPOSITORY=${{ env.ECR_REPOSITORY_PROD }}" >> $GITHUB_ENV ;;
+          esac
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
-        env:
-          IMAGE_NAME_TAG: bpor-rms
-          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
         run: |
-          echo "Build and Output Docker image"
-          docker build -f BPOR/BPOR.Rms/Dockerfile --build-arg NUGET_PACKAGE_USERNAME=USERNAME --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} -t $IMAGE_NAME_TAG .
-          docker save $IMAGE_NAME_TAG > /tmp/bpor-rms.tar
+          IMAGE_TAG=bpor-rms-${{ github.sha }}
+          echo "Using ECR registry: $ECR_REGISTRY"
+          echo "Using ECR repository: $ECR_REPOSITORY"
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: bpor-rms
-          path: /tmp/bpor-rms.tar
+          docker build -f BPOR/BPOR.Rms/Dockerfile \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:bpor-rms \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            --build-arg NUGET_PACKAGE_USERNAME=USERNAME \
+            --build-arg NUGET_PACKAGE_TOKEN=${{ secrets.GITHUB_TOKEN }} .
 
-  deploy-dev:
-    needs: [build]
-    environment: DEV
-    name: 'Deploy Dev'
+          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          
+  deploy:
+    needs: build
     runs-on: ubuntu-latest
-
+    environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (dev)
+  
+      - name: Extract secret ID
+        id: secret
+        run: |
+          echo "id=$(echo \"$SECRET_IDS\" | grep \"${{ github.event.inputs.environment }}=\" | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+  
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
-          aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
+          aws-access-key-id: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID || secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
+          aws-secret-access-key: ${{ github.event.inputs.environment == 'PROD' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'OAT' && secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET || github.event.inputs.environment == 'UAT' && secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET || secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
+  
+      - name: Get secrets from Secrets Manager (deploy)
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
-          dotnet-version: '8.0.x'
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: 'true'
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bpor-rms
-          path: /tmp
-
-      - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
-
-      - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef
-
-      - name: Restore dependencies
-        run: dotnet restore BPOR/BPOR.sln
-
-      - name: Build solution
-        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
-
-      - name: Get GitHub Actions Runner Public IP
-        id: publicip
+          secret-ids: ${{ steps.secret.outputs.id }}
+          parse-json-secrets: true
+  
+      - name: Debug ECS settings
         run: |
-          response=$(curl -s icanhazip.com)
-          echo "ip=$response" >> "$GITHUB_OUTPUT"
-
-      - name: Add Github Actions IP to RDS security group (Dev)
+          echo "EcsSettings__TaskDefinition: $EcsSettings__TaskDefinition"
+          echo "EcsSettings__ContainerName: $EcsSettings__ContainerName"
+          echo "EcsSettings__Service: $EcsSettings__Service"
+          echo "EcsSettings__Cluster: $EcsSettings__Cluster"
+          if [ -z "$EcsSettings__TaskDefinition" ]; then
+            echo "ERROR: EcsSettings__TaskDefinition is not set!"
+            exit 1
+          fi
+  
+      - name: Generate ECS task definition
         run: |
-          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
- 
-      - name: Update Database
-        env:
-          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
-        run: |
-          cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
-
-      - name: Pull, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REPOSITORY: crnccd-ecr-dev-bpor-rms-repository
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_NAME_TAG: bpor-rms
-          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
-        run: |
-          echo "Load artifact"
-          docker load --input /tmp/bpor-rms.tar
-          
-          # Extract the image ID from the list of images
-          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
-
-          echo "Using registry ${{ env.ECR_REGISTRY }}"
-          docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
-          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Generate task definition file from container
-        run: |
-          aws ecs describe-task-definition --task-definition crnccd-ecs-dev-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
-          echo $(cat ./task-definition.json | jq 'del(
-                  .taskDefinitionArn,
-                  .requiresAttributes,
-                  .compatibilities,
-                  .revision,
-                  .status,
-                  .registeredAt,
-                  .registeredBy,
-                  .containerDefinitions[].environment
-              )') > ./task-definition.json
-      - name: Fill in the new image ID in the Amazon ECS task definition
+          aws ecs describe-task-definition \
+            --task-definition "$EcsSettings__TaskDefinition" \
+            --query taskDefinition > task-definition.json
+          jq 'del(.taskDefinitionArn, .requiresAttributes, .compatibilities, .revision, .status, .registeredAt, .registeredBy)' task-definition.json > cleaned.json
+  
+      - name: Fill in image in ECS task definition
         id: task-def
-        env:
-          ECS_TASK_DEFINITION: ./task-definition.json
-          CONTAINER_NAME: crnccd-ecs-dev-bpor-rms-container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
+          task-definition: cleaned.json
+          container-name: ${{ env.EcsSettings__ContainerName }}
+          image: ${{ needs.build.outputs.image }}
           environment-variables: |
-            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
-            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_DEV }}
-            AwsSecretsManagerSettings__Enabled=true
-            ASPNETCORE_ENVIRONMENT=Development
-
-      - name: Remove Github Actions IP from RDS security group (Dev)
-        run: |
-          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
-
-      - name: Deploy Amazon ECS task definition
-        env:
-          ECS_SERVICE: crnccd-ecs-dev-bpor-rms-service
-          ECS_CLUSTER: crnccd-ecs-dev-bpor-rms-cluster
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+            AwsSecretsManagerSettings__Region=${{ env.AWS_REGION }}
+            AwsSecretsManagerSettings__SecretName=${{ env.AwsSecretsManagerSettings__SecretName }}
+            AwsSecretsManagerSettings__Enabled=false
+            DbSettings__Port=${{ env.DbSettings__Port }}
+            DbSettings__Username=${{ env.DbSettings__Username }}
+            DbSettings__Password=${{ env.DbSettings__Password }}
+            DbSettings__Database=${{ env.DbSettings__Database }}
+            DbSettings__Host=${{ env.DbSettings__Host }}
+            AuthenticationSettings__Authority=${{ env.AuthenticationSettings__Authority }}
+            AuthenticationSettings__ClientId=${{ env.AuthenticationSettings__ClientId }}
+            AuthenticationSettings__ClientSecret=${{ env.AuthenticationSettings__ClientSecret }}
+            AuthenticationSettings__Bypass=${{ env.AuthenticationSettings__Bypass }}
+  
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
+          service: ${{ env.EcsSettings__Service }}
+          cluster: ${{ env.EcsSettings__Cluster }}
           wait-for-service-stability: true
 
-  deploy-test:
-    needs: [deploy-dev]
-    environment: TEST
-    name: 'Deploy Test'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (test)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
-          aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: 'true'
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bpor-rms
-          path: /tmp
-
-      - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
-
-      - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef
-
-      - name: Restore dependencies
-        run: dotnet restore BPOR/BPOR.sln
-
-      - name: Build solution
-        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
-
-      - name: Get GitHub Actions Runner Public IP
-        id: publicip
-        run: |
-          response=$(curl -s icanhazip.com)
-          echo "ip=$response" >> "$GITHUB_OUTPUT"
-
-      - name: Add Github Actions IP to RDS security group (Dev)
-        run: |
-          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
- 
-      - name: Update Database
-        env:
-          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
-        run: |
-          cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
-
-      - name: Load, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REPOSITORY: crnccd-ecr-test-bpor-rms-repository
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_NAME_TAG: bpor-rms
-          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
-        run: |
-          echo "Load artifact"
-          docker load --input /tmp/bpor-rms.tar
-          
-          # Extract the image ID from the list of images
-          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
-          
-          echo "Using registry ${{ env.ECR_REGISTRY }}"
-          docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
-          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Generate task definition file from container
-        run: |
-          aws ecs describe-task-definition --task-definition crnccd-ecs-test-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
-          echo $(cat ./task-definition.json | jq 'del(
-                  .taskDefinitionArn,
-                  .requiresAttributes,
-                  .compatibilities,
-                  .revision,
-                  .status,
-                  .registeredAt,
-                  .registeredBy,
-                  .containerDefinitions[].environment
-              )') > ./task-definition.json
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        env:
-          ECS_TASK_DEFINITION: ./task-definition.json
-          CONTAINER_NAME: crnccd-ecs-test-bpor-rms-container
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-          environment-variables: |
-            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
-            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_TEST }}
-            AwsSecretsManagerSettings__Enabled=true
-            ASPNETCORE_ENVIRONMENT=Development
-
-      - name: Remove Github Actions IP from RDS security group (Dev)
-        run: |
-          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
-
-      - name: Deploy Amazon ECS task definition
-        env:
-          ECS_SERVICE: crnccd-ecs-test-bpor-rms-service
-          ECS_CLUSTER: crnccd-ecs-test-bpor-rms-cluster
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
-
-  deploy-uat:
-    needs: [deploy-test]
-    environment: UAT
-    name: 'Deploy Uat'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (uat)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: 'true'
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bpor-rms
-          path: /tmp
-
-      - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
-
-      - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef
-
-      - name: Restore dependencies
-        run: dotnet restore BPOR/BPOR.sln
-
-      - name: Build solution
-        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
-
-      - name: Get GitHub Actions Runner Public IP
-        id: publicip
-        run: |
-          response=$(curl -s icanhazip.com)
-          echo "ip=$response" >> "$GITHUB_OUTPUT"
-
-      - name: Add Github Actions IP to RDS security group (Dev)
-        run: |
-          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
- 
-      - name: Update Database
-        env:
-          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
-        run: |
-          cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
-
-      - name: Load, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REPOSITORY: crnccs-ecr-uat-bpor-rms-repository
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_NAME_TAG: bpor-rms
-          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
-        run: |
-          echo "Load artifact"
-          docker load --input /tmp/bpor-rms.tar
-          
-          # Extract the image ID from the list of images
-          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
-          
-          echo "Using registry ${{ env.ECR_REGISTRY }}"
-          docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
-          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Generate task definition file from container
-        run: |
-          aws ecs describe-task-definition --task-definition crnccs-ecs-uat-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
-          echo $(cat ./task-definition.json | jq 'del(
-                  .taskDefinitionArn,
-                  .requiresAttributes,
-                  .compatibilities,
-                  .revision,
-                  .status,
-                  .registeredAt,
-                  .registeredBy,
-                  .containerDefinitions[].environment
-              )') > ./task-definition.json
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        env:
-          ECS_TASK_DEFINITION: ./task-definition.json
-          CONTAINER_NAME: crnccs-ecs-uat-bpor-rms-container
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-          environment-variables: |
-            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
-            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_UAT }}
-            AwsSecretsManagerSettings__Enabled=true
-            ASPNETCORE_ENVIRONMENT=Development
-
-      - name: Remove Github Actions IP from RDS security group (Dev)
-        run: |
-          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
-
-      - name: Deploy Amazon ECS task definition
-        env:
-          ECS_SERVICE: crnccs-ecs-uat-bpor-rms-service
-          ECS_CLUSTER: crnccs-ecs-uat-bpor-rms-cluster
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
-
-  deploy-oat:
-    needs: [deploy-uat]
-    environment: OAT
-    name: 'Deploy Oat'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (Oat)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: 'true'
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bpor-rms
-          path: /tmp
-
-      - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
-
-      - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef
-
-      - name: Restore dependencies
-        run: dotnet restore BPOR/BPOR.sln
-
-      - name: Build solution
-        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
-
-      - name: Get GitHub Actions Runner Public IP
-        id: publicip
-        run: |
-          response=$(curl -s icanhazip.com)
-          echo "ip=$response" >> "$GITHUB_OUTPUT"
-
-      - name: Add Github Actions IP to RDS security group (Dev)
-        run: |
-          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
- 
-      - name: Update Database
-        env:
-          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
-        run: |
-          cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
-
-      - name: Load, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REPOSITORY: crnccp-ecr-oat-bpor-rms-repository
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_NAME_TAG: bpor-rms
-          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
-        run: |
-          echo "Load artifact"
-          docker load --input /tmp/bpor-rms.tar
-          
-          # Extract the image ID from the list of images
-          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
-          
-          echo "Using registry ${{ env.ECR_REGISTRY }}"
-          docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
-          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Generate task definition file from container
-        run: |
-          aws ecs describe-task-definition --task-definition crnccp-ecs-oat-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
-          echo $(cat ./task-definition.json | jq 'del(
-                  .taskDefinitionArn,
-                  .requiresAttributes,
-                  .compatibilities,
-                  .revision,
-                  .status,
-                  .registeredAt,
-                  .registeredBy,
-                  .containerDefinitions[].environment
-              )') > ./task-definition.json
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        env:
-          ECS_TASK_DEFINITION: ./task-definition.json
-          CONTAINER_NAME: crnccp-ecs-oat-bpor-rms-container
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-          environment-variables: |
-            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
-            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_OAT }}
-            AwsSecretsManagerSettings__Enabled=true
-            ASPNETCORE_ENVIRONMENT=Staging
-
-      - name: Remove Github Actions IP from RDS security group (Dev)
-        run: |
-          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
-
-      - name: Deploy Amazon ECS task definition
-        env:
-          ECS_SERVICE: crnccp-ecs-oat-bpor-rms-service
-          ECS_CLUSTER: crnccp-ecs-oat-bpor-rms-cluster
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
-
-  deploy-prod:
-    needs: [deploy-oat]
-    environment: PROD
-    name: 'Deploy Prod'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (Prod)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: 'true'
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bpor-rms
-          path: /tmp
-
-      - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
-
-      - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef
-
-      - name: Restore dependencies
-        run: dotnet restore BPOR/BPOR.sln
-
-      - name: Build solution
-        run: dotnet build BPOR/BPOR.sln --no-restore --configuration Release
-
-      - name: Get GitHub Actions Runner Public IP
-        id: publicip
-        run: |
-          response=$(curl -s icanhazip.com)
-          echo "ip=$response" >> "$GITHUB_OUTPUT"
-
-      - name: Add Github Actions IP to RDS security group (Dev)
-        run: |
-          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
- 
-      - name: Update Database
-        env:
-          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
-        run: |
-          cd BPOR/BPOR.Domain
-          dotnet ef database update --connection "${{ env.DB_CONNECTION_STRING }}"
-
-      - name: Load, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REPOSITORY: crnccp-ecr-prod-bpor-rms-repository
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_NAME_TAG: bpor-rms
-          IMAGE_SHA_TAG: bpor-rms-${{ github.sha }}
-        run: |
-          echo "Load artifact"
-          docker load --input /tmp/bpor-rms.tar
-          
-          # Extract the image ID from the list of images
-          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
-          
-          echo "Using registry ${{ env.ECR_REGISTRY }}"
-          docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
-          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Generate task definition file from container
-        run: |
-          aws ecs describe-task-definition --task-definition crnccp-ecs-prod-bpor-rms-task-definition --query taskDefinition > ./task-definition.json
-          echo $(cat ./task-definition.json | jq 'del(
-                  .taskDefinitionArn,
-                  .requiresAttributes,
-                  .compatibilities,
-                  .revision,
-                  .status,
-                  .registeredAt,
-                  .registeredBy,
-                  .containerDefinitions[].environment
-              )') > ./task-definition.json
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        env:
-          ECS_TASK_DEFINITION: ./task-definition.json
-          CONTAINER_NAME: crnccp-ecs-prod-bpor-rms-container
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-          environment-variables: |
-            AwsSecretsManagerSettings__Region=${{ secrets.AWS_REGION }}
-            AwsSecretsManagerSettings__SecretName=${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_PROD }}
-            AwsSecretsManagerSettings__Enabled=true
-            ASPNETCORE_ENVIRONMENT=Production
-
-      - name: Remove Github Actions IP from RDS security group (Dev)
-        run: |
-          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.RDS_SG }} --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 3306, "ToPort": 3306, "IpRanges": [{"CidrIp": "${{ steps.publicip.outputs.ip }}/32", "Description": "GitHub runner IP for Sponsor Engagement automation DB migration"}]}]'
-
-      - name: Deploy Amazon ECS task definition
-        env:
-          ECS_SERVICE: crnccp-ecs-prod-bpor-rms-service
-          ECS_CLUSTER: crnccp-ecs-prod-bpor-rms-cluster
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
