@@ -12,8 +12,7 @@ namespace NIHR.GovUk
             var modelErrors = viewContext.ViewData.ModelState
                 .Where(ms => ms.Value.Errors.Count > 0)
                 .DistinctBy(x => x.Value.Errors.FirstOrDefault()?.ErrorMessage);
-
-            var s = viewContext.ViewData.ModelExplorer;
+            
             var modelProperties = viewContext.ViewData.Model?.GetType().GetProperties();
 
             var errors = new List<KeyValuePair<List<int>, KeyValuePair<string, ModelStateEntry>>>();
