@@ -15,7 +15,6 @@ using NIHR.Infrastructure;
 using BPOR.Infrastructure.Clients;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
-using BPOR.Infrastructure.Clients;
 
 namespace DynamoBDupdate.Startup;
 
@@ -37,17 +36,16 @@ public static class DependencyInjection
 
         services.AddTransient<IPostcodeMapper, LocationApiClient>();
 
+        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("DynamoBDupdate");
+
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
         if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
             throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
         }
 
-        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(
-            clientsSettings.Value.LocationService,
-            retryCount: 2,
-            logger: services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("DynamoBDupdate")
-        );
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
+            logger);
 
         services.ConfigureAwsServices(configuration);
 
