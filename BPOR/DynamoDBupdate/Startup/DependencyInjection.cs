@@ -21,19 +21,21 @@ namespace DynamoBDupdate.Startup;
 public static class DependencyInjection
 {
 
-    public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration, IHostEnvironment hostEnvironment)
+    public static IServiceCollection RegisterServices(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment hostEnvironment)
     {
-        services.AddDistributedMemoryCache();
         services.ConfigureNihrLogging(configuration);
-
-        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("DynamoDBupdate");
 
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
 
         services.AddDbContext<ParticipantDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-                x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery).UseNetTopologySuite()));
+                builder => builder
+                    .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+                    .UseNetTopologySuite()));
 
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
         if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
@@ -41,18 +43,15 @@ public static class DependencyInjection
             throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
         }
 
-        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(
-            clientsSettings.Value.LocationService,
-            2,
-            logger
-        );
+        services.AddHttpClient<LocationApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(clientsSettings.Value.LocationService.BaseUrl!);
+        });
 
-        var tempProvider = services.BuildServiceProvider();
-        var postcodeMapper = tempProvider.GetService<IPostcodeMapper>();
-        Console.WriteLine(postcodeMapper == null ? "IPostcodeMapper NOT registered" : "IPostcodeMapper resolved");
+        services.AddScoped<IPostcodeMapper, LocationApiClient>();
 
         services.ConfigureAwsServices(configuration);
-        services.AddScoped<IPostcodeMapper, LocationApiClient>();
+
         services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
         services.AddScoped<Backfill>();
         services.AddScoped<Stage2Backfill>();
