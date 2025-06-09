@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-builder.Configuration.AddNihrConfiguration(builder.Services, builder.Environment);
+builder.AddNihrConfiguration();
 builder.Services.RegisterServices(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
