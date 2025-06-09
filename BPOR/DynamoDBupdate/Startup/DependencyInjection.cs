@@ -24,7 +24,6 @@ public static class DependencyInjection
     public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
         services.AddDistributedMemoryCache();
-
         services.ConfigureNihrLogging(configuration);
 
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("DynamoDBupdate");
@@ -48,8 +47,12 @@ public static class DependencyInjection
             logger
         );
 
-        services.ConfigureAwsServices(configuration);
+        var tempProvider = services.BuildServiceProvider();
+        var postcodeMapper = tempProvider.GetService<IPostcodeMapper>();
+        Console.WriteLine(postcodeMapper == null ? "IPostcodeMapper NOT registered" : "IPostcodeMapper resolved");
 
+        services.ConfigureAwsServices(configuration);
+        services.AddScoped<IPostcodeMapper, LocationApiClient>();
         services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
         services.AddScoped<Backfill>();
         services.AddScoped<Stage2Backfill>();
