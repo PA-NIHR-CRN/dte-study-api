@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using DynamoDBupdate.Backfills;
 using NIHR.Infrastructure;
-using NIHR.Infrastructure.Interfaces;
 using BPOR.Infrastructure.Clients;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
@@ -35,8 +34,6 @@ public static class DependencyInjection
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
                 x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery).UseNetTopologySuite()));
 
-        services.AddTransient<IPostcodeMapper, LocationApiClient>();
-
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("DynamoBDupdate");
 
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
@@ -45,7 +42,7 @@ public static class DependencyInjection
             throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
         }
 
-        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
+        services.AddHttpClientWithRetry<NIHR.Infrastructure.IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
             logger);
 
         services.ConfigureAwsServices(configuration);
