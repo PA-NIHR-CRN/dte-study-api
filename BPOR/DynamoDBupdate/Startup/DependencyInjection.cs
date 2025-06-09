@@ -39,13 +39,14 @@ public static class DependencyInjection
             throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
         }
 
+        using var tempProvider = services.BuildServiceProvider(validateScopes: true);
+        var logger = tempProvider.GetRequiredService<ILoggerFactory>().CreateLogger<LocationApiClient>();
+
         services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(
             clientsSettings.Value.LocationService,
             2,
-            sp => sp.GetRequiredService<ILoggerFactory>().CreateLogger<LocationApiClient>()
+            logger
         );
-
-        services.AddScoped<IPostcodeMapper, LocationApiClient>();
 
         services.ConfigureAwsServices(configuration);
 
