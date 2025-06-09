@@ -45,6 +45,8 @@ public static class DependencyInjection
             sp => sp.GetRequiredService<ILoggerFactory>().CreateLogger<LocationApiClient>()
         );
 
+        services.AddScoped<IPostcodeMapper, LocationApiClient>();
+
         services.ConfigureAwsServices(configuration);
 
         services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
