@@ -28,6 +28,11 @@ public static class DependencyInjection
     {
         services.ConfigureNihrLogging(configuration);
 
+        var logger = services
+            .BuildServiceProvider()
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger<LocationApiClient>();
+
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
 
@@ -43,12 +48,11 @@ public static class DependencyInjection
             throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
         }
 
-        services.AddHttpClient<LocationApiClient>(client =>
-        {
-            client.BaseAddress = new Uri(clientsSettings.Value.LocationService.BaseUrl!);
-        });
-
-        services.AddScoped<IPostcodeMapper, LocationApiClient>();
+        services.AddTransient<IPostcodeMapper, LocationApiClient>();
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(
+            clientsSettings.Value.LocationService,
+            2,
+            logger);
 
         services.ConfigureAwsServices(configuration);
 
