@@ -36,13 +36,14 @@ public static class DependencyInjection
 
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("DynamoBDupdate");
 
+        services.AddTransient<IPostcodeMapper, LocationApiClient>();
+
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
         if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
             throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
         }
-
-        services.AddHttpClientWithRetry<NIHR.Infrastructure.IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
             logger);
 
         services.ConfigureAwsServices(configuration);
