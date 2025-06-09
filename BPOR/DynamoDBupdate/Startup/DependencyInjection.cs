@@ -21,10 +21,13 @@ namespace DynamoBDupdate.Startup;
 public static class DependencyInjection
 {
 
-    public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration,
-    IHostEnvironment hostEnvironment)
+    public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
         services.AddDistributedMemoryCache();
+
+        services.ConfigureNihrLogging(configuration);
+
+        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("DynamoDBupdate");
 
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
@@ -38,9 +41,6 @@ public static class DependencyInjection
         {
             throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
         }
-
-        using var tempProvider = services.BuildServiceProvider(validateScopes: true);
-        var logger = tempProvider.GetRequiredService<ILoggerFactory>().CreateLogger<LocationApiClient>();
 
         services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(
             clientsSettings.Value.LocationService,
