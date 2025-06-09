@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using DynamoDBupdate.Backfills;
 using NIHR.Infrastructure;
+using NIHR.Infrastructure.Interfaces;
 using BPOR.Infrastructure.Clients;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
