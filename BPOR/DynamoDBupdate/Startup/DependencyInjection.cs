@@ -22,10 +22,9 @@ public static class DependencyInjection
 {
 
     public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration,
-        IHostEnvironment hostEnvironment)
+    IHostEnvironment hostEnvironment)
     {
         services.AddDistributedMemoryCache();
-
 
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var connectionString = dbSettings.Value.BuildConnectionString();
@@ -34,17 +33,17 @@ public static class DependencyInjection
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
                 x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery).UseNetTopologySuite()));
 
-        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("DynamoBDupdate");
-
-        services.AddTransient<IPostcodeMapper, LocationApiClient>();
-
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
         if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
             throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
         }
-        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
-            logger);
+
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(
+            clientsSettings.Value.LocationService,
+            2,
+            sp => sp.GetRequiredService<ILoggerFactory>().CreateLogger<LocationApiClient>()
+        );
 
         services.ConfigureAwsServices(configuration);
 
