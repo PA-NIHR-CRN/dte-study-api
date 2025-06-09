@@ -15,7 +15,7 @@ using NIHR.Infrastructure;
 using BPOR.Infrastructure.Clients;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
-
+using BPOR.Infrastructure.Clients;
 
 namespace DynamoBDupdate.Startup;
 
