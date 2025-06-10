@@ -2,6 +2,7 @@
 using BPOR.Domain.Entities;
 using BPOR.Domain.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
+using BPOR.Domain.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -13,13 +14,15 @@ namespace DynamoDBupdate.Backfills
         private readonly ILogger<Stage2Backfill> _logger;
         private readonly DynamoDBOperationConfig _config;
         private readonly IDynamoDBContext _dynamoContext;
+        private readonly IParticipantRepository _participantRepository;
 
-        public Stage2Backfill(ParticipantDbContext participantDbContext, ILogger<Stage2Backfill> logger, IDynamoDBContext participantRepository, DynamoDBOperationConfig config)
+        public Stage2Backfill(ParticipantDbContext participantDbContext, ILogger<Stage2Backfill> logger, IDynamoDBContext dynamoDBContext, DynamoDBOperationConfig config, IParticipantRepository participantRepository)
         {
             _participantDbContext = participantDbContext;
             _logger = logger;
-            _dynamoContext = participantRepository;
+            _dynamoContext = dynamoDBContext;
             _config = config;
+            _participantRepository = participantRepository;
         }
 
         public async Task RunAsync(CancellationToken cancellationToken)
@@ -38,7 +41,7 @@ namespace DynamoDBupdate.Backfills
                         x.HasLongTermCondition != null ||
                         x.GenderId != null
                     ) &&
-                    x.Id == 1 // get ParticipantId 1, to be removed.
+                    x.Id == 56206 // get ParticipantId 56206, to be removed.
                 )
                 .Include(x => x.SourceReferences)
                 .Select(x => new
@@ -69,7 +72,8 @@ namespace DynamoDBupdate.Backfills
                     // participant should only have 1 active record
                     foreach (var participantIdentifier in toBeUpdated.ParticipantIdentifiers)
                     {
-                        participant = await _dynamoContext.LoadAsync<DynamoParticipant>(participantIdentifier, _config, cancellationToken);
+                        participant = await _participantRepository.GetParticipantAsync(participantIdentifier, cancellationToken);
+
                         if (participant != null)
                         {
                             break;
@@ -98,7 +102,7 @@ namespace DynamoDBupdate.Backfills
             }
 
             // sleep for a minute to allow the stream handler time to settle
-            Thread.Sleep(60000);
+            //Thread.Sleep(60000);
 
             // report back on results
             var participantsUpdated = await _participantDbContext.Participants.Where(x => x.Stage2CompleteUtc == null
@@ -191,7 +195,7 @@ namespace DynamoDBupdate.Backfills
             }
 
             // sleep for a minute to allow the stream handler time to settle
-            Thread.Sleep(60000);
+            //Thread.Sleep(60000);
             // report back on results.
             var participantsUpdated = await _participantDbContext.Participants.Where(x => x.IsStage2CompleteUtcBackfilled == true
               ).Include(x => x.ParticipantIdentifiers).Select(x => new

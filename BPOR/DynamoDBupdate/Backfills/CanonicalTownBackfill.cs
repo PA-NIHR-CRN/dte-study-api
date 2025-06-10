@@ -14,19 +14,22 @@ namespace DynamoDBupdate.Backfills
         private readonly DynamoDBOperationConfig _config;
         private readonly IDynamoDBContext _dynamoContext;
         private readonly IPostcodeMapper _postcodeMapper;
+        private readonly IParticipantRepository _participantRepository;
 
         public CanonicalTownBackfill(
             ParticipantDbContext participantDbContext,
             ILogger<CanonicalTownBackfill> logger,
-            IDynamoDBContext participantRepository,
+            IDynamoDBContext dynamoDBContext,
             DynamoDBOperationConfig config,
-            IPostcodeMapper postcodeMapper)
+            IPostcodeMapper postcodeMapper,
+            IParticipantRepository participantRepository)
         {
             _participantDbContext = participantDbContext;
             _logger = logger;
-            _dynamoContext = participantRepository;
+            _dynamoContext = dynamoDBContext;
             _config = config;
             _postcodeMapper = postcodeMapper;
+            _participantRepository = participantRepository;
         }
 
         public async Task RunAsync(CancellationToken cancellationToken)
@@ -73,7 +76,8 @@ namespace DynamoDBupdate.Backfills
                     DynamoParticipant participant = null;
                     foreach (var participantIdentifier in toBeUpdated.ParticipantIdentifiers)
                     {
-                        participant = await _dynamoContext.LoadAsync<DynamoParticipant>(participantIdentifier, _config, cancellationToken);
+                        participant = await _participantRepository.GetParticipantAsync(participantIdentifier, cancellationToken);
+
                         if (participant != null)
                         {
                             break;
@@ -100,7 +104,7 @@ namespace DynamoDBupdate.Backfills
                 currentRecordNum++;
             }
 
-            Thread.Sleep(60000);
+            //Thread.Sleep(60000);
             _logger.LogInformation("Number of accounts in error: {Count}", recordsInError);
         }
 
@@ -156,7 +160,7 @@ namespace DynamoDBupdate.Backfills
                 currentRecordNum++;
             }
 
-            Thread.Sleep(60000);
+            //Thread.Sleep(60000);
             _logger.LogInformation("Number of rollback errors: {Count}", recordsInError);
         }
 
@@ -165,6 +169,7 @@ namespace DynamoDBupdate.Backfills
             try
             {
                 var addresses = await _postcodeMapper.GetAddressesByPostcodeAsync(postcode, cancellationToken);
+
                 return addresses?.FirstOrDefault()?.Town;
             }
             catch (Exception ex)
