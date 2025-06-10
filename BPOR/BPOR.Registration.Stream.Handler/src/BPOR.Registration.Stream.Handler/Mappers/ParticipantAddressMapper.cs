@@ -19,6 +19,7 @@ public static class ParticipantAddressMapper
             destination.Address.AddressLine4 = source.AddressLine4;
             destination.Address.Postcode = source.Postcode;
             destination.Address.Town = source.Town;
+            destination.Address.CanonicalTown = source.CanonicalTown;
         }
 
         return destination.Address;
