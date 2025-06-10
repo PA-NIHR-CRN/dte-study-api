@@ -7,6 +7,14 @@ public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformati
 {
     public int Id { get; set; }
     public Point Location { get; set; }
+    /// <summary>
+    /// OSGB 6 digit Easting
+    /// </summary>
+    public int Easting { get; set; }
+    /// <summary>
+    /// OSGB 6 digit Northing
+    /// </summary>
+    public int Northing { get; set; }
     public bool IsApproximate { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }

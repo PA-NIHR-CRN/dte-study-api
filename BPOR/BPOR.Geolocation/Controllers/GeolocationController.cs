@@ -6,6 +6,7 @@ using BPOR.Domain.Entities.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
+using NIHR.Geometry;
 using NIHR.Infrastructure;
 using Polly;
 using Polly.RateLimit;
@@ -57,9 +58,13 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
         {
             if (cache.TryGetValue(participant.Address.Postcode, out var latLng))
             {
+                var osgb = Osgb.FromLongitudeLatitude(latLng.Longitude, latLng.Latitude);
+
                 participant.ParticipantLocation = new ParticipantLocation
                 {
                     Location = new Point(latLng.Longitude, latLng.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid }
+                    Easting = osgb.Easting,
+                    Northing = osgb.Northing
                 };
             }
         }
@@ -131,9 +136,13 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
             foreach (var participant in participantsBatch)
             {
                 var randomCoordinates = GenerateRandomCoordinatesForUK();
+                var osgb = Osgb.FromLongitudeLatitude(randomCoordinates.longitude, randomCoordinates.latitude);
+
                 participant.ParticipantLocation = new ParticipantLocation
                 {
-                    Location = new Point(randomCoordinates.longitude, randomCoordinates.latitude) { SRID = ParticipantLocationConfiguration.LocationSrid }
+                    Location = new Point(randomCoordinates.longitude, randomCoordinates.latitude) { SRID = ParticipantLocationConfiguration.LocationSrid },
+                    Easting = osgb.Easting,
+                    Northing = osgb.Northing
                 };
             }
 

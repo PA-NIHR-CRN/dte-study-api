@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
+    <ProjectReference Include="..\NIHR.Geometry\NIHR.Geometry.csproj" />
     <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Rbec.Postcodes;
 using Microsoft.EntityFrameworkCore;
 using BPOR.Domain.Entities.Configuration;
+using NIHR.Geometry;
 
 namespace ImportGeocodeData
 {
@@ -93,6 +94,9 @@ namespace ImportGeocodeData
                 }
 
                 address.Participant.ParticipantLocation.Location = new NetTopologySuite.Geometries.Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
+                var osgb = Osgb.FromLongitudeLatitude(location.Longitude, location.Latitude);
+                address.Participant.ParticipantLocation.Easting = osgb.Easting;
+                address.Participant.ParticipantLocation.Northing = osgb.Northing;
                 return true;
             }
             else

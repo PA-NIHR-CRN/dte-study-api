@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using BPOR.Domain.Entities.RefData;
 using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 
+[DebuggerDisplay("Id = {Id}, Name = {FirstName} {LastName}")]
 public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
 {
     public Participant()

@@ -37,14 +37,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="appsettings.user.json">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
       <Folder Include="Constants\" />
     </ItemGroup>
 </Project>

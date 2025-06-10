@@ -35,6 +35,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImportGeocodeData", "Import
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.GovUk.AspNetCore.Mvc", "NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj", "{310FC69F-836B-4940-9634-EE74BA4F219C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.Geometry", "NIHR.Geometry\NIHR.Geometry.csproj", "{3080B510-17A2-4982-83D0-BAED3693ED62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,10 @@ Global
 		{310FC69F-836B-4940-9634-EE74BA4F219C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{310FC69F-836B-4940-9634-EE74BA4F219C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{310FC69F-836B-4940-9634-EE74BA4F219C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3080B510-17A2-4982-83D0-BAED3693ED62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3080B510-17A2-4982-83D0-BAED3693ED62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3080B510-17A2-4982-83D0-BAED3693ED62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3080B510-17A2-4982-83D0-BAED3693ED62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

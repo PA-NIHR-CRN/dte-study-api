@@ -3,6 +3,7 @@ using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Filter;
 using Microsoft.EntityFrameworkCore;
+using NIHR.Geometry;
 
 namespace BPOR.Rms;
 
@@ -144,9 +145,28 @@ public static class ParticipantQueryExtensions
     {
         if (postcodeSearch is not null && postcodeSearch.SearchRadiusMiles is not null && postcodeSearch.SearchRadiusMiles >= 0)
         {
-            var boundingBox = postcodeSearch.GetBoundingBox();
-            var radius = postcodeSearch.GetRadiusInMetres() ?? 0;
-            return query.Where(x => x.ParticipantLocation.Location.Within(boundingBox) && x.ParticipantLocation.Location.IsWithinDistance(postcodeSearch.Location, radius));
+            int searchRadiusMetres = (int)Conversions.MilesToMetres(postcodeSearch.SearchRadiusMiles.Value);
+
+            int innerSearchRadius = (int)(searchRadiusMetres / Math.Sqrt(2));
+
+            var osgbRef = Osgb.FromLongitudeLatitude(postcodeSearch.Location.X, postcodeSearch.Location.Y);
+
+            return query.Where(i =>
+                (i.ParticipantLocation.Easting > osgbRef.Easting - innerSearchRadius &&
+                i.ParticipantLocation.Easting < osgbRef.Easting + innerSearchRadius &&
+                i.ParticipantLocation.Northing < osgbRef.Northing + innerSearchRadius &&
+                i.ParticipantLocation.Northing > osgbRef.Northing - innerSearchRadius)
+            ||
+                (
+                    (i.ParticipantLocation.Easting > osgbRef.Easting - searchRadiusMetres &&
+                    i.ParticipantLocation.Easting < osgbRef.Easting + searchRadiusMetres &&
+                    i.ParticipantLocation.Northing < osgbRef.Northing + searchRadiusMetres &&
+                    i.ParticipantLocation.Northing > osgbRef.Northing - searchRadiusMetres)
+                &&
+                    Math.Sqrt(Math.Pow(i.ParticipantLocation.Easting - osgbRef.Easting, 2)
+                    + Math.Pow(i.ParticipantLocation.Northing - osgbRef.Northing, 2)) < searchRadiusMetres
+                )
+            );
         }
 
         return query;

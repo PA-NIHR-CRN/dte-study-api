@@ -12,6 +12,7 @@ using BPOR.Infrastructure.Clients;
 using BPOR.Registration.Stream.Handler.Services;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
+using NIHR.Geometry;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.Models;
 using static System.Net.Mime.MediaTypeNames;
@@ -169,6 +170,10 @@ public class ParticipantMapper : IParticipantMapper
                     destination.ParticipantLocation ??= new ParticipantLocation();
                     destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
                     { SRID = ParticipantLocationConfiguration.LocationSrid };
+
+                    var osgb = Osgb.FromLongitudeLatitude(coordinates.Longitude, coordinates.Latitude);
+                    destination.ParticipantLocation.Easting = osgb.Easting;
+                    destination.ParticipantLocation.Northing = osgb.Northing;
                 }
 
                 IEnumerable<PostcodeAddressModel> addressModels;
