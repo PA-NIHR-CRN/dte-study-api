@@ -3,7 +3,7 @@ using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authorization;
 using DynamoDBupdate.Backfills;
 using RMSStartup = BPOR.Rms.Startup.DependencyInjection;
-using DynamoStartup = DynamoBDupdate.Startup.DependencyInjection;
+using DynamoStartup = DynamoDBupdate.Startup.DependencyInjection;
 
 var builder = WebApplication
     .CreateBuilder(args);
