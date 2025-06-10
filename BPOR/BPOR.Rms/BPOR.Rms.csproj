@@ -26,6 +26,7 @@
       <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
       <ProjectReference Include="..\NIHR.NotificationService\NIHR.NotificationService.csproj" />
       <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
+      <ProjectReference Include="..\DynamoDBupdate\DynamoDBupdate.csproj" />
     </ItemGroup>
 
     <ItemGroup>
