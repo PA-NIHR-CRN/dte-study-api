@@ -53,43 +53,20 @@ public static class DependencyInjection
     {
         var awsSettings = services.GetSectionAndValidate<AwsSettings>(configuration).Value;
 
-        //var dynamoDbConfig = new AmazonDynamoDBConfig();
-        //if (!string.IsNullOrWhiteSpace(awsSettings.ServiceUrl))
-        //{
-        //    dynamoDbConfig.ServiceURL = awsSettings.ServiceUrl;
-        //}
-
-        //var dynamoDbClient = new AmazonDynamoDBClient(dynamoDbConfig);
-
-        //services.AddSingleton<IAmazonDynamoDB>(dynamoDbClient);
-        //services.AddSingleton<IDynamoDBContext>(_ => new DynamoDBContext(dynamoDbClient));
-        //services.AddSingleton(new DynamoDBOperationConfig
-        //{
-        //    OverrideTableName = awsSettings.ParticipantRegistrationDynamoDbTableName
-        //});
-
         var dynamoDbConfig = new AmazonDynamoDBConfig();
         if (!string.IsNullOrWhiteSpace(awsSettings.ServiceUrl))
         {
-            dynamoDbConfig.ServiceURL = awsSettings.ServiceUrl;
-        }
-        else if (!string.IsNullOrWhiteSpace(awsSettings.CognitoRegion))
-        {
-            dynamoDbConfig.RegionEndpoint = RegionEndpoint.GetBySystemName(awsSettings.CognitoRegion);
+           dynamoDbConfig.ServiceURL = awsSettings.ServiceUrl;
         }
 
-        AWSCredentials credentials;
-        var chain = new CredentialProfileStoreChain();
-        if (!chain.TryGetAWSCredentials(awsSettings.CognitoPoolId, out credentials))
-        {
-            throw new Exception($"Could not load AWS credentials from profile '{awsSettings.CognitoPoolId}'.");
-        }
-
-        var dynamoDbClient = new AmazonDynamoDBClient(credentials, dynamoDbConfig);
+        var dynamoDbClient = new AmazonDynamoDBClient(dynamoDbConfig);
 
         services.AddSingleton<IAmazonDynamoDB>(dynamoDbClient);
         services.AddSingleton<IDynamoDBContext>(_ => new DynamoDBContext(dynamoDbClient));
-        services.AddSingleton(new DynamoDBOperationConfig());
+        services.AddSingleton(new DynamoDBOperationConfig
+        {
+           OverrideTableName = awsSettings.ParticipantRegistrationDynamoDbTableName
+        });
 
         services.AddDefaultAWSOptions(configuration.GetAWSOptions());
     }
