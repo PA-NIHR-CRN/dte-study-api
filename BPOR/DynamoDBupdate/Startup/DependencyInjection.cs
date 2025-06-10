@@ -1,5 +1,8 @@
+using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.Runtime;
+using Amazon.Runtime.CredentialManagement;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Interfaces;
 using BPOR.Domain.Repositories;
@@ -50,20 +53,43 @@ public static class DependencyInjection
     {
         var awsSettings = services.GetSectionAndValidate<AwsSettings>(configuration).Value;
 
+        //var dynamoDbConfig = new AmazonDynamoDBConfig();
+        //if (!string.IsNullOrWhiteSpace(awsSettings.ServiceUrl))
+        //{
+        //    dynamoDbConfig.ServiceURL = awsSettings.ServiceUrl;
+        //}
+
+        //var dynamoDbClient = new AmazonDynamoDBClient(dynamoDbConfig);
+
+        //services.AddSingleton<IAmazonDynamoDB>(dynamoDbClient);
+        //services.AddSingleton<IDynamoDBContext>(_ => new DynamoDBContext(dynamoDbClient));
+        //services.AddSingleton(new DynamoDBOperationConfig
+        //{
+        //    OverrideTableName = awsSettings.ParticipantRegistrationDynamoDbTableName
+        //});
+
         var dynamoDbConfig = new AmazonDynamoDBConfig();
         if (!string.IsNullOrWhiteSpace(awsSettings.ServiceUrl))
         {
             dynamoDbConfig.ServiceURL = awsSettings.ServiceUrl;
         }
+        else if (!string.IsNullOrWhiteSpace(awsSettings.CognitoRegion))
+        {
+            dynamoDbConfig.RegionEndpoint = RegionEndpoint.GetBySystemName(awsSettings.CognitoRegion);
+        }
 
-        var dynamoDbClient = new AmazonDynamoDBClient(dynamoDbConfig);
+        AWSCredentials credentials;
+        var chain = new CredentialProfileStoreChain();
+        if (!chain.TryGetAWSCredentials(awsSettings.CognitoPoolId, out credentials))
+        {
+            throw new Exception($"Could not load AWS credentials from profile '{awsSettings.CognitoPoolId}'.");
+        }
+
+        var dynamoDbClient = new AmazonDynamoDBClient(credentials, dynamoDbConfig);
 
         services.AddSingleton<IAmazonDynamoDB>(dynamoDbClient);
         services.AddSingleton<IDynamoDBContext>(_ => new DynamoDBContext(dynamoDbClient));
-        services.AddSingleton(new DynamoDBOperationConfig
-        {
-            OverrideTableName = awsSettings.ParticipantRegistrationDynamoDbTableName
-        });
+        services.AddSingleton(new DynamoDBOperationConfig());
 
         services.AddDefaultAWSOptions(configuration.GetAWSOptions());
     }
