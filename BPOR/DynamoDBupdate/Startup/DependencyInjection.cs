@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.EntityFrameworkCore;
 
-namespace DynamoBDupdate.Startup;
+namespace DynamoDBupdate.Startup;
 
 public static class DependencyInjection
 {
