@@ -150,6 +150,8 @@ public class ParticipantMapper : IParticipantMapper
         destination.CreatedAt = source.CreatedAtUtc;
         destination.UpdatedAt = source.UpdatedAtUtc.HasValue ? source.UpdatedAtUtc.Value : source.CreatedAtUtc;
         destination.Stage2CompleteUtc = source.Stage2CompleteUtc;
+        destination.IsStage2CompleteUtcBackfilled = source.IsStage2CompleteUtcBackfilled ?? false;
+        destination.IsCanonicalTownBackfilled = source.IsCanonicalTownBackfilled ?? false;
 
         if (!destination.SourceReferences.Any(x => x.Pk == record.PK()))
         {
@@ -171,12 +173,14 @@ public class ParticipantMapper : IParticipantMapper
                     { SRID = ParticipantLocationConfiguration.LocationSrid };
                 }
 
-                IEnumerable<PostcodeAddressModel> addressModels;
-                addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(destination.Address.Postcode, cancellationToken);
-
-                if (addressModels.Any())
+                if (string.IsNullOrWhiteSpace(destination.Address.CanonicalTown))
                 {
-                    destination.Address.CanonicalTown = addressModels.First().Town;
+                    var addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(destination.Address.Postcode, cancellationToken);
+
+                    if (addressModels.Any())
+                    {
+                        destination.Address.CanonicalTown = addressModels.First().Town;
+                    }
                 }
             }
         }
