@@ -173,12 +173,14 @@ public class ParticipantMapper : IParticipantMapper
                     { SRID = ParticipantLocationConfiguration.LocationSrid };
                 }
 
-                IEnumerable<PostcodeAddressModel> addressModels;
-                addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(destination.Address.Postcode, cancellationToken);
-
-                if (addressModels.Any())
+                if (string.IsNullOrWhiteSpace(destination.Address.CanonicalTown))
                 {
-                    destination.Address.CanonicalTown = addressModels.First().Town;
+                    var addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(destination.Address.Postcode, cancellationToken);
+
+                    if (addressModels.Any())
+                    {
+                        destination.Address.CanonicalTown = addressModels.First().Town;
+                    }
                 }
             }
         }
