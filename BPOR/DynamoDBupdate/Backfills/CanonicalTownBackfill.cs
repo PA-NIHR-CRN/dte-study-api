@@ -1,6 +1,7 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Interfaces;
+using BPOR.Domain.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure;
@@ -76,7 +77,7 @@ namespace DynamoDBupdate.Backfills
                     DynamoParticipant participant = null;
                     foreach (var participantIdentifier in toBeUpdated.ParticipantIdentifiers)
                     {
-                        participant = await _participantRepository.GetParticipantAsync(participantIdentifier, cancellationToken);
+                        participant = await _participantRepository.GetParticipantAsync(KeyUtils.StripPrimaryKey(participantIdentifier), cancellationToken);
 
                         if (participant != null)
                         {

@@ -72,7 +72,7 @@ namespace DynamoDBupdate.Backfills
                     // participant should only have 1 active record
                     foreach (var participantIdentifier in toBeUpdated.ParticipantIdentifiers)
                     {
-                        participant = await _participantRepository.GetParticipantAsync(participantIdentifier, cancellationToken);
+                        participant = await _participantRepository.GetParticipantAsync(KeyUtils.StripPrimaryKey(participantIdentifier), cancellationToken);
 
                         if (participant != null)
                         {
