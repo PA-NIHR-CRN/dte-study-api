@@ -16,6 +16,7 @@
         <PackageReference Include="Amazon.Lambda.DynamoDBEvents" Version="2.3.0" />
         <PackageReference Include="Dte.Common" Version="1.7.7" />
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+        <PackageReference Include="Rbec.Postcodes" Version="1.0.0" />
     </ItemGroup>
 
     <ItemGroup>

@@ -155,26 +155,46 @@ public class ParticipantMapper : IParticipantMapper
         {
             destination.Address ??= new ParticipantAddress();
 
-            if (destination.Address.Postcode != source.Address.Postcode || destination.ParticipantLocation is null)
+            var postcodeChanged = destination.Address.Postcode != source.Address.Postcode;
+            if (Rbec.Postcodes.Postcode.TryParse(source.Address.Postcode, out var p))
             {
-                var coordinates = await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
+                var validPostcode = p.ToString();
 
-                if (coordinates != null)
+                if (postcodeChanged || destination.ParticipantLocation is null)
                 {
-                    destination.ParticipantLocation ??= new ParticipantLocation();
-                    destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
-                    { SRID = ParticipantLocationConfiguration.LocationSrid };
+                    var coordinates = await _locationApiClient.GetCoordinatesFromPostcodeAsync(validPostcode, cancellationToken);
+
+                    if (coordinates != null)
+                    {
+                        destination.ParticipantLocation ??= new ParticipantLocation();
+                        destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+                        { SRID = ParticipantLocationConfiguration.LocationSrid };
+                    }
+                    else
+                    {
+                        destination.ParticipantLocation?.Anonymise();
+                    }
                 }
+
+                if (postcodeChanged || string.IsNullOrWhiteSpace(destination.Address.CanonicalTown))
+                {
+                    var addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(validPostcode, cancellationToken);
+
+                    if (addressModels.Any())
+                    {
+                        destination.Address.CanonicalTown = addressModels.First().Town;
+                    }
+                    else
+                    {
+                        destination.Address.CanonicalTown = null;
+                    }
+                }
+
             }
-
-            if (destination.Address.Postcode != source.Address.Postcode || string.IsNullOrWhiteSpace(destination.Address.CanonicalTown))
+            else
             {
-                var addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(source.Address.Postcode, cancellationToken);
-
-                if (addressModels.Any())
-                {
-                    destination.Address.CanonicalTown = addressModels.First().Town;
-                }
+                destination.ParticipantLocation?.Anonymise();
+                destination.Address.CanonicalTown = null;
             }
 
             ParticipantAddressMapper.Map(source.Address, destination);
