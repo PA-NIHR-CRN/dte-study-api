@@ -8,7 +8,7 @@ public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformati
 {
     public int Id { get; set; }
     public Point Location { get; set; } = Point.Empty;
-    public bool IsApproximate { get; set; }
+    public bool IsApproximate { get; set; } = false;
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
@@ -18,5 +18,6 @@ public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformati
     {
         Location = Point.Empty;
         Location.SRID = ParticipantLocationConfiguration.LocationSrid;
+        IsApproximate = true;
     }
 }

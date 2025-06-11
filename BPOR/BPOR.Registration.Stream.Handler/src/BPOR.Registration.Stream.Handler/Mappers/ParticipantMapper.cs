@@ -169,6 +169,7 @@ public class ParticipantMapper : IParticipantMapper
                         destination.ParticipantLocation ??= new ParticipantLocation();
                         destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
                         { SRID = ParticipantLocationConfiguration.LocationSrid };
+                        destination.ParticipantLocation.IsApproximate = false;
                     }
                     else
                     {

@@ -59,8 +59,8 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
             {
                 participant.ParticipantLocation = new ParticipantLocation
                 {
-                    Location = new Point(latLng.Longitude, latLng.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid }
-                };
+                    Location = new Point(latLng.Longitude, latLng.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid },
+                }
             }
         }
 
