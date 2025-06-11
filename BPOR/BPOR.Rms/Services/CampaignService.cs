@@ -222,6 +222,13 @@ public class CampaignService(
     {
         foreach (var volunteer in volunteers)
         {
+            var validity = ValidateParticipantForCampaignType(volunteer, campaign.TypeId);
+            if (!validity.isValid)
+            {
+                logger.LogError("Participant ID:{ParticipantId} is not a valid notification target becuase {Reason}", volunteer.Id, validity.failureMessage);
+                continue;
+            }
+
             var campaignParticipant = queue.SelectMany(e => e.CampaignParticipant)
                 .FirstOrDefault(e => e.ParticipantId == volunteer.Id);
 
@@ -270,16 +277,10 @@ public class CampaignService(
                     break;
 
                 case ContactMethodId.Letter:
-                    if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1) ||
-                        string.IsNullOrWhiteSpace(volunteer.Address.Town) ||
-                        string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
-                    {
-                        throw new InvalidOperationException("Letter notifications require at least 3 address lines");
-                    }
 
                     notification.PrimaryIdentifier = $"ParticipantAddress({volunteer.Address.Id})";
 
-                    var addressFields = new Dictionary<string, string>
+                    var addressFields = new Dictionary<string, string?>
                     {
                         { "address_line_1", volunteer.Address.AddressLine1 },
                         { "address_line_2", volunteer.Address.AddressLine2 },
@@ -311,6 +312,37 @@ public class CampaignService(
         }
 
         await notificationContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private (bool isValid, string? failureMessage) ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, ContactMethodId campaignTypeId)
+    {
+        if (string.IsNullOrWhiteSpace(volunteer.FirstName))
+            return (false, "FirstName cannot be null, empty or whitespace");
+        if (string.IsNullOrWhiteSpace(volunteer.LastName))
+            return (false, "LastName cannot be null, empty or whitespace");
+
+        switch (campaignTypeId)
+        {
+            case ContactMethodId.Email:
+                if (string.IsNullOrWhiteSpace(volunteer.Email))
+                    return (false, "Email cannot be null, empty or whitespace");
+                break;
+            case ContactMethodId.Letter:
+                if (volunteer.Address == null)
+                    return (false, "Address cannot be null");
+                if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1))
+                    return (false, "AddressLine1 cannot be null, empty or whitespace");
+                if (string.IsNullOrWhiteSpace(volunteer.Address.Town))
+                    return (false, "Town cannot be null, empty or whitespace");
+                if (string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
+                    return (false, "Postcode cannot be nnull, empty or whitespaceull");
+                break;
+            default:
+                return (false, "Invalid campaign type id");
+        }
+
+        return (true, null);
+
     }
 }
 

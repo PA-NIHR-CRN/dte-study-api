@@ -30,6 +30,14 @@ internal static class DataHelperMethods
         return data;
     }
 
+    public static void RemoveByKey(this ICollection<NotificationData> datas, string key)
+    {
+        var datasToRemove = datas.Where(datas => datas.Key == key).ToList();
+        foreach (var item in datasToRemove)  
+            datas.Remove(item);
+    }
+
+
     public static bool ValueIs<TValue>(this IDictionary<string, dynamic> data, string key, TValue expectedValue)
         => data.ValueIs<TValue>(key, typedValue => Equals(typedValue, expectedValue));
 

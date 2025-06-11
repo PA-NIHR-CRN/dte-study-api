@@ -24,6 +24,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BPOR.Rms\BPOR.Rms.csproj" />
+      <ProjectReference Include="..\NIHR.NotificationService.Tests\NIHR.NotificationService.Tests.csproj" />
     </ItemGroup>
 
 </Project>

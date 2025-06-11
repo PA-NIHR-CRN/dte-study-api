@@ -12,6 +12,7 @@ using BPOR.Rms.Constants;
 using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Notify.Interfaces;
+using System.Collections.Concurrent;
 
 namespace NIHR.NotificationService.Services
 {
@@ -59,14 +60,19 @@ namespace NIHR.NotificationService.Services
 
                 try
                 {
-                    await SendBatchNotificationAsync(notifications, stoppingToken);
+                    var successfullySentNotifications = new ConcurrentBag<Notification>();
+                    await SendBatchNotificationAsync(notifications, successfullySentNotifications, stoppingToken);
 
-                    foreach (var notification in notifications)
+                    foreach(Notification notification in notifications)
                     {
-                        await UpdateDeliveryStatusForLetterAsync(notification);
                         notification.IsProcessed = true;
                     }
 
+
+                    foreach (Notification notification in successfullySentNotifications)
+                    {
+                        await IfLetterThenUpdateDeliveryStatusAsync(notification);
+                    }
 
                     await _notificationDbContext.SaveChangesAsync(stoppingToken);
                     await _participantDbContext.SaveChangesAsync(stoppingToken);
@@ -79,7 +85,7 @@ namespace NIHR.NotificationService.Services
             }
         }
 
-        private async Task UpdateDeliveryStatusForLetterAsync(Notification notification)
+        private async Task IfLetterThenUpdateDeliveryStatusAsync(Notification notification)
         {
             var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
 
@@ -158,7 +164,7 @@ namespace NIHR.NotificationService.Services
                 personalisation, request.Reference);
         }
 
-        public async Task<NotificationResponse> SendBatchNotificationAsync(List<Notification> notifications,
+        public async Task<NotificationResponse> SendBatchNotificationAsync(List<Notification> notifications, ConcurrentBag<Notification> successfullySentNotifications,
             CancellationToken cancellationToken)
         {
             const int batchSize = 100;
@@ -183,7 +189,7 @@ namespace NIHR.NotificationService.Services
                     cancellationToken.ThrowIfCancellationRequested();
                 }
 
-                tasks.Add(SendBatchWithRateLimitAsync(batch.ToList(), rateLimitPolicy, retryPolicy, cancellationToken));
+                tasks.Add(SendBatchWithRateLimitAsync(batch.ToList(), rateLimitPolicy, retryPolicy, successfullySentNotifications, cancellationToken));
             }
 
             await Task.WhenAll(tasks);
@@ -195,13 +201,13 @@ namespace NIHR.NotificationService.Services
         }
 
         private async Task SendBatchWithRateLimitAsync(List<Notification> batch,
-            AsyncRateLimitPolicy rateLimitPolicy, AsyncPolicy retryPolicy, CancellationToken cancellationToken)
+            AsyncRateLimitPolicy rateLimitPolicy, AsyncPolicy retryPolicy, ConcurrentBag<Notification> successfullySentNotifications, CancellationToken cancellationToken)
         {
             var batchStopwatch = Stopwatch.StartNew();
             var individualTimes = new List<long>();
 
             var tasks = batch.Select(notification =>
-                SendNotificationWithRetryAsync(notification, retryPolicy, cancellationToken, individualTimes)).ToList();
+                SendNotificationWithRetryAsync(notification, retryPolicy, successfullySentNotifications, cancellationToken, individualTimes)).ToList();
 
             await rateLimitPolicy.ExecuteAsync(() => Task.WhenAll(tasks));
 
@@ -212,16 +218,24 @@ namespace NIHR.NotificationService.Services
         }
 
         private async Task SendNotificationWithRetryAsync(Notification notification,
-            AsyncPolicy retryPolicy, CancellationToken cancellationToken, List<long> individualTimes)
+            AsyncPolicy retryPolicy, ConcurrentBag<Notification> successfullySentNotifications, CancellationToken cancellationToken, List<long> individualTimes)
         {
-            var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
-
-            var sendNotificationRequest = CreateSendNotificationRequest(personalisation);
-
             var stopwatch = Stopwatch.StartNew();
-            await retryPolicy.ExecuteAsync(async () => { await SendNotificationAsync(sendNotificationRequest, cancellationToken); });
-            stopwatch.Stop();
 
+            try
+            { 
+                var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
+                var sendNotificationRequest = CreateSendNotificationRequest(personalisation);
+                await retryPolicy.ExecuteAsync(async () => { await SendNotificationAsync(sendNotificationRequest, cancellationToken); });
+                successfullySentNotifications.Add(notification);
+            }
+            catch (Exception ex)
+            {
+                // Do not rethrow as this will cause the entire batch to fail.
+                _logger.LogError(ex, "Unable to send notification ID:{NotificaitionId}; {Reason}", notification.Id, ex.Message);
+            }
+
+            stopwatch.Stop();
             lock (individualTimes)
             {
                 individualTimes.Add(stopwatch.ElapsedMilliseconds);
