@@ -533,32 +533,3 @@
     line-height: 19px;
     margin-left: 5px;
 }
-
-/* Base styles for all tags */
-.govuk-tag {
-    border-radius: 3px;
-    text-align: center;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 24px;
-    font-feature-settings: 'clig' off, 'liga' off;
-    display: flex;
-    height: 23px;
-    padding: 5px 8px 4px 8px;
-    justify-content: center;
-    align-items: center;
-    align-self: stretch;
-}
-
-/* Specific styles for orange tag */
-.govuk-tag--orange {
-    background: #FDEBD8;
-    color: #494949;
-}
-
-/* Specific styles for green tag */
-.govuk-tag--green {
-    background: #388555;
-    color: #FFFFFF;
-}

@@ -50,7 +50,6 @@ public class ParticipantAddress : IPersonalInformation, ISoftDelete
         AddressLine3 = null;
         AddressLine4 = null;
         Town = null;
-        CanonicalTown = null;
         Postcode = GetOutcodeFromPostcode(Postcode);
     }
 }

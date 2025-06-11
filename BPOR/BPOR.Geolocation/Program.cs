@@ -1,5 +1,4 @@
 using BPOR.Geolocation.Startup;
-using NIHR.Infrastructure.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 

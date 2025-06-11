@@ -1,20 +1,14 @@
-using System.Text.Json;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
-using Amazon.Runtime.Internal.Util;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
-using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
-using BPOR.Infrastructure.Clients;
 using BPOR.Registration.Stream.Handler.Services;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure;
-using NIHR.Infrastructure.Models;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace BPOR.Registration.Stream.Handler.Mappers;
 
@@ -68,7 +62,8 @@ public class ParticipantMapper : IParticipantMapper
     }
     private void MapParticipantContactMethod(DynamoParticipant source, Participant participant)
     {
-        if (participant.ContactMethodId.Count == 0) { 
+        if (participant.ContactMethodId.Count == 0)
+        {
             participant.ContactMethodId.Add(new ParticipantContactMethod()
             {
                 ContactMethodId = (int)ContactMethodId.Email,
@@ -125,7 +120,6 @@ public class ParticipantMapper : IParticipantMapper
     public async Task<Participant> Map(Dictionary<string, AttributeValue> record, Participant destination,
         CancellationToken cancellationToken)
     {
-
         var doc = Document.FromAttributeMap(record);
 
         var source = _context.FromDocument<DynamoParticipant>(doc);
@@ -151,20 +145,19 @@ public class ParticipantMapper : IParticipantMapper
         destination.UpdatedAt = source.UpdatedAtUtc.HasValue ? source.UpdatedAtUtc.Value : source.CreatedAtUtc;
         destination.Stage2CompleteUtc = source.Stage2CompleteUtc;
         destination.IsStage2CompleteUtcBackfilled = source.IsStage2CompleteUtcBackfilled ?? false;
-        destination.IsCanonicalTownBackfilled = source.IsCanonicalTownBackfilled ?? false;
 
         if (!destination.SourceReferences.Any(x => x.Pk == record.PK()))
         {
             destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
         }
 
-        if(source.Address != null) { 
-            ParticipantAddressMapper.Map(source.Address, destination);
+        if (source.Address is not null)
+        {
+            destination.Address ??= new ParticipantAddress();
 
-            if (destination.Address != null && !String.IsNullOrWhiteSpace(destination.Address.Postcode))
+            if (destination.Address.Postcode != source.Address.Postcode || destination.ParticipantLocation is null)
             {
-                var coordinates =
-                    await _locationApiClient.GetCoordinatesFromPostcodeAsync(destination.Address.Postcode, cancellationToken);
+                var coordinates = await _locationApiClient.GetCoordinatesFromPostcodeAsync(source.Address.Postcode, cancellationToken);
 
                 if (coordinates != null)
                 {
@@ -172,17 +165,19 @@ public class ParticipantMapper : IParticipantMapper
                     destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
                     { SRID = ParticipantLocationConfiguration.LocationSrid };
                 }
+            }
 
-                if (string.IsNullOrWhiteSpace(destination.Address.CanonicalTown))
+            if (destination.Address.Postcode != source.Address.Postcode || string.IsNullOrWhiteSpace(destination.Address.CanonicalTown))
+            {
+                var addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(source.Address.Postcode, cancellationToken);
+
+                if (addressModels.Any())
                 {
-                    var addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(destination.Address.Postcode, cancellationToken);
-
-                    if (addressModels.Any())
-                    {
-                        destination.Address.CanonicalTown = addressModels.First().Town;
-                    }
+                    destination.Address.CanonicalTown = addressModels.First().Town;
                 }
             }
+
+            ParticipantAddressMapper.Map(source.Address, destination);
         }
 
         MapHealthConditions(source, destination);

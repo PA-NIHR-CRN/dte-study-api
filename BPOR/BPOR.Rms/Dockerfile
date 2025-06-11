@@ -21,7 +21,6 @@ COPY "BPOR/NIHR.Infrastructure.EntityFrameworkCore" "NIHR.Infrastructure.EntityF
 COPY "BPOR/NIHR.Infrastructure.EntityFrameworkCore.MySql" "NIHR.Infrastructure.EntityFrameworkCore.MySql"
 COPY "BPOR/NIHR.NotificationService" "NIHR.NotificationService"
 COPY "BPOR/NIHR.GovUk.AspNetCore.Mvc" "NIHR.GovUk.AspNetCore.Mvc"
-COPY "BPOR/DynamoDBupdate" "DynamoDBupdate"
 
 WORKDIR "/src/BPOR.Rms"
 RUN dotnet build "BPOR.Rms.csproj" -c $BUILD_CONFIGURATION -o /app/build
