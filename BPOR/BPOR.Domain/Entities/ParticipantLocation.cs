@@ -1,3 +1,4 @@
+using BPOR.Domain.Entities.Configuration;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure.EntityFrameworkCore;
 
@@ -16,5 +17,6 @@ public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformati
     public void Anonymise()
     {
         Location = Point.Empty;
+        Location.SRID = ParticipantLocationConfiguration.LocationSrid;
     }
 }
