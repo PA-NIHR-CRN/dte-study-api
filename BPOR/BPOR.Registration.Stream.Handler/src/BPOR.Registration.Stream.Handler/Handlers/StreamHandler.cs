@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.DynamoDBEvents;
@@ -19,7 +18,7 @@ public class StreamHandler(
     public async Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(DynamoDBEvent dynamoDbEvent,
         CancellationToken cancellationToken)
     {
-        participantDbContext.ThrowIfInMaintenanceMode();
+        // participantDbContext.ThrowIfInMaintenanceMode();
 
         var failures = new List<BatchItemFailure>();
         // TODO: how do we handle out of order events if they are indeed out of order?
@@ -31,6 +30,14 @@ public class StreamHandler(
 
             using (logger.BeginScope("{EventId}, {SequenceNumber}", record.EventID, currentRecordSequenceNumber))
             {
+
+                if (record.EventName == OperationType.MODIFY && record.Dynamodb.NewImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var NewIsStage2CompleteUtcBackfilled)
+                    && !record.Dynamodb.OldImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var OldIsStage2CompleteUtcBackfilled))
+                {
+                    logger.LogInformation("Skipping new IsStage2CompleteUtcBackfilled modification");
+                    continue;
+                }
+
                 try
                 {
                     logger.LogInformation(

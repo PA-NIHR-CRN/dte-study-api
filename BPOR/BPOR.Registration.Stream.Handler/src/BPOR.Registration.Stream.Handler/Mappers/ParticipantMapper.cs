@@ -1,20 +1,14 @@
-using System.Text.Json;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
-using Amazon.Runtime.Internal.Util;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
-using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
-using BPOR.Infrastructure.Clients;
 using BPOR.Registration.Stream.Handler.Services;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure;
-using NIHR.Infrastructure.Models;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace BPOR.Registration.Stream.Handler.Mappers;
 
@@ -68,7 +62,8 @@ public class ParticipantMapper : IParticipantMapper
     }
     private void MapParticipantContactMethod(DynamoParticipant source, Participant participant)
     {
-        if (participant.ContactMethodId.Count == 0) { 
+        if (participant.ContactMethodId.Count == 0)
+        {
             participant.ContactMethodId.Add(new ParticipantContactMethod()
             {
                 ContactMethodId = (int)ContactMethodId.Email,
@@ -125,7 +120,6 @@ public class ParticipantMapper : IParticipantMapper
     public async Task<Participant> Map(Dictionary<string, AttributeValue> record, Participant destination,
         CancellationToken cancellationToken)
     {
-
         var doc = Document.FromAttributeMap(record);
 
         var source = _context.FromDocument<DynamoParticipant>(doc);
@@ -150,35 +144,61 @@ public class ParticipantMapper : IParticipantMapper
         destination.CreatedAt = source.CreatedAtUtc;
         destination.UpdatedAt = source.UpdatedAtUtc.HasValue ? source.UpdatedAtUtc.Value : source.CreatedAtUtc;
         destination.Stage2CompleteUtc = source.Stage2CompleteUtc;
+        destination.IsStage2CompleteUtcBackfilled = source.IsStage2CompleteUtcBackfilled ?? false;
 
         if (!destination.SourceReferences.Any(x => x.Pk == record.PK()))
         {
             destination.SourceReferences.Add(new SourceReference { Pk = record.PK() });
         }
 
-        if(source.Address != null) { 
-            ParticipantAddressMapper.Map(source.Address, destination);
+        if (source.Address is not null)
+        {
+            destination.Address ??= new ParticipantAddress();
 
-            if (destination.Address != null && !String.IsNullOrWhiteSpace(destination.Address.Postcode))
+            var postcodeChanged = destination.Address.Postcode != source.Address.Postcode;
+            if (Rbec.Postcodes.Postcode.TryParse(source.Address.Postcode, out var p))
             {
-                var coordinates =
-                    await _locationApiClient.GetCoordinatesFromPostcodeAsync(destination.Address.Postcode, cancellationToken);
+                var validPostcode = p.ToString();
 
-                if (coordinates != null)
+                if (postcodeChanged || destination.ParticipantLocation is null)
                 {
-                    destination.ParticipantLocation ??= new ParticipantLocation();
-                    destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
-                    { SRID = ParticipantLocationConfiguration.LocationSrid };
+                    var coordinates = await _locationApiClient.GetCoordinatesFromPostcodeAsync(validPostcode, cancellationToken);
+
+                    if (coordinates != null)
+                    {
+                        destination.ParticipantLocation ??= new ParticipantLocation();
+                        destination.ParticipantLocation.Location = new Point(coordinates.Longitude, coordinates.Latitude)
+                        { SRID = ParticipantLocationConfiguration.LocationSrid };
+                        destination.ParticipantLocation.IsApproximate = false;
+                    }
+                    else
+                    {
+                        destination.ParticipantLocation?.Anonymise();
+                    }
                 }
 
-                IEnumerable<PostcodeAddressModel> addressModels;
-                addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(destination.Address.Postcode, cancellationToken);
-
-                if (addressModels.Any())
+                if (postcodeChanged || string.IsNullOrWhiteSpace(destination.Address.CanonicalTown))
                 {
-                    destination.Address.CanonicalTown = addressModels.First().Town;
+                    var addressModels = await _locationApiClient.GetAddressesByPostcodeAsync(validPostcode, cancellationToken);
+
+                    if (addressModels.Any())
+                    {
+                        destination.Address.CanonicalTown = addressModels.First().Town;
+                    }
+                    else
+                    {
+                        destination.Address.CanonicalTown = null;
+                    }
                 }
+
             }
+            else
+            {
+                destination.ParticipantLocation?.Anonymise();
+                destination.Address.CanonicalTown = null;
+            }
+
+            ParticipantAddressMapper.Map(source.Address, destination);
         }
 
         MapHealthConditions(source, destination);

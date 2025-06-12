@@ -19,6 +19,7 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
+using System.ComponentModel.DataAnnotations;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -222,6 +223,14 @@ public class CampaignService(
     {
         foreach (var volunteer in volunteers)
         {
+            var validationResults = ValidateParticipantForCampaignType(volunteer, campaign.TypeId).ToArray();
+            if (validationResults.Any())
+            {
+                string reason = string.Join("; ", validationResults.Select(i => i.ErrorMessage));
+                logger.LogError("Participant ID:{ParticipantId} is not a valid notification target because {Reason}", volunteer.Id, reason);
+                continue;
+            }
+
             var campaignParticipant = queue.SelectMany(e => e.CampaignParticipant)
                 .FirstOrDefault(e => e.ParticipantId == volunteer.Id);
 
@@ -270,16 +279,10 @@ public class CampaignService(
                     break;
 
                 case ContactMethodId.Letter:
-                    if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1) ||
-                        string.IsNullOrWhiteSpace(volunteer.Address.Town) ||
-                        string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
-                    {
-                        throw new InvalidOperationException("Letter notifications require at least 3 address lines");
-                    }
 
                     notification.PrimaryIdentifier = $"ParticipantAddress({volunteer.Address.Id})";
 
-                    var addressFields = new Dictionary<string, string>
+                    var addressFields = new Dictionary<string, string?>
                     {
                         { "address_line_1", volunteer.Address.AddressLine1 },
                         { "address_line_2", volunteer.Address.AddressLine2 },
@@ -311,6 +314,38 @@ public class CampaignService(
         }
 
         await notificationContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private IEnumerable<ValidationResult> ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, ContactMethodId campaignTypeId)
+    {
+        if (string.IsNullOrWhiteSpace(volunteer.FirstName))
+            yield return new ValidationResult("FirstName cannot be null, empty or whitespace");
+        if (string.IsNullOrWhiteSpace(volunteer.LastName))
+            yield return new ValidationResult("LastName cannot be null, empty or whitespace");
+
+        switch (campaignTypeId)
+        {
+            case ContactMethodId.Email:
+                if (string.IsNullOrWhiteSpace(volunteer.Email))
+                    yield return new ValidationResult("Email cannot be null, empty or whitespace");
+                break;
+            case ContactMethodId.Letter:
+                if (volunteer.Address == null)
+                    yield return new ValidationResult("Address cannot be null");
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1))
+                        yield return new ValidationResult("AddressLine1 cannot be null, empty or whitespace");
+                    if (string.IsNullOrWhiteSpace(volunteer.Address.Town))
+                        yield return new ValidationResult("Town cannot be null, empty or whitespace");
+                    if (string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
+                        yield return new ValidationResult("Postcode cannot be nnull, empty or whitespaceull");
+                }
+                break;
+            default:
+                yield return new ValidationResult( "Invalid campaign type id");
+                break;
+        }
     }
 }
 

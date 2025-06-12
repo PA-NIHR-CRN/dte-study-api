@@ -43,6 +43,7 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
     public int? DailyLifeImpactId { get; set; }
     public int? CommunicationLanguageId { get; set; }
     public int? GenderId { get; set; }
+    public bool IsStage2CompleteUtcBackfilled { get; set; } = false;
 
     public DailyLifeImpact DailyLifeImpact { get; set; }
     public CommunicationLanguage CommunicationLanguage { get; set; }

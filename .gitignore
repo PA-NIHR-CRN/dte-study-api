@@ -414,3 +414,5 @@ volume/
 /Dynamo.Stream.Handler/src/Dynamo.Stream.Handler/DeployDatabase.sql
 
 .mono
+/BPOR/DynamoDBupdate/postcode-cache.txt
+/BPOR/BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/Properties/PublishProfiles
