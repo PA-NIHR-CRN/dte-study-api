@@ -19,6 +19,7 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
+using System.ComponentModel.DataAnnotations;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -222,10 +223,11 @@ public class CampaignService(
     {
         foreach (var volunteer in volunteers)
         {
-            var validity = ValidateParticipantForCampaignType(volunteer, campaign.TypeId);
-            if (!validity.isValid)
+            var validationResults = ValidateParticipantForCampaignType(volunteer, campaign.TypeId).ToArray();
+            if (validationResults.Any())
             {
-                logger.LogError("Participant ID:{ParticipantId} is not a valid notification target becuase {Reason}", volunteer.Id, validity.failureMessage);
+                string reason = string.Join("; ", validationResults.Select(i => i.ErrorMessage));
+                logger.LogError("Participant ID:{ParticipantId} is not a valid notification target because {Reason}", volunteer.Id, reason);
                 continue;
             }
 
@@ -314,35 +316,36 @@ public class CampaignService(
         await notificationContext.SaveChangesAsync(cancellationToken);
     }
 
-    private (bool isValid, string? failureMessage) ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, ContactMethodId campaignTypeId)
+    private IEnumerable<ValidationResult> ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, ContactMethodId campaignTypeId)
     {
         if (string.IsNullOrWhiteSpace(volunteer.FirstName))
-            return (false, "FirstName cannot be null, empty or whitespace");
+            yield return new ValidationResult("FirstName cannot be null, empty or whitespace");
         if (string.IsNullOrWhiteSpace(volunteer.LastName))
-            return (false, "LastName cannot be null, empty or whitespace");
+            yield return new ValidationResult("LastName cannot be null, empty or whitespace");
 
         switch (campaignTypeId)
         {
             case ContactMethodId.Email:
                 if (string.IsNullOrWhiteSpace(volunteer.Email))
-                    return (false, "Email cannot be null, empty or whitespace");
+                    yield return new ValidationResult("Email cannot be null, empty or whitespace");
                 break;
             case ContactMethodId.Letter:
                 if (volunteer.Address == null)
-                    return (false, "Address cannot be null");
-                if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1))
-                    return (false, "AddressLine1 cannot be null, empty or whitespace");
-                if (string.IsNullOrWhiteSpace(volunteer.Address.Town))
-                    return (false, "Town cannot be null, empty or whitespace");
-                if (string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
-                    return (false, "Postcode cannot be nnull, empty or whitespaceull");
+                    yield return new ValidationResult("Address cannot be null");
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1))
+                        yield return new ValidationResult("AddressLine1 cannot be null, empty or whitespace");
+                    if (string.IsNullOrWhiteSpace(volunteer.Address.Town))
+                        yield return new ValidationResult("Town cannot be null, empty or whitespace");
+                    if (string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
+                        yield return new ValidationResult("Postcode cannot be nnull, empty or whitespaceull");
+                }
                 break;
             default:
-                return (false, "Invalid campaign type id");
+                yield return new ValidationResult( "Invalid campaign type id");
+                break;
         }
-
-        return (true, null);
-
     }
 }
 
