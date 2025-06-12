@@ -31,14 +31,11 @@ public class StreamHandler(
             using (logger.BeginScope("{EventId}, {SequenceNumber}", record.EventID, currentRecordSequenceNumber))
             {
 
-                if (record.Dynamodb.NewImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var NewIsStage2CompleteUtcBackfilled)
-    && record.Dynamodb.OldImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var OldIsStage2CompleteUtcBackfilled))
+                if (record.EventName == OperationType.MODIFY && record.Dynamodb.NewImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var NewIsStage2CompleteUtcBackfilled)
+    && !record.Dynamodb.OldImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var OldIsStage2CompleteUtcBackfilled))
                 {
-                    if (record.EventName == OperationType.MODIFY && NewIsStage2CompleteUtcBackfilled.N == "1" && OldIsStage2CompleteUtcBackfilled.N == "0")
-                    {
-                        logger.LogInformation("Skipping IsStage2CompleteUtcBackfilled");
+                        logger.LogInformation("Skipping new IsStage2CompleteUtcBackfilled modification");
                         continue;
-                    }
                 }
 
                 try
