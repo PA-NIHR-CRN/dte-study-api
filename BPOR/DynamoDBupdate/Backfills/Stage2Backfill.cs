@@ -53,6 +53,7 @@ namespace DynamoDBupdate.Backfills
                     if (TryBackfill(p))
                     {
                         p.IsStage2CompleteUtcBackfilled = true;
+                        p.UpdatedAtUtc = DateTime.UtcNow;
                         batchWrite.AddPutItem(p);
                     }
                 }
