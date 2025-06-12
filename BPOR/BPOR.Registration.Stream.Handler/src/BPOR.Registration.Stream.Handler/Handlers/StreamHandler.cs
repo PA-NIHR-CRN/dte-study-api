@@ -32,10 +32,10 @@ public class StreamHandler(
             {
 
                 if (record.EventName == OperationType.MODIFY && record.Dynamodb.NewImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var NewIsStage2CompleteUtcBackfilled)
-    && !record.Dynamodb.OldImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var OldIsStage2CompleteUtcBackfilled))
+                    && !record.Dynamodb.OldImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var OldIsStage2CompleteUtcBackfilled))
                 {
-                        logger.LogInformation("Skipping new IsStage2CompleteUtcBackfilled modification");
-                        continue;
+                    logger.LogInformation("Skipping new IsStage2CompleteUtcBackfilled modification");
+                    continue;
                 }
 
                 try

@@ -22,6 +22,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddNihrConfiguration(builder.Services, builder.Environment);
 builder.Services.RegisterServices(builder.Configuration, builder.Environment);
 builder.Services.AddScoped<Stage2Backfill>();
+builder.Services.AddScoped<Stage2BackfillUpdate>();
 builder.Services.AddScoped<CanonicalTownBackfill>();
 
 builder.Services.AddOptions<OsSettings>().BindConfiguration("OsSettings");
@@ -46,21 +47,27 @@ var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 
 using var cts = new CancellationTokenSource();
 
-if (false)
-{
-    using (var scope = scopeFactory.CreateScope())
-    {
-        var canonicalTownBackfill = scope.ServiceProvider.GetRequiredService<CanonicalTownBackfill>();
 
-        await canonicalTownBackfill.RunAsync(cts.Token);
-    }
+using (var scope = scopeFactory.CreateScope())
+{
+    var canonicalTownBackfill = scope.ServiceProvider.GetRequiredService<CanonicalTownBackfill>();
+
+    await canonicalTownBackfill.RunAsync(cts.Token);
 }
+
 
 using (var scope = scopeFactory.CreateScope())
 {
     var stage2Backfill = scope.ServiceProvider.GetRequiredService<Stage2Backfill>();
 
     await stage2Backfill.RunAsync(cts.Token);
+}
+
+using (var scope = scopeFactory.CreateScope())
+{
+    var stage2BackfillUpdate = scope.ServiceProvider.GetRequiredService<Stage2BackfillUpdate>();
+
+    await stage2BackfillUpdate.RunAsync(cts.Token);
 }
 
 await app.RunAsync(cts.Token);
