@@ -38,8 +38,6 @@ public class MfaService(
     public async Task<Response<string>> SetUpMfaAsync(string mfaDetails, CancellationToken cancellationToken)
     {
 
-        return Response<string>.CreateSuccessfulContentResponse("MFA setup skipped");
-
         // set up mfa device on cognito.  This may be a phone or a software token
         var mfaLoginDetails = MfaLoginDetails.FromProtectedString(dataProtector, mfaDetails);
         var username = mfaLoginDetails.Username;
