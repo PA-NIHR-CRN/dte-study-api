@@ -45,6 +45,11 @@ public class AuthService(
             var response = await provider.AdminInitiateAuthAsync(request, cancellationToken);
             var protectedString = MfaLoginDetails.ToProtectedString(dataProtector, response, password);
 
+            if (response?.AuthenticationResult != null) // return success regardless of challenge?
+            {
+                return Response<string>.CreateSuccessfulContentResponse(response.AuthenticationResult.IdToken);
+            }
+
             if (response.ChallengeName == ChallengeNameType.MFA_SETUP)
             {
                 return Response<string>.CreateErrorMessageResponse(ProjectAssemblyNames.ApiAssemblyName,
