@@ -165,7 +165,7 @@ public static class ParticipantQueryExtensions
                     i.ParticipantLocation.Northing > osgbRef.Northing - searchRadiusMetres)
                 &&
                     Math.Sqrt(Math.Pow(i.ParticipantLocation.Easting - osgbRef.Easting, 2)
-                    + Math.Pow(i.ParticipantLocation.Easting - osgbRef.Easting, 2)) < searchRadiusMetres
+                    + Math.Pow(i.ParticipantLocation.Northing - osgbRef.Northing, 2)) < searchRadiusMetres
                 )
             );
         }
