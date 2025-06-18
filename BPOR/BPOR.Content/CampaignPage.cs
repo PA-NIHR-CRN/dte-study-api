@@ -8,6 +8,10 @@ namespace BPOR.Content
 
         public string Description { get; set; }
         public string Keywords { get; set; }
+        public Asset MetaImage { get; set; }
+        public string MetaImageAlt { get; set; }
+
+
 
         public Card Hero { get; set; }
 
