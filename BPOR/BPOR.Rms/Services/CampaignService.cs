@@ -20,6 +20,8 @@ using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Extensions;
+using NIHR.Geometry;
 
 public class CampaignService(
     ILogger<CampaignService> logger,

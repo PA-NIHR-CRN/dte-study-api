@@ -10,6 +10,7 @@ using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics;
 
 namespace BPOR.Rms.Controllers;
 
@@ -17,7 +18,8 @@ public class FilterController(ParticipantDbContext context,
                               IPaginationService paginationService,
                               IHostEnvironment hostEnvironment,
                               TimeProvider timeProvider,
-                              ICurrentUserProvider<User> currentUserProvider) : Controller
+                              ICurrentUserProvider<User> currentUserProvider,
+                              ILogger<FilterController> logger) : Controller
 {
     private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
@@ -64,18 +66,22 @@ public class FilterController(ParticipantDbContext context,
             }
         }
 
+        var sw = new Stopwatch();
+        sw.Start();
         if (activity == "FilterVolunteers")
         {
             results = await FilterVolunteersAsync(model, cancellationToken);
+
         }
         else if (activity == "ClearFilters")
         {
             model = ClearFilters(model);
         }
 
-        model.VolunteerCount = results.Count?.Value;
-        model.Testing.VolunteerResults = results.Items?.Value ?? Page<VolunteerResult>.Empty();
-
+        model.VolunteerCount = results.Count?.HasValue == true ? await results.Count.ValueAsync() : default;
+        model.Testing.VolunteerResults = results.Items != null ? await results.Items.ValueAsync() : Page<VolunteerResult>.Empty();
+        sw.Stop();
+        var i = sw.ElapsedMilliseconds;
         if (hostEnvironment.IsProduction())
         {
             foreach (var x in model.Testing.VolunteerResults)
@@ -220,6 +226,7 @@ public class FilterController(ParticipantDbContext context,
 
     protected async Task<FilterResults> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken token = default)
     {
+
         FilterResults results = new();
 
         if (ModelState.IsValid)

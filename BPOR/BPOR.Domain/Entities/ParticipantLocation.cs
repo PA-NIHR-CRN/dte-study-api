@@ -6,7 +6,14 @@ namespace BPOR.Domain.Entities;
 
 public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformation
 {
-    public int Id { get; set; }
+    /// <summary>
+    /// OSGB 6 digit Easting
+    /// </summary>
+    public int Easting { get; set; }
+    /// <summary>
+    /// OSGB 6 digit Northing
+    /// </summary>
+    public int Northing { get; set; }
     public Point Location { get; set; } = Point.Empty;
     public bool IsApproximate { get; set; } = false;
     public bool IsDeleted { get; set; }
