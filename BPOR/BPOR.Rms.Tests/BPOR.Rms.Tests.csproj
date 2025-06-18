@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -24,6 +24,13 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BPOR.Rms\BPOR.Rms.csproj" />
+      <ProjectReference Include="..\NIHR.Geometry\NIHR.Geometry.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.user.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
