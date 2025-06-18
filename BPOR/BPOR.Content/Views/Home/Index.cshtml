@@ -8,12 +8,24 @@
     @{
         if (!string.IsNullOrEmpty(Model?.Description))
         {
-            <meta name="description" content="@Model.Description" />
+        <meta name="description" content="@Model.Description" />
         }
 
         if (!string.IsNullOrEmpty(Model?.Keywords))
         {
-            <meta name="keywords" content="@Model.Keywords" />
+        <meta name="keywords" content="@Model.Keywords" />
+        }
+
+        if (Model?.MetaImage != null)
+        {
+        <meta property="og:image" content="https:@Model.MetaImage.File.Url" />
+        <meta name="twitter:image" content="https:@Model.MetaImage.File.Url" />
+        }
+
+        if (!string.IsNullOrEmpty(Model?.MetaImageAlt))
+        {
+        <meta property="og:image:alt" content="@Model.MetaImageAlt" />
+        <meta name="twitter:image:alt" content="@Model.MetaImageAlt" />
         }
     }
 }
@@ -53,25 +65,25 @@
 
         @if (!string.IsNullOrEmpty(Model.VideoSection.Transcript))
         {
-            <div class="row">
-                <div class="col">
-                    <p class="js-only text-right">
-                        <a class="" data-toggle="collapse" href="#video-transcript" role="button" aria-expanded="false" aria-controls="video-transcript" aria-label="@Model.VideoSection.Link.AriaLabel">
-                            @Model.VideoSection.Link.Label
-                        </a>
-                    </p>
-                </div>
+        <div class="row">
+            <div class="col">
+                <p class="js-only text-right">
+                    <a class="" data-toggle="collapse" href="#video-transcript" role="button" aria-expanded="false" aria-controls="video-transcript" aria-label="@Model.VideoSection.Link.AriaLabel">
+                        @Model.VideoSection.Link.Label
+                    </a>
+                </p>
             </div>
-            <div class="row align-items-stretch collapse-with-js collapse my-3 mb-xl-5" id="video-transcript">
-                <div class="col">
-                    <section class="info-card">
-                        @{
+        </div>
+        <div class="row align-items-stretch collapse-with-js collapse my-3 mb-xl-5" id="video-transcript">
+            <div class="col">
+                <section class="info-card">
+                    @{
                             Model.VideoSection.Transcript = Model.VideoSection.Transcript.Replace("# ", "## ");
-                        }
-                        <markdown markdown="VideoSection.Transcript" />
-                    </section>
-                </div>
+                    }
+                    <markdown markdown="VideoSection.Transcript" />
+                </section>
             </div>
+        </div>
         }
 
 
@@ -109,13 +121,13 @@
                 <ol>
                     @foreach (var item in Model.OrderListSection.Items)
                     {
-                        <li>
-                            <div class="line"></div>
-                            <div>
-                                <h3>@item.Heading</h3>
-                                <markdown>@item.Body</markdown>
-                            </div>
-                        </li>
+                    <li>
+                        <div class="line"></div>
+                        <div>
+                            <h3>@item.Heading</h3>
+                            <markdown>@item.Body</markdown>
+                        </div>
+                    </li>
                     }
                 </ol>
             </section>
@@ -149,23 +161,23 @@
                             <ul class="splide__list">
                                 @foreach (var slide in Model.CarouselSection.Cards)
                                 {
-                                    <li class="splide__slide">
-                                        <div class="card @slide.Title.Replace(" ", "-").ToLowerInvariant()">
-                                            <div class="row no-gutters">
-                                                <div class="col-lg-4">
-                                                    <img src="@slide.Image.File.Url" class="card-img" alt="" role="presentation" />
+                                <li class="splide__slide">
+                                    <div class="card @slide.Title.Replace(" ", "-").ToLowerInvariant()">
+                                        <div class="row no-gutters">
+                                            <div class="col-lg-4">
+                                                <img src="@slide.Image.File.Url" class="card-img" alt="" role="presentation" />
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <div class="card-body">
+                                                    <h3>@slide.Title</h3>
+                                                    <markdown>@slide.Body</markdown>
+                                                    <a href="@slide.Link.Url" target="_blank" aria-label="@slide.Link.AriaLabel">@slide.Link.Label</a>
                                                 </div>
-                                                <div class="col-lg-8">
-                                                    <div class="card-body">
-                                                        <h3>@slide.Title</h3>
-                                                        <markdown>@slide.Body</markdown>
-                                                        <a href="@slide.Link.Url" target="_blank" aria-label="@slide.Link.AriaLabel">@slide.Link.Label</a>
-                                                    </div>
 
-                                                </div>
                                             </div>
                                         </div>
-                                    </li>
+                                    </div>
+                                </li>
                                 }
                             </ul>
                         </div>
@@ -205,11 +217,11 @@
                         var firstOrLast = card == Model.CardSection.Cards.First() || card == Model.CardSection.Cards.Last();
                         var classes = firstOrLast ? "col-lg p-3 " : "col-lg mx-0 mx-lg-4 my-4 my-lg-0 p-3";
 
-                        <div class="@classes info-card">
-                            <img src="@card.Image.File.Url" alt="" role="presentation" />
-                            <h3>@card.Title</h3>
-                            <markdown>@card.Body</markdown>
-                        </div>
+                    <div class="@classes info-card">
+                        <img src="@card.Image.File.Url" alt="" role="presentation" />
+                        <h3>@card.Title</h3>
+                        <markdown>@card.Body</markdown>
+                    </div>
                     }
                 </div>
             </section>
