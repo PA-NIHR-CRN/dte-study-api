@@ -20,6 +20,7 @@ using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Extensions;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -76,6 +77,9 @@ public class CampaignService(
     private async Task<List<CampaignParticipantDetails>> GetFilteredVolunteersAsync(FilterCriteria dbFilter,
         int? targetGroupSize, CancellationToken cancellationToken)
     {
+        const double minPageSizeForRetry = 0.05;
+        const double timeoutPageSizeFactor = 0.5;
+
         var filter = FilterMapper.MapToFilterModel(dbFilter);
 
         // TODO: save the original search location co-ordinates in the FilterCriteria
@@ -85,15 +89,51 @@ public class CampaignService(
             filter.PostcodeSearch.PostcodeRadiusSearch.Location = new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
         }
 
-        var volunteerQuery = context.Participants.FilterVolunteers(timeProvider, filter);
+        var result = new List<CampaignParticipantDetails>();
 
-        return await volunteerQuery
-            .Where(v => !string.IsNullOrEmpty(v.Email))
-            .Randomise()
-            .Take(targetGroupSize ?? int.MaxValue)
-            .AsCampaignParticipant()
-            .ToListAsync(cancellationToken);
+        int seed = Random.Shared.Next();
+
+        double pageMin = 0.0;
+        double pageSize = 0.5;
+
+        while (pageMin < 1.0 && (!targetGroupSize.HasValue || targetGroupSize.Value > result.Count))
+        {
+
+            double pageMax = pageMin + pageSize;
+            var volunteerQuery = context
+                .GetRandomSampleOfParticipants(seed, pageMin, pageMax)
+                .FilterVolunteers(timeProvider, filter)
+                .Where(v => !string.IsNullOrEmpty(v.Email)); // TODO: This is suspect? Why are we always excluding participants with no email address?
+
+            if (targetGroupSize.HasValue)
+            {
+                volunteerQuery = volunteerQuery.Take(targetGroupSize.Value - result.Count);
+            }
+
+            try
+            {
+                result.AddRange(await volunteerQuery.AsCampaignParticipant().ToArrayAsync(cancellationToken));
+                pageMin = pageMax;
+            }
+            catch (TimeoutException)
+            {
+                if (pageSize < minPageSizeForRetry)
+                {
+                    logger.LogError("Volunteer Filter query timed out for filter {filterId} and page size {pageSize}.", dbFilter.Id, pageSize);
+                    throw;
+                }
+                else
+                {
+                    logger.LogWarning("Volunteer Filter query timed out for filter {filterId} and page size {pageSize} - this operation will be retried with a smaller window", dbFilter.Id, pageSize);
+                    pageSize *= timeoutPageSizeFactor;
+                }
+            }
+
+        }
+
+        return result;
     }
+
 
     private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)

@@ -10,6 +10,8 @@ using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using BPOR.Registration.Stream.Handler;
+using System.Diagnostics;
 
 namespace BPOR.Rms.Controllers;
 
@@ -38,7 +40,6 @@ public class FilterController(ParticipantDbContext context,
         {
             return View("Unauthorised");
         }
-        FilterResults results = new();
 
         if (!(User.IsInRole("Tester") && User.IsInRole("Admin")))
         {
@@ -64,6 +65,7 @@ public class FilterController(ParticipantDbContext context,
             }
         }
 
+        FilterResults results = new();
         if (activity == "FilterVolunteers")
         {
             results = await FilterVolunteersAsync(model, cancellationToken);
@@ -73,8 +75,8 @@ public class FilterController(ParticipantDbContext context,
             model = ClearFilters(model);
         }
 
-        model.VolunteerCount = results.Count?.Value;
-        model.Testing.VolunteerResults = results.Items?.Value ?? Page<VolunteerResult>.Empty();
+        model.VolunteerCount = results.Count;
+        model.Testing.VolunteerResults = results.Items == null ? Page<VolunteerResult>.Empty() : await results.Items.ValueAsync(cancellationToken);
 
         if (hostEnvironment.IsProduction())
         {
@@ -220,18 +222,27 @@ public class FilterController(ParticipantDbContext context,
 
     protected async Task<FilterResults> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken token = default)
     {
+        const int batchSize = 100_000;
+
         FilterResults results = new();
 
         if (ModelState.IsValid)
         {
-            var query = context.Participants.FilterVolunteers(timeProvider, model);
+            var maxParticipantId = await context.Participants.Select(i => i.Id).MaxAsync();
 
-            results.Count = query.DeferredCount().FutureValue();
+            int filteredParticipantCount = 0;
+
+            for(int startId = 0; startId <= maxParticipantId; startId += batchSize)
+            {
+                filteredParticipantCount += await context.Participants.AsNoTracking().Where(p => p.Id >= startId && p.Id < startId + batchSize).FilterVolunteers(timeProvider, model).CountAsync();
+            }
+
+            results.Count = filteredParticipantCount;
 
             if (model.Testing.ShowResults)
             {
                 var location = model.PostcodeSearch.PostcodeRadiusSearch.Location;
-                results.Items = query.Select(x => new VolunteerResult
+                results.Items = context.Participants.FilterVolunteers(timeProvider, model).Select(x => new VolunteerResult
                 {
                     Id = x.Id,
                     Email = x.Email,
@@ -262,5 +273,5 @@ public class FilterController(ParticipantDbContext context,
 public class FilterResults
 {
     public PageDeferred<VolunteerResult>? Items { get; internal set; }
-    public QueryFutureValue<int>? Count { get; internal set; }
+    public int Count { get; internal set; }
 }
