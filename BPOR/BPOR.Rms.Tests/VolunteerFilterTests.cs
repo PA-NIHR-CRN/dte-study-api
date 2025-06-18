@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BPOR.Domain.Entities;
+﻿using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
+using BPOR.Rms.Tests.Utilities;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using NetTopologySuite.Geometries;
@@ -28,35 +25,54 @@ namespace BPOR.Rms.Tests
         [Fact]
         public async Task PostcodeRadiusSearchIncludesCorrectParticipants()
         {
+            // Arrange
             ParticipantDatabaseFixture fixture = new ParticipantDatabaseFixture(_configuration);
             using var db = fixture.CreateContext();
 
-            Participant CreateParticipant(string name, double latitude, double longitude, int easting, int northing)
+            static Participant CreateParticipant(string name, double latitude, double longitude, int easting, int northing)
                 => new Participant
                 {
                     FirstName = name,
                     ParticipantLocation = new ParticipantLocation
                     {
-                        Location = new Point(longitude, latitude),
+                        Location = new Point(longitude, latitude) { SRID = 4326 },
                         Easting = easting,
                         Northing = northing
                     }
                 };
 
-            var KGL = CreateParticipant("KGL", 51.706373, -0.43814265, 508019, 202003);
-            var VIC = CreateParticipant("VIC", 51.498148, -0.14262605, 529026, 179325);
-            var KGX = CreateParticipant("KGX", 51.532722, -0.12327559, 530270, 183204);
-            var BCU = CreateParticipant("BCU", 50.816670, -1.5737827, 430122, 101989);
-            var BTN = CreateParticipant("BTN", 50.830229, -0.14145174, 530984, 105056);
+            // Define participants for UK stations (easy to obtain data set!)
+            var KGL = CreateParticipant("KGL", 51.706373, -0.43814265, 508019, 202003); // King's Langley
+            var VIC = CreateParticipant("VIC", 51.498148, -0.14262605, 529026, 179325); // London Victoria
+            var KGX = CreateParticipant("KGX", 51.532722, -0.12327559, 530270, 183204); // London King's Cross
+            var BCU = CreateParticipant("BCU", 50.816670, -1.5737827, 430122, 101989); // Brockenhurst
+            var BTN = CreateParticipant("BTN", 50.830229, -0.14145174, 530984, 105056); // Brighton - 46.5 miles South of VIC
+            var SWI = CreateParticipant("SWI", 51.565723, -1.7856254, 414956, 185227); // Swindon - 70.5 miles West of VIC
 
-            db.Participants.AddRange(KGL, VIC, KGX, BCU, BTN);
+            db.Participants.AddRange(KGL, VIC, KGX, BCU, BTN, SWI);
             await db.SaveChangesAsync();
 
-            var within10OfVIC = await ParticipantQueryExtensions
-                .WhereWithinRadiusOfLocation(db.Participants, new PostcodeRadiusSearchModel {Location = VIC.ParticipantLocation.Location, SearchRadiusMiles = 20 }).ToArrayAsync();
-            Assert.Equal(2, within10OfVIC.Length);
-            Assert.Contains(VIC, within10OfVIC);
-            Assert.Contains(KGX, within10OfVIC);
+            async Task PerformTest(Participant searchOrigin, int searchRadiusMiles, params Participant[] expectedResult)
+            {
+                // Act
+                var queryResult = await ParticipantQueryExtensions
+                    .WhereWithinRadiusOfLocation(db.Participants, new PostcodeRadiusSearchModel { Location = searchOrigin.ParticipantLocation.Location, SearchRadiusMiles = searchRadiusMiles }).ToArrayAsync();
+
+                // Assert
+                queryResult.Should().OnlyContain(expectedResult);
+            }
+
+            await PerformTest(VIC, 10, KGX, VIC);
+            await PerformTest(VIC, 18, KGX, VIC);
+            await PerformTest(VIC, 20, VIC, KGX, KGL);
+            await PerformTest(BTN, 46, BTN);
+            await PerformTest(BTN, 47, VIC, BTN);
+            await PerformTest(BTN, 50, VIC, BTN, KGX);
+            await PerformTest(BCU, 52, BCU);
+            await PerformTest(BCU, 53, BCU, SWI);
+            await PerformTest(VIC, 70, KGL, VIC, KGX, BTN);
+            await PerformTest(VIC, 71, KGL, VIC, KGX, BTN, SWI);
+
         }
     }
 }

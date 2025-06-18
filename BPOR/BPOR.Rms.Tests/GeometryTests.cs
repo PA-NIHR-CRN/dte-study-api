@@ -1,6 +1,6 @@
 using NIHR.Geometry;
 
-namespace BPOR.Rms.Tests.Utilities;
+namespace BPOR.Rms.Tests;
 
 public class GeometryTests
 {
