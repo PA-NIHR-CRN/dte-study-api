@@ -18,5 +18,6 @@ public static class VolunteerFilterExtensions
         .WhereHasSexRegisteredAtBirth(model.GetGenderOptions()) // TODO: sex rather than gender
         .WhereHasGenderSameAsSexRegisteredAtBirth(model.GetGenderSameAsSexRegisteredAtBirthOptions())
         .WhereHasEthnicity(model.GetEthnicityOptions())
-        .WhereHasLocation(model.PostcodeSearch);
+        .WhereHasLocation(model.PostcodeSearch)
+        .Where(i => i.IsDeleted == false);
 }
