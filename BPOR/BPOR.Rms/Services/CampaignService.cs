@@ -29,8 +29,7 @@ public class CampaignService(
     IEncryptionService encryptionService,
     IReferenceGenerator referenceGenerator,
     NotificationDbContext notificationContext,
-    IPostcodeMapper locationApiClient,
-    TimeProvider timeProvider
+    IVolunteerFilterService volunteerFilterService
     )
     : ICampaignService
 {
@@ -49,7 +48,7 @@ public class CampaignService(
             return;
         }
 
-        var volunteers = await GetFilteredVolunteersAsync(dbFilter, campaign.TargetGroupSize, cancellationToken);
+        var volunteers = await volunteerFilterService.GetFilteredVolunteersAsync(dbFilter, campaign.TargetGroupSize, cancellationToken);
         if (!volunteers.Any())
         {
             logger.LogWarning("No volunteers found for campaign {CampaignId}", campaign.Id);
@@ -72,66 +71,6 @@ public class CampaignService(
             .AsNoTracking()
             .IncludeAllFilterProperties()
             .FirstOrDefaultAsync(fc => fc.Id == campaign.FilterCriteriaId, cancellationToken);
-    }
-
-    private async Task<List<CampaignParticipantDetails>> GetFilteredVolunteersAsync(FilterCriteria dbFilter,
-        int? targetGroupSize, CancellationToken cancellationToken)
-    {
-        const double minPageSizeForRetry = 0.05;
-        const double timeoutPageSizeFactor = 0.5;
-
-        var filter = FilterMapper.MapToFilterModel(dbFilter);
-
-        // TODO: save the original search location co-ordinates in the FilterCriteria
-        if (dbFilter.FullPostcode is not null && dbFilter.SearchRadiusMiles is not null && dbFilter.SearchRadiusMiles > 0)
-        {
-            var location = await locationApiClient.GetCoordinatesFromPostcodeAsync(dbFilter.FullPostcode, cancellationToken);
-            filter.PostcodeSearch.PostcodeRadiusSearch.Location = new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
-        }
-
-        var result = new List<CampaignParticipantDetails>();
-
-        int seed = Random.Shared.Next();
-
-        double pageMin = 0.0;
-        double pageSize = 0.5;
-
-        while (pageMin < 1.0 && (!targetGroupSize.HasValue || targetGroupSize.Value > result.Count))
-        {
-
-            double pageMax = pageMin + pageSize;
-            var volunteerQuery = context
-                .GetRandomSampleOfParticipants(seed, pageMin, pageMax)
-                .FilterVolunteers(timeProvider, filter)
-                .Where(v => !string.IsNullOrEmpty(v.Email)); // TODO: This is suspect? Why are we always excluding participants with no email address?
-
-            if (targetGroupSize.HasValue)
-            {
-                volunteerQuery = volunteerQuery.Take(targetGroupSize.Value - result.Count);
-            }
-
-            try
-            {
-                result.AddRange(await volunteerQuery.AsCampaignParticipant().ToArrayAsync(cancellationToken));
-                pageMin = pageMax;
-            }
-            catch (TimeoutException)
-            {
-                if (pageSize < minPageSizeForRetry)
-                {
-                    logger.LogError("Volunteer Filter query timed out for filter {filterId} and page size {pageSize}.", dbFilter.Id, pageSize);
-                    throw;
-                }
-                else
-                {
-                    logger.LogWarning("Volunteer Filter query timed out for filter {filterId} and page size {pageSize} - this operation will be retried with a smaller window", dbFilter.Id, pageSize);
-                    pageSize *= timeoutPageSizeFactor;
-                }
-            }
-
-        }
-
-        return result;
     }
 
 
