@@ -9,9 +9,7 @@ using BPOR.Rms.Startup;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using BPOR.Registration.Stream.Handler;
-using System.Diagnostics;
+using BPOR.Rms.Services;
 
 namespace BPOR.Rms.Controllers;
 
@@ -19,7 +17,8 @@ public class FilterController(ParticipantDbContext context,
                               IPaginationService paginationService,
                               IHostEnvironment hostEnvironment,
                               TimeProvider timeProvider,
-                              ICurrentUserProvider<User> currentUserProvider) : Controller
+                              ICurrentUserProvider<User> currentUserProvider,
+                              IVolunteerFilterService volunteerFilterService) : Controller
 {
     private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
@@ -65,18 +64,24 @@ public class FilterController(ParticipantDbContext context,
             }
         }
 
-        FilterResults results = new();
+        model.VolunteerCount = 0;
+        model.Testing.VolunteerResults = Page<VolunteerResult>.Empty();
+
         if (activity == "FilterVolunteers")
         {
-            results = await FilterVolunteersAsync(model, cancellationToken);
+            if (ModelState.IsValid)
+            {
+                model.VolunteerCount = await volunteerFilterService.GetFilteredVolunteerCountAsync(model, cancellationToken);
+                if (model.Testing.ShowResults)
+                {
+                    model.Testing.VolunteerResults = await volunteerFilterService.GetFilteredVolunteersForTestingAsync(model, paginationService, cancellationToken);
+                }
+            }
         }
         else if (activity == "ClearFilters")
         {
             model = ClearFilters(model);
         }
-
-        model.VolunteerCount = results.Count;
-        model.Testing.VolunteerResults = results.Items == null ? Page<VolunteerResult>.Empty() : await results.Items.ValueAsync(cancellationToken);
 
         if (hostEnvironment.IsProduction())
         {
@@ -220,54 +225,7 @@ public class FilterController(ParticipantDbContext context,
         Map([model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No, model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay],
             x => new FilterSexSameAsRegisteredAtBirth { YesNoPreferNotToSay = x });
 
-    protected async Task<FilterResults> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken token = default)
-    {
-        const int batchSize = 100_000;
-
-        FilterResults results = new();
-
-        if (ModelState.IsValid)
-        {
-            var maxParticipantId = await context.Participants.Select(i => i.Id).MaxAsync();
-
-            int filteredParticipantCount = 0;
-
-            for(int startId = 0; startId <= maxParticipantId; startId += batchSize)
-            {
-                filteredParticipantCount += await context.Participants.AsNoTracking().Where(p => p.Id >= startId && p.Id < startId + batchSize).FilterVolunteers(timeProvider, model).CountAsync();
-            }
-
-            results.Count = filteredParticipantCount;
-
-            if (model.Testing.ShowResults)
-            {
-                var location = model.PostcodeSearch.PostcodeRadiusSearch.Location;
-                results.Items = context.Participants.FilterVolunteers(timeProvider, model).Select(x => new VolunteerResult
-                {
-                    Id = x.Id,
-                    Email = x.Email,
-                    Postcode = x.Address == null ? null : x.Address.Postcode,
-                    AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
-                    DateOfBirth = x.DateOfBirth,
-                    Age = x.DateOfBirth.YearsTo(_today),
-                    Gender = x.Gender.Code,
-                    Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
-                    DistanceInMiles = location != null && x.ParticipantLocation != null ? x.ParticipantLocation.Location.Distance(location) / 1609.344 : null,
-                    FirstName = x.FirstName,
-                    LastName = x.LastName,
-                    HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
-                    HasRegistered = x.RegistrationConsentAtUtc,
-                    EthnicGroup = x.EthnicGroup,
-                    GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
-                    ContactMethod = x.ContactMethodId.FirstOrDefault().ContactMethodId
-                })
-                .OrderBy(x => x.Id)
-                .DeferredPage(paginationService);
-            }
-        }
-
-        return results;
-    }
+    
 }
 
 public class FilterResults
