@@ -12,12 +12,11 @@ public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformati
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public int ParticipantId { get; set; } 
+    public int ParticipantId { get; set; }
     public Participant Participant { get; set; }
     public void Anonymise()
     {
-        Location = Point.Empty;
-        Location.SRID = ParticipantLocationConfiguration.LocationSrid;
+        Location = new Point(0, 0) { SRID = ParticipantLocationConfiguration.LocationSrid };
         IsApproximate = true;
     }
 }
