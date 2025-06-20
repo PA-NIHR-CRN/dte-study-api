@@ -92,7 +92,7 @@ namespace ImportGeocodeData
                     address.Participant.ParticipantLocation = new ParticipantLocation();
                 }
 
-                address.Participant.ParticipantLocation.Location = new NetTopologySuite.Geometries.Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
+                address.Participant.ParticipantLocation.SetLocation(location);
                 return true;
             }
             else
