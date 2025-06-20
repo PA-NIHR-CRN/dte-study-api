@@ -57,13 +57,9 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
         {
             if (cache.TryGetValue(participant.Address.Postcode, out var latLng))
             {
-                participant.ParticipantLocation = new ParticipantLocation
-                {
-                    Location = new Point(latLng.Longitude, latLng.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid }
-                };
+                participant.ParticipantLocation = ParticipantLocation.FromLatLong(latLng.Latitude, latLng.Longitude);
             }
         }
-
 
         await context.SaveChangesAsync(cancellationToken);
 
@@ -131,10 +127,7 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
             foreach (var participant in participantsBatch)
             {
                 var randomCoordinates = GenerateRandomCoordinatesForUK();
-                participant.ParticipantLocation = new ParticipantLocation
-                {
-                    Location = new Point(randomCoordinates.longitude, randomCoordinates.latitude) { SRID = ParticipantLocationConfiguration.LocationSrid }
-                };
+                participant.ParticipantLocation = ParticipantLocation.FromLatLong(randomCoordinates.latitude, randomCoordinates.longitude);
             }
 
             await context.SaveChangesAsync(cancellationToken);

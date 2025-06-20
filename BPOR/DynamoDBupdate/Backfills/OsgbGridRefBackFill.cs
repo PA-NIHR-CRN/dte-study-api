@@ -1,0 +1,24 @@
+﻿using BPOR.Domain.Entities;
+using Microsoft.Extensions.Logging;
+using NIHR.Geometry;
+
+namespace DynamoDBupdate.Backfills
+{
+    public class OsgbGridRefBackFill(ParticipantDbContext participantDbContext, ILogger<OsgbGridRefBackFill> logger)
+    {
+        public async Task RunAsync(CancellationToken cancellationToken)
+        {
+            while (true)
+            {
+                foreach (var participantLocation in participantDbContext.ParticipantLocation.Where(i => i.Easting == 0).Take(1000))
+                {
+                    participantLocation.SetOsgbFromLocation();
+                }
+
+                if (await participantDbContext.SaveChangesAsync() == 0)
+                    break;
+                participantDbContext.ChangeTracker.Clear();
+            }
+        }
+    }
+}

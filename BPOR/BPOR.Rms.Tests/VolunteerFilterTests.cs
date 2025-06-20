@@ -33,12 +33,7 @@ namespace BPOR.Rms.Tests
                 => new Participant
                 {
                     FirstName = name,
-                    ParticipantLocation = new ParticipantLocation
-                    {
-                        Location = new Point(longitude, latitude) { SRID = 4326 },
-                        Easting = easting,
-                        Northing = northing
-                    }
+                    ParticipantLocation = ParticipantLocation.FromLatLong(latitude, longitude)
                 };
 
             // Define participants for UK stations (easy to obtain data set!)
