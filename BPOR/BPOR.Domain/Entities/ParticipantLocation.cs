@@ -71,7 +71,7 @@ public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformati
         {
             var osgbRef = Osgb6.FromLatLong(Location.Y, Location.X);
             Easting = osgbRef.Easting;
-            Northing = -osgbRef.Northing;
+            Northing = osgbRef.Northing;
         }
     }
 }

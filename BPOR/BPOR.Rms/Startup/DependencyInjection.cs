@@ -64,7 +64,6 @@ public static class DependencyInjection
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
 
-        services.AddHostedService<GeoSpatialBackfillService>();
 
         services.AddDistributedMemoryCache();
         services.AddPaging();
