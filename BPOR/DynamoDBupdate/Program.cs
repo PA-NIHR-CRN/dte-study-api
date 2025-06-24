@@ -21,9 +21,11 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Configuration.AddNihrConfiguration(builder.Services, builder.Environment);
 builder.Services.RegisterServices(builder.Configuration, builder.Environment);
+
 builder.Services.AddScoped<Stage2Backfill>();
 builder.Services.AddScoped<Stage2BackfillUpdate>();
 builder.Services.AddScoped<CanonicalTownBackfill>();
+builder.Services.AddScoped<OsgbGridRefBackFill>();
 
 builder.Services.AddOptions<OsSettings>().BindConfiguration("OsSettings");
 
@@ -55,7 +57,6 @@ using (var scope = scopeFactory.CreateScope())
     await canonicalTownBackfill.RunAsync(cts.Token);
 }
 
-
 using (var scope = scopeFactory.CreateScope())
 {
     var stage2Backfill = scope.ServiceProvider.GetRequiredService<Stage2Backfill>();
@@ -68,6 +69,13 @@ using (var scope = scopeFactory.CreateScope())
     var stage2BackfillUpdate = scope.ServiceProvider.GetRequiredService<Stage2BackfillUpdate>();
 
     await stage2BackfillUpdate.RunAsync(cts.Token);
+}
+
+using (var scope = scopeFactory.CreateScope())
+{
+    var osgbGridRefBackFill = scope.ServiceProvider.GetRequiredService<OsgbGridRefBackFill>();
+
+    await osgbGridRefBackFill.RunAsync(cts.Token);
 }
 
 await app.RunAsync(cts.Token);
