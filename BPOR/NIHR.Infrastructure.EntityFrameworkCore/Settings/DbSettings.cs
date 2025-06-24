@@ -12,6 +12,11 @@ namespace NIHR.Infrastructure.EntityFrameworkCore
         public string Database { get; set; } = null!;
         public string NotificationDatabase { get; set; } = null!;
 
+        /// <summary>
+        /// The default command timeout in seconds; if null then the connection string builer's default value is used.
+        /// </summary>
+        public uint? DefaultCommandTimeout { get; set; } = null;
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (string.IsNullOrWhiteSpace(Username))
