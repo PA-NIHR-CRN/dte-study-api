@@ -6,14 +6,14 @@ using System.Diagnostics;
 
 namespace DynamoDBupdate.Backfills
 {
-    public class Stage2Backfill
+    public class Stage2BackfillUpdate
     {
         private readonly ILogger<Stage2Backfill> _logger;
         private readonly IDynamoDBContext _dynamoContext;
         private readonly DynamoDBOperationConfig _dynamoDBOperationConfig;
         private readonly IOptions<OsSettings> _osSettings;
 
-        public Stage2Backfill(
+        public Stage2BackfillUpdate(
             ILogger<Stage2Backfill> logger,
             IDynamoDBContext dynamoDBContext,
             DynamoDBOperationConfig dynamoDBOperationConfig,
@@ -28,9 +28,9 @@ namespace DynamoDBupdate.Backfills
 
         public async Task RunAsync(CancellationToken cancellationToken)
         {
-            if (!_osSettings.Value.RunStage2CompleteBackfill)
+            if (!_osSettings.Value.RunStage2BackfillUpdate)
             {
-                _logger.LogInformation("Not running {job}", nameof(Stage2Backfill));
+                _logger.LogInformation("Not running {job}", nameof(Stage2BackfillUpdate));
                 return;
             }
 
@@ -41,32 +41,26 @@ namespace DynamoDBupdate.Backfills
             sw.Start();
             swTotal.Start();
             var total = 0;
+
+            var file = File.OpenWrite("UpdateSQL.sql");
+            using var swr = new StreamWriter(file);
             while (!scan.IsDone)
             {
-                var batchWrite = _dynamoContext.CreateBatchWrite<DynamoParticipant>(_dynamoDBOperationConfig);
                 var set = await scan.GetNextSetAsync(cancellationToken);
 
                 _logger.LogInformation("Loaded set of {itemCount} items in {ms}ms.", set.Count, sw.ElapsedMilliseconds);
                 sw.Restart();
                 foreach (var p in set)
                 {
-                    if (TryBackfill(p))
+                    if (p.IsStage2CompleteUtcBackfilled.GetValueOrDefault())
                     {
-                        p.IsStage2CompleteUtcBackfilled = true;
-                        p.UpdatedAtUtc = DateTime.UtcNow;
-                        batchWrite.AddPutItem(p);
+                        swr.WriteLine($"UPDATE Participants p LEFT JOIN SourceReference s ON p.id = s.participantid SET p.stage2completeutc='{p.Stage2CompleteUtc?.ToString("yyyy-MM-dd hh:mm:ss")}', p.IsStage2CompleteUtcBackfilled=true, p.updatedat='{DateTime.UtcNow.ToString("yyyy-MM-dd hh:mm:ss")}' WHERE s.Pk = '{p.Pk}';");
                     }
+                    total++;
                 }
-
-                _logger.LogInformation("Writing set of {itemCount} items in {ms}ms.", set.Count, sw.ElapsedMilliseconds);
-                sw.Restart();
-                await batchWrite.ExecuteAsync(cancellationToken);
-                _logger.LogInformation("Written set of {itemCount} items in {ms}ms.", set.Count, sw.ElapsedMilliseconds);
-                sw.Restart();
-
-                total += set.Count;
-                _logger.LogInformation("Total written {total} in {s}s", total, (int)swTotal.ElapsedMilliseconds / 1000);
             }
+
+            swr.Flush();
         }
 
         private bool TryBackfill(DynamoParticipant p)

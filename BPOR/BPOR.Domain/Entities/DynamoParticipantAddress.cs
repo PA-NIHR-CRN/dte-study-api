@@ -7,7 +7,6 @@ public class DynamoParticipantAddress
     public string AddressLine3 { get; set; }
     public string AddressLine4 { get; set; }
     public string Town { get; set; }
-    public string? CanonicalTown { get; set; }
     public string Postcode { get; set; }
 
     private static string GetOutcodeFromPostcode(string postcode)
@@ -24,7 +23,6 @@ public class DynamoParticipantAddress
         AddressLine3 = null;
         AddressLine4 = null;
         Town = Town;
-        CanonicalTown = CanonicalTown;
         Postcode = GetOutcodeFromPostcode(Postcode);
         return this;
     }

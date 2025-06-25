@@ -41,10 +41,19 @@ public static class DependencyInjection
 
         services.ConfigureAwsServices(configuration);
 
+        var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
+
+        if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
+        {
+            throw new ArgumentException("LocationService configuration is required.", nameof(clientsSettings));
+        }
+        var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()
+            .CreateLogger("BPOR.Registration.Api.Startup.DependencyInjection");
+
+        services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings.Value.LocationService, 2,
+            logger);
+
         services.AddScoped<IParticipantRepository, ParticipantDynamoDbRepository>();
-        services.AddScoped<Backfill>();
-        services.AddScoped<Stage2Backfill>();
-        services.AddScoped<CanonicalTownBackfill>();
 
         return services;
     }
@@ -69,5 +78,7 @@ public static class DependencyInjection
         });
 
         services.AddDefaultAWSOptions(configuration.GetAWSOptions());
+
+
     }
 }

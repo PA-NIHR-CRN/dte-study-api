@@ -1,10 +1,9 @@
-﻿using Amazon.DynamoDBv2.DataModel;
-using BPOR.Domain.Entities;
-using BPOR.Domain.Interfaces;
-using BPOR.Domain.Utils;
+﻿using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using NIHR.Infrastructure;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace DynamoDBupdate.Backfills
 {
@@ -12,170 +11,135 @@ namespace DynamoDBupdate.Backfills
     {
         private readonly ParticipantDbContext _participantDbContext;
         private readonly ILogger<CanonicalTownBackfill> _logger;
-        private readonly DynamoDBOperationConfig _config;
-        private readonly IDynamoDBContext _dynamoContext;
-        private readonly IPostcodeMapper _postcodeMapper;
-        private readonly IParticipantRepository _participantRepository;
+        private readonly HttpClient _httpClient;
+        private readonly IOptions<OsSettings> _osSettings;
+        private Dictionary<string, string> _postcodeCache = new();
 
         public CanonicalTownBackfill(
             ParticipantDbContext participantDbContext,
             ILogger<CanonicalTownBackfill> logger,
-            IDynamoDBContext dynamoDBContext,
-            DynamoDBOperationConfig config,
-            IPostcodeMapper postcodeMapper,
-            IParticipantRepository participantRepository)
+            HttpClient httpClient,
+            IOptions<OsSettings> osSettings
+            )
         {
             _participantDbContext = participantDbContext;
             _logger = logger;
-            _dynamoContext = dynamoDBContext;
-            _config = config;
-            _postcodeMapper = postcodeMapper;
-            _participantRepository = participantRepository;
+            _httpClient = httpClient;
+            _osSettings = osSettings;
+            InitialisePostcodeCache(osSettings);
+        }
+
+        private void InitialisePostcodeCache(IOptions<OsSettings> osSettings)
+        {
+            var f = File.ReadAllLines(osSettings.Value.CachePath);
+
+            foreach (var line in f)
+            {
+                var columns = line.Split('\t');
+                _postcodeCache.TryAdd(columns[0], columns[1]);
+            }
         }
 
         public async Task RunAsync(CancellationToken cancellationToken)
         {
-            var participantsToBeUpdated = await _participantDbContext.Participants
-                .Where(x => x.Address.CanonicalTown == null && x.Address.Postcode != null && !x.IsDeleted &&
-                x.Id == 4 // get ParticipantId 4. to be removed.
-                )
-                .Include(x => x.SourceReferences)
-                .Select(x => new
-                {
-                    Id = x.Id,
-                    ParticipantIdentifiers = x.SourceReferences.Select(y => y.Pk),
-                    Postcode = x.Address.Postcode
-                })
+            if (!_osSettings.Value.RunCanonicalTownBackfill)
+            {
+                _logger.LogInformation("Not running {job}", nameof(CanonicalTownBackfill));
+                return;
+            }
+
+            var participantsToBeUpdated = await _participantDbContext.ParticipantAddress
+                .Where(x => x.CanonicalTown == null && x.Postcode != null && !x.IsDeleted)
                 .ToListAsync(cancellationToken);
 
             int totalRecords = participantsToBeUpdated.Count;
-            int currentRecordNum = 1;
+            int currentRecordNum = 0;
             int recordsInError = 0;
             _logger.LogInformation("Total number of accounts to be updated with canonical town: {Count}", totalRecords);
 
-            foreach (var toBeUpdated in participantsToBeUpdated)
+            var sw = new Stopwatch();
+            sw.Start();
+            await Parallel.ForEachAsync(participantsToBeUpdated, cancellationToken, async (toBeUpdated, ct) =>
             {
-                if (toBeUpdated.ParticipantIdentifiers == null || !toBeUpdated.ParticipantIdentifiers.Any())
+                Interlocked.Increment(ref currentRecordNum);
+                string? canonicalTown = null;
+
+                if (!Rbec.Postcodes.Postcode.TryParse(toBeUpdated?.Postcode, out var postcode))
                 {
-                    _logger.LogError("Could not find identifiers for participant @{ParticipantId}", toBeUpdated.Id);
-                    continue;
+                    Interlocked.Increment(ref recordsInError);
+                    canonicalTown = null;
+                    
+                    _logger.LogError("Invalid postcode: {postcode}", toBeUpdated?.Postcode);
+                }
+                else if (IsCanonicalAddress(toBeUpdated))
+                {
+                    canonicalTown = toBeUpdated?.Town;
+
+                    _logger.LogInformation("Using existing town '{town}' for postcode '{postcode}'", toBeUpdated?.Town, toBeUpdated?.Postcode);
+                }
+                else if (_postcodeCache.TryGetValue(postcode.ToString(), out var result))
+                {
+                    canonicalTown = result;
+
+                    _logger.LogInformation("Retrieved from cache {postcode}\t{canonicalTown}", postcode, canonicalTown);
+                }
+                else
+                {
+                    // Call OS places API
+                    Thread.Sleep(100);
+                    canonicalTown = await GetTownAsync(postcode.ToString(), ct);
                 }
 
-                try
+                if (string.IsNullOrWhiteSpace(canonicalTown))
                 {
-                    _logger.LogInformation("{Current}/{Total} Updating participant {ParticipantId} with canonical town from postcode {Postcode}",
-                        currentRecordNum, totalRecords, toBeUpdated.Id, toBeUpdated.Postcode);
-
-                    var canonicalTown = await GetCanonicalTownAsync(toBeUpdated.Postcode, cancellationToken);
-
-                    if (string.IsNullOrWhiteSpace(canonicalTown))
-                    {
-                        _logger.LogWarning("No canonical town found for postcode {Postcode} (participant {ParticipantId})", toBeUpdated.Postcode, toBeUpdated.Id);
-                        continue;
-                    }
-
-                    DynamoParticipant participant = null;
-                    foreach (var participantIdentifier in toBeUpdated.ParticipantIdentifiers)
-                    {
-                        participant = await _participantRepository.GetParticipantAsync(KeyUtils.StripPrimaryKey(participantIdentifier), cancellationToken);
-
-                        if (participant != null)
-                        {
-                            break;
-                        }
-                    }
-
-                    if (participant == null)
-                    {
-                        _logger.LogError("Participant {ParticipantId} not found in DynamoDB", toBeUpdated.Id);
-                        continue;
-                    }
-
-                    participant.Address.CanonicalTown = canonicalTown;
-                    participant.IsCanonicalTownBackfilled = true;
-
-                    await _dynamoContext.SaveAsync(participant, _config, cancellationToken);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Error updating participant {ParticipantId}", toBeUpdated.Id);
-                    recordsInError++;
+                    _logger.LogWarning("No canonical town found for postcode {Postcode} (participant {ParticipantId})", postcode.ToString(), toBeUpdated.Id);
+                    canonicalTown = null;
                 }
 
-                currentRecordNum++;
-            }
+                _logger.LogInformation("{Current}/{Total} {s}s Updating participant {ParticipantId} with '{Town}' from postcode '{Postcode}'",
+currentRecordNum, totalRecords, (int)sw.ElapsedMilliseconds / 1000, toBeUpdated.Id, canonicalTown, toBeUpdated.Postcode);
 
-            //Thread.Sleep(60000);
+                toBeUpdated.CanonicalTown = canonicalTown?.Trim()?.ToUpperInvariant();
+            });
+
+
+            await _participantDbContext.SaveChangesAsync(cancellationToken);
+
             _logger.LogInformation("Number of accounts in error: {Count}", recordsInError);
         }
 
-        public async Task RollBack(CancellationToken cancellationToken)
+        private static bool IsCanonicalAddress(ParticipantAddress? address)
         {
-            var participantsToUpdate = await _participantDbContext.Participants
-                .Where(x => x.IsCanonicalTownBackfilled == true)
-                .Include(x => x.SourceReferences)
-                .Select(x => new
-                {
-                    Id = x.Id,
-                    ParticipantIdentifiers = x.SourceReferences.Select(y => y.Pk)
-                })
-                .ToListAsync(cancellationToken);
-
-            int totalRecords = participantsToUpdate.Count;
-            int currentRecordNum = 1;
-            int recordsInError = 0;
-
-            foreach (var toBeUpdated in participantsToUpdate)
-            {
-                try
-                {
-                    _logger.LogInformation("{Current}/{Total} Rolling back participant {ParticipantId}", currentRecordNum, totalRecords, toBeUpdated.Id);
-
-                    DynamoParticipant participant = null;
-                    foreach (var participantIdentifier in toBeUpdated.ParticipantIdentifiers)
-                    {
-                        participant = await _dynamoContext.LoadAsync<DynamoParticipant>(participantIdentifier, _config, cancellationToken);
-                        if (participant != null)
-                        {
-                            break;
-                        }
-                    }
-
-                    if (participant == null)
-                    {
-                        _logger.LogError("ParticipantId {ParticipantId} not found in DynamoDB", toBeUpdated.Id);
-                        continue;
-                    }
-
-                    participant.Address.CanonicalTown = null;
-                    participant.IsCanonicalTownBackfilled = false;
-
-                    await _dynamoContext.SaveAsync(participant, _config, cancellationToken);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Error rolling back participant {ParticipantId}", toBeUpdated.Id);
-                    recordsInError++;
-                }
-
-                currentRecordNum++;
-            }
-
-            //Thread.Sleep(60000);
-            _logger.LogInformation("Number of rollback errors: {Count}", recordsInError);
+            // Determine if the current address has been selected from the lookup (returns true) or manually entered (returns false).
+            // Addresses from the location API have all fields in UPPERCASE. Manual addresses are likely to have Mixed Case in at least one field.
+            return address?.AddressLine1?.ToUpperInvariant() == address?.AddressLine1
+                                && address?.AddressLine2?.ToUpperInvariant() == address?.AddressLine2
+                                && address?.AddressLine3?.ToUpperInvariant() == address?.AddressLine3
+                                && address?.AddressLine4?.ToUpperInvariant() == address?.AddressLine4
+                                && address?.Town?.ToUpperInvariant() == address?.Town
+                                && address?.Town is not null
+                                && address?.Town != "-";
         }
 
-        private async Task<string?> GetCanonicalTownAsync(string postcode, CancellationToken cancellationToken)
+        private async Task<string?> GetTownAsync(string postcode, CancellationToken cancellationToken)
         {
-            try
+            var httpRequest = new HttpRequestMessage
             {
-                var addresses = await _postcodeMapper.GetAddressesByPostcodeAsync(postcode, cancellationToken);
+                RequestUri = new Uri($"search/places/v1/postcode?{OrdnanceSurveyCountries.CodeQueryParams}&lr=EN&postcode={postcode}&maxresults=1", UriKind.Relative),
+                Method = HttpMethod.Get
+            };
 
-                return addresses?.FirstOrDefault()?.Town;
-            }
-            catch (Exception ex)
+            var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (response.IsSuccessStatusCode)
             {
-                _logger.LogError(ex, "Error retrieving canonical town for postcode: {Postcode}", postcode);
+                var address = JsonConvert.DeserializeObject<OrdnanceSurveyAddressResponse>(content);
+
+                return address?.Results?.First().Dpa.PostTown;
+            }
+            else
+            {
+                _logger.LogWarning(content);
                 return null;
             }
         }

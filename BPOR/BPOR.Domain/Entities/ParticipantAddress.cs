@@ -35,13 +35,14 @@ public class ParticipantAddress : IPersonalInformation, ISoftDelete
 
     private static string? GetOutcodeFromPostcode(string? postcode)
     {
-        if (string.IsNullOrWhiteSpace(postcode))
+        if (Rbec.Postcodes.Postcode.TryParse(postcode, out var validPostcode))
+        {
+            return validPostcode.ToString().Split(' ').First();
+        }
+        else
         {
             return null;
         }
-
-        var postcodeWithoutSpace = postcode.Replace(" ", "");
-        return postcodeWithoutSpace[..^3];
     }
     public void Anonymise()
     {
@@ -50,7 +51,6 @@ public class ParticipantAddress : IPersonalInformation, ISoftDelete
         AddressLine3 = null;
         AddressLine4 = null;
         Town = null;
-        CanonicalTown = null;
         Postcode = GetOutcodeFromPostcode(Postcode);
     }
 }
