@@ -2,7 +2,6 @@ using System.Security.Cryptography.Xml;
 using System.Threading;
 using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 
 namespace BPOR.Tests.Common
@@ -14,7 +13,7 @@ namespace BPOR.Tests.Common
         private readonly IConfiguration _configuration;
         private string ConnectionString => _configuration.GetValue<string>("dteDatabase:connectionString");
 
-        private readonly TestInterceptor _interceptor = new TestInterceptor();
+        private readonly SaveChangeCountInterceptor _interceptor = new SaveChangeCountInterceptor();
 
         public LocalParticipantDatabase(IConfiguration configuration)
         {
@@ -53,20 +52,6 @@ namespace BPOR.Tests.Common
                  .Options);
         }
 
-        private class TestInterceptor : ISaveChangesInterceptor
-        {
-            int _saveChangesAsyncCount = 0;
 
-            public int SaveChancesAsyncCount => _saveChangesAsyncCount;
-
-            public ValueTask<InterceptionResult<int>> SavingChangesAsync(
-               DbContextEventData eventData,
-               InterceptionResult<int> result,
-               CancellationToken cancellationToken = default)
-            {
-                Interlocked.Increment(ref _saveChangesAsyncCount);
-                return ValueTask.FromResult(result);
-            }
-        }
     }
 }

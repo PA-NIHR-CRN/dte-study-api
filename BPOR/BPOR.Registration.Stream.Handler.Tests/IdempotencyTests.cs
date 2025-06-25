@@ -8,10 +8,13 @@ using BPOR.Registration.Stream.Handler.Mappers;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Tests.Common;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Testing;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.Models;
 using NSubstitute;
+using Xunit;
 
 namespace BPOR.Registration.Stream.Handler.Tests
 {
@@ -21,11 +24,12 @@ namespace BPOR.Registration.Stream.Handler.Tests
         public async Task ExecuteAAndBThenCResultsInSingleParticipant()
         {
             // Arrange
-
-            var config = TestConfiguration.GetStandardConfiguration();
-
-            using LocalParticipantDatabase localParticipantDatabase = new LocalParticipantDatabase(config);
-            using var participantDbContext = localParticipantDatabase.CreateDbContext();
+            var interceptor = new SaveChangeCountInterceptor();
+            using var participantDbContext = new ParticipantDbContext(new DbContextOptionsBuilder<ParticipantDbContext>()
+                .UseInMemoryDatabase("IdempotencyTests")
+                .AddInterceptors(interceptor)
+                .Options
+                );
 
             // Mock a location service with a 1 second delay - this allows us to test for concurrent operations by executing two calls to the Lambda with a 500ms interval.
             var locationService = Substitute.For<IPostcodeMapper>();
@@ -61,7 +65,7 @@ namespace BPOR.Registration.Stream.Handler.Tests
             failures_2.Should().HaveCount(1);
             failures_3.Should().BeEmpty();
             // Check the number of calls to SaveChangesAsync to check that the stream handler only ran once
-            localParticipantDatabase.SaveChangesAsyncCount.Should().Be(1);
+            interceptor.SaveChancesAsyncCount.Should().Be(1);
         }
     }
 }
