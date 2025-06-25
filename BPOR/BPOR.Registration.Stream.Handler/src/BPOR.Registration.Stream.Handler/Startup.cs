@@ -41,7 +41,8 @@ public static class Startup
 
         services.AddScoped<IDynamoDBContext>(x => new DynamoDBContext(new AmazonDynamoDBClient()));
 
-        Idempotency.Configure(builder => builder.UseDynamoDb("idempotency_table"));
+        var idempotencySettings = services.GetSectionAndValidate<IdempotencySettings>(configuration);
+        Idempotency.Configure(builder => builder.UseDynamoDb(idempotencySettings.Value.DynamoDbTableName));
 
         // add application services
         services.AddSingleton<IRefDataService, RefDataService>();
