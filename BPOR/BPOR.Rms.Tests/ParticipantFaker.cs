@@ -18,5 +18,7 @@ public class ParticipantFaker : Faker<Participant>
             Town = f.Address.City(),
             Postcode = f.Address.ZipCode()
         });
+        RuleFor(i => i.Stage2CompleteUtc, (f, i) => f.Random.Bool(0.8f) ?
+            f.Date.Between(new DateTime(2022, 1, 1), new DateTime(2025, 1, 1)) : null);
     }
 }
