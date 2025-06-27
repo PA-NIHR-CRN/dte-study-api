@@ -91,3 +91,26 @@
         </div>
     </fieldset>
 </div>
+<div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h3 class="govuk-label govuk-label--l">
+                Long Term Conditions or Illnesses
+            </h3>
+        </legend>
+        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+            <div class="govuk-checkboxes__item">
+                <input asp-for="HasLongTermCondition_Yes" class="govuk-checkboxes__input" id="HasLongTermConditionh_Yes" type="checkbox" />
+                @Html.LabelFor(m => Model.HasLongTermCondition_Yes, new { @class = "govuk-label govuk-checkboxes__label" })
+            </div>
+            <div class="govuk-checkboxes__item">
+                <input asp-for="HasLongTermCondition_No" class="govuk-checkboxes__input" id="HasLongTermCondition_No" type="checkbox" />
+                @Html.LabelFor(m => Model.HasLongTermCondition_No, new { @class = "govuk-label govuk-checkboxes__label" })
+            </div>
+            <div class="govuk-checkboxes__item">
+                <input asp-for="HasLongTermCondition_PreferNotToSay" class="govuk-checkboxes__input" id="HasLongTermCondition_PreferNotToSay" type="checkbox" />
+                @Html.LabelFor(m => Model.HasLongTermCondition_PreferNotToSay, new { @class = "govuk-label govuk-checkboxes__label" })
+            </div>
+        </div>
+    </fieldset>
+</div>
