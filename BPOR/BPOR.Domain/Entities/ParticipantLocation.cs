@@ -1,3 +1,4 @@
+using BPOR.Domain.Entities.Configuration;
 using NetTopologySuite.Geometries;
 using NIHR.Geometry;
 using NIHR.Infrastructure.EntityFrameworkCore;

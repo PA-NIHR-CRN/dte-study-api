@@ -65,9 +65,7 @@ public class FilterController(ParticipantDbContext context,
                 model.SelectedVolunteersPreferredContact = (int)ContactMethodId.Email;
             }
         }
-
-        var sw = new Stopwatch();
-        sw.Start();
+        
         if (activity == "FilterVolunteers")
         {
             results = await FilterVolunteersAsync(model, cancellationToken);
@@ -78,10 +76,9 @@ public class FilterController(ParticipantDbContext context,
             model = ClearFilters(model);
         }
 
-        model.VolunteerCount = results.Count?.HasValue == true ? await results.Count.ValueAsync() : default;
-        model.Testing.VolunteerResults = results.Items != null ? await results.Items.ValueAsync() : Page<VolunteerResult>.Empty();
-        sw.Stop();
-        var i = sw.ElapsedMilliseconds;
+        model.VolunteerCount = results.Count?.HasValue == true ? await results.Count.ValueAsync(cancellationToken) : default;
+        model.Testing.VolunteerResults = results.Items != null ? await results.Items.ValueAsync(cancellationToken) : Page<VolunteerResult>.Empty();
+
         if (hostEnvironment.IsProduction())
         {
             foreach (var x in model.Testing.VolunteerResults)
