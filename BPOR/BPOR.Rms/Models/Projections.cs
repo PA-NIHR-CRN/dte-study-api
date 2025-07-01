@@ -47,6 +47,7 @@ public static class Projections
             RecruitingIdentifiableVolunteers = r.IsRecruitingIdentifiableParticipants,
             OutcomeOfSubmission = r.SubmissionOutcomeId,
             PortfolioSubmissionStatus = r.SubmittedId,
+            InformationUrl = r.InformationUrl
         };
     }
 

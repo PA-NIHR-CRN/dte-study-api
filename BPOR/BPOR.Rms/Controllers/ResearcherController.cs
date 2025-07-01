@@ -67,6 +67,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                         SubmissionOutcomeId = model.PortfolioSubmissionStatus == 1 ? model.OutcomeOfSubmission : null,
                         CpmsId = model.PortfolioSubmissionStatus == 1 ? model.CPMSId : null,
                         FundingCode = model.HasFunding == true ? model.FundingCode : null,
+                        InformationUrl = model.InformationUrl,
                     };
 
                     context.Add(study);
@@ -272,6 +273,15 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 ModelState.AddModelError("RecruitingIdentifiableVolunteers", "Select whether participants in the study will be recruited as named individual volunteers");
             }
         }
+        
+        if (model.Step == 8)
+        {
+            if (!string.IsNullOrWhiteSpace(model.InformationUrl) &&
+                !Uri.IsWellFormedUriString(model.InformationUrl.Trim(), UriKind.Absolute))
+            {
+                ModelState.AddModelError(nameof(model.InformationUrl), "Information URL must be a valid URL");
+            }
+        }
     }
 
     public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
@@ -468,7 +478,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
         [Bind("ShortName,ChiefInvestigator,StudySponsors,CPMSId,PortfolioSubmissionStatus,OutcomeOfSubmission," +
-        "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,RecruitingIdentifiableVolunteers,Step")]
+        "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,RecruitingIdentifiableVolunteers,Step,InformationUrl")]
         ResearcherStudyFormViewModel model)
     {
         model.Id = id;
@@ -549,6 +559,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 studyToUpdate.TargetPopulation = model.TargetPopulation;
                 studyToUpdate.RecruitmentStartDate = model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
                 studyToUpdate.RecruitmentEndDate = model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
+                studyToUpdate.InformationUrl = string.IsNullOrWhiteSpace(model.InformationUrl) ? null : model.InformationUrl.Trim();
 
                 await context.SaveChangesAsync();
             }

@@ -1,0 +1,163 @@
+﻿@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+
+<h1 class="govuk-heading-xl">
+    Check your answers before submitting the study
+</h1>
+
+<dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.ShortName)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @(Model.ShortName)
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <button type="submit" name="Step" value="1" class="link-button">Change</button>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.ChiefInvestigator)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @(Model.ChiefInvestigator)
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <button type="submit" name="Step" value="1" class="link-button">Change</button>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.StudySponsors)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @(Model.StudySponsors)
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <button type="submit" name="Step" value="1" class="link-button">Change</button>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.PortfolioSubmissionStatus)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @(Model.PortfolioSubmissionStatusOptions?.Where(o => o.Id == Model.PortfolioSubmissionStatus).Select(o => o.Description).FirstOrDefault())
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <button type="submit" name="Step" value="2" class="link-button">Change</button>
+        </dd>
+    </div>
+    @if (Model.PortfolioSubmissionStatus.HasValue)
+    {
+        if (Model.PortfolioSubmissionStatus == 1)
+        {
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    @Html.DisplayNameFor(model => model.OutcomeOfSubmission)
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    @(Model.OutcomeOfSubmissionOptions?.Where(o => o.Id == Model.OutcomeOfSubmission).Select(o => o.Description).FirstOrDefault())
+                </dd>
+                <dd class="govuk-summary-list__actions">
+                    <button type="submit" name="Step" value="3" class="link-button">Change</button>
+                </dd>
+            </div>
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    @Html.DisplayNameFor(model => model.CPMSId)
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    @(Model.CPMSId)
+                </dd>
+                <dd class="govuk-summary-list__actions">
+                    <button type="submit" name="Step" value="3" class="link-button">Change</button>
+                </dd>
+            </div>
+        }
+    }
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.HasFunding)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @(Model.HasFunding.HasValue ? (Model.HasFunding.Value ? "Yes" : "No") : "No")
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <button type="submit" name="Step" value="4" class="link-button">Change</button>
+        </dd>
+    </div>
+    @if (Model.HasFunding.HasValue)
+    {
+        if (Model.HasFunding.Value)
+        {
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    @Html.DisplayNameFor(model => model.FundingCode)
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    @(Model.FundingCode)
+                </dd>
+                <dd class="govuk-summary-list__actions">
+                    <button type="submit" name="Step" value="5" class="link-button">Change</button>
+                </dd>
+            </div>
+        }
+    }
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.UKRecruitmentTarget)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @(Model.UKRecruitmentTarget)
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <button type="submit" name="Step" value="6" class="link-button">Change</button>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.TargetPopulation)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @(Model.TargetPopulation)
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <button type="submit" name="Step" value="6" class="link-button">Change</button>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            Recruitment Start Date
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @(Model.RecruitmentStartDate.UKDisplayDate())
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <button type="submit" name="Step" value="7" class="link-button">Change</button>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            Recruitment End Date
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @(Model.RecruitmentEndDate.UKDisplayDate())
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <button type="submit" name="Step" value="7" class="link-button">Change</button>
+        </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Html.DisplayNameFor(model => model.RecruitingIdentifiableVolunteers)
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @(Model.RecruitingIdentifiableVolunteers.HasValue ? (Model.RecruitingIdentifiableVolunteers.Value ? "Yes" : "No") : "No")
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <button type="submit" name="Step" value="7" class="link-button">Change</button>
+        </dd>
+    </div>
+</dl>
