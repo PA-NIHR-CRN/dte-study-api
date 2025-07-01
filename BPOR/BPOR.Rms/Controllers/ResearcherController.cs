@@ -279,7 +279,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             if (!string.IsNullOrWhiteSpace(model.InformationUrl) &&
                 !Uri.IsWellFormedUriString(model.InformationUrl.Trim(), UriKind.Absolute))
             {
-                ModelState.AddModelError(nameof(model.InformationUrl), "Information URL must be a valid URL");
+                ModelState.AddModelError(nameof(model.InformationUrl), "The website you have tried to enter is not formatted correctly");
             }
         }
     }
