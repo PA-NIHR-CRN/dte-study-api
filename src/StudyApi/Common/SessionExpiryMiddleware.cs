@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -36,7 +37,13 @@ public class SessionExpiryMiddleware
         var sessionId = result.Principal.FindFirstValue("sessionId");
         var participantId = context.User.GetParticipantId();
 
-        using (logger.BeginScope("{@sessionId} {@participantId}", sessionId, participantId))
+        var scopeData = new Dictionary<string, object>
+        {
+            ["sessionId"] = sessionId,
+            ["participantId"] = participantId
+        };
+
+        using (logger.BeginScope(scopeData))
         {
             var token = result.Principal.Claims;
             var nhsNumber = token?.FirstOrDefault(x => x.Type == "nhs_number")?.Value;
