@@ -20,8 +20,10 @@ public class SessionExpiryMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context, IServiceScopeFactory serviceScopeFactory)
+    public async Task InvokeAsync(HttpContext context)
     {
+        var logger = context.RequestServices.GetRequiredService<ILogger<SessionExpiryMiddleware>>();
+
         var result = await context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
         if (!result.Succeeded)
@@ -30,29 +32,26 @@ public class SessionExpiryMiddleware
             return;
         }
 
-        using var scope = serviceScopeFactory.CreateScope();
-        var sessionService = scope.ServiceProvider.GetRequiredService<ISessionService>();
+        var sessionService = context.RequestServices.GetRequiredService<ISessionService>();
         var sessionId = result.Principal.FindFirstValue("sessionId");
         var participantId = context.User.GetParticipantId();
 
-        var token = result.Principal.Claims;
-        var nhsNumber = token?.FirstOrDefault(x => x.Type == "nhs_number")?.Value;
-
-        if (nhsNumber == null)
-        {
-            var isSessionValid = await sessionService.ValidateSessionAsync(participantId, sessionId);
-
-            if (!isSessionValid)
-            {
-                await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                context.Response.Cookies.Delete(".BPOR.Session.Expiry");
-            }
-        }
-
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<SessionExpiryMiddleware>>();
         using (logger.BeginScope("{@sessionId} {@participantId}", sessionId, participantId))
         {
-            logger.LogInformation("SessionId: {@sessionId} ParticipantId: {@participantId}", sessionId, participantId);
+            var token = result.Principal.Claims;
+            var nhsNumber = token?.FirstOrDefault(x => x.Type == "nhs_number")?.Value;
+
+            if (nhsNumber == null)
+            {
+                var isSessionValid = await sessionService.ValidateSessionAsync(participantId, sessionId);
+
+                if (!isSessionValid)
+                {
+                    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    context.Response.Cookies.Delete(".BPOR.Session.Expiry");
+                }
+            }
+
             // Call the next delegate/middleware in the pipeline
             await _next(context);
         }
