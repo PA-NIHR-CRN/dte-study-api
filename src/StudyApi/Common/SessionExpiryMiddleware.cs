@@ -29,7 +29,14 @@ public class SessionExpiryMiddleware
 
         if (!result.Succeeded)
         {
-            _logger.LogWarning(result.Failure, result.Failure.Message);
+            if (result.Failure is not null)
+            {
+                _logger.LogWarning(result.Failure, "Cookie authentication failed. {@message}", result.Failure.Message);
+            }
+            else
+            {
+                _logger.LogWarning("Cookie authentication failed.");
+            }
 
             await _next(context);
             return;
