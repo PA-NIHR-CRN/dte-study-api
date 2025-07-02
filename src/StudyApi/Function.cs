@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 using StudyApi.Extensions;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
@@ -13,6 +14,18 @@ namespace StudyApi
         protected override void Init(IWebHostBuilder builder)
         {
             builder
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+
+                    var options = new LambdaLoggerOptions
+                    {
+                        IncludeException = true,
+                        IncludeScopes = true,
+                    };
+
+                    logging.AddLambdaLogger(options);
+                })
                 .UseStartup<Startup>()
                 .AddAwsSecrets();
         }
