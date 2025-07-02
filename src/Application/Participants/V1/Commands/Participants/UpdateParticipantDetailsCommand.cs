@@ -51,7 +51,10 @@ public class UpdateParticipantDetailsCommand : IRequest<Response<object>>
             {
                 var entity = await _participantRepository.GetParticipantDetailsAsync(request.ParticipantId);
 
-                if (entity == null) throw new NotFoundException($"Participant not found, Id: {request.ParticipantId}");
+                if (entity == null)
+                {
+                    throw new NotFoundException($"Participant not found, Id: {request.ParticipantId}");
+                }
 
                 entity.Firstname = request.Firstname;
                 entity.Lastname = request.Lastname;

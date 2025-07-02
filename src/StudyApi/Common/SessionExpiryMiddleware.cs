@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace StudyApi.Common;
 
@@ -48,7 +49,11 @@ public class SessionExpiryMiddleware
             }
         }
 
-        // Call the next delegate/middleware in the pipeline
-        await _next(context);
+        var logger = context.RequestServices.GetRequiredService<ILogger<SessionExpiryMiddleware>>();
+        using (logger.BeginScope("{@sessionId} {@participantId}", sessionId, participantId))
+        {
+            // Call the next delegate/middleware in the pipeline
+            await _next(context);
+        }
     }
 }

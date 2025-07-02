@@ -717,6 +717,8 @@ namespace Infrastructure.Services
             }
             catch (HttpServiceException ex)
             {
+                _logger.LogInformation("NhsLoginAsync():HttpServiceException handler");
+
                 if (ex.ResponseContent !=
                     JsonConvert.SerializeObject(new { Message = ErrorCode.UnableToMatchAccounts }))
                 {
