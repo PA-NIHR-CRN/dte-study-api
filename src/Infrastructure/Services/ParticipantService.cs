@@ -69,7 +69,7 @@ public class ParticipantService : IParticipantService
                 Username = email
             });
 
-            _logger.LogInformation("AdminGetUserAsync(): Found cognito user with sub='{sub}'.", response?.UserAttributes?.FirstOrDefault(x => x.Name == "sub"));
+            _logger.LogInformation("AdminGetUserAsync(): Found cognito user with sub='{sub}'.", response?.UserAttributes?.FirstOrDefault(x => x.Name == "sub")?.Value);
 
             return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
                 ? response.Username
