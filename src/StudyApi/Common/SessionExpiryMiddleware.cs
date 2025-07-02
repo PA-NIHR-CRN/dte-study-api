@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Application.Contracts;
 using Application.Extensions;
+using AWS.Lambda.Powertools.Logging;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -22,6 +23,7 @@ public class SessionExpiryMiddleware
         _next = next;
         _logger = logger;
     }
+
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -52,24 +54,22 @@ public class SessionExpiryMiddleware
             ["participantId"] = participantId
         };
 
-        using (_logger.BeginScope(scopeData))
+        _logger.AppendKeys(scopeData);
+
+        var token = result.Principal.Claims;
+        var nhsNumber = token?.FirstOrDefault(x => x.Type == "nhs_number")?.Value;
+        if (nhsNumber == null)
         {
-            var token = result.Principal.Claims;
-            var nhsNumber = token?.FirstOrDefault(x => x.Type == "nhs_number")?.Value;
+            var isSessionValid = await sessionService.ValidateSessionAsync(participantId, sessionId);
 
-            if (nhsNumber == null)
+            if (!isSessionValid)
             {
-                var isSessionValid = await sessionService.ValidateSessionAsync(participantId, sessionId);
-
-                if (!isSessionValid)
-                {
-                    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                    context.Response.Cookies.Delete(".BPOR.Session.Expiry");
-                }
+                await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                context.Response.Cookies.Delete(".BPOR.Session.Expiry");
             }
-
-            // Call the next delegate/middleware in the pipeline
-            await _next(context);
         }
+
+        // Call the next delegate/middleware in the pipeline
+        await _next(context);
     }
 }
