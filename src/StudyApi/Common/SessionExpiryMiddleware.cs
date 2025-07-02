@@ -49,9 +49,10 @@ public class SessionExpiryMiddleware
             }
         }
 
-        var logger = context.RequestServices.GetRequiredService<ILogger<SessionExpiryMiddleware>>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<SessionExpiryMiddleware>>();
         using (logger.BeginScope("{@sessionId} {@participantId}", sessionId, participantId))
         {
+            logger.LogInformation("SessionId: {@sessionId} ParticipantId: {@participantId}", sessionId, participantId);
             // Call the next delegate/middleware in the pipeline
             await _next(context);
         }
