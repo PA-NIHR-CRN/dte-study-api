@@ -170,13 +170,15 @@ public class ParticipantService : IParticipantService
             {
                 DateTime = request?.DateOfBirth,
                 RoundTripString = request?.DateOfBirth?.ToString("O"),
-                Kind = request?.DateOfBirth?.Kind
+                request?.DateOfBirth?.Kind,
+                KindName = Enum.GetName(request?.DateOfBirth?.Kind ?? DateTimeKind.Unspecified)
             },
             participantDob = new
             {
                 DateTime = participant?.DateOfBirth,
                 RoundTripString = participant?.DateOfBirth?.ToString("O"),
-                Kind = participant?.DateOfBirth?.Kind
+                participant?.DateOfBirth?.Kind,
+                KindName = Enum.GetName(participant?.DateOfBirth?.Kind ?? DateTimeKind.Unspecified)
             }
         };
 
