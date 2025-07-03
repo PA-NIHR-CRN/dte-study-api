@@ -71,7 +71,7 @@ namespace Application.Participants.V1.Queries.Participants
                         ProjectAssemblyNames.ApiAssemblyName, nameof(GetParticipantDemographicsQueryHandler), "err", ex,
                         _headerService.GetConversationId());
                     _logger.LogError(ex,
-                        $"Unknown error getting participant demographics for {request.ParticipantId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                        "Unknown error getting participant demographics for {ParticipantId}: {@exceptionResponse}", request.ParticipantId, exceptionResponse);
                     return exceptionResponse;
                 }
             }

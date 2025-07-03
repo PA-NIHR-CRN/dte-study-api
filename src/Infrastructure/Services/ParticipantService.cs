@@ -69,6 +69,8 @@ public class ParticipantService : IParticipantService
                 Username = email
             });
 
+            _logger.LogInformation("AdminGetUserAsync(): Found cognito user with sub='{sub}'.", response?.UserAttributes?.FirstOrDefault(x => x.Name == "sub")?.Value);
+
             return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
                 ? response.Username
                 : null;
@@ -112,10 +114,10 @@ public class ParticipantService : IParticipantService
         }
 
         var response = await _provider.AdminDisableUserAsync(new AdminDisableUserRequest
-            {
-                Username = participant.ParticipantId,
-                UserPoolId = _awsSettings.CognitoPoolId
-            }
+        {
+            Username = participant.ParticipantId,
+            UserPoolId = _awsSettings.CognitoPoolId
+        }
         );
 
         if ((int)response.HttpStatusCode < 200 || (int)response.HttpStatusCode > 299)
@@ -151,9 +153,43 @@ public class ParticipantService : IParticipantService
 
         // Look up participant by email and date of birth
         var emailRequestId = await AdminGetUserAsync(request.Email);
-        if (emailRequestId == null) return;
+        if (emailRequestId == null)
+        {
+            // No email address match found in cognito.
+            return;
+        }
+
         participant = await _participantRepository.GetParticipantDetailsAsync(emailRequestId);
-        if (participant == null) return;
+
+        var accountMatchingInfo = new
+        {
+            cognitoId = emailRequestId,
+            request?.NhsId,
+            participant?.Pk,
+            requestDob = new
+            {
+                DateTime = request?.DateOfBirth,
+                RoundTripString = request?.DateOfBirth?.ToString("O"),
+                request?.DateOfBirth?.Kind,
+                KindName = Enum.GetName(request?.DateOfBirth?.Kind ?? DateTimeKind.Unspecified)
+            },
+            participantDob = new
+            {
+                DateTime = participant?.DateOfBirth,
+                RoundTripString = participant?.DateOfBirth?.ToString("O"),
+                participant?.DateOfBirth?.Kind,
+                KindName = Enum.GetName(participant?.DateOfBirth?.Kind ?? DateTimeKind.Unspecified)
+            }
+        };
+
+        _logger.LogInformation("Attempting to match accounts based on the following information. {@accountMatchingInfo}",
+            accountMatchingInfo);
+
+        if (participant == null)
+        {
+            // No DynamoDB records found matching the email address.
+            return;
+        }
         // check if string version of date of birth matches without time
         if (participant.DateOfBirth.HasValue && request.DateOfBirth.HasValue &&
             participant.DateOfBirth.Value.Date ==
@@ -163,6 +199,9 @@ public class ParticipantService : IParticipantService
         }
         else
         {
+            _logger.LogError("Unable to match NHS account to existing record by email and date of birth. {@accountMatchingInfo}",
+                accountMatchingInfo);
+
             // pass back error message to be displayed
             throw new ConflictException(ErrorCode.UnableToMatchAccounts);
         }
@@ -172,7 +211,9 @@ public class ParticipantService : IParticipantService
     {
         var participant = await _participantRepository.GetParticipantDetailsAsync(participantId);
         if (participant == null)
+        {
             throw new NotFoundException($"No participant found for participantId: {participantId}");
+        }
 
         participant.Email = newEmail.ToLower();
         participant.UpdatedAtUtc = _clock.Now();
@@ -185,13 +226,13 @@ public class ParticipantService : IParticipantService
         {
             var entity = await _participantRepository.GetParticipantDetailsAsync(participantId);
             if (entity == null) return;
-            
+
             var contentfulEmailRequest = new EmailContentRequest
             {
                 EmailName = _contentfulSettings.EmailTemplates.DeleteAccount,
                 SelectedLocale = new CultureInfo(entity.SelectedLocale ?? SelectedLocale.Default)
             };
-                
+
             var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
 
             await _emailService.SendEmailAsync(entity.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
@@ -213,13 +254,15 @@ public class ParticipantService : IParticipantService
 
     public async Task StoreMfaCodeAsync(string username, string code)
     {
-        var particpiant = await _participantRepository.GetParticipantDetailsAsync(username);
-        if (particpiant == null)
+        var participant = await _participantRepository.GetParticipantDetailsAsync(username);
+        if (participant == null)
+        {
             throw new NotFoundException($"No participant found for username: {username}");
+        }
 
-        particpiant.MfaChangePhoneCode = code;
-        particpiant.MfaChangePhoneCodeExpiry = _clock.Now().AddMinutes(5);
-        await _participantRepository.UpdateParticipantDetailsAsync(particpiant);
+        participant.MfaChangePhoneCode = code;
+        participant.MfaChangePhoneCodeExpiry = _clock.Now().AddMinutes(5);
+        await _participantRepository.UpdateParticipantDetailsAsync(participant);
     }
 
     public async Task<MfaValidationResult> ValidateMfaCodeAsync(string username, string code)
@@ -280,7 +323,7 @@ public class ParticipantService : IParticipantService
         };
 
         await _participantRepository.CreateAnonymisedDemographicParticipantDataAsync(anonEntity);
-        
+
     }
 
     public async Task<ParticipantDetails> GetParticipantDetailsAsync(string participantId)
@@ -304,8 +347,7 @@ public class ParticipantService : IParticipantService
         var participantDetails =
             await _participantRepository.QueryIndexForParticipantDetailsAsync(email, "Email");
 
-        _logger.LogInformation("participantDetails: {ParticipantDetails}",
-            JsonConvert.SerializeObject(participantDetails));
+        _logger.LogInformation("participantDetails: {@ParticipantDetails}", participantDetails);
 
         return participantDetails;
     }
@@ -317,8 +359,7 @@ public class ParticipantService : IParticipantService
         var participantDetails =
             await _participantRepository.QueryIndexForParticipantDetailsAsync(nhsNumber, "NhsNumber");
 
-        _logger.LogInformation("participantDetails: {ParticipantDetails}",
-            JsonConvert.SerializeObject(participantDetails));
+        _logger.LogInformation("participantDetails: {@ParticipantDetails}", participantDetails);
 
         return participantDetails;
     }

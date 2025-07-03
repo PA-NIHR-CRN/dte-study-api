@@ -87,7 +87,7 @@ namespace Application.Participants.V1.Commands.Participants
                         ProjectAssemblyNames.ApiAssemblyName, nameof(CreateParticipantDetailsCommandHandler), "err", ex,
                         _headerService.GetConversationId());
                     _logger.LogError(ex,
-                        $"Unknown error creating participant details for {request.ParticipantId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                        "Unknown error creating participant details for {ParticipantId}: {@exceptionResponse}", request.ParticipantId, exceptionResponse);
                     return exceptionResponse;
                 }
             }

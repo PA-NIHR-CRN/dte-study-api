@@ -51,13 +51,13 @@ namespace Application.Locations.V1.Queries
                 catch (HttpServiceException ex)
                 {
                     var exceptionResponse = Response<IEnumerable<PostcodeAddressModel>>.CreateHttpExceptionResponse(nameof(GetAddressesByPostcodeQueryHandler), ex, ErrorCode.UnableToGetAddressesFromLocationServiceError, _headerService.GetConversationId());
-                    _logger.LogError(ex, $"Error getting addresses for postcode {request.Postcode} - StatusCode: {ex.HttpStatusCode}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    _logger.LogError(ex, "Error getting addresses for postcode {Postcode} - StatusCode: {HttpStatusCode}: {@exceptionResponse}", request.Postcode, ex.HttpStatusCode, exceptionResponse);
                     return exceptionResponse;
                 }
                 catch (Exception ex)
                 {
                     var exceptionResponse = Response<IEnumerable<PostcodeAddressModel>>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName, nameof(GetAddressesByPostcodeQueryHandler), ErrorCode.UnknownErrorGettingAddressesFromLocationServiceError, ex, _headerService.GetConversationId());
-                    _logger.LogError(ex, $"Unknown error getting addresses for postcode {request.Postcode}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    _logger.LogError(ex, "Unknown error getting addresses for postcode {Postcode}: {@exceptionResponse}", request.Postcode, exceptionResponse);
                     return exceptionResponse;
                 }
             }

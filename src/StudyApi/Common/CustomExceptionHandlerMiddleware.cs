@@ -47,12 +47,12 @@ namespace StudyApi.Common
                 case ValidationException validationException:
                     code = HttpStatusCode.BadRequest;
                     result = JsonConvert.SerializeObject(validationException.Failures);
-                    _logger.LogWarning(result);
+                    _logger.LogWarning("{@Failures}", validationException.Failures);
                     break;
                 case BadRequestException badRequestException:
                     code = HttpStatusCode.BadRequest;
                     result = JsonConvert.SerializeObject(new { badRequestException.Message});
-                    _logger.LogWarning(result);
+                    _logger.LogWarning("{@Message}", badRequestException.Message);
                     break;
                 case NotFoundException _:
                     code = HttpStatusCode.NotFound;
@@ -64,9 +64,9 @@ namespace StudyApi.Common
                     code = HttpStatusCode.BadRequest;
                     break;
                 default:
-                    result = JsonConvert.SerializeObject(new { error = code, conversationId = _headerService.GetConversationId() });
-                    _logger.LogError(ex, result);
-                    _logger.LogError(ex.StackTrace);
+                    var error = new { error = code, conversationId = _headerService.GetConversationId() };
+                    result = JsonConvert.SerializeObject(error);
+                    _logger.LogError(ex, "@{error}", error);
                     break;
             }
 

@@ -185,6 +185,7 @@ public class AuthenticationService : IAuthenticationService
         try
         {
             var mfaLoginDetails = MfaLoginDetails.FromProtectedString(_dataProtector, mfaDetails);
+            _logger.LogInformation("{mfaDetails}", new { mfaLoginDetails.Username, mfaLoginDetails.SessionId });
 
             var request = _userService.CreateAuthChallengeRequest("SMS_MFA", mfaLoginDetails.SessionId,
                 mfaLoginDetails.Username,

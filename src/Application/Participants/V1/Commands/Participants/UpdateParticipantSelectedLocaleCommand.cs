@@ -50,7 +50,10 @@ public class UpdateParticipantSelectedLocaleCommand : IRequest<Response<object>>
             {
                 var entity = await _participantRepository.GetParticipantDetailsAsync(request.ParticipantId);
 
-                if (entity == null) throw new NotFoundException($"Participant not found, Id: {request.ParticipantId}");
+                if (entity == null)
+                {
+                    throw new NotFoundException($"Participant not found, Id: {request.ParticipantId}");
+                }
 
                 entity.SelectedLocale = request.SelectedLocale;
                 entity.UpdatedAtUtc = _clock.Now();
@@ -65,9 +68,9 @@ public class UpdateParticipantSelectedLocaleCommand : IRequest<Response<object>>
                     nameof(UpdateParticipantSelectedLocaleCommandHandler), ex, "err",
                     _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    "Error updating participant details for {RequestParticipantId} - StatusCode: {ExHttpStatusCode}\\r\\n{SerializeObject}",
+                    "Error updating participant details for {RequestParticipantId} - StatusCode: {ExHttpStatusCode}: {@exceptionResponse}",
                     request.ParticipantId, ex.HttpStatusCode,
-                    JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
+                    exceptionResponse);
                 return exceptionResponse;
             }
             catch (Exception ex)
@@ -77,8 +80,8 @@ public class UpdateParticipantSelectedLocaleCommand : IRequest<Response<object>>
                     ex,
                     _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    "Unknown error updating participant details for {RequestParticipantId}\\r\\n{SerializeObject}",
-                    request.ParticipantId, JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
+                    "Unknown error updating participant details for {RequestParticipantId}: {@exceptionResponse}",
+                    request.ParticipantId, exceptionResponse);
                 return exceptionResponse;
             }
         }
