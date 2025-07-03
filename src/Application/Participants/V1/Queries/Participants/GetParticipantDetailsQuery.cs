@@ -63,7 +63,7 @@ namespace Application.Participants.V1.Queries.Participants
                         ProjectAssemblyNames.ApiAssemblyName, nameof(GetParticipantDetailsQueryHandler), "err", ex,
                         _headerService.GetConversationId());
                     _logger.LogError(ex,
-                        $"Unknown error getting participant details for {request.ParticipantId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                        "Unknown error getting participant details for {ParticipantId}: {@exceptionResponse}", request.ParticipantId, exceptionResponse);
                     return exceptionResponse;
                 }
             }

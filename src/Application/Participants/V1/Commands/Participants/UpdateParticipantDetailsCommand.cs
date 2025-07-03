@@ -69,9 +69,9 @@ public class UpdateParticipantDetailsCommand : IRequest<Response<object>>
                 var exceptionResponse = Response<object>.CreateHttpExceptionResponse(
                     nameof(UpdateParticipantDetailsCommandHandler), ex, "err", _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    "Error updating participant details for {RequestParticipantId} - StatusCode: {ExHttpStatusCode}\\r\\n{SerializeObject}",
+                    "Error updating participant details for {RequestParticipantId} - StatusCode: {ExHttpStatusCode}: {@exceptionResponse}",
                     request.ParticipantId, ex.HttpStatusCode,
-                    JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
+                    exceptionResponse);
                 return exceptionResponse;
             }
             catch (Exception ex)
@@ -80,8 +80,8 @@ public class UpdateParticipantDetailsCommand : IRequest<Response<object>>
                     ProjectAssemblyNames.ApiAssemblyName, nameof(UpdateParticipantDetailsCommandHandler), "err", ex,
                     _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    "Unknown error updating participant details for {RequestParticipantId}\\r\\n{SerializeObject}",
-                    request.ParticipantId, JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
+                    "Unknown error updating participant details for {RequestParticipantId}: {@exceptionResponse}",
+                    request.ParticipantId, exceptionResponse);
                 return exceptionResponse;
             }
         }

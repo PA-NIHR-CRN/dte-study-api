@@ -148,7 +148,7 @@ namespace Infrastructure.Services
                     ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
                     _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    $"Unknown error logging in user with email {email}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    "Unknown error logging in user with email {@email}: {@exceptionResponse}", email, exceptionResponse);
                 return exceptionResponse;
             }
         }
@@ -180,8 +180,7 @@ namespace Infrastructure.Services
                 ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), errorType,
                 ex.Message, _headerService.GetConversationId());
 
-            _logger.LogError(ex, $"{errorType} occurred\\r\\n{{SerializeObject}}",
-                JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
+            _logger.LogError(ex, "{@errorType} occurred {@exceptionResponse}", errorType, exceptionResponse);
 
             return exceptionResponse;
         }
@@ -268,7 +267,7 @@ namespace Infrastructure.Services
                     _headerService.GetConversationId());
 
                 _logger.LogError(ex,
-                    $"Unknown error resending mfa challenge for user with username {mfaLoginDetails.Username}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    "Unknown error resending mfa challenge for user with username {@Username}: {@exceptionResponse}", mfaLoginDetails.Username, exceptionResponse);
 
                 return exceptionResponse;
             }
@@ -590,8 +589,7 @@ namespace Infrastructure.Services
                 var exceptionResponse = Response<string>.CreateExceptionResponse(
                     ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
                     _headerService.GetConversationId());
-                _logger.LogError(ex, "Unknown error setting up mfa\\r\\n{SerializeObject}",
-                    JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented));
+                _logger.LogError(ex, "Unknown error setting up mfa: {@exceptionResponse}", exceptionResponse);
                 return exceptionResponse;
             }
         }
@@ -690,30 +688,38 @@ namespace Infrastructure.Services
 
                 var nhsUserInfo = await _nhsLoginHttpClient.GetUserInfoAsync(tokens.AccessToken);
 
-                // check if nhsUserInfo.DateOfBirth is under 18 and return an error if so
-                if (nhsUserInfo.DateOfBirth.HasValue && IsUnder18(nhsUserInfo.DateOfBirth.Value))
+                var scopeData = new Dictionary<string, string>
                 {
-                    return Response<NhsLoginResponse>.CreateErrorMessageResponse(
-                        ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.UserIsUnderage,
-                        "User is under 18",
-                        _headerService.GetConversationId()
-                    );
+                    ["participantId"] = nhsUserInfo.NhsId
+                };
+
+                using (_logger.BeginScope(scopeData))
+                {
+                    // check if nhsUserInfo.DateOfBirth is under 18 and return an error if so
+                    if (nhsUserInfo.DateOfBirth.HasValue && IsUnder18(nhsUserInfo.DateOfBirth.Value))
+                    {
+                        return Response<NhsLoginResponse>.CreateErrorMessageResponse(
+                            ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.UserIsUnderage,
+                            "User is under 18",
+                            _headerService.GetConversationId()
+                        );
+                    }
+
+                    await _participantService.NhsLoginAsync(new ParticipantDetails
+                    {
+                        ConsentRegistration = false,
+                        DateOfBirth = nhsUserInfo.DateOfBirth,
+                        Email = nhsUserInfo.Email,
+                        Firstname = nhsUserInfo.FirstName,
+                        Lastname = nhsUserInfo.LastName,
+                        NhsId = nhsUserInfo.NhsId,
+                        NhsNumber = nhsUserInfo.NhsNumber,
+                        SelectedLocale = selectedLocale
+                    });
+
+                    return Response<NhsLoginResponse>.CreateSuccessfulContentResponse(response,
+                        _headerService.GetConversationId());
                 }
-
-                await _participantService.NhsLoginAsync(new ParticipantDetails
-                {
-                    ConsentRegistration = false,
-                    DateOfBirth = nhsUserInfo.DateOfBirth,
-                    Email = nhsUserInfo.Email,
-                    Firstname = nhsUserInfo.FirstName,
-                    Lastname = nhsUserInfo.LastName,
-                    NhsId = nhsUserInfo.NhsId,
-                    NhsNumber = nhsUserInfo.NhsNumber,
-                    SelectedLocale = selectedLocale
-                });
-
-                return Response<NhsLoginResponse>.CreateSuccessfulContentResponse(response,
-                    _headerService.GetConversationId());
             }
             catch (HttpServiceException ex)
             {
@@ -744,7 +750,7 @@ namespace Infrastructure.Services
                 ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
                 _headerService.GetConversationId());
             _logger.LogError(ex,
-                $"Unknown error logging in with NHS login\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                $"Unknown error logging in with NHS login: {@exceptionResponse}", exceptionResponse);
             return exceptionResponse;
         }
 
@@ -769,7 +775,7 @@ namespace Infrastructure.Services
                     ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
                     _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    $"Unknown error logging in with NHS login\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                $"Unknown error logging in with NHS login: {@exceptionResponse}", exceptionResponse);
                 return exceptionResponse;
             }
         }
@@ -856,7 +862,10 @@ namespace Infrastructure.Services
 
                 var setPasswordResponse = await _provider.AdminSetUserPasswordAsync(new AdminSetUserPasswordRequest
                 {
-                    UserPoolId = _awsSettings.CognitoPoolId, Username = email, Password = password, Permanent = true
+                    UserPoolId = _awsSettings.CognitoPoolId,
+                    Username = email,
+                    Password = password,
+                    Permanent = true
                 });
 
                 return IsSuccessHttpStatusCode((int)setPasswordResponse.HttpStatusCode)
@@ -884,7 +893,7 @@ namespace Infrastructure.Services
                     ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
                     _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    $"Unknown error for admin create and set user password\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    "Unknown error for admin create and set user password: {@exceptionResponse}", exceptionResponse);
                 return exceptionResponse;
             }
         }
@@ -912,9 +921,13 @@ namespace Infrastructure.Services
                 return IsSuccessHttpStatusCode((int)response.HttpStatusCode)
                     ? new AdminGetUserResponse
                     {
-                        Email = email, Id = response.Username, Status = response.UserStatus?.ToString(),
-                        CreatedDate = response.UserCreateDate, LastModifiedDate = response.UserLastModifiedDate,
-                        Enabled = response.Enabled, AuthenticatedMobileVerified = authenticatedMobileVerified
+                        Email = email,
+                        Id = response.Username,
+                        Status = response.UserStatus?.ToString(),
+                        CreatedDate = response.UserCreateDate,
+                        LastModifiedDate = response.UserLastModifiedDate,
+                        Enabled = response.Enabled,
+                        AuthenticatedMobileVerified = authenticatedMobileVerified
                     }
                     : null;
             }
@@ -934,7 +947,7 @@ namespace Infrastructure.Services
             try
             {
                 var response = await _provider.AdminGetUserAsync(new AdminGetUserRequest
-                    { UserPoolId = _awsSettings.CognitoPoolId, Username = email });
+                { UserPoolId = _awsSettings.CognitoPoolId, Username = email });
 
                 return response is { HttpStatusCode: HttpStatusCode.OK };
             }
@@ -989,7 +1002,7 @@ namespace Infrastructure.Services
                 var exceptionResponse = Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
                     nameof(UserService), ErrorCode.InternalServerError, ex, _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    $"Unknown error deleting participant account\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    "Unknown error deleting participant account {@exceptionResponse}", exceptionResponse);
                 return exceptionResponse;
             }
         }
@@ -999,7 +1012,7 @@ namespace Infrastructure.Services
             try
             {
                 var describeUserPoolResponse = await _provider.DescribeUserPoolAsync(new DescribeUserPoolRequest
-                    { UserPoolId = _awsSettings.CognitoPoolId });
+                { UserPoolId = _awsSettings.CognitoPoolId });
 
                 if (describeUserPoolResponse?.UserPool?.Policies?.PasswordPolicy == null) return null;
 
@@ -1068,7 +1081,7 @@ namespace Infrastructure.Services
 
             var user = await AdminGetUserAsync(email);
 
-            _logger.LogInformation(JsonConvert.SerializeObject(user));
+            _logger.LogInformation("{@user}", user);
 
             if (user == null || !user.Enabled)
             {
@@ -1103,8 +1116,8 @@ namespace Infrastructure.Services
 
                 if (!IsSuccessHttpStatusCode((int)response.HttpStatusCode))
                 {
-                    _logger.LogWarning("ForgotPasswordAsync returned: {response}",
-                        JsonConvert.SerializeObject(response));
+                    _logger.LogWarning("ForgotPasswordAsync returned: {@response}",
+                        response);
                 }
             }
 
@@ -1148,7 +1161,7 @@ namespace Infrastructure.Services
                     ProjectAssemblyNames.ApiAssemblyName, nameof(UserService), ErrorCode.InternalServerError, ex,
                     _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    $"Unknown error confirming forgot password with userId {userId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    "Unknown error confirming forgot password with userId {userId}: {@exceptionResponse}", userId, exceptionResponse);
                 return exceptionResponse;
             }
         }
@@ -1192,7 +1205,7 @@ namespace Infrastructure.Services
                 var exceptionResponse = Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
                     nameof(UserService), ErrorCode.InternalServerError, ex, _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    $"Unknown error changing user password\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    "Unknown error changing user password: {@exceptionResponse}", exceptionResponse);
                 return exceptionResponse;
             }
         }
@@ -1245,7 +1258,7 @@ namespace Infrastructure.Services
                 var exceptionResponse = Response<object>.CreateExceptionResponse(ProjectAssemblyNames.ApiAssemblyName,
                     nameof(UserService), ErrorCode.InternalServerError, ex, _headerService.GetConversationId());
                 _logger.LogError(ex,
-                    $"Unknown error changing user email\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                    "Unknown error changing user email: {@exceptionResponse}", exceptionResponse);
                 return exceptionResponse;
             }
         }

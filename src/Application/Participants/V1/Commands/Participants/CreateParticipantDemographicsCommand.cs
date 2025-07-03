@@ -92,7 +92,7 @@ namespace Application.Participants.V1.Commands.Participants
 
                     var entity = await _participantRepository.GetParticipantDemographicsAsync(request.ParticipantId);
 
-                    _logger.LogInformation("Participant: {SerializeObject}", JsonConvert.SerializeObject(entity));
+                    _logger.LogInformation("Participant: {@entity}", entity);
 
                     if (!entity.HasDemographics)
                     {
@@ -111,9 +111,9 @@ namespace Application.Participants.V1.Commands.Participants
                         var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
 
                         _logger.LogInformation(
-                            "Sending email with name {EmailTemplatesNhsSignUp} to {UserEmail} for participant {UserParticipantId} with content {ContentfulEmail}",
+                            "Sending email with name {EmailTemplatesNhsSignUp} to {UserEmail} for participant {UserParticipantId} with content {@ContentfulEmail}",
                             emailTemplate, user.Email, user.ParticipantId,
-                            JsonConvert.SerializeObject(contentfulEmail));
+                            contentfulEmail);
 
                         await _emailService.SendEmailAsync(user.Email, contentfulEmail.EmailSubject,
                             contentfulEmail.EmailBody);
@@ -168,7 +168,7 @@ namespace Application.Participants.V1.Commands.Participants
                         nameof(CreateParticipantDemographicsCommandHandler), "err", ex,
                         _headerService.GetConversationId());
                     _logger.LogError(ex,
-                        $"Unknown error creating participant demographics for {request.ParticipantId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                        "Unknown error creating participant demographics for {ParticipantId}: {@exceptionResponse}", request.ParticipantId, exceptionResponse);
                     return exceptionResponse;
                 }
             }

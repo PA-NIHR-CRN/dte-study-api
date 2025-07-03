@@ -113,7 +113,7 @@ namespace Application.Participants.V1.Commands.Participants
                         nameof(UpdateParticipantDemographicsCommandHandler), ex, "err",
                         _headerService.GetConversationId());
                     _logger.LogError(ex,
-                        $"Error updating participant demographics for {request.ParticipantId} - StatusCode: {ex.HttpStatusCode}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                        "Error updating participant demographics for {ParticipantId} - StatusCode: {HttpStatusCode}: {@exceptionResponse}", request.ParticipantId, ex.HttpStatusCode, exceptionResponse);
                     return exceptionResponse;
                 }
                 catch (Exception ex)
@@ -122,7 +122,7 @@ namespace Application.Participants.V1.Commands.Participants
                         ProjectAssemblyNames.ApiAssemblyName, nameof(UpdateParticipantDemographicsCommandHandler),
                         "err", ex, _headerService.GetConversationId());
                     _logger.LogError(ex,
-                        $"Unknown error updating participant demographics for {request.ParticipantId}\r\n{JsonConvert.SerializeObject(exceptionResponse, Formatting.Indented)}");
+                        "Unknown error updating participant demographics for {ParticipantId}: {@exceptionResponse}", request.ParticipantId, exceptionResponse);
                     return exceptionResponse;
                 }
             }

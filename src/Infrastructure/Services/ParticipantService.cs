@@ -162,17 +162,14 @@ public class ParticipantService : IParticipantService
         participant = await _participantRepository.GetParticipantDetailsAsync(emailRequestId);
 
         _logger.LogInformation("Attempting to match accounts based on the following information.\r\n{@details}",
-    // TODO: We should use structured logging for this, but I am following the existing pattern for the time being.
-    JsonConvert.SerializeObject(
-        new
-        {
-            emailRequestId,
-            request?.NhsId,
-            participant?.Pk,
-            requestDob = request?.DateOfBirth?.ToString("O"),
-            participantDob = participant?.DateOfBirth?.ToString("O"),
-        },
-        Formatting.Indented));
+            new
+            {
+                emailRequestId,
+                request?.NhsId,
+                participant?.Pk,
+                requestDob = request?.DateOfBirth?.ToString("O"),
+                participantDob = participant?.DateOfBirth?.ToString("O"),
+            });
 
         if (participant == null)
         {
@@ -188,15 +185,15 @@ public class ParticipantService : IParticipantService
         }
         else
         {
-            _logger.LogWarning("Unable to match NHS account to existing record by email and date of birth.\r\n{@details}",
-                JsonConvert.SerializeObject( 
-                    new { 
-                        request?.NhsId,
-                        participant?.Pk,
-                        requestDob = request?.DateOfBirth?.ToString("O"),
-                        participantDob = participant?.DateOfBirth?.ToString("O"),
-                    },
-                    Formatting.Indented));
+            _logger.LogError("Unable to match NHS account to existing record by email and date of birth.\r\n{@details}",
+                new
+                {
+                    request?.NhsId,
+                    participant?.Pk,
+                    requestDob = request?.DateOfBirth?.ToString("O"),
+                    participantDob = participant?.DateOfBirth?.ToString("O"),
+                });
+
             // pass back error message to be displayed
             throw new ConflictException(ErrorCode.UnableToMatchAccounts);
         }
@@ -342,8 +339,7 @@ public class ParticipantService : IParticipantService
         var participantDetails =
             await _participantRepository.QueryIndexForParticipantDetailsAsync(email, "Email");
 
-        _logger.LogInformation("participantDetails: {ParticipantDetails}",
-            JsonConvert.SerializeObject(participantDetails));
+        _logger.LogInformation("participantDetails: {@ParticipantDetails}", participantDetails);
 
         return participantDetails;
     }
@@ -355,8 +351,7 @@ public class ParticipantService : IParticipantService
         var participantDetails =
             await _participantRepository.QueryIndexForParticipantDetailsAsync(nhsNumber, "NhsNumber");
 
-        _logger.LogInformation("participantDetails: {ParticipantDetails}",
-            JsonConvert.SerializeObject(participantDetails));
+        _logger.LogInformation("participantDetails: {@ParticipantDetails}", participantDetails);
 
         return participantDetails;
     }

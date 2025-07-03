@@ -53,19 +53,19 @@ namespace Infrastructure.Persistence
                 IndexName = $"{colName}Index",
             };
 
-            _logger.LogInformation("request: {Request}", JsonConvert.SerializeObject(request, Formatting.Indented));
+            _logger.LogInformation("request: {@Request}", request);
 
             try
             {
                 var response = await _client.QueryAsync(request);
 
-                _logger.LogInformation("response: {Response}", JsonConvert.SerializeObject(response, Formatting.Indented));
+                _logger.LogInformation("response: {@Response}", response));
 
                 var items = response.Items;
                 if (items.Count == 0) return null;
                 var item = items.OrderByDescending(x => DateTime.Parse(x["CreatedAtUtc"].S)).First();
 
-                _logger.LogInformation("item: {Item}", JsonConvert.SerializeObject(item, Formatting.Indented));
+                _logger.LogInformation("item: {@Item}", item);
 
                 var participant = _context.FromDocument<ParticipantDetails>(Document.FromAttributeMap(item));
                 return await GetParticipantDetailsAsync(participant.Pk.Replace("PARTICIPANT#", ""));
