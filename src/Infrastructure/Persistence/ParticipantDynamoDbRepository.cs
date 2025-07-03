@@ -59,7 +59,7 @@ namespace Infrastructure.Persistence
             {
                 var response = await _client.QueryAsync(request);
 
-                _logger.LogInformation("response: {@Response}", response));
+                _logger.LogInformation("response: {@Response}", response);
 
                 var items = response.Items;
                 if (items.Count == 0) return null;
