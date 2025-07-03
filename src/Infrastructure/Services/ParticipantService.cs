@@ -161,15 +161,27 @@ public class ParticipantService : IParticipantService
 
         participant = await _participantRepository.GetParticipantDetailsAsync(emailRequestId);
 
-        _logger.LogInformation("Attempting to match accounts based on the following information.\r\n{@details}",
-            new
+        var accountMatchingInfo = new
+        {
+            cognitoId = emailRequestId,
+            request?.NhsId,
+            participant?.Pk,
+            requestDob = new
             {
-                emailRequestId,
-                request?.NhsId,
-                participant?.Pk,
-                requestDob = request?.DateOfBirth?.ToString("O"),
-                participantDob = participant?.DateOfBirth?.ToString("O"),
-            });
+                DateTime = request?.DateOfBirth,
+                RoundTripString = request?.DateOfBirth?.ToString("O"),
+                Kind = request?.DateOfBirth?.Kind
+            },
+            participantDob = new
+            {
+                DateTime = participant?.DateOfBirth,
+                RoundTripString = participant?.DateOfBirth?.ToString("O"),
+                Kind = participant?.DateOfBirth?.Kind
+            }
+        };
+
+        _logger.LogInformation("Attempting to match accounts based on the following information. {@accountMatchingInfo}",
+            accountMatchingInfo);
 
         if (participant == null)
         {
@@ -185,14 +197,8 @@ public class ParticipantService : IParticipantService
         }
         else
         {
-            _logger.LogError("Unable to match NHS account to existing record by email and date of birth.\r\n{@details}",
-                new
-                {
-                    request?.NhsId,
-                    participant?.Pk,
-                    requestDob = request?.DateOfBirth?.ToString("O"),
-                    participantDob = participant?.DateOfBirth?.ToString("O"),
-                });
+            _logger.LogError("Unable to match NHS account to existing record by email and date of birth. {@accountMatchingInfo}",
+                accountMatchingInfo);
 
             // pass back error message to be displayed
             throw new ConflictException(ErrorCode.UnableToMatchAccounts);

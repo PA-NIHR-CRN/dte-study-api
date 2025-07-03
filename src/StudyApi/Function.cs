@@ -19,8 +19,11 @@ namespace StudyApi
                 {
                     logging.ClearProviders();
 
-
-                    logging.AddPowertoolsLogger();
+                    logging.AddPowertoolsLogger(
+                        options =>
+                        {
+                            options.Service = "BPoR VS Study API";
+                        });
                 })
                 .UseStartup<Startup>()
                 .AddAwsSecrets();
