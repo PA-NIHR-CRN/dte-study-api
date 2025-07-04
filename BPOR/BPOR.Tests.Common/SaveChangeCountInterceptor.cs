@@ -6,7 +6,7 @@ namespace BPOR.Tests.Common
     {
         int _saveChangesAsyncCount = 0;
 
-        public int SaveChancesAsyncCount => _saveChangesAsyncCount;
+        public int SaveChangesAsyncCount => _saveChangesAsyncCount;
 
         public ValueTask<InterceptionResult<int>> SavingChangesAsync(
            DbContextEventData eventData,

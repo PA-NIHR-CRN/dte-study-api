@@ -65,7 +65,7 @@ namespace BPOR.Registration.Stream.Handler.Tests
             failures_2.Should().HaveCount(1);
             failures_3.Should().BeEmpty();
             // Check the number of calls to SaveChangesAsync to check that the stream handler only ran once
-            interceptor.SaveChancesAsyncCount.Should().Be(1);
+            interceptor.SaveChangesAsyncCount.Should().Be(1);
         }
     }
 }

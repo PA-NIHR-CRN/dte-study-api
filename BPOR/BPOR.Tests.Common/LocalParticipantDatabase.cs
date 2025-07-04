@@ -38,7 +38,7 @@ namespace BPOR.Tests.Common
 
         }
 
-        public int SaveChangesAsyncCount => _interceptor.SaveChancesAsyncCount;
+        public int SaveChangesAsyncCount => _interceptor.SaveChangesAsyncCount;
 
         public ParticipantDbContext CreateDbContext()
         {
