@@ -34,12 +34,12 @@
 
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-one-half govuk-!-margin-top-3">
-                <button class="govuk-button" asp-action="FilterVolunteers" formmethod="post">
+                <button type="submit" value="FilterVolunteers" name="activity" class="govuk-button">
                     Filter volunteers
                 </button>
             </div>
             <div class="govuk-grid-column-one-half govuk-!-margin-top-3">
-                <button class="govuk-button govuk-button--secondary" data-module="govuk-button" asp-action="ClearFilters" formmethod="post">
+                <button type="submit" class="govuk-button govuk-button--secondary" data-module="govuk-button" value="ClearFilters" name="activity">
                     Clear filters
                 </button>
             </div>
