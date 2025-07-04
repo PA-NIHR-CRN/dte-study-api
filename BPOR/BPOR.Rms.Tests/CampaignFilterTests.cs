@@ -12,8 +12,7 @@ namespace BPOR.Rms.Tests
 
     public class CampaignFilterTests(DatabaseFixture databaseFixture) : IClassFixture<DatabaseFixture>
     {
-
-        [MySqlFact]
+        [Fact, Trait("RequiresMySql", "true")]
         public async Task FullSetIsReturnedWhenOverDemanded()
         {
            using var participantDbContext = databaseFixture.LocalParticipantDatabase.CreateDbContext();
@@ -37,7 +36,7 @@ namespace BPOR.Rms.Tests
 
         }
 
-        [MySqlFact]
+        [Fact, Trait("RequiresMySql", "true")]
         public async Task PartialSetIsReturnedWhenUnderDemanded()
         {
             using var participantDbContext = databaseFixture.LocalParticipantDatabase.CreateDbContext();
@@ -60,7 +59,7 @@ namespace BPOR.Rms.Tests
             result.Should().HaveCount(5000);
         }
 
-        [MySqlFact]
+        [Fact, Trait("RequiresMySql", "true")]
         public async Task FullCountIsReturned()
         {
             using var participantDbContext = databaseFixture.LocalParticipantDatabase.CreateDbContext();
@@ -82,7 +81,7 @@ namespace BPOR.Rms.Tests
             result.Should().Be(10000);
         }
 
-        [MySqlFact]
+        [Fact, Trait("RequiresMySql", "true")]
         public async Task CorrectSubsetCounted()
         {
             using var participantDbContext = databaseFixture.LocalParticipantDatabase.CreateDbContext();
@@ -109,7 +108,7 @@ namespace BPOR.Rms.Tests
             result.Should().Be(correctCount);
         }
 
-        [MySqlFact]
+        [Fact, Trait("RequiresMySql", "true")]
         public async Task CorrectSubsetFetched()
         {
             using var participantDbContext = databaseFixture.LocalParticipantDatabase.CreateDbContext();
@@ -137,7 +136,7 @@ namespace BPOR.Rms.Tests
 
         }
 
-        [MySqlFact]
+        [Fact, Trait("RequiresMySql", "true")]
         public async Task SampleIsRandom()
         {
             using var participantDbContext = databaseFixture.LocalParticipantDatabase.CreateDbContext();
@@ -175,9 +174,9 @@ namespace BPOR.Rms.Tests
                 expectedCounts[i] = ((double)runCount * sampleSize) / actualResult.Count;
             
             var chiSqValue = StatsUtils.ChiSqStat(actualResult.Values.ToArray(), expectedCounts);
-            var chiSqPValue = StatsUtils.ChiSqPval(chiSqValue, actualResult.Count - 1);
+            var chiSqPValue =  MathNet.Numerics.Distributions.ChiSquared.CDF(actualResult.Count - 1, chiSqValue);
 
-            chiSqPValue.Should().BeGreaterThanOrEqualTo(0.10);
+            chiSqPValue.Should().BeLessThan(0.10);
         }
     }
 }
