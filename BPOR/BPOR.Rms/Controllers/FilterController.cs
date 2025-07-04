@@ -21,37 +21,58 @@ public class FilterController(ParticipantDbContext context,
 {
     private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
-    private async Task<IActionResult> ViewIndex(VolunteerFilterViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
     {
+        //ModelState.Clear();
+
+        if (TempData["ContactMethodError"] != null)
+        {
+            ModelState.AddModelError(nameof(model.SelectedVolunteersPreferredContact), TempData["ContactMethodError"].ToString());
+            await PopulateFilterIndexDataAsync(model, cancellationToken);
+            return View(model);
+
+        }
         bool isResearcher = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
+
         if (isResearcher)
         {
             return View("Unauthorised");
         }
-        return View("index", model);
-    }
+        FilterResults results = new();
 
-    [HttpPost]
-    public async Task<IActionResult> ClearFilters(VolunteerFilterViewModel model, CancellationToken cancellationToken)
-    {
-        this.AddSuccessNotification($"All previously applied filters have been removed.");
-        ModelState.Clear();
-        model = new VolunteerFilterViewModel { StudyId = model.StudyId };
-        await PopulateStudyDetails(model, cancellationToken);
-        return await ViewIndex(model, cancellationToken);
-    }
-    
-    [HttpPost]
-    public async Task<IActionResult> FilterVolunteers(VolunteerFilterViewModel model, CancellationToken cancellationToken)
-    {
-        await PopulateStudyDetails(model, cancellationToken);
-        
         if (!(User.IsInRole("Tester") && User.IsInRole("Admin")))
         {
             model.Testing = new();
         }
-        
-        var results = await FilterVolunteersAsync(model, cancellationToken);
+
+        if (model.StudyId is not null)
+        {
+            var selectedStudy = await context.Studies
+                .Where(x => x.Id == model.StudyId)
+                .Select(x => new { x.StudyName, x.CpmsId, x.IsRecruitingIdentifiableParticipants })
+                .DeferredFirst()
+                .ExecuteAsync(cancellationToken);
+
+            model.StudyName = selectedStudy.StudyName;
+            model.StudyCpmsId = selectedStudy.CpmsId;
+
+            model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
+            model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
+
+            if (!model.ShowPreferredContactFilter) {
+                model.SelectedVolunteersPreferredContact = (int)ContactMethodId.Email;
+            }
+        }
+
+        if (activity == "FilterVolunteers")
+        {
+            results = await FilterVolunteersAsync(model, cancellationToken);
+        }
+        else if (activity == "ClearFilters")
+        {
+            model = ClearFilters(model);
+        }
+
         model.VolunteerCount = results.Count?.Value;
         model.Testing.VolunteerResults = results.Items?.Value ?? Page<VolunteerResult>.Empty();
 
@@ -71,49 +92,78 @@ public class FilterController(ParticipantDbContext context,
             }
         }
 
-        return await ViewIndex(model, CancellationToken.None);
-    }
-    
-    public async Task<IActionResult> Index(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
-    {
-        await PopulateStudyDetails(model, cancellationToken);
-        return await ViewIndex(model, cancellationToken);
+        return View(model);
     }
 
-    private async Task PopulateStudyDetails(VolunteerFilterViewModel model, CancellationToken cancellationToken)
+    private VolunteerFilterViewModel ClearFilters(VolunteerFilterViewModel model)
     {
-        if (model.StudyId is not null)
+        this.AddSuccessNotification($"All previously applied filters have been removed.");
+
+        ModelState.Clear();
+
+        return new VolunteerFilterViewModel { StudyId = model.StudyId };
+    }
+
+    private async Task PopulateFilterIndexDataAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken)
+    {
+        if (model.StudyId.HasValue)
         {
-            var selectedStudy = await context.Studies
-                .Where(x => x.Id == model.StudyId)
-                .Select(x => new { x.StudyName, x.CpmsId, x.IsRecruitingIdentifiableParticipants })
-                .DeferredFirst()
-                .ExecuteAsync(cancellationToken);
+            var study = await context.Studies
+                .Where(s => s.Id == model.StudyId)
+                .Select(s => new { s.StudyName, s.CpmsId, s.IsRecruitingIdentifiableParticipants })
+                .FirstOrDefaultAsync(cancellationToken);
 
-            model.StudyName = selectedStudy.StudyName;
-            model.StudyCpmsId = selectedStudy.CpmsId;
+            if (study != null)
+            {
+                model.StudyName = study.StudyName;
+                model.StudyCpmsId = study.CpmsId;
+                model.ShowRecruitedFilter = study.IsRecruitingIdentifiableParticipants;
+                model.ShowPreferredContactFilter = study.IsRecruitingIdentifiableParticipants;
 
-            model.ShowRecruitedFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
-            model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
-
-            if (!model.ShowPreferredContactFilter) {
-                model.SelectedVolunteersPreferredContact = (int)ContactMethodId.Email;
+                if (!model.ShowPreferredContactFilter)
+                {
+                    model.SelectedVolunteersPreferredContact = (int)ContactMethodId.Email;
+                }
             }
         }
+
+        if (model.VolunteersPreferredContactItems == null || !model.VolunteersPreferredContactItems.Any())
+        {
+            model.VolunteersPreferredContactItems = VolunteerFilterViewModel.SetVolunteersPreferredContactItems();
+        }
+
+        if (model.VolunteersContactedItems == null || !model.VolunteersContactedItems.Any())
+        {
+            model.VolunteersContactedItems = VolunteerFilterViewModel.SetVolunteersContactedItems();
+        }
+
+        if (model.VolunteersRecruitedItems == null || !model.VolunteersRecruitedItems.Any())
+        {
+            model.VolunteersRecruitedItems = VolunteerFilterViewModel.SetVolunteersRecruitedItems();
+        }
+
+        if (model.VolunteersCompletedRegistrationItems == null || !model.VolunteersCompletedRegistrationItems.Any())
+        {
+            model.VolunteersCompletedRegistrationItems = VolunteerFilterViewModel.SetVolunteersCompletedRegistrationItems();
+        }
+
+        if (model.VolunteersRegisteredInterestItems == null || !model.VolunteersRegisteredInterestItems.Any())
+        {
+            model.VolunteersRegisteredInterestItems = VolunteerFilterViewModel.SetVolunteersRegisteredInterestItems();
+        }
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
-        await PopulateStudyDetails(model, cancellationToken);
-
-        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Email) && 
-            !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Letter) && 
-            model.ShowPreferredContactFilter)
+        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Email) && !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Letter) && model.ShowPreferredContactFilter)
         {
-            ModelState.AddModelError(nameof(model.SelectedVolunteersPreferredContact), "Select if the volunteers preferred contact method is email or letter");
-            return await ViewIndex(model, cancellationToken);
+            TempData["ContactMethodError"] = "Select if the volunteers preferred contact method is email or letter";
+            return RedirectToAction("Index",model);
         }
+        
+
+        var dobRange = _today.GetDatesWithinYearRange(model.AgeRange.From, model.AgeRange.To);
 
         var filterCriteria = new FilterCriteria
         {
