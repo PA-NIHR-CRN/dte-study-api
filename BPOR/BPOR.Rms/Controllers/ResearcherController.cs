@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities;
+using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Researcher;
 using BPOR.Rms.Models.Study;
@@ -66,8 +67,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                         IsRecruitingIdentifiableParticipants = model.RecruitingIdentifiableVolunteers.Value,
                         SubmissionOutcomeId = model.PortfolioSubmissionStatus == 1 ? model.OutcomeOfSubmission : null,
                         CpmsId = model.PortfolioSubmissionStatus == 1 ? model.CPMSId : null,
-                        FundingCode = model.HasFunding == true ? model.FundingCode : null,
-                        InformationUrl = model.InformationUrl,
+                        FundingCode = model.HasFunding == true ? model.FundingCode : null
                     };
 
                     context.Add(study);
@@ -274,14 +274,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             }
         }
         
-        if (model.Step == 8)
-        {
-            if (!string.IsNullOrWhiteSpace(model.InformationUrl) &&
-                !Uri.IsWellFormedUriString(model.InformationUrl.Trim(), UriKind.Absolute))
-            {
-                ModelState.AddModelError(nameof(model.InformationUrl), "The website you have tried to enter is not formatted correctly");
-            }
-        }
     }
 
     public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
@@ -559,7 +551,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 studyToUpdate.TargetPopulation = model.TargetPopulation;
                 studyToUpdate.RecruitmentStartDate = model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
                 studyToUpdate.RecruitmentEndDate = model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
-                studyToUpdate.InformationUrl = string.IsNullOrWhiteSpace(model.InformationUrl) ? null : model.InformationUrl.Trim();
 
                 await context.SaveChangesAsync();
             }

@@ -7,6 +7,8 @@ namespace BPOR.Domain.Entities.Configuration;
 
 public class RoleConfiguration : IEntityTypeConfiguration<Role>
 {
+    public const string RoleNameAdmin = "Admin";
+    
     public static int RoleId(string code)
     {
         return GetRoles().Where(x => x.Code == code).Select(x => x.Id).Single();
@@ -18,7 +20,7 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
             new Role
             {
                 Id = 1,
-                Code = "Admin",
+                Code = RoleNameAdmin,
                 Description = "Admin",
                 IsDeleted = false
             },

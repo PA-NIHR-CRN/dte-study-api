@@ -51,9 +51,6 @@ namespace BPOR.Rms.Models.Researcher
 
         [Display(Name = "Will participants in the study be recruited as named individual volunteers?", Order = 13)]
         public bool? RecruitingIdentifiableVolunteers { get; set; }
-
-        [Display(Name = "Information URL", Order = 14)]
-        public string? InformationUrl { get; set; }
         
         public override String StepName
         {

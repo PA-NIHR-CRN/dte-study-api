@@ -29,6 +29,9 @@ public class StudyFormEditModel : FormWithSteps
     [Required(ErrorMessage = "Select whether the study is recruiting identifiable participants")]
     public bool? IsRecruitingIdentifiableParticipants { get; set; }
 
+    [Display(Name = "Information URL", Order = 6)]
+    public string? InformationUrl { get; set; }
+
     public override String StepName
     {
         get
