@@ -13,8 +13,8 @@ namespace BPOR.Domain.Extensions
         public static IQueryable<Participant> GetRandomSampleOfParticipants(
             this ParticipantDbContext dbContext, int seed, double pageMinInclusive, double pageMaxExclusive)
         {
-            // The no_merge hint is to force the execution engine to evaulate both the random
-            // ordering and page before evaulating any further filters. If this doesn't
+            // The no_merge hint is to force the execution engine to evaluate both the random
+            // ordering and page before evaluating any further filters. If this doesn't
             // happen then a full table scan occurs which can timeout.
             return dbContext.Database
             .SqlQuery<ParticipantOrdering>(
