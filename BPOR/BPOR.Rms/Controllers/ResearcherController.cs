@@ -1,5 +1,4 @@
 using BPOR.Domain.Entities;
-using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Researcher;
 using BPOR.Rms.Models.Study;
@@ -67,7 +66,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                         IsRecruitingIdentifiableParticipants = model.RecruitingIdentifiableVolunteers.Value,
                         SubmissionOutcomeId = model.PortfolioSubmissionStatus == 1 ? model.OutcomeOfSubmission : null,
                         CpmsId = model.PortfolioSubmissionStatus == 1 ? model.CPMSId : null,
-                        FundingCode = model.HasFunding == true ? model.FundingCode : null
+                        FundingCode = model.HasFunding == true ? model.FundingCode : null,
                     };
 
                     context.Add(study);
@@ -273,7 +272,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                 ModelState.AddModelError("RecruitingIdentifiableVolunteers", "Select whether participants in the study will be recruited as named individual volunteers");
             }
         }
-        
     }
 
     public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
@@ -470,7 +468,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
         [Bind("ShortName,ChiefInvestigator,StudySponsors,CPMSId,PortfolioSubmissionStatus,OutcomeOfSubmission," +
-        "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,RecruitingIdentifiableVolunteers,Step,InformationUrl")]
+        "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,RecruitingIdentifiableVolunteers,Step")]
         ResearcherStudyFormViewModel model)
     {
         model.Id = id;
