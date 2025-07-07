@@ -6,7 +6,7 @@ namespace BPOR.Rms.Models.Researcher
 {
     public class ResearcherStudyFormViewModel : FormWithSteps
     {
-        public override int TotalSteps => 9;
+        public override int TotalSteps => 8;
 
         [Display(Name = "Study ID")]
         public int Id { get; set; }
@@ -51,7 +51,7 @@ namespace BPOR.Rms.Models.Researcher
 
         [Display(Name = "Will participants in the study be recruited as named individual volunteers?", Order = 13)]
         public bool? RecruitingIdentifiableVolunteers { get; set; }
-        
+
         public override String StepName
         {
             get
@@ -71,8 +71,6 @@ namespace BPOR.Rms.Models.Researcher
                     case 7:
                         return "Study recruitment";
                     case 8:
-                        return "Email campaign";
-                    case 9:
                         return "Check your answers";
                     default:
                         return "Submit study";
