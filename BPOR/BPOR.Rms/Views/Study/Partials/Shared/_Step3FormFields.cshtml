@@ -4,23 +4,6 @@
     Email campaign
 </h1>
 
-<div class="govuk-form-group @(Html.ViewData.ModelState["InformationUrl"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-    <label asp-for="InformationUrl" class="govuk-label" for="InformationUrl">
-        @Html.DisplayNameFor(model => model.InformationUrl)
-    </label>
-    <div id="information-url-hint" class="govuk-hint">
-        Provide the information URL for the study. A link to this URL will be included in campaign emails.
-    </div>
-    @if (Html.ViewData.ModelState["InformationUrl"]?.Errors.Count > 0)
-    {
-        <span id="InformationUrl-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span>
-            @Html.ValidationMessageFor(model => model.InformationUrl)
-        </span>
-        <input asp-for="InformationUrl" class="govuk-input govuk-input--error" id="InformationUrl" aria-describedby="information-url-hint" aria-errormessage="InformationUrl-error" value="@(Model.InformationUrl)"></input>
-    }
-    else
-    {
-        <input asp-for="InformationUrl" class=" govuk-input" id="InformationUrl" aria-describedby="information-url-hint" value="@(Model.InformationUrl)"></input>
-    }
-</div>
+<form-group for="InformationUrl" class="govuk-form-group">
+    <input asp-for="InformationUrl" class=" govuk-input" id="InformationUrl" aria-describedby="information-url-hint" value="@(Model.InformationUrl)"></input>
+</form-group>
