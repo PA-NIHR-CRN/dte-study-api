@@ -8,11 +8,16 @@ using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Controllers;
-public class StudyController(ParticipantDbContext context, IPaginationService paginationService, ICurrentUserProvider<User> currentUserProvider
+
+public class StudyController(
+    ParticipantDbContext context,
+    IPaginationService paginationService,
+    ICurrentUserProvider<User> currentUserProvider
 ) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false, CancellationToken token = default)
+    public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false,
+        CancellationToken token = default)
     {
         if (hasBeenReset)
         {
@@ -165,17 +170,18 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
             ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
         }
     }
-    
-       private void ValidateStep3(StudyFormViewModel model)
-       {
- if (!string.IsNullOrWhiteSpace(model.InformationUrl) &&
-        !Uri.IsWellFormedUriString(model.InformationUrl.Trim(), UriKind.Absolute))
+
+    private void ValidateStep3(StudyFormViewModel model)
     {
-        ModelState.AddModelError(nameof(model.InformationUrl), "The website you have tried to enter is not formatted correctly");
-    }
+        if (!string.IsNullOrWhiteSpace(model.InformationUrl) &&
+            !Uri.IsWellFormedUriString(model.InformationUrl.Trim(), UriKind.Absolute))
+        {
+            ModelState.AddModelError(nameof(model.InformationUrl),
+                "The website you have tried to enter is not formatted correctly");
+        }
     }
 
-    // succss
+    // success
     public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
     {
         return View(viewModel);
@@ -186,7 +192,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         var studyModel = await context.Studies
             .AsStudyFormViewModel()
             .FirstOrDefaultAsync(s => s.Id == id);
-
 
 
         if (studyModel == null)
@@ -213,14 +218,13 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
 
         if (model.Step == 1)
         {
-            
         }
-        
+
         if (model.Step == 2)
         {
             ValidateStep2(model);
         }
-        
+
         if (model.Step == 3)
         {
             ValidateStep3(model);
