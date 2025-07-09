@@ -1,3 +1,4 @@
+@using BPOR.Domain.Entities.Configuration
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 
 <div>
@@ -9,6 +10,7 @@
         <summary-list-item for="Study.CpmsId" />
         <summary-list-item for="Study.FullName" />
         <summary-list-item for="Study.EmailAddress" />
+        <summary-list-item for="Study.InformationUrl"/>
 
         <summary-list-item for="Study.ChiefInvestigator" />
         <summary-list-item for="Study.StudySponsors" />
