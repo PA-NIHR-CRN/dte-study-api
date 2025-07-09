@@ -218,6 +218,10 @@ public class StudyController(
 
         if (model.Step == 1)
         {
+            if (model.StudyName.Length > 255)
+            {
+                ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
+            }
         }
 
         if (model.Step == 2)
