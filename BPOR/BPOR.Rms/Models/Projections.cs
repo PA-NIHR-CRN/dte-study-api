@@ -49,7 +49,7 @@ public static class Projections
             CPMSId = r.CpmsId,
             RecruitingIdentifiableVolunteers = r.IsRecruitingIdentifiableParticipants,
             OutcomeOfSubmission = r.SubmissionOutcomeId,
-            PortfolioSubmissionStatus = r.SubmittedId,
+            PortfolioSubmissionStatus = r.SubmittedId
         };
     }
 
@@ -61,7 +61,8 @@ public static class Projections
             FullName = s.FullName,
             EmailAddress = s.EmailAddress,
             StudyName = s.StudyName,
-            CpmsId = s.CpmsId
+            CpmsId = s.CpmsId,
+            InformationUrl = s.InformationUrl
         };
     }
 

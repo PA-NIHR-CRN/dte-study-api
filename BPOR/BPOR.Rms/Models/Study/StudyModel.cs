@@ -77,6 +77,8 @@ public class StudyModel
     [ResearcherEdit(4)]
     public string? HasFundingDisplay => HasFunding == null ? null : (HasFunding == true ? "Yes" : "No");
 
+    [Display(Name = "Email campaign information URL")]
+    [StudyEdit(3)]
     public string? InformationUrl { get; set; }
 
 }
