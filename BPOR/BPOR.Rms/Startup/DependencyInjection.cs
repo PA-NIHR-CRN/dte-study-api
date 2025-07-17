@@ -49,6 +49,9 @@ public static class DependencyInjection
             });
         });
 
+        services.Configure<VolunteerFilterServiceOptions>(configuration.GetSection("VolunteerFilterService"));
+
+        services.AddScoped<IVolunteerFilterService, VolunteerFilterService>();
         services.AddScoped<ICampaignService, CampaignService>();
         services.AddTransient<IPostcodeMapper, LocationApiClient>();
         services.AddScoped<IRefDataService, RefDataService>();

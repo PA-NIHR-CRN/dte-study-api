@@ -14,7 +14,7 @@ public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformati
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public int ParticipantId { get; set; }
+    public int ParticipantId { get; set; } 
     public Participant Participant { get; set; }
     /// <summary>
     /// OSGB 6 digit Easting
