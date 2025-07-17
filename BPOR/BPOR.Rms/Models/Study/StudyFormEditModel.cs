@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using BPOR.Rms.Models.Researcher;
 using System.ComponentModel.DataAnnotations;
 
@@ -28,6 +29,9 @@ public class StudyFormEditModel : FormWithSteps
     [Display(Name = "Is this study recruiting identifiable participants?", Order = 4)]
     [Required(ErrorMessage = "Select whether the study is recruiting identifiable participants")]
     public bool? IsRecruitingIdentifiableParticipants { get; set; }
+
+    [Display(Name = "Information URL", Order = 6, Description = "Provide the information URL for the study. A link to this URL will be included in campaign emails.")]
+    public string? InformationUrl { get; set; }
 
     public override String StepName
     {

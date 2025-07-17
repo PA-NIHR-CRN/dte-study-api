@@ -1,0 +1,79 @@
+@using BPOR.Domain.Enums
+@using NIHR.Infrastructure.Paging
+@model IEnumerable<BPOR.Rms.Models.Study.Campaign>
+
+@{
+    var hideCampaignType = (bool?)ViewData["CampaignTable.HideCampaignType"] ?? false;
+}
+<table class="govuk-table" style="width: 100%;">
+
+    <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header ">Date/time sent</th>
+            @if (!hideCampaignType)
+            {
+                <th scope="col" class="govuk-table__header ">Campaign type</th>
+            }
+            <th scope="col" class="govuk-table__header ">Template</th>
+            <th scope="col" class="govuk-table__header ">Number contacted</th>
+            <th scope="col" class="govuk-table__header ">Registered interest</th>
+            <th scope="col" class="govuk-table__header ">Bounced</th>
+            <th scope="col" class="govuk-table__header ">Status</th>
+        </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+        @foreach (var campaign in Model)
+        {
+            <tr class="govuk-table__row">
+                <td class="govuk-table__cell">
+                    @campaign.CreatedAt.ToString("dd/MM/yyyy, HH:mm")
+                </td>
+                @if (!hideCampaignType)
+                {
+                    <td class="govuk-table__cell">@campaign.TypeId.ToString()</td>
+                }
+                <td class="govuk-table__cell">@campaign.Name</td>
+                <td class="govuk-table__cell">@campaign.TotalCampaignNotificationsSent / @campaign.TargetGroupSize</td>
+
+
+                <td class="govuk-table__cell">
+                    @if (@campaign.TypeId == ContactMethodId.Letter)
+                    {
+                        @:Not applicable
+                    }
+                    else
+                    {
+                        @campaign.TotalCampaignRegisteredInterest
+                    }
+                </td>
+
+
+                <td class="govuk-table__cell">
+                    @if (@campaign.TypeId == ContactMethodId.Letter)
+                    {
+                        @:Not applicable
+                    }
+                    else
+                    {
+                        @campaign.TotalContactAttemptsFailed
+                    }
+
+                </td>
+                <td class="govuk-table__cell">
+                    @if (campaign.TotalCampaignNotificationsSent < campaign.TargetGroupSize)
+                    {
+                        <strong class="govuk-tag govuk-tag--orange">
+                            In progress
+                        </strong>
+                    }
+                    else if (campaign.TotalCampaignNotificationsSent >= campaign.TargetGroupSize)
+                    {
+                        <strong class="govuk-tag govuk-tag--green">
+                            Sent
+                        </strong>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -29,4 +29,5 @@ public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformati
         Easting = 0;
         Northing = 0;
         IsApproximate = true;
-    }}
+    }
+}

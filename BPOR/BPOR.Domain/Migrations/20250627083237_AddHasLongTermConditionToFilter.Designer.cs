@@ -4,6 +4,7 @@ using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
@@ -12,9 +13,11 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    partial class ParticipantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250627083237_AddHasLongTermConditionToFilter")]
+    partial class AddHasLongTermConditionToFilter
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -645,9 +648,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("Easting")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsApproximate")
                         .HasColumnType("tinyint(1)");
 
@@ -658,9 +658,6 @@ namespace Dynamo.Stream.Handler.Migrations
                         .IsRequired()
                         .HasColumnType("point")
                         .HasAnnotation("MySql:SpatialReferenceSystemId", 4326);
-
-                    b.Property<int>("Northing")
-                        .HasColumnType("int");
 
                     b.Property<int>("ParticipantId")
                         .HasColumnType("int");
