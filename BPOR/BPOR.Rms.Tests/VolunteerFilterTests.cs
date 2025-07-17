@@ -25,7 +25,7 @@ namespace BPOR.Rms.Tests
         public async Task PostcodeRadiusSearchIncludesCorrectParticipants()
         {
             // Arrange
-            LocalParticipantDatabase localParticipantDatabase = new LocalParticipantDatabase(_configuration);
+            using LocalParticipantDatabase localParticipantDatabase = new LocalParticipantDatabase(_configuration);
             using var db = localParticipantDatabase.CreateDbContext();
 
             static Participant CreateParticipant(string name, double latitude, double longitude)

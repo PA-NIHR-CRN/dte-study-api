@@ -4,9 +4,10 @@ namespace BPOR.Tests.Common
 {
     public class SaveChangeCountInterceptor : ISaveChangesInterceptor
     {
-        int _saveChangesAsyncCount = 0;
+        int _saveChangesAsyncCount, _saveChangesCount = 0;
 
         public int SaveChangesAsyncCount => _saveChangesAsyncCount;
+        public int SaveChangesCount => _saveChangesCount;
 
         public ValueTask<InterceptionResult<int>> SavingChangesAsync(
            DbContextEventData eventData,
@@ -19,7 +20,7 @@ namespace BPOR.Tests.Common
 
         public InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
         {
-            Interlocked.Increment(ref _saveChangesAsyncCount);
+            Interlocked.Increment(ref _saveChangesCount);
             return result;
         }
     }
