@@ -132,6 +132,16 @@ public static class ParticipantQueryExtensions
         return query;
     }
 
+    public static IQueryable<Participant> WhereHasLongTermCondition(this IQueryable<Participant> query, ISet<bool?> options)
+    {
+        if (options.Any())
+        {
+            return query.Where(p => options.Contains(p.HasLongTermCondition));
+        }
+
+        return query;
+    }
+
     public static IQueryable<Participant> WhereHasLocation(this IQueryable<Participant> query, PostcodeSearchModel location)
     {
         query = query.WhereHasAnyPostcodeDistrict(location.GetPostcodeDistricts());

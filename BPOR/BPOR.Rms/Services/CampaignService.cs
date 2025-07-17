@@ -338,6 +338,7 @@ internal static class DbContextExtensions
             .Include(fc => fc.FilterEthnicGroup)
             .Include(fc => fc.FilterPostcode)
             .Include(fc => fc.FilterSexSameAsRegisteredAtBirth)
+            .Include(fc => fc.FilterHasLongTermCondition)
             .Include(fc => fc.Study);
     }
 }

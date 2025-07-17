@@ -5,7 +5,3 @@ using Rbec.Postcodes;
 
 namespace BPOR.Rms.Mappers;
 
-public class FilterMapper
-{
-
-}

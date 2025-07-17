@@ -22,29 +22,67 @@ public class FilterController(ParticipantDbContext context,
 {
     private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 
-    public async Task<IActionResult> Index(VolunteerFilterViewModel model, string? activity = null, CancellationToken cancellationToken = default)
+    private async Task<IActionResult> ViewIndex(VolunteerFilterViewModel model, CancellationToken cancellationToken)
     {
-        //ModelState.Clear();
-
-        if (TempData["ContactMethodError"] != null)
-        {
-            ModelState.AddModelError(nameof(model.SelectedVolunteersPreferredContact), TempData["ContactMethodError"].ToString());
-            await PopulateFilterIndexDataAsync(model, cancellationToken);
-            return View(model);
-
-        }
         bool isResearcher = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
-
         if (isResearcher)
         {
             return View("Unauthorised");
         }
+        return View("index", model);
+    }
 
+    [HttpPost]
+    public async Task<IActionResult> ClearFilters(VolunteerFilterViewModel model, CancellationToken cancellationToken)
+    {
+        this.AddSuccessNotification($"All previously applied filters have been removed.");
+        ModelState.Clear();
+        model = new VolunteerFilterViewModel { StudyId = model.StudyId };
+        await PopulateStudyDetails(model, cancellationToken);
+        return await ViewIndex(model, cancellationToken);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> FilterVolunteers(VolunteerFilterViewModel model, CancellationToken cancellationToken)
+    {
+        await PopulateStudyDetails(model, cancellationToken);
+        
         if (!(User.IsInRole("Tester") && User.IsInRole("Admin")))
         {
             model.Testing = new();
         }
+        
+        var results = await FilterVolunteersAsync(model, cancellationToken);
+        model.VolunteerCount = results.Count?.Value;
+        model.Testing.VolunteerResults = results.Items?.Value ?? Page<VolunteerResult>.Empty();
 
+        if (hostEnvironment.IsProduction())
+        {
+            foreach (var x in model.Testing.VolunteerResults)
+            {
+                if (Postcode.TryParse(x.Postcode, out var postcode))
+                {
+                    x.Postcode = postcode.ToString().Split(' ').First();
+                }
+
+                x.FirstName = string.Empty;
+                x.LastName = string.Empty;
+                x.Email = string.Empty;
+                x.DateOfBirth = null;
+            }
+        }
+
+        return await ViewIndex(model, CancellationToken.None);
+    }
+    
+    public async Task<IActionResult> Index(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
+    {
+        await PopulateStudyDetails(model, cancellationToken);
+        return await ViewIndex(model, cancellationToken);
+    }
+
+    private async Task PopulateStudyDetails(VolunteerFilterViewModel model, CancellationToken cancellationToken)
+    {
         if (model.StudyId is not null)
         {
             var selectedStudy = await context.Studies
@@ -159,18 +197,19 @@ public class FilterController(ParticipantDbContext context,
             model.VolunteersRegisteredInterestItems = VolunteerFilterViewModel.SetVolunteersRegisteredInterestItems();
         }
     }
-
+    
     [HttpPost]
     public async Task<IActionResult> SetupCampaign(VolunteerFilterViewModel model, CancellationToken cancellationToken = default)
     {
-        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Email) && !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Letter) && model.ShowPreferredContactFilter)
-        {
-            TempData["ContactMethodError"] = "Select if the volunteers preferred contact method is email or letter";
-            return RedirectToAction("Index",model);
-        }
-        
+        await PopulateStudyDetails(model, cancellationToken);
 
-        var dobRange = _today.GetDatesWithinYearRange(model.AgeRange.From, model.AgeRange.To);
+        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Email) && 
+            !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Letter) && 
+            model.ShowPreferredContactFilter)
+        {
+            ModelState.AddModelError(nameof(model.SelectedVolunteersPreferredContact), "Select if the volunteers preferred contact method is email or letter");
+            return await ViewIndex(model, cancellationToken);
+        }
 
         var filterCriteria = new FilterCriteria
         {
@@ -196,6 +235,7 @@ public class FilterController(ParticipantDbContext context,
             FilterGender = model.GetGenderOptions().Select(x => new FilterGender { GenderId = (int)x }).ToList(), // TODO: support null gender
             FilterSexSameAsRegisteredAtBirth = GetSexSameAsRegisteredAtBirths(model),
             FilterEthnicGroup = GetEthnicGroups(model),
+            FilterHasLongTermCondition = GetFilterHasLongTermCondition(model)
         };
 
         context.FilterCriterias.Add(filterCriteria);
@@ -225,6 +265,49 @@ public class FilterController(ParticipantDbContext context,
         Map([model.IsGenderSameAsSexRegisteredAtBirth_Yes, model.IsGenderSameAsSexRegisteredAtBirth_No, model.IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay],
             x => new FilterSexSameAsRegisteredAtBirth { YesNoPreferNotToSay = x });
 
+    private static List<FilterHasLongTermCondition> GetFilterHasLongTermCondition(VolunteerFilterViewModel model) =>
+    Map([model.HasLongTermCondition_Yes, model.HasLongTermCondition_No, model.HasLongTermCondition_PreferNotToSay],
+        x => new FilterHasLongTermCondition { YesNoPreferNotToSay = x });
+
+    protected async Task<FilterResults> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken token = default)
+    {
+        FilterResults results = new();
+
+        if (ModelState.IsValid)
+        {
+            var query = context.Participants.FilterVolunteers(timeProvider, model);
+
+            results.Count = query.DeferredCount().FutureValue();
+
+            if (model.Testing.ShowResults)
+            {
+                var location = model.PostcodeSearch.PostcodeRadiusSearch.Location;
+                results.Items = query.Select(x => new VolunteerResult
+                {
+                    Id = x.Id,
+                    Email = x.Email,
+                    Postcode = x.Address == null ? null : x.Address.Postcode,
+                    AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
+                    DateOfBirth = x.DateOfBirth,
+                    Age = x.DateOfBirth.YearsTo(_today),
+                    Gender = x.Gender.Code,
+                    Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
+                    DistanceInMiles = location != null && x.ParticipantLocation != null ? x.ParticipantLocation.Location.Distance(location) / 1609.344 : null,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
+                    HasRegistered = x.RegistrationConsentAtUtc,
+                    EthnicGroup = x.EthnicGroup,
+                    GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
+                    ContactMethod = x.ContactMethodId.FirstOrDefault().ContactMethodId
+                })
+                .OrderBy(x => x.Id)
+                .DeferredPage(paginationService);
+            }
+        }
+
+        return results;
+    }
     
 }
 

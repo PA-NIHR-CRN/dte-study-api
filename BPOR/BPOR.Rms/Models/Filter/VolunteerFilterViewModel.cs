@@ -146,6 +146,12 @@ public class VolunteerFilterViewModel : IValidatableObject
     public bool Ethnicity_Other { get; set; }
     [Display(Name = "White", Order = 20)]
     public bool Ethnicity_White { get; set; }
+    [Display(Name = "Yes", Order = 21)]
+    public bool HasLongTermCondition_Yes { get; set; }
+    [Display(Name = "No", Order = 22)]
+    public bool HasLongTermCondition_No { get; set; }
+    [Display(Name = "Prefer Not To Say", Order = 23)]
+    public bool HasLongTermCondition_PreferNotToSay { get; set; }
     public int? VolunteerCount { get; set; }
 
     public VolunteerFilterViewTestingModel Testing { get; set; } = new();
@@ -184,6 +190,28 @@ public class VolunteerFilterViewModel : IValidatableObject
         }
 
         if (IsGenderSameAsSexRegisteredAtBirth_PreferNotToSay)
+        {
+            retval.Add(null);
+        }
+
+        return retval;
+    }
+
+    public ISet<bool?> GetHasLongTermCondition()
+    {
+        var retval = new HashSet<bool?>();
+
+        if (HasLongTermCondition_Yes)
+        {
+            retval.Add(true);
+        }
+
+        if (HasLongTermCondition_No)
+        {
+            retval.Add(false);
+        }
+
+        if (HasLongTermCondition_PreferNotToSay)
         {
             retval.Add(null);
         }

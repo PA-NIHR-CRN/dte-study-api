@@ -8,11 +8,16 @@ using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Controllers;
-public class StudyController(ParticipantDbContext context, IPaginationService paginationService, ICurrentUserProvider<User> currentUserProvider
+
+public class StudyController(
+    ParticipantDbContext context,
+    IPaginationService paginationService,
+    ICurrentUserProvider<User> currentUserProvider
 ) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false, CancellationToken token = default)
+    public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false,
+        CancellationToken token = default)
     {
         if (hasBeenReset)
         {
@@ -108,14 +113,7 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
             }
             else if (model.Step == 2)
             {
-                if (string.IsNullOrEmpty(model.StudyName))
-                {
-                    ModelState.AddModelError("StudyName", "Enter the study name");
-                }
-                else if (model.StudyName.Length > 255)
-                {
-                    ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
-                }
+                ValidateStep2(model);
 
                 if (ModelState.IsValid)
                 {
@@ -161,7 +159,29 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         return View(model);
     }
 
-    // succss
+    private void ValidateStep2(StudyFormViewModel model)
+    {
+        if (string.IsNullOrEmpty(model.StudyName))
+        {
+            ModelState.AddModelError("StudyName", "Enter the study name");
+        }
+        else if (model.StudyName.Length > 255)
+        {
+            ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
+        }
+    }
+
+    private void ValidateStep3(StudyFormViewModel model)
+    {
+        if (!string.IsNullOrWhiteSpace(model.InformationUrl) &&
+            !Uri.IsWellFormedUriString(model.InformationUrl.Trim(), UriKind.Absolute))
+        {
+            ModelState.AddModelError(nameof(model.InformationUrl),
+                "The website you have tried to enter is not formatted correctly");
+        }
+    }
+
+    // success
     public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
     {
         return View(viewModel);
@@ -172,7 +192,6 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
         var studyModel = await context.Studies
             .AsStudyFormViewModel()
             .FirstOrDefaultAsync(s => s.Id == id);
-
 
 
         if (studyModel == null)
@@ -191,15 +210,28 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
-        [Bind("FullName,EmailAddress,StudyName,CpmsId, Step")]
+        [Bind("FullName,EmailAddress,StudyName,CpmsId,Step,InformationUrl")]
         StudyFormViewModel model)
     {
         model.Id = id;
         ModelState.Remove("IsRecruitingIdentifiableParticipants");
 
-        if (model.StudyName.Length > 255)
+        if (model.Step == 1)
         {
-            ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
+            if (model.StudyName.Length > 255)
+            {
+                ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
+            }
+        }
+
+        if (model.Step == 2)
+        {
+            ValidateStep2(model);
+        }
+
+        if (model.Step == 3)
+        {
+            ValidateStep3(model);
         }
 
         if (ModelState.IsValid)
@@ -218,6 +250,9 @@ public class StudyController(ParticipantDbContext context, IPaginationService pa
                 studyToUpdate.StudyName = model.StudyName;
                 studyToUpdate.CpmsId = model.CpmsId;
                 studyToUpdate.UpdatedAt = DateTime.UtcNow;
+                studyToUpdate.InformationUrl = string.IsNullOrWhiteSpace(model.InformationUrl)
+                    ? null
+                    : model.InformationUrl.Trim();
 
                 await context.SaveChangesAsync();
             }
