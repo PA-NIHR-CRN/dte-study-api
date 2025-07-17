@@ -179,9 +179,3 @@ public class FilterController(ParticipantDbContext context,
     Map([model.HasLongTermCondition_Yes, model.HasLongTermCondition_No, model.HasLongTermCondition_PreferNotToSay],
         x => new FilterHasLongTermCondition { YesNoPreferNotToSay = x });
 }
-
-public class FilterResults
-{
-    public PageDeferred<VolunteerResult>? Items { get; internal set; }
-    public QueryFutureValue<int>? Count { get; internal set; }
-}
