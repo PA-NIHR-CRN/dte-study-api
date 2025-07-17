@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Registration.Stream.Ha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Tests.Common", "BPOR.Tests.Common\BPOR.Tests.Common.csproj", "{9F1B9F43-FDD6-4E5A-BA99-78CCADA0B831}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.Geometry", "NIHR.Geometry\NIHR.Geometry.csproj", "{3080B510-17A2-4982-83D0-BAED3693ED62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -103,6 +105,10 @@ Global
 		{310FC69F-836B-4940-9634-EE74BA4F219C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{310FC69F-836B-4940-9634-EE74BA4F219C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{310FC69F-836B-4940-9634-EE74BA4F219C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3080B510-17A2-4982-83D0-BAED3693ED62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3080B510-17A2-4982-83D0-BAED3693ED62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3080B510-17A2-4982-83D0-BAED3693ED62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3080B510-17A2-4982-83D0-BAED3693ED62}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8CB36539-35E4-8245-E760-778EC134B17D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8CB36539-35E4-8245-E760-778EC134B17D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CB36539-35E4-8245-E760-778EC134B17D}.Release|Any CPU.ActiveCfg = Release|Any CPU

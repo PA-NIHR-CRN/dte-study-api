@@ -40,6 +40,7 @@
     <ItemGroup>
       <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
       <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
+      <ProjectReference Include="..\NIHR.Geometry\NIHR.Geometry.csproj" />
       <ProjectReference Include="..\NIHR.Infrastructure.EntityFrameworkCore\NIHR.Infrastructure.EntityFrameworkCore.csproj" />
       <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
     </ItemGroup>

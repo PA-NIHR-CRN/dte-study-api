@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Domain.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
@@ -57,13 +58,10 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
         {
             if (cache.TryGetValue(participant.Address.Postcode, out var latLng))
             {
-                participant.ParticipantLocation = new ParticipantLocation
-                {
-                    Location = new Point(latLng.Longitude, latLng.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid }
-                };
+                participant.ParticipantLocation = new ParticipantLocation();
+                participant.ParticipantLocation.SetLocationFromLatLong(latLng.Latitude, latLng.Longitude);
             }
         }
-
 
         await context.SaveChangesAsync(cancellationToken);
 
@@ -131,10 +129,8 @@ public class GeolocationController(ParticipantDbContext context, IPostcodeMapper
             foreach (var participant in participantsBatch)
             {
                 var randomCoordinates = GenerateRandomCoordinatesForUK();
-                participant.ParticipantLocation = new ParticipantLocation
-                {
-                    Location = new Point(randomCoordinates.longitude, randomCoordinates.latitude) { SRID = ParticipantLocationConfiguration.LocationSrid }
-                };
+                participant.ParticipantLocation = new ParticipantLocation();
+                participant.ParticipantLocation.SetLocationFromLatLong(randomCoordinates.latitude, randomCoordinates.longitude);
             }
 
             await context.SaveChangesAsync(cancellationToken);
