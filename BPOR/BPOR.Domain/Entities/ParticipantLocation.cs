@@ -1,9 +1,11 @@
 using BPOR.Domain.Entities.Configuration;
+using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 
+[Index(nameof(Easting), nameof(Northing))]
 public class ParticipantLocation : ISoftDelete, ITimestamped, IPersonalInformation
 {
     public int Id { get; set; }

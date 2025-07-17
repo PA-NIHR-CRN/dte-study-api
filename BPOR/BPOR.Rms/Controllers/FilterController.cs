@@ -18,8 +18,7 @@ public class FilterController(ParticipantDbContext context,
                               IPaginationService paginationService,
                               IHostEnvironment hostEnvironment,
                               TimeProvider timeProvider,
-                              ICurrentUserProvider<User> currentUserProvider,
-                              ILogger<FilterController> logger) : Controller
+                              ICurrentUserProvider<User> currentUserProvider) : Controller
 {
     private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
 

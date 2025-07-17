@@ -676,6 +676,8 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.HasIndex("ParticipantId")
                         .IsUnique();
 
+                    b.HasIndex("Easting", "Northing");
+
                     b.ToTable("ParticipantLocation");
                 });
 
