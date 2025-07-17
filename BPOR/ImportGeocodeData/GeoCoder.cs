@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Rbec.Postcodes;
 using Microsoft.EntityFrameworkCore;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Domain.Extensions;
 
 namespace ImportGeocodeData
 {
@@ -92,7 +93,7 @@ namespace ImportGeocodeData
                     address.Participant.ParticipantLocation = new ParticipantLocation();
                 }
 
-                address.Participant.ParticipantLocation.Location = new NetTopologySuite.Geometries.Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
+                address.Participant.ParticipantLocation.SetLocationFromLatLong(location);
                 return true;
             }
             else
