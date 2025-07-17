@@ -46,6 +46,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<FilterGender> FilterGender { get; set; } = null!;
     public DbSet<FilterContactMethod> FilterContactMethod { get; set; } = null!;
     public DbSet<FilterSexSameAsRegisteredAtBirth> FilterSexSameAsRegisteredAtBirth { get; set; } = null!;
+    public DbSet<FilterHasLongTermCondition> FilterHasLongTermCondition { get; set; } = null!;
     public DbSet<CampaignParticipant> CampaignParticipant { get; set; } = null!;
     public DbSet<DeliveryStatus> DeliveryStatus { get; set; } = null!;
     public DbSet<StudyParticipantEnrollment> StudyParticipantEnrollment { get; set; } = null!;

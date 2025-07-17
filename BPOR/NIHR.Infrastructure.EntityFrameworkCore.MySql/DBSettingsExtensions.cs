@@ -18,6 +18,12 @@ namespace NIHR.Infrastructure.EntityFrameworkCore
                 AllowZeroDateTime = true,
                 ConvertZeroDateTime = true,
             };
+
+            if (source.DefaultCommandTimeout is not null)
+            {
+                connectionStringBuilder.DefaultCommandTimeout = source.DefaultCommandTimeout.Value;
+            }
+
             return connectionStringBuilder.ConnectionString;
         }
     }
