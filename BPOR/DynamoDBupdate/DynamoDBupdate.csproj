@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
     <ProjectReference Include="..\BPOR.Rms\BPOR.Rms.csproj" />
+    <ProjectReference Include="..\NIHR.Geometry\NIHR.Geometry.csproj" />
     <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
     <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
   </ItemGroup>

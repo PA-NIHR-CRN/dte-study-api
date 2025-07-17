@@ -66,7 +66,7 @@ public static class DependencyInjection
 
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
-
+        
         services.AddDistributedMemoryCache();
         services.AddPaging();
         services.AddDataProtection();

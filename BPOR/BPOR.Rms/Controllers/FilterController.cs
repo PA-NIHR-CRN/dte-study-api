@@ -19,6 +19,8 @@ public class FilterController(ParticipantDbContext context,
                               ICurrentUserProvider<User> currentUserProvider,
                               IVolunteerFilterService volunteerFilterService) : Controller
 {
+    private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
+
     private async Task<IActionResult> ViewIndex(VolunteerFilterViewModel model, CancellationToken cancellationToken)
     {
         bool isResearcher = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
