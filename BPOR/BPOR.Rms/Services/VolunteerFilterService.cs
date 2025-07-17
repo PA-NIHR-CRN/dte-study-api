@@ -74,6 +74,14 @@ namespace BPOR.Rms.Services
                 Ethnicity_Mixed = criteria.FilterEthnicGroup.Any(f => f.EthnicGroupId == 3),
                 Ethnicity_White = criteria.FilterEthnicGroup.Any(f => f.EthnicGroupId == 4),
                 Ethnicity_Other = criteria.FilterEthnicGroup.Any(f => f.EthnicGroupId == 5),
+                
+                HasLongTermCondition_Yes =
+                    criteria.FilterHasLongTermCondition.Any(f => f.YesNoPreferNotToSay == 1),
+                HasLongTermCondition_No =
+                    criteria.FilterHasLongTermCondition.Any(f => f.YesNoPreferNotToSay == 2),
+                HasLongTermCondition_PreferNotToSay =
+                    criteria.FilterHasLongTermCondition.Any(f => f.YesNoPreferNotToSay == 3),
+
 
                 IncludeNoAreasOfInterest = criteria.IncludeNoAreasOfInterest
             };

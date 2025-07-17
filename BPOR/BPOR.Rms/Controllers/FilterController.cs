@@ -8,7 +8,6 @@ using Rbec.Postcodes;
 using BPOR.Rms.Startup;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 using BPOR.Rms.Services;
 
 namespace BPOR.Rms.Controllers;
@@ -20,8 +19,6 @@ public class FilterController(ParticipantDbContext context,
                               ICurrentUserProvider<User> currentUserProvider,
                               IVolunteerFilterService volunteerFilterService) : Controller
 {
-    private readonly DateOnly _today = DateOnly.FromDateTime(timeProvider.GetLocalNow().Date);
-
     private async Task<IActionResult> ViewIndex(VolunteerFilterViewModel model, CancellationToken cancellationToken)
     {
         bool isResearcher = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
@@ -51,24 +48,32 @@ public class FilterController(ParticipantDbContext context,
         {
             model.Testing = new();
         }
-        
-        var results = await FilterVolunteersAsync(model, cancellationToken);
-        model.VolunteerCount = results.Count?.Value;
-        model.Testing.VolunteerResults = results.Items?.Value ?? Page<VolunteerResult>.Empty();
 
-        if (hostEnvironment.IsProduction())
+        if (ModelState.IsValid)
         {
-            foreach (var x in model.Testing.VolunteerResults)
+            model.VolunteerCount =
+                await volunteerFilterService.GetFilteredVolunteerCountAsync(model, cancellationToken);
+            if (model.Testing.ShowResults)
             {
-                if (Postcode.TryParse(x.Postcode, out var postcode))
+                model.Testing.VolunteerResults =
+                    await volunteerFilterService.GetFilteredVolunteersForTestingAsync(model, paginationService,
+                        cancellationToken);
+                
+                if (hostEnvironment.IsProduction())
                 {
-                    x.Postcode = postcode.ToString().Split(' ').First();
-                }
+                    foreach (var x in model.Testing.VolunteerResults)
+                    {
+                        if (Postcode.TryParse(x.Postcode, out var postcode))
+                        {
+                            x.Postcode = postcode.ToString().Split(' ').First();
+                        }
 
-                x.FirstName = string.Empty;
-                x.LastName = string.Empty;
-                x.Email = string.Empty;
-                x.DateOfBirth = null;
+                        x.FirstName = string.Empty;
+                        x.LastName = string.Empty;
+                        x.Email = string.Empty;
+                        x.DateOfBirth = null;
+                    }
+                }
             }
         }
 
@@ -100,101 +105,6 @@ public class FilterController(ParticipantDbContext context,
             if (!model.ShowPreferredContactFilter) {
                 model.SelectedVolunteersPreferredContact = (int)ContactMethodId.Email;
             }
-        }
-
-        model.VolunteerCount = 0;
-        model.Testing.VolunteerResults = Page<VolunteerResult>.Empty();
-
-        if (activity == "FilterVolunteers")
-        {
-            if (ModelState.IsValid)
-            {
-                model.VolunteerCount = await volunteerFilterService.GetFilteredVolunteerCountAsync(model, cancellationToken);
-                if (model.Testing.ShowResults)
-                {
-                    model.Testing.VolunteerResults = await volunteerFilterService.GetFilteredVolunteersForTestingAsync(model, paginationService, cancellationToken);
-                }
-            }
-        }
-        else if (activity == "ClearFilters")
-        {
-            model = ClearFilters(model);
-        }
-
-        if (hostEnvironment.IsProduction())
-        {
-            foreach (var x in model.Testing.VolunteerResults)
-            {
-                if (Postcode.TryParse(x.Postcode, out var postcode))
-                {
-                    x.Postcode = postcode.ToString().Split(' ').First();
-                }
-
-                x.FirstName = string.Empty;
-                x.LastName = string.Empty;
-                x.Email = string.Empty;
-                x.DateOfBirth = null;
-            }
-        }
-
-        return View(model);
-    }
-
-    private VolunteerFilterViewModel ClearFilters(VolunteerFilterViewModel model)
-    {
-        this.AddSuccessNotification($"All previously applied filters have been removed.");
-
-        ModelState.Clear();
-
-        return new VolunteerFilterViewModel { StudyId = model.StudyId };
-    }
-
-    private async Task PopulateFilterIndexDataAsync(VolunteerFilterViewModel model, CancellationToken cancellationToken)
-    {
-        if (model.StudyId.HasValue)
-        {
-            var study = await context.Studies
-                .Where(s => s.Id == model.StudyId)
-                .Select(s => new { s.StudyName, s.CpmsId, s.IsRecruitingIdentifiableParticipants })
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (study != null)
-            {
-                model.StudyName = study.StudyName;
-                model.StudyCpmsId = study.CpmsId;
-                model.ShowRecruitedFilter = study.IsRecruitingIdentifiableParticipants;
-                model.ShowPreferredContactFilter = study.IsRecruitingIdentifiableParticipants;
-
-                if (!model.ShowPreferredContactFilter)
-                {
-                    model.SelectedVolunteersPreferredContact = (int)ContactMethodId.Email;
-                }
-            }
-        }
-
-        if (model.VolunteersPreferredContactItems == null || !model.VolunteersPreferredContactItems.Any())
-        {
-            model.VolunteersPreferredContactItems = VolunteerFilterViewModel.SetVolunteersPreferredContactItems();
-        }
-
-        if (model.VolunteersContactedItems == null || !model.VolunteersContactedItems.Any())
-        {
-            model.VolunteersContactedItems = VolunteerFilterViewModel.SetVolunteersContactedItems();
-        }
-
-        if (model.VolunteersRecruitedItems == null || !model.VolunteersRecruitedItems.Any())
-        {
-            model.VolunteersRecruitedItems = VolunteerFilterViewModel.SetVolunteersRecruitedItems();
-        }
-
-        if (model.VolunteersCompletedRegistrationItems == null || !model.VolunteersCompletedRegistrationItems.Any())
-        {
-            model.VolunteersCompletedRegistrationItems = VolunteerFilterViewModel.SetVolunteersCompletedRegistrationItems();
-        }
-
-        if (model.VolunteersRegisteredInterestItems == null || !model.VolunteersRegisteredInterestItems.Any())
-        {
-            model.VolunteersRegisteredInterestItems = VolunteerFilterViewModel.SetVolunteersRegisteredInterestItems();
         }
     }
     
@@ -268,51 +178,10 @@ public class FilterController(ParticipantDbContext context,
     private static List<FilterHasLongTermCondition> GetFilterHasLongTermCondition(VolunteerFilterViewModel model) =>
     Map([model.HasLongTermCondition_Yes, model.HasLongTermCondition_No, model.HasLongTermCondition_PreferNotToSay],
         x => new FilterHasLongTermCondition { YesNoPreferNotToSay = x });
-
-    protected async Task<FilterResults> FilterVolunteersAsync(VolunteerFilterViewModel model, CancellationToken token = default)
-    {
-        FilterResults results = new();
-
-        if (ModelState.IsValid)
-        {
-            var query = context.Participants.FilterVolunteers(timeProvider, model);
-
-            results.Count = query.DeferredCount().FutureValue();
-
-            if (model.Testing.ShowResults)
-            {
-                var location = model.PostcodeSearch.PostcodeRadiusSearch.Location;
-                results.Items = query.Select(x => new VolunteerResult
-                {
-                    Id = x.Id,
-                    Email = x.Email,
-                    Postcode = x.Address == null ? null : x.Address.Postcode,
-                    AreasOfResearch = x.HealthConditions.Select(y => y.HealthCondition.Code).OrderBy(y => y).AsEnumerable(),
-                    DateOfBirth = x.DateOfBirth,
-                    Age = x.DateOfBirth.YearsTo(_today),
-                    Gender = x.Gender.Code,
-                    Location = x.ParticipantLocation == null ? null : x.ParticipantLocation.Location,
-                    DistanceInMiles = location != null && x.ParticipantLocation != null ? x.ParticipantLocation.Location.Distance(location) / 1609.344 : null,
-                    FirstName = x.FirstName,
-                    LastName = x.LastName,
-                    HasCompletedRegistration = x.Stage2CompleteUtc.HasValue,
-                    HasRegistered = x.RegistrationConsentAtUtc,
-                    EthnicGroup = x.EthnicGroup,
-                    GenderIsSameAsSexRegisteredAtBirth = x.GenderIsSameAsSexRegisteredAtBirth,
-                    ContactMethod = x.ContactMethodId.FirstOrDefault().ContactMethodId
-                })
-                .OrderBy(x => x.Id)
-                .DeferredPage(paginationService);
-            }
-        }
-
-        return results;
-    }
-    
 }
 
 public class FilterResults
 {
     public PageDeferred<VolunteerResult>? Items { get; internal set; }
-    public int Count { get; internal set; }
+    public QueryFutureValue<int>? Count { get; internal set; }
 }
