@@ -7,6 +7,7 @@ using BPOR.Registration.Stream.Handler.Handlers;
 using BPOR.Registration.Stream.Handler.Mappers;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Tests.Common;
+using BPOR.Tests.Common.Fakers;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;

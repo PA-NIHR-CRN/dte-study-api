@@ -16,5 +16,11 @@ namespace BPOR.Tests.Common
             Interlocked.Increment(ref _saveChangesAsyncCount);
             return ValueTask.FromResult(result);
         }
+
+        public InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
+        {
+            Interlocked.Increment(ref _saveChangesAsyncCount);
+            return result;
+        }
     }
 }

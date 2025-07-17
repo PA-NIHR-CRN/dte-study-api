@@ -11,7 +11,7 @@ namespace BPOR.Tests.Common
 
         public static IdempotencyBuilder UseInMemoryDb(this IdempotencyBuilder builder)
         {
-            builder.WithPersistenceStore(new InMemoryIdempotencyPersistanceStore());
+            builder.WithPersistenceStore(new InMemoryIdempotencyPersistenceStore());
             return builder;
         }
     }

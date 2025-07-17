@@ -4,7 +4,7 @@ using AWS.Lambda.Powertools.Idempotency.Persistence;
 
 namespace BPOR.Tests.Common
 {
-    internal class InMemoryIdempotencyPersistanceStore : BasePersistenceStore
+    internal class InMemoryIdempotencyPersistenceStore : BasePersistenceStore
     {
         private readonly Dictionary<string, DataRecord> _data = new();
         public override async Task DeleteRecord(string idempotencyKey)
@@ -21,7 +21,6 @@ namespace BPOR.Tests.Common
             {
                 return _data.TryGetValue(idempotencyKey, out var record) ? record : null;
             }
-
         }
 
         public override async Task PutRecord(DataRecord record, DateTimeOffset now)

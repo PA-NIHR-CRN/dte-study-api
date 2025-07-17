@@ -1,6 +1,8 @@
 ﻿using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Filter;
 using BPOR.Rms.Services;
+using BPOR.Tests.Common;
+using BPOR.Tests.Common.Fakers;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
 using Microsoft.Extensions.Options;
@@ -9,14 +11,27 @@ using NSubstitute;
 
 namespace BPOR.Rms.Tests
 {
+    public class CampaignTestDataSetFixture : LocalParticipantDatabaseFixture
+    {
+        public CampaignTestDataSetFixture()
+        {
+            using var participantDbContext = LocalParticipantDatabase.CreateDbContext();
 
-    public class CampaignFilterTests(DatabaseFixture databaseFixture) : IClassFixture<DatabaseFixture>
+            var faker = new ParticipantFaker();
+            faker.UseSeed(5832);
+            var participants = faker.Generate(10000);
+            participantDbContext.Participants.AddRange(participants);
+            participantDbContext.SaveChanges();
+        }
+    }
+    
+    public class CampaignFilterTests(CampaignTestDataSetFixture databaseFixture) : IClassFixture<CampaignTestDataSetFixture>
     {
         [Fact, Trait("RequiresMySql", "true")]
         public async Task FullSetIsReturnedWhenOverDemanded()
         {
            using var participantDbContext = databaseFixture.LocalParticipantDatabase.CreateDbContext();
-
+           
             var options = Options.Create(new VolunteerFilterServiceOptions
             {
                 InitialPageSize = 0.2

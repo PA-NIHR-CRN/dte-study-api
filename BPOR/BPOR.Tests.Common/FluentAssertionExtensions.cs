@@ -1,7 +1,7 @@
 ﻿using FluentAssertions.Collections;
 using FluentAssertions.Execution;
 
-namespace BPOR.Rms.Tests.Utilities
+namespace BPOR.Tests.Common
 {
     public static class FluentAssertionExtensions
     {

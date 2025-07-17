@@ -1,8 +1,7 @@
-﻿
-using Bogus;
+﻿using Bogus;
 using BPOR.Domain.Entities;
 
-namespace BPOR.Registration.Stream.Handler.Tests;
+namespace BPOR.Tests.Common.Fakers;
 
 public class DynamoParticipantFaker : Faker<DynamoParticipant>
 {
