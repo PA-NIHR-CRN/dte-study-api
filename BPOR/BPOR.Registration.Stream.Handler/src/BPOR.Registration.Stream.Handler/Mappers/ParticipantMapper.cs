@@ -167,7 +167,7 @@ public class ParticipantMapper : IParticipantMapper
                     if (coordinates != null)
                     {
                         destination.ParticipantLocation ??= new ParticipantLocation();
-                        destination.ParticipantLocation.SetLocation(coordinates);
+                        destination.ParticipantLocation.SetLocationFromLatLong(coordinates);
                         destination.ParticipantLocation.IsApproximate = false;
                     }
                     else

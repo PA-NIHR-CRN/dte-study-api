@@ -1,4 +1,5 @@
 ﻿using BPOR.Domain.Entities;
+using BPOR.Domain.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NIHR.Geometry;
@@ -20,7 +21,7 @@ namespace DynamoDBupdate.Backfills
             {
                 foreach (var participantLocation in participantDbContext.ParticipantLocation.Where(i => i.Easting == 0).Take(1000))
                 {
-                    participantLocation.SetOsgbFromLocation();
+                    participantLocation.UpdateOsgbToMatchLocation();
                 }
 
                 if (await participantDbContext.SaveChangesAsync() == 0)

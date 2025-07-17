@@ -1,4 +1,5 @@
 ﻿using FluentAssertions.Collections;
+using FluentAssertions.Execution;
 
 namespace BPOR.Rms.Tests.Utilities
 {
@@ -8,11 +9,11 @@ namespace BPOR.Rms.Tests.Utilities
         {
             foreach (var item in assertions.Subject.Except(expected))
             {
-                assertions.CurrentAssertionChain.BecauseOf(because, becuaseArgs).FailWith("Element should not exist in collection: {0}", item);
+                Execute.Assertion.BecauseOf(because, becuaseArgs).FailWith("Element should not exist in collection: {0}", item);
             }
             foreach (var item in expected.Except(assertions.Subject))
             {
-                assertions.CurrentAssertionChain.BecauseOf(because, becuaseArgs).FailWith("Item not found in collection: {0}", item);
+                Execute.Assertion.BecauseOf(because, becuaseArgs).FailWith("Item not found in collection: {0}", item);
             }
         }
     }

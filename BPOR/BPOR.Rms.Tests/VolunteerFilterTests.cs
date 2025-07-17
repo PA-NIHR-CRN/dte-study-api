@@ -1,4 +1,5 @@
 ﻿using BPOR.Domain.Entities;
+using BPOR.Domain.Extensions;
 using BPOR.Rms.Models.Filter;
 using BPOR.Rms.Tests.Utilities;
 using FluentAssertions;
@@ -30,11 +31,15 @@ namespace BPOR.Rms.Tests
             using var db = fixture.CreateContext();
 
             static Participant CreateParticipant(string name, double latitude, double longitude, int easting, int northing)
-                => new Participant
+            {
+                var participantLocation = new ParticipantLocation();
+                participantLocation.SetLocationFromLatLong(latitude, longitude);
+                return new Participant
                 {
                     FirstName = name,
-                    ParticipantLocation = ParticipantLocation.FromLatLong(latitude, longitude)
+                    ParticipantLocation = participantLocation
                 };
+            }
 
             // Define participants for UK stations (easy to obtain data set!)
             var KGL = CreateParticipant("KGL", 51.706373, -0.43814265, 508019, 202003); // King's Langley

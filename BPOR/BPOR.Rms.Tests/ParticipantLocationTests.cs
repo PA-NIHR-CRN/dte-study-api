@@ -1,6 +1,7 @@
 ﻿
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Domain.Extensions;
 using FluentAssertions;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure.Models;
@@ -22,19 +23,7 @@ namespace BPOR.Rms.Tests
         {
             ParticipantLocation participantLocation = new ParticipantLocation();
 
-            participantLocation.SetLocation(lat, lon);
-
-            participantLocation.Location.Should().Be(point);
-            participantLocation.Easting.Should().Be(easting);
-            participantLocation.Northing.Should().Be(northing);
-        }
-
-        [Fact]
-        public void SetLocationPointIsCorrect()
-        {
-            ParticipantLocation participantLocation = new ParticipantLocation();
-
-            participantLocation.SetLocation(point);
+            participantLocation.SetLocationFromLatLong(lat, lon);
 
             participantLocation.Location.Should().Be(point);
             participantLocation.Easting.Should().Be(easting);
@@ -46,37 +35,7 @@ namespace BPOR.Rms.Tests
         {
             ParticipantLocation participantLocation = new ParticipantLocation();
 
-            participantLocation.SetLocation(coordinatesModel);
-
-            participantLocation.Location.Should().Be(point);
-            participantLocation.Easting.Should().Be(easting);
-            participantLocation.Northing.Should().Be(northing);
-        }
-
-        [Fact]
-        public void FronmLatLongIsCorrect()
-        {
-            ParticipantLocation participantLocation = ParticipantLocation.FromLatLong(lat, lon);
-
-            participantLocation.Location.Should().Be(point);
-            participantLocation.Easting.Should().Be(easting);
-            participantLocation.Northing.Should().Be(northing);
-        }
-
-        [Fact]
-        public void FromPointIsCorrect()
-        {
-            ParticipantLocation participantLocation = ParticipantLocation.FromPoint(point);
-
-            participantLocation.Location.Should().Be(point);
-            participantLocation.Easting.Should().Be(easting);
-            participantLocation.Northing.Should().Be(northing);
-        }
-
-        [Fact]
-        public void FromCoordinatesIsCorrect()
-        {
-            ParticipantLocation participantLocation = ParticipantLocation.FromCoordinates(coordinatesModel);
+            participantLocation.SetLocationFromLatLong(coordinatesModel);
 
             participantLocation.Location.Should().Be(point);
             participantLocation.Easting.Should().Be(easting);
