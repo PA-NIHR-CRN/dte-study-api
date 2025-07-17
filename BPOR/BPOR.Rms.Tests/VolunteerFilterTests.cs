@@ -1,12 +1,10 @@
 ﻿using BPOR.Domain.Entities;
 using BPOR.Domain.Extensions;
 using BPOR.Rms.Models.Filter;
-using BPOR.Rms.Tests.Utilities;
+using BPOR.Tests.Common;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using NetTopologySuite.Geometries;
-using NIHR.NotificationService.Tests.Fixtures;
 
 namespace BPOR.Rms.Tests
 {
@@ -27,10 +25,10 @@ namespace BPOR.Rms.Tests
         public async Task PostcodeRadiusSearchIncludesCorrectParticipants()
         {
             // Arrange
-            ParticipantDatabaseFixture fixture = new ParticipantDatabaseFixture(_configuration);
-            using var db = fixture.CreateContext();
+            using LocalParticipantDatabase localParticipantDatabase = new LocalParticipantDatabase(_configuration);
+            using var db = localParticipantDatabase.CreateDbContext();
 
-            static Participant CreateParticipant(string name, double latitude, double longitude, int easting, int northing)
+            static Participant CreateParticipant(string name, double latitude, double longitude)
             {
                 var participantLocation = new ParticipantLocation();
                 participantLocation.SetLocationFromLatLong(latitude, longitude);
@@ -42,12 +40,12 @@ namespace BPOR.Rms.Tests
             }
 
             // Define participants for UK stations (easy to obtain data set!)
-            var KGL = CreateParticipant("KGL", 51.706373, -0.43814265, 508019, 202003); // King's Langley
-            var VIC = CreateParticipant("VIC", 51.498148, -0.14262605, 529026, 179325); // London Victoria
-            var KGX = CreateParticipant("KGX", 51.532722, -0.12327559, 530270, 183204); // London King's Cross
-            var BCU = CreateParticipant("BCU", 50.816670, -1.5737827, 430122, 101989); // Brockenhurst
-            var BTN = CreateParticipant("BTN", 50.830229, -0.14145174, 530984, 105056); // Brighton - 46.5 miles South of VIC
-            var SWI = CreateParticipant("SWI", 51.565723, -1.7856254, 414956, 185227); // Swindon - 70.5 miles West of VIC
+            var KGL = CreateParticipant("KGL", 51.706373, -0.43814265); // King's Langley
+            var VIC = CreateParticipant("VIC", 51.498148, -0.14262605); // London Victoria
+            var KGX = CreateParticipant("KGX", 51.532722, -0.12327559); // London King's Cross
+            var BCU = CreateParticipant("BCU", 50.816670, -1.5737827); // Brockenhurst
+            var BTN = CreateParticipant("BTN", 50.830229, -0.14145174); // Brighton - 46.5 miles South of VIC
+            var SWI = CreateParticipant("SWI", 51.565723, -1.7856254); // Swindon - 70.5 miles West of VIC
 
             db.Participants.AddRange(KGL, VIC, KGX, BCU, BTN, SWI);
             await db.SaveChangesAsync();

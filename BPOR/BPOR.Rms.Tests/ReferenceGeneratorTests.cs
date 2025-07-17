@@ -3,7 +3,7 @@ using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
 using LuhnNet;
 
-namespace BPOR.Rms.Tests.Utilities;
+namespace BPOR.Rms.Tests;
 
 public partial class ReferenceGeneratorTests
 {
