@@ -29,7 +29,7 @@ public static class Extensions
         return validator.Validate(instance, options => options.IncludeProperties(properties));
     }
     
-    public static IRuleBuilderOptions<T, string> UriOrNullOrWhitespace<T>(this IRuleBuilder<T, string> ruleBuilder,
+    public static IRuleBuilderOptions<T, string?> UriOrNullOrWhitespace<T>(this IRuleBuilder<T, string?> ruleBuilder,
         UriKind uriKind = UriKind.Absolute)
     {
         return ruleBuilder.Must(value =>
