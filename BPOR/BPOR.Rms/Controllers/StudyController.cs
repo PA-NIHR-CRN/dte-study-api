@@ -118,8 +118,7 @@ public class StudyController(
         {
             if (model.Step == 1)
             {
-                var validationResult = ValidateStep(model, 1);
-                ModelState.AddValidationResult(validationResult);
+                ModelState.AddValidationResult(ValidateStep(model, 1));
                 
                 if (ModelState.IsValid)
                 {
@@ -128,20 +127,10 @@ public class StudyController(
             }
             else if (model.Step == 2)
             {
-                var step1Validation = ValidateStep(model, 1);
-                if (!step1Validation.IsValid)
-                {
-                    // Step 1 has already been validated, but the step 1 data is then round-tripped to the browser
-                    // meaning it needs to be re-validated. This should never fail - but it could (bug, tampering etc.)
-                    // so if re-validation fails then we cannot continue with this operation.
-                    //
-                    // TODO: Is there a better way to handle this? A lot of Gov UK sites have a summary page
-                    // at the end of the steps that can show validation issues.
-                    return base.BadRequest(step1Validation.ToString());
-                }
-                
-                var step2ValidationResult = ValidateStep(model, 2);
-                ModelState.AddValidationResult(step2ValidationResult);
+                // We need to re-validate step 1 since the data has been round-tripped to the browser
+                // since it was first validated.
+                ModelState.AddValidationResult(ValidateStep(model, 1));
+                ModelState.AddValidationResult(ValidateStep(model, 2));
 
                 if (ModelState.IsValid)
                 {
@@ -243,9 +232,8 @@ public class StudyController(
         StudyFormViewModel model)
     {
         model.Id = id;
-
-        var validationResult = ValidateStep(model, model.Step);
-        ModelState.AddValidationResult(validationResult);
+        
+        ModelState.AddValidationResult(ValidateStep(model, model.Step));
 
         if (!ModelState.IsValid)
         {
