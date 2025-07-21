@@ -207,13 +207,12 @@ public class StudyController(
             .AsStudyFormViewModel()
             .FirstOrDefaultAsync(s => s.Id == id);
 
-
         if (studyModel == null)
         {
             return NotFound();
         }
 
-        ViewData["IsEditMode"] = true;
+        studyModel.AllowEditIsRecruitingIdentifiableParticipants = false;
         studyModel.Step = field;
         return View(studyModel);
     }
@@ -240,18 +239,25 @@ public class StudyController(
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
-        [Bind("FullName, EmailAddress, StudyName, CpmsId, Step, InformationUrl")]
+        [Bind(@$"
+            {nameof(StudyFormViewModel.FullName)},
+            {nameof(StudyFormViewModel.EmailAddress)},
+            {nameof(StudyFormViewModel.StudyName)},
+            {nameof(StudyFormViewModel.CpmsId)}, 
+            {nameof(StudyFormViewModel.Step)},
+            {nameof(StudyFormViewModel.InformationUrl)},
+            {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)}")]
         StudyFormViewModel model)
     {
+        ModelState.ClearValidationState();
+        
         model.Id = id;
 
         var validationResult = ValidateStep(model, model.Step);
 
         if (!validationResult.IsValid)
         {
-            ModelState.Clear();
             ModelState.AddValidationResult(validationResult);
-            ViewData["IsEditMode"] = true;
             return View(model);
         }
 
