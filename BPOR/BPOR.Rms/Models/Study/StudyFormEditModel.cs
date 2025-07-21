@@ -9,13 +9,13 @@ public class StudyFormEditModel : FormWithSteps
     public override int TotalSteps => 2;
 
     [Display(Name = "Name of main contact for the study", Order = 1)]
-    public string FullName { get; set; }
+    public string? FullName { get; set; }
 
     [Display(Name = "Email address of main contact for the study", Order = 2)]
-    public string EmailAddress { get; set; }
+    public string? EmailAddress { get; set; }
     
     [Display(Name = "Study name", Order = 3)]
-    public string StudyName { get; set; }
+    public string? StudyName { get; set; }
 
     [Display(Name = "CPMS ID", Order = 5)]
     public long? CpmsId { get; set; }

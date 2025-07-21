@@ -108,7 +108,6 @@ public class StudyController(
             {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)}")]
         StudyFormViewModel model, string action)
     {
-        ModelState.ClearValidationState();
         if (!model.AllowEditIsRecruitingIdentifiableParticipants)
         {
             // This should never happen, but we still need to guard against it.
@@ -120,12 +119,9 @@ public class StudyController(
             if (model.Step == 1)
             {
                 var validationResult = ValidateStep(model, 1);
+                ModelState.AddValidationResult(validationResult);
                 
-                if (!validationResult.IsValid)
-                {
-                    ModelState.AddValidationResult(validationResult);
-                }
-                else
+                if (ModelState.IsValid)
                 {
                     model.GotoNextStep();
                 }
@@ -145,12 +141,9 @@ public class StudyController(
                 }
                 
                 var step2ValidationResult = ValidateStep(model, 2);
+                ModelState.AddValidationResult(step2ValidationResult);
 
-                if (!step2ValidationResult.IsValid)
-                {
-                    ModelState.AddValidationResult(step2ValidationResult);
-                }
-                else
+                if (ModelState.IsValid)
                 {
                     var study = new Study
                     {
@@ -249,15 +242,13 @@ public class StudyController(
             {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)}")]
         StudyFormViewModel model)
     {
-        ModelState.ClearValidationState();
-        
         model.Id = id;
 
         var validationResult = ValidateStep(model, model.Step);
+        ModelState.AddValidationResult(validationResult);
 
-        if (!validationResult.IsValid)
+        if (!ModelState.IsValid)
         {
-            ModelState.AddValidationResult(validationResult);
             return View(model);
         }
 
