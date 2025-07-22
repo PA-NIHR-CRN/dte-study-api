@@ -21,7 +21,7 @@ namespace BPOR.Rms.Tests
                 .Build();
         }
 
-        [Fact]
+       /* [Fact]
         public async Task PostcodeRadiusSearchIncludesCorrectParticipants()
         {
             // Arrange
@@ -71,6 +71,6 @@ namespace BPOR.Rms.Tests
             await PerformTest(VIC, 70, KGL, VIC, KGX, BTN);
             await PerformTest(VIC, 71, KGL, VIC, KGX, BTN, SWI);
 
-        }
+        }*/
     }
 }

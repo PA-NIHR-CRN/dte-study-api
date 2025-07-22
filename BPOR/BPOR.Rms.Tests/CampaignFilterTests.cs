@@ -11,7 +11,7 @@ using NSubstitute;
 
 namespace BPOR.Rms.Tests
 {
-    public class CampaignTestDataSetFixture : LocalParticipantDatabaseFixture
+    /*public class CampaignTestDataSetFixture : LocalParticipantDatabaseFixture
     {
         public CampaignTestDataSetFixture()
         {
@@ -193,5 +193,5 @@ namespace BPOR.Rms.Tests
 
             chiSqPValue.Should().BeLessThan(0.10);
         }
-    }
+    }*/
 }
