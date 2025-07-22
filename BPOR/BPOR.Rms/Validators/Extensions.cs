@@ -14,14 +14,6 @@ public static class Extensions
             modelState.AddModelError(error.PropertyName, error.ErrorMessage);
         }
     }
-
-    public static void ClearValidationState(this ModelStateDictionary modelState)
-    {
-        foreach (var modelStateValue in modelState.Values)
-        {
-            modelStateValue.Errors.Clear();
-        }
-    }
     
     public static ValidationResult ValidateSpecificProperties<T>(this IValidator<T> validator, T instance,
         params Expression<Func<T, object?>>[] properties)
