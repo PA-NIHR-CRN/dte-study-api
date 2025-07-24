@@ -20,6 +20,7 @@ using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Extensions;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -28,8 +29,7 @@ public class CampaignService(
     IEncryptionService encryptionService,
     IReferenceGenerator referenceGenerator,
     NotificationDbContext notificationContext,
-    IPostcodeMapper locationApiClient,
-    TimeProvider timeProvider
+    IVolunteerFilterService volunteerFilterService
     )
     : ICampaignService
 {
@@ -48,7 +48,7 @@ public class CampaignService(
             return;
         }
 
-        var volunteers = await GetFilteredVolunteersAsync(dbFilter, campaign.TargetGroupSize, cancellationToken);
+        var volunteers = await volunteerFilterService.GetFilteredVolunteersAsync(dbFilter, campaign.TargetGroupSize, cancellationToken);
         if (!volunteers.Any())
         {
             logger.LogWarning("No volunteers found for campaign {CampaignId}", campaign.Id);
@@ -73,27 +73,6 @@ public class CampaignService(
             .FirstOrDefaultAsync(fc => fc.Id == campaign.FilterCriteriaId, cancellationToken);
     }
 
-    private async Task<List<CampaignParticipantDetails>> GetFilteredVolunteersAsync(FilterCriteria dbFilter,
-        int? targetGroupSize, CancellationToken cancellationToken)
-    {
-        var filter = FilterMapper.MapToFilterModel(dbFilter);
-
-        // TODO: save the original search location co-ordinates in the FilterCriteria
-        if (dbFilter.FullPostcode is not null && dbFilter.SearchRadiusMiles is not null && dbFilter.SearchRadiusMiles > 0)
-        {
-            var location = await locationApiClient.GetCoordinatesFromPostcodeAsync(dbFilter.FullPostcode, cancellationToken);
-            filter.PostcodeSearch.PostcodeRadiusSearch.Location = new Point(location.Longitude, location.Latitude) { SRID = ParticipantLocationConfiguration.LocationSrid };
-        }
-
-        var volunteerQuery = context.Participants.FilterVolunteers(timeProvider, filter);
-
-        return await volunteerQuery
-            .Where(v => !string.IsNullOrEmpty(v.Email))
-            .Randomise()
-            .Take(targetGroupSize ?? int.MaxValue)
-            .AsCampaignParticipant()
-            .ToListAsync(cancellationToken);
-    }
 
     private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)

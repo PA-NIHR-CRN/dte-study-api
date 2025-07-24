@@ -14,6 +14,7 @@ using BPOR.Infrastructure.Clients;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
 using Microsoft.Extensions.Logging;
+using AWS.Lambda.Powertools.Idempotency;
 
 namespace BPOR.Registration.Stream.Handler;
 
@@ -39,6 +40,9 @@ public static class Startup
                 x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery).UseNetTopologySuite()));
 
         services.AddScoped<IDynamoDBContext>(x => new DynamoDBContext(new AmazonDynamoDBClient()));
+
+        var idempotencySettings = services.GetSectionAndValidate<IdempotencySettings>(configuration);
+        Idempotency.Configure(builder => builder.UseDynamoDb(idempotencySettings.Value.DynamoDbTableName));
 
         // add application services
         services.AddSingleton<IRefDataService, RefDataService>();

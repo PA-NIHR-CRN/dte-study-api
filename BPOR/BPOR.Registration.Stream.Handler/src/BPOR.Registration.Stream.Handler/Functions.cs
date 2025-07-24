@@ -1,5 +1,6 @@
 using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
+using AWS.Lambda.Powertools.Idempotency;
 using BPOR.Registration.Stream.Handler.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,6 +35,8 @@ public class Functions
     {
         using (_logger.BeginScope("{FunctionName}", nameof(ProcessStream)))
         {
+            Idempotency.RegisterLambdaContext(context);
+            
             _logger.LogInformation("Number of records: {RecordsCount}", dynamoDbEvent.Records.Count);
 
             // AWS DynamoDb Stream handler is currently synchronous, but we want the library code

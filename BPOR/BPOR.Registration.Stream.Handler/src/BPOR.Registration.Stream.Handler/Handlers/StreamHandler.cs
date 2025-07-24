@@ -1,6 +1,7 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.DynamoDBEvents;
+using AWS.Lambda.Powertools.Idempotency;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Mappers;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ public class StreamHandler(
     IParticipantMapper participantMapper)
     : IStreamHandler
 {
+
     public async Task<IEnumerable<BatchItemFailure>> ProcessStreamAsync(DynamoDBEvent dynamoDbEvent,
         CancellationToken cancellationToken)
     {
@@ -22,66 +24,79 @@ public class StreamHandler(
 
         var failures = new List<BatchItemFailure>();
         // TODO: how do we handle out of order events if they are indeed out of order?
-        string currentRecordSequenceNumber;
-
         foreach (var record in dynamoDbEvent.Records)
         {
-            currentRecordSequenceNumber = record.Dynamodb.SequenceNumber;
 
-            using (logger.BeginScope("{EventId}, {SequenceNumber}", record.EventID, currentRecordSequenceNumber))
+            try
             {
-
-                if (record.EventName == OperationType.MODIFY && record.Dynamodb.NewImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var NewIsStage2CompleteUtcBackfilled)
-                    && !record.Dynamodb.OldImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var OldIsStage2CompleteUtcBackfilled))
-                {
-                    logger.LogInformation("Skipping new IsStage2CompleteUtcBackfilled modification");
-                    continue;
-                }
-
-                try
-                {
-                    logger.LogInformation(
-                        "Processing record {SequenceNumber}, ApproximateCreationDateTime: {ApproximateCreationDateTime}",
-                        currentRecordSequenceNumber, record.Dynamodb.ApproximateCreationDateTime);
-
-                    logger.LogDebug(
-                        "AwsRegion: {AwsRegion}, EventID: {EventID}, EventName: {EventName}, EventSource: {EventSource}, EventSourceArn: {EventSourceArn}, EventVersion: {EventVersion}, UserIdentity: {@UserIdentity}, SizeBytes: {SizeBytes}, StreamViewType: {StreamViewType}",
-                        record.AwsRegion,
-                        record.EventID,
-                        record.EventName,
-                        record.EventSource,
-                        record.EventSourceArn,
-                        record.EventVersion,
-                        record.UserIdentity,
-                        record.Dynamodb.SizeBytes,
-                        record.Dynamodb.StreamViewType
-                    );
-
-                    logger.LogTrace("{@Record}", record);
-
-                    await ProcessRecordAsync(record, cancellationToken);
-
-                    await participantDbContext.SaveChangesAsync(cancellationToken);
-
-                    logger.LogInformation("Record processing complete");
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, e.Message);
-                    failures.Add(new BatchItemFailure { ItemIdentifier = currentRecordSequenceNumber });
-
-                    // If there is one failure the whole batch is retried, exit early here.
-                    // Support 'Report batch item failures: Yes'
-                    // return failures;
-
-                    // Do not support partial batch failure.
-                    // See 'Report batch item failures: No'
-                    throw;
-                }
+                await ProcessEvent(record.EventID, record, cancellationToken);
+            }
+            catch
+            {
+                failures.Add(new BatchItemFailure { ItemIdentifier = record.Dynamodb.SequenceNumber });
             }
         }
 
         return failures;
+    }
+
+
+    [Idempotent]
+    private async Task ProcessEvent([IdempotencyKey] string eventId, DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
+    {
+        string currentRecordSequenceNumber = record.Dynamodb.SequenceNumber;
+
+        using (logger.BeginScope("{EventId}, {SequenceNumber}", record.EventID, currentRecordSequenceNumber))
+        {
+
+            if (record.EventName == OperationType.MODIFY && record.Dynamodb.NewImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var NewIsStage2CompleteUtcBackfilled)
+                && !record.Dynamodb.OldImage.TryGetValue("IsStage2CompleteUtcBackfilled", out var OldIsStage2CompleteUtcBackfilled))
+            {
+                logger.LogInformation("Skipping new IsStage2CompleteUtcBackfilled modification");
+                return;
+            }
+
+            try
+            {
+
+                logger.LogInformation(
+                    "Processing record {SequenceNumber}, ApproximateCreationDateTime: {ApproximateCreationDateTime}",
+                    currentRecordSequenceNumber, record.Dynamodb.ApproximateCreationDateTime);
+
+                logger.LogDebug(
+                    "AwsRegion: {AwsRegion}, EventID: {EventID}, EventName: {EventName}, EventSource: {EventSource}, EventSourceArn: {EventSourceArn}, EventVersion: {EventVersion}, UserIdentity: {@UserIdentity}, SizeBytes: {SizeBytes}, StreamViewType: {StreamViewType}",
+                    record.AwsRegion,
+                    record.EventID,
+                    record.EventName,
+                    record.EventSource,
+                    record.EventSourceArn,
+                    record.EventVersion,
+                    record.UserIdentity,
+                    record.Dynamodb.SizeBytes,
+                    record.Dynamodb.StreamViewType
+                );
+
+                logger.LogTrace("{@Record}", record);
+
+                await ProcessRecordAsync(record, cancellationToken);
+
+                await participantDbContext.SaveChangesAsync(cancellationToken);
+
+                logger.LogInformation("Record processing complete");
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, e.Message);
+
+                // If there is one failure the whole batch is retried, exit early here.
+                // Support 'Report batch item failures: Yes'
+                // return failures;
+
+                // Do not support partial batch failure.
+                // See 'Report batch item failures: No'
+                throw;
+            }
+        }
     }
 
     private async Task ProcessRecordAsync(DynamoDBEvent.DynamodbStreamRecord record,
