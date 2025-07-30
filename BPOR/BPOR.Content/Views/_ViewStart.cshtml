@@ -1,3 +1,14 @@
 ﻿@{
-    Layout = "_Layout";
+
+    switch (ViewData["site"])
+    {
+        case "BPoR":
+            Layout = "_BporLayout";
+            break;
+        case "JDR":
+            Layout = "_JdrLayout";
+            break;
+
+    };
+    
 }

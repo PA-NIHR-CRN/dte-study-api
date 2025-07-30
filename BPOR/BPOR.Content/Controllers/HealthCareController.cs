@@ -1,3 +1,4 @@
+using Amazon.SecretsManager.Model.Internal.MarshallTransformations;
 using BPOR.Content.Models;
 using Contentful.Core;
 using Contentful.Core.Search;
@@ -9,13 +10,13 @@ using System.Globalization;
 
 namespace BPOR.Content.Controllers
 {
-    public class HomeController : Controller
+    public class HealthCareController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<HealthCareController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IOptionsSnapshot<ContentSettings> _contentSettings;
 
-        public HomeController(ILogger<HomeController> logger, IHttpContextAccessor httpContextAccessor, IOptionsSnapshot<ContentSettings> contentSettings)
+        public HealthCareController(ILogger<HealthCareController> logger, IHttpContextAccessor httpContextAccessor, IOptionsSnapshot<ContentSettings> contentSettings)
         {
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
@@ -23,30 +24,50 @@ namespace BPOR.Content.Controllers
         }
 
         
-        public async Task<IActionResult> Index([FromServices] IContentfulClient contentfulClient, [FromKeyedServices("preview")] IContentfulClient contentfulPreviewClient, string? env_id = null, string? entry_sys_id = null, bool preview = false)
+        public async Task<IActionResult> Index([FromServices] IContentfulClient contentfulClient, [FromKeyedServices("preview")] IContentfulClient contentfulPreviewClient, string? env_id = null, string? entry_sys_id = null, string id = null, bool preview = false)
         {
-            entry_sys_id = entry_sys_id ?? _contentSettings.Value.CampaignPageId;
+            //TODO make config, 
+            entry_sys_id = entry_sys_id ?? "6D5y65aKRUU2Rn6SqZyyed";
 
             var client = preview ? contentfulPreviewClient : contentfulClient;
-            ViewData["site"] = "BPoR";
+            ViewData["site"] = "JDR";
+
             return await GetContent(client, entry_sys_id);
         }
 
+        public async Task<IActionResult> article([FromServices] IContentfulClient contentfulClient, [FromKeyedServices("preview")] IContentfulClient contentfulPreviewClient, string? env_id = null, string? entry_sys_id = null, string? article = null, bool preview = false) {
+
+            //TODO make config,
+            entry_sys_id = entry_sys_id ?? "6D5y65aKRUU2Rn6SqZyyed";
+
+            var client = preview ? contentfulPreviewClient : contentfulClient;
+
+
+
+            return await GetContent(client, entry_sys_id);
+        }
         private async Task<IActionResult> GetContent(IContentfulClient contentfulClient, string entry_sys_id)
         {
-            _logger.LogDebug("Home.Index()");
+            _logger.LogDebug("temp.Index()");
             var rqf = _httpContextAccessor?.HttpContext?.Features.Get<IRequestCultureFeature>();
             // Culture contains the information of the requested culture
             var culture = rqf?.RequestCulture.Culture ?? CultureInfo.GetCultureInfo("en-GB");
+            try
+            {
 
-            var queryBuilder = QueryBuilder<CampaignPage>.New
+                var queryBuilder = QueryBuilder<JdrHealthCarePage>.New
             .Include(10)
             .LocaleIs(culture.ToString())
 
             .FieldEquals("sys.id", entry_sys_id);
 
             var model = (await contentfulClient.GetEntries(queryBuilder)).FirstOrDefault();
-            return View("Index", model);
+                return View("Index", model);
+            }
+            catch(Exception ex) { 
+                _logger.LogError(ex.Message); 
+            }
+            return null;
         }
 
         public IActionResult Privacy()

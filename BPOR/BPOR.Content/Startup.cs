@@ -73,11 +73,16 @@ public class Startup
 
         app.UseRequestLocalization();
 
-        app.UseEndpoints(endpoints =>
+        app.UseEndpoints(endpoints => {
             endpoints.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}")
-        );
+            name: "BPoR",
+            pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            endpoints.MapControllerRoute(
+            name: "JDR",
+            pattern: "HealthCare/{action=Index}/{id?}"
+            );
+            });
 
         app.UseMarkdown();
     }
