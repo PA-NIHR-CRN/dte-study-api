@@ -15,7 +15,7 @@
     <title>@(ViewData["Title"] ?? "Be Part of Research")</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-           @* TODO  are these meta tags needed?*@
+    @* TODO  are these meta tags needed?*@
     <meta property="og:title" content="Join dementia research" />
     <meta property="twitter:title" content="<p>Join Dementia Research</p>" />
 
@@ -30,14 +30,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     @* TODO  links to BPoR stylesheets, will need to be switched to JDR*@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="/join/resources/css/govuk-frontend-4.1.0.min.css" type="text/css" asp-append-version="true" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"  crossorigin="anonymous">
     <link rel="stylesheet" href="/join/resources/css/JDR/style.css" type="text/css" asp-append-version="true" />
-@*     <link rel="stylesheet" href="/join/resources/css/style_copy.css" type="text/css" asp-append-version="true" /> *@
-@*     <link rel="stylesheet" href="/join/resources/css/join.css" type="text/css" asp-append-version="true" /> *@
+    <link rel="stylesheet" href="~/_content/NIHR.GdsExtension/css/jdr.css" />
 
-
-    <link rel="icon" type="image/png" href="https://www.joindementiaresearch.nihr.ac.uk/images/core/JDR_favicon.ico"/>
+    <link rel="icon" type="image/png" href="https://www.joindementiaresearch.nihr.ac.uk/images/core/JDR_favicon.ico" />
 
     @* TODO  further stylesheets that may need changed*@
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,25 +52,24 @@
     <partial name="JDR/_Header" />
 
     <div role="main" id="main" tabindex="-1">
-       @*  <partial name="BPoR/_CookieConsentBanner" /> *@
+        @*  <partial name="BPoR/_CookieConsentBanner" /> *@
         @RenderBody()
     </div>
 
-@*     <div class="no-print container">
-        <div class="d-flex justify-content-end">
-            <div class="back-to-top mb-3">
-                <a href="#main">@(ViewData["BackToTop"] ?? "Back to top") <i class="fa-solid fa-chevron-up ml-2"></i></a>
+    @*     <div class="no-print container">
+            <div class="d-flex justify-content-end">
+                <div class="back-to-top mb-3">
+                    <a href="#main">@(ViewData["BackToTop"] ?? "Back to top") <i class="fa-solid fa-chevron-up ml-2"></i></a>
+                </div>
             </div>
-        </div>
-    </div> *@
+        </div> *@
 
     <partial name="JDR/_Footer" />
 
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+    <script>document.addEventListener('DOMContentLoaded', function () {
             const splide = new Splide('.splide', { gap: '3em' });
 
             splide.on('ready', function () {
@@ -88,9 +85,7 @@
             splide.mount();
 
             document.getElementsByTagName('body')[0].classList.remove("noscript");
-        });
-
-    </script>
+        });</script>
 
     <script>
 
