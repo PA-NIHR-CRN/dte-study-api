@@ -9,9 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="TagHelpers\Accordion\" />
+    <Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="wwwroot\**\*" Pack="true" PackagePath="contentFiles\any\$(TargetFramework)\wwwroot" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="TagHelpers\Accordion\" />
-  </ItemGroup>
+
 </Project>

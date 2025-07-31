@@ -31,7 +31,8 @@
 
     @* TODO  links to BPoR stylesheets, will need to be switched to JDR*@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="/join/resources/css/govuk-frontend-4.1.0.min.css" type="text/css" asp-append-version="true" />
+    @*<link rel="stylesheet" href="/join/resources/css/govuk-frontend-4.1.0.min.css" type="text/css" asp-append-version="true" />*@
+    <link href="~/resources/css/govuk-frontend-5.11.1.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="/join/resources/css/JDR/style.css" type="text/css" asp-append-version="true" />
     <link rel="stylesheet" href="~/_content/NIHR.GdsExtension/css/jdr.css" />
 
@@ -46,23 +47,16 @@
     <script src="/join/resources/js/cookies.min.js" asp-append-version="true"></script>
 </head>
 
-<body class="noscript">
-    <a class="screen-reader screen-reader-focusable" href="#main">Skip to Main Content</a>
+<body class="govuk-width-container noscript">
+    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+
+    <gds-skip-link />
 
     <partial name="JDR/_Header" />
 
-    <div role="main" id="main" tabindex="-1">
-        @*  <partial name="BPoR/_CookieConsentBanner" /> *@
+    <div role="main" id="main">
         @RenderBody()
     </div>
-
-    @*     <div class="no-print container">
-            <div class="d-flex justify-content-end">
-                <div class="back-to-top mb-3">
-                    <a href="#main">@(ViewData["BackToTop"] ?? "Back to top") <i class="fa-solid fa-chevron-up ml-2"></i></a>
-                </div>
-            </div>
-        </div> *@
 
     <partial name="JDR/_Footer" />
 
@@ -176,5 +170,10 @@
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- GOV.UK JS -->
+    <script type="module" src="~/resources/js/govuk-frontend-5.11.1.min.js"></script>
+    <script type="module">import { initAll } from '/resources/js/govuk-frontend-5.11.1.min.js';
+        initAll();</script>
 </body>
 </html>
