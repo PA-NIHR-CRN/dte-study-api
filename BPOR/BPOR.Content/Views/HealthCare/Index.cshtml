@@ -1,8 +1,6 @@
 ﻿@using Westwind.AspNetCore.Markdown
 @model JdrHealthCarePage
-@{
-    ViewData["BackToTop"] = Model.BackToTopLinkLabel;
-}
+
 
 @section Metadata {
     @{
@@ -18,10 +16,34 @@
     }
 }
 
+<section id="onThisPage">
+    <div>
+        <div>
+            <span> On this page</span>
+        </div>
+        <div>
+            <a href="#heroSection">Introduction</a>
+            @{
+                foreach (var accordionLink in Model.AccordionSection1.accordions)
+                {
+                    <a href="#@{@accordionLink.Title.Replace(" ","")}" >@accordionLink.Title</a>
+                }
+                if(Model.onlineResourcesSection != null){
+                    <a href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
+                }
+                if (Model.contactUsSection != null)
+                {
+                    <a href="#contectUsSection">@Model.contactUsSection.Title</a>
+                }
+            }
+        </div>
+    </div>
+</section>
 
 
 <!-- Join dementaia research Hero -->
-<div class="JDR-hero my-2 even" style="background-image: url(@Model.Hero.Image.File.Url )">
+<section id="heroSection">
+<div class="hero my-2 even" style="background-image: url(@Model.Hero.Image.File.Url )">
     <div class="container">
         <div class="align-items-center bg-overlay row">
             <section class="col-xl-7 pt-2 pb-5 py-md-5 text">
@@ -33,8 +55,12 @@
         </div>
     </div>
 </div>
+</section>
 
 <!-- introductions sub section 1 - Video -->
+@{if(Model.VideoSection != null)
+{
+<section id="mediaSection">
 <div class="odd video-section pb-3">
     <div class="container">
         <div class="row align-items-stretch">
@@ -74,8 +100,15 @@
         }
     </div>
 </div>
+</section>
+}
+}
 
+@{
+    if (Model.TextSection1 != null)
+{
 <!-- introductions sub section 2 - multi-links -->
+<setion id="PageLinkSection">
 <div class="even what-is-bpor-section">
     <div class="container">
         <div class="row align-items-stretch">
@@ -93,39 +126,49 @@
         </div>
     </div>
 </div>
+</setion>
+}
+}
 
+
+@{
+    if (Model.Banner != null)
+{
 <!-- subsection 3 Banner -->
-
+<section id="bannerSection">
 <div id="banner-container">
     <span class="jdr-banner">
         <markdown markdown="Banner" />
     </span>
 </div>
+</section>
+}
+}
 
-
-
+@{
+    if (Model.AccordionSection1 != null)
+{
 <!-- Accordion section -->
-
 <section id="AccordionSection">
-    <div id="AccordionSectionTitle">
-        @Model.AccordionSectionTitle
-    </div>
+    <h2 id="AccordionSectionTitle">
+        @Model.AccordionSection1.title
+    </h2>
     <div>
-        @Model.AccordionSectionDescription
+        @Model.AccordionSection1.description
     </div>
     <div id="accodionSectionContent">
         @{
-            for(int i = 0; i < Model.AccordionSection.Count; i++)
+            for(int i = 0; i < Model.AccordionSection1.accordions.Count; i++)
             {
                 var targetClass = "accordionSection" + i;
                 <div class="jdr-accordion">
-                    <div class="jdr-accordionTitle">
+                    <h3 class="jdr-accordionTitle" id="@Model.AccordionSection1.accordions[i].Title.Replace(" ","")">
                         <button type="button" class="jdr-accodion-title" data-toggle="collapse" data-target=".@{@targetClass}">
-                            <i class="fas fa-bars" aria-hidden="true"></i> @Model.AccordionSection[i].Title
+                            <i class="fas fa-bars" aria-hidden="true"></i> @Model.AccordionSection1.accordions[i].Title
                         </button>
-                    </div>
+                    </h3>
                         <div class="@{@targetClass} jdr-accordionContent collapse">
-                            <markdown>@Model.AccordionSection[i].Content</markdown >
+                        <markdown>@Model.AccordionSection1.accordions[i].Content</markdown>
                         </div>
                     </div>
 
@@ -135,126 +178,47 @@
     </div>
 
 </section>
+}
+}
 
-
-<!-- How does Be Part of Research work? -->
-@* <div class="odd how-does-bpor-work-section">
-    <div class="container">
-        <div class="row justify-content-end py-5">
-            <div class="col-lg-4">
-                <img src="/join/resources/img/green-aqua.svg" alt="" role="presentation" />
-            </div>
-            <section class="col-lg-8">
-                <h2>@Model.OrderListSection.Title</h2>
-                <markdown markdown="OrderListSection.Body" />
-
-                <ol>
-                    @foreach (var item in Model.OrderListSection.Items)
-                    {
-                        <li>
-                            <div class="line"></div>
-                            <div>
-                                <h3>@item.Heading</h3>
-                                <markdown>@item.Body</markdown>
-                            </div>
-                        </li>
-                    }
-                </ol>
-            </section>
+@{
+    if (Model.onlineResourcesSection != null)
+{
+@* online resource section *@
+<section id="onlineResourceSection">
+    <div>
+        <div>
+            <img src="@Model.onlineResourcesSection.image.File.Url" alt="" role="presentation" />
         </div>
-    </div>
-</div> *@
-@* 
-<!-- Who can take part? -->
-<div class="even who-can-take-part-section">
-    <div class="container">
-        <div class="row align-items-stretch">
-            <section class="col-lg-8 py-5">
-                <h2>@Model.TextSection2.Heading</h2>
-
-                <markdown markdown="TextSection2.Body" />
-            </section>
-        </div>
-    </div>
-</div>
-
-<!-- Meet our volunteers -->
-<div class="odd meet-out-volunteers-section">
-    <div class="container">
-        <div class="row">
-            <section class="col col-lg-9 py-3 py-md-5 ">
-                <h2>@Model.CarouselSection.Title</h2>
-                <markdown markdown="CarouselSection.Body" />
-                <div class="carousel d-flex flex-column flex-lg-column-reverse">
-                    <div class="splide" role="group" aria-label="Meet our volunteers carousel">
-                        <div class="splide__track">
-                            <ul class="splide__list">
-                                @foreach (var slide in Model.CarouselSection.Cards)
-                                {
-                                    <li class="splide__slide">
-                                        <div class="card @slide.Title.Replace(" ", "-").ToLowerInvariant()">
-                                            <div class="row no-gutters">
-                                                <div class="col-lg-4">
-                                                    <img src="@slide.Image.File.Url" class="card-img" alt="" role="presentation" />
-                                                </div>
-                                                <div class="col-lg-8">
-                                                    <div class="card-body">
-                                                        <h3>@slide.Title</h3>
-                                                        <markdown>@slide.Body</markdown>
-                                                        <a href="@slide.Link.Url" target="_blank" aria-label="@slide.Link.AriaLabel">@slide.Link.Label</a>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="carousel-controls mt-5 mt-lg-0 mb-lg-3 d-flex justify-content-center justify-content-lg-end"></div>
-                </div>
-            </section>
-        </div>
-    </div>
-</div>
-
-<!-- Who runs Be Part of Research? -->
-<div class="even who-runs-bpor-section">
-    <div class="container">
-        <div class="row align-items-stretch">
-            <section class="col-lg-8 py-5">
-                <h2>@Model.TextSection3.Heading</h2>
-                <markdown markdown="TextSection3.Body" />
-            </section>
-            <div class="col d-flex d-lg-none embellishment justify-content-end">
-                <img src="/join/resources/img/purple-yellow.svg" alt="" role="presentation" />
+        <div>
+            <h2>
+                @Model.onlineResourcesSection.Title
+            </h2>
+            <div>
+                <markdown markdown="onlineResourcesSection.Text" />
             </div>
         </div>
     </div>
-</div>
 
-<!-- Information about taking part -->
-<div class="odd taking-part-section pt-4 pt-md-0">
-    <div class="container">
-        <div class="row align-items-stretch">
-            <section class="col pt-5 pb-3 pb-lg-4">
-                <h2 class="mb-4">@Model.CardSection.Title</h2>
-                <markdown></markdown>
-                <div class="row align-items-stretch px-0">
-                    @foreach (var card in Model.CardSection.Cards)
-                    {
-                        var firstOrLast = card == Model.CardSection.Cards.First() || card == Model.CardSection.Cards.Last();
-                        var classes = firstOrLast ? "col-lg p-3 " : "col-lg mx-0 mx-lg-4 my-4 my-lg-0 p-3";
+</section>
+}
+}
 
-                        <div class="@classes info-card">
-                            <img src="@card.Image.File.Url" alt="" role="presentation" />
-                            <h3>@card.Title</h3>
-                            <markdown>@card.Body</markdown>
-                        </div>
-                    }
-                </div>
-            </section>
+@{
+    if (Model.contactUsSection != null)
+{
+<section id="contectUsSection">
+    <div>
+        <h2>
+            @Model.contactUsSection.Title
+        </h2>
+        <div>
+            <markdown markdown="contactUsSection.Text" />
+        </div>
+        <div>
+            <a href="@Model.contactUsSection.link.Url" aria-label="@Model.contactUsSection.link.AriaLabel" >@Model.contactUsSection.link.Label</a>
         </div>
     </div>
-</div> *@
+</section>
+}
+}

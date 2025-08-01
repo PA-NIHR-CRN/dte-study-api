@@ -54,17 +54,10 @@
     <partial name="JDR/_Header" />
 
     <div role="main" id="main" tabindex="-1">
-       @*  <partial name="BPoR/_CookieConsentBanner" /> *@
+        <partial name="BPoR/_CookieConsentBanner" />
         @RenderBody()
     </div>
 
-@*     <div class="no-print container">
-        <div class="d-flex justify-content-end">
-            <div class="back-to-top mb-3">
-                <a href="#main">@(ViewData["BackToTop"] ?? "Back to top") <i class="fa-solid fa-chevron-up ml-2"></i></a>
-            </div>
-        </div>
-    </div> *@
 
     <partial name="JDR/_Footer" />
 
@@ -117,14 +110,13 @@
 
 
         function acceptCookie() {
-            Cookies.set("cookiesAccepted", "true-" + "20221221", { expires: 180, secure: true, domain: cookieDomain })
-            Cookies.set("BPoRcookie", "BePartOfResearch")
+            Cookies.set("jdrAdditionalCookies", "accepted-" + "20221221", { expires: 180, secure: true, domain: cookieDomain })
             confirmation("accepted")
             handleAcceptedCookies();
         }
 
         function handleAcceptedCookies() {
-            if (Cookies.get("cookiesAccepted").includes("true")) {
+            if (Cookies.get("jdrAdditionalCookies").includes("accepted")) {
                 @if (!string.IsNullOrWhiteSpace(gtm)) {
                   <text>tagManager(window, document, 'script', 'dataLayer', @Json.Serialize(gtm))</text>
                 }
@@ -141,7 +133,7 @@
         };
 
         function rejectCookie() {
-            Cookies.set("cookiesAccepted", "false-" + "20221221", { expires: 180, secure: true, domain: cookieDomain })
+            Cookies.set("jdrAdditionalCookies", "rejected-" + "20221221", { expires: 180, secure: true, domain: cookieDomain })
             Cookies.set("BPoRcookie", "BePartOfResearch")
             // remove existing cookies
             for (const cookie in Cookies.get()) {

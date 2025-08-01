@@ -19,19 +19,9 @@ namespace BPOR.Content
         public string Banner {  get; set; }
         public string AccordionSectionTitle {  get; set; }
         public string AccordionSectionDescription { get; set; }
-        public List<Accordion> AccordionSection {  get; set; }    
-
-        public OrderedListSection OrderListSection { get; set; }
-
-        public TextSection TextSection2 { get; set; }
-
-        public Carousel CarouselSection { get; set; }
-
-        public TextSection TextSection3 { get; set; }
-
-        public Carousel CardSection { get; set; }
-
-        public string BackToTopLinkLabel { get; set; }
+        public AccordionSection AccordionSection1 {  get; set; }    
+        public OnlineResourcesSection onlineResourcesSection {  get; set; }
+        public ContactUsSection contactUsSection { get; set; }
     }
 
     public class MultiLinkSection
@@ -42,6 +32,12 @@ namespace BPOR.Content
         public List<Link> JdrPageLinks { get; set; }
     }
 
+    public class AccordionSection
+    {
+        public string title { get; set; }
+        public string description { get; set; }
+        public List<Accordion> accordions { get; set; }
+    }
 
     public class Accordion
     {
@@ -49,42 +45,18 @@ namespace BPOR.Content
 
         public string Content { get; set; }
     }
+    public class ContactUsSection
+    {
+        public string Title { get; set; }
+        public string Text { get; set; }
+        public Link link { get; set; }
+    }
 
-
-    //public class TextSection
-    //{
-    //    public string Heading { get; set; }
-
-    //    public string Body { get; set; }
-    //}
-
-    //public class Video
-    //{
-    //    public string Heading { get; set; }
-
-    //    public string Description { get; set; }
-    //    public Link Link { get; set; }
-
-    //    public string VideoUrl { get; set; }
-
-    //    public string Transcript { get; set; }
-    //}
-
-    //public class Card
-    //{
-    //    public string Title { get; set; }
-
-    //    public string Body { get; set; }
-
-    //    public Link Link { get; set; }
-
-    //    public Asset Image { get; set; }
-    //}
-
-    //public class Link
-    //{
-    //    public string Label { get; set; }
-    //    public string Url { get; set; }
-    //    public string AriaLabel { get; set; }
-    //}
+    public class OnlineResourcesSection
+    {
+        public string Title { get; set; }
+        public string Text { get; set; }
+        public Asset image {  get; set; }
+        public Link link { get; set; }
+    }
 }
