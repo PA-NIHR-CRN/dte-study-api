@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace NIHR.GdsExtension.TagHelpers
+namespace NIHR.GovUk.Extension.Jdr.TagHelpers
 {
     [HtmlTargetElement("gds-accordion")]
     public class AccordionTagHelper : TagHelper
