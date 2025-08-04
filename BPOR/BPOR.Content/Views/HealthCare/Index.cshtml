@@ -24,17 +24,22 @@
         <div>
             <a href="#heroSection">Introduction</a>
             @{
-                foreach (var accordionLink in Model.AccordionSection1.accordions)
+                if (Model.AccordionSection1 != null)
                 {
-                    <a href="#@{@accordionLink.Title.Replace(" ","")}" >@accordionLink.Title</a>
+                    foreach (var accordionLink in Model.AccordionSection1.accordions)
+                    {
+                        <a href="#@{@accordionLink.Title.Replace(" ","")}" >@accordionLink.Title</a>
+                    }
                 }
-                if(Model.onlineResourcesSection != null){
+                if (Model.onlineResourcesSection != null)
+                {
                     <a href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
                 }
                 if (Model.contactUsSection != null)
                 {
                     <a href="#contectUsSection">@Model.contactUsSection.Title</a>
                 }
+                
             }
         </div>
     </div>
