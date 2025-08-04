@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj" />
     <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
+    <ProjectReference Include="..\NIHR.GdsExtension\NIHR.GdsExtension.csproj" />
   </ItemGroup>
 
   <ItemGroup>

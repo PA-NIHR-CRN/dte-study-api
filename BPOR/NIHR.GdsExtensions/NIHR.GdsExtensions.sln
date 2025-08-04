@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 25.0.1706.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.GdsExtensions", "NIHR.GdsExtensions.csproj", "{B5856BD8-45B9-4F46-BE33-B6E445DFD88A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B5856BD8-45B9-4F46-BE33-B6E445DFD88A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5856BD8-45B9-4F46-BE33-B6E445DFD88A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5856BD8-45B9-4F46-BE33-B6E445DFD88A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5856BD8-45B9-4F46-BE33-B6E445DFD88A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {054D6DBB-7490-4EC2-9823-AF37307509B5}
+	EndGlobalSection
+EndGlobal

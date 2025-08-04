@@ -120,12 +120,12 @@
             <section class="col-lg-8 py-5">
                 <markdown markdown="TextSection1.Text" />
                 <div class="container">
-                @{
-                    foreach( var link in Model.TextSection1.JdrPageLinks)
-                    {
-                        <a class="jdr-btn btn-wide" href="@link.Url" aria-label="@link.AriaLabel"> @link.Label </a>
+                    @{
+                        foreach (var link in Model.TextSection1.JdrPageLinks)
+                        {
+                            <a class="jdr-btn btn-wide" href="@link.Url" aria-label="@link.AriaLabel"> @link.Label </a>
+                        }
                     }
-                }
                 </div>
             </section>
         </div>
@@ -154,35 +154,16 @@
     if (Model.AccordionSection1 != null)
 {
 <!-- Accordion section -->
-<section id="AccordionSection">
-    <h2 id="AccordionSectionTitle">
-        @Model.AccordionSection1.title
-    </h2>
-    <div>
-        @Model.AccordionSection1.description
-    </div>
-    <div id="accodionSectionContent">
-        @{
-            for(int i = 0; i < Model.AccordionSection1.accordions.Count; i++)
-            {
-                var targetClass = "accordionSection" + i;
-                <div class="jdr-accordion">
-                    <h3 class="jdr-accordionTitle" id="@Model.AccordionSection1.accordions[i].Title.Replace(" ","")">
-                        <button type="button" class="jdr-accodion-title" data-toggle="collapse" data-target=".@{@targetClass}">
-                            <i class="fas fa-bars" aria-hidden="true"></i> @Model.AccordionSection1.accordions[i].Title
-                        </button>
-                    </h3>
-                        <div class="@{@targetClass} jdr-accordionContent collapse">
-                        <markdown>@Model.AccordionSection1.accordions[i].Content</markdown>
-                        </div>
-                    </div>
-
-
-            }
+<gds-accordion id="test-accordion">
+    @{
+        for (int i = 0; i < Model.AccordionSection.Count; i++)
+        {
+        <gds-accordion-item heading="@Model.AccordionSection[i].Title">
+            <markdown>@Model.AccordionSection[i].Content</markdown>
+        </gds-accordion-item>
         }
-    </div>
-
-</section>
+    }
+</gds-accordion>
 }
 }
 
