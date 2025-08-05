@@ -62,7 +62,6 @@ public class Startup
             app.UseHsts();
         }
 
-        app.UsePathBase("/join");
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
@@ -76,13 +75,14 @@ public class Startup
         app.UseEndpoints(endpoints => {
             endpoints.MapControllerRoute(
             name: "BPoR",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
+            pattern: "{controller=Home}/{action=Index}/{id?}",
+            defaults: new { controller = "Home" });
 
             endpoints.MapControllerRoute(
             name: "JDR",
-            pattern: "HealthCare/{action=Index}/{id?}"
-            );
-            });
+            pattern: "healthcare/{action=Index}/{id?}",
+            defaults: new { controller = "Healthcare" });
+        });
 
         app.UseMarkdown();
     }

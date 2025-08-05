@@ -2,18 +2,20 @@
 
 namespace NIHR.GovUk.Extension.Jdr.TagHelpers
 {
-    [HtmlTargetElement("gds-accordion")]
+    [HtmlTargetElement("accordion")]
     public class AccordionTagHelper : TagHelper
     {
-        public string Id { get; set; } = "accordion";
+        public string? Id { get; set; }
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
             output.TagName = "div";
-            output.Attributes.SetAttribute("class", "govuk-accordion");
-            output.Attributes.SetAttribute("data-module", "govuk-accordion");
-            output.Attributes.SetAttribute("data-remember-expanded", "false");
-            output.Attributes.SetAttribute("id", Id);
+            output.Attributes.SetAttribute("class", "accordion");
+
+            if (!string.IsNullOrWhiteSpace(Id))
+            {
+                output.Attributes.SetAttribute("id", Id);
+            }
         }
     }
 }

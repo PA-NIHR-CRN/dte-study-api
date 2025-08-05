@@ -151,21 +151,18 @@
 }
 }
 
-@{
-    if (Model.AccordionSection1 != null)
+<!-- Accordion -->
+@if (Model?.AccordionSection1?.accordions != null)
 {
-<!-- Accordion section -->
-<gds-accordion id="test-accordion">
-    @{
-        for (int i = 0; i < Model.AccordionSection.Count; i++)
+    <div class="accordion">
+        @foreach (var accordion in Model.AccordionSection1.accordions)
         {
-        <gds-accordion-item heading="@Model.AccordionSection[i].Title">
-            <markdown>@Model.AccordionSection[i].Content</markdown>
-        </gds-accordion-item>
+            <details>
+                <summary>@accordion?.Title</summary>
+                <markdown>@accordion?.Content</markdown>
+            </details>
         }
-    }
-</gds-accordion>
-}
+    </div>
 }
 
 @{

@@ -2,31 +2,30 @@
 
 namespace NIHR.GovUk.Extension.Jdr.TagHelpers
 {
-    [HtmlTargetElement("gds-accordion-item", ParentTag = "gds-accordion")]
+    [HtmlTargetElement("details", ParentTag = "accordion")]
     public class AccordionItemTagHelper : TagHelper
     {
-        public string Heading { get; set; } = "";
-        public string ItemId { get; set; } = Guid.NewGuid().ToString();
-
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            output.TagName = "div";
-            output.Attributes.SetAttribute("class", "govuk-accordion__section");
+            output.TagName = "details";
+            output.Attributes.SetAttribute("class", "accordion-item");
 
-            var headingHtml = $@"
-                <div class=""govuk-accordion__section-header"">
-                    <h2 class=""govuk-accordion__section-heading"">
-                        <span class=""govuk-accordion__section-button"" id=""{ItemId}-heading"">
-                            {Heading}
-                        </span>
-                    </h2>
-                </div>";
+            var childContent = output.GetChildContentAsync().Result.GetContent();
 
-            var contentStart = $@"<div id=""{ItemId}-content"" class=""govuk-accordion__section-content"">";
-            var contentEnd = "</div>";
+            var summaryEndIndex = childContent.IndexOf("</summary>", StringComparison.OrdinalIgnoreCase);
+            if (summaryEndIndex >= 0)
+            {
+                summaryEndIndex += "</summary>".Length;
+                var summaryPart = childContent.Substring(0, summaryEndIndex);
+                var contentPart = childContent.Substring(summaryEndIndex);
 
-            output.PreContent.SetHtmlContent(headingHtml + contentStart);
-            output.PostContent.SetHtmlContent(contentEnd);
+                var wrappedContent = $@"{summaryPart}<div class=""accordion-content"">{contentPart}</div>";
+                output.Content.SetHtmlContent(wrappedContent);
+            }
+            else
+            {
+                output.Content.SetHtmlContent($@"<div class=""accordion-content"">{childContent}</div>");
+            }
         }
     }
 }
