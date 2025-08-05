@@ -14,7 +14,8 @@ namespace BPOR.Rms.Controllers;
 public class StudyController(
     ParticipantDbContext context,
     IPaginationService paginationService,
-    ICurrentUserProvider<User> currentUserProvider
+    ICurrentUserProvider<User> currentUserProvider,
+    ILogger<StudyController> logger
 ) : Controller
 {
     [HttpGet]
@@ -78,6 +79,7 @@ public class StudyController(
 
         if (study == null)
         {
+            logger.LogWarning("[HttpGet]Details called with non-existent study: {StudyId}", id);
             return NotFound();
         }
 
@@ -111,6 +113,7 @@ public class StudyController(
         if (!model.AllowEditIsRecruitingIdentifiableParticipants)
         {
             // This should never happen, but we still need to guard against it.
+            logger.LogWarning("[HttpPost]Create called with IsRecruitingIdentifiableParticipants set to false");
             return BadRequest("Model must allow editing of IsRecruitingIdentifiableParticipants");
         }
         
@@ -153,6 +156,11 @@ public class StudyController(
                     });
                 }
             }
+            else
+            {
+                logger.LogWarning("[HttpPost]Create called with step out of range: {Step}", model.Step);
+                return BadRequest($"Step out of range: {model.Step}");
+            }
         }
         else if (action == "Back")
         {
@@ -171,6 +179,11 @@ public class StudyController(
                 // will exit correctly.
                 return RedirectToAction("Index");
             }
+        }
+        else
+        {
+            logger.LogWarning("[HttpPost]Create called with action out of range: {Action}", action);
+            return BadRequest($"Action out of range: {action}");
         }
 
         return View(model);
@@ -191,6 +204,7 @@ public class StudyController(
 
         if (studyModel == null)
         {
+            logger.LogWarning("[HttpGet]Edit called with non-existent study: {StudyId}", id);
             return NotFound();
         }
 
@@ -232,6 +246,12 @@ public class StudyController(
         StudyFormViewModel model)
     {
         model.Id = id;
+
+        if (model.Step is < 1 or > 3)
+        {
+            logger.LogWarning("[HttpPost]Edit called with step out of range: {Step}", model.Step);
+            return BadRequest($"Step out of range: {model.Step}");
+        }
         
         ModelState.AddValidationResult(ValidateStep(model, model.Step));
 
@@ -246,6 +266,7 @@ public class StudyController(
 
             if (studyToUpdate == null)
             {
+                logger.LogWarning("[HttpPost]Edit called with non-existent study: {StudyId}", id);
                 return NotFound();
             }
 
@@ -274,6 +295,7 @@ public class StudyController(
         {
             if (!StudyExists(id))
             {
+                logger.LogWarning("[HttpPost]Edit called with non-existent study following concurrency exception: {StudyId}", id);
                 return NotFound();
             }
             else
