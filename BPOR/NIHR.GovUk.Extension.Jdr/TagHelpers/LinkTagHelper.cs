@@ -15,7 +15,11 @@ namespace NIHR.GovUk.Extension.Jdr.TagHelpers
 
                 if (classes.Contains("button", StringComparer.OrdinalIgnoreCase))
                 {
-                    output.Attributes.SetAttribute("class", "govuk-button");
+                    classes.RemoveAll(c => c.Equals("button", StringComparison.OrdinalIgnoreCase));
+
+                    classes.Insert(0, "govuk-button");
+
+                    output.Attributes.SetAttribute("class", string.Join(" ", classes));
                 }
             }
         }
