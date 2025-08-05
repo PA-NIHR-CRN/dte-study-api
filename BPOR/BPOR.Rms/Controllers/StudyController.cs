@@ -2,6 +2,8 @@ using BPOR.Domain.Entities;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Startup;
+using BPOR.Rms.Validators;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NIHR.GovUk.AspNetCore.Mvc;
@@ -12,7 +14,8 @@ namespace BPOR.Rms.Controllers;
 public class StudyController(
     ParticipantDbContext context,
     IPaginationService paginationService,
-    ICurrentUserProvider<User> currentUserProvider
+    ICurrentUserProvider<User> currentUserProvider,
+    ILogger<StudyController> logger
 ) : Controller
 {
     [HttpGet]
@@ -76,6 +79,7 @@ public class StudyController(
 
         if (study == null)
         {
+            logger.LogWarning("[HttpGet]Details called with non-existent study: {StudyId}", id);
             return NotFound();
         }
 
@@ -85,7 +89,7 @@ public class StudyController(
     // GET: Study/Create
     public IActionResult Create()
     {
-        var model = new StudyFormViewModel();
+        var model = new StudyFormViewModel(){AllowEditIsRecruitingIdentifiableParticipants = true};
         return View(model);
     }
 
@@ -95,17 +99,30 @@ public class StudyController(
     [HttpPost]
     // [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-        [Bind("Id,FullName,EmailAddress,StudyName,CpmsId,IsRecruitingIdentifiableParticipants,Step")]
+        [Bind(@$"
+            {nameof(StudyFormViewModel.Id)}, 
+            {nameof(StudyFormViewModel.FullName)},
+            {nameof(StudyFormViewModel.EmailAddress)},
+            {nameof(StudyFormViewModel.StudyName)},
+            {nameof(StudyFormViewModel.CpmsId)}, 
+            {nameof(StudyFormViewModel.IsRecruitingIdentifiableParticipants)}, 
+            {nameof(StudyFormViewModel.Step)},
+            {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)}")]
         StudyFormViewModel model, string action)
     {
+        if (!model.AllowEditIsRecruitingIdentifiableParticipants)
+        {
+            // This should never happen, but we still need to guard against it.
+            logger.LogWarning("[HttpPost]Create called with IsRecruitingIdentifiableParticipants set to false");
+            return BadRequest("Model must allow editing of IsRecruitingIdentifiableParticipants");
+        }
+        
         if (action == "Next" || action == "Save")
         {
             if (model.Step == 1)
             {
-                ModelState.Remove("StudyName");
-                ModelState.Remove("IsRecruitingIdentifiableParticipants");
-                ModelState.Remove("CpmsId");
-
+                ModelState.AddValidationResult(ValidateStep(model, 1));
+                
                 if (ModelState.IsValid)
                 {
                     model.GotoNextStep();
@@ -113,7 +130,10 @@ public class StudyController(
             }
             else if (model.Step == 2)
             {
-                ValidateStep2(model);
+                // We need to re-validate step 1 since the data has been round-tripped to the browser
+                // since it was first validated.
+                ModelState.AddValidationResult(ValidateStep(model, 1));
+                ModelState.AddValidationResult(ValidateStep(model, 2));
 
                 if (ModelState.IsValid)
                 {
@@ -136,6 +156,11 @@ public class StudyController(
                     });
                 }
             }
+            else
+            {
+                logger.LogWarning("[HttpPost]Create called with step out of range: {Step}", model.Step);
+                return BadRequest($"Step out of range: {model.Step}");
+            }
         }
         else if (action == "Back")
         {
@@ -155,31 +180,15 @@ public class StudyController(
                 return RedirectToAction("Index");
             }
         }
+        else
+        {
+            logger.LogWarning("[HttpPost]Create called with action out of range: {Action}", action);
+            return BadRequest($"Action out of range: {action}");
+        }
 
         return View(model);
     }
-
-    private void ValidateStep2(StudyFormViewModel model)
-    {
-        if (string.IsNullOrEmpty(model.StudyName))
-        {
-            ModelState.AddModelError("StudyName", "Enter the study name");
-        }
-        else if (model.StudyName.Length > 255)
-        {
-            ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
-        }
-    }
-
-    private void ValidateStep3(StudyFormViewModel model)
-    {
-        if (!string.IsNullOrWhiteSpace(model.InformationUrl) &&
-            !Uri.IsWellFormedUriString(model.InformationUrl.Trim(), UriKind.Absolute))
-        {
-            ModelState.AddModelError(nameof(model.InformationUrl),
-                "The website you have tried to enter is not formatted correctly");
-        }
-    }
+    
 
     // success
     public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
@@ -193,15 +202,31 @@ public class StudyController(
             .AsStudyFormViewModel()
             .FirstOrDefaultAsync(s => s.Id == id);
 
-
         if (studyModel == null)
         {
+            logger.LogWarning("[HttpGet]Edit called with non-existent study: {StudyId}", id);
             return NotFound();
         }
 
-        ViewData["IsEditMode"] = true;
+        studyModel.AllowEditIsRecruitingIdentifiableParticipants = false;
         studyModel.Step = field;
         return View(studyModel);
+    }
+
+    static ValidationResult ValidateStep(StudyFormViewModel model, int step )
+    {
+        StudyFormModelValidator validator = new();
+        switch (step)
+        {
+            case 1:
+                return validator.ValidateSpecificProperties(model, i => i.FullName, i => i.EmailAddress);
+            case 2:
+                return validator.ValidateSpecificProperties(model, i => i.StudyName, i => i.IsRecruitingIdentifiableParticipants, i=>i.CpmsId);
+            case 3:
+                return validator.ValidateSpecificProperties(model, i => i.InformationUrl);
+            default:
+                throw new ArgumentOutOfRangeException(nameof(model.Step));
+        }
     }
 
     // POST: Study/Edit/5
@@ -210,77 +235,84 @@ public class StudyController(
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
-        [Bind("FullName,EmailAddress,StudyName,CpmsId,Step,InformationUrl")]
+        [Bind(@$"
+            {nameof(StudyFormViewModel.FullName)},
+            {nameof(StudyFormViewModel.EmailAddress)},
+            {nameof(StudyFormViewModel.StudyName)},
+            {nameof(StudyFormViewModel.CpmsId)}, 
+            {nameof(StudyFormViewModel.Step)},
+            {nameof(StudyFormViewModel.InformationUrl)},
+            {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)}")]
         StudyFormViewModel model)
     {
         model.Id = id;
-        ModelState.Remove("IsRecruitingIdentifiableParticipants");
 
-        if (model.Step == 1)
+        if (model.Step is < 1 or > 3)
         {
-            if (model.StudyName.Length > 255)
+            logger.LogWarning("[HttpPost]Edit called with step out of range: {Step}", model.Step);
+            return BadRequest($"Step out of range: {model.Step}");
+        }
+        
+        ModelState.AddValidationResult(ValidateStep(model, model.Step));
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        try
+        {
+            var studyToUpdate = await context.Studies.FirstOrDefaultAsync(s => s.Id == id);
+
+            if (studyToUpdate == null)
             {
-                ModelState.AddModelError("StudyName", "Study name must be less than 255 characters");
+                logger.LogWarning("[HttpPost]Edit called with non-existent study: {StudyId}", id);
+                return NotFound();
+            }
+
+            switch (model.Step)
+            {
+                case 1:
+                    studyToUpdate.FullName = model.FullName;
+                    studyToUpdate.EmailAddress = model.EmailAddress;
+                    break;
+                case 2:
+                    studyToUpdate.StudyName = model.StudyName;
+                    studyToUpdate.CpmsId = model.CpmsId;
+                    break;
+                case 3:
+                    studyToUpdate.InformationUrl = string.IsNullOrWhiteSpace(model.InformationUrl)
+                        ? null
+                        : model.InformationUrl.Trim();
+                    break;
+            }
+                  
+            studyToUpdate.UpdatedAt = DateTime.UtcNow;
+
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!StudyExists(id))
+            {
+                logger.LogWarning("[HttpPost]Edit called with non-existent study following concurrency exception: {StudyId}", id);
+                return NotFound();
+            }
+            else
+            {
+                throw;
             }
         }
 
-        if (model.Step == 2)
+        this.AddNotification(new NotificationBannerModel
         {
-            ValidateStep2(model);
-        }
+            IsSuccess = true,
+            Title = "Study details updated",
+            Body = $"{model.StudyName} has been successfully updated"
+        });
 
-        if (model.Step == 3)
-        {
-            ValidateStep3(model);
-        }
-
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                var studyToUpdate = await context.Studies.FirstOrDefaultAsync(s => s.Id == id);
-
-                if (studyToUpdate == null)
-                {
-                    return NotFound();
-                }
-
-                studyToUpdate.FullName = model.FullName;
-                studyToUpdate.EmailAddress = model.EmailAddress;
-                studyToUpdate.StudyName = model.StudyName;
-                studyToUpdate.CpmsId = model.CpmsId;
-                studyToUpdate.UpdatedAt = DateTime.UtcNow;
-                studyToUpdate.InformationUrl = string.IsNullOrWhiteSpace(model.InformationUrl)
-                    ? null
-                    : model.InformationUrl.Trim();
-
-                await context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!StudyExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            this.AddNotification(new NotificationBannerModel
-            {
-                IsSuccess = true,
-                Title = "Study details updated",
-                Body = $"{model.StudyName} has been successfully updated"
-            });
-
-            return RedirectToAction(nameof(Details), new { id });
-        }
-
-        ViewData["IsEditMode"] = true;
-
-        return View(model);
+        return RedirectToAction(nameof(Details), new { id });
+        
     }
 
     private bool StudyExists(int id)

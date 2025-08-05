@@ -1,8 +1,5 @@
 @model BPOR.Rms.Models.Study.StudyFormViewModel
 
-@{
-    var isEditMode = ViewData["IsEditMode"] as bool? ?? false;
-}
 <div class="govuk-form-group @(Html.ViewData.ModelState["StudyName"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="StudyName" class="govuk-label">
         @Html.DisplayNameFor(model => model.StudyName)
@@ -17,7 +14,9 @@
     <textarea asp-for="StudyName" class="govuk-textarea @(Html.ViewData.ModelState["StudyName"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" aria-describedby="@(Html.ViewData.ModelState["StudyName"]?.Errors.Count > 0 ? "study-name-error" : "")"></textarea>
 </div>
 
-@if (!isEditMode)
+<input asp-for="AllowEditIsRecruitingIdentifiableParticipants" type="hidden" value="@Model.AllowEditIsRecruitingIdentifiableParticipants"></input>
+
+@if (Model.AllowEditIsRecruitingIdentifiableParticipants)
 {
     <div class="govuk-form-group @(Html.ViewData.ModelState["IsRecruitingIdentifiableParticipants"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
         <fieldset class="govuk-fieldset">
