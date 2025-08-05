@@ -6,13 +6,12 @@
     --White: #FFF;
     --Disabled: #D1D1D1;
     --Red: #D4351C;
-
+    --Yellow: #FFDD00;
     /* Typography */
     --font-button-family: "Gotham Bold", sans-serif;
     --font-button-size: 18px;
     --font-button-line-height: 20px;
     --font-button-weight: 700;
-
     /* Spacing / Borders */
     --radius-default: 5px;
     --border-thick: 2px solid var(--Pink-1);
@@ -26,7 +25,7 @@
 }
 
 .accordion details {
-    border: 1px solid var(--Pink-1);
+    border: 2px solid var(--Pink-1);
     border-radius: 20px;
     background-color: var(--Pink-1);
     overflow: hidden;
@@ -118,7 +117,6 @@
     width: auto !important;
 }
 
-
 .govuk-button,
 .govuk-button:link,
 .govuk-button:visited {
@@ -129,28 +127,111 @@
     align-items: center;
     border-radius: var(--radius-default);
     border: var(--border-thick);
-    background: var(--White);
-    box-shadow: 0 3px 0 0 #0B0C0C;
-    color: var(--Pink-1);
+    background: var(--Pink-1);
+    box-shadow: 0 2px 0 0 #0B0C0C;
+    color: var(--White);
     text-align: center;
     font-family: var(--font-button-family);
     font-size: var(--font-button-size);
     font-style: normal;
     font-weight: var(--font-button-weight);
     line-height: var(--font-button-line-height);
-    transition: all 0.2s ease-in-out;
     cursor: pointer;
+    margin: 5px;
+    width: 100px;
+    height: 50px;
+    border-radius: 4px;
 }
 
-.govuk-button:hover,
-.govuk-button:focus {
-    color: var(--White);
-    background: var(--Pink-2);
-    box-shadow: 0 -2px 0 0 #002D18 inset;
-    outline: none;
-}
+    .govuk-button:hover,
+    .govuk-button:focus {
+        color: var(--Pink-1) !important;
+        background: var(--White) !important;
+        border: 2px solid !important;
+        border-color: var(--Black) !important;
+        box-shadow: 0px 0px 0px 3px var(--Yellow) !important;
+    }
 
 .govuk-button:active {
     color: var(--White);
     background: var(--Black);
+}
+
+.btn-secondary,
+.btn-secondary:link,
+.btn-secondary:visited {
+    background: var(--Black);
+    color: var(--White);
+    border-color: var(--Black);
+}
+
+    .btn-secondary:hover,
+    .btn-secondary:focus {
+        background: var(--White) !important;
+        color: var(--Black) !important;
+        box-shadow: 0 0 0 3px var(--Yellow) !important;
+        outline: none !important;
+    }
+
+
+.btn-tertiary,
+.btn-tertiary:link,
+.btn-tertiary:visited {
+    background: var(--White);
+    color: var(--Pink-1);
+    border-color: var(--Pink-1);
+}
+
+    .btn-tertiary:hover,
+    .btn-tertiary:focus {
+        color: var(--Pink-1) !important;
+        background: var(--White) !important;
+        border: 2px solid !important;
+        border-color: var(--Pink-1) !important;
+        box-shadow: 0px 0px 0px 3px var(--Yellow) !important;
+    }
+
+.btn-error,
+.btn-error:link,
+.btn-error:visited {
+    background: var(--Red);
+    color: var(--White);
+    border-color: var(--Red);
+    box-shadow: 0 2px 0 0 var(--Red);
+}
+    .btn-error:hover,
+    .btn-error:focus {
+        color: var(--White) !important;
+        background: var(--Red) !important;
+        border: 2px solid !important;
+        border-color: var(--Red) !important;
+        box-shadow: 0px 0px 0px 3px var(--Yellow) !important;
+    }
+
+.btn-disabled,
+.btn-disabled:link,
+.btn-disabled:visited {
+    background: var(--Disabled);
+    color: var(--White);
+    border: var(--Disabled);
+    pointer-events: none;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+header .govuk-button {
+    margin-bottom: 0px;
+}
+
+.header-images {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.header-buttons {
+    display: flex;
+    justify-content: flex-end;
 }
