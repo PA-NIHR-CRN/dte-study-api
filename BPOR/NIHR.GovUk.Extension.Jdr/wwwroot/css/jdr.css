@@ -1,35 +1,22 @@
 ﻿:root {
     /* Colours */
-    --JDR-Pink-1: #990066;
-    --JDR-Pink-2: #A21774;
-    --JDR-Black: #000;
-    --JDR-White: #FFF;
-    /* Typography */
-    --font-button-family: "Gotham Bold", sans-serif;
-    --font-button-size: 18px;
-    --font-button-line-height: 20px;
-    --font-button-weight: 700;
-    /* Spacing / Borders */
-    --radius-default: 5px;
-    --border-thick: 2px solid var(--JDR-Pink-1);
-    color: var(--JDR-Pink-1);
-}
+    --Pink-1: #990066;
+    --Pink-2: #A21774;
+    --Black: #000;
+    --White: #FFF;
+    --Disabled: #D1D1D1;
+    --Red: #D4351C;
 
-:root {
-    /* Colours */
-    --JDR-Pink-1: #990066;
-    --JDR-Pink-2: #A21774;
-    --JDR-Black: #000;
-    --JDR-White: #FFF;
     /* Typography */
     --font-button-family: "Gotham Bold", sans-serif;
     --font-button-size: 18px;
     --font-button-line-height: 20px;
     --font-button-weight: 700;
+
     /* Spacing / Borders */
     --radius-default: 5px;
-    --border-thick: 2px solid var(--JDR-Pink-1);
-    color: var(--JDR-Pink-1);
+    --border-thick: 2px solid var(--Pink-1);
+    color: var(--Pink-1);
 }
 
 .accordion {
@@ -39,9 +26,9 @@
 }
 
 .accordion details {
-    border: 1px solid var(--JDR-Pink-1);
+    border: 1px solid var(--Pink-1);
     border-radius: 20px;
-    background-color: var(--JDR-Pink-1);
+    background-color: var(--Pink-1);
     overflow: hidden;
     transition: all 0.3s ease;
 }
@@ -53,8 +40,8 @@
         font-weight: bold;
         font-size: 1rem;
         padding: 1rem 1.5rem;
-        background-color: var(--JDR-Pink-1);
-        color: var(--JDR-White);
+        background-color: var(--Pink-1);
+        color: var(--White);
         border-radius: 20px;
         cursor: pointer;
         position: relative;
@@ -70,7 +57,7 @@
         details summary::after {
             content: "▾";
             font-size: 1.2rem;
-            color: var(--JDR-White);
+            color: var(--White);
             position: absolute;
             right: 1.5rem;
             top: 50%;
@@ -78,31 +65,27 @@
             transition: transform 0.3s ease, color 0.3s;
         }
 
-    details[open] summary {
-        background-color: var(--JDR-White);
-        color: var(--JDR-Pink-1);
-    }
 
         details[open] summary::after {
             transform: translateY(-50%) rotate(180deg);
-            color: var(--JDR-Pink-1);
+            color: var(--Pink-1);
         }
 
     details summary:hover,
     details summary:focus-visible {
-        background-color: var(--JDR-White);
-        color: var(--JDR-Pink-1);
+        background-color: var(--White);
+        color: var(--Pink-1);
         outline: none;
     }
 
         details summary:hover::after,
         details summary:focus-visible::after {
-            color: var(--JDR-Pink-1);
+            color: var(--Pink-1);
         }
 
     details p {
         padding: 1rem 1.5rem;
-        background-color: var(--JDR-White);
+        background-color: var(--White);
         color: #333;
         border-top: 1px solid #ccc;
     }
@@ -146,9 +129,9 @@
     align-items: center;
     border-radius: var(--radius-default);
     border: var(--border-thick);
-    background: var(--JDR-White);
+    background: var(--White);
     box-shadow: 0 3px 0 0 #0B0C0C;
-    color: var(--JDR-Pink-1);
+    color: var(--Pink-1);
     text-align: center;
     font-family: var(--font-button-family);
     font-size: var(--font-button-size);
@@ -161,13 +144,13 @@
 
 .govuk-button:hover,
 .govuk-button:focus {
-    color: var(--JDR-White);
-    background: var(--JDR-Pink-2);
+    color: var(--White);
+    background: var(--Pink-2);
     box-shadow: 0 -2px 0 0 #002D18 inset;
     outline: none;
 }
 
 .govuk-button:active {
-    color: var(--JDR-White);
-    background: var(--JDR-Black);
+    color: var(--White);
+    background: var(--Black);
 }
