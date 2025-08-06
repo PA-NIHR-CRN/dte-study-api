@@ -1,0 +1,268 @@
+﻿:root {
+    /* Colours */
+    --Pink-1: #990066;
+    --Pink-2: #A21774;
+    --Black: #000;
+    --White: #FFF;
+    --Disabled: #D1D1D1;
+    --Red: #D4351C;
+    --Yellow: #FFDD00;
+    /* Typography */
+    --font-button-family: "Gotham Bold", sans-serif;
+    --font-button-size: 18px;
+    --font-button-line-height: 20px;
+    --font-button-weight: 700;
+    /* Spacing / Borders */
+    --radius-default: 5px;
+    --border-thick: 2px solid var(--Pink-1);
+    color: var(--Pink-1);
+}
+
+.accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+    .accordion details {
+        border: 2px solid var(--Pink-1);
+        border-radius: 20px;
+        background-color: var(--Pink-1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .accordion details summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 1rem 1.5rem;
+            background-color: var(--Pink-1);
+            color: var(--White);
+            border-radius: 20px;
+            cursor: pointer;
+            position: relative;
+            list-style: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+details summary::marker,
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details summary::after {
+    content: "▾";
+    font-size: 1.2rem;
+    color: var(--White);
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 0.3s ease, color 0.3s;
+}
+
+
+details[open] summary::after {
+    transform: translateY(-50%) rotate(180deg);
+    color: var(--Pink-1);
+}
+
+details summary:hover,
+details summary:focus-visible {
+    background-color: var(--White);
+    color: var(--Pink-1);
+    outline: none;
+}
+
+    details summary:hover::after,
+    details summary:focus-visible::after {
+        color: var(--Pink-1);
+    }
+
+details p {
+    padding: 1rem 1.5rem;
+    background-color: var(--White);
+    color: #333;
+    border-top: 1px solid #ccc;
+}
+
+
+a,
+.govuk-skip-link {
+    font-family: Lato;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+    .govuk-skip-link:active,
+    .govuk-skip-link:focus {
+        display: inline-block;
+        clip: auto !important;
+        height: auto !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        position: static !important;
+        white-space: normal !important;
+        width: auto !important;
+        text-decoration: underline;
+        box-shadow: none;
+    }
+
+.govuk-button,
+.govuk-button:link,
+.govuk-button:visited {
+    display: inline-flex;
+    padding: 8px 12px 7px 12px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--radius-default);
+    border: var(--border-thick);
+    background: var(--Pink-1);
+    box-shadow: 0 2px 0 0 #0B0C0C;
+    color: var(--White);
+    text-align: center;
+    font-family: var(--font-button-family);
+    font-size: var(--font-button-size);
+    font-style: normal;
+    font-weight: var(--font-button-weight);
+    line-height: var(--font-button-line-height);
+    cursor: pointer;
+    margin: 5px;
+    width: 100px;
+    height: 50px;
+    border-radius: 4px;
+}
+
+    .govuk-button:hover,
+    .govuk-button:focus {
+        color: var(--Pink-1) !important;
+        background: var(--White) !important;
+        border: 2px solid !important;
+        border-color: var(--Pink-1) !important;
+        box-shadow: 0px 0px 0px 3px var(--Yellow) !important;
+    }
+
+    .govuk-button:active {
+        color: var(--White);
+        background: var(--Black);
+    }
+
+.btn-secondary,
+.btn-secondary:link,
+.btn-secondary:visited {
+    background: var(--Black);
+    color: var(--White);
+    border-color: var(--Black);
+}
+
+    .btn-secondary:hover,
+    .btn-secondary:focus {
+        background: var(--White) !important;
+        color: var(--Black) !important;
+        box-shadow: 0 0 0 3px var(--Yellow) !important;
+        outline: none !important;
+    }
+
+
+.btn-tertiary,
+.btn-tertiary:link,
+.btn-tertiary:visited {
+    background: var(--White);
+    color: var(--Pink-1);
+    border-color: var(--Pink-1);
+}
+
+    .btn-tertiary:hover,
+    .btn-tertiary:focus {
+        color: var(--Pink-1) !important;
+        background: var(--White) !important;
+        border: 2px solid !important;
+        border-color: var(--Pink-1) !important;
+        box-shadow: 0px 0px 0px 3px var(--Yellow) !important;
+    }
+
+.btn-error,
+.btn-error:link,
+.btn-error:visited {
+    background: var(--Red);
+    color: var(--White);
+    border-color: var(--Red);
+    box-shadow: 0 2px 0 0 var(--Red);
+}
+
+    .btn-error:hover,
+    .btn-error:focus {
+        color: var(--White) !important;
+        background: var(--Red) !important;
+        border: 2px solid !important;
+        border-color: var(--Red) !important;
+        box-shadow: 0px 0px 0px 3px var(--Yellow) !important;
+    }
+
+.btn-disabled,
+.btn-disabled:link,
+.btn-disabled:visited {
+    background: var(--Disabled);
+    color: var(--White);
+    border: var(--Disabled);
+    pointer-events: none;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+header .govuk-button {
+    margin-bottom: 0px;
+}
+
+.header-images {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.header-buttons {
+    display: flex;
+    justify-content: flex-end;
+}
+
+nav {
+    background: var(--Pink-1);
+}
+
+    nav .navbar-nav {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        nav .navbar-nav > li > a {
+            color: var(--White) !important;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 20px;
+            vertical-align: middle;
+            text-decoration: none;
+        }
+
+    nav .nav > li > a:focus,
+    nav .nav > li > a:hover {
+        background-color: var(--Pink-1);
+        box-shadow: 0 0 0 3px var(--Yellow) !important;
+    }
+
+.header-images .govuk-link:focus,
+.header-images .govuk-link:hover {
+    background-color: transparent;
+    box-shadow: 0 0 0 3px var(--Yellow) !important;
+}
+
+.jdr-logo {
+    height: auto;
+}

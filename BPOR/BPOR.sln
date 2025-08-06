@@ -35,9 +35,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.GovUk.AspNetCore.Mvc",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Content", "BPOR.Content\BPOR.Content.csproj", "{DAC3849D-DAB3-4F3F-BC46-91E448C72499}"
 EndProject
-Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "BPOR.Geolocation", "BPOR.Geolocation\BPOR.Geolocation.csproj", "{6B0160F6-7CD2-4349-BBAA-F005BCAD2A5F}"
+Project("{9344BDBB-3E7F-41FC-A0DD-8665D75EE146}") = "BPOR.Geolocation", "BPOR.Geolocation\BPOR.Geolocation.csproj", "{EC719664-5E1E-4FEB-B7F3-5FB31F193625}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.GdsExtension", "NIHR.GdsExtension\NIHR.GdsExtension.csproj", "{2709E0FF-705F-475B-9E81-D815704AD9EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.GovUk.Extension.Jdr", "NIHR.GovUk.Extension.Jdr\NIHR.GovUk.Extension.Jdr.csproj", "{346B7C9C-28CF-4AC0-A125-5EE38388F308}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,21 +101,21 @@ Global
 		{DAC3849D-DAB3-4F3F-BC46-91E448C72499}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DAC3849D-DAB3-4F3F-BC46-91E448C72499}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DAC3849D-DAB3-4F3F-BC46-91E448C72499}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6B0160F6-7CD2-4349-BBAA-F005BCAD2A5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B0160F6-7CD2-4349-BBAA-F005BCAD2A5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B0160F6-7CD2-4349-BBAA-F005BCAD2A5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B0160F6-7CD2-4349-BBAA-F005BCAD2A5F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2709E0FF-705F-475B-9E81-D815704AD9EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2709E0FF-705F-475B-9E81-D815704AD9EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2709E0FF-705F-475B-9E81-D815704AD9EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2709E0FF-705F-475B-9E81-D815704AD9EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC719664-5E1E-4FEB-B7F3-5FB31F193625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC719664-5E1E-4FEB-B7F3-5FB31F193625}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC719664-5E1E-4FEB-B7F3-5FB31F193625}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC719664-5E1E-4FEB-B7F3-5FB31F193625}.Release|Any CPU.Build.0 = Release|Any CPU
+		{346B7C9C-28CF-4AC0-A125-5EE38388F308}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{346B7C9C-28CF-4AC0-A125-5EE38388F308}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{346B7C9C-28CF-4AC0-A125-5EE38388F308}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{346B7C9C-28CF-4AC0-A125-5EE38388F308}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DB8E1DBE-FBB1-4A1F-B2D6-D75F02898EFE} = {94C3A807-9598-40BE-8D1A-D6C6B79100F8}
-		{6B0160F6-7CD2-4349-BBAA-F005BCAD2A5F} = {7D035B4F-4ECD-4D3F-B31E-0908D729085E}
+		{EC719664-5E1E-4FEB-B7F3-5FB31F193625} = {7D035B4F-4ECD-4D3F-B31E-0908D729085E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4E45AB36-07F2-4CE9-8685-CFE1BBD4AC3E}
