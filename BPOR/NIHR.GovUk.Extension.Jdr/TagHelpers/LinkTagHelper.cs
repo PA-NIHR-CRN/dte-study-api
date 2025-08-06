@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+using NIHR.GovUk.AspNetCore.Mvc.TagHelpers.Extensions;
 
 namespace NIHR.GovUk.Extension.Jdr.TagHelpers
 {
@@ -7,21 +8,11 @@ namespace NIHR.GovUk.Extension.Jdr.TagHelpers
     {
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            if (output.Attributes.TryGetAttribute("class", out var classAttr))
-            {
-                var classes = classAttr.Value?.ToString()
-                    ?.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                    .ToList() ?? new List<string>();
+            if (!output.HasClass("button"))
+                return;
 
-                if (classes.Contains("button", StringComparer.OrdinalIgnoreCase))
-                {
-                    classes.RemoveAll(c => c.Equals("button", StringComparison.OrdinalIgnoreCase));
-
-                    classes.Insert(0, "govuk-button");
-
-                    output.Attributes.SetAttribute("class", string.Join(" ", classes));
-                }
-            }
+            output.RemoveClass("button");
+            output.PrependClass("govuk-button");
         }
     }
 }

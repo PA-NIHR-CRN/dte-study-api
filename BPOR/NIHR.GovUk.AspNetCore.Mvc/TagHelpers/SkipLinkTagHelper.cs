@@ -1,32 +1,17 @@
 ﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+using NIHR.GovUk.AspNetCore.Mvc.TagHelpers.Extensions;
 
-namespace NIHR.GovUk.Extension.Jdr.TagHelpers
+namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
 {
     [HtmlTargetElement("a", Attributes = "class")]
     public class SkipLinkTagHelper : TagHelper
     {
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            if (output.Attributes.TryGetAttribute("class", out var classAttr))
+            if (output.HasClass("skip-link"))
             {
-                var classList = classAttr.Value?.ToString()?
-                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                    .ToList() ?? new List<string>();
-
-                if (classList.Contains("skip-link", StringComparer.OrdinalIgnoreCase))
-                {
-                    output.Attributes.SetAttribute("class", "govuk-skip-link");
-
-                    if (!output.Attributes.ContainsName("href"))
-                    {
-                        output.Attributes.SetAttribute("href", "#main-content");
-                    }
-
-                    if (!output.Content.IsModified)
-                    {
-                        output.Content.SetContent("Skip to main content");
-                    }
-                }
+                output.RemoveClass("skip-link");
+                output.PrependClass("govuk-skip-link");
             }
         }
     }
