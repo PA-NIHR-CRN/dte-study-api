@@ -2,6 +2,7 @@
     /* Colours */
     --JDR-Primary-Pink: #990066;
     --JDR-Pink-2: #A21774;
+    --JDR-Pink-11: #E3B9D5;
     --JDR-Black: #000;
     --JDR-White: #FFF;
     /* Typography */
@@ -13,9 +14,11 @@
     --radius-default: 5px;
     --border-thick: 2px solid var(--JDR-Primary-Pink, #990066);
     color: var(--Primary-purple, #6667AD);
-
 }
 
+h2{
+    color:var(--JDR-Black);
+}
 .govuk-accordion__controls {
     display: none !important;
 }
@@ -191,3 +194,32 @@
     color: var(--JDR-White);
     background: var(--JDR-Black);
 }
+
+.jdr-center{
+    float:none;
+    justify-self:center;
+}
+.jdr-background-black{
+    background-color: var( --JDR-Black)
+}
+.row{
+    display:flex;
+}
+.w-100{
+    width:100%
+}
+
+.jdr-resources-image {
+    padding: 2% 0 2% 2%;
+    align-content: center;
+    min-height:260px;
+}
+.jdr-resources-content {
+    align-self: center;
+    background-color: var( --JDR-Pink-11);
+    margin-block: 5% 5%;
+}
+.jdr-resources-content-inner {
+    padding: 3% 3% 3% 0;
+}
+
