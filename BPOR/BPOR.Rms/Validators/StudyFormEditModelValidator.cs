@@ -13,7 +13,7 @@ public class StudyFormModelValidator : AbstractValidator<StudyFormEditModel>
             .MaximumLength(255).WithMessage("Main contact name must be less than 256 characters");
         RuleFor(i => i.EmailAddress)
             .NotEmpty().WithMessage("Enter the email address of the main contact for the study")
-            .EmailAddress().WithMessage("Enter an email address in the correct format, like name@example.com")
+            .EmailAddress().WithMessage("The email address you have entered is not in an accepted format. Example: name@example.com")
             .MaximumLength(255).WithMessage("Email address must be less than 256 characters");
         RuleFor(i => i.StudyName)
             .NotEmpty().WithMessage("Enter the study name")
