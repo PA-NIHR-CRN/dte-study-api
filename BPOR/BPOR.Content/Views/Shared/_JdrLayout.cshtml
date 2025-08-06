@@ -49,15 +49,15 @@
     <script src="/resources/js/cookies.min.js" asp-append-version="true"></script>
 </head>
 
-<body class="govuk-width-container noscript">
+<body class="noscript">
     <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
 
     <a class="skip-link" href="#main-content">Skip to main content</a>
 
     <partial name="JDR/_Header" />
 
-    <div role="main" id="main-content" >
-        <partial name="BPoR/_CookieConsentBanner" />
+    <div role="main" id="main-content" class="govuk-width-container">
+        <partial name="JDR/_CookieConsentBanner" />
         @RenderBody()
     </div>
 

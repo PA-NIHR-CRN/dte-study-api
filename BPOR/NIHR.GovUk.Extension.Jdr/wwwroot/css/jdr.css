@@ -24,98 +24,90 @@
     gap: 1rem;
 }
 
-.accordion details {
-    border: 2px solid var(--Pink-1);
-    border-radius: 20px;
-    background-color: var(--Pink-1);
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-    .accordion details summary {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: bold;
-        font-size: 1rem;
-        padding: 1rem 1.5rem;
-        background-color: var(--Pink-1);
-        color: var(--White);
+    .accordion details {
+        border: 2px solid var(--Pink-1);
         border-radius: 20px;
-        cursor: pointer;
-        position: relative;
-        list-style: none;
-        transition: background-color 0.3s, color 0.3s;
+        background-color: var(--Pink-1);
+        overflow: hidden;
+        transition: all 0.3s ease;
     }
 
-    details summary::marker,
-    details summary::-webkit-details-marker {
-        display: none;
-    }
-
-        details summary::after {
-            content: "▾";
-            font-size: 1.2rem;
+        .accordion details summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 1rem 1.5rem;
+            background-color: var(--Pink-1);
             color: var(--White);
-            position: absolute;
-            right: 1.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            transition: transform 0.3s ease, color 0.3s;
+            border-radius: 20px;
+            cursor: pointer;
+            position: relative;
+            list-style: none;
+            transition: background-color 0.3s, color 0.3s;
         }
 
+details summary::marker,
+details summary::-webkit-details-marker {
+    display: none;
+}
 
-        details[open] summary::after {
-            transform: translateY(-50%) rotate(180deg);
-            color: var(--Pink-1);
-        }
+details summary::after {
+    content: "▾";
+    font-size: 1.2rem;
+    color: var(--White);
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 0.3s ease, color 0.3s;
+}
 
-    details summary:hover,
-    details summary:focus-visible {
-        background-color: var(--White);
+
+details[open] summary::after {
+    transform: translateY(-50%) rotate(180deg);
+    color: var(--Pink-1);
+}
+
+details summary:hover,
+details summary:focus-visible {
+    background-color: var(--White);
+    color: var(--Pink-1);
+    outline: none;
+}
+
+    details summary:hover::after,
+    details summary:focus-visible::after {
         color: var(--Pink-1);
-        outline: none;
     }
 
-        details summary:hover::after,
-        details summary:focus-visible::after {
-            color: var(--Pink-1);
-        }
-
-    details p {
-        padding: 1rem 1.5rem;
-        background-color: var(--White);
-        color: #333;
-        border-top: 1px solid #ccc;
-    }
+details p {
+    padding: 1rem 1.5rem;
+    background-color: var(--White);
+    color: #333;
+    border-top: 1px solid #ccc;
+}
 
 
+a,
 .govuk-skip-link {
-    color: var(--Primary-purple, #6667AD) !important;
-    font-family: var(--font-body-link, Lato) !important;
-    font-size: var(--font-body-link-size, 19px) !important;
-    font-style: normal !important;
-    font-weight: var(--font-body-link-weight, 700) !important;
-    line-height: var(--font-body-link-line-height, 28px) !important;
-    text-decoration-line: underline !important;
-    text-decoration-style: solid !important;
-    text-decoration-skip-ink: auto !important;
-    text-decoration-thickness: auto !important;
-    text-underline-offset: auto !important;
-    text-underline-position: from-font !important;
+    font-family: Lato;
+    font-weight: 700;
+    font-size: 16px;
 }
 
-
-.govuk-skip-link:active,
-.govuk-skip-link:focus {
-    clip: auto !important;
-    height: auto !important;
-    margin: 0 !important;
-    overflow: visible !important;
-    position: static !important;
-    white-space: normal !important;
-    width: auto !important;
-}
+    .govuk-skip-link:active,
+    .govuk-skip-link:focus {
+        display: inline-block;
+        clip: auto !important;
+        height: auto !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        position: static !important;
+        white-space: normal !important;
+        width: auto !important;
+    }
 
 .govuk-button,
 .govuk-button:link,
@@ -152,10 +144,10 @@
         box-shadow: 0px 0px 0px 3px var(--Yellow) !important;
     }
 
-.govuk-button:active {
-    color: var(--White);
-    background: var(--Black);
-}
+    .govuk-button:active {
+        color: var(--White);
+        background: var(--Black);
+    }
 
 .btn-secondary,
 .btn-secondary:link,
@@ -199,6 +191,7 @@
     border-color: var(--Red);
     box-shadow: 0 2px 0 0 var(--Red);
 }
+
     .btn-error:hover,
     .btn-error:focus {
         color: var(--White) !important;
@@ -234,4 +227,40 @@ header .govuk-button {
 .header-buttons {
     display: flex;
     justify-content: flex-end;
+}
+
+nav {
+    background: var(--Pink-1);
+}
+
+    nav .navbar-nav {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        nav .navbar-nav > li > a {
+            color: var(--White) !important;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 20px;
+            vertical-align: middle;
+            text-decoration: none;
+        }
+
+    nav .nav > li > a:focus,
+    nav .nav > li > a:hover {
+        background-color: var(--Pink-1);
+        box-shadow: 0 0 0 3px var(--Yellow) !important;
+    }
+
+.header-images .govuk-link:focus,
+.header-images .govuk-link:hover {
+    background-color: transparent;
+    box-shadow: 0 0 0 3px var(--Yellow) !important;
+}
+
+.jdr-logo {
+    height: auto;
 }
