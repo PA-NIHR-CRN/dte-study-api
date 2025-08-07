@@ -2,6 +2,7 @@
     /* Colours */
     --Pink-1: #990066;
     --Pink-2: #A21774;
+    --Pink-11: #E3B9D5;
     --Black: #000;
     --White: #FFF;
     --Disabled: #D1D1D1;
@@ -18,6 +19,19 @@
     color: var(--Pink-1);
 }
 
+h1,h2,h3,h4{
+    color: var(--Black);
+}
+
+.hero {
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 495px;
+}
+h1.display-1 {
+    margin-bottom: 2.5em;
+    margin-top: 1.5em;
+}
 .accordion {
     display: flex;
     flex-direction: column;
@@ -266,3 +280,49 @@ nav {
 .jdr-logo {
     height: auto;
 }
+
+.center {
+    float: none;
+    justify-self: center;
+}
+
+.jdr-background-black {
+    background-color: var( --Black)
+}
+
+.row {
+    display: flex;
+}
+
+.w-100 {
+    width: 100%
+}
+
+.jdr-resources-image {
+    padding: 2% 0 2% 2%;
+    align-content: center;
+    min-height: 260px;
+}
+
+.jdr-resources-content {
+    align-self: center;
+    background-color: var( --Pink-11);
+    margin-block: 5% 5%;
+}
+
+.jdr-resources-content-inner {
+    padding: 3% 3% 3% 0;
+}
+.banner {
+    background-color: var(--Pink-1);
+    color: var(--White);
+    text-align: center;
+}
+.banner-container{
+    padding-block:20px;
+}
+
+.banner > h1,h2,h3,h4{
+    color:var(--White) !important;
+}
+
