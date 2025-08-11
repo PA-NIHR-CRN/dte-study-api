@@ -20,27 +20,27 @@
 <section id="onThisPage">
     <div>
         <div>
-            <span> On this page</span>
+            <h2> On this page</h2>
         </div>
         <div>
-            <a href="#heroSection">Introduction</a>
+            <a href="#heroSection" class="govuk-button">Introduction</a>
             @{
                 if (Model.AccordionSection1 != null)
                 {
                     foreach (var accordionLink in Model.AccordionSection1.accordions)
                     {
-                        <a href="#@{
+                        <a class="govuk-button" href="#@{
                     @accordionLink.Title.Replace(" ","")
 }">@accordionLink.Title</a>
                     }
                 }
                 if (Model.onlineResourcesSection != null)
                 {
-                    <a href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
+                    <a class="govuk-button" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
                 }
                 if (Model.contactUsSection != null)
                 {
-                    <a href="#contectUsSection">@Model.contactUsSection.Title</a>
+                    <a class="govuk-button" href="#contectUsSection">@Model.contactUsSection.Title</a>
                 }
 
             }
@@ -73,7 +73,7 @@
     {
 
         <!-- subsection 3 Banner -->
-        <section id="bannerSection" class="govuk-grid-column-full banner">
+        <section id="bannerSection" class="govuk-grid-column-full banner no-float">
             <div class="banner-container govuk-grid-column-two-thirds center">
                 <span class="banner">
                     <markdown markdown="Banner" />
@@ -87,11 +87,10 @@
 @{
     if (Model.VideoSection != null)
     {
-        <br />
         <section id="mediaSection">
             <div class="odd video-section pb-3">
-                <div class="container">
-                    <div class="row align-items-stretch">
+                <div class="govuk-width-container">
+                    <div class="">
                         <div class="col-xl-4 my-2 order-last order-xl-first">
                             <section class="video-info info-card">
                                 <h2>@Model.VideoSection.Heading</h2>
@@ -99,33 +98,28 @@
                                 <markdown markdown="VideoSection.Description" />
                             </section>
                         </div>
-                        <div class="col-xl-8 my-2 video-wrapper d-flex justify-content-center">
-                            <iframe src="@Model.VideoSection.VideoUrl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        <div class="video-wrapper">
+                            <iframe src="@Model.VideoSection.VideoUrl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen"></iframe>
                         </div>
                     </div>
 
                     @if (!string.IsNullOrEmpty(Model.VideoSection.Transcript))
                     {
-                        <div class="row">
-                            <div class="col">
-                                <p class="js-only text-right">
-                                    <a class="" data-toggle="collapse" href="#video-transcript" role="button" aria-expanded="false" aria-controls="video-transcript" aria-label="@Model.VideoSection.Link.AriaLabel">
-                                        @Model.VideoSection.Link.Label
-                                    </a>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="row align-items-stretch collapse-with-js collapse my-3 mb-xl-5" id="video-transcript">
-                            <div class="col">
-                                <section class="info-card">
-                                    @{
-                                        Model.VideoSection.Transcript = Model.VideoSection.Transcript.Replace("# ", "## ");
-                                    }
-                                    <markdown markdown="VideoSection.Transcript" />
-                                </section>
-                            </div>
-                        </div>
+
+                        <details>
+                            <summary class="govuk-button button-wide">@Model.VideoSection.Link.Label</summary>
+                            <section class="info-card">
+                            @{
+                                Model.VideoSection.Transcript = Model.VideoSection.Transcript.Replace("# ", "## ");
+                            }
+                            <markdown markdown="VideoSection.Transcript" />
+                            </section>
+                        </details>
                     }
+                
+                 <div>
+                        <markdown markdown="VideoSection.LowerDescription" />
+                 </div>   
                 </div>
             </div>
         </section>

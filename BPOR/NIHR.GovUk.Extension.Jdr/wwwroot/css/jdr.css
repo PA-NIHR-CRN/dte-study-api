@@ -322,7 +322,27 @@ nav {
     padding-block:20px;
 }
 
-.banner > h1,h2,h3,h4{
-    color:var(--White) !important;
+.banner > h1,
+.banner > h2,
+.banner > h3,
+.banner > h4 {
+    color: var(--White) !important;
+}
+
+.button-wide {
+    width: 200px;
+}
+
+.video-section iframe{
+    height:100%;
+    width:100%;
+}
+.video-wrapper{
+    width:100%;
+    aspect-ratio:1.777778;
+}
+
+.no-float{
+    float:none;
 }
 
