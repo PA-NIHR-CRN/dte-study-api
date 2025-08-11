@@ -18,29 +18,29 @@
 }
 
 <section id="onThisPage">
-    <div>
+    <div class="govuk-width-container">
         <div>
             <h2> On this page</h2>
         </div>
-        <div>
-            <a href="#heroSection" class="govuk-button">Introduction</a>
+        <div class="govuk-button-group">
+            <a href="#heroSection" class="button-width-fit-content govuk-button--secondary">Introduction</a>
             @{
                 if (Model.AccordionSection1 != null)
                 {
                     foreach (var accordionLink in Model.AccordionSection1.accordions)
                     {
-                        <a class="govuk-button" href="#@{
+                        <a class="button-width-fit-content govuk-button--secondary" href="#@{
                     @accordionLink.Title.Replace(" ","")
 }">@accordionLink.Title</a>
                     }
                 }
                 if (Model.onlineResourcesSection != null)
                 {
-                    <a class="govuk-button" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
+                    <a class="button-width-fit-content govuk-button--secondary" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
                 }
                 if (Model.contactUsSection != null)
                 {
-                    <a class="govuk-button" href="#contectUsSection">@Model.contactUsSection.Title</a>
+                    <a class="button-width-fit-content govuk-button--secondary" href="#contectUsSection">@Model.contactUsSection.Title</a>
                 }
 
             }
@@ -52,7 +52,7 @@
 <!-- Join dementaia research Hero TODO, some classes are bootstrap leftovers, will need cleared out-->
 <section id="heroSection">
     <div class="hero my-2 even" style="background-image:url(@Model.Hero.Image.File.Url )">
-        <div class="container">
+        <div class="govuk-width-container">
             <div class="govuk-grid-column-two-thirds align-items-center bg-overlay row">
                 <section class="col-xl-7 pt-2 pb-5 py-md-5 text">
                     <h1 class="display-1">@Model.Hero.Title</h1>
@@ -126,32 +126,31 @@
     }
 }
 
-@{
-    if (Model.TextSection1 != null)
-    {
-        <br />
-        <!-- introductions sub section 2 - multi-links -->
-        <setion id="PageLinkSection">
-            <div class="even what-is-bpor-section">
-                <div class="container">
-                    <div class="row align-items-stretch">
-                        <section class="col-lg-8 py-5">
-                            <markdown markdown="TextSection1.Text" />
-                            <div class="container">
-                                @{
-                                    foreach (var link in Model.TextSection1.JdrPageLinks)
-                                    {
-                                        <a class="jdr-btn btn-wide" href="@link.Url" aria-label="@link.AriaLabel"> @link.Label </a>
-                                    }
-                                }
-                            </div>
-                        </section>
-                    </div>
-                </div>
-            </div>
-        </setion>
-    }
-}
+// @{
+//     if (Model.TextSection1 != null)
+//     {
+//         <!-- introductions sub section 2 - multi-links -->
+//         <setion id="PageLinkSection">
+//             <div class="even what-is-bpor-section">
+//                 <div class="container">
+//                     <div class="row align-items-stretch">
+//                         <section class="col-lg-8 py-5">
+//                             <markdown markdown="TextSection1.Text" />
+//                             <div class="container">
+//                                 @{
+//                                     foreach (var link in Model.TextSection1.JdrPageLinks)
+//                                     {
+//                                         <a class="jdr-btn btn-wide" href="@link.Url" aria-label="@link.AriaLabel"> @link.Label </a>
+//                                     }
+//                                 }
+//                             </div>
+//                         </section>
+//                     </div>
+//                 </div>
+//             </div>
+//         </setion>
+//     }
+// }
 
 
 <!-- Accordion -->
