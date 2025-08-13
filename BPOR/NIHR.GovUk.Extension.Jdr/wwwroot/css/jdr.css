@@ -2,7 +2,7 @@
     /* Colours */
     --Pink-1: #990066;
     --Pink-2: #A21774;
-    --Pink-11: #E3B9D5;
+    --Pink-11: #F6E8F1;
     --Black: #000;
     --White: #FFF;
     --Disabled: #D1D1D1;
@@ -37,30 +37,35 @@ h1.display-1 {
     flex-direction: column;
     gap: 1rem;
 }
+.accordion-title {
+    color: inherit;
+    border-top: none;
+    padding-block: 10px;
+    font-weight: 700;
+}
 
-    .accordion details {
-        border: 2px solid var(--Pink-1);
-        border-radius: 20px;
+.accordion details {
+    border: 2px solid var(--Pink-1);
+    border-radius: 20px;
+    background-color: var(--Pink-1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+    .accordion details summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 700;
+        /*font-size: 1rem;*/
+        padding: 1rem 1.5rem;
         background-color: var(--Pink-1);
-        overflow: hidden;
-        transition: all 0.3s ease;
+        color: var(--White);
+        cursor: pointer;
+        position: relative;
+        list-style: none;
+        transition: background-color 0.3s, color 0.3s;
     }
-
-        .accordion details summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            font-size: 1rem;
-            padding: 1rem 1.5rem;
-            background-color: var(--Pink-1);
-            color: var(--White);
-            border-radius: 20px;
-            cursor: pointer;
-            position: relative;
-            list-style: none;
-            transition: background-color 0.3s, color 0.3s;
-        }
 
 details summary::marker,
 details summary::-webkit-details-marker {
@@ -68,24 +73,28 @@ details summary::-webkit-details-marker {
 }
 
 details summary::after {
-    content: "▾";
-    font-size: 1.2rem;
-    color: var(--White);
+    content: ">";
+    color: var(--Pink-1);
     position: absolute;
     right: 1.5rem;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(-50%) rotate(90deg);
     transition: transform 0.3s ease, color 0.3s;
+    background-color: var(--White);
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    text-align:center;
 }
 
 
 details[open] summary::after {
-    transform: translateY(-50%) rotate(180deg);
+    transform: translateY(-50%) rotate(270deg);
     color: var(--Pink-1);
 }
 
 details summary:hover,
-details summary:focus-visible {
+details summary:focus-visible{
     background-color: var(--White);
     color: var(--Pink-1);
     outline: none;
@@ -350,7 +359,12 @@ nav {
 }
 
 .jdr-resources-content-inner {
-    padding: 3% 3% 3% 0;
+    padding-right: 3%;
+    height: 336px;
+    display: flex;
+    flex-direction: column;
+    padding-block: 20px;
+    justify-content: space-between;
 }
 .banner {
     background-color: var(--Pink-1);
@@ -387,4 +401,22 @@ nav {
 .no-float{
     float:none;
 }
+
+.d-none{
+    display:none !important;
+}
+
+.cookie-btn{
+    width:fit-content;
+}
+
+.govuk-cookie-banner{
+    background-color: var(--Pink-11)
+}
+
+.jdr-resources-image > img {
+    height: 399px;
+    width: 482px;
+    float: right;
+} 
 

@@ -126,41 +126,21 @@
     }
 }
 
-// @{
-//     if (Model.TextSection1 != null)
-//     {
-//         <!-- introductions sub section 2 - multi-links -->
-//         <setion id="PageLinkSection">
-//             <div class="even what-is-bpor-section">
-//                 <div class="container">
-//                     <div class="row align-items-stretch">
-//                         <section class="col-lg-8 py-5">
-//                             <markdown markdown="TextSection1.Text" />
-//                             <div class="container">
-//                                 @{
-//                                     foreach (var link in Model.TextSection1.JdrPageLinks)
-//                                     {
-//                                         <a class="jdr-btn btn-wide" href="@link.Url" aria-label="@link.AriaLabel"> @link.Label </a>
-//                                     }
-//                                 }
-//                             </div>
-//                         </section>
-//                     </div>
-//                 </div>
-//             </div>
-//         </setion>
-//     }
-// }
+
+
 
 
 <!-- Accordion -->
 @if (Model?.AccordionSection1?.accordions != null)
 {
-    <div class="accordion">
+    <div class="accordion govuk-width-container">
+        <h2>@Model.AccordionSection1.title</h2>
+        <markdown markdown="AccordionSection1.description"></markdown>
         @foreach (var accordion in Model.AccordionSection1.accordions)
         {
-            <details>
-                <summary>@accordion?.Title</summary>
+
+            <details id="@accordion?.Title.Replace(" ", "")" >
+                <summary><h3 class="accordion-title govuk-grid-column-two-thirds">@accordion?.Title</h3></summary>
                 <markdown>@accordion?.Content</markdown>
             </details>
         }
@@ -185,7 +165,7 @@
                     <div>
                         <markdown markdown="onlineResourcesSection.Text" />
                     </div>
-                    <a class="govuk-button" href="@{@Model.onlineResourcesSection.link.Url}" aria-label="@{@Model.onlineResourcesSection.link.AriaLabel}">@Model.onlineResourcesSection.link.Label </a>
+                    <a class="govuk-button--secondary button-width-fit-content" href="@{@Model.onlineResourcesSection.link.Url}" aria-label="@{@Model.onlineResourcesSection.link.AriaLabel}">@Model.onlineResourcesSection.link.Label </a>
                     </div>
                 </div>
             </div>
