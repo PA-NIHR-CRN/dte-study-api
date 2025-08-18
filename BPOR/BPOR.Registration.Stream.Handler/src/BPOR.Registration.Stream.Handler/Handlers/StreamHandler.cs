@@ -131,16 +131,18 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
-
         var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
-
 
         if (targetParticipant == null)
         {
             // No linked participant exists, create a new one.
             targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
+        }
+        else
+        {
+            await participantDbContext.Entry(targetParticipant).ReloadAsync(cancellationToken);
         }
 
         return await participantMapper.Map(image, targetParticipant, cancellationToken);
@@ -158,6 +160,10 @@ public class StreamHandler(
         {
             participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
             await participantDbContext.SaveChangesAsync(cancellationToken);
+        }
+        else
+        {
+            await participantDbContext.Entry(participant).ReloadAsync(cancellationToken);
         }
 
         await participantMapper.Map(record.Dynamodb.NewImage, participant, cancellationToken);
@@ -177,6 +183,10 @@ public class StreamHandler(
         {
             participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
             await participantDbContext.SaveChangesAsync(cancellationToken);
+        }
+        else
+        {
+            await participantDbContext.Entry(participant).ReloadAsync(cancellationToken);
         }
 
         // Remove participant contact method record
