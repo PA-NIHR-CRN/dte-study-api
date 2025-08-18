@@ -42,7 +42,7 @@ jobs:
           dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./BPOR.Content crnccd-lambda-test-jdr-healthcare -ev "ASPNETCORE_ENVIRONMENT=Development;AwsSecretsManagerSettings__SecretName=crnccd-secret-dev-content-app-config;AwsSecretsManagerSettings__Region=eu-west-2;JDR_CONTENT_BUILD_STRING=DEV-${{ github.run_number }}-${{ github.run_id }};" --function-publish true     
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: stream-handler-artifact
           path: BPOR.Content/bin/Release/net8.0/publish/
