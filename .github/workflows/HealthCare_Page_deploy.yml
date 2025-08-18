@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./BPOR
+        working-directory: ./BPOR/BPOR.Content
     environment: DEV
     steps:
       - uses: actions/checkout@v2
@@ -45,7 +45,7 @@ jobs:
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./BPOR.Content crnccd-lambda-test-jdr-healthcare -ev "ASPNETCORE_ENVIRONMENT=Development;AwsSecretsManagerSettings__SecretName=crnccd-secret-dev-content-app-config;AwsSecretsManagerSettings__Region=eu-west-2;JDR_CONTENT_BUILD_STRING=DEV-${{ github.run_number }}-${{ github.run_id }};" --function-publish true     
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./ crnccd-lambda-test-jdr-healthcare -ev "ASPNETCORE_ENVIRONMENT=Development;AwsSecretsManagerSettings__SecretName=crnccd-secret-dev-content-app-config;AwsSecretsManagerSettings__Region=eu-west-2;JDR_CONTENT_BUILD_STRING=DEV-${{ github.run_number }}-${{ github.run_id }};" --function-publish true     
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
