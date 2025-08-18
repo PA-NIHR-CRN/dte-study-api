@@ -1,6 +1,10 @@
 name: Deploy JDR healthcare Page
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - '**'
+    
 
 jobs:
   dev_build_deploy:
