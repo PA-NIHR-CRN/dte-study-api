@@ -413,3 +413,4 @@ docker/dynamodb/shared-local-instance.db
 volume/
 /Dynamo.Stream.Handler/src/Dynamo.Stream.Handler/DeployDatabase.sql
 /BPOR/BPOR.Content/.config
+**/.mono/registry/**/visualstudio/telemetry/
