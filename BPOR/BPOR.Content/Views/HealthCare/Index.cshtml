@@ -25,9 +25,9 @@
         <div class="govuk-button-group">
             <a href="#heroSection" class="button-width-fit-content govuk-button--secondary">Introduction</a>
             @{
-                if (Model.AccordionSection1 != null)
+                if (Model.AccordionSection != null)
                 {
-                    foreach (var accordionLink in Model.AccordionSection1.accordions)
+                    foreach (var accordionLink in Model.AccordionSection.accordions)
                     {
                         <a class="button-width-fit-content govuk-button--secondary" href="#@{
                     @accordionLink.Title.Replace(" ","")
@@ -67,21 +67,6 @@
 
 
 
-<!-- banner section -->
-@{
-    if (Model.Banner != null)
-    {
-
-        <!-- subsection 3 Banner -->
-        <section id="bannerSection" class="govuk-grid-column-full banner no-float">
-            <div class="banner-container govuk-grid-column-two-thirds center">
-                <span class="banner">
-                    <markdown markdown="Banner" />
-                </span>
-            </div>
-        </section>
-    }
-}
 
 <!-- introductions sub section 1 - Video -->
 @{
@@ -109,18 +94,34 @@
                         <details>
                             <summary class="govuk-button button-wide">@Model.VideoSection.Link.Label</summary>
                             <section class="info-card">
-                            @{
-                                Model.VideoSection.Transcript = Model.VideoSection.Transcript.Replace("# ", "## ");
-                            }
-                            <markdown markdown="VideoSection.Transcript" />
+                                @{
+                                    Model.VideoSection.Transcript = Model.VideoSection.Transcript.Replace("# ", "## ");
+                                }
+                                <markdown markdown="VideoSection.Transcript" />
                             </section>
                         </details>
                     }
-                
-                 <div>
+
+                    <div>
                         <markdown markdown="VideoSection.LowerDescription" />
-                 </div>   
+                    </div>
                 </div>
+            </div>
+        </section>
+    }
+}
+
+<!-- banner section -->
+@{
+    if (Model.Banner != null)
+    {
+
+        <!-- subsection 3 Banner -->
+        <section id="bannerSection" class="govuk-grid-column-full banner no-float">
+            <div class="banner-container govuk-grid-column-two-thirds center">
+                <span class="banner">
+                    <markdown markdown="Banner" />
+                </span>
             </div>
         </section>
     }
@@ -130,13 +131,15 @@
 
 
 
+
+
 <!-- Accordion -->
-@if (Model?.AccordionSection1?.accordions != null)
+@if (Model?.AccordionSection?.accordions != null)
 {
     <div class="accordion govuk-width-container">
-        <h2>@Model.AccordionSection1.title</h2>
-        <markdown markdown="AccordionSection1.description"></markdown>
-        @foreach (var accordion in Model.AccordionSection1.accordions)
+        <h2>@Model.AccordionSection.title</h2>
+        <markdown markdown="AccordionSection.description"></markdown>
+        @foreach (var accordion in Model.AccordionSection.accordions)
         {
 
             <details id="@accordion?.Title.Replace(" ", "")" >
@@ -161,7 +164,7 @@
                     <div class="jdr-resources-content-inner">
                     <h2>
                         @Model.onlineResourcesSection.Title
-                    </h2>
+                        </h2>
                     <div>
                         <markdown markdown="onlineResourcesSection.Text" />
                     </div>
