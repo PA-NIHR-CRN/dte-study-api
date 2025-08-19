@@ -18,147 +18,132 @@
 }
 
 <section id="onThisPage">
-    <div>
+    <div class="govuk-width-container">
         <div>
-            <span> On this page</span>
+            <h2> On this page</h2>
         </div>
-        <div>
-            <a href="#heroSection">Introduction</a>
+        <div class="govuk-button-group">
+            <a href="#heroSection" class="button-width-fit-content govuk-button--secondary">Introduction</a>
             @{
-                if (Model.AccordionSection1 != null)
+                if (Model.AccordionSection != null)
                 {
-                    foreach (var accordionLink in Model.AccordionSection1.accordions)
+                    foreach (var accordionLink in Model.AccordionSection.accordions)
                     {
-                        <a href="#@{@accordionLink.Title.Replace(" ","")}" >@accordionLink.Title</a>
+                        <a class="button-width-fit-content govuk-button--secondary" href="#@{
+                    @accordionLink.Title.Replace(" ","")
+}">@accordionLink.Title</a>
                     }
                 }
                 if (Model.onlineResourcesSection != null)
                 {
-                    <a href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
+                    <a class="button-width-fit-content govuk-button--secondary" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
                 }
                 if (Model.contactUsSection != null)
                 {
-                    <a href="#contectUsSection">@Model.contactUsSection.Title</a>
+                    <a class="button-width-fit-content govuk-button--secondary" href="#contectUsSection">@Model.contactUsSection.Title</a>
                 }
-                
+
             }
         </div>
     </div>
 </section>
+<br />
 
-
-<!-- Join dementaia research Hero -->
+<!-- Join dementaia research Hero TODO, some classes are bootstrap leftovers, will need cleared out-->
 <section id="heroSection">
-<div class="hero my-2 even" style="background-image: url(@Model.Hero.Image.File.Url )">
-    <div class="container">
-        <div class="align-items-center bg-overlay row">
-            <section class="col-xl-7 pt-2 pb-5 py-md-5 text">
-                <h1 class="display-1 hero">@Model.Hero.Title</h1>
+    <div class="hero my-2 even" style="background-image:url(@Model.Hero.Image.File.Url )">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-column-two-thirds align-items-center bg-overlay row">
+                <section class="col-xl-7 pt-2 pb-5 py-md-5 text">
+                    <h1 class="display-1">@Model.Hero.Title</h1>
 
-                <markdown markdown="Hero.Body" />
+                    <markdown markdown="Hero.Body" />
 
-            </section>
-        </div>
-    </div>
-</div>
-</section>
-
-<!-- introductions sub section 1 - Video -->
-@{if(Model.VideoSection != null)
-{
-<section id="mediaSection">
-<div class="odd video-section pb-3">
-    <div class="container">
-        <div class="row align-items-stretch">
-            <div class="col-xl-4 my-2 order-last order-xl-first">
-                <section class="video-info info-card">
-                    <h2>@Model.VideoSection.Heading</h2>
-
-                    <markdown markdown="VideoSection.Description" />
                 </section>
             </div>
-            <div class="col-xl-8 my-2 video-wrapper d-flex justify-content-center">
-                <iframe src="@Model.VideoSection.VideoUrl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-            </div>
         </div>
-
-        @if (!string.IsNullOrEmpty(Model.VideoSection.Transcript))
-        {
-            <div class="row">
-                <div class="col">
-                    <p class="js-only text-right">
-                        <a class="" data-toggle="collapse" href="#video-transcript" role="button" aria-expanded="false" aria-controls="video-transcript" aria-label="@Model.VideoSection.Link.AriaLabel">
-                            @Model.VideoSection.Link.Label
-                        </a>
-                    </p>
-                </div>
-            </div>
-            <div class="row align-items-stretch collapse-with-js collapse my-3 mb-xl-5" id="video-transcript">
-                <div class="col">
-                    <section class="info-card">
-                        @{
-                            Model.VideoSection.Transcript = Model.VideoSection.Transcript.Replace("# ", "## ");
-                        }
-                        <markdown markdown="VideoSection.Transcript" />
-                    </section>
-                </div>
-            </div>
-        }
     </div>
-</div>
 </section>
-}
-}
 
+
+
+
+<!-- introductions sub section 1 - Video -->
 @{
-    if (Model.TextSection1 != null)
-{
-<!-- introductions sub section 2 - multi-links -->
-<setion id="PageLinkSection">
-<div class="even what-is-bpor-section">
-    <div class="container">
-        <div class="row align-items-stretch">
-            <section class="col-lg-8 py-5">
-                <markdown markdown="TextSection1.Text" />
-                <div class="container">
-                    @{
-                        foreach (var link in Model.TextSection1.JdrPageLinks)
-                        {
-                            <a class="jdr-btn btn-wide" href="@link.Url" aria-label="@link.AriaLabel"> @link.Label </a>
-                        }
+    if (Model.VideoSection != null)
+    {
+        <section id="mediaSection">
+            <div class="odd video-section pb-3">
+                <div class="govuk-width-container">
+                    <div class="">
+                        <div class="col-xl-4 my-2 order-last order-xl-first">
+                            <section class="video-info info-card">
+                                <h2>@Model.VideoSection.Heading</h2>
+
+                                <markdown markdown="VideoSection.Description" />
+                            </section>
+                        </div>
+                        <div class="video-wrapper">
+                            <iframe src="@Model.VideoSection.VideoUrl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen"></iframe>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.VideoSection.Transcript))
+                    {
+
+                        <details>
+                            <summary class="govuk-button button-wide">@Model.VideoSection.Link.Label</summary>
+                            <section class="info-card">
+                                @{
+                                    Model.VideoSection.Transcript = Model.VideoSection.Transcript.Replace("# ", "## ");
+                                }
+                                <markdown markdown="VideoSection.Transcript" />
+                            </section>
+                        </details>
                     }
+
+                    <div>
+                        <markdown markdown="VideoSection.LowerDescription" />
+                    </div>
                 </div>
-            </section>
-        </div>
-    </div>
-</div>
-</setion>
-}
+            </div>
+        </section>
+    }
 }
 
-
+<!-- banner section -->
 @{
     if (Model.Banner != null)
-{
-<!-- subsection 3 Banner -->
-<section id="bannerSection">
-<div id="banner-container">
-    <span class="jdr-banner">
-        <markdown markdown="Banner" />
-    </span>
-</div>
-</section>
-}
+    {
+
+        <!-- subsection 3 Banner -->
+        <section id="bannerSection" class="govuk-grid-column-full banner no-float">
+            <div class="banner-container govuk-grid-column-two-thirds center">
+                <span class="banner">
+                    <markdown markdown="Banner" />
+                </span>
+            </div>
+        </section>
+    }
 }
 
+
+
+
+
+
+
 <!-- Accordion -->
-@if (Model?.AccordionSection1?.accordions != null)
+@if (Model?.AccordionSection?.accordions != null)
 {
-    <div class="accordion">
-        @foreach (var accordion in Model.AccordionSection1.accordions)
+    <div class="accordion govuk-width-container">
+        <h2>@Model.AccordionSection.title</h2>
+        <markdown markdown="AccordionSection.description"></markdown>
+        @foreach (var accordion in Model.AccordionSection.accordions)
         {
-            <details>
-                <summary>@accordion?.Title</summary>
+
+            <details id="@accordion?.Title.Replace(" ", "")" >
+                <summary><h3 class="accordion-title govuk-grid-column-two-thirds">@accordion?.Title</h3></summary>
                 <markdown>@accordion?.Content</markdown>
             </details>
         }
@@ -167,42 +152,41 @@
 
 @{
     if (Model.onlineResourcesSection != null)
-{
-@* online resource section *@
-<section id="onlineResourceSection">
-    <div>
-        <div>
-            <img src="@Model.onlineResourcesSection.image.File.Url" alt="" role="presentation" />
-        </div>
-        <div>
-            <h2>
-                @Model.onlineResourcesSection.Title
-            </h2>
-            <div>
-                <markdown markdown="onlineResourcesSection.Text" />
+    {
+        <br />
+        @* online resource section *@
+        <section id="onlineResourceSection" class="govuk-grid-column-full govuk-!-margin-bottom-9 jdr-background-black ">
+            <div class="govuk-grid-column-two-thirds center row">
+                <div class="govuk-grid-column-one-half jdr-resources-image">
+                    <img src="@Model.onlineResourcesSection.image.File.Url" alt="" role="presentation" class="w-100" />
+                </div>
+                <div class="govuk-grid-column-one-half jdr-resources-content">
+                    <div class="jdr-resources-content-inner">
+                    <h2>
+                        @Model.onlineResourcesSection.Title
+                        </h2>
+                    <div>
+                        <markdown markdown="onlineResourcesSection.Text" />
+                    </div>
+                    <a class="govuk-button--secondary button-width-fit-content" href="@{@Model.onlineResourcesSection.link.Url}" aria-label="@{@Model.onlineResourcesSection.link.AriaLabel}">@Model.onlineResourcesSection.link.Label </a>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-</section>
-}
+        </section>
+    }
 }
 
 @{
     if (Model.contactUsSection != null)
-{
-<section id="contectUsSection">
-    <div>
-        <h2>
-            @Model.contactUsSection.Title
-        </h2>
-        <div>
-            <markdown markdown="contactUsSection.Text" />
-        </div>
-        <div>
-            <a href="@Model.contactUsSection.link.Url" aria-label="@Model.contactUsSection.link.AriaLabel" >@Model.contactUsSection.link.Label</a>
-        </div>
-    </div>
-</section>
-}
+    {
+        <section-with-heading heading="@Model.contactUsSection.Title" id="contectUsSection" class="govuk-grid-column-two-thirds center" >
+            <div>
+                <markdown markdown="contactUsSection.Text"/>
+            </div>
+            <div>
+                <a class="govuk-button" href="@Model.contactUsSection.link.Url" aria-label="@Model.contactUsSection.link.AriaLabel"> @Model.contactUsSection.link.Label</a>
+            </div>
+        </section-with-heading>
+    }
 }

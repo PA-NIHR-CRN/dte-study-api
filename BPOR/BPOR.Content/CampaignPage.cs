@@ -63,6 +63,7 @@ namespace BPOR.Content
         public string Heading { get; set; }
 
         public string Description { get; set; }
+        public string LowerDescription { get; set; }
         public Link Link { get; set; }
 
         public string VideoUrl { get; set; }
