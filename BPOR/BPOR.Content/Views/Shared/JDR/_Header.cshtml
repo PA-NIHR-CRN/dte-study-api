@@ -5,9 +5,9 @@
             <a class="" href="https://www.nhs.uk/" target="_blank"><img src="https://nhs.joindementiaresearch.nihr.ac.uk/wp-content/themes/patients-in-research-2023/images/NHS-Logo.png" alt="" height="45"></a>
         </div>
 
-        <div class="header-buttons">
-            <a class="govuk-button" href="https://www.joindementiaresearch.nihr.ac.uk/signup?question=start&amp;true">Register</a>
+        <div class="header-buttons govuk-button-group">
             <a class="govuk-button" href="https://www.joindementiaresearch.nihr.ac.uk/loginform">Login</a>
+            <a class="govuk-button" href="https://www.joindementiaresearch.nihr.ac.uk/signup?question=start&amp;true">Sign Up</a>
         </div>
     </div>
 
@@ -22,46 +22,39 @@
 
             <ul class="nav navbar-nav">
                 <li>
-                    <a onclick="hideBackgroundMobile(this)" href="https://www.joindementiaresearch.nihr.ac.uk/" title="Home">
+                    <a href="https://www.joindementiaresearch.nihr.ac.uk/" title="Home">
                         Home
                     </a>
                 </li>
                 <li>
-                    <a onclick="hideBackgroundMobile(this)" href="https://www.joindementiaresearch.nihr.ac.uk/content/about" title="About us">
+                    <a href="https://www.joindementiaresearch.nihr.ac.uk/content/about" title="About us">
                         About us
                     </a>
                 </li>
                 <li>
-                    <a onclick="hideBackgroundMobile(this)" href="https://www.joindementiaresearch.nihr.ac.uk/content/whysignup" title="Why sign up?">
+                    <a href="https://www.joindementiaresearch.nihr.ac.uk/content/whysignup" title="Why sign up?">
                         Why sign up?
                     </a>
                 </li>
 
                 <li>
-                    <a onclick="hideBackgroundMobile(this)" href="https://news.joindementiaresearch.nihr.ac.uk/category/volunteer-stories/" title="Volunteer stories">
+                    <a href="https://news.joindementiaresearch.nihr.ac.uk/category/volunteer-stories/" title="Volunteer stories">
                         Volunteer stories
                     </a>
                 </li>
                 <li>
-                    <a onclick="hideBackgroundMobile(this)" href="https://news.joindementiaresearch.nihr.ac.uk" title="News">
+                    <a href="https://news.joindementiaresearch.nihr.ac.uk" title="News">
                         News
                     </a>
                 </li>
-                <li class="dropdown">
-                    <a aria-expanded="false" href="#" data-toggle="dropdown">For professionals<b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li class="nav-dropdown-item">
-                            <a onclick="hideBackgroundMobile(this)" href="https://www.joindementiaresearch.nihr.ac.uk/content/researchers" title="Researchers">
-                                Researchers
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li class="nav-dropdown-item">
-                            <a onclick="hideBackgroundMobile(this)" href="https://nhs.joindementiaresearch.nihr.ac.uk/" title="Healthcare">
-                                Healthcare
-                            </a>
-                        </li>
-                    </ul>
+                <li class="nav-dropdown">
+                    <details>
+                        <summary class="govuk-link">For professionals</summary>
+                        <ul class="sub-menu">
+                            <li><a href="https://nhs.joindementiaresearch.nihr.ac.uk/" class="govuk-link">For healthcare</a></li>
+                            <li><a href="https://www.joindementiaresearch.nihr.ac.uk/content/researchers" class="govuk-link">For researchers</a></li>
+                        </ul>
+                    </details>
                 </li>
             </ul>
         </div><!--/.nav-collapse -->
