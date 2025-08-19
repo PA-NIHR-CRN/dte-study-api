@@ -8,7 +8,7 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
     {
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            output.AppendClass("govuk-link");
+            output.PrependClass("govuk-link");
         }
     }
 }

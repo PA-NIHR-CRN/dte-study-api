@@ -19,28 +19,28 @@
 
 <section id="onThisPage">
     <div class="govuk-width-container">
-        <div>
-            <h2> On this page</h2>
+        <div class="header-container">
+            <h3>What's on this page</h3>
         </div>
-        <div class="govuk-button-group">
-            <a href="#heroSection" class="button-width-fit-content govuk-button--secondary">Introduction</a>
+        <div class="govuk-button-group on-this-page">
+            <a href="#heroSection" class="button-width-fit-content govuk-button--tertiary">Introduction</a>
             @{
                 if (Model.AccordionSection1 != null)
                 {
                     foreach (var accordionLink in Model.AccordionSection1.accordions)
                     {
-                        <a class="button-width-fit-content govuk-button--secondary" href="#@{
+                        <a class="button-width-fit-content govuk-button--tertiary" href="#@{
                     @accordionLink.Title.Replace(" ","")
 }">@accordionLink.Title</a>
                     }
                 }
                 if (Model.onlineResourcesSection != null)
                 {
-                    <a class="button-width-fit-content govuk-button--secondary" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
+                    <a class="button-width-fit-content govuk-button--tertiary" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
                 }
                 if (Model.contactUsSection != null)
                 {
-                    <a class="button-width-fit-content govuk-button--secondary" href="#contectUsSection">@Model.contactUsSection.Title</a>
+                    <a class="button-width-fit-content govuk-button--tertiary" href="#contectUsSection">@Model.contactUsSection.Title</a>
                 }
 
             }
@@ -51,10 +51,10 @@
 
 <!-- Join dementaia research Hero TODO, some classes are bootstrap leftovers, will need cleared out-->
 <section id="heroSection">
-    <div class="hero my-2 even" style="background-image:url(@Model.Hero.Image.File.Url )">
+    <div class="intro my-2 even" style="background-image:url(@Model.Hero.Image.File.Url )">
         <div class="govuk-width-container">
             <div class="govuk-grid-column-two-thirds align-items-center bg-overlay row">
-                <section class="col-xl-7 pt-2 pb-5 py-md-5 text">
+                <section>
                     <h1 class="display-1">@Model.Hero.Title</h1>
 
                     <markdown markdown="Hero.Body" />
@@ -74,8 +74,8 @@
 
         <!-- subsection 3 Banner -->
         <section id="bannerSection" class="govuk-grid-column-full banner no-float">
-            <div class="banner-container govuk-grid-column-two-thirds center">
-                <span class="banner">
+            <div class="govuk-width-container">
+                <span class="banner-text-container">
                     <markdown markdown="Banner" />
                 </span>
             </div>
@@ -152,12 +152,12 @@
     {
         <br />
         @* online resource section *@
-        <section id="onlineResourceSection" class="govuk-grid-column-full govuk-!-margin-bottom-9 jdr-background-black ">
-            <div class="govuk-grid-column-two-thirds center row">
-                <div class="govuk-grid-column-one-half jdr-resources-image">
+        <section id="onlineResourceSection" class="govuk-!-margin-bottom-9 jdr-background-black ">
+            <div class="jdr-resources-container">
+                <div class="jdr-resources jdr-resources-image">
                     <img src="@Model.onlineResourcesSection.image.File.Url" alt="" role="presentation" class="w-100" />
                 </div>
-                <div class="govuk-grid-column-one-half jdr-resources-content">
+                <div class="jdr-resources jdr-resources-content">
                     <div class="jdr-resources-content-inner">
                     <h2>
                         @Model.onlineResourcesSection.Title
@@ -165,11 +165,10 @@
                     <div>
                         <markdown markdown="onlineResourcesSection.Text" />
                     </div>
-                    <a class="govuk-button--secondary button-width-fit-content" href="@{@Model.onlineResourcesSection.link.Url}" aria-label="@{@Model.onlineResourcesSection.link.AriaLabel}">@Model.onlineResourcesSection.link.Label </a>
+                    <a class="govuk-button--tertiary button-width-fit-content" href="@{@Model.onlineResourcesSection.link.Url}" aria-label="@{@Model.onlineResourcesSection.link.AriaLabel}">@Model.onlineResourcesSection.link.Label </a>
                     </div>
                 </div>
             </div>
-
         </section>
     }
 }
@@ -177,13 +176,9 @@
 @{
     if (Model.contactUsSection != null)
     {
-        <section-with-heading heading="@Model.contactUsSection.Title" id="contectUsSection" class="govuk-grid-column-two-thirds center" >
-            <div>
-                <markdown markdown="contactUsSection.Text"/>
-            </div>
-            <div>
-                <a class="govuk-button" href="@Model.contactUsSection.link.Url" aria-label="@Model.contactUsSection.link.AriaLabel"> @Model.contactUsSection.link.Label</a>
-            </div>
+        <section-with-heading heading="@Model.contactUsSection.Title" id="contectUsSection" class="govuk-grid-column-two-thirds center section-container govuk-width-container">
+            <markdown markdown="contactUsSection.Text"/>
+            <a class="govuk-button govuk-button--secondary button-width-fit-content" href="@Model.contactUsSection.link.Url" aria-label="@Model.contactUsSection.link.AriaLabel"> @Model.contactUsSection.link.Label</a>
         </section-with-heading>
     }
 }
