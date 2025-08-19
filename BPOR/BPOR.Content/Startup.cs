@@ -5,6 +5,7 @@ using BPOR.Content;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
 using Westwind.AspNetCore.Markdown;
+using Microsoft.AspNetCore.Rewrite;
 
 public class Startup
 {
@@ -63,6 +64,13 @@ public class Startup
         }
 
         app.UseHttpsRedirection();
+
+
+        var options = new RewriteOptions()
+            .AddRewrite("^healthcare/resources/(.*)", "resources/$1", true)
+            .AddRewrite("^healthcare/_content/(.*)", "_content/$1", true);
+
+        app.UseRewriter(options);
 
         app.UseStaticFiles();
 

@@ -18,6 +18,7 @@
     --radius-default: 5px;
     --border-thick: 2px solid var(--Pink-1);
     color: var(--Pink-1);
+    font-size: 16px;
 }
 
 
