@@ -58,6 +58,18 @@ h3 {
     margin-bottom: 20px;
 }
 
+.govuk-cookie-banner a {
+    display: inline-flex;
+    padding: 15px;
+    align-items: flex-end;
+    text-decoration: underline !important;
+}
+
+    a:hover, a:focus {
+        text-decoration: underline;
+        box-shadow: none !important;
+    }
+
 p {
     font-family: Lato;
     font-size: 19px;
@@ -434,6 +446,7 @@ nav {
     nav .nav > li > a:hover,
     nav .nav > li summary:focus,
     nav .nav > li summary:hover {
+        text-decoration: none !important;
         color: var(--Black) !important;
         background-color: var(--Pink-11) !important;
         box-shadow: 0 0 0 3px var(--Yellow) !important;
@@ -480,6 +493,7 @@ nav {
     }
 
         .sub-menu > li > a:focus, .sub-menu > li > a:hover {
+            text-decoration: none !important;
             color: var(--Black);
             box-shadow: none;
             background-color: var(--Pink-11) !important;
