@@ -161,7 +161,7 @@ details[open] summary::after {
 
 details summary:hover,
 details summary:focus-visible {
-    background-color: var(--White);
+    background-color: var(--Pink-11);
     color: var(--Pink-1);
     outline: none;
 }
@@ -617,7 +617,6 @@ nav {
 
 .jdr-resources {
     width: 453px;
-    height: 336px;
 }
 
 .jdr-resources-image > img {
@@ -627,7 +626,6 @@ nav {
 }
 
 .jdr-resources-image {
-    padding: 2% 0 2% 2%;
     align-content: center;
     min-height: 260px;
 }
@@ -635,7 +633,6 @@ nav {
 .jdr-resources-content {
     align-self: center;
     background-color: var( --Pink-11);
-    margin-block: 5% 5%;
 }
 
 .jdr-resources-content-inner {
