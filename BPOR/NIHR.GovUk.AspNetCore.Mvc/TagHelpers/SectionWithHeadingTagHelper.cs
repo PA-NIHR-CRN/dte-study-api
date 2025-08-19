@@ -13,12 +13,7 @@ namespace NIHR.GovUk.Extension.Jdr.TagHelpers
             output.TagName = "section";
             output.AppendClass("section");
 
-
-            output.PreContent.AppendHtml($"""
-                    <h2>
-                    {heading}
-                    </h2>
-                """);
+            output.PreContent.AppendHtml($"""<h2>{heading}</h2>""");
         }
     }
 }
