@@ -21,6 +21,13 @@
     font-size: 16px;
 }
 
+@font-face {
+    font-family: "GothamBold";
+    src: url("../fonts/Gotham-Bold.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+}
+
 
 h1, h2, h3, h4 {
     color: var(--Black);
@@ -31,20 +38,16 @@ h1 {
 
 h2 {
     color: var(--Black);
-    /* font-family: "Gotham Bold"; */
+    font-family: "GothamBold"; 
     font-size: 36px;
-    font-style: normal;
-    font-weight: 700;
     line-height: 40px;
     letter-spacing: -0.72px;
 }
 
 h3 {
     color: var(--Black);
-    /*    font-family: "Gotham Bold";*/
+    font-family: "GothamBold";
     font-size: 21px;
-    font-style: normal;
-    font-weight: 700;
     line-height: 25px;
     letter-spacing: -0.42px;
     border-top: none;
@@ -577,10 +580,8 @@ nav {
     .banner-text-container > p {
         color: var(--White);
         text-align: center;
-        /*        font-family: "Gotham Bold";*/
+        font-family: "GothamBold";
         font-size: 24px;
-        font-style: normal;
-        font-weight: 700;
         line-height: 30px;
         letter-spacing: -0.48px;
         margin: 0px;
