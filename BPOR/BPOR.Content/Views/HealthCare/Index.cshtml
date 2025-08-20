@@ -70,7 +70,7 @@
 @{
     if (Model.VideoSection != null)
     {
-        <section id="mediaSection">
+        <section id="mediaSection" class="media-section">
             <div class="odd video-section pb-3">
                 <div class="govuk-width-container">
                     <div class="">
@@ -89,9 +89,9 @@
                     @if (!string.IsNullOrEmpty(Model.VideoSection.Transcript))
                     {
 
-                        <details>
+                        <details class="transcript-wrapper">
                             <summary class="govuk-button button-wide">@Model.VideoSection.Link.Label</summary>
-                            <section class="info-card">
+                            <section class="info-card transcript">
                                 @{
                                     Model.VideoSection.Transcript = Model.VideoSection.Transcript.Replace("# ", "## ");
                                 }
@@ -129,24 +129,26 @@
 <!-- Accordion -->
 @if (Model?.AccordionSection?.accordions != null)
 {
-    <div class="accordion govuk-width-container">
-        <h2>@Model.AccordionSection.title</h2>
-        <markdown markdown="AccordionSection.description"></markdown>
-        @foreach (var accordion in Model.AccordionSection.accordions)
-        {
+    <div class="accordion-section">
+        <div class="accordion govuk-width-container">
+            <h2>@Model.AccordionSection.title</h2>
+            <markdown markdown="AccordionSection.description"></markdown>
+            @foreach (var accordion in Model.AccordionSection.accordions)
+            {
 
-            <details id="@accordion?.Title.Replace(" ", "")" >
-                <summary><h3 class="accordion-title govuk-grid-column-two-thirds">@accordion?.Title</h3></summary>
-                <markdown>@accordion?.Content</markdown>
-            </details>
-        }
+                <details id="@accordion?.Title.Replace(" ", "")">
+                    <summary><h3 class="accordion-title govuk-grid-column-two-thirds">@accordion?.Title</h3></summary>
+                    <markdown>@accordion?.Content</markdown>
+                </details>
+            }
+        </div>
     </div>
+
 }
 
 @{
     if (Model.onlineResourcesSection != null)
     {
-        <br />
         @* online resource section *@
         <section id="onlineResourceSection" class="govuk-!-margin-bottom-9 jdr-background-black ">
             <div class="jdr-resources-container">
