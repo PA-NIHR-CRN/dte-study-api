@@ -87,6 +87,7 @@ p {
     background-repeat: no-repeat;
     background-size: cover;
     min-height: 495px;
+    background-color: var(--Pink-11);
 }
 
     .intro section {
@@ -113,6 +114,19 @@ p {
         flex-direction: column;
         gap: 20px;
     }
+
+
+.media-section {
+    padding-top: 40px;
+    padding-bottom: 50px;
+}
+
+.accordion-section {
+    width: 100%;
+    background-color: var(--Pink-11);
+    padding-top: 50px;
+    padding-bottom: 80px;
+}
 
 .accordion {
     display: flex;
@@ -573,7 +587,7 @@ nav {
 }
 
 .button-wide {
-    width: 200px !important;
+    min-width: 230px;
 }
 
 .button-width-fit-content {
@@ -586,8 +600,22 @@ nav {
 }
 
 .video-wrapper {
-    width: 100%;
-    aspect-ratio: 1.777778;
+    height: 372px;
+    flex: 1 0 0;
+    aspect-ratio: 329/186;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+
+.transcript-wrapper {
+    text-align: center;
+}
+
+.transcript {
+    text-align: left;
 }
 
 .no-float {
