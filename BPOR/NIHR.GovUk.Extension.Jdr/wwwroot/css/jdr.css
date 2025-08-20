@@ -208,6 +208,10 @@ details p {
     border-top: 1px solid #ccc;
 }
 
+.govuk-grid-column-two-thirds {
+    padding: 0px !important;
+}
+
 .govuk-width-container {
     max-width: 916px;
 }
