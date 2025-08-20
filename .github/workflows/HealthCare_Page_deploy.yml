@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      '**'
+      'feature/CRNCC-2691-style-package'
     
 
 jobs:
