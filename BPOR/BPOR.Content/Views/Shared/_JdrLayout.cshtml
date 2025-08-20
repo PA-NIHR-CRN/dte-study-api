@@ -106,7 +106,7 @@
                 });
             });
 
-            if (Cookies.get("cookiesAccepted")) {
+            if (Cookies.get("jdrAdditionalCookies")) {
                 closeCookieBanner();
                 handleAcceptedCookies();
             }
@@ -114,7 +114,7 @@
 
 
         function acceptCookie() {
-            Cookies.set("jdrAdditionalCookies", "accepted-" + "20221221", { expires: 180, secure: true, domain: cookieDomain })
+            Cookies.set("jdrAdditionalCookies", "accepted-" + "221214", { expires: 180, secure: true, domain: cookieDomain })
             confirmation("accepted")
             handleAcceptedCookies();
         }
@@ -137,7 +137,7 @@
         };
 
         function rejectCookie() {
-            Cookies.set("jdrAdditionalCookies", "rejected-" + "20221221", { expires: 180, secure: true, domain: cookieDomain })
+            Cookies.set("jdrAdditionalCookies", "rejected-" + "221214", { expires: 180, secure: true, domain: cookieDomain })
             // remove existing cookies
             for (const cookie in Cookies.get()) {
                 if (cookie.includes("_g") || cookie.includes("_hj") || cookie.includes("_fbp")) {
