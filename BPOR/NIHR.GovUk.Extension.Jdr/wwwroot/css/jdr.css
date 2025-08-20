@@ -406,8 +406,6 @@ header .govuk-button {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 20px;
-    margin-bottom: 20px;
 }
 
 .header-buttons {
@@ -519,9 +517,23 @@ nav {
     box-shadow: 0 0 0 3px var(--Yellow) !important;
 }
 
-.jdr-logo {
+.jdr-logo-container {
     height: auto;
 }
+
+.jdr-logo {
+    margin: 30px;
+    max-width: 140px;
+}
+
+.nhs-logo {
+    margin: 30px;
+    max-height: 40px;
+}
+
+/*.nhs-logo media */
+/*>600px and <1000px wide: height 35px; margin: 20px;*/
+/*<600px wide: height 30px; margin: 15px;*/
 
 .center {
     float: none;
