@@ -101,6 +101,18 @@ p {
         flex-shrink: 0;
     }
 
+    @media(max-width:1110px){
+        .intro {
+            background-position-x: 20%;
+            background-position-y: 0;
+        }
+    }
+@media(max-width:626px) {
+    .intro section {
+        width:100%;
+    }
+}
+
 .section-container {
     display: flex;
     flex-direction: column;
@@ -162,6 +174,12 @@ p {
         position: relative;
         list-style: none;
         transition: background-color 0.3s, color 0.3s;
+    }
+
+    @media(max-width:40.0625em){
+        .accordion-title{
+            max-width:93%;
+        }
     }
 
 details summary::marker,
@@ -275,7 +293,7 @@ a,
     font-weight: var(--font-button-weight);
     line-height: var(--font-button-line-height);
     cursor: pointer;
-    width: 100px;
+    min-width: 100px;
     height: 50px;
     border-radius: 4px;
 }
@@ -319,7 +337,7 @@ a,
     font-weight: var(--font-button-weight);
     line-height: var(--font-button-line-height);
     cursor: pointer;
-    width: 100px;
+    min-width: 100px;
     height: 50px;
     border-radius: 4px;
     margin-right: 0px !important;
@@ -541,6 +559,27 @@ nav {
     display: flex;
 }
 
+@media(max-width:957px) {
+    /* for some reason default row margin was causeing 
+        issues around tablet screen width range */
+    footer .row {
+        margin-right: 0;
+    }
+}
+@media(max-width:562px) {
+
+    .footerImageContainerCol {
+        flex-direction:column;
+    }
+    .footerImageContainerInnerCol {
+        margin-top: 25px;
+        
+    }
+    .footerImageContainer {
+        margin-inline: auto;
+    }
+}
+
 .w-100 {
     width: 100%
 }
@@ -591,7 +630,7 @@ nav {
 }
 
 .button-width-fit-content {
-    width: fit-content !important;
+    width: fit-content;
 }
 
 .video-section iframe {
@@ -609,6 +648,11 @@ nav {
     margin-bottom: 20px;
 }
 
+@media(max-width:757px){
+    .video-wrapper {
+        height: unset;
+    }
+}
 
 .transcript-wrapper {
     text-align: center;
@@ -659,8 +703,10 @@ nav {
     display: flex;
     height: 557px;
     justify-self: center;
-    padding: 74px;
+    padding-block: 74px;
 }
+
+
 
 .jdr-resources {
     width: 453px;
@@ -691,6 +737,49 @@ nav {
     justify-content: space-between;
 }
 
+
+@media(max-width: 957px) {
+
+    .jdr-resources-container {
+        display: block;
+        height: unset;
+    }
+
+    .jdr-resources-image > img {
+        height: unset;
+        width: 100%;
+    }
+}
+
+@media(max-width: 40.0625em) {
+
+    .jdr-resources-container {
+        padding-block: 0;
+        height: unset;
+    }
+    .jdr-resources-content-inner {
+        height: unset;
+        min-height: 336px;
+        background: var(--Black);
+        color:var(--White);
+    }
+    .jdr-resources-content-inner > h2 {
+        color: var(--White) !important;
+    }
+
+    .jdr-resources-content-inner-text {
+        padding-block: 25px;
+    }
+
+    .jdr-resources-image > img {
+        height: unset;
+        width: 100%;
+    }
+
+    .jdr-resources {
+        width: 100%;
+    }
+}
 .on-this-page {
     gap: 5px;
     row-gap: 0px;
@@ -701,4 +790,11 @@ nav {
         margin-right: 0px !important;
         margin-top: 5px !important;
         margin-bottom: 5px !important;
+        width: fit-content;
     }
+
+@media(max-width:40.0625em) {
+    .on-this-page > a {
+        width:100%;
+    }
+}

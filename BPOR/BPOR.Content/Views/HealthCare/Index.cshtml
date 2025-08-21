@@ -23,36 +23,36 @@
             <h3>What's on this page</h3>
         </div>
         <div class="govuk-button-group on-this-page">
-            <a href="#heroSection" class="button-width-fit-content govuk-button--tertiary">Introduction</a>
+            <a href="#heroSection" class="govuk-button--tertiary button-width-fit-content">Introduction</a>
             @{
                 if (Model.AccordionSection != null)
                 {
                     foreach (var accordionLink in Model.AccordionSection.accordions)
                     {
-                        <a class="button-width-fit-content govuk-button--tertiary" href="#@{
+                        <a class="govuk-button--tertiary button-width-fit-content" href="#@{
                     @accordionLink.Title.Replace(" ","")
 }">@accordionLink.Title</a>
                     }
                 }
                 if (Model.onlineResourcesSection != null)
                 {
-                    <a class="button-width-fit-content govuk-button--tertiary" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
+                    <a class="govuk-button--tertiary button-width-fit-content" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
                 }
                 if (Model.contactUsSection != null)
                 {
-                    <a class="button-width-fit-content govuk-button--tertiary" href="#contectUsSection">@Model.contactUsSection.Title</a>
+                    <a class="govuk-button--tertiary button-width-fit-content" href="#contectUsSection">@Model.contactUsSection.Title</a>
                 }
 
             }
         </div>
     </div>
 </section>
-<br />
+
 
 <!-- Join dementaia research Hero TODO, some classes are bootstrap leftovers, will need cleared out-->
 <section id="heroSection">
     <div class="intro my-2 even"
-         @(Model.Hero?.Image?.File?.Url != null ? $"style=\"background-image:url('{Model.Hero.Image.File.Url}')\"" : "")>
+         @(Model.Hero?.Image?.File?.Url != null ? $"style=background-image:url('{Model.Hero.Image.File.Url}')" : "")>
         <div class="govuk-width-container">
             <div class="govuk-grid-column-two-thirds align-items-center bg-overlay row">
                 <section>
@@ -160,7 +160,7 @@
                     <h2>
                         @Model.onlineResourcesSection.Title
                         </h2>
-                    <div>
+                    <div class="jdr-resources-content-inner-text">
                         <markdown markdown="onlineResourcesSection.Text" />
                     </div>
                     <a class="govuk-button--tertiary button-width-fit-content" href="@{@Model.onlineResourcesSection.link.Url}" aria-label="@{@Model.onlineResourcesSection.link.AriaLabel}">@Model.onlineResourcesSection.link.Label </a>
