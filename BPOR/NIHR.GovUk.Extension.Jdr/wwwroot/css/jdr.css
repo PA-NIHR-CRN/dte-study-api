@@ -181,7 +181,6 @@ p {
         cursor: pointer;
         position: relative;
         list-style: none;
-        transition: background-color 0.3s, color 0.3s;
     }
 
     @media(max-width:40.0625em){
@@ -195,25 +194,15 @@ details summary::-webkit-details-marker {
     display: none;
 }
 
-details summary::after {
-    content: ">";
-    color: var(--Pink-1);
-    position: absolute;
-    right: 1.5rem;
-    top: 50%;
-    transform: translateY(-50%) rotate(90deg);
-    transition: transform 0.3s ease, color 0.3s;
-    background-color: var(--White);
-    height: 20px;
-    width: 20px;
+summary .chevron {
+    display: inline-grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border: 0px solid var(--White);
     border-radius: 50%;
-    text-align: center;
-}
-
-
-details[open] summary::after {
-    transform: translateY(-50%) rotate(270deg);
-    color: var(--Pink-1);
+    background-color: white;
+    padding: 5px;
 }
 
 details summary:hover,
@@ -223,11 +212,28 @@ details summary:focus-visible {
     outline: none;
 }
 
-    details summary:hover::after,
-    details summary:focus-visible::after {
-        color: var(--White);
-        background-color: var(--Black);
+details summary:hover .chevron,
+details summary:focus-visible .chevron {
+    background-color: var(--Black);
+    color: var(--Pink-11);
+    outline: none;
+}
+    details[open] summary .chevron svg,
+    details[open] summary svg {
+        transform: rotate(180deg);
     }
+
+    details summary:focus-visible .chevron path,
+    details summary:hover .chevron path {
+        stroke: var(--Pink-11);
+    }
+
+.chevron path {
+    stroke: var(--Pink-1);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 
 details p {
     padding: 1rem 1.5rem;
@@ -649,7 +655,8 @@ nav {
 }
 
 .button-wide {
-    min-width: 230px;
+    width: fit-content;
+    flex-direction: row;
 }
 
 .button-width-fit-content {
