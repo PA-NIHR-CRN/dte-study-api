@@ -21,31 +21,34 @@
     font-size: 16px;
 }
 
+@font-face {
+    font-family: "GothamBold";
+    src: url("../fonts/Gotham-Bold.woff") format("woff");
+}
+
 
 h1, h2, h3, h4 {
     color: var(--Black);
+    font-weight: 700;
+    font-style: normal;
+    font-family: "GothamBold";
 }
 
 h1 {
+    font-size: 48px;
+    line-height: 50px;
+    letter-spacing: -0.72px;
 }
 
 h2 {
-    color: var(--Black);
-    /* font-family: "Gotham Bold"; */
     font-size: 36px;
-    font-style: normal;
-    font-weight: 700;
     line-height: 40px;
     letter-spacing: -0.72px;
 }
 
 h3 {
-    color: var(--Black);
-    /*    font-family: "Gotham Bold";*/
-    font-size: 21px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 25px;
+    font-size: 24px;
+    line-height: 28px;
     letter-spacing: -0.42px;
     border-top: none;
     padding-top: 0px;
@@ -86,19 +89,15 @@ p {
 .intro {
     background-repeat: no-repeat;
     background-size: cover;
-    min-height: 495px;
+    padding-bottom: 50px;
     background-color: var(--Pink-11);
 }
 
     .intro section {
         display: flex;
-        width: 625px;
-        height: 493px;
-        padding: 40px 40px 40px 30px;
+        padding: 40px 40px 40px 0px;
         flex-direction: column;
-        align-items: flex-start;
         gap: 30px;
-        flex-shrink: 0;
     }
 
     @media(max-width:1110px){
@@ -137,7 +136,7 @@ p {
     width: 100%;
     background-color: var(--Pink-11);
     padding-top: 50px;
-    padding-bottom: 80px;
+    padding-bottom: 100px;
 }
 
 .accordion {
@@ -226,6 +225,10 @@ details p {
     background-color: var(--White);
     color: #333;
     border-top: 1px solid #ccc;
+}
+
+.govuk-grid-column-two-thirds {
+    padding: 0px !important;
 }
 
 .govuk-width-container {
@@ -429,7 +432,6 @@ header .govuk-button {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 20px;
     margin-bottom: 20px;
 }
 
@@ -542,9 +544,23 @@ nav {
     box-shadow: 0 0 0 3px var(--Yellow) !important;
 }
 
-.jdr-logo {
+.jdr-logo-container {
     height: auto;
 }
+
+.jdr-logo {
+    margin: 30px;
+    max-width: 140px;
+}
+
+.nhs-logo {
+    margin: 30px;
+    max-height: 40px;
+}
+
+/*.nhs-logo media */
+/*>600px and <1000px wide: height 35px; margin: 20px;*/
+/*<600px wide: height 30px; margin: 15px;*/
 
 .center {
     float: none;
@@ -599,7 +615,7 @@ nav {
 .banner-text-container {
     display: flex;
     height: 201px;
-    padding: 20px;
+    padding: 20px 0px;
     justify-content: center;
     align-items: center;
     gap: 10px;
@@ -609,10 +625,8 @@ nav {
     .banner-text-container > p {
         color: var(--White);
         text-align: center;
-        /*        font-family: "Gotham Bold";*/
+        font-family: "GothamBold";
         font-size: 24px;
-        font-style: normal;
-        font-weight: 700;
         line-height: 30px;
         letter-spacing: -0.48px;
         margin: 0px;
@@ -784,6 +798,7 @@ nav {
     gap: 5px;
     row-gap: 0px;
     margin-left: 0px;
+    padding-bottom: 20px;
 }
 
     .on-this-page > a {
@@ -798,3 +813,10 @@ nav {
         width:100%;
     }
 }
+
+.quick-links {
+    margin-bottom: 40px;
+}
+
+
+
