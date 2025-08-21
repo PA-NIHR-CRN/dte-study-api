@@ -86,6 +86,14 @@ p {
     font-size:inherit !important;
 }
 
+.hero-container{
+    width:67%;
+}
+@media(max-width:880px){
+    .hero-container {
+        width: 90%;
+    }
+}
 .intro {
     background-repeat: no-repeat;
     background-size: cover;
@@ -95,6 +103,7 @@ p {
 
     .intro section {
         display: flex;
+        min-height:500px;
         padding: 40px 40px 40px 0px;
         flex-direction: column;
         gap: 30px;
