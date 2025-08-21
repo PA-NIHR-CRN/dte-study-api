@@ -1,6 +1,10 @@
 name: Deploy JDR healthcare Page
+# temporary push trigger while workflow is not on main for workflow _dispatch trigger.
 on:
   workflow_dispatch:
+  push:
+    branches:
+      'feature/CRNCC-2691-style-package'
     
 
 jobs:
