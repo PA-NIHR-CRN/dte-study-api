@@ -1,0 +1,7 @@
+# Fonts are binary – don’t normalize line endings
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.otf   binary
+*.svg   binary
