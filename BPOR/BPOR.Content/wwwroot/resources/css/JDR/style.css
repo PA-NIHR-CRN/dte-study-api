@@ -1,6 +1,6 @@
 ﻿/** Main styles have been taken from the main site **/
 
-@font-face {
+/*@font-face {
     font-family: "GothamBold";
     src: url('css/fonts/Gotham-Bold.eot?#iefix') format('embedded-opentype'), url('css/fonts/Gotham-Bold.woff') format('woff'), url('css/fonts/Gotham-Bold.ttf') format('truetype'), url('css/fonts/Gotham-Bold.svg') format('svg');
 }
@@ -23,7 +23,7 @@
 @font-face {
     font-family: "FrutigerBlack";
     src: url('css/fonts/FrutigerBlack.eot?#iefix') format('embedded-opentype'), url('css/fonts/FrutigerBlack.woff') format('woff'), url('css/fonts/FrutigerBlack.ttf') format('truetype'), url('css/fonts/FrutigerBlack.svg') format('svg');
-}
+}*/
 
 body {
     font-size: 14px;

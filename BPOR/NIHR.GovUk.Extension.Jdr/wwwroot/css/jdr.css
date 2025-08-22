@@ -26,7 +26,6 @@
     src: url("/healthcare/_content/NIHR.GovUk.Extension.Jdr/fonts/Gotham-Bold.woff") format("woff");
 }
 
-
 h1, h2, h3, h4 {
     color: var(--Black);
     font-weight: 700;
