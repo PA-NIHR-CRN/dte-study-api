@@ -23,7 +23,7 @@
 
 @font-face {
     font-family: "GothamBold";
-    src: url("/healthcare/_content/NIHR.GovUk.Extension.Jdr/fonts/Gotham-Bold.woff") format("woff");
+    src: url("/healthcare/_content/NIHR.GovUk.Extension.Jdr/fonts/Gotham-Bold.woff2") format("woff2");
 }
 
 h1, h2, h3, h4 {
@@ -454,6 +454,7 @@ header .govuk-button {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    margin-top: 10px;
 }
 
 .header-buttons {
