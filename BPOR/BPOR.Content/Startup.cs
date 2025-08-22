@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
 using Westwind.AspNetCore.Markdown;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.StaticFiles;
 
 public class Startup
 {
@@ -65,33 +66,36 @@ public class Startup
 
         app.UseHttpsRedirection();
 
-
         var options = new RewriteOptions()
             .AddRewrite("^healthcare/resources/(.*)", "resources/$1", true)
             .AddRewrite("^healthcare/_content/(.*)", "_content/$1", true);
 
         app.UseRewriter(options);
 
-        app.UseStaticFiles();
+        // Static files with .woff2 mapping
+        var provider = new FileExtensionContentTypeProvider();
+        provider.Mappings[".woff2"] = "font/woff2";
 
-        app.UseRouting();
+        app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provider });
 
-        app.UseAuthorization();
+        app.UseMarkdown();
 
         app.UseRequestLocalization();
 
-        app.UseEndpoints(endpoints => {
+        app.UseRouting();
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints =>
+        {
             endpoints.MapControllerRoute(
-            name: "BPoR",
-            pattern: "{controller=Home}/{action=Index}/{id?}",
-            defaults: new { controller = "Home" });
+                name: "BPoR",
+                pattern: "{controller=Home}/{action=Index}/{id?}",
+                defaults: new { controller = "Home" });
 
             endpoints.MapControllerRoute(
-            name: "JDR",
-            pattern: "healthcare/{action=Index}/{id?}",
-            defaults: new { controller = "Healthcare" });
+                name: "JDR",
+                pattern: "healthcare/{action=Index}/{id?}",
+                defaults: new { controller = "Healthcare" });
         });
-
-        app.UseMarkdown();
     }
 }
