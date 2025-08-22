@@ -68,10 +68,10 @@ h3 {
     text-decoration: underline !important;
 }
 
-    a:hover, a:focus {
-        text-decoration: underline;
-        box-shadow: none !important;
-    }
+a:hover, a:focus {
+    text-decoration: underline;
+    box-shadow: none !important;
+}
 
 p {
     font-family: Lato;
@@ -80,10 +80,11 @@ p {
     font-weight: 400;
     line-height: 28px;
 }
-.inline-link{
-    display:inline !important;
-    padding:0 !important;
-    font-size:inherit !important;
+
+.inline-link {
+    display: inline !important;
+    padding: 0 !important;
+    font-size: inherit !important;
 }
 
 .hero-container{
@@ -109,15 +110,16 @@ p {
         gap: 30px;
     }
 
-    @media(max-width:1110px){
-        .intro {
-            background-position-x: 20%;
-            background-position-y: 0;
-        }
+@media(max-width:1110px) {
+    .intro {
+        background-position-x: 20%;
+        background-position-y: 0;
     }
+}
+
 @media(max-width:626px) {
     .intro section {
-        width:100%;
+        width: 100%;
     }
 }
 
@@ -161,12 +163,15 @@ p {
     font-weight: 700;
 }
 
+.accordion-body {
+    background: var(--White);
+    padding: 10px 10px;
+    box-shadow: 0 -1.5px 0 0 #000 inset;
+}
+
 .accordion details {
-    border: 2px solid var(--Pink-1);
-    border-radius: 20px;
-    background-color: var(--Pink-1);
-    overflow: hidden;
-    transition: all 0.3s ease;
+    background-color: var(--White);
+    border-radius: 10px;
 }
 
     .accordion details summary {
@@ -181,13 +186,15 @@ p {
         cursor: pointer;
         position: relative;
         list-style: none;
+        border: 5px solid var(--Pink-1);
+        border-radius: 10px;
     }
 
-    @media(max-width:40.0625em){
-        .accordion-title{
-            max-width:93%;
-        }
+@media(max-width:40.0625em) {
+    .accordion-title {
+        max-width: 93%;
     }
+}
 
 details summary::marker,
 details summary::-webkit-details-marker {
@@ -207,26 +214,27 @@ summary .chevron {
 
 details summary:hover,
 details summary:focus-visible {
-    background-color: var(--Pink-11);
+    background-color: var(--White);
     color: var(--Pink-1);
     outline: none;
 }
 
-details summary:hover .chevron,
-details summary:focus-visible .chevron {
-    background-color: var(--Black);
-    color: var(--Pink-11);
-    outline: none;
-}
-    details[open] summary .chevron svg,
-    details[open] summary svg {
-        transform: rotate(180deg);
+    details summary:hover .chevron,
+    details summary:focus-visible .chevron {
+        background-color: var(--Black);
+        color: var(--Pink-11);
+        outline: none;
     }
 
-    details summary:focus-visible .chevron path,
-    details summary:hover .chevron path {
-        stroke: var(--Pink-11);
-    }
+details[open] summary .chevron svg,
+details[open] summary svg {
+    transform: rotate(180deg);
+}
+
+details summary:focus-visible .chevron path,
+details summary:hover .chevron path {
+    stroke: var(--White);
+}
 
 .chevron path {
     stroke: var(--Pink-1);
@@ -236,10 +244,9 @@ details summary:focus-visible .chevron {
 }
 
 details p {
-    padding: 1rem 1.5rem;
+    padding: 10px 15px;
     background-color: var(--White);
     color: #333;
-    border-top: 1px solid #ccc;
 }
 
 .govuk-grid-column-two-thirds {
@@ -514,7 +521,7 @@ nav {
 
 @media (min-width: 768px) {
     .navbar-nav > li > a,
-    nav .nav > li summary{
+    nav .nav > li summary {
         padding-top: 18px;
         padding-bottom: 18px;
     }
@@ -597,15 +604,17 @@ nav {
         margin-right: 0;
     }
 }
+
 @media(max-width:562px) {
 
     .footerImageContainerCol {
-        flex-direction:column;
+        flex-direction: column;
     }
+
     .footerImageContainerInnerCol {
         margin-top: 25px;
-        
     }
+
     .footerImageContainer {
         margin-inline: auto;
     }
@@ -678,7 +687,7 @@ nav {
     margin-bottom: 20px;
 }
 
-@media(max-width:757px){
+@media(max-width:757px) {
     .video-wrapper {
         height: unset;
     }
@@ -787,15 +796,17 @@ nav {
         padding-block: 0;
         height: unset;
     }
+
     .jdr-resources-content-inner {
         height: unset;
         min-height: 336px;
         background: var(--Black);
-        color:var(--White);
+        color: var(--White);
     }
-    .jdr-resources-content-inner > h2 {
-        color: var(--White) !important;
-    }
+
+        .jdr-resources-content-inner > h2 {
+            color: var(--White) !important;
+        }
 
     .jdr-resources-content-inner-text {
         padding-block: 25px;
@@ -810,6 +821,7 @@ nav {
         width: 100%;
     }
 }
+
 .on-this-page {
     gap: 5px;
     row-gap: 0px;
@@ -826,13 +838,10 @@ nav {
 
 @media(max-width:40.0625em) {
     .on-this-page > a {
-        width:100%;
+        width: 100%;
     }
 }
 
 .quick-links {
     margin-bottom: 40px;
 }
-
-
-

@@ -90,7 +90,7 @@
                             <summary class="govuk-button button-wide">
                                 @Model.VideoSection.Link.Label
                                 <span class="chevron">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 8 8" fill="none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 8 8" fill="none">
                                         <path d="M6.33366 3L4.00033 5.33333L1.66699 3"></path>
                                     </svg>
                                 </span>
@@ -144,12 +144,14 @@
                     <summary>
                         <h3 class="accordion-title govuk-grid-column-two-thirds">@accordion?.Title</h3>
                         <span class="chevron">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 8 8" fill="none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 8 8" fill="none">
                                 <path d="M6.33366 3L4.00033 5.33333L1.66699 3"></path>
                             </svg>
                         </span>
                     </summary>
-                    <markdown>@accordion?.Content</markdown>
+                    <div class="accordion-body">
+                        <markdown>@accordion?.Content</markdown>
+                    </div>
                 </details>
             }
         </div>
