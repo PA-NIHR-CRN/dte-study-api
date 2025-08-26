@@ -72,9 +72,9 @@ public class Startup
 
         app.UseRewriter(options);
 
-        // Static files with .woff2 mapping
         var provider = new FileExtensionContentTypeProvider();
-        provider.Mappings[".woff2"] = "font/woff2";
+        // workaround for testing fonts
+        provider.Mappings[".woff2"] = "application/octet-stream";
 
         app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provider });
 
