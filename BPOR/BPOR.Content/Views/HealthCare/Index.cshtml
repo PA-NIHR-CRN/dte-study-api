@@ -62,46 +62,9 @@
     </div>
 </section>
 
-<!-- introductions sub section 1 - Video -->
-@{
-    if (Model.VideoSection != null)
-    {
-        <section id="mediaSection" class="media-section">
-            <div class="odd video-section pb-3">
-                <div class="govuk-width-container">
-                    <div class="">
-                        <div class="col-xl-4 my-2 order-last order-xl-first">
-                            <section class="video-info info-card">
-                                <h2>@Model.VideoSection.Heading</h2>
-
-                                <markdown markdown="VideoSection.Description" />
-                            </section>
-                        </div>
-                        <div class="video-wrapper">
-                            <iframe src="@Model.VideoSection.VideoUrl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen"></iframe>
-                        </div>
-                    </div>
-
-                    @if (!string.IsNullOrEmpty(Model.VideoSection.Transcript))
-                    {
-
-                        <details class="transcript-wrapper">
-                            <summary class="govuk-button button-wide">@Model.VideoSection.Link.Label</summary>
-                            <section class="info-card transcript">
-                                @{
-                                    Model.VideoSection.Transcript = Model.VideoSection.Transcript.Replace("# ", "## ");
-                                }
-                                <markdown markdown="VideoSection.Transcript" />
-                            </section>
-                        </details>
-                    }
-
-                    <div>
-                        <markdown markdown="VideoSection.LowerDescription" />
-                    </div>
-                </div>
-            </div>
-        </section>
+<!-- introductions sub section 1 - Media -->
+@{if(Model.MediaSection != null){
+<partial name="JDR/MediaSection@{@Model.MediaSection.GetType().Name}" model="@Model.MediaSection" />
     }
 }
 
