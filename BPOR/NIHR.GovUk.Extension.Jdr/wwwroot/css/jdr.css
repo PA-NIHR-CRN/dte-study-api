@@ -23,7 +23,10 @@
 
 @font-face {
     font-family: "GothamBold";
-    src: url("../fonts/Gotham-Bold.woff") format("woff");
+    src: url("../fonts/Gotham-Bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
 }
 
 
@@ -68,10 +71,10 @@ h3 {
     text-decoration: underline !important;
 }
 
-    a:hover, a:focus {
-        text-decoration: underline;
-        box-shadow: none !important;
-    }
+a:hover, a:focus {
+    text-decoration: underline;
+    box-shadow: none !important;
+}
 
 p {
     font-family: Lato;
@@ -80,10 +83,11 @@ p {
     font-weight: 400;
     line-height: 28px;
 }
-.inline-link{
-    display:inline !important;
-    padding:0 !important;
-    font-size:inherit !important;
+
+.inline-link {
+    display: inline !important;
+    padding: 0 !important;
+    font-size: inherit !important;
 }
 #heroSection {
     background-color: var(--Pink-11);
@@ -127,15 +131,9 @@ div.hero-content > p {
         gap: 30px;
     }
 
-/*    @media(max-width:1210px){
-        .intro {
-            background-position-x: 20%;
-            background-position-y: 0;
-        }
-    }*/
 @media(max-width:626px) {
     .intro section {
-        width:100%;
+        width: 100%;
     }
 }
 
@@ -179,12 +177,15 @@ div.hero-content > p {
     font-weight: 700;
 }
 
+.accordion-body {
+    background: var(--White);
+    padding: 10px 10px;
+    box-shadow: 0 -1.5px 0 0 #000 inset;
+}
+
 .accordion details {
-    border: 2px solid var(--Pink-1);
-    border-radius: 20px;
-    background-color: var(--Pink-1);
-    overflow: hidden;
-    transition: all 0.3s ease;
+    background-color: var(--White);
+    border-radius: 10px;
 }
 
     .accordion details summary {
@@ -199,59 +200,67 @@ div.hero-content > p {
         cursor: pointer;
         position: relative;
         list-style: none;
-        transition: background-color 0.3s, color 0.3s;
+        border: 5px solid var(--Pink-1);
+        border-radius: 10px;
     }
 
-    @media(max-width:40.0625em){
-        .accordion-title{
-            max-width:93%;
-        }
+@media(max-width:40.0625em) {
+    .accordion-title {
+        max-width: 93%;
     }
+}
 
 details summary::marker,
 details summary::-webkit-details-marker {
     display: none;
 }
 
-details summary::after {
-    content: ">";
-    color: var(--Pink-1);
-    position: absolute;
-    right: 1.5rem;
-    top: 50%;
-    transform: translateY(-50%) rotate(90deg);
-    transition: transform 0.3s ease, color 0.3s;
-    background-color: var(--White);
-    height: 20px;
-    width: 20px;
+summary .chevron {
+    display: inline-grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border: 0px solid var(--White);
     border-radius: 50%;
-    text-align: center;
-}
-
-
-details[open] summary::after {
-    transform: translateY(-50%) rotate(270deg);
-    color: var(--Pink-1);
+    background-color: white;
+    padding: 5px;
 }
 
 details summary:hover,
 details summary:focus-visible {
-    background-color: var(--Pink-11);
+    background-color: var(--White);
     color: var(--Pink-1);
     outline: none;
 }
 
-    details summary:hover::after,
-    details summary:focus-visible::after {
-        color: var(--White);
+    details summary:hover .chevron,
+    details summary:focus-visible .chevron {
         background-color: var(--Black);
+        color: var(--Pink-11);
+        outline: none;
     }
 
+details[open] summary .chevron svg,
+details[open] summary svg {
+    transform: rotate(180deg);
+}
+
+details summary:focus-visible .chevron path,
+details summary:hover .chevron path {
+    stroke: var(--White);
+}
+
+.chevron path {
+    stroke: var(--Pink-1);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 details p {
-    padding: 1rem 1.5rem;
+    padding: 10px 15px;
     background-color: var(--White);
     color: #333;
-    border-top: 1px solid #ccc;
 }
 
 .govuk-grid-column-two-thirds {
@@ -460,6 +469,7 @@ header .govuk-button {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    margin-top: 10px;
 }
 
 .header-buttons {
@@ -526,7 +536,7 @@ nav {
 
 @media (min-width: 768px) {
     .navbar-nav > li > a,
-    nav .nav > li summary{
+    nav .nav > li summary {
         padding-top: 18px;
         padding-bottom: 18px;
     }
@@ -609,15 +619,17 @@ nav {
         margin-right: 0;
     }
 }
+
 @media(max-width:562px) {
 
     .footerImageContainerCol {
-        flex-direction:column;
+        flex-direction: column;
     }
+
     .footerImageContainerInnerCol {
         margin-top: 25px;
-        
     }
+
     .footerImageContainer {
         margin-inline: auto;
     }
@@ -667,7 +679,8 @@ nav {
 }
 
 .button-wide {
-    min-width: 230px;
+    width: fit-content;
+    flex-direction: row;
 }
 
 .button-width-fit-content {
@@ -689,7 +702,7 @@ nav {
     margin-bottom: 20px;
 }
 
-@media(max-width:757px){
+@media(max-width:757px) {
     .video-wrapper {
         height: unset;
     }
@@ -798,15 +811,17 @@ nav {
         padding-block: 0;
         height: unset;
     }
+
     .jdr-resources-content-inner {
         height: unset;
         min-height: 336px;
         background: var(--Black);
-        color:var(--White);
+        color: var(--White);
     }
-    .jdr-resources-content-inner > h2 {
-        color: var(--White) !important;
-    }
+
+        .jdr-resources-content-inner > h2 {
+            color: var(--White) !important;
+        }
 
     .jdr-resources-content-inner-text {
         padding-block: 25px;
@@ -821,6 +836,7 @@ nav {
         width: 100%;
     }
 }
+
 .on-this-page {
     gap: 5px;
     row-gap: 0px;
@@ -837,13 +853,10 @@ nav {
 
 @media(max-width:40.0625em) {
     .on-this-page > a {
-        width:100%;
+        width: 100%;
     }
 }
 
 .quick-links {
     margin-bottom: 40px;
 }
-
-
-

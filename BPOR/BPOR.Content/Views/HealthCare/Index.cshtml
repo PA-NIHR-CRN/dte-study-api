@@ -61,11 +61,11 @@
         </div>
     </div>
 </section>
-
 <!-- introductions sub section 1 - Media -->
-@{if(Model.MediaSection != null){
-<partial name="JDR/MediaSection@{@Model.MediaSection.GetType().Name}" model="@Model.MediaSection" />
-    }
+@{
+if(Model.MediaSection != null){
+  <partial name="JDR/MediaSection@{@Model.MediaSection.GetType().Name}" model="@Model.MediaSection" />
+  }
 }
 
 <!-- banner section -->
@@ -96,8 +96,17 @@
             {
 
                 <details id="@accordion?.Title.Replace(" ", "")">
-                    <summary><h3 class="accordion-title govuk-grid-column-two-thirds">@accordion?.Title</h3></summary>
-                    <markdown>@accordion?.Content</markdown>
+                    <summary>
+                        <h3 class="accordion-title govuk-grid-column-two-thirds">@accordion?.Title</h3>
+                        <span class="chevron">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 8 8" fill="none">
+                                <path d="M6.33366 3L4.00033 5.33333L1.66699 3"></path>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="accordion-body">
+                        <markdown>@accordion?.Content</markdown>
+                    </div>
                 </details>
             }
         </div>
