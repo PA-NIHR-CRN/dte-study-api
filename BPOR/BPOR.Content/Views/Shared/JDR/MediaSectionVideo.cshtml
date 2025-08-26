@@ -20,7 +20,14 @@
             {
 
                 <details class="transcript-wrapper">
-                    <summary class="govuk-button button-wide">@Model.Link.Label</summary>
+                    <summary class="govuk-button button-wide">
+                        @Model.Link.Label
+                        <span class="chevron">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 8 8" fill="none">
+                                <path d="M6.33366 3L4.00033 5.33333L1.66699 3"></path>
+                            </svg>
+                        </span>
+                    </summary>
                     <section class="info-card transcript">
                         @{
                             Model.Transcript = Model.Transcript.Replace("# ", "## ");
