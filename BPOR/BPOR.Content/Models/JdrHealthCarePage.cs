@@ -1,4 +1,5 @@
-﻿using Contentful.AspNetCore.TagHelpers;
+﻿using BPOR.Content.Models.Components;
+using Contentful.AspNetCore.TagHelpers;
 using Contentful.Core.Models;
 
 namespace BPOR.Content
@@ -12,9 +13,7 @@ namespace BPOR.Content
 
         public Card Hero { get; set; }
 
-        public Video VideoSection { get; set; }
-
-        public MultiLinkSection TextSection1 { get; set; }
+        public IContentfulComponent MediaSection { get; set; }
 
         public string Banner {  get; set; }
         public string AccordionSectionTitle {  get; set; }
@@ -24,13 +23,6 @@ namespace BPOR.Content
         public ContactUsSection contactUsSection { get; set; }
     }
 
-    public class MultiLinkSection
-    {
-        public string Name { get; set; }
-        public string Text { get; set; }
-
-        public List<Link> JdrPageLinks { get; set; }
-    }
 
     public class AccordionSection
     {
@@ -59,4 +51,6 @@ namespace BPOR.Content
         public Asset image {  get; set; }
         public Link link { get; set; }
     }
+
+
 }
