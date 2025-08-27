@@ -15,7 +15,7 @@ namespace Dynamo.Stream.Handler.Migrations
                 SELECT pa.Id,
                 pa.CanonicalTown AS Town,
                 LEFT(TRIM(pa.Postcode), CHAR_LENGTH(TRIM(pa.Postcode)) - 3) AS Outcode, 
-                pa.Postcode
+                pa.Postcode,
                 pa.ParticipantId,
                 pa.IsDeleted
                 FROM ParticipantAddress pa;
