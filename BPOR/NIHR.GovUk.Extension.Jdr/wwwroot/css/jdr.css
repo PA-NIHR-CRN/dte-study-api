@@ -703,7 +703,13 @@ nav {
 
 .transcript {
     text-align: left;
+    padding: 55px;
+    background-color: var(--Pink-11);
 }
+
+    .transcript details p {
+        background-color: var(--Pink-11);
+    }
 
 .no-float {
     float: none;
