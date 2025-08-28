@@ -26,11 +26,12 @@ namespace BPOR.Content.Controllers
         
         public async Task<IActionResult> Index([FromServices] IContentfulClient contentfulClient, [FromKeyedServices("preview")] IContentfulClient contentfulPreviewClient, string? env_id = null, string? entry_sys_id = null, string id = null, bool preview = false)
         {
+ 
             entry_sys_id = entry_sys_id ?? _contentSettings.Value.JdrHealthCareId;
 
             var client = preview ? contentfulPreviewClient : contentfulClient;
             ViewData["site"] = "JDR";
-
+            client.ContentTypeResolver = new ModulesResolver();
             return await GetContent(client, entry_sys_id);
         }
 
