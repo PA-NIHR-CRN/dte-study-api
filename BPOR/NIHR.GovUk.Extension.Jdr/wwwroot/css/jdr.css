@@ -225,8 +225,7 @@ div.hero-content > p {
         justify-content: space-between;
         align-items: center;
         font-weight: 700;
-        /*font-size: 1rem;*/
-        padding: 1rem 1.5rem;
+        padding: 0px 20px;
         background-color: var(--Pink-1);
         color: var(--White);
         cursor: pointer;
@@ -792,6 +791,7 @@ nav {
     .transcript p {
         margin: 0px;
         padding: 0px;
+        background-color: var(--Pink-11);
     }
 
     .transcript details p {
