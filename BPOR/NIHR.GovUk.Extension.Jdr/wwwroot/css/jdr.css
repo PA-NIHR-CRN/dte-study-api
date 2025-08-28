@@ -792,6 +792,9 @@ nav {
     .transcript p {
         margin: 0px;
         padding: 0px;
+    }
+
+    .transcript details p {
         background-color: var(--Pink-11);
     }
 
