@@ -155,13 +155,13 @@ div.hero-content > p {
     }
 }
 
-.intro section {
-    display: flex;
-    height: 493px;
-    padding: 40px 40px 40px 0px;
-    flex-direction: column;
-    gap: 30px;
-}
+    .intro section {
+        display: flex;
+        min-height:493px;
+        padding: 40px 40px 40px 0px;
+        flex-direction: column;
+        gap: 30px;
+    }
 
 @media(max-width:626px) {
     .intro section {
@@ -246,7 +246,8 @@ details summary::-webkit-details-marker {
     display: none;
 }
 
-summary .chevron {
+summary .chevron,
+button .chevron{
     display: inline-grid;
     place-items: center;
     width: 25px;
@@ -258,7 +259,9 @@ summary .chevron {
 }
 
 details summary:hover,
-details summary:focus-visible {
+details summary:focus-visible,
+.dropdown:hover,
+.dropdown:focus-visible{
     background-color: var(--White);
     outline: none;
     color: var(--Pink-1) !important;
@@ -269,6 +272,8 @@ details summary:focus-visible {
 
     details summary:hover .chevron,
     details summary:focus-visible .chevron,
+    .dropdown:hover .chevron,
+    .dropdown:focus-visible .chevron,
     .govuk-button:hover .chevron,
     .govuk-button:focus .chevron {
         background-color: var(--Black);
@@ -277,14 +282,19 @@ details summary:focus-visible {
     }
 
 details[open] summary .chevron svg,
-details[open] summary svg {
+details[open] summary svg,
+button[aria-expanded="true"] .chevron svg,
+button[aria-expanded="true"] svg {
     transform: rotate(180deg);
 }
 
 details summary:focus-visible .chevron path,
 details summary:hover .chevron path,
+button:focus-visible .chevron path,
+button:hover .chevron path,
 .govuk-button:hover path,
 .govuk-button:focus path {
+
     stroke: var(--White);
 }
 
@@ -542,15 +552,22 @@ header .govuk-button {
 .header-buttons {
     display: flex;
     justify-content: flex-end;
+    flex-direction:row;
+}
+.header-buttons > a{
+    width:auto;
 }
 
 nav {
     background: var(--Pink-1);
 }
+.nav-menu-button{
+    margin:0;
+}
 
-    nav summary {
-        padding: 15px 100px 15px 15px;
-    }
+nav summary {
+    padding: 15px 100px 15px 15px;
+}
 
     nav .nav-dropdown summary, nav details a {
         text-decoration: none !important;
@@ -610,6 +627,70 @@ nav {
     }
 }
 
+Navbar-mobile-control{
+    display:block;
+}
+@media (min-width: 40.0625em) {
+    .Navbar-mobile-control {
+        display: none
+    }
+    details[closed].Nav-mobile-details {
+        display: block;
+    }
+}
+@media(min-width:768px){
+    .navigation {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        max-width: 100%;
+    }
+}
+#navbar-button-header {
+    float: unset !important;
+    font-family: "GothamBold";
+    width: 100%;
+    text-align: left;
+    color: var(--White);
+    font-size: 16px;
+    border-radius: 0;
+    margin: 0;
+}
+#navbar-button-header:hover,
+#navbar-button-header:focus-visible{
+    color:var(--Pink-1)
+}
+
+@media(max-width:810px) {
+    nav .navbar-collapse {
+        margin-inline: 0 !important;
+    }
+}
+@media(max-width:768px) {
+    .navbar-toggle {
+        display: inline-block !important;
+    }
+
+    .nav.navbar-nav {
+        flex-direction: column;
+    }
+
+    nav .navbar-nav > li{
+        width:100%;
+        justify-content:left;
+        background-color:var(--Pink-11);
+        
+    }
+        nav .navbar-nav > li > a {
+            width: 100%;
+            color: var(--Black) !important;
+        }
+
+    .navbar-nav {
+            margin: 0;
+        }
+}
+
 .sub-menu {
     display: flex;
     flex-direction: column;
@@ -655,6 +736,7 @@ nav {
 
 .jdr-logo {
     margin: 30px;
+    margin-left:0;
     max-width: 140px;
 }
 
@@ -712,8 +794,7 @@ nav {
     color: var(--White);
     text-align: center;
     display: flex;
-    height: 201px;
-    padding: 20px;
+    min-height: 201px;
     justify-content: center;
     align-items: center;
     gap: 10px;
@@ -721,7 +802,7 @@ nav {
 
 .banner-text-container {
     display: flex;
-    height: 201px;
+    min-height: 201px;
     padding: 20px 0px;
     justify-content: center;
     align-items: center;
@@ -749,6 +830,9 @@ nav {
 .button-wide {
     width: fit-content;
     flex-direction: row;
+}
+button .chevron{
+    float:right;
 }
 
 .button-width-fit-content {

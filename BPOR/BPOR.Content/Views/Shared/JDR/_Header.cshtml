@@ -15,15 +15,19 @@
         </div>
     </div>
 
-    <nav role="navigation">
-        @*<div>
-                <button type="button" class="navbar-toggle pull-right" data-toggle="collapse" data-target=".navbar-collapse">
+    <nav role="navigation" class="govuk-width-container navigation">
+        <div id="nav-menu-button" class="d-none govuk-width-container">
+                <button type="button" class="navbar-toggle dropdown" data-toggle="collapse" data-target=".navbar-collapse" id="navbar-button-header">
                     <span class="sr-only">Toggle navigation</span>
-                    <i class="fas fa-bars" aria-hidden="true"></i> Menu
+                    Menu
+                <span class="chevron">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 8 8" fill="none">
+                        <path d="M6.33366 3L4.00033 5.33333L1.66699 3"></path>
+                    </svg>
+                </span>
                 </button>
-            </div>*@
-        <div class="govuk-width-container navbar-collapse collapse">
-
+            </div>
+        <div class="govuk-width-container navbar-collapse">
             <ul class="nav navbar-nav">
                 <li>
                     <a href="/" title="Home">
@@ -73,4 +77,11 @@
             </ul>
         </div><!--/.nav-collapse -->
     </nav>
+    <script>
+        // remove d-none and add class for control over the menu button.
+        document.querySelector('#nav-menu-button').className = document.querySelector('#nav-menu-button').className.replace('d-none', 'nav-menu-button')
+
+        // hide the list when js is enabled
+        document.querySelector('.navbar-collapse').className += " collapse"
+    </script>
 </header>
