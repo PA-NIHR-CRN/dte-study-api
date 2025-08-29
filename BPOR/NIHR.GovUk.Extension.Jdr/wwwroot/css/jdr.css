@@ -76,6 +76,40 @@ h5 {
     letter-spacing: -0.42px;
 }
 
+@media(max-width:40.0625em) {
+    h1 {
+        font-size: 27px;
+        line-height: 30px;
+        letter-spacing: -0.72px;
+    }
+
+    h2 {
+        font-size: 24px;
+        line-height: 30px;
+        letter-spacing: -0.72px;
+    }
+
+    h3 {
+        font-size: 16px;
+        line-height: 20px;
+        letter-spacing: -0.42px;
+    }
+
+    h4 {
+        font-size: 16px;
+        line-height: 20px;
+        letter-spacing: -0.42px;
+    }
+
+    h5 {
+        font-size: 16px;
+        line-height: 20px;
+        letter-spacing: -0.42px;
+    }
+
+
+}
+
 footer h2 {
     color: #bd007a;
 }
@@ -108,7 +142,12 @@ p {
     font-weight: 400;
     line-height: 28px;
 }
-
+@media(max-width:40.0625em) {
+    p {
+        font-size: 16px;
+        line-height: 20px;
+    }
+}
 ul {
     margin: revert;
     padding: revert;
@@ -124,8 +163,8 @@ ul {
     background-color: var(--Pink-11);
     background-image: url("../img/JDR_hero_left.svg"), url("../img/JDR_hero_right.svg");
     background-repeat: no-repeat, no-repeat;
-    background-position: left top, right;
-    background-size: 142px 495px,421px 495px;
+    background-position: left top, right -50px center;
+    background-size: 142px 495px,467px 530px;
 }
 
 @media(max-width:1150px) {
@@ -152,7 +191,7 @@ div.hero-content > p {
 /*591 w 495 h*/
 @media(max-width:880px){
     .hero-content, .hero-title {
-        width: 90%;
+        width: 100%;
     }
 }
 
@@ -208,6 +247,13 @@ div.hero-content > p {
     border-top: none;
     padding-block: 10px;
     font-weight: 700;
+}
+@media(max-width:40.0625em){
+
+    .accordion-title{
+        font-size:16px;
+        line-height:20px;
+    }
 }
 
 .accordion-body {
@@ -318,6 +364,11 @@ details p {
 
 .govuk-width-container {
     max-width: 916px;
+}
+@media(max-width:40.0625em){
+    .govuk-width-container {
+        margin-inline:31px;
+    }
 }
 
 a, a:visited {
@@ -559,70 +610,70 @@ header .govuk-button {
     width:auto;
 }
 
-nav {
+#nav {
     background: var(--Pink-1);
 }
 .nav-menu-button{
     margin:0;
 }
 
-nav summary {
+#nav summary {
     padding: 15px 100px 15px 15px;
 }
 
-    nav .nav-dropdown summary, nav details a {
-        text-decoration: none !important;
-    }
+#nav .nav-dropdown summary, #nav details a {
+    text-decoration: none !important;
+}
 
-    nav details {
-        flex-direction: column;
-        justify-content: center;
-    }
+#nav details {
+    flex-direction: column;
+    justify-content: center;
+}
 
-    nav .navbar-nav {
-        width: 100%;
+#nav .navbar-nav {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+    #nav .navbar-nav > li {
         display: flex;
+        height: 60px;
+        justify-content: flex-end;
         align-items: center;
-        justify-content: space-between;
+        flex-shrink: 0;
     }
 
-        nav .navbar-nav > li {
-            display: flex;
-            height: 60px;
-            justify-content: flex-end;
-            align-items: center;
-            flex-shrink: 0;
+        #nav .navbar-nav > li > a, #nav .nav-dropdown summary {
+            color: var(--White) !important;
+            font-weight: 700;
+            font-size: 16px !important;
+            line-height: 20px;
+            vertical-align: middle;
+            text-decoration: none;
         }
 
-            nav .navbar-nav > li > a, nav .nav-dropdown summary {
-                color: var(--White) !important;
-                font-weight: 700;
-                font-size: 16px !important;
-                line-height: 20px;
-                vertical-align: middle;
-                text-decoration: none;
-            }
+#nav .nav > li > a:focus,
+#nav .nav > li > a:hover,
+#nav .nav > li summary:focus,
+#nav .nav > li summary:hover {
+    text-decoration: none !important;
+    color: var(--Black) !important;
+    background-color: var(--Pink-11) !important;
+    box-shadow: 0 0 0 3px var(--Yellow) !important;
+    border-radius: 4px;
+}
 
-    nav .nav > li > a:focus,
-    nav .nav > li > a:hover,
-    nav .nav > li summary:focus,
-    nav .nav > li summary:hover {
-        text-decoration: none !important;
-        color: var(--Black) !important;
-        background-color: var(--Pink-11) !important;
-        box-shadow: 0 0 0 3px var(--Yellow) !important;
-        border-radius: 4px;
-    }
-
-    nav .sub-menu > li:focus-within,
-    nav summary:hover {
-        background-color: var(--Pink-11) !important;
-        box-shadow: 0 0 0 3px var(--Yellow) !important;
-    }
+#nav .sub-menu > li:focus-within,
+#nav summary:hover {
+    background-color: var(--Pink-11) !important;
+    box-shadow: 0 0 0 3px var(--Yellow) !important;
+}
 
 @media (min-width: 768px) {
     .navbar-nav > li > a,
-    nav .nav > li summary {
+    #nav .nav > li summary {
         padding-top: 18px;
         padding-bottom: 18px;
     }
@@ -663,7 +714,7 @@ Navbar-mobile-control{
 }
 
 @media(max-width:810px) {
-    nav .navbar-collapse {
+    #nav .navbar-collapse {
         margin-inline: 0 !important;
     }
 }
@@ -676,13 +727,12 @@ Navbar-mobile-control{
         flex-direction: column;
     }
 
-    nav .navbar-nav > li{
-        width:100%;
-        justify-content:left;
-        background-color:var(--Pink-11);
-        
+    #nav .navbar-nav > li {
+        width: 100%;
+        justify-content: left;
+        background-color: var(--Pink-11);
     }
-        nav .navbar-nav > li > a {
+        #nav .navbar-nav > li > a {
             width: 100%;
             color: var(--Black) !important;
         }
@@ -919,6 +969,11 @@ button .chevron{
 .cookie-btn {
     width: fit-content;
 }
+@media(max-width:40.0625em){
+    .cookie-btn {
+        width: 100%;
+    }
+}
 
 .govuk-cookie-banner {
     background-color: var(--Pink-11)
@@ -931,6 +986,9 @@ button .chevron{
     font-weight: 700;
     line-height: 40px;
     letter-spacing: -0.72px;
+}
+.govuk-cookie-banner__content {
+    padding-block: 20px !important;
 }
 
 .govuk-cookie-banner__content > .govuk-body, .transcript p, .transcript li {

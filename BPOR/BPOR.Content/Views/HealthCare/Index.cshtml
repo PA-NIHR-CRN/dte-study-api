@@ -17,7 +17,7 @@
     }
 }
 
-<section id="onThisPage" class="quick-link">
+<nav id="onThisPage" class="quick-link" aria-label="On this page">
     <div class="govuk-width-container">
         <div class="header-container">
             <h3>What's on this page</h3>
@@ -30,8 +30,8 @@
                     foreach (var accordionLink in Model.AccordionSection.accordions)
                     {
                         <a class="govuk-button--tertiary button-width-fit-content" href="#@{
-                    @accordionLink.Title.Replace(" ","")
-}">@accordionLink.Title</a>
+                            @accordionLink.Title.Replace(" ","")
+    }">@accordionLink.Title</a>
                     }
                 }
                 if (Model.onlineResourcesSection != null)
@@ -46,7 +46,9 @@
             }
         </div>
     </div>
-</section>
+</nav>
+<div role="main" id="main-content" class="">
+
 
 <!-- Join dementaia research Hero TODO, some classes are bootstrap leftovers, will need cleared out-->
 <section id="heroSection">
@@ -148,3 +150,5 @@ if(Model.MediaSection != null){
         </section-with-heading>
     }
 }
+
+</div>
