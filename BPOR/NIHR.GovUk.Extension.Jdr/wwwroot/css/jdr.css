@@ -397,6 +397,12 @@ p a, li a {
     font-weight: normal;
 }
 
+@media(max-width:40.0625em){
+    p a, li a {
+        font-size: 16px;
+    }
+}
+
 .govuk-link {
     color: var(--Black);
     font-family: Lato;
