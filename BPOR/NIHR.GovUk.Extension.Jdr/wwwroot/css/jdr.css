@@ -84,6 +84,10 @@ footer h2 {
     margin-top: 30px;
     margin-bottom: 20px;
 }
+.header-container > h3 {
+    font-size:21px;
+    line-height:25px
+}
 
 .govuk-cookie-banner a {
     display: inline-flex;
@@ -134,14 +138,11 @@ ul {
     }
 }
 
-.hero-content {
-    width: 67%;
+.hero-content{
+    width:69%;
 }
-
-h1.hero-content {
-    font-size: 36px;
-    line-height: 40px;
-    letter-spacing: -0.72px;
+hero-title {
+    width: 80%;
 }
 
 div.hero-content > p {
@@ -149,8 +150,8 @@ div.hero-content > p {
 }
 
 /*591 w 495 h*/
-@media(max-width:880px) {
-    .hero-content {
+@media(max-width:880px){
+    .hero-content, .hero-title {
         width: 90%;
     }
 }
@@ -596,7 +597,7 @@ nav summary {
             nav .navbar-nav > li > a, nav .nav-dropdown summary {
                 color: var(--White) !important;
                 font-weight: 700;
-                font-size: 16px;
+                font-size: 16px !important;
                 line-height: 20px;
                 vertical-align: middle;
                 text-decoration: none;
@@ -819,6 +820,14 @@ Navbar-mobile-control{
         letter-spacing: -0.48px;
         margin: 0px;
     }
+    @media(max-width:40.0625em){
+        .banner-text-container > p {
+
+            font-size: 16px;
+            line-height: 20px;
+
+        }
+    }
 
 .banner > h1,
 .banner > h2,
@@ -853,11 +862,28 @@ button .chevron{
     margin-top: 20px;
     margin-bottom: 20px;
 }
+.image-wrapper {
+    height: 372px;
+    flex: 1 0 0;
+    text-align:center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+    .image-wrapper > img {
+        height: 100%;
+    }
 
 @media(max-width:757px) {
     .video-wrapper {
         height: unset;
     }
+    .image-wrapper {
+        height: unset;
+        width:100%;
+    }
+        .image-wrapper > img {
+            width: 100%;
+        }
 }
 
 .transcript-wrapper {
@@ -952,6 +978,10 @@ button .chevron{
     padding-block: 20px;
     justify-content: space-between;
 }
+.jdr-resources-content-inner-text > p {
+    font-size: 16px;
+    line-height: 20px;
+}
 
 
 @media(max-width: 957px) {
@@ -989,10 +1019,11 @@ button .chevron{
         padding-block: 25px;
     }
 
-    .jdr-resources-image > img {
-        height: unset;
-        width: 100%;
-    }
+
+        .jdr-resources-image > img {
+            height: unset;
+            width: 100%;
+        }
 
     .jdr-resources {
         width: 100%;

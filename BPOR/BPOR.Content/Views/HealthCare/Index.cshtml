@@ -53,7 +53,7 @@
     <div class="intro my-2 even">
         <div class="govuk-width-container">
             <section>
-                <h1 class="hero-content">@Model.Hero.Title</h1>
+                <h1 class="hero-title">@Model.Hero.Title</h1>
                 <div class="hero-content">
                     <markdown markdown="Hero.Body" />
                 </div>
@@ -90,7 +90,7 @@ if(Model.MediaSection != null){
 {
     <div class="accordion-section">
         <div class="accordion govuk-width-container">
-            <h2>@Model.AccordionSection.title</h2>
+            <h2 class="govuk-!-margin-bottom-8">@Model.AccordionSection.title</h2>
             <markdown markdown="AccordionSection.description"></markdown>
             @foreach (var accordion in Model.AccordionSection.accordions)
             {
