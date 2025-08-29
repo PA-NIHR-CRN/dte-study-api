@@ -968,6 +968,7 @@ button .chevron{
 
 .cookie-btn {
     width: fit-content;
+    padding-inline: 15px !important;
 }
 @media(max-width:40.0625em){
     .cookie-btn {
