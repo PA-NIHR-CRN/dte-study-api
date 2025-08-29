@@ -958,6 +958,15 @@ button .chevron{
         background-color: var(--Pink-11);
     }
 
+    @media(max-width:40.0625em){
+        .transcript {
+            padding: 1px 15px;
+        }
+        .transcript ul {
+            padding-inline-start: 20px;
+        }
+    }
+
 .no-float {
     float: none;
 }
@@ -999,6 +1008,13 @@ button .chevron{
     font-style: normal;
     font-weight: 400;
     line-height: 28px;
+}
+
+@media(max-width:40.0625em){
+    .transcript p, .transcript li{
+        font-size:16px;
+        line-height:20px;
+    }
 }
 
 .jdr-resources-container {
