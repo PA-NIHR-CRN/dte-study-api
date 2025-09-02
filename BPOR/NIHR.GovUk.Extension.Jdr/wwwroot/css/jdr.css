@@ -6,6 +6,7 @@
     --Purple-1: #6F5091;
     --White: #FFF;
     --Black: #000;
+    --gray: #5A5555;
     --Disabled: #D1D1D1;
     --Red: #D4351C;
     --Yellow: #FFDD00;
@@ -114,6 +115,9 @@ footer h2 {
     color: #bd007a;
 }
 
+
+
+
 .header-container {
     margin-top: 30px;
     margin-bottom: 20px;
@@ -173,7 +177,8 @@ ul {
     }
 
     .intro section {
-        min-height: 493px;
+        min-height: unset;
+        padding: 40px 10px 40px 10px;
     }
 }
 
@@ -282,6 +287,65 @@ div.hero-content > p {
         border-radius: 10px;
     }
 
+.accordionBorder details summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 20px;
+    cursor: pointer;
+    position: relative;
+    list-style: none;
+    border: 5px solid var(--Pink-1);
+    color: var(--Pink-1);
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background-color: #eaeaea;
+ 
+}
+    .accordionBorder details summary p
+     {
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 20px;
+    }
+
+    .accordionBorder details summary p,
+    .accordionBorder details ul{
+        padding-inline:31px;
+    }
+
+        .accordionBorder details a {
+            font-size: 14px !important;
+        }
+
+    .accordionBorder details summary:hover,
+    .accordionBorder details summary:focus-visible {
+        background-color: #eaeaea;
+        box-shadow: inset 0px 0px 0px 2px var(--Pink-1) !important;
+    }
+
+
+
+        .accordionBorder details summary .chevron,
+        .accordionBorder details summary:hover .chevron,
+        .accordionBorder details summary:focus-visible .chevron,
+        .accordionBorder details summary .chevron path {
+            display: inline-grid;
+            place-items: center;
+            width: 25px;
+            height: 25px;
+            border: none;
+            border-radius: none;
+            background-color: transparent;
+            color: var(--Pink-1);
+            stroke: var(--Pink-1) !important;
+            padding: 5px;
+        }
+.accordionMobile p{
+    background: transparent;
+}
+
 @media(max-width:40.0625em) {
     .accordion-title {
         max-width: 93%;
@@ -308,13 +372,14 @@ button .chevron{
 details summary:hover,
 details summary:focus-visible,
 .dropdown:hover,
-.dropdown:focus-visible{
+.dropdown:focus-visible {
     background-color: var(--White);
     outline: none;
     color: var(--Pink-1) !important;
-    border: 4px solid !important;
-    border-color: var(--Pink-1) !important;
-    box-shadow: 0px 0px 0px 3px var(--Yellow) !important;
+    /*border: 4px solid !important;*/
+    /*border-color: var(--Pink-1) !important;*/
+    /*box-shadow: 0px 0px 0px 3px var(--Yellow) !important;*/
+    box-shadow: 0 0 0 3px var(--Pink-1), 0px 0px 0px 7px var(--Yellow) !important;
 }
 
     details summary:hover .chevron,
@@ -737,6 +802,7 @@ Navbar-mobile-control{
         width: 100%;
         justify-content: left;
         background-color: var(--Pink-11);
+        border-block: solid 0.5px var(--gray);
     }
         #nav .navbar-nav > li > a {
             width: 100%;
@@ -985,11 +1051,6 @@ button .chevron{
     width: fit-content;
     padding-inline: 15px !important;
 }
-@media(max-width:40.0625em){
-    .cookie-btn {
-        width: 100%;
-    }
-}
 
 .govuk-cookie-banner {
     background-color: var(--Pink-11)
@@ -1016,11 +1077,29 @@ button .chevron{
     line-height: 28px;
 }
 
-@media(max-width:40.0625em){
-    .transcript p, .transcript li{
-        font-size:16px;
-        line-height:20px;
+.govuk-cookie-banner__content > p a{
+    font-weight:700;
+}
+
+
+@media(max-width:40.0625em) {
+    .govuk-cookie-banner__content > .govuk-body, .transcript p, .transcript li {
+        font-size: 16px;
+        line-height: 20px;
     }
+    .cookie-btn {
+        width: 80%;
+    }
+    .govuk-cookie-banner__heading {
+        font-size: 24px;
+        line-height: 30px;
+    }
+
+    .govuk-cookie-banner__message > .govuk-button-group {
+        gap: unset;
+    }
+
+    
 }
 
 .jdr-resources-container {
