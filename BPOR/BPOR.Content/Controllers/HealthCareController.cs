@@ -31,21 +31,29 @@ namespace BPOR.Content.Controllers
 
             var client = preview ? contentfulPreviewClient : contentfulClient;
             ViewData["site"] = "JDR";
-            client.ContentTypeResolver = new ModulesResolver();
+
             return await GetContent(client, entry_sys_id);
         }
 
+        public RedirectResult redirectTo404()
+        {
+            return Redirect(_contentSettings.Value.Jdr404Url);
+        }
         public async Task<IActionResult> article([FromServices] IContentfulClient contentfulClient, [FromKeyedServices("preview")] IContentfulClient contentfulPreviewClient, string id, string? env_id = null, string? entry_sys_id = null, string? article = null , bool preview = false) {
 
+            if (String.IsNullOrEmpty(id))
+            {
+                return redirectTo404();
+            }
 
             var client = preview ? contentfulPreviewClient : contentfulClient;
             ViewData["site"] = "JDR";
-
-            return await GetContentByPageTitle(client, id);
+            return await GetContentByPageTitle(client, id.Replace("-"," "));
         }
         private async Task<IActionResult> GetContentByPageTitle(IContentfulClient contentfulClient, string PageTitle)
         {
             _logger.LogDebug("healthcare.article()");
+            contentfulClient.ContentTypeResolver = new ModulesResolver();
             var rqf = _httpContextAccessor?.HttpContext?.Features.Get<IRequestCultureFeature>();
             // Culture contains the information of the requested culture
             var culture = rqf?.RequestCulture.Culture ?? CultureInfo.GetCultureInfo("en-GB");
@@ -57,17 +65,22 @@ namespace BPOR.Content.Controllers
             .FieldEquals("fields.title", PageTitle);
 
             var model = (await contentfulClient.GetEntries(queryBuilder)).FirstOrDefault();
+            if (model == null)
+            {
+               return redirectTo404();
+            }
             return View("Index", model);
 
         }
             private async Task<IActionResult> GetContent(IContentfulClient contentfulClient, string entry_sys_id)
         {
             _logger.LogDebug("healthcare.index()");
+            contentfulClient.ContentTypeResolver = new ModulesResolver();
             var rqf = _httpContextAccessor?.HttpContext?.Features.Get<IRequestCultureFeature>();
             // Culture contains the information of the requested culture
             var culture = rqf?.RequestCulture.Culture ?? CultureInfo.GetCultureInfo("en-GB");
 
-                var queryBuilder = QueryBuilder<JdrHealthCarePage>.New
+            var queryBuilder = QueryBuilder<JdrHealthCarePage>.New
             .Include(10)
             .LocaleIs(culture.ToString())
             .FieldEquals("sys.id", entry_sys_id);
