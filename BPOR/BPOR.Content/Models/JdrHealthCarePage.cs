@@ -16,8 +16,6 @@ namespace BPOR.Content
         public IContentfulComponent MediaSection { get; set; }
 
         public string Banner {  get; set; }
-        public string AccordionSectionTitle {  get; set; }
-        public string AccordionSectionDescription { get; set; }
         public AccordionSection AccordionSection {  get; set; }    
         public OnlineResourcesSection onlineResourcesSection {  get; set; }
         public ContactUsSection contactUsSection { get; set; }

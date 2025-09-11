@@ -27,10 +27,11 @@ public class Startup
         services.AddKeyedTransient<IContentfulClient>("preview", (sp, key) =>
         {
             ContentfulOptions value2 = sp.GetService<IOptionsSnapshot<ContentfulOptions>>().Value;
-            value2.UsePreviewApi = true;
-
+            value2.UsePreviewApi = true; 
             HttpClient service2 = sp.GetService<HttpClient>();
-            return new ContentfulClient(service2, value2);
+            var contentfulClient = new ContentfulClient(service2, value2);
+            contentfulClient.ContentTypeResolver = new ModulesResolver();
+            return contentfulClient;
         });
 
         // Add services to the container.
