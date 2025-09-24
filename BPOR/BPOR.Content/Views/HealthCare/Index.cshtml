@@ -25,6 +25,11 @@
         <div class="govuk-button-group on-this-page">
             <a href="#heroSection" class="govuk-button--tertiary button-width-fit-content">Introduction</a>
             @{
+                if(Model.MediaSection != null)
+                {
+                <a class="govuk-button--tertiary button-width-fit-content" href="#MediaSection">@Model.MediaSection.getTitle()</a>
+                    
+                }
                 if (Model.AccordionSection != null)
                 {
                     foreach (var accordionLink in Model.AccordionSection.accordions)
@@ -123,7 +128,7 @@ if(Model.MediaSection != null){
         <section id="onlineResourceSection" class="govuk-!-margin-bottom-9 jdr-background-black ">
             <div class="jdr-resources-container">
                 <div class="jdr-resources jdr-resources-image">
-                    <img src="@Model.onlineResourcesSection.image.File.Url" alt="" role="presentation" class="w-100" />
+                        <img src="@Model.onlineResourcesSection.image.File.Url" alt="@Model.onlineResourcesSection.image.Description" role="presentation" class="w-100" />
                 </div>
                 <div class="jdr-resources jdr-resources-content">
                     <div class="jdr-resources-content-inner">

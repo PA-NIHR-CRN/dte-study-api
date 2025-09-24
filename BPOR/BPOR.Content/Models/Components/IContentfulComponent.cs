@@ -1,6 +1,12 @@
 ﻿namespace BPOR.Content.Models.Components
 {
-    public class IContentfulComponent
+    public abstract class IContentfulComponent
     {
+
+        public abstract String getTitle();
+     
     }
+
+
+
 }
