@@ -165,10 +165,10 @@ ul {
 
 #heroSection {
     background-color: var(--Pink-11);
-    background-image: url("../img/JDR_hero_left.svg"), url("../img/JDR_hero_right.svg");
+    background-image: url("../img/JDR_hero_left.svg"), url("../img/Mask_group.svg");
     background-repeat: no-repeat, no-repeat;
-    background-position: left top, right -50px center;
-    background-size: 142px 495px,467px 530px;
+    background-position: left top, right -333px bottom -93px;
+    background-size: 142px 495px,670px 672px;
 }
 
 @media(max-width:1150px) {
