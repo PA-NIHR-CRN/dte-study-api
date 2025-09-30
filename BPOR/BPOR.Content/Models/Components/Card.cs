@@ -11,5 +11,7 @@ namespace BPOR.Content.Models.Components
         public Link Link { get; set; }
 
         public Asset Image { get; set; }
+
+        override public string getTitle(){ return Title; }
     }
 }

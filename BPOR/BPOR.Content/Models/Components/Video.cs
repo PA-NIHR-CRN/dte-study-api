@@ -14,5 +14,7 @@ namespace BPOR.Content.Models.Components
         public string VideoUrl { get; set; }
 
         public string Transcript { get; set; }
+
+        override public string getTitle() { return Heading; }
     }
 }

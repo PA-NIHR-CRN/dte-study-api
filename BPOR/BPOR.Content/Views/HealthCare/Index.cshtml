@@ -7,12 +7,12 @@
     @{
         if (!string.IsNullOrEmpty(Model?.Description))
         {
-            <meta name="description" content="@Model.Description" />
+                    <meta name="description" content="@Model.Description" />
         }
 
         if (!string.IsNullOrEmpty(Model?.Keywords))
         {
-            <meta name="keywords" content="@Model.Keywords" />
+                    <meta name="keywords" content="@Model.Keywords" />
         }
     }
 }
@@ -25,22 +25,27 @@
         <div class="govuk-button-group on-this-page">
             <a href="#heroSection" class="govuk-button--tertiary button-width-fit-content">Introduction</a>
             @{
+                if(Model.MediaSection != null)
+                {
+                        <a class="govuk-button--tertiary button-width-fit-content" href="#MediaSection">@Model.MediaSection.getTitle()</a>
+                    
+                }
                 if (Model.AccordionSection != null)
                 {
                     foreach (var accordionLink in Model.AccordionSection.accordions)
                     {
-                        <a class="govuk-button--tertiary button-width-fit-content" href="#@{
-                            @accordionLink.Title.Replace(" ","")
-    }">@accordionLink.Title</a>
+                                <a class="govuk-button--tertiary button-width-fit-content" href="#@{
+                                            @accordionLink.Title.Replace(" ","")
+            }">@accordionLink.Title</a>
                     }
                 }
                 if (Model.onlineResourcesSection != null)
                 {
-                    <a class="govuk-button--tertiary button-width-fit-content" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
+                            <a class="govuk-button--tertiary button-width-fit-content" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
                 }
                 if (Model.contactUsSection != null)
                 {
-                    <a class="govuk-button--tertiary button-width-fit-content" href="#contectUsSection">@Model.contactUsSection.Title</a>
+                            <a class="govuk-button--tertiary button-width-fit-content" href="#contectUsSection">@Model.contactUsSection.Title</a>
                 }
 
             }
@@ -66,7 +71,7 @@
 <!-- introductions sub section 1 - Media -->
 @{
 if(Model.MediaSection != null){
-  <partial name="JDR/MediaSection@{@Model.MediaSection.GetType().Name}" model="@Model.MediaSection" />
+          <partial name="JDR/MediaSection@{@Model.MediaSection.GetType().Name}" model="@Model.MediaSection" />
   }
 }
 
@@ -75,14 +80,14 @@ if(Model.MediaSection != null){
     if (Model.Banner != null)
     {
 
-        <!-- subsection 3 Banner -->
-       <section id="bannerSection" class="govuk-grid-column-full banner no-float">
-            <div class="govuk-width-container">
-                <span class="banner-text-container">
-                    <markdown markdown="Banner" />
-                </span>
-            </div>
-        </section>
+                <!-- subsection 3 Banner -->
+               <section id="bannerSection" class="govuk-grid-column-full banner no-float">
+                    <div class="govuk-width-container">
+                        <span class="banner-text-container">
+                            <markdown markdown="Banner" />
+                        </span>
+                    </div>
+                </section>
     }
 }
 
@@ -119,35 +124,51 @@ if(Model.MediaSection != null){
 @{
     if (Model.onlineResourcesSection != null)
     {
-        @* online resource section *@
-        <section id="onlineResourceSection" class="govuk-!-margin-bottom-9 jdr-background-black ">
-            <div class="jdr-resources-container">
-                <div class="jdr-resources jdr-resources-image">
-                    <img src="@Model.onlineResourcesSection.image.File.Url" alt="" role="presentation" class="w-100" />
-                </div>
-                <div class="jdr-resources jdr-resources-content">
-                    <div class="jdr-resources-content-inner">
-                    <h2>
-                        @Model.onlineResourcesSection.Title
-                        </h2>
-                    <div class="jdr-resources-content-inner-text">
-                        <markdown markdown="onlineResourcesSection.Text" />
+                @* online resource section *@
+                <section id="onlineResourceSection" class="govuk-!-margin-bottom-9 jdr-background-black ">
+                    <div class="jdr-resources-container">
+                        <div class="jdr-resources jdr-resources-image">
+                                <img src="@Model.onlineResourcesSection.image.File.Url" alt="@Model.onlineResourcesSection.image.Description" role="presentation" class="w-100" />
+                        </div>
+                            <div class="jdr-resources jdr-resources-content" id="jdr-resources-content">
+                            <div class="jdr-resources-content-inner">
+                            <h2>
+                                @Model.onlineResourcesSection.Title
+                                </h2>
+                            <div class="jdr-resources-content-inner-text">
+                                <markdown markdown="onlineResourcesSection.Text" />
+                            </div>
+                            <a class="govuk-button--tertiary button-width-fit-content" href="@{@Model.onlineResourcesSection.link.Url}" aria-label="@{@Model.onlineResourcesSection.link.AriaLabel}">@Model.onlineResourcesSection.link.Label </a>
+                            </div>
+                        </div>
                     </div>
-                    <a class="govuk-button--tertiary button-width-fit-content" href="@{@Model.onlineResourcesSection.link.Url}" aria-label="@{@Model.onlineResourcesSection.link.AriaLabel}">@Model.onlineResourcesSection.link.Label </a>
-                    </div>
-                </div>
-            </div>
-        </section>
+                </section>
+
+                <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            var container = document.getElementById("jdr-resources-content");
+                            if (container.offsetHeight > 420){
+                                var images = document.getElementsByClassName("jdr-resources-image")
+                                var textContent = document.getElementsByClassName("jdr-resources-container")
+                                for (var i = 0; i < images.length; i++) {
+                                    images[i].className += " jdr-resources-image-mobile";
+                                }
+                                for (var i = 0; i < textContent.length; i++) {
+                                    textContent[i].className += " jdr-resources-container-mobile";
+                                }
+                            }
+                        });
+                </script>
     }
 }
 
 @{
     if (Model.contactUsSection != null)
     {
-        <section-with-heading heading="@Model.contactUsSection.Title" id="contectUsSection" class="section-container govuk-width-container">
-            <markdown markdown="contactUsSection.Text"/>
-            <a class="govuk-button govuk-button--secondary button-width-fit-content" href="@Model.contactUsSection.link.Url" aria-label="@Model.contactUsSection.link.AriaLabel"> @Model.contactUsSection.link.Label</a>
-        </section-with-heading>
+                <section-with-heading heading="@Model.contactUsSection.Title" id="contectUsSection" class="section-container govuk-width-container">
+                    <markdown markdown="contactUsSection.Text"/>
+                    <a class="govuk-button govuk-button--secondary button-width-fit-content" href="@Model.contactUsSection.link.Url" aria-label="@Model.contactUsSection.link.AriaLabel"> @Model.contactUsSection.link.Label</a>
+                </section-with-heading>
     }
 }
 
