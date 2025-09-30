@@ -1119,7 +1119,8 @@ button .chevron{
 
 .jdr-resources-container {
     display: flex;
-    height: 557px;
+    min-height: 557px;
+    height:1px;
     justify-self: center;
     padding-block: 74px;
 }
@@ -1147,7 +1148,7 @@ button .chevron{
 
 .jdr-resources-content-inner {
     padding: 40px;
-    height: 336px;
+    min-height: 336px;
     display: flex;
     flex-direction: column;
     padding-block: 20px;
@@ -1158,6 +1159,15 @@ button .chevron{
     line-height: 20px;
 }
 
+.jdr-resources-container-mobile {
+    display: block !important;
+    height: unset !important;
+}
+
+.jdr-resources-image-mobile > img {
+    height: unset !important;
+    width: 100% !important;
+}
 
 @media(max-width: 957px) {
 
