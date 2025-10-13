@@ -97,6 +97,11 @@ public class Startup
                 name: "JDR",
                 pattern: "healthcare/{action=Index}/{id?}",
                 defaults: new { controller = "Healthcare" });
+
+            endpoints.MapControllerRoute(
+               name: "Cookie Page",
+               pattern: "Cookie-Policy/{action=Index}/{id?}",
+               defaults: new { controller = "CookiePolicy" });
         });
     }
 }

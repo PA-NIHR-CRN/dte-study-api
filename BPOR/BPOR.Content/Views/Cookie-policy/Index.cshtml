@@ -1,0 +1,175 @@
+@using Westwind.AspNetCore.Markdown
+
+@model JdrHealthCarePage
+
+
+@section Metadata {
+    @{
+        if (!string.IsNullOrEmpty(Model?.Description))
+        {
+                    <meta name="description" content="@Model.Description" />
+        }
+
+        if (!string.IsNullOrEmpty(Model?.Keywords))
+        {
+                    <meta name="keywords" content="@Model.Keywords" />
+        }
+    }
+}
+
+<nav id="onThisPage" class="quick-link" aria-label="On this page">
+    <div class="govuk-width-container">
+        <div class="header-container">
+            <h3>What's on this page</h3>
+        </div>
+        <div class="govuk-button-group on-this-page">
+            <a href="#heroSection" class="govuk-button--tertiary button-width-fit-content">Introduction</a>
+            @{
+                if(Model.MediaSection != null)
+                {
+                        <a class="govuk-button--tertiary button-width-fit-content" href="#MediaSection">@Model.MediaSection.getTitle()</a>
+                    
+                }
+                if (Model.AccordionSection != null)
+                {
+                    foreach (var accordionLink in Model.AccordionSection.accordions)
+                    {
+                                <a class="govuk-button--tertiary button-width-fit-content" href="#@{
+                                            @accordionLink.Title.Replace(" ","")
+            }">@accordionLink.Title</a>
+                    }
+                }
+                if (Model.onlineResourcesSection != null)
+                {
+                            <a class="govuk-button--tertiary button-width-fit-content" href="#onlineResourceSection">@Model.onlineResourcesSection.Title</a>
+                }
+                if (Model.contactUsSection != null)
+                {
+                            <a class="govuk-button--tertiary button-width-fit-content" href="#contectUsSection">@Model.contactUsSection.Title</a>
+                }
+
+            }
+        </div>
+    </div>
+</nav>
+<div role="main" id="main-content" class="">
+
+
+<!-- Join dementaia research Hero TODO, some classes are bootstrap leftovers, will need cleared out-->
+<section id="heroSection">
+    <div class="intro my-2 even">
+        <div class="govuk-width-container">
+            <section>
+                <h1 class="hero-title">@Model.Hero.Title</h1>
+                <div class="hero-content">
+                    <markdown markdown="Hero.Body" />
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+<!-- introductions sub section 1 - Media -->
+@{
+if(Model.MediaSection != null){
+          <partial name="JDR/MediaSection@{@Model.MediaSection.GetType().Name}" model="@Model.MediaSection" />
+  }
+}
+
+<!-- banner section -->
+@{
+    if (Model.Banner != null)
+    {
+
+                <!-- subsection 3 Banner -->
+               <section id="bannerSection" class="govuk-grid-column-full banner no-float">
+                    <div class="govuk-width-container">
+                        <span class="banner-text-container">
+                            <markdown markdown="Banner" />
+                        </span>
+                    </div>
+                </section>
+    }
+}
+
+
+<!-- Accordion -->
+@if (Model?.AccordionSection?.accordions != null)
+{
+    <div class="accordion-section">
+        <div class="accordion govuk-width-container">
+            <h2 class="govuk-!-margin-bottom-8">@Model.AccordionSection.title</h2>
+            <markdown markdown="AccordionSection.description"></markdown>
+            @foreach (var accordion in Model.AccordionSection.accordions)
+            {
+
+                <details id="@accordion?.Title.Replace(" ", "")">
+                    <summary>
+                        <h3 class="accordion-title govuk-grid-column-two-thirds">@accordion?.Title</h3>
+                        <span class="chevron">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 8 8" fill="none">
+                                <path d="M6.33366 3L4.00033 5.33333L1.66699 3"></path>
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="accordion-body">
+                        <markdown>@accordion?.Content</markdown>
+                    </div>
+                </details>
+            }
+        </div>
+    </div>
+
+}
+
+@{
+    if (Model.onlineResourcesSection != null)
+    {
+                @* online resource section *@
+                <section id="onlineResourceSection" class="govuk-!-margin-bottom-9 jdr-background-black ">
+                    <div class="jdr-resources-container">
+                        <div class="jdr-resources jdr-resources-image">
+                                <img src="@Model.onlineResourcesSection.image.File.Url" alt="@Model.onlineResourcesSection.image.Description" role="presentation" class="w-100" />
+                        </div>
+                            <div class="jdr-resources jdr-resources-content" id="jdr-resources-content">
+                            <div class="jdr-resources-content-inner">
+                            <h2>
+                                @Model.onlineResourcesSection.Title
+                                </h2>
+                            <div class="jdr-resources-content-inner-text">
+                                <markdown markdown="onlineResourcesSection.Text" />
+                            </div>
+                            <a class="govuk-button--tertiary button-width-fit-content" href="@{@Model.onlineResourcesSection.link.Url}" aria-label="@{@Model.onlineResourcesSection.link.AriaLabel}">@Model.onlineResourcesSection.link.Label </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            var container = document.getElementById("jdr-resources-content");
+                            if (container.offsetHeight > 420){
+                                var images = document.getElementsByClassName("jdr-resources-image")
+                                var textContent = document.getElementsByClassName("jdr-resources-container")
+                                for (var i = 0; i < images.length; i++) {
+                                    images[i].className += " jdr-resources-image-mobile";
+                                }
+                                for (var i = 0; i < textContent.length; i++) {
+                                    textContent[i].className += " jdr-resources-container-mobile";
+                                }
+                            }
+                        });
+                </script>
+    }
+}
+
+@{
+    if (Model.contactUsSection != null)
+    {
+                <section-with-heading heading="@Model.contactUsSection.Title" id="contectUsSection" class="section-container govuk-width-container">
+                    <markdown markdown="contactUsSection.Text"/>
+                    <a class="govuk-button govuk-button--secondary button-width-fit-content" href="@Model.contactUsSection.link.Url" aria-label="@Model.contactUsSection.link.AriaLabel"> @Model.contactUsSection.link.Label</a>
+                </section-with-heading>
+    }
+}
+
+</div>
