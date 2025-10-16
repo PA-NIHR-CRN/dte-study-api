@@ -25,21 +25,22 @@ namespace BPOR.Content.Controllers
         
         public async Task<IActionResult> Index([FromServices] IContentfulClient contentfulClient, [FromKeyedServices("preview")] IContentfulClient contentfulPreviewClient, string? env_id = null, string? entry_sys_id = null, bool preview = false)
         {
-            entry_sys_id = entry_sys_id ?? _contentSettings.Value.CampaignPageId;
+            entry_sys_id = entry_sys_id ?? _contentSettings.Value.CookiePolicyId;
+            contentfulClient.ContentTypeResolver = new ModulesResolver();
 
             var client = preview ? contentfulPreviewClient : contentfulClient;
-            ViewData["site"] = "BPoR";
+            ViewData["site"] = "JDR";
             return await GetContent(client, entry_sys_id);
         }
 
         private async Task<IActionResult> GetContent(IContentfulClient contentfulClient, string entry_sys_id)
         {
-            _logger.LogDebug("Home.Index()");
+            _logger.LogDebug("CookiePolicy.Index()");
             var rqf = _httpContextAccessor?.HttpContext?.Features.Get<IRequestCultureFeature>();
             // Culture contains the information of the requested culture
             var culture = rqf?.RequestCulture.Culture ?? CultureInfo.GetCultureInfo("en-GB");
 
-            var queryBuilder = QueryBuilder<CampaignPage>.New
+            var queryBuilder = QueryBuilder<CookiePolicyPage>.New
             .Include(10)
             .LocaleIs(culture.ToString())
 

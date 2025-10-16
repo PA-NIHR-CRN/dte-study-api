@@ -22,7 +22,7 @@ public class Startup
         services.Configure<ContentSettings>(Configuration.GetSection("Content"));
         services.Configure<GoogleAnalyticsSettings>(Configuration.GetSection("GoogleAnalytics"));
 
-        services.AddContentful(Configuration);
+        services.AddContentManagement(Configuration);
 
         services.AddKeyedTransient<IContentfulClient>("preview", (sp, key) =>
         {
@@ -69,7 +69,9 @@ public class Startup
 
         var options = new RewriteOptions()
             .AddRewrite("^healthcare/resources/(.*)", "resources/$1", true)
-            .AddRewrite("^healthcare/_content/(.*)", "_content/$1", true);
+            .AddRewrite("^healthcare/_content/(.*)", "_content/$1", true)
+            .AddRewrite("^cookie-policy/resources/(.*)", "resources/$1", true)
+            .AddRewrite("^cookie-policy/_content/(.*)", "_content/$1", true);
 
         app.UseRewriter(options);
 

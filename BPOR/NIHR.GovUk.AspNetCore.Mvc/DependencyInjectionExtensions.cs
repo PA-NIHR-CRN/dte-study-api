@@ -20,6 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 var renderer = new HtmlRenderer();
                 renderer.AddRenderer(new GovUkHeadingRenderer(renderer.Renderers) { Order = 10 });
                 renderer.AddRenderer(new GovUkParagraphRenderer(renderer.Renderers) { Order = 10 });
+                renderer.AddRenderer(new GovUkTableRenderer(renderer.Renderers) { Order = 10 });
                 return renderer;
             });
 

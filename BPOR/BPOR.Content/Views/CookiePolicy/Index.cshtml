@@ -1,0 +1,42 @@
+@using Westwind.AspNetCore.Markdown
+
+@model CookiePolicyPage
+
+
+@section Metadata {
+    @{
+        if (!string.IsNullOrEmpty(Model?.Description))
+        {
+                    <meta name="description" content="@Model.Description" />
+        }
+
+        if (!string.IsNullOrEmpty(Model?.Keywords))
+        {
+                    <meta name="keywords" content="@Model.Keywords" />
+        }
+    }
+}
+
+<div role="main" id="main-content" class="govuk-width-container govuk-!-margin-top-9 govuk-!-margin-bottom-9">
+
+
+
+    @{
+        foreach(var pageSection in Model.pageSections)
+        {
+            if (pageSection.GetType().Name.Contains("JDR"))
+            {
+                <partial name="JDR/_@{@pageSection.GetType().Name}" model="pageSection" />
+            }else
+            {
+                <partial name="components/_@{@pageSection.GetType().Name}" model="pageSection" />
+            }
+            
+        }
+
+}
+
+
+
+
+</div>
