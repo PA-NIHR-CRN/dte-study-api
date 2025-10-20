@@ -8,6 +8,7 @@ public class StudyDetailsViewModel
 {
     public StudyModel Study { get; set; }
     [Display(Name = "Is this study recruiting identifiable participants?\t")]
+    [StudyEdit(2)]
     public string IsRecruitingIdentifiableParticipantsDisplay => Study.IsRecruitingIdentifiableParticipants ? "Yes" : "No";
 
     public IEnumerable<EnrollmentDetails> EnrollmentDetails { get; set; }

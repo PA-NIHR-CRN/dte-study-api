@@ -208,7 +208,7 @@ public class StudyController(
             return NotFound();
         }
 
-        studyModel.AllowEditIsRecruitingIdentifiableParticipants = false;
+        studyModel.AllowEditIsRecruitingIdentifiableParticipants = !studyModel.HasCampaigns;
         studyModel.Step = field;
         return View(studyModel);
     }
@@ -242,7 +242,8 @@ public class StudyController(
             {nameof(StudyFormViewModel.CpmsId)}, 
             {nameof(StudyFormViewModel.Step)},
             {nameof(StudyFormViewModel.InformationUrl)},
-            {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)}")]
+            {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)},
+            {nameof(StudyFormViewModel.IsRecruitingIdentifiableParticipants)}")]
         StudyFormViewModel model)
     {
         model.Id = id;
@@ -279,6 +280,15 @@ public class StudyController(
                 case 2:
                     studyToUpdate.StudyName = model.StudyName;
                     studyToUpdate.CpmsId = model.CpmsId;
+                    if (model is
+                        {
+                            AllowEditIsRecruitingIdentifiableParticipants: true,
+                            HasCampaigns: false,
+                            IsRecruitingIdentifiableParticipants: not null
+                        })
+                    {
+                        studyToUpdate.IsRecruitingIdentifiableParticipants = (bool)model.IsRecruitingIdentifiableParticipants;
+                    }
                     break;
                 case 3:
                     studyToUpdate.InformationUrl = string.IsNullOrWhiteSpace(model.InformationUrl)
