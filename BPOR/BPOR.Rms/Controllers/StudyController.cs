@@ -263,14 +263,17 @@ public class StudyController(
 
         try
         {
-            var studyToUpdate = await context.Studies.FirstOrDefaultAsync(s => s.Id == id);
+            var studyToUpdate = await context.Studies
+                .Include(fc => fc.FilterCriterias)
+                .ThenInclude(c => c.Campaign)
+                .FirstOrDefaultAsync(s => s.Id == id);
 
             if (studyToUpdate == null)
             {
                 logger.LogWarning("[HttpPost]Edit called with non-existent study: {StudyId}", id);
                 return NotFound();
             }
-
+            
             switch (model.Step)
             {
                 case 1:
@@ -280,15 +283,31 @@ public class StudyController(
                 case 2:
                     studyToUpdate.StudyName = model.StudyName;
                     studyToUpdate.CpmsId = model.CpmsId;
-                    if (model is
-                        {
-                            AllowEditIsRecruitingIdentifiableParticipants: true,
-                            HasCampaigns: false,
-                            IsRecruitingIdentifiableParticipants: not null
-                        })
+                    
+                    var hasCampaigns = studyToUpdate.FilterCriterias.Any(fc => fc.Campaign.Any());
+                    
+                    if (model.AllowEditIsRecruitingIdentifiableParticipants)
                     {
-                        studyToUpdate.IsRecruitingIdentifiableParticipants = (bool)model.IsRecruitingIdentifiableParticipants;
+                        var isRecruitmentFlagChanging = model.IsRecruitingIdentifiableParticipants != studyToUpdate.IsRecruitingIdentifiableParticipants;
+
+                        if (hasCampaigns && isRecruitmentFlagChanging)
+                        {
+                            this.AddNotification(new NotificationBannerModel
+                            {
+                                IsSuccess = false,
+                                Title = "Study details not updated",
+                                Body = $"{model.StudyName} has been modified by another user - please check the study details and try again"
+                            });
+
+                            return RedirectToAction(nameof(Details), new { id });
+                        }
+
+                        if (!hasCampaigns)
+                        {
+                            studyToUpdate.IsRecruitingIdentifiableParticipants = (bool)model.IsRecruitingIdentifiableParticipants;
+                        }
                     }
+
                     break;
                 case 3:
                     studyToUpdate.InformationUrl = string.IsNullOrWhiteSpace(model.InformationUrl)
