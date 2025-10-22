@@ -64,7 +64,7 @@ public static class Projections
             CpmsId = s.CpmsId,
             InformationUrl = s.InformationUrl,
             IsRecruitingIdentifiableParticipants = s.IsRecruitingIdentifiableParticipants,
-            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Count != 0)
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
         };
     }
 

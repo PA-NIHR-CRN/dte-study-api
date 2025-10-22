@@ -18,7 +18,7 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
     [HtmlAttributeName("show-when")]
     public bool Show { get; set; } = true;
     
-    [HtmlAttributeName("allow-edit")]
+    [HtmlAttributeName("edit-when")]
     public bool Editable { get; set; } = true;
 
     [HtmlAttributeNotBound]

@@ -263,10 +263,7 @@ public class StudyController(
 
         try
         {
-            var studyToUpdate = await context.Studies
-                .Include(fc => fc.FilterCriterias)
-                .ThenInclude(c => c.Campaign)
-                .FirstOrDefaultAsync(s => s.Id == id);
+            var studyToUpdate = await context.Studies.FirstOrDefaultAsync(s => s.Id == id);
 
             if (studyToUpdate == null)
             {
@@ -284,17 +281,16 @@ public class StudyController(
                     studyToUpdate.StudyName = model.StudyName;
                     studyToUpdate.CpmsId = model.CpmsId;
                     
-                    var hasCampaigns = studyToUpdate.FilterCriterias.Any(fc => fc.Campaign.Any());
-                    
                     if (model.AllowEditIsRecruitingIdentifiableParticipants)
                     {
+                        var hasCampaigns = await context.FilterCriterias.AnyAsync(fc => fc.StudyId == studyToUpdate.Id && fc.Campaign.Any());
                         var isRecruitmentFlagChanging = model.IsRecruitingIdentifiableParticipants != studyToUpdate.IsRecruitingIdentifiableParticipants;
 
                         if (hasCampaigns && isRecruitmentFlagChanging)
                         {
                             ModelState.AddModelError(
                                 nameof(model.IsRecruitingIdentifiableParticipants),
-                                $"{model.StudyName} has been modified by another user - please check the study details and try again");
+                                "The recruitment type cannot be updated once a campaign has been sent for a study.");
                             
                             model.StudyName = studyToUpdate.StudyName;
                             model.CpmsId = studyToUpdate.CpmsId;
