@@ -292,14 +292,15 @@ public class StudyController(
 
                         if (hasCampaigns && isRecruitmentFlagChanging)
                         {
-                            this.AddNotification(new NotificationBannerModel
-                            {
-                                IsSuccess = false,
-                                Title = "Study details not updated",
-                                Body = $"{model.StudyName} has been modified by another user - please check the study details and try again"
-                            });
-
-                            return RedirectToAction(nameof(Details), new { id });
+                            ModelState.AddModelError(
+                                nameof(model.IsRecruitingIdentifiableParticipants),
+                                $"{model.StudyName} has been modified by another user - please check the study details and try again");
+                            
+                            model.StudyName = studyToUpdate.StudyName;
+                            model.CpmsId = studyToUpdate.CpmsId;
+                            model.AllowEditIsRecruitingIdentifiableParticipants = false;
+                            
+                            return View(model);
                         }
 
                         if (!hasCampaigns)
