@@ -291,9 +291,6 @@ public class StudyController(
                             ModelState.AddModelError(
                                 nameof(model.IsRecruitingIdentifiableParticipants),
                                 "The recruitment type cannot be updated once a campaign has been sent for a study.");
-                            
-                            model.StudyName = studyToUpdate.StudyName;
-                            model.CpmsId = studyToUpdate.CpmsId;
                             model.AllowEditIsRecruitingIdentifiableParticipants = false;
                             
                             return View(model);
