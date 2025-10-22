@@ -11,11 +11,14 @@ using NIHR.Infrastructure;
 using NIHR.Infrastructure.Models;
 using Rbec.Postcodes;
 using System.Text.Json;
+using BPOR.Rms.Startup;
+using UserRole = BPOR.Domain.Enums.UserRole;
 
 namespace BPOR.Rms.Controllers;
 
 public class VolunteerController(ParticipantDbContext context,
     ILogger<VolunteerController> logger,
+    ICurrentUserProvider<User> currentUserProvider,
    IPostcodeMapper locationApiClient) : Controller
 {
 
@@ -287,7 +290,8 @@ public class VolunteerController(ParticipantDbContext context,
             return NotFound();
         }
 
-        if ((study.HasCampaigns && User.IsInRole("Researcher")) || User.IsInRole("Admin"))
+        if ((study.HasCampaigns && currentUserProvider.User.HasRole(UserRole.Researcher)) 
+            || currentUserProvider.User.HasRole(UserRole.Admin))
         {
             return View(study);
         }
@@ -419,7 +423,8 @@ public class VolunteerController(ParticipantDbContext context,
             return NotFound();
         }
         
-        if ((study.HasCampaigns && User.IsInRole("Researcher")) || User.IsInRole("Admin"))
+        if ((study.HasCampaigns && currentUserProvider.User.HasRole(UserRole.Researcher)) 
+            || currentUserProvider.User.HasRole(UserRole.Admin))
         {
             return View(study);
         }
