@@ -21,7 +21,7 @@
         <div class="govuk-button-group govuk-!-margin-bottom-0">
             @if (!Model.Study.IsRecruitingIdentifiableParticipants)
             {
-                if (Model.HasCampaigns)
+                if ((Model.HasCampaigns && User.IsInRole("Researcher")) || User.IsInRole("Admin"))
                 {
                     <a asp-action="UpdateAnonymousRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button">Update recruitment total</a>
                 }
@@ -32,7 +32,7 @@
             }
             else
             {
-                if (Model.HasCampaigns)
+                if ((Model.HasCampaigns && User.IsInRole("Researcher")) || User.IsInRole("Admin"))
                 {
                     <a asp-action="UpdateRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" asp-route-StudyName="@Model.Study.StudyName" role="button" draggable="false" class="govuk-button" data-module="govuk-button">Add enrollments</a>
                 }

@@ -287,19 +287,12 @@ public class VolunteerController(ParticipantDbContext context,
             return NotFound();
         }
 
-        if (!study.HasCampaigns)
+        if ((study.HasCampaigns && User.IsInRole("Researcher")) || User.IsInRole("Admin"))
         {
-            this.AddNotification(new NotificationBannerModel
-            {
-                IsSuccess = false,
-                Title = "Volunteers cannot be updated",
-                Body = $"Volunteers cannot be updated when a study has no campaigns"
-            });
-
-            return RedirectToAction("Details", "Study", new { Id = model.StudyId });
+            return View(study);
         }
 
-        return View(study);
+        return Forbid();
     }
 
     [HttpPost]
@@ -419,26 +412,19 @@ public class VolunteerController(ParticipantDbContext context,
         ModelState.Remove("RecruitmentTotal");
 
         var study = await GetStudyDetails(model.StudyId);
-            
+        
         if (study == null)
         {
             logger.LogWarning("[HttpGet]UpdateAnonymousRecruited called with non-existent study: {StudyId}", model.StudyId);
             return NotFound();
         }
-
-        if (!study.HasCampaigns)
+        
+        if ((study.HasCampaigns && User.IsInRole("Researcher")) || User.IsInRole("Admin"))
         {
-            this.AddNotification(new NotificationBannerModel
-            {
-                IsSuccess = false,
-                Title = "Volunteers cannot be updated",
-                Body = $"Volunteers cannot be updated when a study has no campaigns"
-            });
-
-            return RedirectToAction("Details", "Study", new { Id = model.StudyId });
+            return View(study);
         }
 
-        return View(study);
+        return Forbid();
     }
 
     [HttpPost]
