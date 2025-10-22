@@ -1,11 +1,10 @@
-@using BPOR.Domain.Entities.Configuration
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 
 <div>
     <h2 class="govuk-heading-l govuk-!-margin-bottom-3">Study details</h2>
     <dl class="govuk-summary-list">
         <summary-list-item for="Study.Id" />
-        <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" />
+        <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"/>
         <summary-list-item for="Study.StudyName" />
         <summary-list-item for="Study.CpmsId" />
         <summary-list-item for="Study.FullName" />

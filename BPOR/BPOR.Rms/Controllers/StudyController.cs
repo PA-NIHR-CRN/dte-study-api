@@ -208,7 +208,7 @@ public class StudyController(
             return NotFound();
         }
 
-        studyModel.AllowEditIsRecruitingIdentifiableParticipants = false;
+        studyModel.AllowEditIsRecruitingIdentifiableParticipants = !studyModel.HasCampaigns;
         studyModel.Step = field;
         return View(studyModel);
     }
@@ -242,7 +242,8 @@ public class StudyController(
             {nameof(StudyFormViewModel.CpmsId)}, 
             {nameof(StudyFormViewModel.Step)},
             {nameof(StudyFormViewModel.InformationUrl)},
-            {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)}")]
+            {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)},
+            {nameof(StudyFormViewModel.IsRecruitingIdentifiableParticipants)}")]
         StudyFormViewModel model)
     {
         model.Id = id;
@@ -269,7 +270,7 @@ public class StudyController(
                 logger.LogWarning("[HttpPost]Edit called with non-existent study: {StudyId}", id);
                 return NotFound();
             }
-
+            
             switch (model.Step)
             {
                 case 1:
@@ -279,6 +280,28 @@ public class StudyController(
                 case 2:
                     studyToUpdate.StudyName = model.StudyName;
                     studyToUpdate.CpmsId = model.CpmsId;
+                    
+                    if (model.AllowEditIsRecruitingIdentifiableParticipants)
+                    {
+                        var hasCampaigns = await context.FilterCriterias.AnyAsync(fc => fc.StudyId == studyToUpdate.Id && fc.Campaign.Any());
+                        var isRecruitmentFlagChanging = model.IsRecruitingIdentifiableParticipants != studyToUpdate.IsRecruitingIdentifiableParticipants;
+
+                        if (hasCampaigns && isRecruitmentFlagChanging)
+                        {
+                            ModelState.AddModelError(
+                                nameof(model.IsRecruitingIdentifiableParticipants),
+                                "The recruitment type cannot be updated once a campaign has been sent for a study.");
+                            model.AllowEditIsRecruitingIdentifiableParticipants = false;
+                            
+                            return View(model);
+                        }
+
+                        if (!hasCampaigns)
+                        {
+                            studyToUpdate.IsRecruitingIdentifiableParticipants = (bool)model.IsRecruitingIdentifiableParticipants;
+                        }
+                    }
+
                     break;
                 case 3:
                     studyToUpdate.InformationUrl = string.IsNullOrWhiteSpace(model.InformationUrl)
