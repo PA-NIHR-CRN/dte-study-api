@@ -27,7 +27,7 @@
                 }
                 else
                 {
-                    <a asp-action="UpdateAnonymousRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button" disabled="disabled">Update recruitment total</a>
+                    <a asp-action="UpdateAnonymousRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button" disabled="disabled" tabindex="-1">Update recruitment total</a>
                 }
             }
             else
@@ -38,7 +38,7 @@
                 }
                 else
                 {
-                    <a asp-action="UpdateRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" asp-route-StudyName="@Model.Study.StudyName" role="button" draggable="false" class="govuk-button" data-module="govuk-button" disabled="disabled">Add enrollments</a>
+                    <a asp-action="UpdateRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" asp-route-StudyName="@Model.Study.StudyName" role="button" draggable="false" class="govuk-button" data-module="govuk-button" disabled="disabled" tabindex="-1">Add enrollments</a>
                 }
                 
             }

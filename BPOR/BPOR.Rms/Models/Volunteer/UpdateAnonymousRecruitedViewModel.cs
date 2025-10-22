@@ -15,5 +15,5 @@ public class UpdateAnonymousRecruitedViewModel
     public int? RecruitmentTotal { get; set; }
     public IEnumerable<EnrollmentDetails> EnrollmentDetails { get; set; } = new List<EnrollmentDetails>();
     public int? LatestRecruitmentTotal => EnrollmentDetails?.FirstOrDefault()?.RecruitmentTotal ?? 0;
-
+    public bool HasCampaigns { get; set; }
 }

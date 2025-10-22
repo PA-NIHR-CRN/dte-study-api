@@ -276,7 +276,30 @@ public class VolunteerController(ParticipantDbContext context,
     {
         ModelState.Remove("VolunteerReferenceNumbers");
 
-        return View(model);
+        var study = await context.Studies
+            .Where(s => s.Id == model.StudyId)
+            .Select(Projections.StudyAsUpdateRecruitedViewModel())
+            .FirstOrDefaultAsync();
+            
+        if (study == null)
+        {
+            logger.LogWarning("[HttpGet]UpdateRecruited called with non-existent study: {StudyId}", model.StudyId);
+            return NotFound();
+        }
+
+        if (!study.HasCampaigns)
+        {
+            this.AddNotification(new NotificationBannerModel
+            {
+                IsSuccess = false,
+                Title = "Volunteers cannot be updated",
+                Body = $"Volunteers cannot be updated when a study has no campaigns"
+            });
+
+            return RedirectToAction("Details", "Study", new { Id = model.StudyId });
+        }
+
+        return View(study);
     }
 
     [HttpPost]
@@ -395,14 +418,27 @@ public class VolunteerController(ParticipantDbContext context,
     {
         ModelState.Remove("RecruitmentTotal");
 
-        if (model.StudyId != 0)
+        var study = await GetStudyDetails(model.StudyId);
+            
+        if (study == null)
         {
-            var study = await GetStudyDetails(model.StudyId);
-
-            return View(study);
+            logger.LogWarning("[HttpGet]UpdateAnonymousRecruited called with non-existent study: {StudyId}", model.StudyId);
+            return NotFound();
         }
 
-        return View(model);
+        if (!study.HasCampaigns)
+        {
+            this.AddNotification(new NotificationBannerModel
+            {
+                IsSuccess = false,
+                Title = "Volunteers cannot be updated",
+                Body = $"Volunteers cannot be updated when a study has no campaigns"
+            });
+
+            return RedirectToAction("Details", "Study", new { Id = model.StudyId });
+        }
+
+        return View(study);
     }
 
     [HttpPost]
