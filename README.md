@@ -14,7 +14,7 @@ The API interacts with participant-api and location-api to provide information a
 ## How to Install and Run the Project
 To run the project, you will need to have the following installed on your machine:
 
-- [.NET Core 6 SDK or later](#net-core-6-sdk-or-later)
+- [.NET Core 8 SDK or later](#net-core-8-sdk-or-later)
 - [Homebrew](#homebrew)
 - [AWS CLI](#aws-cli)
 - [C# dev kit extension for VS Code](#c-dev-kit-extension-for-vs-code)
