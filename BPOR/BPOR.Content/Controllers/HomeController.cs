@@ -28,7 +28,7 @@ namespace BPOR.Content.Controllers
             entry_sys_id = entry_sys_id ?? _contentSettings.Value.CampaignPageId;
 
             var client = preview ? contentfulPreviewClient : contentfulClient;
-
+            ViewData["site"] = "BPoR";
             return await GetContent(client, entry_sys_id);
         }
 

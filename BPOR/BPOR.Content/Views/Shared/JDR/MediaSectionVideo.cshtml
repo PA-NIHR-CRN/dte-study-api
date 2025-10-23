@@ -1,0 +1,43 @@
+﻿@model BPOR.Content.Models.Components.Video
+
+<section id="MediaSection" class="media-section">
+    <div class="odd video-section pb-3">
+        <div class="govuk-width-container">
+            <div class="">
+                <div class="col-xl-4 my-2 order-last order-xl-first">
+                    <section class="video-info info-card">
+                        <h2>@Model.Heading</h2>
+
+                        <markdown markdown="Description" />
+                    </section>
+                </div>
+                <div class="video-wrapper">
+                    <iframe src="@Model.VideoUrl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen"></iframe>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Transcript))
+            {
+
+                <details class="transcript-wrapper">
+                    <summary class="govuk-button button-wide">
+                        @Model.Link.Label
+                        <span class="chevron">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 8 8" fill="none">
+                                <path d="M6.33366 3L4.00033 5.33333L1.66699 3"></path>
+                            </svg>
+                        </span>
+                    </summary>
+                    <section class="info-card transcript">
+                        @{
+                            Model.Transcript = Model.Transcript.Replace("# ", "## ");
+                        }
+                        <markdown markdown="Transcript" />
+                    </section>
+                </details>
+            }
+
+            <markdown markdown="LowerDescription" />
+        </div>
+    </div>
+</section>

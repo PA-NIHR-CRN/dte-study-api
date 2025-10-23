@@ -5,6 +5,8 @@ using BPOR.Content;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
 using Westwind.AspNetCore.Markdown;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.StaticFiles;
 
 public class Startup
 {
@@ -25,10 +27,11 @@ public class Startup
         services.AddKeyedTransient<IContentfulClient>("preview", (sp, key) =>
         {
             ContentfulOptions value2 = sp.GetService<IOptionsSnapshot<ContentfulOptions>>().Value;
-            value2.UsePreviewApi = true;
-
+            value2.UsePreviewApi = true; 
             HttpClient service2 = sp.GetService<HttpClient>();
-            return new ContentfulClient(service2, value2);
+            var contentfulClient = new ContentfulClient(service2, value2);
+            contentfulClient.ContentTypeResolver = new ModulesResolver();
+            return contentfulClient;
         });
 
         // Add services to the container.
@@ -62,23 +65,38 @@ public class Startup
             app.UseHsts();
         }
 
-        app.UsePathBase("/join");
-
         app.UseHttpsRedirection();
-        app.UseStaticFiles();
 
-        app.UseRouting();
+        var options = new RewriteOptions()
+            .AddRewrite("^healthcare/resources/(.*)", "resources/$1", true)
+            .AddRewrite("^healthcare/_content/(.*)", "_content/$1", true);
 
-        app.UseAuthorization();
+        app.UseRewriter(options);
+
+        var provider = new FileExtensionContentTypeProvider();
+        // workaround for testing fonts
+        provider.Mappings[".woff2"] = "application/octet-stream";
+
+        app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provider });
+
+        app.UseMarkdown();
 
         app.UseRequestLocalization();
 
-        app.UseEndpoints(endpoints =>
-            endpoints.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}")
-        );
+        app.UseRouting();
+        app.UseAuthorization();
 
-        app.UseMarkdown();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllerRoute(
+                name: "BPoR",
+                pattern: "{controller=Home}/{action=Index}/{id?}",
+                defaults: new { controller = "Home" });
+
+            endpoints.MapControllerRoute(
+                name: "JDR",
+                pattern: "healthcare/{action=Index}/{id?}",
+                defaults: new { controller = "Healthcare" });
+        });
     }
 }

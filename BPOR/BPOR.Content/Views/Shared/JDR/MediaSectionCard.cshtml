@@ -1,0 +1,22 @@
+﻿@model BPOR.Content.Models.Components.Card
+
+<section id="MediaSection" class="media-section">
+    <div class="odd video-section pb-3">
+        <div class="govuk-width-container">
+            <div class="">
+                <div class="col-xl-4 my-2 order-last order-xl-first">
+                    <section class="video-info info-card">
+                        <h2>@Model.Title</h2>
+                    </section>
+                </div>
+                <div class="image-wrapper">
+                    <img src="@Model.Image.File.Url" alt="@Model.Image.Description"/>
+                </div>
+            </div>
+
+            <div>
+                <markdown markdown="Body" />
+            </div>
+        </div>
+    </div>
+</section>

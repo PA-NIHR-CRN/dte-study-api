@@ -1,4 +1,5 @@
-﻿using Contentful.Core.Models;
+﻿using BPOR.Content.Models.Components;
+using Contentful.Core.Models;
 
 namespace BPOR.Content
 {
@@ -58,28 +59,6 @@ namespace BPOR.Content
         public string Body { get; set; }
     }
 
-    public class Video
-    {
-        public string Heading { get; set; }
-
-        public string Description { get; set; }
-        public Link Link { get; set; }
-
-        public string VideoUrl { get; set; }
-
-        public string Transcript { get; set; }
-    }
-
-    public class Card
-    {
-        public string Title { get; set; }
-
-        public string Body { get; set; }
-
-        public Link Link { get; set; }
-
-        public Asset Image { get; set; }
-    }
 
     public class Link
     {
