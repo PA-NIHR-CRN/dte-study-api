@@ -725,6 +725,7 @@ header .govuk-button {
         flex-shrink: 0;
     }
 
+
         #nav .navbar-nav > li > a, #nav .nav-dropdown summary {
             color: var(--White) !important;
             font-weight: 700;
@@ -733,7 +734,6 @@ header .govuk-button {
             vertical-align: middle;
             text-decoration: none;
         }
-
 #nav .nav > li > a:focus,
 #nav .nav > li > a:hover,
 #nav .nav > li summary:focus,
@@ -744,11 +744,32 @@ header .govuk-button {
     box-shadow: 0 0 0 3px var(--Yellow) !important;
     border-radius: 4px;
 }
-
 #nav .sub-menu > li:focus-within,
 #nav summary:hover {
     background-color: var(--Pink-11) !important;
     box-shadow: 0 0 0 3px var(--Yellow) !important;
+}
+
+@media (max-width: 40.0625em) {
+    #nav .nav > li:hover,
+    #nav .nav > li:focus-within {
+        text-decoration: none !important;
+        color: var(--Black) !important;
+        background-color: var(--Pink-11) !important;
+        box-shadow: inset 0 0px 0px 3px var(--Yellow) !important;
+    }
+
+    #nav .nav > li > a:focus,
+    #nav .nav > li > a:hover,
+    #nav .nav > li summary:focus,
+    #nav .nav > li summary:hover {
+        /* override for bootstrap nav.less class*/
+        background-color: transparent !important;
+
+        box-shadow: unset !important;
+        border-radius: unset;
+    }
+
 }
 
 @media (min-width: 768px) {
