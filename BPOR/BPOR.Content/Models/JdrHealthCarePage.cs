@@ -29,12 +29,7 @@ namespace BPOR.Content
         public List<Accordion> accordions { get; set; }
     }
 
-    public class Accordion
-    {
-        public string Title { get; set; }
 
-        public string Content { get; set; }
-    }
     public class ContactUsSection
     {
         public string Title { get; set; }
