@@ -1,3 +1,4 @@
+@using BPOR.Domain.Enums
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 
 
@@ -27,20 +28,19 @@
                 }
                 else
                 {
-                    <a asp-action="UpdateAnonymousRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button" disabled="disabled">Update recruitment total</a>
+                    <a asp-action="UpdateAnonymousRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button" role-disable="@UserRole.Researcher">Update recruitment total</a>
                 }
             }
             else
             {
                 if (Model.HasCampaigns)
                 {
-                    <a asp-action="UpdateRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" asp-route-StudyName="@Model.Study.StudyName" role="button" draggable="false" class="govuk-button" data-module="govuk-button">Add enrollments</a>
+                    <a asp-action="UpdateRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button">Add enrollments</a>
                 }
                 else
                 {
-                    <a asp-action="UpdateRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" asp-route-StudyName="@Model.Study.StudyName" role="button" draggable="false" class="govuk-button" data-module="govuk-button" disabled="disabled">Add enrollments</a>
+                    <a asp-action="UpdateRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button" role-disable="@UserRole.Researcher">Add enrollments</a>
                 }
-                
             }
         </div>
     </div>
