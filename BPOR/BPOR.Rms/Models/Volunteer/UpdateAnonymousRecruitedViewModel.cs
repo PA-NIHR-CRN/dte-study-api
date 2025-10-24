@@ -3,11 +3,8 @@ using BPOR.Rms.Models.Filter;
 
 namespace BPOR.Rms.Models.Volunteer;
 
-public class UpdateAnonymousRecruitedViewModel
+public class UpdateAnonymousRecruitedViewModel : UpdateRecruitedBase
 {
-    public string? StudyName { get; set; }
-    public int StudyId { get; set; }
-
     [Display(Name = "Latest recruitment total")]
     [Required(ErrorMessage = "Enter the total number of Be Part of Research volunteers recruited")]
     [IntegerOrDecimal(ErrorMessage = "Please enter a valid number")]
@@ -15,5 +12,4 @@ public class UpdateAnonymousRecruitedViewModel
     public int? RecruitmentTotal { get; set; }
     public IEnumerable<EnrollmentDetails> EnrollmentDetails { get; set; } = new List<EnrollmentDetails>();
     public int? LatestRecruitmentTotal => EnrollmentDetails?.FirstOrDefault()?.RecruitmentTotal ?? 0;
-    public bool HasCampaigns { get; set; }
 }

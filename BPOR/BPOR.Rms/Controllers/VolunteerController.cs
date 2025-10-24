@@ -275,23 +275,20 @@ public class VolunteerController(ParticipantDbContext context,
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IActionResult> UpdateRecruited(UpdateRecruitedViewModel model)
+    public async Task<IActionResult> UpdateRecruited(int studyId)
     {
-        ModelState.Remove("VolunteerReferenceNumbers");
-
         var study = await context.Studies
-            .Where(s => s.Id == model.StudyId)
+            .Where(s => s.Id == studyId)
             .Select(Projections.StudyAsUpdateRecruitedViewModel())
             .FirstOrDefaultAsync();
             
         if (study == null)
         {
-            logger.LogWarning("[HttpGet]UpdateRecruited called with non-existent study: {StudyId}", model.StudyId);
+            logger.LogWarning("[HttpGet]UpdateRecruited called with non-existent study: {StudyId}", studyId);
             return NotFound();
         }
 
-        if ((study.HasCampaigns && currentUserProvider.User.HasRole(UserRole.Researcher)) 
-            || currentUserProvider.User.HasRole(UserRole.Admin))
+        if (study.CanUpdateRecruitment(currentUserProvider.User))
         {
             return View(study);
         }
@@ -411,20 +408,17 @@ public class VolunteerController(ParticipantDbContext context,
         return RedirectToAction("UpdateRecruited", model);
     }
 
-    public async Task<IActionResult> UpdateAnonymousRecruited(UpdateAnonymousRecruitedViewModel model)
+    public async Task<IActionResult> UpdateAnonymousRecruited(int studyId)
     {
-        ModelState.Remove("RecruitmentTotal");
-
-        var study = await GetStudyDetails(model.StudyId);
+        var study = await GetStudyDetails(studyId);
         
         if (study == null)
         {
-            logger.LogWarning("[HttpGet]UpdateAnonymousRecruited called with non-existent study: {StudyId}", model.StudyId);
+            logger.LogWarning("[HttpGet]UpdateAnonymousRecruited called with non-existent study: {StudyId}", studyId);
             return NotFound();
         }
         
-        if ((study.HasCampaigns && currentUserProvider.User.HasRole(UserRole.Researcher)) 
-            || currentUserProvider.User.HasRole(UserRole.Admin))
+        if (study.CanUpdateRecruitment(currentUserProvider.User))
         {
             return View(study);
         }
