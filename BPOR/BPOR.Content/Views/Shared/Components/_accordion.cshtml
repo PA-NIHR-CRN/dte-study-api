@@ -1,0 +1,16 @@
+﻿@model BPOR.Content.Models.Components.Accordion
+
+
+<details id="@Model?.Title.Replace(" ", "")">
+    <summary>
+        <h3 class="accordion-title govuk-grid-column-two-thirds">@Model?.Title</h3>
+        <span class="chevron">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 8 8" fill="none">
+                <path d="M6.33366 3L4.00033 5.33333L1.66699 3"></path>
+            </svg>
+        </span>
+    </summary>
+    <div class="accordion-body">
+        <markdown>@Model?.Content</markdown>
+    </div>
+</details>

@@ -10,6 +10,8 @@ namespace BPOR.Content
         {
             { "video", typeof(Video) },
             { "card", typeof(Card) },
+            { "genericText", typeof(GenericText) },
+            { "richTextSection", typeof(RichTextSection) },
         };
 
         /// <summary>
