@@ -288,12 +288,19 @@ public class VolunteerController(ParticipantDbContext context,
             return NotFound();
         }
 
-        if (study.CanUpdateRecruitment(currentUserProvider.User))
+        if (study.HasCampaigns)
         {
             return View(study);
         }
+        
+        this.AddNotification(new NotificationBannerModel
+        {
+            IsSuccess = false,
+            Title = "Enrolments cannot be added",
+            Heading = "A mailout must be sent before enrolments can be added",
+        });
 
-        return Forbid();
+        return RedirectToAction(nameof(StudyController.Details), "Study", new { id = studyId });
     }
 
     [HttpPost]
