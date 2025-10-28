@@ -11,14 +11,13 @@ namespace BPOR.Rms.TagHelpers
     {
         public string? RoleInclude { get; set; }
         public string? RoleExclude { get; set; }
-        public string? RoleDisable { get; set; }
         
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            Process(currentUserProvider, output, RoleInclude, RoleExclude, RoleDisable);
+            Process(currentUserProvider, output, RoleInclude, RoleExclude);
         }
 
-        public static void Process(ICurrentUserProvider<User> currentUserProvider, TagHelperOutput output, string? roleInclude, string? roleExclude, string? roleDisable)
+        public static void Process(ICurrentUserProvider<User> currentUserProvider, TagHelperOutput output, string? roleInclude, string? roleExclude)
         {
             if (string.Equals(output.TagName, "role", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -27,7 +26,6 @@ namespace BPOR.Rms.TagHelpers
 
             var include = roleInclude?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
             var exclude = roleExclude?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-            var disable = roleDisable?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
             
             if (exclude.Any(currentUserProvider.User.HasRole))
             {
@@ -37,13 +35,6 @@ namespace BPOR.Rms.TagHelpers
             {
                 output.SuppressOutput();
             }
-            
-            if (disable.Any(currentUserProvider.User.HasRole))
-            {
-                output.Attributes.Add("disabled", "disabled");
-                output.Attributes.Add("tabindex", "-1");
-            }
-
         }
     }
 
@@ -51,11 +42,10 @@ namespace BPOR.Rms.TagHelpers
     {
         public string? Include { get; set; }
         public string? Exclude { get; set; }
-        public string? Disable { get; set; }
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            RoleAttributeTagHelper.Process(currentUserProvider, output, Include, Exclude, Disable);
+            RoleAttributeTagHelper.Process(currentUserProvider, output, Include, Exclude);
         }
     }
 }

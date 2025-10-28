@@ -288,19 +288,19 @@ public class VolunteerController(ParticipantDbContext context,
             return NotFound();
         }
 
-        if (study.HasCampaigns)
+        if (!study.HasCampaigns)
         {
-            return View(study);
+            this.AddNotification(new NotificationBannerModel
+            {
+                IsSuccess = false,
+                Title = "Volunteer numbers cannot be added",
+                Heading = "A campaign must be sent before volunteer numbers can be added",
+            });
+
+            return RedirectToAction(nameof(StudyController.Details), "Study", new { id = studyId });
         }
         
-        this.AddNotification(new NotificationBannerModel
-        {
-            IsSuccess = false,
-            Title = "Enrolments cannot be added",
-            Heading = "A mailout must be sent before enrolments can be added",
-        });
-
-        return RedirectToAction(nameof(StudyController.Details), "Study", new { id = studyId });
+        return View(study);
     }
 
     [HttpPost]
@@ -425,12 +425,12 @@ public class VolunteerController(ParticipantDbContext context,
             return NotFound();
         }
         
-        if (study.CanUpdateRecruitment(currentUserProvider.User))
+        if (!CanUpdateRecruitment(study, currentUserProvider.User))
         {
-            return View(study);
+            return Forbid();
         }
-
-        return Forbid();
+        
+        return View(study);
     }
 
     [HttpPost]
@@ -481,5 +481,12 @@ public class VolunteerController(ParticipantDbContext context,
             return new List<PostcodeAddressModel>();
         }
     }
-
+    
+    private bool CanUpdateRecruitment(UpdateAnonymousRecruitedViewModel study, User? user)
+    {
+        if (user == null) return false;
+        
+        return (study.HasCampaigns && user.HasRole(UserRole.Researcher)) 
+               || user.HasRole(UserRole.Admin);
+    }
 }

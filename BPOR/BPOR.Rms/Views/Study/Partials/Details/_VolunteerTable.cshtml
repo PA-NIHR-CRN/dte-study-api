@@ -1,6 +1,13 @@
 @using BPOR.Domain.Enums
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 
+@{
+    var isIdentifiable = Model.Study.IsRecruitingIdentifiableParticipants;
+    var action = isIdentifiable ? "UpdateRecruited" : "UpdateAnonymousRecruited";
+    var buttonText = isIdentifiable ? "Add enrolments" : "Update recruitment total";
+    var roleFilter = !Model.HasCampaigns ? isIdentifiable ? $"{UserRole.Researcher}, {UserRole.Admin}" : $"{UserRole.Researcher}" : null;
+}
+
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
@@ -20,30 +27,21 @@
     </div>
     <div class="govuk-grid-column-one-half right-align-buttons-desktop">
         <div class="govuk-button-group govuk-!-margin-bottom-0">
-            @if (!Model.Study.IsRecruitingIdentifiableParticipants)
-            {
-                if (Model.HasCampaigns)
-                {
-                    <a asp-action="UpdateAnonymousRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button">Update recruitment total</a>
-                }
-                else
-                {
-                    <a asp-action="UpdateAnonymousRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button" role-disable="@UserRole.Researcher">Update recruitment total</a>
-                }
-            }
-            else
-            {
-                if (Model.HasCampaigns)
-                {
-                    <a asp-action="UpdateRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button">Add enrolments</a>
-                }
-                else
-                {
-                    <a asp-action="UpdateRecruited" asp-controller="Volunteer" asp-route-StudyId="@Model.Study.Id" role="button" draggable="false" class="govuk-button" data-module="govuk-button" role-disable="@UserRole.Researcher, @UserRole.Admin">Add enrolments</a>
-                }
-            }
+            <a asp-action="@action" 
+               asp-controller="Volunteer" 
+               asp-route-StudyId="@Model.Study.Id" 
+               role="button" 
+               draggable="false" 
+               class="govuk-button" 
+               data-module="govuk-button"
+               role-exclude="@roleFilter">@buttonText</a>
         </div>
+        @if (!Model.HasCampaigns)
+        {
+            <div class="govuk-inset-text" role-include="@roleFilter">
+                A campaign must be sent before volunteer numbers can be added.
+            </div>
+        }
     </div>
     <div class="govuk-grid-column-full"> <partial name="Partials/_RecruitedTable" for="EnrollmentDetails" /></div>
-
 </div>
