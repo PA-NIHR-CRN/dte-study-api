@@ -425,7 +425,7 @@ public class VolunteerController(ParticipantDbContext context,
             return NotFound();
         }
         
-        if (!CanUpdateRecruitment(study, currentUserProvider.User))
+        if (!CanUpdateAnonymousRecruitment(study, currentUserProvider.User))
         {
             return Forbid();
         }
@@ -482,7 +482,7 @@ public class VolunteerController(ParticipantDbContext context,
         }
     }
     
-    private bool CanUpdateRecruitment(UpdateAnonymousRecruitedViewModel study, User? user)
+    private bool CanUpdateAnonymousRecruitment(UpdateAnonymousRecruitedViewModel study, User? user)
     {
         if (user == null) return false;
         
