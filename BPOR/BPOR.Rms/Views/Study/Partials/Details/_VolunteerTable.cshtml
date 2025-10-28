@@ -5,6 +5,7 @@
     var isIdentifiable = Model.Study.IsRecruitingIdentifiableParticipants;
     var action = isIdentifiable ? "UpdateRecruited" : "UpdateAnonymousRecruited";
     var buttonText = isIdentifiable ? "Add enrolments" : "Update recruitment total";
+    var insetText = isIdentifiable ? "Volunteer enrolments can be added when a campaign has been sent." : "The recruitment total can be updated when a campaign has been sent";
     var roleFilter = !Model.HasCampaigns ? isIdentifiable ? $"{UserRole.Researcher}, {UserRole.Admin}" : $"{UserRole.Researcher}" : null;
 }
 
@@ -38,8 +39,10 @@
         </div>
         @if (!Model.HasCampaigns)
         {
-            <div class="govuk-inset-text" role-include="@roleFilter">
-                A campaign must be sent before volunteer numbers can be added.
+            <div class="govuk-inset-text govuk-!-padding-2" role-include="@roleFilter">
+                <p class="govuk-body-s govuk-!-margin-bottom-0">
+                    @insetText
+                </p>
             </div>
         }
     </div>
