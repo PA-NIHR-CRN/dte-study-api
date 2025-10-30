@@ -6,7 +6,6 @@ namespace BPOR.Rms.TagHelpers
 {
     [HtmlTargetElement(Attributes = "role-exclude")]
     [HtmlTargetElement(Attributes = "role-include")]
-    [HtmlTargetElement(Attributes = "role-disable")]
     public class RoleAttributeTagHelper(ICurrentUserProvider<User> currentUserProvider) : TagHelper
     {
         public string? RoleInclude { get; set; }

@@ -1,12 +1,16 @@
-@using BPOR.Domain.Enums
+@using BPOR.Domain.Entities
+@using BPOR.Rms.Startup
+@using UserRole = BPOR.Domain.Enums.UserRole
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
+@inject ICurrentUserProvider<User> CurrentUserProvider
 
 @{
     var isIdentifiable = Model.Study.IsRecruitingIdentifiableParticipants;
     var action = isIdentifiable ? "UpdateRecruited" : "UpdateAnonymousRecruited";
     var buttonText = isIdentifiable ? "Add enrolments" : "Update recruitment total";
     var insetText = isIdentifiable ? "Volunteer enrolments can be added when a campaign has been sent." : "The recruitment total can be updated when a campaign has been sent";
-    var roleFilter = !Model.HasCampaigns ? isIdentifiable ? $"{UserRole.Researcher}, {UserRole.Admin}" : $"{UserRole.Researcher}" : null;
+    var isAdmin = CurrentUserProvider.User.HasRole(UserRole.Admin);
+    var isResearcher = CurrentUserProvider.User.HasRole(UserRole.Researcher);
 }
 
 
@@ -27,19 +31,21 @@
         </h3>
     </div>
     <div class="govuk-grid-column-one-half right-align-buttons-desktop">
-        <div class="govuk-button-group govuk-!-margin-bottom-0">
-            <a asp-action="@action" 
-               asp-controller="Volunteer" 
-               asp-route-StudyId="@Model.Study.Id" 
-               role="button" 
-               draggable="false" 
-               class="govuk-button" 
-               data-module="govuk-button"
-               role-exclude="@roleFilter">@buttonText</a>
-        </div>
-        @if (!Model.HasCampaigns)
+        @if (isIdentifiable ? Model.HasCampaigns : isAdmin || (Model.HasCampaigns && isResearcher))
         {
-            <div class="govuk-inset-text govuk-!-padding-2" role-include="@roleFilter">
+            <div class="govuk-button-group govuk-!-margin-bottom-0">
+                <a asp-action="@action" 
+                   asp-controller="Volunteer" 
+                   asp-route-StudyId="@Model.Study.Id" 
+                   role="button" 
+                   draggable="false" 
+                   class="govuk-button" 
+                   data-module="govuk-button">@buttonText</a>
+            </div>
+        }
+        else
+        {
+            <div class="govuk-inset-text govuk-!-padding-2">
                 <p class="govuk-body-s govuk-!-margin-bottom-0">
                     @insetText
                 </p>
