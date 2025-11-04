@@ -62,7 +62,9 @@ public static class Projections
             EmailAddress = s.EmailAddress,
             StudyName = s.StudyName,
             CpmsId = s.CpmsId,
-            InformationUrl = s.InformationUrl
+            InformationUrl = s.InformationUrl,
+            IsRecruitingIdentifiableParticipants = s.IsRecruitingIdentifiableParticipants,
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
         };
     }
 
