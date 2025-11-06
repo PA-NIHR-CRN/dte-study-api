@@ -562,3 +562,49 @@
     background: #388555;
     color: #FFFFFF;
 }
+
+.d-none {
+    display: none !important;
+}
+
+.cookie-warning {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    width: 100%;
+}
+
+.cookie-text:focus {
+    outline: 3px solid #FED47A;
+}
+
+.cookieRow{
+    margin-inline: 0px;
+    padding-block: 20px;
+    border-bottom: 1px solid black;
+}
+#cookies{
+    z-index: 99999;
+}
+
+.cookie-container{
+    padding-top: 50px;
+}
+
+.govuk-cookie-banner {
+    padding-top: 20px;
+    border-bottom: 10px solid rgba(0, 0, 0, 0);
+    background-color: #f3f2f1;
+}
+.govuk-cookie-banner[hidden] {
+    display: none;
+}
+.govuk-cookie-banner__message {
+    margin-bottom: -10px;
+}
+.govuk-cookie-banner__message[hidden] {
+    display: none;
+}
+.govuk-cookie-banner__message:focus {
+    outline: none;
+}
