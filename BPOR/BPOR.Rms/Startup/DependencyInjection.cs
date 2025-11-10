@@ -63,6 +63,7 @@ public static class DependencyInjection
         services.AddTransient<IEmailService, EmailService>();
         services.AddTransient<ITransactionalEmailService, TransactionalEmailService>();
         services.GetSectionAndValidate<EmailSettings>(configuration);
+        services.GetSectionAndValidate<CookieSettings>(configuration);
 
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();

@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="~/css/nihr-typography.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/nihr-component-ui.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/bpor.css" asp-append-version="true" />
-
+    <link rel="stylesheet" href="~/_content/NIHR.GovUk.AspNetCore.Mvc/stylesheets/bpor-cookie-banner.css" asp-append-version="true" />
     @* <link rel="stylesheet" href="~/{APP ASSEMBLY}.styles.css" /> *@
 
     <link rel="icon" href="~/images/NIHR-favicon.ico" type="image/x-icon">
@@ -29,6 +29,7 @@
     <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 
     <partial name="_Header" />
+    @await Html.PartialAsync("_CookieBanner")
 
     <div class="govuk-width-container">
         <back-link />
@@ -49,6 +50,8 @@
         initAll()
     </script>
     <script src="~/js/nihr-ui.js" asp-append-version="true"></script>
+    <script src="~/_content/NIHR.GovUk.AspNetCore.Mvc/javascripts/cookies.min.js" asp-append-version="true"></script>
+    <script src="~/_content/NIHR.GovUk.AspNetCore.Mvc/javascripts/bpor-cookie-banner.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
