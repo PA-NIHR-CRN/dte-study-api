@@ -3,7 +3,7 @@
 @inject IOptions<CookieSettings> cookieSettings
 
 <section id="cookies" class="bg-athens cookie-warning no-print" aria-label="Cookies Banner">
-    <div class="govuk-cookie-banner" role="region" aria-label="Cookies on @cookieSettings.Value.ServiceName">
+    <section class="govuk-cookie-banner" role="region" aria-label="Cookies on @cookieSettings.Value.ServiceName">
         <div class="govuk-cookie-banner__message govuk-width-container">
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-two-thirds">
@@ -25,7 +25,7 @@
                 <a class="govuk-link" href=@cookieSettings.Value.PolicyLink>View cookies</a>
             </div>
         </div>
-    </div>
+    </section>
 </section>
 
 <template id="confirmationMessageTemplate">
@@ -37,12 +37,12 @@
                 </div>
             </div>
             <div class="govuk-button-group">
-                <button role="button" draggable="false" class="govuk-button" onclick="closeCookieBanner()" tabindex="0">
+                <button draggable="false" class="govuk-button" onclick="closeCookieBanner()" tabindex="0">
                     Hide cookie message
                 </button>
             </div>
 </template>
 
 <script>
-    window.cookieDomain = @Json.Serialize(cookieSettings.Value.Domain)
+    globalThis.cookieDomain = @Json.Serialize(cookieSettings.Value.Domain)
 </script>

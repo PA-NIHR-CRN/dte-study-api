@@ -1,4 +1,4 @@
-    const cookieDomain = window.cookieDomain;
+    const cookieDomain = globalThis.cookieDomain;
     
     document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".btn-dark.cookie-btn").forEach(element => {
