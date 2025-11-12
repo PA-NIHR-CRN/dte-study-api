@@ -18,30 +18,32 @@
 
 @if(options.Cookies is not null && options.Cookies.Mode != CookieMode.Essential)
 {
-    <div id="cookies" class="govuk-cookie-banner" data-nosnippet role="region" aria-label="Cookies on @options.ServiceName">
-        <div class="govuk-cookie-banner__message govuk-width-container">
-            <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-                <h2 class="govuk-cookie-banner__heading govuk-heading-m">
-                Cookies on @options.ServiceName
-                </h2>
-                <div class="govuk-cookie-banner__content">
-                <p class="govuk-body">We use some essential cookies to make this service work.</p>
-                <p class="govuk-body">@cookieText</p>
+    <form action="/form-handler" method="post" novalidate>
+        <div id="cookies" class="govuk-cookie-banner" data-nosnippet role="region" aria-label="Cookies on @options.ServiceName">
+            <div class="govuk-cookie-banner__message govuk-width-container">
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-two-thirds">
+                        <h2 class="govuk-cookie-banner__heading govuk-heading-m">
+                            Cookies on @options.ServiceName
+                        </h2>
+                        <div class="govuk-cookie-banner__content">
+                            <p class="govuk-body">We use some essential cookies to make this service work.</p>
+                            <p class="govuk-body">@cookieText</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="govuk-button-group">
+                    <button value="yes" type="submit" name="cookies[@buttonText]" class="govuk-button" data-module="govuk-button">
+                        Accept @buttonText cookies
+                    </button>
+                    <button value="no" type="submit" name="cookies[@buttonText]" class="govuk-button" data-module="govuk-button">
+                        Reject @buttonText cookies
+                    </button>
+                    <a class="govuk-link" href=@options.Cookies.PolicyLink>View cookies</a>
                 </div>
             </div>
-            </div>
-            <div class="govuk-button-group">
-            <button value="accept" type="button" class="govuk-button cookie-btn" data-module="govuk-button">
-                Accept @buttonText cookies
-            </button>
-            <button value="reject" type="button" class="govuk-button cookie-btn" data-module="govuk-button">
-                Reject @buttonText cookies
-            </button>
-            <a class="govuk-link" href=@options.Cookies.PolicyLink>View cookies</a>
-            </div>
         </div>
-    </div>
+    </form>
 
     <template id="confirmationMessageTemplate">
                 <div class="govuk-grid-row">

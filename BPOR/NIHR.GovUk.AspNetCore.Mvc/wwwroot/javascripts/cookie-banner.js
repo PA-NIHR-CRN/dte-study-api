@@ -1,24 +1,26 @@
 
 window.CookieBanner = {
     init: function () {
-        document.addEventListener("DOMContentLoaded", function () {
-            const buttons = document.querySelectorAll(".govuk-button.cookie-btn");
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.querySelector("form[action='/form-handler']");
 
-            buttons.forEach(element => {
-                element.addEventListener("click", function () {
-                    if (element.value.includes("accept")) {
+            if (form) {
+                form.addEventListener("submit", (event) => {
+                    event.preventDefault();
+                    const clickedButton = event.submitter?.value || "unknown";
+
+                    if (clickedButton === "yes") {
                         CookieBanner.acceptCookie();
                     } else {
                         CookieBanner.rejectCookie();
                     }
                 });
-            });
-
-            if (Cookies.get("cookiesAccepted")) {
-                CookieBanner.closeCookieBanner();
             }
         });
 
+        if (Cookies.get("cookiesAccepted")) {
+                CookieBanner.closeCookieBanner();
+            }
 
         document.addEventListener("click", (e) => {
             if (e.target.classList.contains("hide-banner-btn")) {
@@ -40,9 +42,11 @@ window.CookieBanner = {
     },
 
     closeCookieBanner: function () {
-        document.querySelector("#cookies")?.classList.add("d-none");
+        const banner = document.querySelector("#cookies");
+        if (banner) {
+            banner.setAttribute("hidden", "true");
+        }
     }
 };
 
-// Initialize
 CookieBanner.init();
