@@ -25,7 +25,6 @@ using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
 using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
-using HandlebarsDotNet;
 
 namespace BPOR.Rms.Startup;
 
