@@ -25,6 +25,7 @@ using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
 using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
+using HandlebarsDotNet;
 
 namespace BPOR.Rms.Startup;
 
@@ -63,7 +64,6 @@ public static class DependencyInjection
         services.AddTransient<IEmailService, EmailService>();
         services.AddTransient<ITransactionalEmailService, TransactionalEmailService>();
         services.GetSectionAndValidate<EmailSettings>(configuration);
-        services.GetSectionAndValidate<CookieSettings>(configuration);
 
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
@@ -127,6 +127,17 @@ public static class DependencyInjection
 
         var govNotifySettings = services.GetSectionAndValidate<NotificationServiceSettings>(configuration);
         services.AddSingleton(new NotificationClient(govNotifySettings.Value.ApiKey));
+
+        services.AddGovUk(options =>
+        {
+            options.ServiceName = "Be Part of Research";
+            options.Cookies = new NIHR.GovUk.AspNetCore.Mvc.CookieOptions
+            {
+                Domain = null,
+                PolicyLink = "https://bepartofresearch.nihr.ac.uk/site-policies/cookie-policy/",
+                Mode = NIHR.GovUk.AspNetCore.Mvc.CookieMode.Additional
+            };
+        }); 
 
         if (hostEnvironment.IsDevelopment())
         {

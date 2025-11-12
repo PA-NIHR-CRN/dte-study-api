@@ -1,0 +1,14 @@
+.d-none {
+    display: none !important;
+}
+
+.cookie-warning {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    width: 100%;
+}
+
+#cookies{
+    z-index: 99999;
+}

@@ -1,48 +1,64 @@
-@using Microsoft.Extensions.Options
-@using NIHR.Infrastructure.Settings
-@inject IOptions<CookieSettings> cookieSettings
+@inject GovUkOptions options
 
-<section id="cookies" class="bg-athens cookie-warning no-print" aria-label="Cookies Banner">
-    <section class="govuk-cookie-banner" role="region" aria-label="Cookies on @cookieSettings.Value.ServiceName">
+@{
+    string? cookieText = options.Cookies?.Mode switch
+    {
+        CookieMode.Additional => "We’d like to set additional cookies so we can remember your settings, understand how people use the service and make improvements.",
+        CookieMode.Analytics => "We’d also like to use analytics cookies so we can understand how you use the service and make improvements.",
+        _ => null
+    };
+
+    string? buttonText = options.Cookies?.Mode switch
+    {
+        CookieMode.Additional => "additional",
+        CookieMode.Analytics => "analytics",
+        _ => null
+    };
+}
+
+@if(options.Cookies is not null && options.Cookies.Mode != CookieMode.Essential)
+{
+    <div id="cookies" class="govuk-cookie-banner" data-nosnippet role="region" aria-label="Cookies on @options.ServiceName">
         <div class="govuk-cookie-banner__message govuk-width-container">
             <div class="govuk-grid-row">
-                <div class="govuk-grid-column-two-thirds">
-                    <h2 class="govuk-cookie-banner__heading govuk-heading-m">Cookies on @cookieSettings.Value.ServiceName</h2>
-                    <div class="govuk-cookie-banner__content">
-                        <p class="govuk-body">We use some essential cookies to make this service work.</p>
-                        <p class="govuk-body">We would like to use additional cookies to remember your settings, understand how you use @cookieSettings.Value.ServiceName and improve the service.</p>
-                        <p class="govuk-body">We also use cookies set by other sites to help us deliver content via their services.</p>
-                    </div>
+            <div class="govuk-grid-column-two-thirds">
+                <h2 class="govuk-cookie-banner__heading govuk-heading-m">
+                Cookies on @options.ServiceName
+                </h2>
+                <div class="govuk-cookie-banner__content">
+                <p class="govuk-body">We use some essential cookies to make this service work.</p>
+                <p class="govuk-body">@cookieText</p>
                 </div>
             </div>
+            </div>
             <div class="govuk-button-group">
-                <button value="accept" type="submit" name="cookies" class="govuk-button" onclick="acceptCookie()" tabindex="0">
-                    Accept additional cookies
-                </button>
-                <button value="reject" type="submit" name="cookies" class="govuk-button" onclick="rejectCookie()" tabindex="0">
-                    Reject additional cookies
-                </button>
-                <a class="govuk-link" href=@cookieSettings.Value.PolicyLink>View cookies</a>
+            <button value="accept" type="button" class="govuk-button cookie-btn" data-module="govuk-button">
+                Accept @buttonText cookies
+            </button>
+            <button value="reject" type="button" class="govuk-button cookie-btn" data-module="govuk-button">
+                Reject @buttonText cookies
+            </button>
+            <a class="govuk-link" href=@options.Cookies.PolicyLink>View cookies</a>
             </div>
         </div>
-    </section>
-</section>
+    </div>
 
-<template id="confirmationMessageTemplate">
-            <div class="govuk-grid-row">
-                <div class="govuk-grid-column-two-thirds">
-                    <div class="govuk-cookie-banner__content">
-                        <p class="govuk-body">You’ve <span class="user-decision"></span> additional cookies. You can <a class="govuk-link" href=@cookieSettings.Value.PolicyLink>View our cookie policy for more information</a> at any time.</p>
+    <template id="confirmationMessageTemplate">
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-two-thirds">
+                        <div class="govuk-cookie-banner__content">
+                            <p class="govuk-body">You’ve <span class="user-decision"></span> additional cookies. You can <a class="govuk-link" href=@options.Cookies.PolicyLink> View our cookie policy for more information</a> at any time.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="govuk-button-group">
-                <button draggable="false" class="govuk-button" onclick="closeCookieBanner()" tabindex="0">
-                    Hide cookie message
-                </button>
-            </div>
-</template>
+                <div class="govuk-button-group">
+                    <button draggable="false" class="govuk-button hide-banner-btn" onclick="closeCookieBanner()" tabindex="0">
+                        Hide cookie message
+                    </button>
+                </div>
+    </template>
 
-<script>
-    globalThis.cookieDomain = @Json.Serialize(cookieSettings.Value.Domain)
-</script>
+    <script>
+        globalThis.cookieDomain = @Json.Serialize(options.Cookies.Domain)
+    </script>
+}
