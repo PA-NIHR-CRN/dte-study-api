@@ -6,7 +6,7 @@ namespace NIHR.GovUk.AspNetCore.Mvc
     {
         public string? ServiceName { get; set; }
 
-        public CookieOptions? Cookies { get; set; }
+        public CookieOptions Cookies { get; set; } = new CookieOptions();
 
         public bool HasServiceName() => !string.IsNullOrWhiteSpace(ServiceName);
     }

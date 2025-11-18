@@ -25,6 +25,7 @@ using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
 using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
+using NIHR.GovUk.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Startup;
 
@@ -130,12 +131,8 @@ public static class DependencyInjection
         services.AddGovUk(options =>
         {
             options.ServiceName = "Be Part of Research";
-            options.Cookies = new NIHR.GovUk.AspNetCore.Mvc.CookieOptions
-            {
-                Domain = null,
-                PolicyLink = "https://bepartofresearch.nihr.ac.uk/site-policies/cookie-policy/",
-                Mode = NIHR.GovUk.AspNetCore.Mvc.CookieMode.Additional
-            };
+            options.Cookies.PolicyLink = "https://bepartofresearch.nihr.ac.uk/site-policies/cookie-policy/";
+            options.Cookies.Mode = CookieMode.Additional;
         }); 
 
         if (hostEnvironment.IsDevelopment())

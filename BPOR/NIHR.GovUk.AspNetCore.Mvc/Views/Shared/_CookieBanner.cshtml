@@ -1,3 +1,4 @@
+@using NIHR.GovUk.AspNetCore.Mvc
 @inject GovUkOptions options
 
 @{
@@ -14,9 +15,11 @@
         CookieMode.Analytics => "analytics",
         _ => null
     };
+
+    bool showCookieBanner = options?.Cookies?.Mode != CookieMode.None || options?.Cookies?.Mode != CookieMode.Essential;
 }
 
-@if(options.Cookies is not null && options.Cookies.Mode != CookieMode.Essential)
+@if (showCookieBanner)
 {
     <form action="/form-handler" method="post" novalidate>
         <div id="cookies" class="govuk-cookie-banner" data-nosnippet role="region" aria-label="Cookies on @options.ServiceName">
