@@ -51,7 +51,7 @@ public static class DependencyInjection
         });
 
         services.Configure<VolunteerFilterServiceOptions>(configuration.GetSection("VolunteerFilterService"));
-
+        
         services.AddScoped<IVolunteerFilterService, VolunteerFilterService>();
         services.AddScoped<ICampaignService, CampaignService>();
         services.AddTransient<IPostcodeMapper, LocationApiClient>();
@@ -131,8 +131,8 @@ public static class DependencyInjection
         services.AddGovUk(options =>
         {
             options.ServiceName = "Be Part of Research";
-            options.Cookies.PolicyLink = "https://bepartofresearch.nihr.ac.uk/site-policies/cookie-policy/";
             options.Cookies.Mode = CookieMode.Additional;
+            options.Cookies.PolicyLink = configuration.GetValue<string>("CookieOptions:PolicyLink");
         }); 
 
         if (hostEnvironment.IsDevelopment())

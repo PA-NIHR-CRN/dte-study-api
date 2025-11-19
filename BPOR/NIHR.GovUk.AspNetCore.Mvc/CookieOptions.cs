@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-
 namespace NIHR.GovUk.AspNetCore.Mvc
 {
     public class CookieOptions
