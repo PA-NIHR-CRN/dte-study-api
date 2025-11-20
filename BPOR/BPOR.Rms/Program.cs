@@ -20,6 +20,8 @@ builder.AddAWSSystemsManagerDataProtection("/BPOR/RMS");
 
 builder.Services.RegisterServices(builder.Configuration, builder.Environment);
 
+builder.WebHost.UseStaticWebAssets();
+
 var app = builder.Build();
 
 app.ConfigureSwagger(builder.Environment);
