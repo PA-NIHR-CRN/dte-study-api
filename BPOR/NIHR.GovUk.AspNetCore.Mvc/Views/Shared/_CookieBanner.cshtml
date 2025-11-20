@@ -42,25 +42,25 @@
                     <button value="no" type="submit" name="cookies[@buttonText]" class="govuk-button" data-module="govuk-button">
                         Reject @buttonText cookies
                     </button>
-                    <a class="govuk-link" href=@options.Cookies.PolicyLink>View cookies</a>
+                    <a class="govuk-link" href=@options?.Cookies?.PolicyLink>View cookies</a>
                 </div>
             </div>
         </div>
     </form>
 
     <template id="confirmationMessageTemplate">
-                <div class="govuk-grid-row">
-                    <div class="govuk-grid-column-two-thirds">
-                        <div class="govuk-cookie-banner__content">
-                            <p class="govuk-body">You’ve <span class="user-decision"></span> additional cookies. You can <a class="govuk-link" href=@options.Cookies.PolicyLink> View our cookie policy for more information</a> at any time.</p>
-                        </div>
-                    </div>
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <div class="govuk-cookie-banner__content">
+                    <p class="govuk-body">You’ve <span class="user-decision"></span> additional cookies. You can <a class="govuk-link" href=@options?.Cookies?.PolicyLink> View our cookie policy for more information</a> at any time.</p>
                 </div>
-                <div class="govuk-button-group">
-                    <button draggable="false" class="govuk-button hide-banner-btn" onclick="closeCookieBanner()" tabindex="0">
-                        Hide cookie message
-                    </button>
-                </div>
+            </div>
+        </div>
+        <div class="govuk-button-group">
+            <button draggable="false" class="govuk-button hide-banner-btn" onclick="closeCookieBanner()" tabindex="0">
+                Hide cookie message
+            </button>
+        </div>
     </template>
 
     <script>
