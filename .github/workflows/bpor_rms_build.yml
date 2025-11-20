@@ -5,6 +5,7 @@ on:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
+  DOTNET_VERSION: '8.0.x'
 
 jobs:
   build:
@@ -48,7 +49,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -66,7 +67,7 @@ jobs:
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
       - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
         run: dotnet restore BPOR/BPOR.sln
@@ -173,7 +174,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -191,7 +192,7 @@ jobs:
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
       - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version ${{ env.DOTNET_EF_VERSION }}
 
       - name: Restore dependencies
         run: dotnet restore BPOR/BPOR.sln
