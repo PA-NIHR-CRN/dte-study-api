@@ -17,6 +17,9 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
 
     [HtmlAttributeName("show-when")]
     public bool Show { get; set; } = true;
+    
+    [HtmlAttributeName("edit-when")]
+    public bool Editable { get; set; } = true;
 
     [HtmlAttributeNotBound]
     [ViewContext]
@@ -65,7 +68,11 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
                 }
             }
 
-            if (field is not null && viewModel is not null && (currentUserProvider?.User?.HasRole("Admin") ?? false))
+            if (
+                field is not null &&
+                viewModel is not null &&
+                Editable &&
+                (currentUserProvider?.User?.HasRole("Admin") ?? false))
             {
                 var url = linkGenerator.GetUriByAction(ViewContext.HttpContext, "Edit", controller.Replace("Controller", ""), new { id = viewModel.Study.Id, field });
 
