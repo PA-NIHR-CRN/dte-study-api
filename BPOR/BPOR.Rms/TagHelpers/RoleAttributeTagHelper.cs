@@ -10,7 +10,7 @@ namespace BPOR.Rms.TagHelpers
     {
         public string? RoleInclude { get; set; }
         public string? RoleExclude { get; set; }
-
+        
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
             Process(currentUserProvider, output, RoleInclude, RoleExclude);
@@ -25,7 +25,7 @@ namespace BPOR.Rms.TagHelpers
 
             var include = roleInclude?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
             var exclude = roleExclude?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-
+            
             if (exclude.Any(currentUserProvider.User.HasRole))
             {
                 output.SuppressOutput();

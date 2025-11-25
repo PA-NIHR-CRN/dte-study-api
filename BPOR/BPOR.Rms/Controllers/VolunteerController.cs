@@ -11,11 +11,14 @@ using NIHR.Infrastructure;
 using NIHR.Infrastructure.Models;
 using Rbec.Postcodes;
 using System.Text.Json;
+using BPOR.Rms.Startup;
+using UserRole = BPOR.Domain.Enums.UserRole;
 
 namespace BPOR.Rms.Controllers;
 
 public class VolunteerController(ParticipantDbContext context,
     ILogger<VolunteerController> logger,
+    ICurrentUserProvider<User> currentUserProvider,
    IPostcodeMapper locationApiClient) : Controller
 {
 
@@ -272,11 +275,32 @@ public class VolunteerController(ParticipantDbContext context,
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IActionResult> UpdateRecruited(UpdateRecruitedViewModel model)
+    public async Task<IActionResult> UpdateRecruited(int studyId)
     {
-        ModelState.Remove("VolunteerReferenceNumbers");
+        var study = await context.Studies
+            .Where(s => s.Id == studyId)
+            .Select(Projections.StudyAsUpdateRecruitedViewModel())
+            .FirstOrDefaultAsync();
+            
+        if (study == null)
+        {
+            logger.LogWarning("[HttpGet]UpdateRecruited called with non-existent study: {StudyId}", studyId);
+            return NotFound();
+        }
 
-        return View(model);
+        if (!study.HasCampaigns)
+        {
+            this.AddNotification(new NotificationBannerModel
+            {
+                IsSuccess = false,
+                Title = "Volunteer numbers cannot be added",
+                Heading = "A campaign must be sent before volunteer numbers can be added",
+            });
+
+            return RedirectToAction(nameof(StudyController.Details), "Study", new { id = studyId });
+        }
+        
+        return View(study);
     }
 
     [HttpPost]
@@ -391,18 +415,22 @@ public class VolunteerController(ParticipantDbContext context,
         return RedirectToAction("UpdateRecruited", model);
     }
 
-    public async Task<IActionResult> UpdateAnonymousRecruited(UpdateAnonymousRecruitedViewModel model)
+    public async Task<IActionResult> UpdateAnonymousRecruited(int studyId)
     {
-        ModelState.Remove("RecruitmentTotal");
-
-        if (model.StudyId != 0)
+        var study = await GetStudyDetails(studyId);
+        
+        if (study == null)
         {
-            var study = await GetStudyDetails(model.StudyId);
-
-            return View(study);
+            logger.LogWarning("[HttpGet]UpdateAnonymousRecruited called with non-existent study: {StudyId}", studyId);
+            return NotFound();
         }
-
-        return View(model);
+        
+        if (!CanUpdateAnonymousRecruitment(study, currentUserProvider.User))
+        {
+            return Forbid();
+        }
+        
+        return View(study);
     }
 
     [HttpPost]
@@ -453,5 +481,12 @@ public class VolunteerController(ParticipantDbContext context,
             return new List<PostcodeAddressModel>();
         }
     }
-
+    
+    private bool CanUpdateAnonymousRecruitment(UpdateAnonymousRecruitedViewModel study, User? user)
+    {
+        if (user == null) return false;
+        
+        return (study.HasCampaigns && user.HasRole(UserRole.Researcher)) 
+               || user.HasRole(UserRole.Admin);
+    }
 }
