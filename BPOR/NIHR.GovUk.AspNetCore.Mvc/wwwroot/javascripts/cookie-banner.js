@@ -11,9 +11,12 @@ window.CookieBanner = {
 
                     if (clickedButton === "yes") {
                         CookieBanner.acceptCookie();
-                    } else {
+                    } else if (clickedButton === "no") {
                         CookieBanner.rejectCookie();
+                    } else if (clickedButton === "hide") {
+                        CookieBanner.closeCookieBanner();
                     }
+
                 });
             }
         });
