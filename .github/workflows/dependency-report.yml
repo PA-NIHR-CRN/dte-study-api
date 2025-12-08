@@ -1,0 +1,18 @@
+name: Dependency Report
+
+on:
+  push:
+    branches:
+      - i/3rd-party-dashboard
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    uses: PA-NIHR-CRN/dependency-dashboard/.github/workflows/dependency-report-dotnet.yml@main
+    with:
+      dotnet_version: "8.0.x"
+      branches: '["main","rework-added-RMS"]'
+    secrets:
+      DEPENDENCY_DASHBOARD_TOKEN: ${{ secrets.DEPENDENCY_DASHBOARD_TOKEN }}
