@@ -106,27 +106,10 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ github.token }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
       - name: Restore projects (.csproj only)
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t csproj < <(find . -type f -name "*.csproj" | sort)
-          
-          echo "🗂️ Found ${#csproj[@]} .csproj:"
-          printf ' - %s\n' "${csproj[@]}" || true
-          
-          if [ ${#csproj[@]} -eq 0 ]; then
-            echo "❌ No .csproj files found. NuGet analysis cannot proceed."
-            exit 1
-          fi
-          
-          for p in "${csproj[@]}"; do
-            echo "dotnet restore \"$p\""
-            dotnet restore "$p" || true
-          done
-
+        run: dotnet restore BPOR/BPOR.sln
 
       - name: Collect latest versions (NuGet → outdated.json from .csproj only)
         shell: bash
