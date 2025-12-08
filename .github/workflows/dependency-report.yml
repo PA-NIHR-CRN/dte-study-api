@@ -227,13 +227,13 @@ jobs:
           path: dashboard
           fetch-depth: 0
 
-      - name: Save report into ${{ env.DASHBOARD_DATA_PATH }}
+      - name: Save report into dashboard/${{ env.DASHBOARD_DATA_PATH }}
         shell: bash
         run: |
           set -euo pipefail
           SAFE_BRANCH="${BRANCH_NAME//\//-}"   # replace slashes with '-'
-          mkdir -p "${{ env.DASHBOARD_DATA_PATH }}"
-          cp summary.json "${{ env.DASHBOARD_DATA_PATH }}/${REPO_NAME}-${SAFE_BRANCH}.json"
+          mkdir -p "dashboard/${{ env.DASHBOARD_DATA_PATH }}"
+          cp summary.json "dashboard/${{ env.DASHBOARD_DATA_PATH }}/${REPO_NAME}-${SAFE_BRANCH}.json"
           cd dashboard
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
