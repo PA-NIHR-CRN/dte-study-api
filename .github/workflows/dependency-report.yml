@@ -105,29 +105,30 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore solutions/projects
+      - name: Restore projects (.csproj only)
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t sln < <(find . -type f -name "*.sln" | sort)
           mapfile -t csproj < <(find . -type f -name "*.csproj" | sort)
-          if [ ${#sln[@]} -gt 0 ]; then
-            for s in "${sln[@]}"; do
-              echo "dotnet restore \"$s\""; dotnet restore "$s" || true
-            done
-          else
-            for p in "${csproj[@]}"; do
-              echo "dotnet restore \"$p\""; dotnet restore "$p" || true
-            done
+          
+          echo "🗂️ Found ${#csproj[@]} .csproj:"
+          printf ' - %s\n' "${csproj[@]}" || true
+          
+          if [ ${#csproj[@]} -eq 0 ]; then
+            echo "❌ No .csproj files found. NuGet analysis cannot proceed."
+            exit 1
           fi
+          
+          for p in "${csproj[@]}"; do
+            echo "dotnet restore \"$p\""
+            dotnet restore "$p" || true
+          done
 
-      - name: Collect latest versions (NuGet → outdated.json)
+
+      - name: Collect latest versions (NuGet → outdated.json from .csproj only)
         shell: bash
         run: |
           set -euo pipefail
-
-          # Discover targets
-          mapfile -t sln < <(find . -type f -name "*.sln" | sort)
           mapfile -t csproj < <(find . -type f -name "*.csproj" | sort)
 
           rm -f __out-*.json || true
@@ -138,27 +139,22 @@ jobs:
             include_flag="--include-transitive"
           fi
 
-          if [ ${#sln[@]} -gt 0 ]; then
-            for s in "${sln[@]}"; do
-              idx=$((idx+1))
-              echo "🔎 dotnet list \"$s\" package --outdated $include_flag --format json"
-              dotnet list "$s" package --outdated $include_flag --format json > "__out-$idx.json" 2>/dev/null || true
-            done
-          else
-            for p in "${csproj[@]}"; do
-              idx=$((idx+1))
-              echo "🔎 dotnet list \"$p\" package --outdated $include_flag --format json"
-              dotnet list "$p" package --outdated $include_flag --format json > "__out-$idx.json" 2>/dev/null || true
-            done
-          fi
+          for p in "${csproj[@]}"; do
+            idx=$((idx+1))
+            echo "🔧 dotnet list \"$p\" package --outdated $include_flag --format json"
+            dotnet list "$p" package --outdated $include_flag --format json > "__out-$idx.json" || true
+            echo "   -> wrote __out-$idx.json (size: $(wc -c < __out-$idx.json 2>/dev/null || echo 0))"
+          done
 
           # Ensure jq is present
           if ! command -v jq >/dev/null 2>&1; then
-            sudo apt-get update -y
-            sudo apt-get install -y jq
+            sudo apt-get update -y && sudo apt-get install -y jq
           fi
 
-          # Merge to the same format as your npm step:
+          echo "🔎 Sampling first __out-*.json (for debugging):"
+          head -c 500 __out-1.json 2>/dev/null || echo "(no __out-1.json found)"
+
+          # Merge into the dashboard format:
           # { "Package.Name": { "current": "x.y.z", "latest": "a.b.c" }, ... }
           jq -s '
             [ .[] | select(. != null) | .projects[]? | .frameworks[]? |
@@ -176,12 +172,27 @@ jobs:
             | add
           ' __out-*.json > outdated.json
 
-          # Fallback in case nothing was detected
           if [ ! -s outdated.json ]; then
             echo "{}" > outdated.json
           fi
 
-      # ------------------------
+          echo "✅ Created outdated.json (size: $(wc -c < outdated.json))"
+          echo "🔎 First 10 package keys:"
+          jq -r 'keys | .[:10][]' outdated.json || true
+      
+      - name: Verify outdated.json before summary build
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f outdated.json ]; then
+            echo "❌ outdated.json missing. The summary will fallback to SBOM."
+            exit 1
+          fi
+          echo "✅ outdated.json present. Showing first few entries:"
+          jq 'to_entries | .[:10]' outdated.json || cat outdated.json
+      
+      
+        # ------------------------
       # Download builder script (summary builder)
       # ------------------------
       - name: Download build-summary.mjs from dashboard repo (API)
