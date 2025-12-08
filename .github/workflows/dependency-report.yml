@@ -240,3 +240,4 @@ jobs:
           git add "${{ env.DASHBOARD_DATA_PATH }}/${REPO_NAME}-${SAFE_BRANCH}.json"
           git commit -m "Update dependency report for ${REPO_NAME} (${BRANCH_NAME})" || echo "No changes"
           git pull --rebase || true
+          git push
