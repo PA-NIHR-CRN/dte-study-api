@@ -53,7 +53,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        branch: ${{ fromJSON(github.event.inputs.branches || '["i/3rd-party-dashboard"]') }}
+        branch: ${{ fromJSON(github.event.inputs.branches || '["rework-added-RMS"]') }}
 
     env:
       REPO_NAME: ${{ github.event.repository.name }}
