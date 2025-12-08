@@ -13,7 +13,7 @@ on:
         description: 'JSON array of branch names to scan, e.g. ["main","develop"]'
         type: string
         required: false
-        default: '["main","rework-added-RMS"]'
+        default: '["rework-added-RMS"]'
       dashboard_repo:
         description: "Org/Repo of the central dashboard"
         type: string
@@ -42,13 +42,15 @@ on:
   schedule:
     - cron: "0 8 * * *"
 
+env:
+  REPO_NAME: ${{ github.event.repository.name }}
+
 jobs:
   sbom-and-dashboard:
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
-    # Build a matrix from workflow_dispatch inputs (or default), so we can scan multiple branches
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -56,7 +58,6 @@ jobs:
         branch: ${{ fromJSON(github.event.inputs.branches || '["rework-added-RMS"]') }}
 
     env:
-      REPO_NAME: ${{ github.event.repository.name }}
       BRANCH_NAME: ${{ matrix.branch }}
       DOTNET_VERSION: ${{ github.event.inputs.dotnet_version || '8.0.x' }}
       DASHBOARD_REPO: ${{ github.event.inputs.dashboard_repo || 'PA-NIHR-CRN/dependency-dashboard' }}
@@ -66,7 +67,7 @@ jobs:
 
     steps:
       # ------------------------
-      # Checkout this application (at matrix branch)
+      # Checkout this application (matrix branch)
       # ------------------------
       - name: Checkout app repo (branch = ${{ matrix.branch }})
         uses: actions/checkout@v4
@@ -81,6 +82,7 @@ jobs:
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
             | sh -s -- -b /usr/local/bin
+
       - name: Generate SBOM
         run: syft dir:. -o cyclonedx-json > sbom.json
 
@@ -91,6 +93,7 @@ jobs:
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
             | sh -s -- -b /usr/local/bin
+
       - name: Scan vulnerabilities
         run: grype sbom:sbom.json -o json > grype-output.json
 
@@ -181,15 +184,26 @@ jobs:
       # ------------------------
       # Download builder script (summary builder)
       # ------------------------
-      - name: Download build-summary.mjs from dashboard repo
+      - name: Download build-summary.mjs from dashboard repo (API)
+        env:
+          GH_TOKEN: ${{ secrets.DEPENDENCY_DASHBOARD_TOKEN }}
+          OWNER_REPO: ${{ env.DASHBOARD_REPO }}
+          FILE_PATH: scripts/build-summary.mjs
+          REF: main
+        shell: bash
         run: |
-          curl -H "Authorization: token ${{ secrets.DEPENDENCY_DASHBOARD_TOKEN }}" \
-            -L "https://raw.githubusercontent.com/${{ env.DASHBOARD_REPO }}/main/scripts/build-summary.mjs" \
-            -o build-summary.mjs
-          if grep -q "404: Not Found" build-summary.mjs; then
-            echo "ERROR: build-summary.mjs not accessible"
+          set -euo pipefail
+          API_URL="https://api.github.com/repos/${OWNER_REPO}/contents/${FILE_PATH}?ref=${REF}"
+          echo "Fetching ${API_URL}"
+          HTTP_STATUS=$(curl -sS -w "%{http_code}" -o build-summary.mjs \
+            -H "Authorization: token ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github.v3.raw" \
+            -L "${API_URL}")
+          if [ "$HTTP_STATUS" != "200" ] || [ ! -s build-summary.mjs ]; then
+            echo "❌ Failed to download ${FILE_PATH} from ${OWNER_REPO}@${REF}. HTTP ${HTTP_STATUS}"
             exit 1
           fi
+          echo "✅ build-summary.mjs downloaded."
 
       # ------------------------
       # Build summary.json (requires Node)
@@ -226,4 +240,3 @@ jobs:
           git add "${{ env.DASHBOARD_DATA_PATH }}/${REPO_NAME}-${SAFE_BRANCH}.json"
           git commit -m "Update dependency report for ${REPO_NAME} (${BRANCH_NAME})" || echo "No changes"
           git pull --rebase || true
-          git push
