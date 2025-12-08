@@ -1,18 +1,229 @@
-name: Dependency Report
+
+name: Dependency Report (.NET)
 
 on:
+  workflow_dispatch:
+    inputs:
+      dotnet_version:
+        description: ".NET SDK version to use"
+        type: string
+        required: false
+        default: "8.0.x"
+      branches:
+        description: 'JSON array of branch names to scan, e.g. ["main","develop"]'
+        type: string
+        required: false
+        default: '["main","rework-added-RMS"]'
+      dashboard_repo:
+        description: "Org/Repo of the central dashboard"
+        type: string
+        required: false
+        default: "PA-NIHR-CRN/dependency-dashboard"
+      dashboard_data_path:
+        description: "Path in dashboard repo to store JSON files"
+        type: string
+        required: false
+        default: "docs/data"
+      include_transitive:
+        description: "Include transitive packages in NuGet analysis"
+        type: boolean
+        required: false
+        default: true
+      node_version:
+        description: "Node.js version (to run build-summary.mjs)"
+        type: string
+        required: false
+        default: "20"
+
   push:
     branches:
       - i/3rd-party-dashboard
+
   schedule:
     - cron: "0 8 * * *"
-  workflow_dispatch:
 
 jobs:
-  run:
-    uses: PA-NIHR-CRN/dependency-dashboard/.github/workflows/dependency-report-dotnet.yml@main
-    with:
-      dotnet_version: "8.0.x"
-      branches: '["main","rework-added-RMS"]'
-    secrets:
-      DEPENDENCY_DASHBOARD_TOKEN: ${{ secrets.DEPENDENCY_DASHBOARD_TOKEN }}
+  sbom-and-dashboard:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    # Build a matrix from workflow_dispatch inputs (or default), so we can scan multiple branches
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        branch: ${{ fromJSON(github.event.inputs.branches || '["i/3rd-party-dashboard"]') }}
+
+    env:
+      REPO_NAME: ${{ github.event.repository.name }}
+      BRANCH_NAME: ${{ matrix.branch }}
+      DOTNET_VERSION: ${{ github.event.inputs.dotnet_version || '8.0.x' }}
+      DASHBOARD_REPO: ${{ github.event.inputs.dashboard_repo || 'PA-NIHR-CRN/dependency-dashboard' }}
+      DASHBOARD_DATA_PATH: ${{ github.event.inputs.dashboard_data_path || 'docs/data' }}
+      INCLUDE_TRANSITIVE: ${{ github.event.inputs.include_transitive || 'true' }}
+      NODE_VERSION: ${{ github.event.inputs.node_version || '20' }}
+
+    steps:
+      # ------------------------
+      # Checkout this application (at matrix branch)
+      # ------------------------
+      - name: Checkout app repo (branch = ${{ matrix.branch }})
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 0
+
+      # ------------------------
+      # SBOM (Syft)
+      # ------------------------
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
+            | sh -s -- -b /usr/local/bin
+      - name: Generate SBOM
+        run: syft dir:. -o cyclonedx-json > sbom.json
+
+      # ------------------------
+      # Vulnerabilities (Grype)
+      # ------------------------
+      - name: Install Grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
+            | sh -s -- -b /usr/local/bin
+      - name: Scan vulnerabilities
+        run: grype sbom:sbom.json -o json > grype-output.json
+
+      # ------------------------
+      # Collect version information (.NET)
+      # ------------------------
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore solutions/projects
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t sln < <(find . -type f -name "*.sln" | sort)
+          mapfile -t csproj < <(find . -type f -name "*.csproj" | sort)
+          if [ ${#sln[@]} -gt 0 ]; then
+            for s in "${sln[@]}"; do
+              echo "dotnet restore \"$s\""; dotnet restore "$s" || true
+            done
+          else
+            for p in "${csproj[@]}"; do
+              echo "dotnet restore \"$p\""; dotnet restore "$p" || true
+            done
+          fi
+
+      - name: Collect latest versions (NuGet → outdated.json)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Discover targets
+          mapfile -t sln < <(find . -type f -name "*.sln" | sort)
+          mapfile -t csproj < <(find . -type f -name "*.csproj" | sort)
+
+          rm -f __out-*.json || true
+          idx=0
+
+          include_flag=""
+          if [ "${{ env.INCLUDE_TRANSITIVE }}" = "true" ]; then
+            include_flag="--include-transitive"
+          fi
+
+          if [ ${#sln[@]} -gt 0 ]; then
+            for s in "${sln[@]}"; do
+              idx=$((idx+1))
+              echo "🔎 dotnet list \"$s\" package --outdated $include_flag --format json"
+              dotnet list "$s" package --outdated $include_flag --format json > "__out-$idx.json" 2>/dev/null || true
+            done
+          else
+            for p in "${csproj[@]}"; do
+              idx=$((idx+1))
+              echo "🔎 dotnet list \"$p\" package --outdated $include_flag --format json"
+              dotnet list "$p" package --outdated $include_flag --format json > "__out-$idx.json" 2>/dev/null || true
+            done
+          fi
+
+          # Ensure jq is present
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update -y
+            sudo apt-get install -y jq
+          fi
+
+          # Merge to the same format as your npm step:
+          # { "Package.Name": { "current": "x.y.z", "latest": "a.b.c" }, ... }
+          jq -s '
+            [ .[] | select(. != null) | .projects[]? | .frameworks[]? |
+              ((.topLevelPackages // []) + (.transitivePackages // []))[]? |
+              { name, current: (.resolvedVersion // .requestedVersion // null), latest: (.latestVersion // null) }
+            ]
+            | sort_by(.name)
+            | group_by(.name)
+            | map({
+                (.[0].name): {
+                  current: ( [ .[].current ] | map(select(. != null)) | max // null ),
+                  latest:  ( [ .[].latest  ] | map(select(. != null)) | max // null )
+                }
+              })
+            | add
+          ' __out-*.json > outdated.json
+
+          # Fallback in case nothing was detected
+          if [ ! -s outdated.json ]; then
+            echo "{}" > outdated.json
+          fi
+
+      # ------------------------
+      # Download builder script (summary builder)
+      # ------------------------
+      - name: Download build-summary.mjs from dashboard repo
+        run: |
+          curl -H "Authorization: token ${{ secrets.DEPENDENCY_DASHBOARD_TOKEN }}" \
+            -L "https://raw.githubusercontent.com/${{ env.DASHBOARD_REPO }}/main/scripts/build-summary.mjs" \
+            -o build-summary.mjs
+          if grep -q "404: Not Found" build-summary.mjs; then
+            echo "ERROR: build-summary.mjs not accessible"
+            exit 1
+          fi
+
+      # ------------------------
+      # Build summary.json (requires Node)
+      # ------------------------
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Build summary JSON
+        run: node build-summary.mjs
+
+      # ------------------------
+      # Push json file → central dashboard (name: {REPO_NAME}-{BRANCH}.json)
+      # ------------------------
+      - name: Checkout dashboard repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.DASHBOARD_REPO }}
+          token: ${{ secrets.DEPENDENCY_DASHBOARD_TOKEN }}
+          path: dashboard
+          fetch-depth: 0
+
+      - name: Save report into dashboard/${{ env.DASHBOARD_DATA_PATH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SAFE_BRANCH="${BRANCH_NAME//\//-}"   # replace slashes with '-'
+          mkdir -p "dashboard/${{ env.DASHBOARD_DATA_PATH }}"
+          cp summary.json "dashboard/${{ env.DASHBOARD_DATA_PATH }}/${REPO_NAME}-${SAFE_BRANCH}.json"
+          cd dashboard
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${{ env.DASHBOARD_DATA_PATH }}/${REPO_NAME}-${SAFE_BRANCH}.json"
+          git commit -m "Update dependency report for ${REPO_NAME} (${BRANCH_NAME})" || echo "No changes"
+          git pull --rebase || true
+          git push
