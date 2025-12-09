@@ -69,9 +69,15 @@ jobs:
       # Emit outdated packages as JSON
       - name: Detect outdated NuGet packages (JSON)
         run: |
-          # Try the built-in CLI with JSON output (SDK >= 7.0.200)
           set -e
-          dotnet package list --project BPOR/BPOR.sln --outdated --include-transitive --format json > raw.json
+          dotnet list BPOR/BPOR.sln package --outdated --include-transitive --format json > raw.json
+
+      #DEBUG STEPS
+      - name: Human-readable check
+        run: dotnet list BPOR/BPOR.sln package --outdated --include-transitive
+          
+      - name: Inspect raw.json (first 200 chars)
+        run: head -c 200 raw.json || true
 
       # Convert dotnet JSON → the simple map your dashboard builder expects
       - name: Build outdated.json
