@@ -176,58 +176,137 @@ jobs:
       # ------------------------
       # Build summary.json
       # ------------------------
-      - name: Build summary.json from NuGet data only
+      - name: Build summary.json (NuGet + SBOM + Grype)
         run: |
           node << 'EOF'
           const fs = require('fs');
-          
-          // Inputs: raw.json (from `dotnet list ... --format json`) and outdated.json (id -> {current, latest})
+
+          // --- Load inputs ---
           const raw = JSON.parse(fs.readFileSync('raw.json', 'utf8'));
           const outdated = JSON.parse(fs.readFileSync('outdated.json', 'utf8'));
-          
-          // Build set of top-level package IDs (case-insensitive) from raw.json
+          const sbom = JSON.parse(fs.readFileSync('sbom.json', 'utf8'));
+          const grype = fs.existsSync('grype-output.json')
+            ? JSON.parse(fs.readFileSync('grype-output.json', 'utf8'))
+            : { matches: [] };
+
+          // --- Build top-level set from raw.json (case-insensitive) ---
           const topLevel = new Set();
-          (raw.projects || []).forEach(p => {
-            (p.frameworks || []).forEach(fw => {
-              (fw.topLevelPackages || []).forEach(pkg => {
+          for (const p of raw.projects || []) {
+            for (const fw of p.frameworks || []) {
+              for (const pkg of fw.topLevelPackages || []) {
                 if (pkg?.id) topLevel.add(pkg.id.toLowerCase());
-              });
-            });
-          });
-          
-          // Flatten outdated map into records
-          const all = [];
+              }
+            }
+          }
+
+          // --- Case-insensitive latest lookup ---
+          const latestMap = {};
           for (const [id, info] of Object.entries(outdated)) {
-            const name = id;
-            const current = info.current ?? info.resolvedVersion ?? info.version ?? null;
-            const latest  = info.latest  ?? info.latestVersion  ?? null;
-            const isTop = topLevel.has(name.toLowerCase());
-            all.push({
-              name,
-              version: current,
-              latest: latest ?? current,
-              requiredBy: [],        // not available from raw.json alone
-              license: null,         // SBOM join omitted in this quick path
-              vulnCount: 0,
-              maxSeverity: null,
-              vulnerabilities: [],
-              isTopLevel: isTop
+            latestMap[id.toLowerCase()] = info.latest ?? info.latestVersion ?? info.version ?? null;
+          }
+
+          // --- Index SBOM components by ref and by lower-cased name ---
+          const byRef = {};
+          const byNameLC = {};
+          for (const c of (sbom.components || [])) {
+            const ref = c['bom-ref'] || c.purl || c.name;
+            byRef[ref] = c;
+            if (c.name) byNameLC[c.name.toLowerCase()] = c;
+          }
+
+          // --- Reverse dependency graph (for requiredBy ancestry) ---
+          const reverse = {};
+          for (const d of (sbom.dependencies || [])) {
+            for (const child of d.dependsOn || []) {
+              (reverse[child] ||= []).push(d.ref);
+            }
+          }
+          function findRequiredBy(ref) {
+            const seen = new Set();
+            const out = new Set();
+            const walk = (node) => {
+              if (!node || seen.has(node)) return;
+              seen.add(node);
+              const comp = byRef[node];
+              if (comp?.name && topLevel.has(comp.name.toLowerCase())) out.add(comp.name);
+              for (const parent of (reverse[node] || [])) walk(parent);
+            };
+            walk(ref);
+            return [...out].sort();
+          }
+
+          // --- Vulnerabilities by PURL (from Grype) ---
+          const sevOrder = ['LOW','MEDIUM','HIGH','CRITICAL'];
+          const vulnsByPurl = {};
+          for (const m of (grype.matches || [])) {
+            const purl = m.artifact?.purl;
+            const sev  = m.vulnerability?.severity;
+            if (!purl || !sev) continue;
+            (vulnsByPurl[purl] ||= { count: 0, maxSeverity: null, vulns: [] });
+            const bucket = vulnsByPurl[purl];
+            bucket.count++;
+            if (!bucket.maxSeverity || sevOrder.indexOf(sev) > sevOrder.indexOf(bucket.maxSeverity)) {
+              bucket.maxSeverity = sev;
+            }
+            bucket.vulns.push({
+              id: m.vulnerability?.id,
+              severity: sev,
+              link: m.vulnerability?.dataSource || null
             });
           }
-          
+
+          // --- Helper to compute a candidate NuGet PURL if SBOM lacks one ---
+          const makeNugetPurl = (id, version) => version ? `pkg:nuget/${id}@${version}` : null;
+
+          // --- Assemble records from outdated map (ensures we include all NuGet packages) ---
+          const records = [];
+          for (const [id, val] of Object.entries(outdated)) {
+            const idLC = id.toLowerCase();
+            const current = val.current ?? val.resolvedVersion ?? val.version ?? null;
+            const latest = latestMap[idLC] ?? current;
+
+            // Try to find a matching SBOM component (best effort name match)
+            const comp = byNameLC[idLC];
+            const ref  = comp ? (comp['bom-ref'] || comp.purl || comp.name) : null;
+            const license = comp?.licenses?.[0]?.license?.id || null;
+
+            // purl for vuln join (from SBOM if present, else best-effort nuget purl)
+            const purl = comp?.purl || makeNugetPurl(id, current);
+            const vul = purl && vulnsByPurl[purl]
+              ? vulnsByPurl[purl]
+              : { count: 0, maxSeverity: null, vulns: [] };
+
+            records.push({
+              id,
+              name: id,                 // display
+              version: current,
+              latest,
+              license,
+              purl,
+              requiredBy: ref ? findRequiredBy(ref) : [],
+              vulnCount: vul.count,
+              maxSeverity: vul.maxSeverity,
+              vulnerabilities: vul.vulns,
+              isTopLevel: topLevel.has(idLC)
+            });
+          }
+
+          // --- Split into top-level and transitive, drop helper fields ---
+          const top = records.filter(r => r.isTopLevel).map(({isTopLevel, id, purl, ...x}) => x);
+          const trans = records.filter(r => !r.isTopLevel).map(({isTopLevel, id, purl, ...x}) => x);
+
           const summary = {
             application: process.cwd().split('/').pop(),
             generated: new Date().toISOString(),
-            topLevel:   all.filter(x => x.isTopLevel).map(({isTopLevel, ...r}) => r),
-            transitive: all.filter(x => !x.isTopLevel).map(({isTopLevel, ...r}) => r)
+            topLevel: top,
+            transitive: trans
           };
-          
-          fs.writeFileSync('summary.json', JSON.stringify(summary, null, 2));
-          console.log(`summary.json generated from NuGet:
-            topLevel: ${summary.topLevel.length}
-            transitive: ${summary.transitive.length}`);
-          EOF
 
+          fs.writeFileSync('summary.json', JSON.stringify(summary, null, 2));
+          console.log(`summary.json generated with vulnerabilities:
+            topLevel: ${top.length}, transitive: ${trans.length}`);
+          EOF
+      
       # ------------------------
       # Push json file → central dashboard
       # ------------------------
