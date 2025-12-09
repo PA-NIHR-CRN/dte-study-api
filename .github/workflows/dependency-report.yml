@@ -59,9 +59,6 @@ jobs:
 
       - name: Add Nuget Source
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
-
-      - name: Show NuGet sources
-        run: dotnet nuget list source
         
       - name: Restore packages
         run: dotnet restore BPOR/BPOR.sln
@@ -76,7 +73,7 @@ jobs:
       - name: Human-readable check
         run: dotnet list BPOR/BPOR.sln package --outdated --include-transitive
           
-      - name: Inspect raw.json (first 200 chars)
+      - name: Inspect raw.json (first 1000 chars)
         run: head -c 200 raw.json || true
 
       # Convert dotnet JSON → the simple map your dashboard builder expects
@@ -84,12 +81,32 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Transform raw.json to outdated.json
         run: |
           node << 'EOF'
           const fs = require('fs');
-
-          // --------- Helpers (very loose semver-ish compare for numeric parts) ----------
+          
+          // Read raw.json
+          const text = fs.readFileSync('raw.json', 'utf8').trim();
+          if (!text) {
+            fs.writeFileSync('outdated.json', '{}');
+            process.exit(0);
+          }
+          
+          let data;
+          try { data = JSON.parse(text); }
+          catch { fs.writeFileSync('outdated.json', '{}'); process.exit(0); }
+          
+          // Helper: collect package entries from a framework node
+          function collectFrameworkPkgs(fw) {
+            const out = [];
+            if (Array.isArray(fw.topLevelPackages)) out.push(...fw.topLevelPackages);
+            if (Array.isArray(fw.transitivePackages)) out.push(...fw.transitivePackages);
+            return out;
+          }
+          
+          // Simple semver-ish compare (numerical components only)
           function splitVer(v){ return (v||'').split(/[^\d]+/).map(s => s === '' ? -1 : parseInt(s, 10)).filter(n => n >= 0); }
           function cmp(a,b){
             const A = splitVer(a), B = splitVer(b);
@@ -100,49 +117,38 @@ jobs:
             }
             return 0;
           }
-          function pickHigher(a,b){ if (!a) return b; if (!b) return a; return cmp(a,b) >= 0 ? a : b; }
-          function pickLower(a,b){ if (!a) return b; if (!b) return a; return cmp(a,b) <= 0 ? a : b; }
-
-          // --------- Load "dotnet package list --outdated --format json" output ----------
-          const text = fs.readFileSync('raw.json','utf8').trim();
-          if (!text) { fs.writeFileSync('outdated.json', '{}'); process.exit(0); }
-
-          let data;
-          try { data = JSON.parse(text); } catch (e) {
-            console.error('Failed to parse raw.json as JSON'); process.exit(0);
-          }
-
-          // Structure from dotnet JSON: { version, parameters, projects: [ { path, frameworks: [ { framework, topLevelPackages:[], transitivePackages:[] } ] } ] }
-          const out = {}; // { packageId: { current, latest } }
-
-          const pkgLists = (fw) => {
-            const lists = [];
-            if (Array.isArray(fw.topLevelPackages)) lists.push(...fw.topLevelPackages);
-            if (Array.isArray(fw.transitivePackages)) lists.push(...fw.transitivePackages);
-            return lists;
-          };
-
-          (data.projects || []).forEach(p => {
-            (p.frameworks || []).forEach(fw => {
-              pkgLists(fw).forEach(pkg => {
+          const pickHigher = (a,b) => (!a ? b : !b ? a : (cmp(a,b) >= 0 ? a : b));
+          const pickLower  = (a,b) => (!a ? b : !b ? a : (cmp(a,b) <= 0 ? a : b));
+          
+          // Build map: { packageId: { current, latest } }
+          const result = {};
+          
+          const projects = Array.isArray(data.projects) ? data.projects : [];
+          projects.forEach(p => {
+            const frameworks = Array.isArray(p.frameworks) ? p.frameworks : [];
+            frameworks.forEach(fw => {
+              collectFrameworkPkgs(fw).forEach(pkg => {
+                // dotnet list package JSON fields:
+                // id, requestedVersion (tl only), resolvedVersion, latestVersion
                 const id = pkg.id || pkg.name;
                 const current = pkg.resolvedVersion || pkg.version || null;
                 const latest  = pkg.latestVersion  || pkg.latest  || null;
+          
                 if (!id || (!current && !latest)) return;
-
-                if (!out[id]) {
-                  out[id] = { current, latest };
+          
+                if (!result[id]) {
+                  result[id] = { current, latest };
                 } else {
-                  // If multiple projects/frameworks, keep the "oldest" current and the "newest" latest we see
-                  out[id].current = pickLower(out[id].current, current);
-                  out[id].latest  = pickHigher(out[id].latest, latest);
+                  result[id].current = pickLower(result[id].current, current);
+                  result[id].latest  = pickHigher(result[id].latest, latest);
                 }
               });
             });
           });
-
-          fs.writeFileSync('outdated.json', JSON.stringify(out, null, 2));
+          
+          fs.writeFileSync('outdated.json', JSON.stringify(result, null, 2));
           EOF
+
 
       # ------------------------
       # Select token (DEPENDENCY_DASHBOARD_TOKEN or CRNCC_AUTOMATION_PAT)
