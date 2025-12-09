@@ -71,7 +71,7 @@ jobs:
         run: |
           # Try the built-in CLI with JSON output (SDK >= 7.0.200)
           set -e
-          dotnet package list --outdated --include-transitive --format json > raw.json
+          dotnet package list --project BPOR/BPOR.sln --outdated --include-transitive --format json > raw.json
 
       # Convert dotnet JSON → the simple map your dashboard builder expects
       - name: Build outdated.json
