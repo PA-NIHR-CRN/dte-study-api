@@ -30,6 +30,20 @@ jobs:
           ref: rework-added-RMS
 
       # ------------------------
+      # Collect version information (NuGet / .NET)
+      # ------------------------
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'   # JSON output supported on SDK >= 7.0.200
+
+      - name: Add Nuget Source
+        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+        
+      - name: Restore packages
+        run: dotnet restore BPOR/BPOR.sln
+        
+      # ------------------------
       # SBOM (Syft)
       # ------------------------
       - name: Install Syft
@@ -49,32 +63,11 @@ jobs:
       - name: Scan vulnerabilities
         run: grype sbom:sbom.json -o json > grype-output.json
 
-      # ------------------------
-      # Collect version information (NuGet / .NET)
-      # ------------------------
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'   # JSON output supported on SDK >= 7.0.200
-
-      - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
-        
-      - name: Restore packages
-        run: dotnet restore BPOR/BPOR.sln
-
       # Emit outdated packages as JSON
       - name: Detect outdated NuGet packages (JSON)
         run: |
           set -e
           dotnet list BPOR/BPOR.sln package --outdated --include-transitive --format json > raw.json
-
-      #DEBUG STEPS
-      - name: Human-readable check
-        run: dotnet list BPOR/BPOR.sln package --outdated --include-transitive
-          
-      - name: Inspect raw.json (first 1000 chars)
-        run: head -c 1000 raw.json || true
 
       # Convert dotnet JSON → the simple map your dashboard builder expects
       - name: Build outdated.json
@@ -86,29 +79,30 @@ jobs:
         run: |
           node << 'EOF'
           const fs = require('fs');
-          
-          // Read raw.json
-          const text = fs.readFileSync('raw.json', 'utf8').trim();
+
+          // --- Load raw.json safely ---
+          let text = '';
+          try { text = fs.readFileSync('raw.json', 'utf8'); } catch {}
+          text = (text || '').trim();
           if (!text) {
             fs.writeFileSync('outdated.json', '{}');
             process.exit(0);
           }
-          
+
           let data;
           try { data = JSON.parse(text); }
           catch { fs.writeFileSync('outdated.json', '{}'); process.exit(0); }
-          
-          // Helper: collect package entries from a framework node
+
+          // --- Helpers ---
           function collectFrameworkPkgs(fw) {
-            const out = [];
-            if (Array.isArray(fw.topLevelPackages)) out.push(...fw.topLevelPackages);
-            if (Array.isArray(fw.transitivePackages)) out.push(...fw.transitivePackages);
-            return out;
+            const list = [];
+            if (Array.isArray(fw.topLevelPackages))   list.push(...fw.topLevelPackages);
+            if (Array.isArray(fw.transitivePackages)) list.push(...fw.transitivePackages);
+            return list;
           }
-          
-          // Simple semver-ish compare (numerical components only)
-          function splitVer(v){ return (v||'').split(/[^\d]+/).map(s => s === '' ? -1 : parseInt(s, 10)).filter(n => n >= 0); }
-          function cmp(a,b){
+          // numeric-only compare, keeps lowest "current" and highest "latest"
+          const splitVer = v => (v||'').split(/[^\d]+/).map(s => s === '' ? -1 : parseInt(s, 10)).filter(n => n >= 0);
+          const cmp = (a,b) => {
             const A = splitVer(a), B = splitVer(b);
             const len = Math.max(A.length, B.length);
             for (let i=0;i<len;i++){
@@ -116,40 +110,39 @@ jobs:
               if (x !== y) return x - y;
             }
             return 0;
-          }
+          };
           const pickHigher = (a,b) => (!a ? b : !b ? a : (cmp(a,b) >= 0 ? a : b));
           const pickLower  = (a,b) => (!a ? b : !b ? a : (cmp(a,b) <= 0 ? a : b));
-          
-          // Build map: { packageId: { current, latest } }
+
+          // --- Build { packageId: { current, latest } } ---
           const result = {};
-          
           const projects = Array.isArray(data.projects) ? data.projects : [];
-          projects.forEach(p => {
+
+          for (const p of projects) {
             const frameworks = Array.isArray(p.frameworks) ? p.frameworks : [];
-            frameworks.forEach(fw => {
-              collectFrameworkPkgs(fw).forEach(pkg => {
-                // dotnet list package JSON fields:
-                // id, requestedVersion (tl only), resolvedVersion, latestVersion
-                const id = pkg.id || pkg.name;
+            for (const fw of frameworks) {
+              for (const pkg of collectFrameworkPkgs(fw)) {
+                // Fields from dotnet list package --format json
+                const id      = pkg.id || pkg.name;
                 const current = pkg.resolvedVersion || pkg.version || null;
                 const latest  = pkg.latestVersion  || pkg.latest  || null;
-          
-                if (!id || (!current && !latest)) return;
-          
+
+                if (!id || (!current && !latest)) continue;
+
                 if (!result[id]) {
                   result[id] = { current, latest };
                 } else {
                   result[id].current = pickLower(result[id].current, current);
                   result[id].latest  = pickHigher(result[id].latest, latest);
                 }
-              });
-            });
-          });
-          
+              }
+            }
+          }
+
           fs.writeFileSync('outdated.json', JSON.stringify(result, null, 2));
+          console.log('Wrote outdated.json with', Object.keys(result).length, 'packages');
           EOF
-
-
+      
       # ------------------------
       # Select token (DEPENDENCY_DASHBOARD_TOKEN or CRNCC_AUTOMATION_PAT)
       # ------------------------
