@@ -12,16 +12,13 @@ on:
 env:
   REPO_NAME: ${{ github.event.repository.name }}
 
-permissions:
-  contents: read
-  packages: read
-
 jobs:
   sbom-and-dashboard:
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
+      packages: read
 
     steps:
       # ------------------------
