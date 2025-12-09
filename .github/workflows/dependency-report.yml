@@ -178,6 +178,16 @@ jobs:
       # ------------------------
       - name: Build summary JSON
         run: node build-summary.mjs
+        
+
+      - name: Show summary counters & sample
+        run: |
+          echo "---- summary.json (first 500 lines) ----"
+          sed -n '1,500p' summary.json || true
+          echo
+          echo "---- counts with jq ----"
+          jq '.topLevel | length as $t | .transitive | length as $x | {topLevel: $t, transitive: $x}' summary.json
+
 
       # ------------------------
       # Push json file → central dashboard
