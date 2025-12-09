@@ -29,7 +29,7 @@ jobs:
           ref: rework-added-RMS
           
       # ------------------------
-      # Setup .NET (pin to 8.x to avoid SDK 9 issue)
+      # Setup .NET
       # ------------------------
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -41,15 +41,14 @@ jobs:
         run: dotnet restore BPOR/BPOR.sln
 
       # ------------------------
-      # SBOM (Syft) + Vulnerabilities (Grype) [optional but recommended]
+      # SBOM (Syft) + Vulnerabilities (Grype)
       # ------------------------
-      - name: Install Syft
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
-            | sh -s -- -b /usr/local/bin
-      - name: Generate SBOM (CycloneDX JSON)
-        run: syft dir:. -o cyclonedx-json > sbom.json
-
+      - name: Install CycloneDX .NET tool
+        run: dotnet tool install --global CycloneDX
+    
+      - name: Generate SBOM (CycloneDX .NET)
+        run: ~/.dotnet/tools/dotnet-CycloneDX BPOR/BPOR.sln -o . --filename sbom.json --output-format json
+      
       - name: Install Grype
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
@@ -70,6 +69,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          
       - name: Build outdated-nuget.json
         run: |
           node << 'EOF'
