@@ -17,7 +17,8 @@ jobs:
 
     permissions:
       contents: write
-
+      packages: read
+      
     steps:
       # ------------------------
       # Checkout this application
