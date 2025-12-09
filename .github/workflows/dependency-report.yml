@@ -24,7 +24,9 @@ jobs:
       # ------------------------
       - name: Checkout app repo
         uses: actions/checkout@v4
-
+        with:
+          ref: rework-added-RMS
+          
       # ------------------------
       # Setup .NET (pin to 8.x to avoid SDK 9 issue)
       # ------------------------
