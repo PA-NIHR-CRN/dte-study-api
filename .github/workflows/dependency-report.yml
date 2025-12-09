@@ -74,7 +74,7 @@ jobs:
         run: dotnet list BPOR/BPOR.sln package --outdated --include-transitive
           
       - name: Inspect raw.json (first 1000 chars)
-        run: head -c 200 raw.json || true
+        run: head -c 1000 raw.json || true
 
       # Convert dotnet JSON → the simple map your dashboard builder expects
       - name: Build outdated.json
