@@ -1,10 +1,9 @@
 
-name: Dependency Report
+name: Dependency Report (.NET)
 
 on:
   push:
-    branches:
-      - i/3rd-party-dashboard
+    branches: [ i/3rd-party-dashboard ]
   schedule:
     - cron: "0 8 * * *"
   workflow_dispatch:
@@ -18,7 +17,6 @@ jobs:
 
     permissions:
       contents: write
-      packages: read
 
     steps:
       # ------------------------
@@ -26,74 +24,59 @@ jobs:
       # ------------------------
       - name: Checkout app repo
         uses: actions/checkout@v4
-        with:
-          ref: rework-added-RMS
 
       # ------------------------
-      # Collect version information (NuGet / .NET)
+      # Setup .NET (pin to 8.x to avoid SDK 9 issue)
       # ------------------------
-      - name: Setup .NET
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'   # JSON output supported on SDK >= 7.0.200
-
+          dotnet-version: '8.0.x' 
       - name: Add Nuget Source
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
-        
       - name: Restore packages
         run: dotnet restore BPOR/BPOR.sln
-        
+
       # ------------------------
-      # SBOM (Syft)
+      # SBOM (Syft) + Vulnerabilities (Grype) [optional but recommended]
       # ------------------------
       - name: Install Syft
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
             | sh -s -- -b /usr/local/bin
-      - name: Generate SBOM
+      - name: Generate SBOM (CycloneDX JSON)
         run: syft dir:. -o cyclonedx-json > sbom.json
 
-      # ------------------------
-      # Vulnerabilities (Grype)
-      # ------------------------
       - name: Install Grype
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
             | sh -s -- -b /usr/local/bin
-      - name: Scan vulnerabilities
+      - name: Scan SBOM with Grype (JSON)
         run: grype sbom:sbom.json -o json > grype-output.json
 
-      # Emit outdated packages as JSON
-      - name: Detect outdated NuGet packages (JSON)
-        run: |
-          set -e
-          dotnet list BPOR/BPOR.sln package --outdated --include-transitive --format json > raw.json
+      # ------------------------
+      # Built-in NuGet vulnerability & latest version data
+      # ------------------------
+      - name: Audit vulnerable NuGet packages (JSON)
+        run: dotnet list BPOR/BPOR.sln package --vulnerable --include-transitive --format json > vulnerable-nuget.json
 
-      # Convert dotnet JSON → the simple map your dashboard builder expects
-      - name: Build outdated.json
+      - name: Detect NuGet packages (resolved & latest) as JSON
+        run: dotnet list BPOR/BPOR.sln package --include-transitive --format json > raw-nuget.json
+
+      - name: Transform raw-nuget.json → outdated-nuget.json
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Transform raw.json to outdated.json
+      - name: Build outdated-nuget.json
         run: |
           node << 'EOF'
           const fs = require('fs');
 
-          // --- Load raw.json safely ---
           let text = '';
-          try { text = fs.readFileSync('raw.json', 'utf8'); } catch {}
-          text = (text || '').trim();
-          if (!text) {
-            fs.writeFileSync('outdated.json', '{}');
-            process.exit(0);
-          }
+          try { text = fs.readFileSync('raw-nuget.json', 'utf8'); } catch {}
+          let data = {};
+          try { data = JSON.parse(text || '{}'); } catch {}
 
-          let data;
-          try { data = JSON.parse(text); }
-          catch { fs.writeFileSync('outdated.json', '{}'); process.exit(0); }
-
-          // --- Helpers ---
           function collectFrameworkPkgs(fw) {
             const list = [];
             if (Array.isArray(fw.topLevelPackages))   list.push(...fw.topLevelPackages);
@@ -114,19 +97,13 @@ jobs:
           const pickHigher = (a,b) => (!a ? b : !b ? a : (cmp(a,b) >= 0 ? a : b));
           const pickLower  = (a,b) => (!a ? b : !b ? a : (cmp(a,b) <= 0 ? a : b));
 
-          // --- Build { packageId: { current, latest } } ---
           const result = {};
-          const projects = Array.isArray(data.projects) ? data.projects : [];
-
-          for (const p of projects) {
-            const frameworks = Array.isArray(p.frameworks) ? p.frameworks : [];
-            for (const fw of frameworks) {
+          for (const p of (data.projects || [])) {
+            for (const fw of (p.frameworks || [])) {
               for (const pkg of collectFrameworkPkgs(fw)) {
-                // Fields from dotnet list package --format json
                 const id      = pkg.id || pkg.name;
                 const current = pkg.resolvedVersion || pkg.version || null;
                 const latest  = pkg.latestVersion  || pkg.latest  || null;
-
                 if (!id || (!current && !latest)) continue;
 
                 if (!result[id]) {
@@ -139,29 +116,26 @@ jobs:
             }
           }
 
-          fs.writeFileSync('outdated.json', JSON.stringify(result, null, 2));
-          console.log('Wrote outdated.json with', Object.keys(result).length, 'packages');
+          fs.writeFileSync('outdated-nuget.json', JSON.stringify(result, null, 2));
+          console.log('Wrote outdated-nuget.json with', Object.keys(result).length, 'packages');
           EOF
-      
+
       # ------------------------
-      # Select token (DEPENDENCY_DASHBOARD_TOKEN or CRNCC_AUTOMATION_PAT)
+      # Select dashboard token (two possible secrets)
       # ------------------------
       - name: Select dashboard token
         run: |
           if [ -n "${{ secrets.DEPENDENCY_DASHBOARD_TOKEN }}" ]; then
-            echo "Using DEPENDENCY_DASHBOARD_TOKEN"
             echo "DASHBOARD_TOKEN=${{ secrets.DEPENDENCY_DASHBOARD_TOKEN }}" >> $GITHUB_ENV
           elif [ -n "${{ secrets.CRNCC_AUTOMATION_PAT }}" ]; then
-            echo "Using CRNCC_AUTOMATION_PAT"
             echo "DASHBOARD_TOKEN=${{ secrets.CRNCC_AUTOMATION_PAT }}" >> $GITHUB_ENV
           else
             echo "❌ ERROR: No DEPENDENCY_DASHBOARD_TOKEN or CRNCC_AUTOMATION_PAT available."
             exit 1
           fi
-      
-      
+
       # ------------------------
-      # Download builder script
+      # Download unified builder (works for both Node & .NET repos)
       # ------------------------
       - name: Download build-summary.mjs from dashboard repo
         run: |
@@ -174,11 +148,11 @@ jobs:
           fi
 
       # ------------------------
-      # Build summary.json
+      # Build summary.json (merges SBOM/Grype + NuGet data)
       # ------------------------
       - name: Build summary JSON
         run: node build-summary.mjs
-      
+
       # ------------------------
       # Push json file → central dashboard
       # ------------------------
