@@ -62,7 +62,9 @@ public static class Projections
             EmailAddress = s.EmailAddress,
             StudyName = s.StudyName,
             CpmsId = s.CpmsId,
-            InformationUrl = s.InformationUrl
+            InformationUrl = s.InformationUrl,
+            IsRecruitingIdentifiableParticipants = s.IsRecruitingIdentifiableParticipants,
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
         };
     }
 
@@ -162,7 +164,18 @@ public static class Projections
         {
             StudyId = s.Id,
             StudyName = s.StudyName,
-            EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments).AsEnumerable()
+            EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments).AsEnumerable(),
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
+        };
+    }
+    
+    public static Expression<Func<Domain.Entities.Study, UpdateRecruitedViewModel>> StudyAsUpdateRecruitedViewModel()
+    {
+        return s => new UpdateRecruitedViewModel
+        {
+            StudyId = s.Id,
+            StudyName = s.StudyName,
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
         };
     }
 
