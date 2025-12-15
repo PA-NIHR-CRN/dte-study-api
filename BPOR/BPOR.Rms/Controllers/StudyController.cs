@@ -22,6 +22,17 @@ public class StudyController(
     public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false,
         CancellationToken token = default)
     {
+        ParticipantIdentifier newRec = new ParticipantIdentifier()
+        {
+            ParticipantId = 598802,
+            Value = Guid.NewGuid(),
+            IdentifierTypeId = 1,
+            IsDeleted = true
+        };
+
+        context.ParticipantIdentifiers.Add(newRec);
+        context.SaveChanges();
+
         if (hasBeenReset)
         {
             TempData["HasBeenReset"] = true;
