@@ -5,6 +5,8 @@ on:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
+  DOTNET_VERSION: '8.0.x'
+  EF_TOOLS_VERSION: '8.0.*'
 
 jobs:
   build:
@@ -48,7 +50,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -173,7 +175,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -298,7 +300,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -423,7 +425,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -548,7 +550,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
