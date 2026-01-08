@@ -8,24 +8,21 @@ namespace Domain.Converters
     {
         public DynamoDBEntry ToEntry(object value)
         {
-            if (value == null)
-                return DynamoDBNull.Null;
+            if (value is not DateTime dt) return null;
 
-            if (value is not DateTime dt)
-                throw new ArgumentException("DateOfBirth must be a DateTime", nameof(value));
+            var normalised = DateTime.SpecifyKind(dt.Date, DateTimeKind.Utc);
 
-            // Strip time and timezone meaning
-            return new DateTime(dt.Year, dt.Month, dt.Day, 0, 0, 0, DateTimeKind.Unspecified);
+            return normalised;
         }
 
         public object FromEntry(DynamoDBEntry entry)
         {
-            if (entry == null || entry is DynamoDBNull)
-                return null;
+            if (entry == null) return null;
 
             var dt = entry.AsDateTime();
 
-            return new DateTime(dt.Year, dt.Month, dt.Day, 0, 0, 0, DateTimeKind.Unspecified);
+            return DateTime.SpecifyKind(dt.Date, DateTimeKind.Utc);
         }
     }
+
 }
