@@ -18,7 +18,7 @@ public class Participant
     [DynamoDBProperty] public string SessionId { get; set; }
     [DynamoDBProperty] public string NhsNumber { get; set; }
     [DynamoDBProperty] public bool ConsentRegistration { get; set; }
-    [DynamoDBProperty] public DateTime? DateOfBirth { get; set; }
+    [DynamoDBProperty(typeof(DateOfBirthConverter))] public DateTime? DateOfBirth { get; set; }
     [DynamoDBProperty] public string MfaChangePhoneCode { get; set; }
     [DynamoDBProperty] public DateTime? MfaChangePhoneCodeExpiry { get; set; }
     [DynamoDBProperty(typeof(DateTimeUtcConverter))] public DateTime? ConsentRegistrationAtUtc { get; set; }
