@@ -68,7 +68,7 @@ jobs:
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
       - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef --version ${{ env.EF_TOOLS_VERSION }}
+        run: dotnet tool install --global dotnet-ef --version 8.0.22
 
       - name: Restore dependencies
         run: dotnet restore BPOR/BPOR.sln
@@ -193,7 +193,7 @@ jobs:
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
       - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef --version ${{ env.EF_TOOLS_VERSION }}
+        run: dotnet tool install --global dotnet-ef --version 8.0.22
 
       - name: Restore dependencies
         run: dotnet restore BPOR/BPOR.sln
@@ -318,7 +318,7 @@ jobs:
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
       - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef --version ${{ env.EF_TOOLS_VERSION }}
+        run: dotnet tool install --global dotnet-ef --version 8.0.22
 
       - name: Restore dependencies
         run: dotnet restore BPOR/BPOR.sln
@@ -443,7 +443,7 @@ jobs:
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
       - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef --version ${{ env.EF_TOOLS_VERSION }}
+        run: dotnet tool install --global dotnet-ef --version 8.0.22
 
       - name: Restore dependencies
         run: dotnet restore BPOR/BPOR.sln
@@ -568,7 +568,7 @@ jobs:
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
       - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef --version ${{ env.EF_TOOLS_VERSION }}
+        run: dotnet tool install --global dotnet-ef --version 8.0.22
 
       - name: Restore dependencies
         run: dotnet restore BPOR/BPOR.sln

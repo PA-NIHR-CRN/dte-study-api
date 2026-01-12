@@ -143,8 +143,20 @@ public class ParticipantMapper : IParticipantMapper
         destination.DailyLifeImpactId = _refDataService.GetDailyLifeImpactId(source.DisabilityDescription);
         destination.CreatedAt = source.CreatedAtUtc;
         destination.UpdatedAt = source.UpdatedAtUtc.HasValue ? source.UpdatedAtUtc.Value : source.CreatedAtUtc;
-        destination.Stage2CompleteUtc = source.Stage2CompleteUtc;
-        destination.IsStage2CompleteUtcBackfilled = source.IsStage2CompleteUtcBackfilled ?? false;
+
+        #region CRNCC-2718
+        // CRNCC-2718 - Only copy stage 2 complete values if the reporting database does not already hold a value
+        if (destination.Stage2CompleteUtc is null && source.Stage2CompleteUtc.HasValue)
+        {
+            destination.Stage2CompleteUtc = source.Stage2CompleteUtc;
+            destination.IsStage2CompleteUtcBackfilled = false;
+        }
+
+        if (source.IsStage2CompleteUtcBackfilled.HasValue)
+        {
+            destination.IsStage2CompleteUtcBackfilled = source.IsStage2CompleteUtcBackfilled.Value;
+        }
+        #endregion
 
         if (!destination.SourceReferences.Any(x => x.Pk == record.PK()))
         {
