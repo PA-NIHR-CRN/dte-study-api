@@ -26,6 +26,11 @@
     <script>
         document.body.className += 'js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
     </script>
+
+    <section id="cookies" class="bg-athens cookie-warning no-print" aria-label="Cookie Banner">
+        <partial name="_CookieBanner.cshtml" />
+    </section>
+
     <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 
     <partial name="_Header" />
@@ -49,6 +54,9 @@
         initAll()
     </script>
     <script src="~/js/nihr-ui.js" asp-append-version="true"></script>
+    <script src="~/_content/NIHR.GovUk.AspNetCore.Mvc/javascripts/cookies.min.js" asp-append-version="true"></script>
+    <script src="~/_content/NIHR.GovUk.AspNetCore.Mvc/javascripts/cookie-banner.js" asp-append-version="true"></script>
+    <script src="~/js/bpor-cookie-banner.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

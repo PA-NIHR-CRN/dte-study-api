@@ -25,6 +25,7 @@ using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
 using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
+using NIHR.GovUk.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Startup;
 
@@ -66,7 +67,7 @@ public static class DependencyInjection
 
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
-        
+
         services.AddDistributedMemoryCache();
         services.AddPaging();
         services.AddDataProtection();
@@ -126,6 +127,17 @@ public static class DependencyInjection
 
         var govNotifySettings = services.GetSectionAndValidate<NotificationServiceSettings>(configuration);
         services.AddSingleton(new NotificationClient(govNotifySettings.Value.ApiKey));
+
+        services.AddGovUk(options =>
+        {
+            options.ServiceName = "Be Part of Research";
+            options.Cookies.Mode = CookieMode.Additional;
+            options.Cookies.PolicyLink = configuration.GetValue<string>("CookieOptions:PolicyLink");
+            if (string.IsNullOrWhiteSpace(options.Cookies.PolicyLink))
+            {
+                logger?.LogWarning("CookieOptions.PolicyLink is not configured.");
+            }
+        });
 
         if (hostEnvironment.IsDevelopment())
         {
