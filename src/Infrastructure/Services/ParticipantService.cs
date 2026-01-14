@@ -479,8 +479,8 @@ public class ParticipantService : IParticipantService
         await _participantRepository.UpdateParticipantDemographicsAsync(entity);
     }
 
-    public static DateTime NormaliseDob(DateTime dt)
+    public static DateOnly NormaliseDob(DateTime dt)
     {
-        return dt.ToUniversalTime().Date;
+        return new DateOnly(dt.Year, dt.Month, dt.Day);
     }
 }
