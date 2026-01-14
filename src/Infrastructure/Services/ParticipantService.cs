@@ -194,6 +194,7 @@ public class ParticipantService : IParticipantService
         if (participant.DateOfBirth.HasValue && request.DateOfBirth.HasValue &&
             NormaliseDob(participant.DateOfBirth.Value) == NormaliseDob(request.DateOfBirth.Value))
         {
+            _logger.LogInformation("DateOfBirth matched");
             await CreateUserAndDeactivateOldUserAsync(request, participant);
         }
         else
