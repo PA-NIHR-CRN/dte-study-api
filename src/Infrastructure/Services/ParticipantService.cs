@@ -192,7 +192,7 @@ public class ParticipantService : IParticipantService
         }
         // check if string version of date of birth matches without time
         if (participant.DateOfBirth.HasValue && request.DateOfBirth.HasValue &&
-            NormaliseDob(participant.DateOfBirth.Value.Date) == NormaliseDob(request.DateOfBirth.Value.Date))
+            NormaliseDob(participant.DateOfBirth.Value) == NormaliseDob(request.DateOfBirth.Value))
         {
             await CreateUserAndDeactivateOldUserAsync(request, participant);
         }
