@@ -192,9 +192,9 @@ public class ParticipantService : IParticipantService
         }
         // check if string version of date of birth matches without time
         if (participant.DateOfBirth.HasValue && request.DateOfBirth.HasValue &&
-            participant.DateOfBirth.Value.Date ==
-            request.DateOfBirth.Value.Date)
+            NormaliseDob(participant.DateOfBirth.Value) == NormaliseDob(request.DateOfBirth.Value))
         {
+            _logger.LogInformation("DateOfBirth matched");
             await CreateUserAndDeactivateOldUserAsync(request, participant);
         }
         else
@@ -478,5 +478,10 @@ public class ParticipantService : IParticipantService
         }
 
         await _participantRepository.UpdateParticipantDemographicsAsync(entity);
+    }
+
+    public static DateOnly NormaliseDob(DateTime dt)
+    {
+        return new DateOnly(dt.Year, dt.Month, dt.Day);
     }
 }

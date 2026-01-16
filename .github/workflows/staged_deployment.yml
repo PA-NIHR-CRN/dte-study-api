@@ -8,16 +8,13 @@ jobs:
     environment: DEV
     steps:
       - uses: actions/checkout@v4
-      - name: Configure AWS credentials - All
-        # if: github.ref == 'refs/heads/main'
+
+      - name: Configure AWS credentials - DEV
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
           aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Build Run Number and Build Id
-        run: echo ${{ github.run_number }}-${{ github.run_id }}
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
@@ -30,144 +27,178 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
 
+      - name: Show resolved Dte.Common version
+        run: dotnet list src/StudyApi package --include-transitive | grep Dte.Common
+
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal
 
-      - name: Deploy
+      - name: Inspect built Dte.Common.dll
+        run: |
+          DLL=$(find src -name "Dte.Common.dll" | head -n 1)
+          echo "Found DLL at: $DLL"
+          ls -lh "$DLL"
+          pwsh -c "[System.Reflection.AssemblyName]::GetAssemblyName('$DLL').FullName"
+
+      - name: Deploy DEV
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./src/StudyApi crnccd-lambda-dev-dte-study-api --function-role crnccd-iam-dev-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=DEV-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccd-secret-dev-dte-study-api" --function-publish true
+          dotnet lambda deploy-function \
+            --region ${{ secrets.AWS_REGION }} \
+            -pl ./src/StudyApi \
+            crnccd-lambda-dev-dte-study-api \
+            --function-role crnccd-iam-dev-dte-role \
+            --s3-bucket crnccd-s3-dev-lambda-artifacts \
+            --s3-prefix dte-study-api \
+            -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=DEV-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccd-secret-dev-dte-study-api" \
+            --function-publish true
 
-      - name: Update alias to point to new version
+      - name: Update alias
         run: |
           VERSION=$(aws lambda list-versions-by-function --function-name crnccd-lambda-dev-dte-study-api --query "Versions[-1]" | jq -r .Version)
           aws lambda update-alias --function-name crnccd-lambda-dev-dte-study-api --name main --function-version $VERSION
-          
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: reference-data-api-artifact
-          path: src/StudyApi/bin/Release/net6.0/publish/
-        
+
   QA_deploy:
     runs-on: ubuntu-latest
     needs: dev_build_test_deploy
     environment: QA
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v2
-        with:
-          name: reference-data-api-artifact
-          path: src/StudyApi/bin/Release/net6.0/publish/
-      - name: Configure AWS credentials - All
+
+      - name: Configure AWS credentials - QA
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_ID }}
           aws-secret-access-key: ${{ secrets.NIHR_GITHUB_ACTIONS_IAM_SECRET }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Add Nuget Source
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
-      - name: Deploy
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Show resolved Dte.Common version
+        run: dotnet list src/StudyApi package --include-transitive | grep Dte.Common
+
+      - name: Deploy QA
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./src/StudyApi crnccd-lambda-test-dte-study-api --function-role crnccd-iam-test-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=test-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccd-secret-test-dte-study-api" --function-publish true
+          dotnet lambda deploy-function \
+            --region ${{ secrets.AWS_REGION }} \
+            -pl ./src/StudyApi \
+            crnccd-lambda-test-dte-study-api \
+            --function-role crnccd-iam-test-dte-role \
+            --s3-bucket crnccd-s3-test-lambda-artifacts \
+            --s3-prefix dte-study-api \
+            -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=QA-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccd-secret-test-dte-study-api" \
+            --function-publish true
 
-      - name: Update alias to point to new version
+      - name: Update alias
         run: |
           VERSION=$(aws lambda list-versions-by-function --function-name crnccd-lambda-test-dte-study-api --query "Versions[-1]" | jq -r .Version)
           aws lambda update-alias --function-name crnccd-lambda-test-dte-study-api --name main --function-version $VERSION
-          
+
   UAT_deploy:
     runs-on: ubuntu-latest
     needs: QA_deploy
     environment: UAT
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v2
+      - uses: actions/setup-dotnet@v4
         with:
-          name: reference-data-api-artifact
-          path: src/StudyApi/bin/Release/net6.0/publish/
-      - name: Configure AWS credentials - All
-        uses: aws-actions/configure-aws-credentials@v4
+          dotnet-version: '6.0.x'
+
+      - run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+      - run: dotnet restore
+      - run: dotnet list src/StudyApi package --include-transitive | grep Dte.Common
+
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
-      - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
-      - name: Deploy
-        run: |
+      - run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./src/StudyApi crnccs-lambda-uat-dte-study-api --function-role crnccs-iam-uat-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=UAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccs-secret-uat-dte-study-api" --function-publish true
+          dotnet lambda deploy-function \
+            --region ${{ secrets.AWS_REGION }} \
+            -pl ./src/StudyApi \
+            crnccs-lambda-uat-dte-study-api \
+            --function-role crnccs-iam-uat-dte-role \
+            --s3-bucket crnccs-s3-uat-lambda-artifacts \
+            --s3-prefix dte-study-api \
+            -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=UAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccs-secret-uat-dte-study-api" \
+            --function-publish true
 
-      - name: Update alias to point to new version
-        run: |
-          VERSION=$(aws lambda list-versions-by-function --function-name crnccs-lambda-uat-dte-study-api --query "Versions[-1]" | jq -r .Version)
-          aws lambda update-alias --function-name crnccs-lambda-uat-dte-study-api --name main --function-version $VERSION
-          
   OAT_deploy:
     runs-on: ubuntu-latest
     needs: UAT_deploy
     environment: OAT
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v2
+      - uses: actions/setup-dotnet@v4
         with:
-          name: reference-data-api-artifact
-          path: src/StudyApi/bin/Release/net6.0/publish/
-      - name: Configure AWS credentials - All
-        uses: aws-actions/configure-aws-credentials@v4
+          dotnet-version: '6.0.x'
+
+      - run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+      - run: dotnet restore
+      - run: dotnet list src/StudyApi package --include-transitive | grep Dte.Common
+
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
-
-      - name: Deploy
-        run: |
+      - run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./src/StudyApi crnccp-lambda-oat-dte-study-api --function-role crnccp-iam-oat-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=OAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccp-secret-oat-dte-study-api" --function-publish true
+          dotnet lambda deploy-function \
+            --region ${{ secrets.AWS_REGION }} \
+            -pl ./src/StudyApi \
+            crnccp-lambda-oat-dte-study-api \
+            --function-role crnccp-iam-oat-dte-role \
+            --s3-bucket crnccp-s3-oat-lambda-artifacts \
+            --s3-prefix dte-study-api \
+            -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=OAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccp-secret-oat-dte-study-api" \
+            --function-publish true
 
-      - name: Update alias to point to new version
-        run: |
-          VERSION=$(aws lambda list-versions-by-function --function-name crnccp-lambda-oat-dte-study-api --query "Versions[-1]" | jq -r .Version)
-          aws lambda update-alias --function-name crnccp-lambda-oat-dte-study-api --name main --function-version $VERSION
-          
   PROD_deploy:
     runs-on: ubuntu-latest
     needs: OAT_deploy
     environment: PROD
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v2
+      - uses: actions/setup-dotnet@v4
         with:
-          name: reference-data-api-artifact
-          path: src/StudyApi/bin/Release/net6.0/publish/
-      - name: Configure AWS credentials - All
-        uses: aws-actions/configure-aws-credentials@v4
+          dotnet-version: '6.0.x'
+
+      - run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
+      - run: dotnet restore
+      - run: dotnet list src/StudyApi package --include-transitive | grep Dte.Common
+
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
-      - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
-      - name: Deploy
-        run: |
+      - run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./src/StudyApi crnccp-lambda-prod-dte-study-api --function-role crnccp-iam-prod-dte-role -ev "ASPNETCORE_ENVIRONMENT=Production;DTE_BUILD_STRING=PROD-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccp-secret-prod-dte-study-api" --function-publish true
-
-      - name: Update alias to point to new version
-        run: |
-          VERSION=$(aws lambda list-versions-by-function --function-name crnccp-lambda-prod-dte-study-api --query "Versions[-1]" | jq -r .Version)
-          aws lambda update-alias --function-name crnccp-lambda-prod-dte-study-api --name main --function-version $VERSION
+          dotnet lambda deploy-function \
+            --region ${{ secrets.AWS_REGION }} \
+            -pl ./src/StudyApi \
+            crnccp-lambda-prod-dte-study-api \
+            --function-role crnccp-iam-prod-dte-role \
+            --s3-bucket crnccp-s3-prod-lambda-artifacts \
+            --s3-prefix dte-study-api \
+            -ev "ASPNETCORE_ENVIRONMENT=Production;DTE_BUILD_STRING=PROD-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccp-secret-prod-dte-study-api" \
+            --function-publish true
