@@ -13,12 +13,12 @@ using Microsoft.Extensions.Options;
 public class NhsAuthController : ControllerBase
 {
     private readonly INhsLoginStateStore _stateStore;
-    private readonly NhsLoginSettings _settings;
+    private readonly NhsLoginSettings nhsLoginSettings;
 
-    public NhsAuthController(INhsLoginStateStore stateStore, IOptions<NhsLoginSettings> settings)
+    public NhsAuthController(INhsLoginStateStore stateStore, IOptions<NhsLoginSettings> nhsLoginSettings)
     {
         _stateStore = stateStore;
-        _settings = settings.Value;
+        this.nhsLoginSettings = nhsLoginSettings.Value;
     }
 
     [AllowAnonymous]
@@ -31,11 +31,11 @@ public class NhsAuthController : ControllerBase
         await _stateStore.StoreAsync(state, nonce, ct);
 
         var url =
-            $"{_settings.BaseUrl}{_settings.AuthorizeEndpoint}"
-            + $"?client_id={Uri.EscapeDataString(_settings.ClientId)}"
-            + $"&scope={Uri.EscapeDataString(_settings.Scope)}"
+            $"{nhsLoginSettings.BaseUrl}{nhsLoginSettings.AuthorizeEndpoint}"
+            + $"?client_id={Uri.EscapeDataString(nhsLoginSettings.ClientId)}"
+            + $"&scope={Uri.EscapeDataString(nhsLoginSettings.Scope)}"
             + $"&response_type=code"
-            + $"&redirect_uri={Uri.EscapeDataString(_settings.RedirectUri)}"
+            + $"&redirect_uri={Uri.EscapeDataString(nhsLoginSettings.RedirectUri)}"
             + $"&state={Uri.EscapeDataString(state)}"
             + $"&nonce={Uri.EscapeDataString(nonce)}";
 
