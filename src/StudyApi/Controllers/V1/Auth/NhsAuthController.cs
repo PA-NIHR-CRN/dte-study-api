@@ -31,7 +31,7 @@ public class NhsAuthController : ControllerBase
         await _stateStore.StoreAsync(state, nonce, ct);
 
         var url =
-            $"{_settings.AuthorizeEndpoint}"
+            $"{_settings.BaseUrl}{_settings.AuthorizeEndpoint}"
             + $"?client_id={Uri.EscapeDataString(_settings.ClientId)}"
             + $"&scope={Uri.EscapeDataString(_settings.Scope)}"
             + $"&response_type=code"
