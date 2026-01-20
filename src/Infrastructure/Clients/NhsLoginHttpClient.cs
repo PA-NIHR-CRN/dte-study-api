@@ -50,17 +50,7 @@ namespace Infrastructure.Clients
                                 { "client_assertion", bearerToken }
                             }), cancellationToken);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var body = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger.LogError("NHS token endpoint error {Status}: {Body}", response.StatusCode, body);
-
-                throw new HttpRequestException(
-                    $"NHS token endpoint returned {(int)response.StatusCode}: {body}"
-                );
-            }
-
-            // response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode();
 
             var tokens = await response.Content.ReadFromJsonAsync<TokenResponse>(
                 cancellationToken: cancellationToken
