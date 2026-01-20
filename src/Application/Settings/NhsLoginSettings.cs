@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Application.Settings
+﻿namespace Application.Settings
 {
     public class NhsLoginSettings
     {
@@ -16,9 +10,13 @@ namespace Application.Settings
         // Private key must be supplied using either PemFilePath or PrivateKey.
         // If both are specified, PrivateKey takes precedence.
         // PemFilePath specifies the file path to the PEM file holding the private key.
-        public string PemFilePath { get; set; } 
+        public string PemFilePath { get; set; }
 
         // PrivateKey holds the key contents directly.
         public string PrivateKey { get; set; }
+
+        public string AuthorizeEndpoint { get; set; }
+        public string Scope { get; set; }
+        public string RedirectUri { get; set; }
     }
 }

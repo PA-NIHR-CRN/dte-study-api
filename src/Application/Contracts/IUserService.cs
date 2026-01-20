@@ -16,7 +16,7 @@ namespace Application.Contracts
     public interface IUserService
     {
         Task<Response<string>> LoginAsync(string email, string password);
-        Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl, string selectedLocale);
+        Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string state, string redirectUrl, string selectedLocale);
         Task<Response<SignUpResponse>> NhsSignUpAsync(bool consent, string selectedLocale, string token);
         Task<Response<object>> ConfirmSignUpAsync(string code, string userId);
         Task<Response<SignUpResponse>> AdminCreateUserSetPasswordAsync(string email, string password);

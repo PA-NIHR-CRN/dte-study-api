@@ -10,30 +10,39 @@ namespace Application.Users.V1.Commands
     public class NhsLoginCommand : IRequest<Response<NhsLoginResponse>>
     {
         private string Code { get; }
+        private string Nonce { get; }
         private string RedirectUrl { get; }
         private string SelectedLocale { get; }
 
-        public NhsLoginCommand(string code, string redirectUrl, string selectedLocale)
+        public NhsLoginCommand(string code, string nonce, string redirectUrl, string selectedLocale)
         {
             Code = code;
+            Nonce = nonce;
             RedirectUrl = redirectUrl;
             SelectedLocale = selectedLocale;
         }
 
-        public class NhsLoginCommandHandler : IRequestHandler<NhsLoginCommand, Response<NhsLoginResponse>>
+        public class NhsLoginCommandHandler
+            : IRequestHandler<NhsLoginCommand, Response<NhsLoginResponse>>
         {
             private readonly IUserService _userService;
 
-            public NhsLoginCommandHandler(
-                IUserService userService)
+            public NhsLoginCommandHandler(IUserService userService)
             {
                 _userService = userService;
             }
 
-            public async Task<Response<NhsLoginResponse>> Handle(NhsLoginCommand request,
-                CancellationToken cancellationToken)
+            public async Task<Response<NhsLoginResponse>> Handle(
+                NhsLoginCommand request,
+                CancellationToken cancellationToken
+            )
             {
-                return await _userService.NhsLoginAsync(request.Code, request.RedirectUrl, request.SelectedLocale);
+                return await _userService.NhsLoginAsync(
+                    request.Code,
+                    request.Nonce,
+                    request.RedirectUrl,
+                    request.SelectedLocale
+                );
             }
         }
     }
