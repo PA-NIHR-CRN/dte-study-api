@@ -71,7 +71,7 @@ jobs:
             --region ${{ secrets.AWS_REGION }} \
             --function-name crnccs-lambda-uat-dte-study-api \
             --function-role crnccs-iam-uat-dte-role \
-            --package ./out \
+            --package $GITHUB_WORKSPACE/out \
             --function-publish true \
             --environment-variables "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=UAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccs-secret-uat-dte-study-api"
 
