@@ -9,60 +9,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials - All
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CRNCC_STAGING_IAM_ACCESS_KEY_SECRET }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build Run Number and Build Id
-        run: echo ${{ github.run_number }}-${{ github.run_id }}
-
-      - name: Setup .NET Core
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
 
-      - name: Add Nuget Source
+      - name: Add NuGet source
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
       - name: Restore
         run: dotnet restore
 
-      - name: Show resolved Dte packages
-        run: dotnet list src/StudyApi package --include-transitive | grep Dte || true
-
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build -c Release --no-restore
 
       - name: Test
-        run: dotnet test --no-restore --verbosity normal
+        run: dotnet test --no-restore
 
-      - name: Inspect built Dte.Common.dll
-        run: |
-          DLL=$(find src -name "Dte.Common.dll" | head -n 1)
-          echo "Found DLL at: $DLL"
-          ls -lh "$DLL"
-          pwsh -c "[System.Reflection.AssemblyName]::GetAssemblyName('$DLL').FullName"
+      - name: Publish for Lambda
+        run: dotnet publish src/StudyApi -c Release -r linux-x64 --self-contained false -o out
 
-      - name: Publish to clean folder
-        run: dotnet publish src/StudyApi -c Release -o out
-
-      - name: Inspect publish output
-        run: |
-          echo "===== TOTAL PUBLISH SIZE ====="
-          du -sh out
-
-          echo ""
-          echo "===== TOP 40 SIZE HOGS ====="
-          du -h out | sort -hr | head -40
-
-          echo ""
-          echo "===== DLL COUNT ====="
-          find out -name "*.dll" | wc -l
-
-      # Deploy the published folder only
       - name: Deploy to Lambda
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
@@ -71,16 +44,15 @@ jobs:
             --region ${{ secrets.AWS_REGION }} \
             --function-name crnccs-lambda-uat-dte-study-api \
             --function-role crnccs-iam-uat-dte-role \
-            --package $GITHUB_WORKSPACE/out \
+            --package "$GITHUB_WORKSPACE/out" \
             --function-publish true \
             --environment-variables "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=UAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccs-secret-uat-dte-study-api"
 
-      - name: Update alias to point to new version
+      - name: Update alias
         run: |
           VERSION=$(aws lambda list-versions-by-function \
             --function-name crnccs-lambda-uat-dte-study-api \
-            --query "Versions[-1]" \
-            | jq -r .Version)
+            --query "Versions[-1]" | jq -r .Version)
 
           aws lambda update-alias \
             --function-name crnccs-lambda-uat-dte-study-api \
