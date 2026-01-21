@@ -40,7 +40,7 @@ jobs:
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler crnccd-lambda-dev-dte-participant-stream --function-role crnccd-iam-dev-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=DEV-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccd-secret-dev-rds-aurora-mysql-dte-stream-s" --function-publish true
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler crnccd-lambda-dev-dte-participant-stream --function-role crnccd-iam-dev-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging,DTE_BUILD_STRING=DEV-${{ github.run_number }}-${{ github.run_id }},AWS_SECRET_MANAGER_SECRET_NAME=crnccd-secret-dev-rds-aurora-mysql-dte-stream-s" --function-publish true
 
       - name: Update alias to point to new version
         run: |
@@ -78,7 +78,7 @@ jobs:
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler crnccd-lambda-test-dte-participant-stream --function-role crnccd-iam-test-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=test-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccd-secret-test-rds-aurora-mysql-dte-stream-s" --function-publish true
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler crnccd-lambda-test-dte-participant-stream --function-role crnccd-iam-test-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging,DTE_BUILD_STRING=test-${{ github.run_number }}-${{ github.run_id }},AWS_SECRET_MANAGER_SECRET_NAME=crnccd-secret-test-rds-aurora-mysql-dte-stream-s" --function-publish true
 
       - name: Update alias to point to new version
         run: |
@@ -109,7 +109,7 @@ jobs:
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler crnccs-lambda-uat-dte-participant-stream --function-role crnccs-iam-uat-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=UAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccs-secret-uat-rds-aurora-mysql-dte-stream-s" --function-publish true
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler crnccs-lambda-uat-dte-participant-stream --function-role crnccs-iam-uat-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging,DTE_BUILD_STRING=UAT-${{ github.run_number }}-${{ github.run_id }},AWS_SECRET_MANAGER_SECRET_NAME=crnccs-secret-uat-rds-aurora-mysql-dte-stream-s" --function-publish true
 
       - name: Update alias to point to new version
         run: |
@@ -140,7 +140,7 @@ jobs:
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler crnccp-lambda-oat-dte-participant-stream --function-role crnccp-iam-oat-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=OAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccp-secret-oat-rds-aurora-mysql-dte-stream-s" --function-publish true
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler crnccp-lambda-oat-dte-participant-stream --function-role crnccp-iam-oat-dte-role -ev "ASPNETCORE_ENVIRONMENT=Staging,DTE_BUILD_STRING=OAT-${{ github.run_number }}-${{ github.run_id }},AWS_SECRET_MANAGER_SECRET_NAME=crnccp-secret-oat-rds-aurora-mysql-dte-stream-s" --function-publish true
 
       - name: Update alias to point to new version
         run: |
@@ -171,7 +171,7 @@ jobs:
       - name: Deploy
         run: |
           dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler crnccp-lambda-prod-dte-participant-stream --function-role crnccp-iam-prod-dte-role -ev "ASPNETCORE_ENVIRONMENT=Production;DTE_BUILD_STRING=PROD-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccp-secret-prod-rds-aurora-mysql-dte-stream-s" --function-publish true
+          dotnet lambda deploy-function --region ${{ secrets.AWS_REGION }} -pl ./Dynamo.Stream.Handler/src/Dynamo.Stream.Handler crnccp-lambda-prod-dte-participant-stream --function-role crnccp-iam-prod-dte-role -ev "ASPNETCORE_ENVIRONMENT=Production,DTE_BUILD_STRING=PROD-${{ github.run_number }}-${{ github.run_id }},AWS_SECRET_MANAGER_SECRET_NAME=crnccp-secret-prod-rds-aurora-mysql-dte-stream-s" --function-publish true
 
       - name: Update alias to point to new version
         run: |
