@@ -27,7 +27,7 @@ jobs:
       - name: Add Nuget Source
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/pa-nihr-crn/index.json"
 
-      - name: Install dependencies
+      - name: Restore
         run: dotnet restore
 
       - name: Show resolved Dte packages
@@ -46,36 +46,43 @@ jobs:
           ls -lh "$DLL"
           pwsh -c "[System.Reflection.AssemblyName]::GetAssemblyName('$DLL').FullName"
 
-      - name: Publish (no deploy)
-        run: dotnet publish src/StudyApi -c Release
+      - name: Publish to clean folder
+        run: dotnet publish src/StudyApi -c Release -o out
 
-      - name: Inspect publish size and top files
+      - name: Inspect publish output
         run: |
-          PUBLISH_DIR="src/StudyApi/bin/Release/net6.0/publish"
-
           echo "===== TOTAL PUBLISH SIZE ====="
-          du -sh "$PUBLISH_DIR"
+          du -sh out
 
           echo ""
-          echo "===== TOP 50 SIZE HOGS ====="
-          du -h "$PUBLISH_DIR" | sort -hr | head -50
+          echo "===== TOP 40 SIZE HOGS ====="
+          du -h out | sort -hr | head -40
 
           echo ""
           echo "===== DLL COUNT ====="
-          find "$PUBLISH_DIR" -name "*.dll" | wc -l
+          find out -name "*.dll" | wc -l
 
-      # - name: Deploy
-      #   run: |
-      #     dotnet tool install -g Amazon.Lambda.Tools
-      #     dotnet lambda deploy-function \
-      #       --region ${{ secrets.AWS_REGION }} \
-      #       -pl ./src/StudyApi \
-      #       crnccs-lambda-uat-dte-study-api \
-      #       --function-role crnccs-iam-uat-dte-role \
-      #       -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=UAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccs-secret-uat-dte-study-api" \
-      #       --function-publish true
+      # Deploy the published folder only
+      - name: Deploy to Lambda
+        run: |
+          dotnet tool install -g Amazon.Lambda.Tools
 
-      # - name: Update alias to point to new version
-      #   run: |
-      #     VERSION=$(aws lambda list-versions-by-function --function-name crnccs-lambda-uat-dte-study-api --query "Versions[-1]" | jq -r .Version)
-      #     aws lambda update-alias --function-name crnccs-lambda-uat-dte-study-api --name main --function-version $VERSION
+          dotnet lambda deploy-function \
+            --region ${{ secrets.AWS_REGION }} \
+            --function-name crnccs-lambda-uat-dte-study-api \
+            --function-role crnccs-iam-uat-dte-role \
+            --package out \
+            --function-publish true \
+            --environment-variables "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=UAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccs-secret-uat-dte-study-api"
+
+      - name: Update alias to point to new version
+        run: |
+          VERSION=$(aws lambda list-versions-by-function \
+            --function-name crnccs-lambda-uat-dte-study-api \
+            --query "Versions[-1]" \
+            | jq -r .Version)
+
+          aws lambda update-alias \
+            --function-name crnccs-lambda-uat-dte-study-api \
+            --name main \
+            --function-version $VERSION
