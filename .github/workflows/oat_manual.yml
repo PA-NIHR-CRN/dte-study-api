@@ -46,7 +46,7 @@ jobs:
             -pl ./src/StudyApi \
             crnccp-lambda-oat-dte-study-api \
             --function-role crnccp-iam-oat-dte-role \
-            --s3-bucket crnccp-s3-oat-lambda-artifacts \
+            --s3-bucket crnccd-s3-oat-lambda-artifacts \
             --s3-prefix dte-study-api \
             -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=OAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccp-secret-oat-dte-study-api" \
             --function-publish true
