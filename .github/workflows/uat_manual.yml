@@ -39,21 +39,6 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
 
-      - name: Inspect publish size and top files
-        run: |
-          PUBLISH_DIR="src/StudyApi/bin/Release/net6.0/publish"
-
-          echo "===== TOTAL PUBLISH SIZE ====="
-          du -sh "$PUBLISH_DIR" || true
-
-          echo ""
-          echo "===== FILE COUNT ====="
-          find "$PUBLISH_DIR" -type f | wc -l || true
-
-          echo ""
-          echo "===== TOP 40 SIZE HOGS ====="
-          du -h "$PUBLISH_DIR" | sort -hr | head -40 || true
-
       - name: Inspect built Dte.Common.dll
         run: |
           DLL=$(find src -name "Dte.Common.dll" | head -n 1)
@@ -61,18 +46,36 @@ jobs:
           ls -lh "$DLL"
           pwsh -c "[System.Reflection.AssemblyName]::GetAssemblyName('$DLL').FullName"
 
-      - name: Deploy
-        run: |
-          dotnet tool install -g Amazon.Lambda.Tools
-          dotnet lambda deploy-function \
-            --region ${{ secrets.AWS_REGION }} \
-            -pl ./src/StudyApi \
-            crnccs-lambda-uat-dte-study-api \
-            --function-role crnccs-iam-uat-dte-role \
-            -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=UAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccs-secret-uat-dte-study-api" \
-            --function-publish true
+      - name: Publish (no deploy)
+        run: dotnet publish src/StudyApi -c Release
 
-      - name: Update alias to point to new version
+      - name: Inspect publish size and top files
         run: |
-          VERSION=$(aws lambda list-versions-by-function --function-name crnccs-lambda-uat-dte-study-api --query "Versions[-1]" | jq -r .Version)
-          aws lambda update-alias --function-name crnccs-lambda-uat-dte-study-api --name main --function-version $VERSION
+          PUBLISH_DIR="src/StudyApi/bin/Release/net6.0/publish"
+
+          echo "===== TOTAL PUBLISH SIZE ====="
+          du -sh "$PUBLISH_DIR"
+
+          echo ""
+          echo "===== TOP 50 SIZE HOGS ====="
+          du -h "$PUBLISH_DIR" | sort -hr | head -50
+
+          echo ""
+          echo "===== DLL COUNT ====="
+          find "$PUBLISH_DIR" -name "*.dll" | wc -l
+
+      # - name: Deploy
+      #   run: |
+      #     dotnet tool install -g Amazon.Lambda.Tools
+      #     dotnet lambda deploy-function \
+      #       --region ${{ secrets.AWS_REGION }} \
+      #       -pl ./src/StudyApi \
+      #       crnccs-lambda-uat-dte-study-api \
+      #       --function-role crnccs-iam-uat-dte-role \
+      #       -ev "ASPNETCORE_ENVIRONMENT=Staging;DTE_BUILD_STRING=UAT-${{ github.run_number }}-${{ github.run_id }};AWS_SECRET_MANAGER_SECRET_NAME=crnccs-secret-uat-dte-study-api" \
+      #       --function-publish true
+
+      # - name: Update alias to point to new version
+      #   run: |
+      #     VERSION=$(aws lambda list-versions-by-function --function-name crnccs-lambda-uat-dte-study-api --query "Versions[-1]" | jq -r .Version)
+      #     aws lambda update-alias --function-name crnccs-lambda-uat-dte-study-api --name main --function-version $VERSION
