@@ -729,6 +729,18 @@ namespace Infrastructure.Services
                         _headerService.GetConversationId());
                 }
             }
+            catch (AuthenticationException ex)
+            {
+                _logger.LogWarning(ex, "NHS login session invalid or expired");
+
+                return Response<NhsLoginResponse>.CreateErrorMessageResponse(
+                    ProjectAssemblyNames.ApiAssemblyName,
+                    nameof(UserService),
+                    ErrorCode.AuthenticationError,
+                    "NHS login session expired or invalid",
+                    _headerService.GetConversationId()
+                );
+            }
             catch (HttpServiceException ex)
             {
                 _logger.LogInformation("NhsLoginAsync():HttpServiceException handler");

@@ -91,12 +91,12 @@ namespace Infrastructure.Clients
             var jwt = handler.ReadJwtToken(idToken);
 
             if (!jwt.Payload.TryGetValue("nonce", out var nonceObj))
-                throw new SecurityTokenException("Nonce missing from id_token");
+                throw new AuthenticationException("Nonce missing from id_token");
 
             var actualNonce = nonceObj?.ToString();
 
             if (!FixedTimeEquals(actualNonce, expectedNonce))
-                throw new SecurityTokenException("Invalid nonce");
+                throw new AuthenticationException("Invalid nonce");
         }
 
         private static bool FixedTimeEquals(string? a, string? b)
