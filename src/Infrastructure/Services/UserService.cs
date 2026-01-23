@@ -673,12 +673,20 @@ namespace Infrastructure.Services
 
         private static bool IsUnder18(DateTime dateOfBirth) => DateTime.Now.AddYears(-18).Date < dateOfBirth.Date;
 
-        public async Task<Response<NhsLoginResponse>> NhsLoginAsync(string code, string redirectUrl,
-            string selectedLocale)
+        public async Task<Response<NhsLoginResponse>> NhsLoginAsync(
+            string code,
+            string nonce,
+            string redirectUrl,
+            string selectedLocale
+        )
         {
             try
             {
-                var tokens = await _nhsLoginHttpClient.GetTokensFromAuthorizationCode(code, redirectUrl);
+                var tokens = await _nhsLoginHttpClient.GetTokensFromAuthorizationCode(
+                    code,
+                    redirectUrl,
+                    nonce
+                );
 
                 var response = new NhsLoginResponse
                 {
@@ -720,6 +728,18 @@ namespace Infrastructure.Services
                     return Response<NhsLoginResponse>.CreateSuccessfulContentResponse(response,
                         _headerService.GetConversationId());
                 }
+            }
+            catch (AuthenticationException ex)
+            {
+                _logger.LogWarning(ex, "NHS login session invalid or expired");
+
+                return Response<NhsLoginResponse>.CreateErrorMessageResponse(
+                    ProjectAssemblyNames.ApiAssemblyName,
+                    nameof(UserService),
+                    ErrorCode.AuthenticationError,
+                    "NHS login session expired or invalid",
+                    _headerService.GetConversationId()
+                );
             }
             catch (HttpServiceException ex)
             {

@@ -3,8 +3,10 @@ using Application.Responses.V1.Users;
 using Application.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -29,7 +31,11 @@ namespace Infrastructure.Clients
             this.nhsLoginSettings = nhsLoginSettings.Value;
         }
 
-        public async Task<TokenResponse> GetTokensFromAuthorizationCode(string authorizationCode, string redirectUrl, CancellationToken cancellationToken = default)
+        public async Task<TokenResponse> GetTokensFromAuthorizationCode(
+            string authorizationCode,
+            string redirectUrl,
+            string nonce,
+            CancellationToken cancellationToken = default)
         {
             var bearerToken = await clientAssertionJwtProvider.CreateClientAssertionJwtAsync(cancellationToken);
 
@@ -46,7 +52,18 @@ namespace Infrastructure.Clients
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<TokenResponse>(cancellationToken: cancellationToken);
+            var tokens = await response.Content.ReadFromJsonAsync<TokenResponse>(
+                cancellationToken: cancellationToken
+            );
+
+            if (tokens == null || string.IsNullOrWhiteSpace(tokens.IdToken))
+            {
+                throw new SecurityTokenException("ID token missing from token response");
+            }
+
+            ValidateNonce(tokens.IdToken, nonce);
+
+            return tokens;
         }
 
         public async Task<NhsUserInfo> GetUserInfoAsync(string accessToken, CancellationToken cancellationToken = default)
@@ -67,6 +84,33 @@ namespace Infrastructure.Clients
 
             return await userInfo.Content.ReadFromJsonAsync<NhsUserInfo>(cancellationToken: cancellationToken);
         }
+
+        private static void ValidateNonce(string idToken, string expectedNonce)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(idToken);
+
+            if (!jwt.Payload.TryGetValue("nonce", out var nonceObj))
+                throw new AuthenticationException("Nonce missing from id_token");
+
+            var actualNonce = nonceObj?.ToString();
+
+            if (!FixedTimeEquals(actualNonce, expectedNonce))
+                throw new AuthenticationException("Invalid nonce");
+        }
+
+        private static bool FixedTimeEquals(string? a, string? b)
+        {
+            if (a == null || b == null || a.Length != b.Length)
+                return false;
+
+            var result = 0;
+            for (int i = 0; i < a.Length; i++)
+                result |= a[i] ^ b[i];
+
+            return result == 0;
+        }
+
     }
 
     public class NhsUserInfo

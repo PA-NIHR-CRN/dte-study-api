@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Application.Contracts;
 using Application.Settings;
 using AspNetCoreRateLimit;
 using Dte.Common;
@@ -65,10 +66,14 @@ namespace StudyApi
             services.AddSingleton(emailSettings);
             services.AddSingleton(appSettings);
             services.AddSingleton(contentfulSettings);
-
+            
+            services.AddDistributedMemoryCache();
+            
             services.AddTransient(provider => Configuration);
 
             services.Configure<NhsLoginSettings>(Configuration.GetSection("NhsLogin"));
+
+            services.AddScoped<INhsLoginStateStore, NhsLoginStateStore>();
 
             services.AddHttpClient<NhsLoginHttpClient>((serviceProvider, httpClient) =>
             {

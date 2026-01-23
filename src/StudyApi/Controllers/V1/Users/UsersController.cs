@@ -43,10 +43,11 @@ namespace StudyApi.Controllers.V1.Users
         private readonly ISessionService _sessionService;
         private readonly IUserService _userService;
         private readonly IAuthenticationService _authenticationService;
+        private readonly INhsLoginStateStore _stateStore;
 
         public UsersController(IMediator mediator, ILogger<UsersController> logger,
             IDataProtectionProvider dataProtector, ISessionService sessionService, IUserService userService,
-            IAuthenticationService authenticationService)
+            IAuthenticationService authenticationService, INhsLoginStateStore stateStore)
         {
             _mediator = mediator;
             _logger = logger;
@@ -54,6 +55,7 @@ namespace StudyApi.Controllers.V1.Users
             _sessionService = sessionService;
             _userService = userService;
             _authenticationService = authenticationService;
+            _stateStore = stateStore;
         }
 
         private async Task CreateSessionAndLogin(string jwtToken, string sessionId)
@@ -303,8 +305,13 @@ namespace StudyApi.Controllers.V1.Users
         [HttpPost("nhslogin")]
         public async Task<IActionResult> NhsLogin([FromBody] NhsLoginRequest request)
         {
+            var expectedNonce = await _stateStore.GetAndDeleteAsync(
+                request.State,
+                HttpContext.RequestAborted
+            );
+
             var response =
-                await _mediator.Send(new NhsLoginCommand(request.Code, request.RedirectUrl, request.SelectedLocale));
+                await _mediator.Send(new NhsLoginCommand(request.Code,expectedNonce, request.RedirectUrl, request.SelectedLocale));
 
             if (!response.IsSuccess)
             {
