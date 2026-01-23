@@ -310,11 +310,6 @@ namespace StudyApi.Controllers.V1.Users
                 HttpContext.RequestAborted
             );
 
-            if (string.IsNullOrWhiteSpace(expectedNonce))
-            {
-                return Unauthorized("Invalid or expired NHS login attempt");
-            }
-
             var response =
                 await _mediator.Send(new NhsLoginCommand(request.Code,expectedNonce, request.RedirectUrl, request.SelectedLocale));
 
