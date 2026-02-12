@@ -131,14 +131,18 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
-
+        logger.LogInformation(
+            "InsertAsync identifiers: {Identifiers}",
+            string.Join(", ", identifiers.Select(i => $"{i.Type}:{i.Value}"))
+        );
+        
         var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
-
         if (targetParticipant == null)
         {
+            logger.LogInformation("InsertAsync - No existing participant found with linked identifiers, creating new participant");
             // No linked participant exists, create a new one.
             targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
         }
