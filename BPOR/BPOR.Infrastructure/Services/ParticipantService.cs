@@ -125,24 +125,27 @@ public class ParticipantService(
     private async Task CreateUserAndDeactivateOldUserAsync(DynamoParticipant request, DynamoParticipant participant,
         CancellationToken cancellationToken)
     {
-    logger.LogInformation(
-        "MapNewUserFromRequestAndParticipant INPUT: request.NhsId={RequestNhsId}, request.ParticipantId={RequestParticipantId}, participant.ParticipantId={ParticipantParticipantId}, participant.NhsId={ParticipantNhsId}, participant.Email={ParticipantEmail}",
-        request.NhsId,
-        request.ParticipantId,
-        participant.ParticipantId,
-        participant.NhsId,
-        participant.Email
-    );
+        _logger.LogInformation("CreateUserAndDeactivateOldUserAsync - Attempting to create user for NHS ID: {NhsId}, {ParticipantId}", request.NhsId, request.ParticipantId);
 
-    var entity = request.MapNewUserFromRequestAndParticipant(participant);
+        logger.LogInformation(
+            "MapNewUserFromRequestAndParticipant INPUT: request.NhsId={RequestNhsId}, request.ParticipantId={RequestParticipantId}, participant.ParticipantId={ParticipantParticipantId}, participant.NhsId={ParticipantNhsId}, participant.Email={ParticipantEmail}",
+            request.NhsId,
+            request.ParticipantId,
+            participant.ParticipantId,
+            participant.NhsId,
+            participant.Email
+        );
 
-    logger.LogInformation(
-        "MapNewUserFromRequestAndParticipant OUTPUT: entity.PK={Pk}, entity.ParticipantId={EntityParticipantId}, entity.NhsId={EntityNhsId}, entity.Email={EntityEmail}",
-        entity.Pk,
-        entity.ParticipantId,
-        entity.NhsId,
-        entity.Email
-    );
+        var entity = request.MapNewUserFromRequestAndParticipant(participant);
+
+        logger.LogInformation(
+            "MapNewUserFromRequestAndParticipant OUTPUT: entity.PK={Pk}, entity.ParticipantId={EntityParticipantId}, entity.NhsId={EntityNhsId}, entity.Email={EntityEmail}",
+            entity.Pk,
+            entity.ParticipantId,
+            entity.NhsId,
+            entity.Email
+        );
+        
         await participantRepository.CreateParticipantAsync(entity, cancellationToken);
 
         var response = await provider.AdminDisableUserAsync(new AdminDisableUserRequest
@@ -159,6 +162,9 @@ public class ParticipantService(
 
     public async Task NhsLoginAsync(DynamoParticipant request, CancellationToken cancellationToken)
     {
+
+        _logger.LogInformation("NhsLoginAsync - Attempting login for NHS ID: {NhsId}, {ParticipantId}", request.NhsId, request.ParticipantId);
+
         var participant = await participantRepository.GetParticipantAsync(request.NhsId, cancellationToken);
         if (participant != null)
         {
