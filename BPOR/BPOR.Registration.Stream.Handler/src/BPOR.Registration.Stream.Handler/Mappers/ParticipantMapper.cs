@@ -209,16 +209,25 @@ public class ParticipantMapper : IParticipantMapper
 
     public List<Identifier> ExtractIdentifiers(Dictionary<string, AttributeValue> newImage)
     {
-        var keyNames = new[] { "ParticipantId", "NhsId", "Email" };
+        var keyNames = new[] { "ParticipantId", "NhsId" };
         var identifiers = new List<Identifier>();
 
         foreach (var keyName in keyNames)
         {
             if (newImage.TryGetValue(keyName, out var attrValue) && !string.IsNullOrWhiteSpace(attrValue.S))
             {
-                _logger.LogInformation("ExtractIdentifiers - Found {KeyName} = {Value}", keyName, attrValue.S);
-                int typeId = _refDataService.GetIdentifierTypeId(keyName);
-                identifiers.Add(new Identifier(typeId, Guid.Parse(attrValue.S)));
+                if (Guid.TryParse(attrValue.S, out var guid))
+                {
+                    int typeId = _refDataService.GetIdentifierTypeId(keyName);
+
+                    _logger.LogInformation("ExtractIdentifiers - Found {KeyName} = {Value}", keyName, attrValue.S);
+
+                    identifiers.Add(new Identifier(typeId, guid));
+                }
+                else
+                {
+                    _logger.LogWarning("ExtractIdentifiers - {KeyName} was not a valid GUID: {Value}", keyName, attrValue.S);
+                }
             }
         }
 
