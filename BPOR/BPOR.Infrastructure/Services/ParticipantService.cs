@@ -125,7 +125,7 @@ public class ParticipantService(
     private async Task CreateUserAndDeactivateOldUserAsync(DynamoParticipant request, DynamoParticipant participant,
         CancellationToken cancellationToken)
     {
-    _logger.LogInformation(
+    logger.LogInformation(
         "MapNewUserFromRequestAndParticipant INPUT: request.NhsId={RequestNhsId}, request.ParticipantId={RequestParticipantId}, participant.ParticipantId={ParticipantParticipantId}, participant.NhsId={ParticipantNhsId}, participant.Email={ParticipantEmail}",
         request.NhsId,
         request.ParticipantId,
@@ -136,7 +136,7 @@ public class ParticipantService(
 
     var entity = request.MapNewUserFromRequestAndParticipant(participant);
 
-    _logger.LogInformation(
+    logger.LogInformation(
         "MapNewUserFromRequestAndParticipant OUTPUT: entity.PK={Pk}, entity.ParticipantId={EntityParticipantId}, entity.NhsId={EntityNhsId}, entity.Email={EntityEmail}",
         entity.Pk,
         entity.ParticipantId,
