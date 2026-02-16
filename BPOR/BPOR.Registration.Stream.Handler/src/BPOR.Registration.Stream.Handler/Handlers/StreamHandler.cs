@@ -127,13 +127,17 @@ public class StreamHandler(
     }
 
     private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image,
-    CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
         logger.LogInformation(
-            "InsertAsync - Extracted identifiers: {Identifiers}",
-            string.Join(", ", identifiers.Select(i => $"{i.Type}:{i.Value}"))
+            "InsertAsync raw identifiers: PK={PK}, ParticipantId={ParticipantId}, NhsId={NhsId}, Email={Email}, DateOfBirth={DateOfBirth}",
+            image.TryGetValue("PK", out var pk) ? pk.S : "NULL",
+            image.TryGetValue("ParticipantId", out var pid) ? pid.S : "NULL",
+            image.TryGetValue("NhsId", out var nhs) ? nhs.S : "NULL",
+            image.TryGetValue("Email", out var email) ? email.S : "NULL",
+            image.TryGetValue("DateOfBirth", out var dob) ? dob.S : "NULL"
         );
 
         var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
@@ -142,44 +146,7 @@ public class StreamHandler(
 
         if (targetParticipant == null)
         {
-            logger.LogInformation("InsertAsync - No match found via participant identifiers.");
-
-            image.TryGetValue("Email", out var emailAttr);
-            var email = emailAttr?.S?.ToLowerInvariant();
-
-            image.TryGetValue("DateOfBirth", out var dobAttr);
-            DateTime? dob = null;
-
-            if (!string.IsNullOrWhiteSpace(dobAttr?.S) && DateTime.TryParse(dobAttr.S, out var parsedDob))
-            {
-                dob = parsedDob;
-            }
-
-            logger.LogInformation("InsertAsync - Fallback match attempt using Email={Email}, Dob={Dob}", email, dob);
-
-            if (!string.IsNullOrWhiteSpace(email) && dob.HasValue)
-            {
-                var dobDate = dob.Value.Date;
-
-                targetParticipant = await participantDbContext.Participants
-                    .ForUpdate()
-                    .SingleOrDefaultAsync(p =>
-                            p.Email != null &&
-                            p.Email.ToLower() == email &&
-                            p.DateOfBirth.HasValue &&
-                            p.DateOfBirth.Value.Date == dobDate,
-                        cancellationToken);
-
-                if (targetParticipant != null)
-                {
-                    logger.LogInformation("InsertAsync - Found existing participant via Email + DOB match.");
-                }
-            }
-        }
-
-        if (targetParticipant == null)
-        {
-            logger.LogInformation("InsertAsync - No existing participant found. Creating new participant.");
+            logger.LogInformation("InsertAsync - No existing participant found with linked identifiers, creating new participant");
             targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
         }
 
