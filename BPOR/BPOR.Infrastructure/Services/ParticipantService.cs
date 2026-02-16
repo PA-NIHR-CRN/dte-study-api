@@ -125,8 +125,24 @@ public class ParticipantService(
     private async Task CreateUserAndDeactivateOldUserAsync(DynamoParticipant request, DynamoParticipant participant,
         CancellationToken cancellationToken)
     {
-        var entity = request.MapNewUserFromRequestAndParticipant(participant);
+    _logger.LogInformation(
+        "MapNewUserFromRequestAndParticipant INPUT: request.NhsId={RequestNhsId}, request.ParticipantId={RequestParticipantId}, participant.ParticipantId={ParticipantParticipantId}, participant.NhsId={ParticipantNhsId}, participant.Email={ParticipantEmail}",
+        request.NhsId,
+        request.ParticipantId,
+        participant.ParticipantId,
+        participant.NhsId,
+        participant.Email
+    );
 
+    var entity = request.MapNewUserFromRequestAndParticipant(participant);
+
+    _logger.LogInformation(
+        "MapNewUserFromRequestAndParticipant OUTPUT: entity.PK={Pk}, entity.ParticipantId={EntityParticipantId}, entity.NhsId={EntityNhsId}, entity.Email={EntityEmail}",
+        entity.Pk,
+        entity.ParticipantId,
+        entity.NhsId,
+        entity.Email
+    );
         await participantRepository.CreateParticipantAsync(entity, cancellationToken);
 
         var response = await provider.AdminDisableUserAsync(new AdminDisableUserRequest
