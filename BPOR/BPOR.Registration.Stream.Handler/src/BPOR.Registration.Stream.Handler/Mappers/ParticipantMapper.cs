@@ -214,10 +214,9 @@ public class ParticipantMapper : IParticipantMapper
 
         foreach (var keyName in keyNames)
         {
-            _logger.LogInformation("ExtractIdentifiers - Found {KeyName} = {Value}", keyName, attrValue.S);
-
             if (newImage.TryGetValue(keyName, out var attrValue) && !string.IsNullOrWhiteSpace(attrValue.S))
             {
+                _logger.LogInformation("ExtractIdentifiers - Found {KeyName} = {Value}", keyName, attrValue.S);
                 int typeId = _refDataService.GetIdentifierTypeId(keyName);
                 identifiers.Add(new Identifier(typeId, Guid.Parse(attrValue.S)));
             }
