@@ -131,6 +131,11 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
+        logger.LogInformation(
+            "InsertAsync - Extracted identifiers {@Identifiers}",
+            identifiers.Select(i => new { i.Type, i.Value })
+        );
+
         var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
