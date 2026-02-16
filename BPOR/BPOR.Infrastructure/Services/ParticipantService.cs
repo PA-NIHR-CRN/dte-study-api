@@ -125,7 +125,7 @@ public class ParticipantService(
     private async Task CreateUserAndDeactivateOldUserAsync(DynamoParticipant request, DynamoParticipant participant,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation("CreateUserAndDeactivateOldUserAsync - Attempting to create user for NHS ID: {NhsId}, {ParticipantId}", request.NhsId, request.ParticipantId);
+        logger.LogInformation("CreateUserAndDeactivateOldUserAsync - Attempting to create user for NHS ID: {NhsId}, {ParticipantId}", request.NhsId, request.ParticipantId);
 
         logger.LogInformation(
             "MapNewUserFromRequestAndParticipant INPUT: request.NhsId={RequestNhsId}, request.ParticipantId={RequestParticipantId}, participant.ParticipantId={ParticipantParticipantId}, participant.NhsId={ParticipantNhsId}, participant.Email={ParticipantEmail}",
@@ -163,7 +163,7 @@ public class ParticipantService(
     public async Task NhsLoginAsync(DynamoParticipant request, CancellationToken cancellationToken)
     {
 
-        _logger.LogInformation("NhsLoginAsync - Attempting login for NHS ID: {NhsId}, {ParticipantId}", request.NhsId, request.ParticipantId);
+        logger.LogInformation("NhsLoginAsync - Attempting login for NHS ID: {NhsId}, {ParticipantId}", request.NhsId, request.ParticipantId);
 
         var participant = await participantRepository.GetParticipantAsync(request.NhsId, cancellationToken);
         if (participant != null)
