@@ -209,17 +209,24 @@ public class ParticipantMapper : IParticipantMapper
 
     public List<Identifier> ExtractIdentifiers(Dictionary<string, AttributeValue> newImage)
     {
-        var keyNames = new[] { "ParticipantId", "NhsId" };
+        var keyNames = new[] { "ParticipantId", "NhsId", "Email" };
         var identifiers = new List<Identifier>();
 
         foreach (var keyName in keyNames)
         {
+            _logger.LogInformation("ExtractIdentifiers - Found {KeyName} = {Value}", keyName, attrValue.S);
+
             if (newImage.TryGetValue(keyName, out var attrValue) && !string.IsNullOrWhiteSpace(attrValue.S))
             {
                 int typeId = _refDataService.GetIdentifierTypeId(keyName);
                 identifiers.Add(new Identifier(typeId, Guid.Parse(attrValue.S)));
             }
         }
+
+        _logger.LogInformation(
+            "ExtractIdentifiers - Parsed identifiers: {Identifiers}",
+            string.Join(", ", identifiers.Select(i => $"{i.Type}:{i.Value}"))
+        );
 
         return identifiers;
     }
