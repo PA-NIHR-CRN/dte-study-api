@@ -131,26 +131,63 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
-        // 3rd log
+        var pk = image.TryGetValue("PK", out var pkAttr) ? pkAttr.S : null;
+        var participantId = image.TryGetValue("ParticipantId", out var pidAttr) ? pidAttr.S : null;
+        var nhsId = image.TryGetValue("NhsId", out var nhsAttr) ? nhsAttr.S : null;
+        var email = image.TryGetValue("Email", out var emailAttr) ? emailAttr.S : null;
+        var dobRaw = image.TryGetValue("DateOfBirth", out var dobAttr) ? dobAttr.S : null;
+
         logger.LogInformation(
             "InsertAsync raw identifiers: PK={PK}, ParticipantId={ParticipantId}, NhsId={NhsId}, Email={Email}, DateOfBirth={DateOfBirth}",
-            image.TryGetValue("PK", out var pk) ? pk.S : "NULL",
-            image.TryGetValue("ParticipantId", out var pid) ? pid.S : "NULL",
-            image.TryGetValue("NhsId", out var nhs) ? nhs.S : "NULL",
-            image.TryGetValue("Email", out var email) ? email.S : "NULL",
-            image.TryGetValue("DateOfBirth", out var dob) ? dob.S : "NULL"
+            pk ?? "NULL",
+            participantId ?? "NULL",
+            nhsId ?? "NULL",
+            email ?? "NULL",
+            dobRaw ?? "NULL"
         );
 
-        // get by new ParticipantId, which would always be null, resulting in a new participant record being created.
-        var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
+        email = email?.Trim().ToLowerInvariant();
+
+        DateTime? dob = null;
+        if (!string.IsNullOrWhiteSpace(dobRaw) && DateTime.TryParse(dobRaw, out var parsedDob))
+        {
+            dob = parsedDob.ToUniversalTime().Date;
+        }
+
+        var targetParticipant = await participantDbContext
+            .GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
+        if (targetParticipant == null && !string.IsNullOrWhiteSpace(email) && dob.HasValue)
+        {
+            var dobStart = dob.Value.Date;
+            var dobEnd = dobStart.AddDays(1);
+
+            logger.LogInformation(
+                "InsertAsync fallback lookup by Email + DOB: Email={Email}, DobStart={DobStart}",
+                email,
+                dobStart.ToString("O")
+            );
+
+            targetParticipant = await participantDbContext.Participants
+                .ForUpdate()
+                .SingleOrDefaultAsync(p =>
+                    p.Email == email &&
+                    p.DateOfBirth.HasValue &&
+                    p.DateOfBirth.Value >= dobStart &&
+                    p.DateOfBirth.Value < dobEnd,
+                    cancellationToken);
+        }
+
         if (targetParticipant == null)
         {
-            // 4th log
-            logger.LogInformation("InsertAsync - No existing participant found with linked identifiers, creating new participant");
+            logger.LogInformation("InsertAsync - No participant found by identifiers OR email+dob. Creating new participant.");
             targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
+        }
+        else
+        {
+            logger.LogInformation("InsertAsync - Found existing participant: {ParticipantDbId}", targetParticipant.Id);
         }
 
         return await participantMapper.Map(image, targetParticipant, cancellationToken);
