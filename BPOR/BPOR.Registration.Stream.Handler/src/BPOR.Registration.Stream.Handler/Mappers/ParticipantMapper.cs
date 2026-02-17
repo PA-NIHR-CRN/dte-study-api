@@ -35,13 +35,13 @@ public class ParticipantMapper : IParticipantMapper
             "MapIdentifiers: source.ParticipantId={ParticipantId}, source.NhsId={NhsId}, participant.Id={Id}",
             source.ParticipantId,
             source.NhsId,
-            participant.Id
+            participant.Id.ToString()
         );
 
         // Get dictionary of identifiers from source
         var identifiers = ExtractIdentifiers(new Dictionary<string, AttributeValue>
         {
-            { "ParticipantId", new AttributeValue { S = participant.Id } },
+            { "ParticipantId", new AttributeValue { S = participant.Id.ToString() } },
             { "NhsId", new AttributeValue { S = source.NhsId } }
         });
 
