@@ -41,7 +41,7 @@ public class ParticipantMapper : IParticipantMapper
         // Get dictionary of identifiers from source
         var identifiers = ExtractIdentifiers(new Dictionary<string, AttributeValue>
         {
-            { "ParticipantId", new AttributeValue { S = participant.ParticipantId } },
+            { "ParticipantId", new AttributeValue { S = participant.Id } },
             { "NhsId", new AttributeValue { S = source.NhsId } }
         });
 
