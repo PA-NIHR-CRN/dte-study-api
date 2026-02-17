@@ -167,7 +167,7 @@ public class StreamHandler(
             await participantDbContext.SaveChangesAsync(cancellationToken);
         }
 
-        logger.LogInformation("ProcessModifyAsync - Participant found: {ParticipantId}", participant.ParticipantId);
+        logger.LogInformation("ProcessModifyAsync - Participant found: {ParticipantId}", participant.id);
 
         await participantMapper.Map(record.Dynamodb.NewImage, participant, cancellationToken);
     }
