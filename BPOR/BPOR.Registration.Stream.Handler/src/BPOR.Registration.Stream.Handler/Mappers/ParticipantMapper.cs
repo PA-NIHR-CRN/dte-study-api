@@ -30,10 +30,18 @@ public class ParticipantMapper : IParticipantMapper
 
     private void MapIdentifiers(DynamoParticipant source, Participant participant)
     {
+
+        _logger.LogInformation(
+            "MapIdentifiers: source.ParticipantId={ParticipantId}, source.NhsId={NhsId}, participant.Id={Id}",
+            source.ParticipantId,
+            source.NhsId,
+            participant.Id
+        );
+
         // Get dictionary of identifiers from source
         var identifiers = ExtractIdentifiers(new Dictionary<string, AttributeValue>
         {
-            { "ParticipantId", new AttributeValue { S = source.ParticipantId } },
+            { "ParticipantId", new AttributeValue { S = participant.ParticipantId } },
             { "NhsId", new AttributeValue { S = source.NhsId } }
         });
 
@@ -209,6 +217,8 @@ public class ParticipantMapper : IParticipantMapper
 
     public List<Identifier> ExtractIdentifiers(Dictionary<string, AttributeValue> newImage)
     {
+
+        // 1st log
         var keyNames = new[] { "ParticipantId", "NhsId" };
         var identifiers = new List<Identifier>();
 
@@ -231,6 +241,7 @@ public class ParticipantMapper : IParticipantMapper
             }
         }
 
+        // 2nd log
         _logger.LogInformation(
             "ExtractIdentifiers - Parsed identifiers: {Identifiers}",
             string.Join(", ", identifiers.Select(i => $"{i.Type}:{i.Value}"))

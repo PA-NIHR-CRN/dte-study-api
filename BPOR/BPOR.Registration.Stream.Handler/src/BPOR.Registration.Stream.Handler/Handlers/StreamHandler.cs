@@ -131,6 +131,7 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
+        // 3rd log
         logger.LogInformation(
             "InsertAsync raw identifiers: PK={PK}, ParticipantId={ParticipantId}, NhsId={NhsId}, Email={Email}, DateOfBirth={DateOfBirth}",
             image.TryGetValue("PK", out var pk) ? pk.S : "NULL",
@@ -140,12 +141,14 @@ public class StreamHandler(
             image.TryGetValue("DateOfBirth", out var dob) ? dob.S : "NULL"
         );
 
+        // get by new ParticipantId, which would always be null, resulting in a new participant record being created.
         var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
         if (targetParticipant == null)
         {
+            // 4th log
             logger.LogInformation("InsertAsync - No existing participant found with linked identifiers, creating new participant");
             targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
         }
