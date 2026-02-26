@@ -60,6 +60,8 @@ public class ParticipantService(
 
     public async Task DeleteParticipantAsync(string participantId, CancellationToken cancellationToken)
     {
+        logger.LogWarning("Deleting participant {ParticipantId}", participantId);
+
         var entity = await participantRepository.GetParticipantAsync(participantId, cancellationToken);
         if (entity == null) return;
 
@@ -245,6 +247,8 @@ public class ParticipantService(
 
     private async Task RemoveParticipantDataAsync(DynamoParticipant entity, CancellationToken cancellationToken)
     {
+        logger.LogInformation("Removing participant {NhsId}, {ParticipantId}", entity.NhsId, entity.ParticipantId);
+
         var participantId = KeyUtils.StripPrimaryKey(entity.Pk);
         if (entity.NhsId == null)
         {

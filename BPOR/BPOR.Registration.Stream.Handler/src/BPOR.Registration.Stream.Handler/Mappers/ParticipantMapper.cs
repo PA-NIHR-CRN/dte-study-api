@@ -132,6 +132,9 @@ public class ParticipantMapper : IParticipantMapper
 
         var source = _context.FromDocument<DynamoParticipant>(doc);
 
+        _logger.LogInformation("Mapping DynamoParticipant to Participant: {ParticipantId}", source.ParticipantId);
+        _logger.LogInformation("Destination NHSNumber: {NHSNumber}, source NHSNumber: {SourceNHSNumber}", destination.NHSNumber, source.NhsNumber);
+        
         destination.Email = source.Email;
         destination.FirstName = source.Firstname;
         destination.LastName = source.Lastname;
@@ -149,7 +152,7 @@ public class ParticipantMapper : IParticipantMapper
         destination.GenderId = _refDataService.GetGenderId(source.SexRegisteredAtBirth);
         destination.CommunicationLanguageId = _refDataService.GetCommunicationLanguageId(source.SelectedLocale);
         destination.DailyLifeImpactId = _refDataService.GetDailyLifeImpactId(source.DisabilityDescription);
-        destination.CreatedAt = source.CreatedAtUtc;
+        destination.CreatedAt = destination.Id == 0 ? source.CreatedAtUtc : destination.CreatedAt;
         destination.UpdatedAt = source.UpdatedAtUtc.HasValue ? source.UpdatedAtUtc.Value : source.CreatedAtUtc;
         destination.Stage2CompleteUtc = source.Stage2CompleteUtc;
         destination.IsStage2CompleteUtcBackfilled = source.IsStage2CompleteUtcBackfilled ?? false;
