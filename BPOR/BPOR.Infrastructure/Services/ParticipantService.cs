@@ -60,8 +60,6 @@ public class ParticipantService(
 
     public async Task DeleteParticipantAsync(string participantId, CancellationToken cancellationToken)
     {
-        logger.LogWarning("Deleting participant {ParticipantId}", participantId);
-
         var entity = await participantRepository.GetParticipantAsync(participantId, cancellationToken);
         if (entity == null) return;
 
