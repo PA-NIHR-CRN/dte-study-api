@@ -11,23 +11,50 @@ namespace Dynamo.Stream.Handler.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
              migrationBuilder.Sql(@"
-                CREATE VIEW Participants_Origin AS
+                CREATE 
+                    ALGORITHM = UNDEFINED 
+                    DEFINER = `dte-stream-s`@`%` 
+                    SQL SECURITY DEFINER
+                VIEW `dte`.`Participants_Origin` AS
                 SELECT
-                pi.Id,
-                pi.ParticipantId,
-                p.FirstName,
-                p.LastName,
-                pi.IdentifierTypeId,
-                CASE 
-                    WHEN pi.IdentifierTypeId = 1 THEN 'BPOR'
-                    WHEN pi.IdentifierTypeId = 2 THEN 'NHS'
-                    ELSE it.Description
-                END AS Description,
-                pi.CreatedAt
-                FROM dte.ParticipantIdentifiers pi
-                JOIN dte.SysRefIdentifierType it ON pi.IdentifierTypeId = it.Id
-                JOIN dte.Participants p ON pi.ParticipantId = p.Id
-                ORDER BY pi.ParticipantId, pi.IdentifierTypeId;");
+                    x.Id,
+                    x.ParticipantId,
+                    x.FirstName,
+                    x.LastName,
+                    x.IdentifierTypeId,
+                    x.Description,
+                    x.CreatedAt
+                FROM (
+                    SELECT 
+                        pi.Id AS Id,
+                        pi.ParticipantId AS ParticipantId,
+                        p.FirstName AS FirstName,
+                        p.LastName AS LastName,
+                        pi.IdentifierTypeId AS IdentifierTypeId,
+                        CASE
+                            WHEN pi.IdentifierTypeId = 1 THEN 'BPOR'
+                            WHEN pi.IdentifierTypeId = 2 THEN 'NHS'
+                            ELSE it.Description
+                        END AS Description,
+                        p.CreatedAt AS CreatedAt,
+
+                        ROW_NUMBER() OVER (
+                            PARTITION BY pi.ParticipantId
+                            ORDER BY pi.Id ASC
+                        ) AS rn
+
+                    FROM dte.ParticipantIdentifiers pi
+                    JOIN dte.SysRefIdentifierType it 
+                        ON pi.IdentifierTypeId = it.Id
+                    JOIN dte.Participants p 
+                        ON pi.ParticipantId = p.Id
+                        
+                    WHERE pi.Active = 1
+                    AND p.Active = 1
+
+                ) x
+                WHERE x.rn = 1;
+                ");
         }
 
         /// <inheritdoc />
