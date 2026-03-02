@@ -142,16 +142,10 @@ public class ParticipantService(
         {
             throw new AmazonCognitoIdentityProviderException($"Unable to disable user account: {response}");
         }
-
-        await SaveAnonymisedDemographicParticipantDataAsync(entity, cancellationToken);
-        await RemoveParticipantDataAsync(entity, cancellationToken);
     }
 
     public async Task NhsLoginAsync(DynamoParticipant request, CancellationToken cancellationToken)
     {
-
-        logger.LogInformation("NhsLoginAsync - Attempting login for NHS ID: {NhsId}, {ParticipantId}", request.NhsId, request.ParticipantId);
-
         var participant = await participantRepository.GetParticipantAsync(request.NhsId, cancellationToken);
         if (participant != null)
         {
@@ -232,8 +226,6 @@ public class ParticipantService(
 
     private async Task RemoveParticipantDataAsync(DynamoParticipant entity, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Removing participant {NhsId}, {ParticipantId}", entity.NhsId, entity.ParticipantId);
-
         var participantId = KeyUtils.StripPrimaryKey(entity.Pk);
         if (entity.NhsId == null)
         {
