@@ -4,7 +4,7 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 
-public class ParticipantIdentifier : ISoftDelete
+public class ParticipantIdentifier : ISoftDelete, ITimestamped
 {
     public ParticipantIdentifier()
     {
@@ -20,6 +20,8 @@ public class ParticipantIdentifier : ISoftDelete
 
     public int IdentifierTypeId { get; set; }
     public bool IsDeleted { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     public IdentifierType Type { get; set; }
     public Participant Participant { get; set; }
