@@ -31,13 +31,6 @@ public class ParticipantMapper : IParticipantMapper
     private void MapIdentifiers(DynamoParticipant source, Participant participant)
     {
 
-        _logger.LogInformation(
-            "MapIdentifiers: source.ParticipantId={ParticipantId}, source.NhsId={NhsId}, participant.Id={Id}",
-            source.ParticipantId,
-            source.NhsId,
-            participant.Id.ToString()
-        );
-
         // Get dictionary of identifiers from source
         var identifiers = ExtractIdentifiers(new Dictionary<string, AttributeValue>
         {
@@ -131,9 +124,6 @@ public class ParticipantMapper : IParticipantMapper
         var doc = Document.FromAttributeMap(record);
 
         var source = _context.FromDocument<DynamoParticipant>(doc);
-
-        _logger.LogInformation("Mapping DynamoParticipant to Participant: {ParticipantId}", source.ParticipantId);
-        _logger.LogInformation("Destination NHSNumber: {NHSNumber}, source NHSNumber: {SourceNHSNumber}", destination.NHSNumber, source.NhsNumber);
         
         destination.Email = source.Email;
         destination.FirstName = source.Firstname;
@@ -227,7 +217,6 @@ public class ParticipantMapper : IParticipantMapper
     public List<Identifier> ExtractIdentifiers(Dictionary<string, AttributeValue> newImage)
     {
 
-        // 1st log
         var keyNames = new[] { "ParticipantId", "NhsId" };
         var identifiers = new List<Identifier>();
 
@@ -249,13 +238,7 @@ public class ParticipantMapper : IParticipantMapper
                 }
             }
         }
-
-        // 2nd log
-        _logger.LogInformation(
-            "ExtractIdentifiers - Parsed identifiers: {Identifiers}",
-            string.Join(", ", identifiers.Select(i => $"{i.Type}:{i.Value}"))
-        );
-
+        
         return identifiers;
     }
 }

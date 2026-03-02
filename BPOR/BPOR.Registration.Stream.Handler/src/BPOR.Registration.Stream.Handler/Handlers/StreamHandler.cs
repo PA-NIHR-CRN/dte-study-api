@@ -131,21 +131,6 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
-        var pk = image.TryGetValue("PK", out var pkAttr) ? pkAttr.S : null;
-        var participantId = image.TryGetValue("ParticipantId", out var pidAttr) ? pidAttr.S : null;
-        var nhsId = image.TryGetValue("NhsId", out var nhsAttr) ? nhsAttr.S : null;
-        var email = image.TryGetValue("Email", out var emailAttr) ? emailAttr.S : null;
-        var dobRaw = image.TryGetValue("DateOfBirth", out var dobAttr) ? dobAttr.S : null;
-
-        logger.LogInformation(
-            "InsertAsync raw identifiers: PK={PK}, ParticipantId={ParticipantId}, NhsId={NhsId}, Email={Email}, DateOfBirth={DateOfBirth}",
-            pk ?? "NULL",
-            participantId ?? "NULL",
-            nhsId ?? "NULL",
-            email ?? "NULL",
-            dobRaw ?? "NULL"
-        );
-
         email = email?.Trim().ToLowerInvariant();
 
         DateTime? dob = null;
@@ -164,12 +149,6 @@ public class StreamHandler(
             var dobStart = dob.Value.Date;
             var dobEnd = dobStart.AddDays(1);
 
-            logger.LogInformation(
-                "InsertAsync fallback lookup by Email + DOB: Email={Email}, DobStart={DobStart}",
-                email,
-                dobStart.ToString("O")
-            );
-
             targetParticipant = await participantDbContext.Participants
                 .ForUpdate()
                 .SingleOrDefaultAsync(p =>
@@ -182,12 +161,7 @@ public class StreamHandler(
 
         if (targetParticipant == null)
         {
-            logger.LogInformation("InsertAsync - No participant found by identifiers OR email+dob. Creating new participant.");
             targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
-        }
-        else
-        {
-            logger.LogInformation("InsertAsync - Found existing participant: {ParticipantDbId}", targetParticipant.Id);
         }
 
         return await participantMapper.Map(image, targetParticipant, cancellationToken);
