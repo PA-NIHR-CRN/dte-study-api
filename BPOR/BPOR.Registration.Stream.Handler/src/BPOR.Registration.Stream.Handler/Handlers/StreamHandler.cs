@@ -131,6 +131,12 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
+        var pk = image.TryGetValue("PK", out var pkAttr) ? pkAttr.S : null;
+        var participantId = image.TryGetValue("ParticipantId", out var pidAttr) ? pidAttr.S : null;
+        var nhsId = image.TryGetValue("NhsId", out var nhsAttr) ? nhsAttr.S : null;
+        var email = image.TryGetValue("Email", out var emailAttr) ? emailAttr.S : null;
+        var dobRaw = image.TryGetValue("DateOfBirth", out var dobAttr) ? dobAttr.S : null;
+
         email = email?.Trim().ToLowerInvariant();
 
         DateTime? dob = null;
