@@ -160,6 +160,9 @@ public class ParticipantService(
         {
             throw new AmazonCognitoIdentityProviderException($"Unable to disable user account: {response}");
         }
+
+        await SaveAnonymisedDemographicParticipantDataAsync(entity, cancellationToken);
+        await RemoveParticipantDataAsync(entity, cancellationToken);
     }
 
     public async Task NhsLoginAsync(DynamoParticipant request, CancellationToken cancellationToken)
