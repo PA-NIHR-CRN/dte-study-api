@@ -197,11 +197,42 @@ public class StreamHandler(
             string.Join(", ", identifiers.Select(id => id.Value))
         );
 
-        var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
+        // var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
+        //     .IgnoreQueryFilters()
+        //     .Include(x => x.ParticipantIdentifiers)
+        //     .Include(x => x.ContactMethodId)
+        //     .SingleOrDefaultAsync(cancellationToken);
+
+        var participants = await participantDbContext
+            .GetParticipantByLinkedIdentifiers(identifiers)
             .IgnoreQueryFilters()
+            .AsSplitQuery()
             .Include(x => x.ParticipantIdentifiers)
             .Include(x => x.ContactMethodId)
-            .SingleOrDefaultAsync(cancellationToken);
+            .ToListAsync(cancellationToken);
+
+        logger.LogInformation(
+            "ProcessRemoveAsync - MatchedParticipantsCount: {Count}",
+            participants.Count
+        );
+
+        if (participants.Any())
+        {
+            logger.LogInformation(
+                "ProcessRemoveAsync - MatchedParticipants {@Participants}",
+                participants.Select(p => new
+                {
+                    p.Id,
+                    p.CreatedAt,
+                    IdentifierValues = p.ParticipantIdentifiers
+                        .Select(pi => new { pi.IdentifierTypeId, pi.Value })
+                        .ToList(),
+                    ContactMethodCount = p.ContactMethodId.Count
+                }).ToList()
+            );
+        }
+
+        var participant = participants.SingleOrDefault();
 
         if (participant == null)
         {
