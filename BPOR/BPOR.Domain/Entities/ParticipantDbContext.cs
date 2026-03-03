@@ -68,6 +68,11 @@ public class ParticipantDbContext : DbContext
     {
         var values = identifiers.Select(id => id.Value).ToList();
 
+        logger.LogInformation(
+            "GetParticipantByLinkedIdentifiers - values: {Values}",
+            string.Join(", ", values)
+        );
+
         return Participants.Where(p => p.ParticipantIdentifiers.Any(pi => values.Contains(pi.Value)));
     }
 
