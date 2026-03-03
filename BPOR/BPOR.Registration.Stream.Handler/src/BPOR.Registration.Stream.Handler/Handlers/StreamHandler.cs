@@ -197,40 +197,17 @@ public class StreamHandler(
             string.Join(", ", identifiers.Select(id => id.Value))
         );
 
-        // var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
-        //     .IgnoreQueryFilters()
-        //     .Include(x => x.ParticipantIdentifiers)
-        //     .Include(x => x.ContactMethodId)
-        //     .SingleOrDefaultAsync(cancellationToken);
-
-        var participants = await participantDbContext
-            .GetParticipantByLinkedIdentifiers(identifiers)
-            .IgnoreQueryFilters()
-            .AsSplitQuery()
-            .Include(x => x.ParticipantIdentifiers)
-            .Include(x => x.ContactMethodId)
-            .ToListAsync(cancellationToken);
+            var participants = await participantDbContext
+                .GetParticipantByLinkedIdentifiers(identifiers)
+                .AsSplitQuery()
+                .Include(x => x.ParticipantIdentifiers)
+                .Include(x => x.ContactMethodId)
+                .ToListAsync(cancellationToken);
 
         logger.LogInformation(
             "ProcessRemoveAsync - MatchedParticipantsCount: {Count}",
             participants.Count
         );
-
-        if (participants.Any())
-        {
-            logger.LogInformation(
-                "ProcessRemoveAsync - MatchedParticipants {@Participants}",
-                participants.Select(p => new
-                {
-                    p.Id,
-                    p.CreatedAt,
-                    IdentifierValues = p.ParticipantIdentifiers
-                        .Select(pi => new { pi.IdentifierTypeId, pi.Value })
-                        .ToList(),
-                    ContactMethodCount = p.ContactMethodId.Count
-                }).ToList()
-            );
-        }
 
         var participant = participants.SingleOrDefault();
 
@@ -238,23 +215,19 @@ public class StreamHandler(
         {
             logger.LogInformation("ProcessRemoveAsync - participant not found");
 
-            participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken); // TODO: INSERT in a remove?
+            participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
             await participantDbContext.SaveChangesAsync(cancellationToken);
         }
 
-        // Remove participant contact method record
-        participantDbContext.ParticipantContactMethod.RemoveRange(participant.ContactMethodId);
+        // Remove participant contact methods
+        participantDbContext.ParticipantContactMethod
+            .RemoveRange(participant.ContactMethodId);
 
-        // TODO: are we removing the Participant here, or just the ParticipantIdentifer?
-        // Only delete the Participant if all participant identifiers have also been deleted.
-        var idsToRemove =
-            participant.ParticipantIdentifiers.Where(x => identifiers.Select(y => y.Value).Contains(x.Value));
+        // Remove ALL identifiers
+        participantDbContext.ParticipantIdentifiers
+            .RemoveRange(participant.ParticipantIdentifiers);
 
-        participantDbContext.ParticipantIdentifiers.RemoveRange(idsToRemove);
-
-        if (participant.ParticipantIdentifiers.Except(idsToRemove).All(x => x.IsDeleted))
-        {
-            participantDbContext.Participants.Remove(participant);
-        }
+        // Remove participant
+        participantDbContext.Participants.Remove(participant);
     }
 }
