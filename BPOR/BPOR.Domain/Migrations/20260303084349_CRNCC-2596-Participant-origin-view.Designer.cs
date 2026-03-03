@@ -13,8 +13,8 @@ using NetTopologySuite.Geometries;
 namespace Dynamo.Stream.Handler.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20250925135541_CRNCC-2596-ParticipantIdentifier-ITimestamped")]
-    partial class CRNCC2596ParticipantIdentifierITimestamped
+    [Migration("20260303084349_CRNCC-2596-Participant-origin-view")]
+    partial class CRNCC2596Participantoriginview
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -614,9 +614,6 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int>("IdentifierTypeId")
                         .HasColumnType("int");
 
@@ -625,9 +622,6 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<int>("ParticipantId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<Guid>("Value")
                         .HasColumnType("char(36)");
