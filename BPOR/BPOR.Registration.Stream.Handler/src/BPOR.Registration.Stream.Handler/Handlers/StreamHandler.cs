@@ -191,6 +191,12 @@ public class StreamHandler(
         CancellationToken cancellationToken)
     {
         var identifiers = participantMapper.ExtractIdentifiers(record.Dynamodb.OldImage);
+        
+        logger.LogInformation(
+            "ProcessRemoveAsync - identifier values: {Values}",
+            string.Join(", ", identifiers.Select(id => id.Value))
+        );
+
         var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
             .IgnoreQueryFilters()
             .Include(x => x.ParticipantIdentifiers)
@@ -199,7 +205,9 @@ public class StreamHandler(
 
         if (participant == null)
         {
-            participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
+            logger.LogInformation("ProcessRemoveAsync - participant not found");
+
+            participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken); // TODO: INSERT in a remove?
             await participantDbContext.SaveChangesAsync(cancellationToken);
         }
 
