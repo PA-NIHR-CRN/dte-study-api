@@ -10,7 +10,7 @@ namespace Dynamo.Stream.Handler.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-             migrationBuilder.Sql(@"
+            migrationBuilder.Sql(@"
                 CREATE 
                     ALGORITHM = UNDEFINED 
                     DEFINER = `dte-stream-s`@`%` 
@@ -48,10 +48,8 @@ namespace Dynamo.Stream.Handler.Migrations
                         ON pi.IdentifierTypeId = it.Id
                     JOIN dte.Participants p 
                         ON pi.ParticipantId = p.Id
-                        
-                    WHERE pi.Active = 1
-                    AND p.Active = 1
-
+                    WHERE pi.IsDeleted = 0
+                    AND p.IsDeleted = 0
                 ) x
                 WHERE x.rn = 1;
                 ");
