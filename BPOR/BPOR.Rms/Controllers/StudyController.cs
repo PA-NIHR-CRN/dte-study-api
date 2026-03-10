@@ -243,7 +243,9 @@ public class StudyController(
             {nameof(StudyFormViewModel.Step)},
             {nameof(StudyFormViewModel.InformationUrl)},
             {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)},
-            {nameof(StudyFormViewModel.IsRecruitingIdentifiableParticipants)}")]
+            {nameof(StudyFormViewModel.IsRecruitingIdentifiableParticipants)},
+            {nameof(StudyFormViewModel.IsManagedByMultiplePersons)},
+            {nameof(StudyFormViewModel.HasMultipleResearchLocations)}")]
         StudyFormViewModel model)
     {
         model.Id = id;
@@ -280,6 +282,8 @@ public class StudyController(
                 case 2:
                     studyToUpdate.StudyName = model.StudyName;
                     studyToUpdate.CpmsId = model.CpmsId;
+                    studyToUpdate.HasMultipleResearchLocations = model.HasMultipleResearchLocations;
+                    studyToUpdate.IsManagedByMultiplePersons =  model.IsManagedByMultiplePersons;
                     
                     if (model.AllowEditIsRecruitingIdentifiableParticipants)
                     {
@@ -341,5 +345,26 @@ public class StudyController(
     private bool StudyExists(int id)
     {
         return context.Studies.Any(e => e.Id == id);
+    }
+
+    public async Task<IActionResult> SendIntroductoryEmail(int id)
+    {
+        var studyModel = await context.Studies
+            .Where(s => s.Id == id)
+            .AsStudyDetailsViewModel()
+            .FirstOrDefaultAsync();
+
+        if (studyModel == null)
+        {
+            logger.LogWarning("[HttpGet]Edit called with non-existent study: {StudyId}", id);
+            return NotFound();
+        }
+
+        if (!studyModel.Study.IsEligibilityCriteriaComplete)
+        {
+            return BadRequest(ModelState);
+        }
+
+        return View(studyModel);
     }
 }

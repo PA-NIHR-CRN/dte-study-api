@@ -18,6 +18,7 @@
         <input asp-for="FullName" class=" govuk-input" id="FullName" value="@(Model.FullName)"/>
     }
 </div>
+
 <div class="govuk-form-group @(Html.ViewData.ModelState["EmailAddress"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
     <label asp-for="EmailAddress" class="govuk-label" for="EmailAddress">
         @Html.DisplayNameFor(model => model.EmailAddress)

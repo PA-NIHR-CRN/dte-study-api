@@ -9898,6 +9898,9 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<string>("FundingCode")
                         .HasColumnType("longtext");
 
+                    b.Property<bool?>("HasMultipleResearchLocations")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool?>("HasNihrFunding")
                         .HasColumnType("tinyint(1)");
 
@@ -9906,6 +9909,9 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("varchar(2048)");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool?>("IsManagedByMultiplePersons")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsRecruitingIdentifiableParticipants")

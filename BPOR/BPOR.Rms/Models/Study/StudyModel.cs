@@ -80,5 +80,18 @@ public class StudyModel
     [Display(Name = "Email campaign information URL")]
     [StudyEdit(3)]
     public string? InformationUrl { get; set; }
+    
+    [Display(Name = "Will this study have more thank one research location?")]
+    [StudyEdit(2)]
+    public bool? HasMultipleResearchLocations { get; set; }
+    
+    [Display(Name = "Will be study be managed by more than one person?")]
+    [StudyEdit(2)]
+    public bool? IsManagedByMultiplePersons { get; set; }
 
+    public bool IsEligibilityCriteriaComplete =>
+        HasMultipleResearchLocations.HasValue && IsManagedByMultiplePersons.HasValue;
+
+    public bool IsEligibleForPrescreener =>
+        IsEligibilityCriteriaComplete && !(HasMultipleResearchLocations!.Value && IsManagedByMultiplePersons!.Value);
 }

@@ -32,7 +32,6 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
         var researcherEdit = For.Metadata.ContainerType?.GetProperty(studyRelativeName)?.GetCustomAttribute<ResearcherEditAttribute>();
 
         var viewModel = For.ModelExplorer.Container.Model as StudyDetailsViewModel;
-        var isResearcherCompleted = !string.IsNullOrWhiteSpace(viewModel?.Study.ChiefInvestigator);
 
         if (Show)
         {
@@ -57,17 +56,13 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
 
             var field = studyEdit?.FieldId;
             var controller = nameof(StudyController);
-
-
-            if (isResearcherCompleted)
+            
+            if (researcherEdit is not null)
             {
-                if (researcherEdit is not null)
-                {
-                    field = researcherEdit.FieldId;
-                    controller = nameof(ResearcherController);
-                }
+                field = researcherEdit.FieldId;
+                controller = nameof(ResearcherController);
             }
-
+            
             if (
                 field is not null &&
                 viewModel is not null &&

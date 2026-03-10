@@ -35,4 +35,7 @@ public class StudyFormEditModel : FormWithSteps
     }
     
     public bool AllowEditIsRecruitingIdentifiableParticipants { get; set; }
+    
+    public bool? HasMultipleResearchLocations { get; set; }
+    public bool? IsManagedByMultiplePersons { get; set; }
 }
