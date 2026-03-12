@@ -8,6 +8,9 @@ using BPOR.Rms.Models.Study;
 using BPOR.Rms.Controllers;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using System.Text.Encodings.Web;
+using BPOR.Rms.Utilities;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace BPOR.Rms.TagHelpers;
 
@@ -40,8 +43,8 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
             output.AddClass("govuk-summary-list__row", HtmlEncoder.Default);
 
             var displayName = For.Metadata.DisplayName ?? For.Name;
-            var displayValue = For.Model?.ToString() ?? string.Empty;
-
+            var displayValue = For.GetDisplayString();
+            
             var title = new TagBuilder("dt");
             title.AddCssClass("govuk-summary-list__key");
 

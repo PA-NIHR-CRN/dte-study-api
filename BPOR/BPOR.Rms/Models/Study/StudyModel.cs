@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BPOR.Rms.Utilities;
 
 namespace BPOR.Rms.Models.Study;
 
@@ -81,13 +82,17 @@ public class StudyModel
     [StudyEdit(3)]
     public string? InformationUrl { get; set; }
     
+    [ValueDisplayFormatter(typeof(YesNoFormatter))]
     [Display(Name = "Will this study have more thank one research location?")]
     [StudyEdit(2)]
     public bool? HasMultipleResearchLocations { get; set; }
     
+
+    [ValueDisplayFormatter(typeof(YesNoFormatter))]
     [Display(Name = "Will be study be managed by more than one person?")]
     [StudyEdit(2)]
     public bool? IsManagedByMultiplePersons { get; set; }
+    
 
     public bool IsEligibilityCriteriaComplete =>
         HasMultipleResearchLocations.HasValue && IsManagedByMultiplePersons.HasValue;
@@ -95,3 +100,4 @@ public class StudyModel
     public bool IsEligibleForPrescreener =>
         IsEligibilityCriteriaComplete && !(HasMultipleResearchLocations!.Value && IsManagedByMultiplePersons!.Value);
 }
+
