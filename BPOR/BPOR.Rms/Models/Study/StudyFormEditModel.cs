@@ -36,6 +36,9 @@ public class StudyFormEditModel : FormWithSteps
     
     public bool AllowEditIsRecruitingIdentifiableParticipants { get; set; }
     
-    public bool? HasMultipleResearchLocations { get; set; }
+    [Display(Name = "Will be study be managed by more than one person?", Order = 6)]
     public bool? IsManagedByMultiplePersons { get; set; }
+
+    [Display(Name = "Will this study have more thank one research location?", Order = 7)]
+    public bool? HasMultipleResearchLocations { get; set; }
 }
