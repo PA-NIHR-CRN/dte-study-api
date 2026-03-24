@@ -136,10 +136,7 @@ public class ParticipantMapper : IParticipantMapper
         destination.EthnicGroup = source.EthnicGroup;
         destination.EthnicBackground = source.EthnicBackground;
         destination.GenderIsSameAsSexRegisteredAtBirth = source.GenderIsSameAsSexRegisteredAtBirth;
-        if (
-            !string.IsNullOrWhiteSpace(source.NhsNumber)
-            && destination.NHSNumber != source.NhsNumber
-        )
+        if (!string.IsNullOrWhiteSpace(source.NhsNumber))
         {
             destination.NHSNumber = source.NhsNumber;
         }
