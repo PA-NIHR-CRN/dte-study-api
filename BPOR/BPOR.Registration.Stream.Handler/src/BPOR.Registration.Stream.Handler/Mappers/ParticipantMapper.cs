@@ -229,10 +229,6 @@ public class ParticipantMapper : IParticipantMapper
 
                     identifiers.Add(new Identifier(typeId, guid));
                 }
-                else
-                {
-                    _logger.LogWarning("ExtractIdentifiers - {KeyName} was not a valid GUID: {Value}", keyName, attrValue.S);
-                }
             }
         }
         
