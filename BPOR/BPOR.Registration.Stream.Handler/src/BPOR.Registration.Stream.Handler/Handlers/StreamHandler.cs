@@ -125,41 +125,39 @@ public class StreamHandler(
     {
         await InsertAsync(record.Dynamodb.NewImage, cancellationToken);
     }
-
-    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image,
-        CancellationToken cancellationToken)
+    
+    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image,CancellationToken cancellationToken)
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
-
-        var email = image.TryGetValue("Email", out var emailAttr) ? emailAttr.S : null;
-        var dobRaw = image.TryGetValue("DateOfBirth", out var dobAttr) ? dobAttr.S : null;
-
-        email = email?.Trim().ToLowerInvariant();
-
-        DateTime? dob = null;
-        if (!string.IsNullOrWhiteSpace(dobRaw) && DateTime.TryParse(dobRaw, out var parsedDob))
-        {
-            dob = parsedDob.ToUniversalTime().Date;
-        }
 
         var targetParticipant = await participantDbContext
             .GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
-        if (targetParticipant == null && !string.IsNullOrWhiteSpace(email) && dob.HasValue)
+        if (targetParticipant == null)
         {
-            var dobStart = dob.Value.Date;
-            var dobEnd = dobStart.AddDays(1);
+            if (image.TryGetValue("Email", out var emailAttr) &&
+                image.TryGetValue("DateOfBirth", out var dobAttr))
+            {
+                var email = emailAttr.S?.Trim().ToLowerInvariant();
 
-            targetParticipant = await participantDbContext.Participants
-                .ForUpdate()
-                .SingleOrDefaultAsync(p =>
-                    p.Email == email &&
-                    p.DateOfBirth.HasValue &&
-                    p.DateOfBirth.Value >= dobStart &&
-                    p.DateOfBirth.Value < dobEnd,
-                    cancellationToken);
+                if (!string.IsNullOrWhiteSpace(email) &&
+                    DateOnly.TryParse(dobAttr.S, out var parsedDob))
+                {
+                    var dobStart = parsedDob.ToDateTime(TimeOnly.MinValue);
+                    var dobEnd = dobStart.AddDays(1);
+
+                    targetParticipant = await participantDbContext.Participants
+                        .ForUpdate()
+                        .SingleOrDefaultAsync(p =>
+                            p.Email == email &&
+                            p.DateOfBirth.HasValue &&
+                            p.DateOfBirth.Value >= dobStart &&
+                            p.DateOfBirth.Value < dobEnd,
+                            cancellationToken);
+                }
+            }
         }
 
         if (targetParticipant == null)
