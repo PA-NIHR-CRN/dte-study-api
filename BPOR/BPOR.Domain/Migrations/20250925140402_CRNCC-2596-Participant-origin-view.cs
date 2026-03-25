@@ -10,7 +10,7 @@ namespace Dynamo.Stream.Handler.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-             migrationBuilder.Sql(@"
+            migrationBuilder.Sql(@"
                 CREATE 
                     ALGORITHM = UNDEFINED 
                     DEFINER = `dte-stream-s`@`%` 
