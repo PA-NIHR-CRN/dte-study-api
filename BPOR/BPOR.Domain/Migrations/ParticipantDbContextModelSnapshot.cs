@@ -611,9 +611,6 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int>("IdentifierTypeId")
                         .HasColumnType("int");
 
@@ -622,9 +619,6 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<int>("ParticipantId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<Guid>("Value")
                         .HasColumnType("char(36)");
