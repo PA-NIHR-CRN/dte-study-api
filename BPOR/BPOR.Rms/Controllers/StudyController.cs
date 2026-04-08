@@ -224,6 +224,12 @@ public class StudyController(
                 return validator.ValidateSpecificProperties(model, i => i.StudyName, i => i.IsRecruitingIdentifiableParticipants, i=>i.CpmsId);
             case 3:
                 return validator.ValidateSpecificProperties(model, i => i.InformationUrl);
+            case 4:
+                return validator.ValidateSpecificProperties(model, i => i.HasMultipleResearchLocations);
+            case 5:
+                return validator.ValidateSpecificProperties(model, i => i.SinglePersonResponsibleForRecruiting);
+            case 6:
+                return validator.ValidateSpecificProperties(model, i => i.PreScreenerUrl);
             default:
                 throw new ArgumentOutOfRangeException(nameof(model.Step));
         }
@@ -244,13 +250,14 @@ public class StudyController(
             {nameof(StudyFormViewModel.InformationUrl)},
             {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)},
             {nameof(StudyFormViewModel.IsRecruitingIdentifiableParticipants)},
-            {nameof(StudyFormViewModel.IsManagedByMultiplePersons)},
-            {nameof(StudyFormViewModel.HasMultipleResearchLocations)}")]
+            {nameof(StudyFormViewModel.SinglePersonResponsibleForRecruiting)},
+            {nameof(StudyFormViewModel.HasMultipleResearchLocations)},
+            {nameof(StudyFormViewModel.PreScreenerUrl)}")]
         StudyFormViewModel model)
     {
         model.Id = id;
 
-        if (model.Step is < 1 or > 3)
+        if (model.Step is < 1 or > 6)
         {
             logger.LogWarning("[HttpPost]Edit called with step out of range: {Step}", model.Step);
             return BadRequest($"Step out of range: {model.Step}");
@@ -282,8 +289,6 @@ public class StudyController(
                 case 2:
                     studyToUpdate.StudyName = model.StudyName;
                     studyToUpdate.CpmsId = model.CpmsId;
-                    studyToUpdate.HasMultipleResearchLocations = model.HasMultipleResearchLocations;
-                    studyToUpdate.IsManagedByMultiplePersons =  model.IsManagedByMultiplePersons;
                     
                     if (model.AllowEditIsRecruitingIdentifiableParticipants)
                     {
@@ -311,6 +316,15 @@ public class StudyController(
                     studyToUpdate.InformationUrl = string.IsNullOrWhiteSpace(model.InformationUrl)
                         ? null
                         : model.InformationUrl.Trim();
+                    break;
+                case 4:
+                    studyToUpdate.HasMultipleResearchLocations = model.HasMultipleResearchLocations;
+                    break;
+                case 5:
+                    studyToUpdate.SinglePersonResponsibleForRecruiting = model.SinglePersonResponsibleForRecruiting;
+                    break;
+                case 6:
+                    studyToUpdate.PreScreenerUrl = model.PreScreenerUrl;
                     break;
             }
                   

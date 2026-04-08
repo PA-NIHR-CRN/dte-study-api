@@ -7,10 +7,17 @@
         <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"/>
         <summary-list-item for="Study.StudyName"/>
         <summary-list-item for="Study.CpmsId"/>
+        <summary-list-item for="Study.HasMultipleResearchLocations" 
+                           show-researcher-when="Model.Study.HasMultipleResearchLocations.HasValue"/>
+        <summary-list-item for="Study.SinglePersonResponsibleForRecruiting" 
+                           show-researcher-when="Model.Study.SinglePersonResponsibleForRecruiting.HasValue"/>       
         <summary-list-item for="Study.FullName"/>
         <summary-list-item for="Study.EmailAddress"/>
         <summary-list-item for="Study.InformationUrl"/>
-
+        <summary-list-item for="Study.PreScreenerUrl" 
+                           show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.PreScreenerUrl)"/>
+        <summary-list-item for="Study.VolunteerInformationUrl" 
+                           show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.VolunteerInformationUrl)"/>
         <summary-list-item for="Study.ChiefInvestigator"/>
         <summary-list-item for="Study.StudySponsors"/>
         <summary-list-item for="Study.PortfolioSubmissionStatus"/>
@@ -19,8 +26,7 @@
         <summary-list-item for="Study.HasFundingDisplay"/>
         <summary-list-item for="Study.FundingCode" show-when="@Model.Study.HasFunding ==true"/>
         <summary-list-item for="Study.UKRecruitmentTarget"/>
-        <summary-list-item for="Study.HasMultipleResearchLocations"/>
-        <summary-list-item for="Study.IsManagedByMultiplePersons"/>
+
         <summary-list-item for="Study.TargetPopulation"/>
         <summary-list-item for="Study.RecruitmentStartDate"/>
         <summary-list-item for="Study.RecruitmentEndDate"/>

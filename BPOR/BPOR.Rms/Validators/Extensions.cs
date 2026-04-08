@@ -21,10 +21,43 @@ public static class Extensions
         return validator.Validate(instance, options => options.IncludeProperties(properties));
     }
     
-    public static IRuleBuilderOptions<T, string?> UriOrNullOrWhitespace<T>(this IRuleBuilder<T, string?> ruleBuilder,
-        UriKind uriKind = UriKind.Absolute)
+    /// <summary>
+    /// Validates a URI as per RFC 3986 and, per convention, allows a maximum of 2048 characters.
+    /// </summary>
+    /// <param name="uriKind"> The kind of URI to allow (absolute or relative). Defaults to absolute</param>
+    /// <param name="schemes"> The URI schemes to allow. Defaults to https only.</param>
+    public static IRuleBuilder<T, string?> Uri<T>(this IRuleBuilder<T, string?> ruleBuilder,
+        UriKind uriKind = UriKind.Absolute, params string[] schemes)
     {
-        return ruleBuilder.Must(value =>
-            string.IsNullOrWhiteSpace(value) || Uri.IsWellFormedUriString(value.Trim(), uriKind));
+        if (schemes.Length == 0)
+        {
+            schemes = ["https"];
+        }
+
+        return ruleBuilder.Custom((value, context) =>
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return;
+            }
+
+            value = value.Trim();
+
+            if (value.Length > 2048)
+            {
+                context.AddFailure("The link must be less that 2049 characters");
+            }
+
+            if (!System.Uri.TryCreate(value, uriKind, out var uri))
+            {
+                context.AddFailure("The link you entered isn’t in the correct format");
+                return;
+            }
+
+            if (!schemes.Contains(uri.Scheme, StringComparer.OrdinalIgnoreCase))
+            {
+                context.AddFailure($"The link must start with {string.Join(" or ", schemes.Select(i => $"{i}://"))}");
+            }
+        });
     }
 }

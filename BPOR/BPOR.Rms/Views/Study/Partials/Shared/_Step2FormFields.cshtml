@@ -63,25 +63,3 @@
     }
     <input asp-for="CpmsId" class="govuk-input govuk-input--width-10 govuk-input @(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "govuk-input--error" : "")" aria-describedby="@(Html.ViewData.ModelState["CpmsId"]?.Errors.Count > 0 ? "cpms-id-error" : "")" type="text" inputmode="numeric" />
 </div>
-
-<div class="govuk-form-group">
-    <label asp-for="HasMultipleResearchLocations" class="govuk-label">
-        @Html.DisplayNameFor(model => model.HasMultipleResearchLocations)
-    </label>
-    <select asp-for="HasMultipleResearchLocations" class="govuk-select">
-        <option value="">Choose answer</option>
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-    </select>
-</div>
-
-<div class="govuk-form-group">
-    <label asp-for="IsManagedByMultiplePersons" class="govuk-label">
-        @Html.DisplayNameFor(model => model.IsManagedByMultiplePersons)
-    </label>
-    <select asp-for="IsManagedByMultiplePersons" class="govuk-select">
-        <option value="">Choose answer</option>
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-    </select>
-</div>

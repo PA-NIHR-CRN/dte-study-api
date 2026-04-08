@@ -9911,14 +9911,15 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool?>("IsManagedByMultiplePersons")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<bool>("IsRecruitingIdentifiableParticipants")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int?>("ParticipantsRecruited")
                         .HasColumnType("int");
+
+                    b.Property<string>("PreScreenerUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("varchar(2048)");
 
                     b.Property<DateTime?>("RecruitmentEndDate")
                         .HasColumnType("datetime(6)");
@@ -9928,6 +9929,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<string>("RecruitmentTarget")
                         .HasColumnType("longtext");
+
+                    b.Property<bool?>("SinglePersonResponsibleForRecruiting")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Sponsors")
                         .HasColumnType("longtext");

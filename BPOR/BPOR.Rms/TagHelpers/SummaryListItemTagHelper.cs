@@ -21,6 +21,12 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
     [HtmlAttributeName("show-when")]
     public bool Show { get; set; } = true;
     
+    [HtmlAttributeName("show-admin-when")]
+    public bool ShowAdmin { get; set; } = true;
+    
+    [HtmlAttributeName("show-researcher-when")]
+    public bool ShowResearcher { get; set; } = true;
+    
     [HtmlAttributeName("edit-when")]
     public bool Editable { get; set; } = true;
 
@@ -36,7 +42,11 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
 
         var viewModel = For.ModelExplorer.Container.Model as StudyDetailsViewModel;
 
-        if (Show)
+        var visible = Show;
+        visible &= !currentUserProvider.IsAdmin() || ShowAdmin;
+        visible &= !currentUserProvider.IsResearcher() || ShowResearcher;
+
+        if (visible)
         {
             output.TagName = "div";
             output.TagMode = TagMode.StartTagAndEndTag;
@@ -66,11 +76,10 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
                 controller = nameof(ResearcherController);
             }
             
-            if (
-                field is not null &&
+            if (field is not null &&
                 viewModel is not null &&
-                Editable &&
-                (currentUserProvider?.User?.HasRole("Admin") ?? false))
+                Editable && 
+                currentUserProvider.IsAdmin())
             {
                 var url = linkGenerator.GetUriByAction(ViewContext.HttpContext, "Edit", controller.Replace("Controller", ""), new { id = viewModel.Study.Id, field });
 
