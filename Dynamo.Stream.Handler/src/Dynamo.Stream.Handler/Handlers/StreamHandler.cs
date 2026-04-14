@@ -150,7 +150,7 @@ public class StreamHandler : IStreamHandler
             targetParticipant = _dbContext.Participants.Add(new Participant()).Entity;
         }
 
-        return await participantMapper.Map(image, targetParticipant, cancellationToken);
+        return await _participantMapper.Map(image, targetParticipant, cancellationToken);
     }
 
     private async Task ProcessModifyAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
