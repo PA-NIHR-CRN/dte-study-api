@@ -84,6 +84,12 @@ public class ParticipantService : IParticipantService
     private async Task CreateUserAndDeactivateOldUserAsync(ParticipantDetails request,
         ParticipantDetails participant)
     {
+        _logger.LogInformation(
+            "CreateUserAndDeactivateOldUserAsync: participant={@participant}, request={@request}",
+            participant,
+            request
+        );
+
         var entity = new ParticipantDetails
         {
             NhsId = request.NhsId,
@@ -378,8 +384,10 @@ public class ParticipantService : IParticipantService
 
     public async Task CreateParticipantDetailsAsync(ParticipantDetails request)
     {
+        _logger.LogInformation("CreateParticipantDetailsAsync: request={@request}", request);
+
         var entity = new ParticipantDetails
-        {
+        { 
             NhsId = request.NhsId,
             NhsNumber = request.NhsNumber,
             ParticipantId = request.ParticipantId,
