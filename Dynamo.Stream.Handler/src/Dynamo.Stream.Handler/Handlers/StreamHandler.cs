@@ -113,7 +113,8 @@ public class StreamHandler : IStreamHandler
                                                 .ForUpdate()
                                                 .SingleOrDefaultAsync(cancellationToken);
 
-
+        logger.LogInformation("Stream InsertAsync: identifiers {@identifiers}", identifiers);
+        
         if (targetParticipant == null)
         {
             // No linked participant exists, create a new one.
