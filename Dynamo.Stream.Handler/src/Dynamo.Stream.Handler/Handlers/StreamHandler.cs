@@ -105,23 +105,52 @@ public class StreamHandler : IStreamHandler
         await InsertAsync(record.Dynamodb.NewImage, cancellationToken);
     }
 
-    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image, CancellationToken cancellationToken)
+    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image,CancellationToken cancellationToken)
     {
-        var identifiers = _participantMapper.ExtractIdentifiers(image);
+        var identifiers = participantMapper.ExtractIdentifiers(image);
 
-        var targetParticipant = await _dbContext.GetParticipantByLinkedIdentifiers(identifiers)
-                                                .ForUpdate()
-                                                .SingleOrDefaultAsync(cancellationToken);
-
-        _logger.LogInformation("Stream InsertAsync: identifiers {@identifiers}", identifiers);
+        var targetParticipant = await participantDbContext
+            .GetParticipantByLinkedIdentifiers(identifiers)
+            .ForUpdate()
+            .SingleOrDefaultAsync(cancellationToken);
 
         if (targetParticipant == null)
         {
-            // No linked participant exists, create a new one.
-            targetParticipant = _dbContext.Participants.Add(new Participant()).Entity;
+            if (
+                image.TryGetValue("Email", out var emailAttr)
+                && image.TryGetValue("DateOfBirth", out var dobAttr)
+            )
+            {
+                var email = emailAttr.S?.Trim().ToLowerInvariant();
+
+                if (
+                    !string.IsNullOrWhiteSpace(email)
+                    && DateOnly.TryParse(dobAttr.S, out var parsedDob)
+                )
+                {
+                    var dobStart = parsedDob.ToDateTime(TimeOnly.MinValue);
+                    var dobEnd = dobStart.AddDays(1);
+
+                    targetParticipant = await participantDbContext
+                        .Participants.ForUpdate()
+                        .SingleOrDefaultAsync(
+                            p =>
+                                p.Email == email
+                                && p.DateOfBirth.HasValue
+                                && p.DateOfBirth.Value >= dobStart
+                                && p.DateOfBirth.Value < dobEnd,
+                            cancellationToken
+                        );
+                }
+            }
         }
 
-        return _participantMapper.Map(image, targetParticipant);
+        if (targetParticipant == null)
+        {
+            targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
+        }
+
+        return await participantMapper.Map(image, targetParticipant, cancellationToken);
     }
 
     private async Task ProcessModifyAsync(DynamoDBEvent.DynamodbStreamRecord record, CancellationToken cancellationToken)
