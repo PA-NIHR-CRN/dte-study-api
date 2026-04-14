@@ -105,11 +105,11 @@ public class StreamHandler : IStreamHandler
         await InsertAsync(record.Dynamodb.NewImage, cancellationToken);
     }
 
-    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image,CancellationToken cancellationToken)
+    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image, CancellationToken cancellationToken)
     {
-        var identifiers = participantMapper.ExtractIdentifiers(image);
+        var identifiers = _participantMapper.ExtractIdentifiers(image);
 
-        var targetParticipant = await participantDbContext
+        var targetParticipant = await _dbContext
             .GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
@@ -131,7 +131,7 @@ public class StreamHandler : IStreamHandler
                     var dobStart = parsedDob.ToDateTime(TimeOnly.MinValue);
                     var dobEnd = dobStart.AddDays(1);
 
-                    targetParticipant = await participantDbContext
+                    targetParticipant = await _dbContext
                         .Participants.ForUpdate()
                         .SingleOrDefaultAsync(
                             p =>
@@ -147,7 +147,7 @@ public class StreamHandler : IStreamHandler
 
         if (targetParticipant == null)
         {
-            targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
+            targetParticipant = _dbContext.Participants.Add(new Participant()).Entity;
         }
 
         return await participantMapper.Map(image, targetParticipant, cancellationToken);
