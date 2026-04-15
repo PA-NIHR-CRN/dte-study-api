@@ -114,13 +114,24 @@ public class StreamHandler : IStreamHandler
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
+        _logger.LogInformation(
+            "InsertAsync: targetParticipant={@targetParticipant}",
+            targetParticipant
+        );
+
         if (targetParticipant == null)
         {
             if (
                 image.TryGetValue("Email", out var emailAttr)
                 && image.TryGetValue("DateOfBirth", out var dobAttr)
-            )
+            ) // TODO: logs to check dob and email dupe check
             {
+                _logger.LogInformation(
+                    "InsertAsync: Email={@Email}, DOB={@DOB}",
+                    emailAttr.S,
+                    dobAttr.S
+                );
+
                 var email = emailAttr.S?.Trim().ToLowerInvariant();
 
                 if (
@@ -130,6 +141,13 @@ public class StreamHandler : IStreamHandler
                 {
                     var dobStart = parsedDob.ToDateTime(TimeOnly.MinValue);
                     var dobEnd = dobStart.AddDays(1);
+
+                    _logger.LogInformation(
+                        "InsertAsync: email={@Email}, dobStart={@dobStart}, dobEnd={@dobEnd}",
+                        email,
+                        dobStart,
+                        dobEnd
+                    );
 
                     targetParticipant = await _dbContext
                         .Participants.ForUpdate()
