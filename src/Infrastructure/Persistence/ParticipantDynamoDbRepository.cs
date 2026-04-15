@@ -85,6 +85,7 @@ namespace Infrastructure.Persistence
 
         public async Task CreateParticipantDetailsAsync(ParticipantDetails entity)
         {
+            _logger.LogInformation("CreateParticipantDetailsAsync: entity={@entity}", entity);
             // TODO pull out this logic into a mapper
             entity.Pk = ParticipantKey(string.IsNullOrEmpty(entity.ParticipantId)
                 ? entity.NhsId
