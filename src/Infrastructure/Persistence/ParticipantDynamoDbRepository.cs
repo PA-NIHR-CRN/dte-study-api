@@ -97,11 +97,13 @@ namespace Infrastructure.Persistence
 
         public async Task UpdateParticipantDetailsAsync(ParticipantDetails entity)
         {
+            _logger.LogInformation("UpdateParticipantDetailsAsync: entity={@entity}", entity);
             await _context.SaveAsync(entity, _config);
         }
 
         public async Task CreateParticipantDemographicsAsync(ParticipantDemographics entity)
         {
+            _logger.LogInformation("CreateParticipantDemographicsAsync: entity={@entity}", entity);
             entity.Pk = ParticipantKey(entity.ParticipantId);
             entity.Sk = ParticipantKey();
 
@@ -110,6 +112,7 @@ namespace Infrastructure.Persistence
 
         public async Task AddDemographicsToNhsUserAsync(ParticipantDemographics entity, string nhsId)
         {
+            _logger.LogInformation("AddDemographicsToNhsUserAsync: entity={@entity}, nhsId={@nhsId}", entity, nhsId);
             entity.Pk = ParticipantKey(nhsId);
             entity.Sk = ParticipantKey();
 
@@ -118,16 +121,19 @@ namespace Infrastructure.Persistence
 
         public async Task UpdateParticipantDemographicsAsync(ParticipantDemographics entity)
         {
+            _logger.LogInformation("UpdateParticipantDemographicsAsync: entity={@entity}", entity);
             await _context.SaveAsync(entity, _config);
         }
 
         public async Task DeleteParticipantDetailsAsync(ParticipantDetails entity)
         {
+            _logger.LogInformation("DeleteParticipantDetailsAsync: entity={@entity}", entity);
             await _context.DeleteAsync(entity, _config);
         }
 
         public async Task CreateAnonymisedDemographicParticipantDataAsync(ParticipantDetails entity)
         {
+            _logger.LogInformation("CreateAnonymisedDemographicParticipantDataAsync: entity={@entity}", entity);
             await _context.SaveAsync(entity, _config);
         }
     }

@@ -114,11 +114,21 @@ public class ParticipantService : IParticipantService
 
         if (demographics.HasDemographics)
         {
+            _logger.LogInformation(
+                "CreateUserAndDeactivateOldUserAsync: HasDemographics={@HasDemographics}",
+                demographics.HasDemographics
+            );
+
             await _participantRepository.CreateParticipantDetailsAsync(entity);
             await _participantRepository.AddDemographicsToNhsUserAsync(demographics, entity.NhsId);
         }
         else if (participant.ConsentRegistration)
         {
+            _logger.LogInformation(
+                "CreateUserAndDeactivateOldUserAsync: ConsentRegistration={@ConsentRegistration}",
+                participant.ConsentRegistration
+            );
+
             // create new user with consent and deactivate the old user
             await _participantRepository.CreateParticipantDetailsAsync(entity);
         }
