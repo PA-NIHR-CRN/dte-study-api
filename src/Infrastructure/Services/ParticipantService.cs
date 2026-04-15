@@ -156,7 +156,10 @@ public class ParticipantService : IParticipantService
             participant.Firstname = request.Firstname;
             participant.Lastname = request.Lastname;
             participant.DateOfBirth = request.DateOfBirth;
-            participant.NhsNumber = request.NhsNumber;
+            if (!string.IsNullOrWhiteSpace(request.NhsNumber))
+            {
+                participant.NhsNumber = request.NhsNumber;
+            }
             participant.UpdatedAtUtc = _clock.Now();
             participant.SelectedLocale = request.SelectedLocale;
 
@@ -242,9 +245,20 @@ public class ParticipantService : IParticipantService
 
     public async Task DeleteUserAsync(string participantId)
     {
+        _logger.LogInformation("DeleteUserAsync: {@participantId}", participantId);
+
         try
         {
             var entity = await _participantRepository.GetParticipantDetailsAsync(participantId);
+
+            _logger.LogInformation(
+                "DeleteUserAsync entity: ParticipantId={ParticipantId}, PK={PK}, Email={Email}, NHS={NHS}",
+                entity.ParticipantId,
+                entity.Pk,
+                entity.Email,
+                entity.NhsNumber
+            );
+
             if (entity == null) return;
 
             var contentfulEmailRequest = new EmailContentRequest
@@ -304,6 +318,12 @@ public class ParticipantService : IParticipantService
 
     private async Task RemoveParticipantDataAsync(ParticipantDetails entity)
     {
+        _logger.LogInformation(
+            "RemoveParticipantDataAsync: {@entity.ParticipantId}, {@entity.NhsId}",
+            entity.ParticipantId,
+            entity.NhsId
+        );
+
         var participantId = StripPrimaryKey(entity.Pk);
         if (entity.NhsId == null)
         {
@@ -324,6 +344,12 @@ public class ParticipantService : IParticipantService
 
     private async Task SaveAnonymisedDemographicParticipantDataAsync(ParticipantDetails entity)
     {
+        _logger.LogInformation(
+            "SaveAnonymisedDemographicParticipantDataAsync: {@entity.ParticipantId}, {@entity.NhsId}",
+            entity.ParticipantId,
+            entity.NhsId
+        );
+
         var primaryKey = DeletedKey(Guid.NewGuid());
         var anonEntity = new ParticipantDetails
         {
@@ -343,7 +369,6 @@ public class ParticipantService : IParticipantService
         };
 
         await _participantRepository.CreateAnonymisedDemographicParticipantDataAsync(anonEntity);
-
     }
 
     public async Task<ParticipantDetails> GetParticipantDetailsAsync(string participantId)
