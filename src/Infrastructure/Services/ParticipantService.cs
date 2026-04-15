@@ -336,18 +336,6 @@ public class ParticipantService : IParticipantService
 
     private async Task RemoveCognitoUserAsync(string username)
     {
-        var user = await _provider.AdminGetUserAsync(new AdminGetUserRequest
-        {
-            Username = username,
-            UserPoolId = _awsSettings.CognitoPoolId
-        });
-
-        if (user == null)
-        {
-            _logger.LogWarning("Cognito user not found: {Username}", username);
-            return;
-        }
-
         await _provider.AdminDeleteUserAsync(new AdminDeleteUserRequest
         {
             UserPoolId = _awsSettings.CognitoPoolId,
