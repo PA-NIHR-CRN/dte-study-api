@@ -109,9 +109,12 @@ public class ParticipantMapper : IParticipantMapper
         var source = _context.FromDocument<DynamoParticipant>(doc);
 
         _logger.LogInformation(
-            "Map: destination={@participant}, request={@request}",
-            destination,
-            source
+            "Map: PK={PK}, DestEmail={DestEmail}, DestNHS={DestNHS}, SourceEmail={SourceEmail}, SourceNHS={SourceNHS}",
+            record.PK(),
+            destination.Email,
+            destination.NHSNumber,
+            source.Email,
+            source.NhsNumber
         );
 
         destination.Email = source.Email;
