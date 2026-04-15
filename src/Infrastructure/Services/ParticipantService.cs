@@ -319,7 +319,8 @@ public class ParticipantService : IParticipantService
     private async Task RemoveParticipantDataAsync(ParticipantDetails entity)
     {
         _logger.LogInformation(
-            "RemoveParticipantDataAsync: {@entity.ParticipantId}, {@entity.NhsId}",
+            "RemoveParticipantDataAsync: {@entity.Pk}, {@entity.ParticipantId}, {@entity.NhsId}",
+            entity.Pk,
             entity.ParticipantId,
             entity.NhsId
         );
@@ -335,6 +336,18 @@ public class ParticipantService : IParticipantService
 
     private async Task RemoveCognitoUserAsync(string username)
     {
+        var user = await _provider.AdminGetUserAsync(new AdminGetUserRequest
+        {
+            Username = username,
+            UserPoolId = _awsSettings.CognitoPoolId
+        });
+
+        if (user == null)
+        {
+            _logger.LogWarning("Cognito user not found: {Username}", username);
+            return;
+        }
+
         await _provider.AdminDeleteUserAsync(new AdminDeleteUserRequest
         {
             UserPoolId = _awsSettings.CognitoPoolId,
