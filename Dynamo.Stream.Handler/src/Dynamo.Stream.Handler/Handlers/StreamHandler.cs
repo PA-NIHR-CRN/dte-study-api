@@ -136,9 +136,11 @@ public class StreamHandler : IStreamHandler
 
                 if (
                     !string.IsNullOrWhiteSpace(email)
-                    && DateOnly.TryParse(dobAttr.S, out var parsedDob)
+                    && DateTime.TryParse(dobAttr.S, out var parsedDateTime)
                 )
                 {
+                    var parsedDob = DateOnly.FromDateTime(parsedDateTime);
+
                     var dobStart = parsedDob.ToDateTime(TimeOnly.MinValue);
                     var dobEnd = dobStart.AddDays(1);
 
