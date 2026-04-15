@@ -5,6 +5,7 @@ using Dynamo.Stream.Handler.Entities;
 using Dynamo.Stream.Handler.Enums;
 using Dynamo.Stream.Handler.Extensions;
 using Dynamo.Stream.Handler.Services;
+using Microsoft.Extensions.Logging;
 using DynamoParticipant = Domain.Entities.Participants.Participant;
 
 namespace Dynamo.Stream.Handler.Mappers;
