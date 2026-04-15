@@ -328,7 +328,7 @@ public class ParticipantService : IParticipantService
         var participantId = StripPrimaryKey(entity.Pk);
         if (entity.NhsId == null)
         {
-            await RemoveCognitoUserAsync(participantId);
+            await RemoveCognitoUserAsync(entity.ParticipantId);
         }
 
         await _participantRepository.DeleteParticipantDetailsAsync(entity);
