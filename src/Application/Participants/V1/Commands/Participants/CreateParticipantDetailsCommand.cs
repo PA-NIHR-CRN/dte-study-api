@@ -59,6 +59,11 @@ namespace Application.Participants.V1.Commands.Participants
 
             public async Task<Response<object>> Handle(CreateParticipantDetailsCommand request, CancellationToken cancellationToken)
             {
+                _logger.LogInformation(
+                    "CreateParticipantDetailsCommand Handle: request={@request}",
+                    request
+                );
+
                 try
                 {
                     var entity = new ParticipantDetails

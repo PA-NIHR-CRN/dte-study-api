@@ -11,13 +11,15 @@ namespace Dynamo.Stream.Handler.Mappers;
 
 public class ParticipantMapper : IParticipantMapper
 {
+    private readonly ILogger<ParticipantMapper> _logger;
     private readonly IDynamoDBContext _context;
     private readonly IRefDataService _refDataService;
 
-    public ParticipantMapper(IDynamoDBContext context, IRefDataService refDataService)
+    public ParticipantMapper(IDynamoDBContext context, IRefDataService refDataService, ILogger<ParticipantMapper> logger)
     {
         _context = context;
         _refDataService = refDataService;
+        _logger = logger;
     }
 
     private void MapIdentifiers(DynamoParticipant source, Participant participant)
@@ -104,6 +106,12 @@ public class ParticipantMapper : IParticipantMapper
         var doc = Document.FromAttributeMap(record);
 
         var source = _context.FromDocument<DynamoParticipant>(doc);
+
+        _logger.LogInformation(
+            "Map: destination={@participant}, request={@request}",
+            destination,
+            source
+        );
 
         destination.Email = source.Email;
         destination.FirstName = source.Firstname;
