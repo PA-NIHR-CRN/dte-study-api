@@ -325,7 +325,6 @@ public class ParticipantService : IParticipantService
             entity.NhsId
         );
 
-        var participantId = StripPrimaryKey(entity.Pk);
         if (entity.NhsId == null)
         {
             await RemoveCognitoUserAsync(entity.ParticipantId);
@@ -336,6 +335,12 @@ public class ParticipantService : IParticipantService
 
     private async Task RemoveCognitoUserAsync(string username)
     {
+        _logger.LogInformation(
+            "Deleting Cognito user: Username={Username}, PoolId={PoolId}",
+            username,
+            _awsSettings.CognitoPoolId
+        );
+
         await _provider.AdminDeleteUserAsync(new AdminDeleteUserRequest
         {
             UserPoolId = _awsSettings.CognitoPoolId,
