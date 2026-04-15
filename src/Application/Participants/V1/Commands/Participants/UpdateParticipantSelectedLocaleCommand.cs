@@ -48,7 +48,11 @@ public class UpdateParticipantSelectedLocaleCommand : IRequest<Response<object>>
         {
             try
             {
-                var entity = await _participantRepository.GetParticipantDetailsAsync(request.ParticipantId);
+                _logger.LogInformation("UpdateParticipantSelectedLocaleCommand: request={@request}", request);
+
+                var entity = await _participantRepository.GetParticipantDetailsAsync(
+                    request.ParticipantId
+                );
 
                 if (entity == null)
                 {
