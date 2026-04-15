@@ -81,8 +81,10 @@ public class ParticipantService : IParticipantService
         }
     }
 
-    private async Task CreateUserAndDeactivateOldUserAsync(ParticipantDetails request,
-        ParticipantDetails participant)
+    private async Task CreateUserAndDeactivateOldUserAsync(
+        ParticipantDetails request,
+        ParticipantDetails participant
+    )
     {
         _logger.LogInformation(
             "CreateUserAndDeactivateOldUserAsync: participant={@participant}, request={@request}",
@@ -95,7 +97,7 @@ public class ParticipantService : IParticipantService
             NhsId = request.NhsId,
             NhsNumber = request.NhsNumber,
             Email = request.Email,
-            ParticipantId = request.ParticipantId,
+            ParticipantId = request.ParticipantId ?? participant.ParticipantId,
             Firstname = request.Firstname,
             Lastname = request.Lastname,
             ConsentRegistration = participant.ConsentRegistration,
@@ -106,8 +108,10 @@ public class ParticipantService : IParticipantService
             SelectedLocale = request.SelectedLocale
         };
         // check if demographic data is complete
-        var demographics = await _participantRepository
-            .GetParticipantDemographicsAsync(participant.Pk.Replace("PARTICIPANT#", ""));
+        var demographics = await _participantRepository.GetParticipantDemographicsAsync(
+            participant.Pk.Replace("PARTICIPANT#", "")
+        );
+
         if (demographics.HasDemographics)
         {
             await _participantRepository.CreateParticipantDetailsAsync(entity);
