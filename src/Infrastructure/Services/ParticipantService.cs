@@ -97,7 +97,7 @@ public class ParticipantService : IParticipantService
             NhsId = request.NhsId,
             NhsNumber = request.NhsNumber,
             Email = request.Email,
-            ParticipantId = request.ParticipantId ?? participant.ParticipantId,
+            ParticipantId = request.NhsId,
             Firstname = request.Firstname,
             Lastname = request.Lastname,
             ConsentRegistration = participant.ConsentRegistration,
