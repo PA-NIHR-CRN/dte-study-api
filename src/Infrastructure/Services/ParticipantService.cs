@@ -404,7 +404,7 @@ public class ParticipantService : IParticipantService
         { 
             NhsId = request.NhsId,
             NhsNumber = request.NhsNumber,
-            ParticipantId = request.ParticipantId,
+            ParticipantId = request.NhsId,
             Email = request.Email.ToLower(),
             Firstname = request.Firstname,
             Lastname = request.Lastname,
