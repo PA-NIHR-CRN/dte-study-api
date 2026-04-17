@@ -34,13 +34,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudyApi.Acceptance.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.Tests", "tests\Application.Tests\Application.Tests.csproj", "{5B0B13E2-CD2E-46AD-AD07-53D090FDB0A4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dynamo.Stream.Handler", "Dynamo.Stream.Handler\src\Dynamo.Stream.Handler\Dynamo.Stream.Handler.csproj", "{2BC45B3E-6B16-4102-8DDD-95F2D2D9A5FB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dynamo.Stream.Handler.Tests", "tests\Dynamo.Stream.Handler.Tests\Dynamo.Stream.Handler.Tests.csproj", "{B5447623-44A4-452D-8839-C46700803DEE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dynamo.Stream.Ingestor", "Dynamo.Stream.Ingestor\src\Dynamo.Stream.Ingestor\Dynamo.Stream.Ingestor.csproj", "{7EE662AA-1826-4839-91CB-302F5D533614}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dynamo.Stream.Ingestor.Harness", "Dynamo.Stream.Ingestor.Harness\Dynamo.Stream.Ingestor.Harness.csproj", "{DED4F965-F330-42DF-9102-8B02EE1BC473}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
