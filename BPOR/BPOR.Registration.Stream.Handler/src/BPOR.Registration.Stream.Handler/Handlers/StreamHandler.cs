@@ -129,8 +129,9 @@ public class StreamHandler(
     private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image,CancellationToken cancellationToken)
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
+        var pk = image.PK();
 
-        _logger.LogInformation(
+        logger.LogInformation(
             "Insert IDENTIFIERS: PK={PK}, Count={Count}, Values={Values}",
             pk,
             identifiers.Count,
@@ -142,7 +143,7 @@ public class StreamHandler(
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
-            _logger.LogInformation(
+        logger.LogInformation(
             "Insert IDENTIFIER MATCH: PK={PK}, Found={Found}, ParticipantId={ParticipantId}",
             pk,
             targetParticipant != null,
@@ -156,7 +157,7 @@ public class StreamHandler(
             {
                 var email = emailAttr.S?.Trim().ToLowerInvariant();
 
-                _logger.LogInformation(
+                logger.LogInformation(
                     "Insert FALLBACK INPUT: PK={PK}, Email={Email}, DOBRaw={DOB}",
                     pk,
                     email,
@@ -169,7 +170,7 @@ public class StreamHandler(
                     var dobStart = parsedDob.ToDateTime(TimeOnly.MinValue);
                     var dobEnd = dobStart.AddDays(1);
 
-                    _logger.LogInformation(
+                    logger.LogInformation(
                         "Insert FALLBACK PARSED: PK={PK}, Email={Email}, DobStart={DobStart}, DobEnd={DobEnd}",
                         pk,
                         email,
