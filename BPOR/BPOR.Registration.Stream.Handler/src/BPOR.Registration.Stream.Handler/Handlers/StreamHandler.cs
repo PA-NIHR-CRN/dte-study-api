@@ -129,7 +129,7 @@ public class StreamHandler(
     private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image,CancellationToken cancellationToken)
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
-        var pk = image.PK();
+        var pk = image.TryGetValue("PK", out var pkAttr) ? pkAttr.S : null;
 
         logger.LogInformation(
             "Insert IDENTIFIERS: PK={PK}, Count={Count}, Values={Values}",
