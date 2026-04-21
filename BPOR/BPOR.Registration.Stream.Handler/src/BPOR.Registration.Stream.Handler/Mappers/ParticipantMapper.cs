@@ -124,7 +124,26 @@ public class ParticipantMapper : IParticipantMapper
         var doc = Document.FromAttributeMap(record);
 
         var source = _context.FromDocument<DynamoParticipant>(doc);
-        
+
+        _logger.LogInformation(
+            "Map START: PK={PK}, ParticipantId={ParticipantId}, Source: Email={Email}, NHS={NHS}, DOB={DOB}, AddressNull={AddressNull}",
+            record.PK(),
+            source.ParticipantId,
+            source.Email,
+            source.NhsNumber,
+            source.DateOfBirth,
+            source.Address == null
+        );
+
+        _logger.LogInformation(
+            "Map BEFORE: Id={Id}, Email={Email}, NHS={NHS}, DOB={DOB}, AddressNull={AddressNull}",
+            destination.Id,
+            destination.Email,
+            destination.NHSNumber,
+            destination.DateOfBirth,
+            destination.Address == null
+        );
+
         destination.Email = source.Email;
         destination.FirstName = source.Firstname;
         destination.LastName = source.Lastname;
@@ -203,6 +222,15 @@ public class ParticipantMapper : IParticipantMapper
 
             ParticipantAddressMapper.Map(source.Address, destination);
         }
+
+        _logger.LogInformation(
+            "Map END: Id={Id}, Email={Email}, NHS={NHS}, DOB={DOB}, AddressNull={AddressNull}",
+            destination.Id,
+            destination.Email,
+            destination.NHSNumber,
+            destination.DateOfBirth,
+            destination.Address == null
+        );
 
         MapHealthConditions(source, destination);
         MapIdentifiers(source, destination);

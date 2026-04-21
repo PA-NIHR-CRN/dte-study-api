@@ -130,10 +130,24 @@ public class StreamHandler(
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
 
+        _logger.LogInformation(
+            "Insert IDENTIFIERS: PK={PK}, Count={Count}, Values={Values}",
+            pk,
+            identifiers.Count,
+            identifiers.Select(i => $"{i.Type}:{i.Value}")
+        );
+
         var targetParticipant = await participantDbContext
             .GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
+
+            _logger.LogInformation(
+            "Insert IDENTIFIER MATCH: PK={PK}, Found={Found}, ParticipantId={ParticipantId}",
+            pk,
+            targetParticipant != null,
+            targetParticipant?.Id
+        );
 
         if (targetParticipant == null)
         {
@@ -142,11 +156,26 @@ public class StreamHandler(
             {
                 var email = emailAttr.S?.Trim().ToLowerInvariant();
 
+                _logger.LogInformation(
+                    "Insert FALLBACK INPUT: PK={PK}, Email={Email}, DOBRaw={DOB}",
+                    pk,
+                    email,
+                    dobAttr.S
+                );
+
                 if (!string.IsNullOrWhiteSpace(email) &&
                     DateOnly.TryParse(dobAttr.S, out var parsedDob))
                 {
                     var dobStart = parsedDob.ToDateTime(TimeOnly.MinValue);
                     var dobEnd = dobStart.AddDays(1);
+
+                    _logger.LogInformation(
+                        "Insert FALLBACK PARSED: PK={PK}, Email={Email}, DobStart={DobStart}, DobEnd={DobEnd}",
+                        pk,
+                        email,
+                        dobStart,
+                        dobEnd
+                    );
 
                     targetParticipant = await participantDbContext.Participants
                         .ForUpdate()
