@@ -83,7 +83,7 @@ public class StudyModel
     public string? InformationUrl { get; set; }
     
     [ValueDisplayFormatter(typeof(YesNoFormatter))]
-    [Display(Name = "Will this study have more thank one research location?")]
+    [Display(Name = "Will this study have more thank one research location in the UK?")]
     [StudyEdit(4)]
     public bool? HasMultipleResearchLocations { get; set; }
     

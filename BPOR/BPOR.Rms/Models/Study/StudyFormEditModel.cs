@@ -39,7 +39,7 @@ public class StudyFormEditModel : FormWithSteps
     [Display(Name = "Will one person be responsible for recruiting or screening for this study using Be Part of Research?", Order = 6)]
     public bool? SinglePersonResponsibleForRecruiting { get; set; }
 
-    [Display(Name = "Will this study have more thank one research location?", Order = 7)]
+    [Display(Name = "Will this study have more thank one research location in the UK?", Order = 7)]
     public bool? HasMultipleResearchLocations { get; set; }
     
     [Display(Name = "Pre-screener link", Order = 8)]
