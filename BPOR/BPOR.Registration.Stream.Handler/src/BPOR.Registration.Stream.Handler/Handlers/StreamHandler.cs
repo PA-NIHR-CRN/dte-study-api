@@ -218,48 +218,36 @@ public class StreamHandler(
 
         await participantMapper.Map(record.Dynamodb.NewImage, participant, cancellationToken);
     }
-
+    
     private async Task ProcessRemoveAsync(DynamoDBEvent.DynamodbStreamRecord record,
         CancellationToken cancellationToken)
     {
         var identifiers = participantMapper.ExtractIdentifiers(record.Dynamodb.OldImage);
-        
-        logger.LogInformation(
-            "ProcessRemoveAsync - identifier values: {Values}",
-            string.Join(", ", identifiers.Select(id => id.Value))
-        );
-
-            var participants = await participantDbContext
-                .GetParticipantByLinkedIdentifiers(identifiers)
-                .AsSplitQuery()
-                .Include(x => x.ParticipantIdentifiers)
-                .Include(x => x.ContactMethodId)
-                .ToListAsync(cancellationToken);
-
-        logger.LogInformation(
-            "ProcessRemoveAsync - MatchedParticipantsCount: {Count}",
-            participants.Count
-        );
-
-        var participant = participants.SingleOrDefault();
+        var participant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
+            .IgnoreQueryFilters()
+            .Include(x => x.ParticipantIdentifiers)
+            .Include(x => x.ContactMethodId)
+            .SingleOrDefaultAsync(cancellationToken);
 
         if (participant == null)
         {
-            logger.LogInformation("ProcessRemoveAsync - participant not found");
-
             participant = await InsertAsync(record.Dynamodb.OldImage, cancellationToken);
             await participantDbContext.SaveChangesAsync(cancellationToken);
         }
 
-        // Remove participant contact methods
-        participantDbContext.ParticipantContactMethod
-            .RemoveRange(participant.ContactMethodId);
+        // Remove participant contact method record
+        participantDbContext.ParticipantContactMethod.RemoveRange(participant.ContactMethodId);
 
-        // Remove ALL identifiers
-        participantDbContext.ParticipantIdentifiers
-            .RemoveRange(participant.ParticipantIdentifiers);
+        // TODO: are we removing the Participant here, or just the ParticipantIdentifer?
+        // Only delete the Participant if all participant identifiers have also been deleted.
+        var idsToRemove =
+            participant.ParticipantIdentifiers.Where(x => identifiers.Select(y => y.Value).Contains(x.Value));
 
-        // Remove participant
-        participantDbContext.Participants.Remove(participant);
+        participantDbContext.ParticipantIdentifiers.RemoveRange(idsToRemove);
+
+        if (participant.ParticipantIdentifiers.Except(idsToRemove).All(x => x.IsDeleted))
+        {
+            participantDbContext.Participants.Remove(participant);
+        }
     }
 }
