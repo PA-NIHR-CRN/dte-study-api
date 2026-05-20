@@ -1,0 +1,23 @@
+﻿@page 
+@model BPOR.Rms.Models.VolunteerStudyInformation.StartModel
+
+@{
+    Layout = null;
+}
+
+<h1>Volunteer study information page creation</h1>
+<h3>Overview</h3>
+<p>
+    After collaborating with the researcher and finalising the content of the ‘volunteer study information’ form, you
+    will need to fill out this form.
+</p>
+<p>
+    This form has the same questions in the same order as the volunteer study information form. Make sure you have it 
+    open, as you will need to copy-paste most of the information.
+</p>
+<p>
+    Not all fields are required, you can skip those that are not applicable to the study you’re filling the form for.
+</p>
+<div>
+    <a asp-action="step1" asp-route-id="@Model.VolunteerStudyInformationPageId"></a>
+</div>

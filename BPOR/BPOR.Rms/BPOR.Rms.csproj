@@ -70,11 +70,21 @@
     </ItemGroup>
     <ItemGroup>
       <_ContentIncludedByDefault Remove="Views\Shared\Unauthorised.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Study\VolunteerInformation\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Study\VolunteerInformation\Edit\Partials\_Step5FormFields.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Study\VolunteerInformation\Edit\Start.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Study\VolunteerInformation\Edit\Step1.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Study\VolunteerInformation\Edit\_VsiEditLayout.cshtml" />
     </ItemGroup>
     <ItemGroup>
       <None Include="Views\Shared\Unauthorised.cshtml" />
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Exceptions\" />
+      <Folder Include="Models\Study\VolunteerInformation\" />
+    </ItemGroup>
+    <ItemGroup>
+      <AdditionalFiles Include="Views\VolunteerStudyInformation\Edit.cshtml" />
+      <AdditionalFiles Include="Views\VolunteerStudyInformation\Partials\_Step5FormFields.cshtml" />
     </ItemGroup>
 </Project>

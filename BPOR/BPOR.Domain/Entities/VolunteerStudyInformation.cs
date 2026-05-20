@@ -9,7 +9,7 @@ public class VolunteerStudyInformation : ISoftDelete
     public VolunteerStudyInformationStatusId StatusId { get; set;}
     public bool IsDeleted { get; set;}
     public string Description { get; set; }
-    public VolunteerStudyInformationStudyTypeId StudyTypeId { get; set; }
+    public VsiStudyTypeId StudyTypeId { get; set; }
     public string WhatYouWillDo { get; set; }
     public bool CostReimbursement { get; set; }
     public bool HasIncentive { get; set; }

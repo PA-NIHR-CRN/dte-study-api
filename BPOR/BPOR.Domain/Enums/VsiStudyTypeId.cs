@@ -1,6 +1,6 @@
 namespace BPOR.Domain.Enums;
 
-public enum VolunteerStudyInformationStudyTypeId : long
+public enum VsiStudyTypeId : long
 {
     Remote = 0,
     InPerson = 1,
