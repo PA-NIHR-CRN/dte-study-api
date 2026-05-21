@@ -4,6 +4,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>BPOR.Rms.Api</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -12,5 +13,11 @@
 
     <ItemGroup>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
+      <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
     </ItemGroup>
 </Project>

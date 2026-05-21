@@ -5,6 +5,8 @@ using NIHR.Infrastructure.Settings;
 using NIHR.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using System.Diagnostics;
+using BPOR.Infrastructure.Authentication;
+using BPOR.Rms.Api;
 using NIHR.Infrastructure.Authentication.IDG;
 using NIHR.Infrastructure.Authentication.IDG.SCIM;
 
@@ -89,7 +91,8 @@ public static class ConfigureAuthentication
                 options.Events.OnRedirectToIdentityProvider = MakeHttps;
                 options.Events.OnRedirectToIdentityProviderForSignOut = MakeHttps;
 
-            });
+            })
+            .AddApiKeyAuthentication();
 
         return builder;
     }
