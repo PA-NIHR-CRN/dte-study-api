@@ -10,12 +10,15 @@ namespace BPOR.Rms.Api.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(AuthenticationSchemes = ApiKeyAuthenticationOptions.DefaultScheme)]
-public class VolunteerController(ParticipantDbContext context, IRrvTokenGenerator rrvTokenGenerator) : ControllerBase
+public class VolunteerController() : ControllerBase
 {
     private const int staticCheckValue = 155156040;
 
     [HttpGet("generatetesttoken/{participantId:long}")]
-    public ActionResult<GetTestTokenResponse> GetTestTokenAsync(long participantId, bool staticToken = false)
+    public ActionResult<GetTestTokenResponse> GetTestTokenAsync(        
+        [FromServices] IRrvTokenGenerator rrvTokenGenerator, 
+        long participantId,
+        bool staticToken = false)
     {
         if (staticToken)
         {
@@ -33,7 +36,11 @@ public class VolunteerController(ParticipantDbContext context, IRrvTokenGenerato
     }
     
     [HttpGet("information/{token}")]
-    public async Task<ActionResult<GetInformationResponse>> GetInformation(string token, CancellationToken cancellationToken)
+    public async Task<ActionResult<GetInformationResponse>> GetInformation(
+        [FromServices] ParticipantDbContext context, 
+        [FromServices] IRrvTokenGenerator rrvTokenGenerator, 
+        string token,
+        CancellationToken cancellationToken)
     {
         long campaignParticipantId;
         
