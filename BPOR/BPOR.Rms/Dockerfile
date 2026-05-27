@@ -22,6 +22,7 @@ COPY "BPOR/NIHR.Infrastructure.EntityFrameworkCore.MySql" "NIHR.Infrastructure.E
 COPY "BPOR/NIHR.NotificationService" "NIHR.NotificationService"
 COPY "BPOR/NIHR.GovUk.AspNetCore.Mvc" "NIHR.GovUk.AspNetCore.Mvc"
 COPY "BPOR/NIHR.Geometry" "NIHR.Geometry"
+COPY "BPOR/BPOR.Rms.VolunteerInformation" "BPOR.Rms.VolunteerInformation"
 
 WORKDIR "/src/BPOR.Rms"
 RUN dotnet build "BPOR.Rms.csproj" -c $BUILD_CONFIGURATION -o /app/build
