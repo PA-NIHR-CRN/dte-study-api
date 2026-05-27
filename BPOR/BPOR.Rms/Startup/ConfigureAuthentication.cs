@@ -2,11 +2,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using NIHR.Infrastructure.Settings;
-using NIHR.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authorization;
-using System.Diagnostics;
 using BPOR.Infrastructure.Authentication;
-using BPOR.Rms.Api;
 using NIHR.Infrastructure.Authentication.IDG;
 using NIHR.Infrastructure.Authentication.IDG.SCIM;
 
