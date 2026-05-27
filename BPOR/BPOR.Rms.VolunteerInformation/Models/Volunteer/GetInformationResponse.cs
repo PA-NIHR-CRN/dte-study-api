@@ -1,4 +1,4 @@
-namespace BPOR.Rms.Api.Models.Volunteer;
+namespace BPOR.Rms.VolunteerInformation.Models.Volunteer;
 
 public class GetInformationResponse
 {

@@ -1,11 +1,11 @@
 ﻿using BPOR.Domain.Entities;
 using BPOR.Infrastructure.Authentication;
-using BPOR.Rms.Api.Models.Volunteer;
+using BPOR.Rms.VolunteerInformation.Models.Volunteer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace BPOR.Rms.Api.Controllers;
+namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [ApiController]
 [Route("[controller]")]

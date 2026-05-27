@@ -1,6 +1,6 @@
 using BPOR.Domain.Entities.Configuration;
-using BPOR.Rms.Api;
 using BPOR.Rms.Startup;
+using BPOR.Rms.VolunteerInformation;
 using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication

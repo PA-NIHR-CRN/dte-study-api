@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace BPOR.Rms.Api;
+namespace BPOR.Rms.VolunteerInformation;
 
 public static class DiExtensions
 {

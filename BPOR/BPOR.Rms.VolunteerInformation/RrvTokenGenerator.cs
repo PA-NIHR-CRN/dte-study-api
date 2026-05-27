@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace BPOR.Rms.Api;
+namespace BPOR.Rms.VolunteerInformation;
 
 public class RrvTokenGenerator(IOptions<RrvTokenOptions> options) : IRrvTokenGenerator
 {

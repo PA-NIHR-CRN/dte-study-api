@@ -1,4 +1,4 @@
-namespace BPOR.Rms.Api;
+namespace BPOR.Rms.VolunteerInformation;
 
 public class RrvTokenOptions
 {
