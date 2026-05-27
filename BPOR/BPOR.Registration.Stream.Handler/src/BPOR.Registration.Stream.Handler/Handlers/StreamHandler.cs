@@ -125,21 +125,77 @@ public class StreamHandler(
     {
         await InsertAsync(record.Dynamodb.NewImage, cancellationToken);
     }
-
-    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image,
-        CancellationToken cancellationToken)
+    
+    private async Task<Participant> InsertAsync(Dictionary<string, AttributeValue> image,CancellationToken cancellationToken)
     {
         var identifiers = participantMapper.ExtractIdentifiers(image);
+        var pk = image.TryGetValue("PK", out var pkAttr) ? pkAttr.S : null;
 
+        logger.LogInformation(
+            "Insert IDENTIFIERS: PK={PK}, Count={Count}, Values={Values}",
+            pk,
+            identifiers.Count,
+            identifiers.Select(i => $"{i.Type}:{i.Value}")
+        );
 
-        var targetParticipant = await participantDbContext.GetParticipantByLinkedIdentifiers(identifiers)
+        var targetParticipant = await participantDbContext
+            .GetParticipantByLinkedIdentifiers(identifiers)
             .ForUpdate()
             .SingleOrDefaultAsync(cancellationToken);
 
+        logger.LogInformation(
+            "Insert IDENTIFIER MATCH: PK={PK}, Found={Found}, ParticipantId={ParticipantId}",
+            pk,
+            targetParticipant != null,
+            targetParticipant?.Id
+        );
 
         if (targetParticipant == null)
         {
-            // No linked participant exists, create a new one.
+            if (image.TryGetValue("Email", out var emailAttr) &&
+                image.TryGetValue("DateOfBirth", out var dobAttr))
+            {
+                var email = emailAttr.S?.Trim().ToLowerInvariant();
+
+                logger.LogInformation(
+                    "Insert FALLBACK INPUT: PK={PK}, Email={Email}, DOBRaw={DOB}",
+                    pk,
+                    email,
+                    dobAttr.S
+                );
+
+                if (
+                    !string.IsNullOrWhiteSpace(email)
+                    && DateTime.TryParse(dobAttr.S, out var parsedDateTime)
+                )
+                {
+                    var parsedDob = DateOnly.FromDateTime(parsedDateTime);
+
+                    var dobStart = parsedDob.ToDateTime(TimeOnly.MinValue);
+                    var dobEnd = dobStart.AddDays(1);
+
+                    logger.LogInformation(
+                        "Insert FALLBACK PARSED: PK={PK}, Email={Email}, DobStart={DobStart}, DobEnd={DobEnd}",
+                        pk,
+                        email,
+                        dobStart,
+                        dobEnd
+                    );
+
+                    targetParticipant = await participantDbContext.Participants
+                        .ForUpdate()
+                        .SingleOrDefaultAsync(p =>
+                            p.Email == email &&
+                            p.DateOfBirth.HasValue &&
+                            p.DateOfBirth.Value >= dobStart &&
+                            p.DateOfBirth.Value < dobEnd,
+                            cancellationToken);
+                }
+            }
+        }
+
+        if (targetParticipant == null)
+        {
             targetParticipant = participantDbContext.Participants.Add(new Participant()).Entity;
         }
 
@@ -162,7 +218,7 @@ public class StreamHandler(
 
         await participantMapper.Map(record.Dynamodb.NewImage, participant, cancellationToken);
     }
-
+    
     private async Task ProcessRemoveAsync(DynamoDBEvent.DynamodbStreamRecord record,
         CancellationToken cancellationToken)
     {

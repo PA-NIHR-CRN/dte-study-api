@@ -125,8 +125,9 @@ public class ParticipantService(
     private async Task CreateUserAndDeactivateOldUserAsync(DynamoParticipant request, DynamoParticipant participant,
         CancellationToken cancellationToken)
     {
-        var entity = request.MapNewUserFromRequestAndParticipant(participant);
 
+        var entity = request.MapNewUserFromRequestAndParticipant(participant);
+        
         await participantRepository.CreateParticipantAsync(entity, cancellationToken);
 
         var response = await provider.AdminDisableUserAsync(new AdminDisableUserRequest
@@ -178,17 +179,20 @@ public class ParticipantService(
             return;
         }
 
-        // check if string version of date of birth matches without time
-        if (participant.DateOfBirth.HasValue && request.DateOfBirth.HasValue &&
-            participant.DateOfBirth.Value.Date == request.DateOfBirth.Value.Date)
+        if (!participant.DateOfBirth.HasValue || !request.DateOfBirth.HasValue)
         {
-            await CreateUserAndDeactivateOldUserAsync(request, participant, cancellationToken);
-        }
-        else
-        {
-            // pass back error message to be displayed
             throw new ConflictException(ErrorCode.UnableToMatchAccounts);
         }
+
+        var participantDob = DateOnly.FromDateTime(participant.DateOfBirth.Value);
+        var requestDob = DateOnly.FromDateTime(request.DateOfBirth.Value);
+
+        if (participantDob != requestDob)
+        {
+            throw new ConflictException(ErrorCode.UnableToMatchAccounts);
+        }
+
+        await CreateUserAndDeactivateOldUserAsync(request, participant, cancellationToken);
     }
 
     public async Task<DynamoParticipant> GetParticipantDetailsByEmailAsync(string email,
