@@ -4,6 +4,8 @@ using BPOR.Rms.VolunteerInformation.Models.Volunteer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Participant = BPOR.Rms.VolunteerInformation.Models.Volunteer.Participant;
+using Study = BPOR.Rms.VolunteerInformation.Models.Volunteer.Study;
 
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
@@ -68,10 +70,17 @@ public class VolunteerController() : ControllerBase
             .Select (i => new GetInformationResponse()
             {
                 CampaignParticipantId = i.Id,
-                ParticipantEmail = i.Participant.Email,
-                ParticipantId = i.ParticipantId,
-                ParticipantName = i.Participant.FirstName + " " + i.Participant.LastName,
-                StudyId = (long)i.Campaign.FilterCriteria.StudyId // TODO: Why would this ever be null?
+                Participant = new Participant()
+                {
+                    Email = i.Participant.Email,
+                    Id = i.ParticipantId,
+                    Name = i.Participant.FirstName + " " + i.Participant.LastName
+                },
+                Study = new Study()
+                {
+                    StudyId = (long)i.Campaign.FilterCriteria.StudyId, // TODO: Why would this ever be null?
+                    PrescreenerUrl = i.Campaign.FilterCriteria.Study.PreScreenerUrl
+                }
             })
             .SingleOrDefaultAsync(cancellationToken);
 

@@ -1,66 +1,62 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+﻿using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 
 namespace BPOR.Rms.VolunteerInformation;
 
-public class RrvTokenGenerator(IOptions<RrvTokenOptions> options) : IRrvTokenGenerator
+public class RrvTokenGenerator(IDataProtectionProvider dataProtectionProvider, IOptions<RrvTokenOptions> options) : IRrvTokenGenerator
 {
-    private const string _participantIdClaimType = "participantId";
+    private const string DataProtectionPurpose = "rrvToken";
+
+    private class Token
+    {
+        [JsonPropertyName("exp")]
+        public DateTime ExpiresUtc { get; set; }
+        [JsonPropertyName("cpi")]
+        public long CampaignParticipantId { get; set; }
+    }
     
     public string GenerateToken(long campaignParticipantId)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.SymmetricKey));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var protector = dataProtectionProvider.CreateProtector(DataProtectionPurpose);
 
-        var claims = new[]
+        var plaintextBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Token
         {
-            new Claim(_participantIdClaimType, campaignParticipantId.ToString())
-        };
+            CampaignParticipantId = campaignParticipantId,
+            ExpiresUtc = DateTime.UtcNow.Add(options.Value.Ttl)
+        }));
 
-        var token = new JwtSecurityToken(
-            issuer: options.Value.Issuer,
-            audience: options.Value.Audience,
-            claims: claims,
-            expires: DateTime.Now.Add(options.Value.Ttl),
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var cipheredBytes = protector.Protect(plaintextBytes);
+        
+        return Convert.ToHexString(cipheredBytes);
     }
 
     public bool TryValidateToken(string token, out long campaignParticipantId)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.SymmetricKey));
-        var validationParameters = new TokenValidationParameters()
-        {
-            ValidateLifetime = true,
-            ValidateAudience = true,
-            ValidateIssuer = true,
-            ValidIssuer = options.Value.Issuer,
-            ValidAudience = options.Value.Audience,
-            IssuerSigningKey = securityKey
-        };
+        var protector = dataProtectionProvider.CreateProtector(DataProtectionPurpose);
 
         try
         {
-            var identity = tokenHandler.ValidateToken(token, validationParameters, out _);
-            var participantIdString = identity.FindFirst(_participantIdClaimType);
-            if (participantIdString != null && long.TryParse(participantIdString.Value, out var parsedParticipantId))
+            var cipheredBytes = Convert.FromHexString(token);
+            var plaintextBytes = protector.Unprotect(cipheredBytes);
+            var plaintext = Encoding.UTF8.GetString(plaintextBytes);
+            var plainToken = JsonSerializer.Deserialize<Token>(plaintext);
+
+            if (plainToken == null || plainToken.ExpiresUtc < DateTime.UtcNow)
             {
-                campaignParticipantId = parsedParticipantId;
-                return true;
+                campaignParticipantId = 0;
+                return false;
             }
+            
+            campaignParticipantId = plainToken.CampaignParticipantId;
+            return true;
         }
         catch
         {
-            // Intentionally do nothing for now ... but need to handle JWT validation errors.
+            campaignParticipantId = 0;
+            return false;
         }
-        
-        campaignParticipantId = 0;
-        return false;
     }
 }
