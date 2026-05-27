@@ -1,0 +1,11 @@
+@using NIHR.GovUk.AspNetCore.Mvc.Views
+@model NIHR.GovUk.AspNetCore.Mvc.Models.GovUkFieldSetModel
+
+<fieldset class="govuk-fieldset">
+    <legend class="govuk-fieldset__legend @GovUkStylingHelper.GetFieldSetLegendSizeClass(Model.HeadingSize)">
+        <h1 class="govuk-fieldset__heading">
+            @Model.HeadingText
+        </h1>
+    </legend>
+    @Model.InnerContent
+</fieldset>

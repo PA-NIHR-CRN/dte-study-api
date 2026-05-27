@@ -64,7 +64,10 @@ public static class Projections
             CpmsId = s.CpmsId,
             InformationUrl = s.InformationUrl,
             IsRecruitingIdentifiableParticipants = s.IsRecruitingIdentifiableParticipants,
-            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any()),
+            SinglePersonResponsibleForRecruiting = s.SinglePersonResponsibleForRecruiting,
+            HasMultipleResearchLocations = s.HasMultipleResearchLocations,
+            PreScreenerUrl = s.PreScreenerUrl
         };
     }
 
@@ -131,6 +134,9 @@ public static class Projections
                 RecruitmentStartDate = GovUkDate.FromDateTime(s.RecruitmentStartDate).UKDisplayDate(),
                 RecruitmentEndDate = GovUkDate.FromDateTime(s.RecruitmentEndDate).UKDisplayDate(),
                 InformationUrl = s.InformationUrl,
+                HasMultipleResearchLocations = s.HasMultipleResearchLocations,
+                SinglePersonResponsibleForRecruiting = s.SinglePersonResponsibleForRecruiting,
+                PreScreenerUrl = s.PreScreenerUrl
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 

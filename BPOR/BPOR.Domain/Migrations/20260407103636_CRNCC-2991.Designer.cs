@@ -4,17 +4,20 @@ using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 
 #nullable disable
 
-namespace Dynamo.Stream.Handler.Migrations
+namespace BPOR.Domain.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    partial class ParticipantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260407103636_CRNCC-2991")]
+    partial class CRNCC2991
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -611,6 +614,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("IdentifierTypeId")
                         .HasColumnType("int");
 
@@ -619,6 +625,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<int>("ParticipantId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<Guid>("Value")
                         .HasColumnType("char(36)");
