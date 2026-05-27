@@ -58,6 +58,12 @@ public class ParticipantDbContext : DbContext
     public DbSet<User> User { get; set; } = null!;
     public DbSet<UserRole> UserRole { get; set; } = null!;
     
+    public DbSet<VolunteerStudyInformation> VolunteerStudyInformation { get; set; } = null!;
+    public DbSet<VolunteerStudyInformationContact> VolunteerStudyInformationContact { get; set; } = null!;
+    public DbSet<VolunteerStudyInformationGroup> VolunteerStudyInformationGroup { get; set; } = null!;
+    public DbSet<VolunteerStudyInformationGroupCriteria> VolunteerStudyInformationGroupCriteria { get; set; } = null!;
+
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

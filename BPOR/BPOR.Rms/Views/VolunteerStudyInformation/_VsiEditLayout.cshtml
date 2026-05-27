@@ -5,7 +5,7 @@
 @model BPOR.Rms.Models.Study.VolunteerInformation.VsiEditModel
 
 @{
-    ViewData["Title"] = Model.StepName;
+    ViewData["Title"] = ViewData["StepName"];
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData.AddBreadcrumbs(new Dictionary<string, string>
     {
@@ -17,9 +17,9 @@
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-        <h1 class="govuk-heading-xl">Edit Volunteer Study Information details</h1>
+        <h1 class="govuk-heading-xl">@ViewData["StepName"]</h1>
         
-        <form asp-action="Edit">
+        <form>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="Step" value="@Model.Step" />

@@ -1,14 +1,13 @@
-﻿@page 
-@model BPOR.Rms.Models.VolunteerStudyInformation.StartModel
+﻿@page
+@using BPOR.Domain.Settings
+@using Microsoft.Extensions.Options
 
-@{
-    Layout = null;
-}
+@inject IOptions<VsiSettings> Options;
 
 <h1>Volunteer study information page creation</h1>
 <h3>Overview</h3>
 <p>
-    After collaborating with the researcher and finalising the content of the ‘volunteer study information’ form, you
+    After collaborating with the researcher and finalising the content of the <a href="@Options.Value.GoogleDocUri">‘volunteer study information’</a> form, you
     will need to fill out this form.
 </p>
 <p>
@@ -19,5 +18,7 @@
     Not all fields are required, you can skip those that are not applicable to the study you’re filling the form for.
 </p>
 <div>
-    <a asp-action="step1" asp-route-id="@Model.VolunteerStudyInformationPageId"></a>
+    <form method="post">
+        <button class="govuk-button" data_module="govuk-button" type="submit">Start</button>
+    </form>
 </div>

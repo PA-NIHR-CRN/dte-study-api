@@ -7,6 +7,12 @@ public class VolunteerStudyInformationConfiguration : IEntityTypeConfiguration<V
 {
     public void Configure(EntityTypeBuilder<VolunteerStudyInformation> builder)
     {
+        
+        builder.HasOne(vsi => vsi.Study)
+            .WithMany(c => c.VolunteerStudyInformation)
+            .HasForeignKey(c => c.StudyId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
         builder.HasMany(vsi => vsi.Contacts)
             .WithOne(c => c.VolunteerStudyInformation)
             .HasForeignKey(c => c.VolunteerStudyInformationId)

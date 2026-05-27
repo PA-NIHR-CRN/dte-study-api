@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using AngleSharp.Text;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -14,19 +15,47 @@ public static class Extensions
             modelState.AddModelError(error.PropertyName, error.ErrorMessage);
         }
     }
-    
+
+    public static void AddToModelState(this ValidationResult validationResult, ModelStateDictionary modelState)
+        => modelState.AddValidationResult(validationResult);
+
     public static ValidationResult ValidateSpecificProperties<T>(this IValidator<T> validator, T instance,
         params Expression<Func<T, object?>>[] properties)
     {
         return validator.Validate(instance, options => options.IncludeProperties(properties));
     }
     
+    public static int CountWords(this string value)
+    {
+        int result = 0;
+        bool inWord = false;
+        
+        foreach (char c in value)
+        {
+            bool isWhitespace = char.IsWhiteSpace(c);
+            if (!isWhitespace && !inWord)
+            {
+                result++;
+            }
+            inWord = !isWhitespace;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Validates a URI as per RFC 3986 and, per convention, allows a maximum of 2048 characters.
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> MaxWords<T>(this IRuleBuilder<T, string?> ruleBuilder,
+        int maxWordCount) =>
+        ruleBuilder.SetValidator(new MaxWordValidator<T>(maxWordCount));
+
     /// <summary>
     /// Validates a URI as per RFC 3986 and, per convention, allows a maximum of 2048 characters.
     /// </summary>
     /// <param name="uriKind"> The kind of URI to allow (absolute or relative). Defaults to absolute</param>
     /// <param name="schemes"> The URI schemes to allow. Defaults to https only.</param>
-    public static IRuleBuilder<T, string?> Uri<T>(this IRuleBuilder<T, string?> ruleBuilder,
+    public static IRuleBuilderOptionsConditions<T, string?> Uri<T>(this IRuleBuilder<T, string?> ruleBuilder,
         UriKind uriKind = UriKind.Absolute, params string[] schemes)
     {
         if (schemes.Length == 0)

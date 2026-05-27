@@ -1,6 +1,6 @@
 ﻿@page
 @using BPOR.Domain.Enums
-@model BPOR.Rms.Models.Study.VolunteerInformation.Step2Model
+@model BPOR.Rms.Models.Study.VolunteerInformation.VsiEditModel
 
 @{
     Layout = "_VsiEditLayout";
@@ -8,8 +8,8 @@
 
 <form-group for="StudyType">
     <radio-set for="StudyType">
-        <radio value="@VsiStudyTypeId.InPerson">Yes</radio>
-        <radio value="@VsiStudyTypeId.Remote">No</radio>
-        <radio value="@VsiStudyTypeId.Hybrid">No</radio>
+        <radio value="@VsiStudyTypeId.InPerson">In Person / On Site</radio>
+        <radio value="@VsiStudyTypeId.Remote">Remote / Online</radio>
+        <radio value="@VsiStudyTypeId.Hybrid">Hybrid</radio>
     </radio-set>
 </form-group>

@@ -2,6 +2,8 @@ using System.Reflection;
 using Amazon;
 using Amazon.SimpleEmail;
 using BPOR.Domain.Entities;
+using BPOR.Domain.Repositories;
+using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Clients;
 using BPOR.Rms.Services;
 using Dte.Common.Authentication;
@@ -104,7 +106,7 @@ public static class DependencyInjection
                 builder => { builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery); }));
 
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("BPOR.Rms");
-
+        
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
         if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
@@ -143,6 +145,9 @@ public static class DependencyInjection
         {
             services.RegisterDevelopmentServices(configuration);
         }
+
+        services.AddScoped<VsiRepository>();
+        services.AddOptions<VsiSettings>().BindConfiguration("Vsi");
 
         return services;
     }

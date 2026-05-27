@@ -2,8 +2,8 @@ namespace BPOR.Domain.Entities;
 
 public class VolunteerStudyInformationGroup
 {
-    public long Id { get; set; }
-    public long VolunteerStudyInformationId { get; set; }
+    public int Id { get; set; }
+    public int VolunteerStudyInformationId { get; set; }
     public string Name { get; set; }
 
     public VolunteerStudyInformation VolunteerStudyInformation { get; set; }
