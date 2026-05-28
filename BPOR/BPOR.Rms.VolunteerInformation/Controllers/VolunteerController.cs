@@ -14,26 +14,29 @@ namespace BPOR.Rms.VolunteerInformation.Controllers;
 [Authorize(AuthenticationSchemes = ApiKeyAuthenticationOptions.DefaultScheme)]
 public class VolunteerController() : ControllerBase
 {
-    private const int staticCheckValue = 155156040;
-
     [HttpGet("generatetesttoken/{participantId:long}")]
-    public ActionResult<GetTestTokenResponse> GetTestTokenAsync(        
-        [FromServices] IRrvTokenGenerator rrvTokenGenerator, 
-        long participantId,
-        bool staticToken = false)
+    public async Task<ActionResult<GetTestTokenResponse>> GetTestTokenAsync(        
+        [FromServices] ParticipantDbContext context, 
+        long campaignParticipantId,
+        CancellationToken cancellationToken)
     {
-        if (staticToken)
+        var campaignParticipant = await context.CampaignParticipant.SingleOrDefaultAsync(
+            cp => cp.Id == campaignParticipantId, cancellationToken);
+
+        if (campaignParticipant == null)
         {
-            return Ok(new GetTestTokenResponse
-            {
-                Token = new Guid(staticCheckValue, 0, 0, BitConverter.GetBytes(participantId)).ToString("N")
-            });
+            return NotFound();
+        }
+
+        if (campaignParticipant.Token == null)
+        {
+            campaignParticipant.Token = UniqueTokenGenerator.CreateUniqueToken(campaignParticipantId);
+            await context.SaveChangesAsync(cancellationToken);
         }
         
-        var token = rrvTokenGenerator.GenerateToken(participantId);
         return Ok(new GetTestTokenResponse
         {
-            Token = token
+            Token = campaignParticipant.Token
         });
     }
     
@@ -44,29 +47,8 @@ public class VolunteerController() : ControllerBase
         string token,
         CancellationToken cancellationToken)
     {
-        long campaignParticipantId;
-        
-        if (Guid.TryParse(token, out var guid))
-        {
-            var bytes = guid.ToByteArray();
-            int check = BitConverter.ToInt32(bytes, 0);
-            if (check != staticCheckValue)
-            {
-                return BadRequest("Invalid static Token");
-            }
-            campaignParticipantId = BitConverter.ToInt64(bytes, 8);
-        }
-        else
-        {
-            if (!rrvTokenGenerator.TryValidateToken(token, out campaignParticipantId))
-            {
-                // TODO: Include error detail?
-                return BadRequest();
-            }
-        }
-
         var result = await context.CampaignParticipant
-            .Where(cp => cp.Id == campaignParticipantId)
+            .Where(cp => cp.Token == token)
             .Select (i => new GetInformationResponse()
             {
                 CampaignParticipantId = i.Id,

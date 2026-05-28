@@ -1,10 +1,13 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace BPOR.Rms.VolunteerInformation;
 
 public static class UniqueTokenGenerator
 {
+        const int bitsPerByte = 8;
+        
     /// <summary>
     /// Creates a pseudo-random 32 character token such that two tokens generated for different seed values are guaranteed to differ.
     /// </summary>
@@ -13,25 +16,30 @@ public static class UniqueTokenGenerator
     ///
     /// This is not meant to be massively optimised.
     /// </remarks>
-    public static string CreateUniqueToken(int seed)
+    public static string CreateUniqueToken(long seed)
     {
+        const int resultByteCount = 32;
+        
         int[] seedMap =
         [
-            20, 68, 69, 22, 120, 6, 18, 61, 117, 59, 110, 54, 78, 46, 111, 108, 81, 5, 82, 55, 25, 43, 24, 102, 32, 70,
-            115, 26, 13, 63, 125, 84
+            208, 53, 86, 227, 29, 10, 120, 199, 18, 112, 1, 214, 186, 99, 130, 219, 56, 251, 224, 169, 48, 138, 167,
+            203, 15, 67, 91, 196, 119, 57, 180, 133, 135, 5, 142, 206, 84, 83, 73, 42, 211, 64, 163, 158, 108, 175, 118,
+            95, 127, 179, 13, 43, 221, 76, 51, 65, 223, 19, 239, 217, 88, 193, 153, 96
         ];
+        
+        Debug.Assert(seedMap.Length == sizeof(long) * bitsPerByte);
 
-        byte[] result = RandomNumberGenerator.GetBytes(16);
+        byte[] result = RandomNumberGenerator.GetBytes(resultByteCount);
 
         var seedBytes = BitConverter.GetBytes(seed);
-        for (int i = 0; i < 32; i++)
+        for (int i = 0; i < seedMap.Length; i++)
         {
             SetBit(result, seedMap[i], GetBit(seedBytes, i));
         }
 
         // Bitwise chained xor to 'hide' the seed bits....
         bool previousBit = GetBit(result, 0);
-        for (int i = 1; i < 128; i++)
+        for (int i = 1; i < resultByteCount * bitsPerByte; i++)
         {
             bool currentBit = GetBit(result, i);
             SetBit(result, i, previousBit ^ currentBit);
@@ -43,21 +51,21 @@ public static class UniqueTokenGenerator
 
     private static bool GetBit(byte[] target, int bitIndex)
     {
-        byte mask = (byte)(1 << (bitIndex % 8));
-        var maskedResult = target[bitIndex / 8] & mask;
+        byte mask = (byte)(1 << (bitIndex % bitsPerByte));
+        var maskedResult = target[bitIndex / bitsPerByte] & mask;
         return maskedResult != 0;
     }
 
     private static void SetBit(byte[] target, int bitIndex, bool value)
     {
-        byte mask = (byte)(1 << (bitIndex % 8));
+        byte mask = (byte)(1 << (bitIndex % bitsPerByte));
         if (value)
         {
-            target[bitIndex / 8] |= mask;
+            target[bitIndex / bitsPerByte] |= mask;
         }
         else
         {
-            target[bitIndex / 8] &= (byte)~mask;
+            target[bitIndex / bitsPerByte] &= (byte)~mask;
         }
     }
 }
