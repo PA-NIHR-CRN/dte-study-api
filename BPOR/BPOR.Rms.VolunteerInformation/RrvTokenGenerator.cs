@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BPOR.Rms.VolunteerInformation;
 
@@ -21,6 +22,7 @@ public class RrvTokenGenerator(IDataProtectionProvider dataProtectionProvider, I
     public string GenerateToken(long campaignParticipantId)
     {
         var protector = dataProtectionProvider.CreateProtector(DataProtectionPurpose);
+
 
         var plaintextBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Token
         {

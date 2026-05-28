@@ -16,6 +16,5 @@ public class Participant
 
 public class Study
 {
-    public long StudyId { get; set; }
-    public string PrescreenerUrl { get; set; }
+    public string PrescreenerId { get; set; }
 }

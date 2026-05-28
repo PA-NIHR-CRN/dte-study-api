@@ -10,3 +10,10 @@ public class ParticipantIdentifierConfiguration : IEntityTypeConfiguration<Parti
         builder.HasIndex(x => new { x.Value });
     }
 }
+public class CampaignParticipantConfiguration : IEntityTypeConfiguration<CampaignParticipant>
+{
+    public void Configure(EntityTypeBuilder<CampaignParticipant> builder)
+    {
+        builder.Property(i => i.Token).HasMaxLength(32);
+    }
+}

@@ -21,6 +21,8 @@ public class CampaignParticipant : IAudit, ISoftDelete
     public int CreatedById { get; set; }
     public int UpdatedById { get; set; }
     public bool IsDeleted { get; set; }
+    public string? Token { get; set; }
+    
     public DeliveryStatus DeliveryStatus { get; set; }
     public Campaign Campaign { get; set; }
     public Participant Participant { get; set; }

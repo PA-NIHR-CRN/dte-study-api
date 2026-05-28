@@ -114,6 +114,10 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<DateTime?>("SentAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("Token")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 

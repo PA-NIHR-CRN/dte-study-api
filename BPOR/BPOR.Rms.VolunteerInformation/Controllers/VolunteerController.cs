@@ -78,8 +78,7 @@ public class VolunteerController() : ControllerBase
                 },
                 Study = new Study()
                 {
-                    StudyId = (long)i.Campaign.FilterCriteria.StudyId, // TODO: Why would this ever be null?
-                    PrescreenerUrl = i.Campaign.FilterCriteria.Study.PreScreenerUrl
+                    PrescreenerId = i.Campaign.FilterCriteria.Study.PreScreenerUrl
                 }
             })
             .SingleOrDefaultAsync(cancellationToken);
