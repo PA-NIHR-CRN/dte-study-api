@@ -43,6 +43,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Tests.Common", "BPOR.T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Registration.Stream.Handler.Tests", "BPOR.Registration.Stream.Handler.Tests\BPOR.Registration.Stream.Handler.Tests.csproj", "{F362BE7D-40F3-4ECB-9C65-939C3B688844}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Rms.VolunteerInformation", "BPOR.Rms.VolunteerInformation\BPOR.Rms.VolunteerInformation.csproj", "{F5F35365-845B-4AA9-A835-DB8D1A661A93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.Rts.Client", "NIHR.Rts.Client\NIHR.Rts.Client.csproj", "{99BFD9D5-119C-46CC-86DD-1CBC4ACD1636}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -121,6 +125,14 @@ Global
 		{F362BE7D-40F3-4ECB-9C65-939C3B688844}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F362BE7D-40F3-4ECB-9C65-939C3B688844}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F362BE7D-40F3-4ECB-9C65-939C3B688844}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5F35365-845B-4AA9-A835-DB8D1A661A93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5F35365-845B-4AA9-A835-DB8D1A661A93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5F35365-845B-4AA9-A835-DB8D1A661A93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5F35365-845B-4AA9-A835-DB8D1A661A93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99BFD9D5-119C-46CC-86DD-1CBC4ACD1636}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99BFD9D5-119C-46CC-86DD-1CBC4ACD1636}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99BFD9D5-119C-46CC-86DD-1CBC4ACD1636}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99BFD9D5-119C-46CC-86DD-1CBC4ACD1636}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

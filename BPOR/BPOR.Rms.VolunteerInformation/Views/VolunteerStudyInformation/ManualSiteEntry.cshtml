@@ -1,0 +1,31 @@
+﻿@model BPOR.Rms.VolunteerInformation.Models.ManualSiteEntryModel
+
+@{
+    ViewBag.SectionName = "Section 1: Overview";
+}
+
+<h1>Research Location</h1>
+
+<form method="post">
+    <p>Add an item</p>
+    <form-group label="Address Line one">
+        <input class="govuk-input" asp-for="Address.AddressLine1" type="text">
+    </form-group>
+    <form-group label="Address Line two (optional)">
+        <input class="govuk-input" asp-for="Address.AddressLine2" type="text">
+    </form-group>
+    <form-group label="Address Line three (optional)">
+        <input class="govuk-input" asp-for="Address.AddressLine3" type="text">
+    </form-group>
+    <form-group label="Town or city">
+        <input class="govuk-input" asp-for="Address.AddressLine4" type="text">
+    </form-group>
+    <form-group label="County (optional)">
+        <input class="govuk-input" asp-for="Address.AddressLine5" type="text">
+    </form-group>
+    <form-group label="Post code">
+        <input class="govuk-input" asp-for="Address.Postcode" type="text">
+    </form-group>
+    
+    <button type="submit">Submit</button>
+</form>

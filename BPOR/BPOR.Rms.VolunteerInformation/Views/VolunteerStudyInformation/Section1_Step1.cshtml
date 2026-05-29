@@ -1,0 +1,10 @@
+﻿@model BPOR.Rms.VolunteerInformation.Models.VsiEditModel
+
+@{
+    ViewBag.SectionName = "Section 1: Overview";
+    Layout = "_VsiEditLayout";
+}
+
+<form-group for="Description">
+    <input class="govuk-input" asp-for="Description" type="text">
+</form-group>

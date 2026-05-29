@@ -62,7 +62,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<VolunteerStudyInformationContact> VolunteerStudyInformationContact { get; set; } = null!;
     public DbSet<VolunteerStudyInformationGroup> VolunteerStudyInformationGroup { get; set; } = null!;
     public DbSet<VolunteerStudyInformationGroupCriteria> VolunteerStudyInformationGroupCriteria { get; set; } = null!;
-
+    public DbSet<VolunteerStudyInformationSite> VolunteerStudyInformationSite { get; set; } = null!;
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

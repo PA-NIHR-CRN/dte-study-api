@@ -1,0 +1,22 @@
+﻿@using BPOR.Domain.Enums
+@model BPOR.Rms.VolunteerInformation.Models.VsiGroupModel
+
+@{
+    ViewBag.SectionName = "Section 1: Overview";
+}
+
+<h1>Add inclusion criteria</h1>
+
+<p>You have added the following criteria for @Model.Name:</p>
+@foreach (var criterion in Model.Criteria.Where(i => i.Type == VolunteerStudyInformationGroupCriteriaTypeId.Include))
+{
+    <div>
+        <p>@criterion.Criteria</p>
+        <form asp-action="RemoveCriteria" asp-route-studyId="@Model.StudyId" asp-route-id="@criterion.Id">
+            <button type="submit">Delete</button>
+        </form>
+    </div>
+}
+
+<a asp-action="CreateCriterion" asp-route-studyid="@Model.StudyId" asp-route-id="@Model.Id">Add more criteria</a>
+<a asp-action="ExclusionCriteria" asp-route-studyid="@Model.StudyId" asp-route-id="@Model.Id" class="govuk-button" data-module="govuk-button">Continue</a>

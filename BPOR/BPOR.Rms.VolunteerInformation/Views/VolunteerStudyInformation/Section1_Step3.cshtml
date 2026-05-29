@@ -1,0 +1,42 @@
+﻿@model BPOR.Rms.VolunteerInformation.Models.VsiEditModel
+
+@{
+    ViewBag.SectionName = "Section 1: Overview";
+}
+
+@if (Model.Sites.Any())
+{
+    <p>You have selected the following location(s)</p>
+    @foreach (var site in Model.Sites)
+    {
+        <div>
+            <div>
+                <p>@site.AddressLine1</p>
+                <p>@site.AddressLine2</p>
+                <p>@site.AddressLine3</p>
+                <p>@site.AddressLine4</p>
+                <p>@site.AddressLine5</p>
+                <p>@site.Postcode</p>
+            </div>
+            <div>
+                <form method="post" asp-action="RemoveSite" asp-route-studyId="@Model.StudyId" asp-route-siteId="@site.Id">
+                    <button type="submit">Remove</button>
+                </form>
+            </div>
+        </div>
+    }
+    
+    <a asp-action="SiteSearch" asp-route-studyId="@Model.StudyId">Add another research location</a>
+    <a asp-action="Step4" asp-route-studyId="@Model.StudyId">Continue</a>
+}
+else
+{
+    <form method="get" asp-action="SiteSearch" asp-route-studyId="@Model.StudyId">
+        <form-group label="Enter a postcode to select one or multiple research locations">
+            <input class="govuk-input" name="searchTerm" type="text">
+        </form-group>
+        <button type="submit">Search postcode</button>
+    </form>
+    
+    <a asp-action="ManualSiteEntry" asp-route-studyId="@Model.StudyId">Add address manually</a>
+}

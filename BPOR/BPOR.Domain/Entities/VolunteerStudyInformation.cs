@@ -8,7 +8,7 @@ public class VolunteerStudyInformation : ISoftDelete, IAudit
     public int Id { get; set; }
     
     public int StudyId { get; set; }
-    public VolunteerStudyInformationStatusId? StatusId { get; set;}
+    public VolunteerStudyInformationStatusId StatusId { get; set;}
     public bool IsDeleted { get; set;}
     public string? Description { get; set; }
     public VsiStudyTypeId? StudyTypeId { get; set; }

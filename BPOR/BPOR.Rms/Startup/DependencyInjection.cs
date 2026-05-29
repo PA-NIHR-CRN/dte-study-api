@@ -28,6 +28,7 @@ using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
 using NIHR.GovUk.AspNetCore.Mvc;
+using NIHR.Rts.Client;
 
 namespace BPOR.Rms.Startup;
 
@@ -148,6 +149,7 @@ public static class DependencyInjection
 
         services.AddScoped<VsiRepository>();
         services.AddOptions<VsiSettings>().BindConfiguration("Vsi");
+        services.AddSingleton<IRtsAddressSource, TestRtsAddressSource>();
 
         return services;
     }

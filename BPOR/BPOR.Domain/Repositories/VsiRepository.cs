@@ -24,13 +24,13 @@ public class VsiRepository(ParticipantDbContext db, IOptions<VsiSettings> option
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    public Task<VolunteerStudyInformation?> GetActiveDraft(int studyId, int vsiId,
+    public Task<VolunteerStudyInformation?> GetCurrentVsi(int studyId,
         CancellationToken cancellationToken)
     {
-        return GetActiveDraft<VolunteerStudyInformation>(studyId, vsiId, i => i, cancellationToken);
+        return GetCurrentVsi<VolunteerStudyInformation>(studyId, i => i, cancellationToken);
     }
 
-    public async Task<T?> GetActiveDraft<T>(long studyId, long vsiId,
+    public async Task<T?> GetCurrentVsi<T>(long studyId,
         Expression<Func<VolunteerStudyInformation, T>> selector,
         CancellationToken cancellationToken)
     {
@@ -39,9 +39,11 @@ public class VsiRepository(ParticipantDbContext db, IOptions<VsiSettings> option
         var query = db.VolunteerStudyInformation.Where(vsi =>
             vsi.IsDeleted == false &&
             vsi.StudyId == studyId &&
-            vsi.Id == vsiId &&
-            vsi.StatusId == VolunteerStudyInformationStatusId.Draft &&
-            vsi.UpdatedAt > minUpdateTime);
+            (
+                (vsi.StatusId == VolunteerStudyInformationStatusId.Draft && vsi.UpdatedAt > minUpdateTime) ||
+                vsi.StatusId == VolunteerStudyInformationStatusId.Active
+                )
+            );
         
         var projection = query.Select(selector);
         

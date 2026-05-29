@@ -8,7 +8,11 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers;
 public class RadioSet(IHtmlHelper htmlHelper) : PartialTagHelperBase(htmlHelper)
 {
     public const string ContextVariableName = "__govuk_radios_context";
-    public ModelExpression For { get; set; }
+    public ModelExpression? For { get; set; }
+    
+    public string? Name { get; set; }
+    
+    public object? Value { get; set; }
     
     public GovUkRadioSize Size { get; set; } = GovUkRadioSize.Default;
     
@@ -16,7 +20,9 @@ public class RadioSet(IHtmlHelper htmlHelper) : PartialTagHelperBase(htmlHelper)
 
     public override void Init(TagHelperContext context)
     {
-        context.Items.Add(ContextVariableName, new RadiosContext(For.Name, For.ModelExplorer.Model));
+        context.Items.Add(ContextVariableName, new RadiosContext(
+            Name ?? For?.Name,
+            Name == null ? For?.ModelExplorer.Model : Value));
         base.Init(context);
     }
 

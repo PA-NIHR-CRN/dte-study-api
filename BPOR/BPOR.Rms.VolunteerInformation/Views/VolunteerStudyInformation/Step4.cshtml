@@ -1,0 +1,43 @@
+﻿@model BPOR.Rms.VolunteerInformation.Models.VsiEditModel
+
+@{
+    ViewBag.SectionName = "Section 1: Overview";
+}
+
+<h1>Create volunteer groups</h1>
+
+@if (Model.Sites.Any())
+{
+    <p>You can click 'Save and continue' to proceed with the form</p>
+    @foreach (var group in Model.Groups)
+    {
+        <div>
+            <div>
+                <p>@group.Name</p>
+            </div>
+            <div>
+                <a asp-action="CreateCriterion" asp-route-studyId="@Model.StudyId" asp-route-id="@group.Id">Edit</a>
+                <form method="post" asp-action="RemoveGroup" asp-route-studyId="@Model.StudyId" asp-route-siteId="@group.Id">
+                    <button type="submit">Remove</button>
+                </form>
+            </div>
+        </div>
+    }
+    
+    <a asp-action="SiteSearch" asp-route-studyId="@Model.StudyId">Add another research location</a>
+    <a asp-action="Step4" asp-route-studyId="@Model.StudyId">Continue</a>
+}
+else
+{
+
+    <p>If your study requires multiple groups, you can add more after providing information for each group.</p>
+    <p>Enter a name for this group</p>
+    <form method="post" asp-action="CreateGroup" asp-route-studyId="@Model.StudyId">
+        <form-group label="Enter a name for this group.">
+            <input class="govuk-input" name="name" type="text">
+        </form-group>
+        <button type="submit">Submit</button>
+    </form>
+    
+    <a asp-action="ManualSiteEntry" asp-route-studyId="@Model.StudyId">Add address manually</a>
+}

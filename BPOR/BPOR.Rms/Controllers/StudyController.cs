@@ -7,6 +7,7 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NIHR.GovUk.AspNetCore.Mvc;
+using NIHR.Infrastructure.AspNetCore.Validation;
 using NIHR.Infrastructure.Paging;
 
 namespace BPOR.Rms.Controllers;

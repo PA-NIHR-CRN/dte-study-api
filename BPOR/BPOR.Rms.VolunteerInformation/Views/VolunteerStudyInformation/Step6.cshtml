@@ -1,0 +1,16 @@
+﻿@model BPOR.Rms.VolunteerInformation.Models.VsiEditModel
+
+@{
+    Layout = "_VsiEditLayout";
+}
+
+<form-group for="HasIncentive">
+    <radio-set for="HasIncentive">
+        <radio value="@true">Yes</radio>
+        <radio value="@false">No</radio>
+    </radio-set>
+</form-group>
+
+<form-group for="IncentiveDetails">
+    <input class="govuk-input" asp-for="IncentiveDetails" type="text">
+</form-group>
