@@ -1,0 +1,21 @@
+﻿@using BPOR.Domain.Entities
+@using BPOR.Rms.Startup
+@model BPOR.Rms.Models.PreScreenerEligibility.PreScreenerEligibilityViewModel
+@inject ICurrentUserProvider<User> CurrentUserProvider
+
+@if (CurrentUserProvider.IsAdmin())
+{
+    if (Model.IsEligibilityCriteriaComplete)
+    {
+        <div class="govuk-!-margin-bottom-5 govuk-!-margin-left-2">
+            @if (Model.IsEligibleForPrescreener)
+            {
+                <govuk-tag colour="Purple">Pre-Screener Eligible</govuk-tag>
+            }
+            else
+            {
+                <govuk-tag colour="Red">Pre-Screener Ineligible</govuk-tag>
+            }
+        </div>
+    }
+}

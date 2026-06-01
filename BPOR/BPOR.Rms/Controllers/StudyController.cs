@@ -83,6 +83,30 @@ public class StudyController(
             logger.LogWarning("[HttpGet]Details called with non-existent study: {StudyId}", id);
             return NotFound();
         }
+        
+        study.ActionLinks =
+        [
+            new StudyDetailsViewModel.ActionLink
+            {
+                Text = "Create volunteer study information page",
+                Url = Url.Action("CreateVolunteerStudyInformationPage", "Study")
+            },
+            new StudyDetailsViewModel.ActionLink
+            {
+                Text = "Update recruitment total",
+                Url = Url.Action("UpdateRecruitmentTotal", "Study")
+            },
+            new StudyDetailsViewModel.ActionLink
+            {
+                Text = "Find volunteers",
+                Url = Url.Action("FindVolunteers", "Study")
+            },
+            new StudyDetailsViewModel.ActionLink
+            {
+                Text = "Send an email",
+                Url = Url.Action("Index", "ResearcherEmail", new { studyId = id})
+            }
+        ];
 
         return View(study);
     }
