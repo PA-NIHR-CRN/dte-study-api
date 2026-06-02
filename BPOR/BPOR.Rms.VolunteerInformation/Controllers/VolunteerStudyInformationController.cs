@@ -1,7 +1,6 @@
-using System.Linq.Expressions;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Enums;
-using BPOR.Domain.Repositories;
+using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Models;
 using BPOR.Rms.VolunteerInformation.Validators;
 using Microsoft.AspNetCore.Mvc;
@@ -14,8 +13,6 @@ namespace BPOR.Rms.VolunteerInformation.Controllers;
 [Route("Study/{studyId}/VolunteerInformation/[action]")]
 public class VolunteerStudyInformationController : Controller
 {
-    private static readonly TimeSpan draftTtl = new TimeSpan(8, 0, 0);
-
     // static VolunteerStudyInformationController()
     // {
     //     var metadata = new MultistepFormBuilder<VsiEditModel>()
@@ -44,6 +41,18 @@ public class VolunteerStudyInformationController : Controller
     //         ).Build();
     // }
 
+    private void SetContext(VolunteerStudyInformation currentVsi, string sectionName, string? backUrl)
+    {
+        this.ViewBag.Context = new VsiEditContext()
+        {
+            Vsi = currentVsi,
+            SectionName = sectionName,
+            BackUrl = backUrl
+        };
+    }
+
+    #region Start
+    
     [HttpGet]
     public IActionResult Start()
     {
@@ -95,21 +104,32 @@ public class VolunteerStudyInformationController : Controller
         }
     }
 
+    #endregion
     #region Step 1
 
     [HttpGet]
     public async Task<IActionResult> Section1_Step1([FromServices] VsiRepository vsiRepository, int studyId,
         CancellationToken cancellationToken)
     {
-        var model = await vsiRepository.GetCurrentVsi(studyId,
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+
+        // Don't go back to the start page as it makes no sense once the VSI draft has been created.
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Details", "Study", new { id = currentVsi.StudyId }));
+        
+        var data = await vsiRepository.GetCurrentVsi(studyId,
             i => new VsiEditModel
             {
-                Status = i.StatusId,
                 Description = i.Description
             },
             cancellationToken);
-        return model == null ? NotFound() : View(model);
+        
+        return data == null ? NotFound() : View(data);
     }
+
 
     [HttpPost]
     public async Task<IActionResult> Section1_Step1(
@@ -131,18 +151,25 @@ public class VolunteerStudyInformationController : Controller
         await db.SaveChangesAsync(cancellationToken);
         return RedirectToAction("Section1_Step2", new { studyId, id = vsi.Id });
     }
-    
+
     #endregion
+
     #region Step 2
 
-
     [HttpGet]
-    public async Task<IActionResult> Section1_Step2([FromServices] VsiRepository vsiRepository, int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section1_Step2([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
     {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Section1_Step1", new { id = currentVsi.StudyId }));
+        
         var model = await vsiRepository.GetCurrentVsi(studyId,
             i => new VsiEditModel
             {
-                Status = i.StatusId,
                 StudyType = i.StudyTypeId
             },
             cancellationToken);
@@ -174,8 +201,9 @@ public class VolunteerStudyInformationController : Controller
         await db.SaveChangesAsync(cancellationToken);
         return RedirectToAction("Section1_Step3", new { studyId, id = vsi.Id });
     }
-    
+
     #endregion
+
     #region Step 3
 
     [HttpGet]
@@ -185,7 +213,9 @@ public class VolunteerStudyInformationController : Controller
         string searchTerm,
         CancellationToken cancellationToken)
     {
-        var result = string.IsNullOrWhiteSpace(searchTerm) ? [] : await addressSource.SearchByPostcode(searchTerm, cancellationToken);
+        var result = string.IsNullOrWhiteSpace(searchTerm)
+            ? []
+            : await addressSource.SearchByPostcode(searchTerm, cancellationToken);
         return View(new SiteSearchModel
             { StudyId = studyId, SearchTerm = searchTerm, SearchResult = result.ToArray() });
     }
@@ -230,13 +260,19 @@ public class VolunteerStudyInformationController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Section1_Step3([FromServices] VsiRepository vsiRepository, int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section1_Step3([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
     {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Section1_Step2", new { id = currentVsi.StudyId }));
+        
         var model = await vsiRepository.GetCurrentVsi(studyId,
             i => new VsiEditModel
             {
-                Status = i.StatusId,
-                StudyId = studyId,
                 Sites = i.Sites.Select(site => new VsiSiteModel
                 {
                     AddressLine1 = site.AddressLine1,
@@ -274,7 +310,7 @@ public class VolunteerStudyInformationController : Controller
     {
         return View(new ManualSiteEntryModel { StudyId = studyId });
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> ManualSiteEntry(
         [FromServices] VsiRepository vsiRepository,
@@ -286,19 +322,25 @@ public class VolunteerStudyInformationController : Controller
 
         return await AddSite(vsiRepository, model.Address, studyId, cancellationToken);
     }
-    
+
     #endregion
-    
+
     #region Step 4
-    
+
     [HttpGet]
-    public async Task<IActionResult> Step4([FromServices] VsiRepository vsiRepository, int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section1_Step4([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
     {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Section1_Step3", new { id = currentVsi.StudyId }));
+        
         var model = await vsiRepository.GetCurrentVsi(studyId,
             i => new VsiEditModel
             {
-                StudyId = studyId,
-                Status = i.StatusId,
                 Groups = i.Groups.Select(g => new VsiGroupModel
                 {
                     Id = g.Id,
@@ -310,7 +352,30 @@ public class VolunteerStudyInformationController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateCriterion(
+    public async Task<IActionResult> CreateExclusionCriterion(
+        [FromServices] ParticipantDbContext db,
+        int studyId,
+        int id,
+        [FromForm] string criteria,
+        CancellationToken cancellationToken)
+    {
+        var group = await db.VolunteerStudyInformationGroup
+            .SingleOrDefaultAsync(i => i.Id == id, cancellationToken);
+
+        var newCriteria = new VolunteerStudyInformationGroupCriteria()
+        {
+            Criteria = criteria,
+            TypeId = VolunteerStudyInformationGroupCriteriaTypeId.Exclude
+        };
+
+        group.Criteria.Add(newCriteria);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return RedirectToAction("ExclusionCriteria", new { studyId, id });
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateInclusionCriterion(
         [FromServices] ParticipantDbContext db,
         int studyId,
         int id,
@@ -325,20 +390,19 @@ public class VolunteerStudyInformationController : Controller
             Criteria = criteria,
             TypeId = VolunteerStudyInformationGroupCriteriaTypeId.Include
         };
-        
+
         group.Criteria.Add(newCriteria);
         await db.SaveChangesAsync(cancellationToken);
-        
+
         return RedirectToAction("InclusionCriteria", new { studyId, id });
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> InclusionCriteria(
         [FromServices] ParticipantDbContext db, int studyId, int id, CancellationToken cancellationToken)
     {
         var group = await db.VolunteerStudyInformationGroup
-            .Where(
-                i => i.Id == id && i.VolunteerStudyInformation.StudyId == studyId)
+            .Where(i => i.Id == id && i.VolunteerStudyInformation.StudyId == studyId)
             .Select(i => new VsiGroupModel()
                 {
                     StudyId = studyId,
@@ -353,51 +417,90 @@ public class VolunteerStudyInformationController : Controller
                 }
             )
             .SingleOrDefaultAsync(cancellationToken);
-        
+
         return View(group);
     }
-    
-        [HttpGet]
-        public async Task<IActionResult> ExclusionCriteria(
-            [FromServices] ParticipantDbContext db, int studyId, int id, CancellationToken cancellationToken)
-        {
-            var group = await db.VolunteerStudyInformationGroup
-                .Where(
-                    i => i.Id == id && i.VolunteerStudyInformation.StudyId == studyId)
-                .Select(i => new VsiGroupModel()
-                    {
-                        StudyId = studyId,
-                        Id = i.Id,
-                        Name = i.Name,
-                        Criteria = i.Criteria.Select(c => new VsiGroupCriteriaModel
-                        {
-                            Id = c.Id,
-                            Criteria = c.Criteria,
-                            Type = c.TypeId
-                        }).ToList()
-                    }
-                )
-                .SingleOrDefaultAsync(cancellationToken);
-            
-            return View(group);
-        }
-    
+
     [HttpGet]
-    public async Task<IActionResult> CreateCriterion(
+    public IActionResult QueryAddExclusionCriteria(int studyId, int groupId)
+    {
+        return View();
+    }
+    
+    [HttpPost]
+    public IActionResult QueryAddExclusionCriteria(int studyId, int groupId, [FromForm] bool addExclusionCriteria)
+    {
+        if (addExclusionCriteria)
+        {
+            return RedirectToAction("ExclusionCriteria");
+        }
+        else
+        {
+            return RedirectToAction("GroupOverview", new {studyId, groupId});
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExclusionCriteria(
         [FromServices] ParticipantDbContext db, int studyId, int id, CancellationToken cancellationToken)
     {
         var group = await db.VolunteerStudyInformationGroup
-            .Where(
-            i => i.Id == id && i.VolunteerStudyInformation.StudyId == studyId)
+            .Where(i => i.Id == id && i.VolunteerStudyInformation.StudyId == studyId)
             .Select(i => new VsiGroupModel()
                 {
                     StudyId = studyId,
                     Id = i.Id,
-                    Name = i.Name
+                    Name = i.Name,
+                    Criteria = i.Criteria.Select(c => new VsiGroupCriteriaModel
+                    {
+                        Id = c.Id,
+                        Criteria = c.Criteria,
+                        Type = c.TypeId
+                    }).ToList()
                 }
             )
             .SingleOrDefaultAsync(cancellationToken);
-        
+
+        return View(group);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> ExclusionCriteria(
+        [FromServices] ParticipantDbContext db, int studyId, int id, bool addExclusionCriteria, CancellationToken cancellationToken)
+    {
+        var group = await db.VolunteerStudyInformationGroup
+            .Where(i => i.Id == id && i.VolunteerStudyInformation.StudyId == studyId)
+            .Select(i => new VsiGroupModel()
+                {
+                    StudyId = studyId,
+                    Id = i.Id,
+                    Name = i.Name,
+                    Criteria = i.Criteria.Select(c => new VsiGroupCriteriaModel
+                    {
+                        Id = c.Id,
+                        Criteria = c.Criteria,
+                        Type = c.TypeId
+                    }).ToList()
+                }
+            )
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return View(group);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> CreateInclusionCriterion(
+        [FromServices] VsiRepository db, int studyId, int id, CancellationToken cancellationToken)
+    {
+        var group = await db.GetCurrentVsiGroup(studyId, id,
+            i => new VsiGroupModel()
+            {
+                StudyId = studyId,
+                Id = i.Id,
+                Name = i.Name
+            }
+            , cancellationToken);
+
         return View(group);
     }
 
@@ -408,9 +511,9 @@ public class VolunteerStudyInformationController : Controller
         [FromForm] int id,
         CancellationToken cancellationToken)
     {
-        return RedirectToAction("Step4", new { studyId, id });
+        return RedirectToAction("Section1_Step4", new { studyId, id });
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> RemoveCriteria(
         [FromServices] ParticipantDbContext db,
@@ -421,10 +524,10 @@ public class VolunteerStudyInformationController : Controller
         var criteria = await db.VolunteerStudyInformationGroupCriteria
             .Include(i => i.Group)
             .SingleOrDefaultAsync(i => i.Id == id, cancellationToken: cancellationToken);
-        
+
         db.VolunteerStudyInformationGroupCriteria.Remove(criteria);
         await db.SaveChangesAsync(cancellationToken);
-        
+
         return RedirectToAction("InclusionCriteria", new { studyId, id = criteria.VolunteerStudyInformationGroupId });
     }
 
@@ -432,12 +535,12 @@ public class VolunteerStudyInformationController : Controller
     public async Task<IActionResult> CreateGroup(
         [FromServices] VsiRepository vsiRepository,
         int studyId,
-        [FromForm] string name, 
+        [FromForm] string name,
         CancellationToken cancellationToken)
     {
         var vsi = await vsiRepository.GetCurrentVsi(studyId,
             cancellationToken);
-        
+
         if (vsi == null)
         {
             return NotFound();
@@ -447,31 +550,38 @@ public class VolunteerStudyInformationController : Controller
         {
             Name = name,
         };
-        
+
         vsi.Groups.Add(group);
         await vsiRepository.SaveChangesAsync(cancellationToken);
-        
-        return RedirectToAction("CreateCriterion", new{studyId, group.Id});
+
+        return RedirectToAction("CreateInclusionCriterion", new { studyId, group.Id });
     }
-    
-    
+
     #endregion
+
     #region Section2_Step1
-    
+
     [HttpGet]
-    public async Task<IActionResult> Section2_Step1([FromServices] VsiRepository vsiRepository, int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section2_Step1([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
     {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Section1_Step4", new { id = currentVsi.StudyId }));
+        
         var model = await vsiRepository.GetCurrentVsi(studyId,
             i => new VsiEditModel
             {
-                Status = i.StatusId,
                 WhatWillYouDo = i.WhatYouWillDo
             },
             cancellationToken);
         return model == null ? NotFound() : View(model);
     }
-    
-    
+
+
     [HttpPost]
     public async Task<IActionResult> Section2_Step1(
         [FromServices] VsiRepository db,
@@ -497,24 +607,32 @@ public class VolunteerStudyInformationController : Controller
         await db.SaveChangesAsync(cancellationToken);
         return RedirectToAction("Section2_Step2", new { studyId, id = vsi.Id });
     }
-    
+
     #endregion
+
     #region Section2_Step2
-    
+
     [HttpGet]
-    public async Task<IActionResult> Section2_Step2([FromServices] VsiRepository vsiRepository, int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section2_Step2([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
     {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Section2_Step1", new { id = currentVsi.StudyId }));
+        
         var model = await vsiRepository.GetCurrentVsi(studyId,
             i => new VsiEditModel
             {
-                Status = i.StatusId,
                 CostReimbursement = i.CostReimbursement
             },
             cancellationToken);
         return model == null ? NotFound() : View(model);
     }
-    
-    
+
+
     [HttpPost]
     public async Task<IActionResult> Section2_Step2(
         [FromServices] VsiRepository db,
@@ -538,27 +656,35 @@ public class VolunteerStudyInformationController : Controller
 
         vsi.CostReimbursement = model.CostReimbursement;
         await db.SaveChangesAsync(cancellationToken);
-        return RedirectToAction("Step6", new { studyId, id = vsi.Id });
+        return RedirectToAction("Section2_Step3", new { studyId, id = vsi.Id });
     }
-    
+
     #endregion
-    #region Step 6
-    
+
+    #region Section 2 Step 3
+
     [HttpGet]
-    public async Task<IActionResult> Step6([FromServices] VsiRepository vsiRepository, int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section2_Step3([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
     {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Section2_Step2", new { id = currentVsi.StudyId }));
+        
         var model = await vsiRepository.GetCurrentVsi(studyId,
             i => new VsiEditModel
             {
-                Status = i.StatusId,
                 IncentiveDetails = i.IncentiveDetails
             },
             cancellationToken);
         return model == null ? NotFound() : View(model);
     }
-    
+
     [HttpPost]
-    public async Task<IActionResult> Step6(
+    public async Task<IActionResult> Section2_Step3(
         [FromServices] VsiRepository db,
         [FromRoute] int studyId,
         [FromForm] VsiEditModel model,
@@ -580,27 +706,35 @@ public class VolunteerStudyInformationController : Controller
 
         vsi.IncentiveDetails = model.IncentiveDetails;
         await db.SaveChangesAsync(cancellationToken);
-        return RedirectToAction("Step7", new { studyId });
+        return RedirectToAction("Section2_Step4", new { studyId });
     }
-    
+
     #endregion
+
     #region Step 7
 
     [HttpGet]
-    public async Task<IActionResult> Step7([FromServices] VsiRepository vsiRepository, int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section2_Step4([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
     {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Section2_Step3", new { id = currentVsi.StudyId }));
+        
         var model = await vsiRepository.GetCurrentVsi(studyId,
             i => new VsiEditModel
             {
-                Status = i.StatusId,
                 NumberOfVisits = i.NumberOfVisits
             },
             cancellationToken);
         return model == null ? NotFound() : View(model);
     }
-    
+
     [HttpPost]
-    public async Task<IActionResult> Step7(
+    public async Task<IActionResult> Section2_Step4(
         [FromServices] VsiRepository db,
         [FromRoute] int studyId,
         [FromForm] VsiEditModel model,
@@ -622,27 +756,34 @@ public class VolunteerStudyInformationController : Controller
 
         vsi.NumberOfVisits = model.NumberOfVisits;
         await db.SaveChangesAsync(cancellationToken);
-        return RedirectToAction("Step8", new { studyId });
+        return RedirectToAction("Section2_Step5", new { studyId });
     }
-    
+
     #endregion
-    #region Step 8
-    
+
+    #region Section2_Step5
     [HttpGet]
-    public async Task<IActionResult> Step8([FromServices] VsiRepository vsiRepository, int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section2_Step5([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
     {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Section2_Step4", new { id = currentVsi.StudyId }));
+        
         var model = await vsiRepository.GetCurrentVsi(studyId,
             i => new VsiEditModel
             {
-                Status = i.StatusId,
                 StudyDuration = i.StudyDuration
             },
             cancellationToken);
         return model == null ? NotFound() : View(model);
     }
-    
+
     [HttpPost]
-    public async Task<IActionResult> Step8(
+    public async Task<IActionResult> Section2_Step5(
         [FromServices] VsiRepository db,
         [FromRoute] int studyId,
         [FromForm] VsiEditModel model,
@@ -664,11 +805,110 @@ public class VolunteerStudyInformationController : Controller
 
         vsi.StudyDuration = model.StudyDuration;
         await db.SaveChangesAsync(cancellationToken);
-        return RedirectToAction("Step9", new { studyId });
+        return RedirectToAction("Section2_Step6", new { studyId });
+    }
+
+    #endregion
+
+    #region Section2_Step6
+
+    [HttpGet]
+    public async Task<IActionResult> Section2_Step6([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
+    {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Section2_Step4", new { id = currentVsi.StudyId }));
+        
+        var model = await vsiRepository.GetCurrentVsi(studyId,
+            i => new VsiEditModel
+            {
+                StudyFormat = i.StudyFormat
+            },
+            cancellationToken);
+        return model == null ? NotFound() : View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Section2_Step6(
+        [FromServices] VsiRepository db,
+        [FromRoute] int studyId,
+        [FromForm] VsiEditModel model,
+        CancellationToken cancellationToken)
+    {
+        VsiValidator validator = new VsiValidator();
+        validator.ValidateSpecificProperties(model, i => i.StudyFormat).AddToModelState(ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var vsi = await db.GetCurrentVsi(studyId, cancellationToken);
+        if (vsi == null)
+        {
+            return NotFound();
+        }
+
+        vsi.StudyFormat = model.StudyFormat;
+        await db.SaveChangesAsync(cancellationToken);
+        return RedirectToAction("Section2_Step7", new { studyId });
     }
 
     #endregion
     
+    #region Section2_Step7
+
+    [HttpGet]
+    public async Task<IActionResult> Section2_Step7([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
+    {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section1Name, Url.Action("Section2_Step4", new { id = currentVsi.StudyId }));
+        
+        var model = await vsiRepository.GetCurrentVsi(studyId,
+            i => new VsiEditModel
+            {
+                OtherDetails = i.OtherDetails
+            },
+            cancellationToken);
+        return model == null ? NotFound() : View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Section2_Step7(
+        [FromServices] VsiRepository db,
+        [FromRoute] int studyId,
+        [FromForm] VsiEditModel model,
+        CancellationToken cancellationToken)
+    {
+        VsiValidator validator = new VsiValidator();
+        validator.ValidateSpecificProperties(model, i => i.OtherDetails).AddToModelState(ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var vsi = await db.GetCurrentVsi(studyId, cancellationToken);
+        if (vsi == null)
+        {
+            return NotFound();
+        }
+
+        vsi.OtherDetails = model.OtherDetails;
+        await db.SaveChangesAsync(cancellationToken);
+        return RedirectToAction("Section3_Step1", new { studyId });
+    }
+
+    #endregion
     [HttpGet("ResearchLocation")]
     public IActionResult ResearchLocation(long id)
     {
@@ -679,5 +919,251 @@ public class VolunteerStudyInformationController : Controller
     public IActionResult VolunteerGroups(long id)
     {
         return NotFound();
+    }
+
+    [HttpGet]
+    public IActionResult GroupOverview(int studyId, int groupId)
+    {
+        return View();
+    }
+
+    #region Section 3
+    
+        #region Section3_Step1
+
+        [HttpGet]
+        public async Task<IActionResult> Section3_Step1([FromServices] VsiRepository vsiRepository, int studyId,
+            CancellationToken cancellationToken)
+        {
+            var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+            if (currentVsi == null)
+            {
+                return NotFound();
+            }
+            SetContext(currentVsi, Resources.Section3Name, Url.Action("Section2_Step4", new { id = currentVsi.StudyId }));
+            
+            var model = await vsiRepository.GetCurrentVsi(studyId,
+                i => new VsiEditModel
+                {
+                    StagedPreScreenerUrl = i.StagedPreScreenerUrl
+                },
+                cancellationToken);
+            return model == null ? NotFound() : View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Section3_Step1(
+            [FromServices] VsiRepository db,
+            [FromRoute] int studyId,
+            [FromForm] VsiEditModel model,
+            CancellationToken cancellationToken)
+        {
+            VsiValidator validator = new VsiValidator();
+            validator.ValidateSpecificProperties(model, i => i.StagedPreScreenerUrl).AddToModelState(ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var vsi = await db.GetCurrentVsi(studyId, cancellationToken);
+            if (vsi == null)
+            {
+                return NotFound();
+            }
+
+            vsi.StagedPreScreenerUrl = model.StagedPreScreenerUrl;
+            await db.SaveChangesAsync(cancellationToken);
+            return RedirectToAction("Section3_Step2", new { studyId });
+        }
+
+        #endregion
+        
+        #region Section3_Step2
+
+        [HttpGet]
+        public async Task<IActionResult> Section3_Step2([FromServices] VsiRepository vsiRepository, int studyId,
+            CancellationToken cancellationToken)
+        {
+            var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+            if (currentVsi == null)
+            {
+                return NotFound();
+            }
+            SetContext(currentVsi, Resources.Section3Name, Url.Action("Section2_Step4", new { id = currentVsi.StudyId }));
+            
+            var model = await vsiRepository.GetCurrentVsi(studyId,
+                i => new VsiEditModel
+                {
+                    ExternalWebsiteUrl = i.ExternalWebsiteUrl
+                },
+                cancellationToken);
+            return model == null ? NotFound() : View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Section3_Step2(
+            [FromServices] VsiRepository db,
+            [FromRoute] int studyId,
+            [FromForm] VsiEditModel model,
+            CancellationToken cancellationToken)
+        {
+            VsiValidator validator = new VsiValidator();
+            validator.ValidateSpecificProperties(model, i => i.ExternalWebsiteUrl).AddToModelState(ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var vsi = await db.GetCurrentVsi(studyId, cancellationToken);
+            if (vsi == null)
+            {
+                return NotFound();
+            }
+
+            vsi.ExternalWebsiteUrl = model.ExternalWebsiteUrl;
+            await db.SaveChangesAsync(cancellationToken);
+            return RedirectToAction("Step9", new { studyId });
+        }
+
+        #endregion
+        
+        #region Section3_Step3
+
+        [HttpGet]
+        public async Task<IActionResult> Section3_Step3([FromServices] VsiRepository vsiRepository, int studyId,
+            CancellationToken cancellationToken)
+        {
+            var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+            if (currentVsi == null)
+            {
+                return NotFound();
+            }
+            SetContext(currentVsi, Resources.Section3Name, Url.Action("Section2_Step4", new { id = currentVsi.StudyId }));
+            
+            var model = await vsiRepository.GetCurrentVsi(studyId,
+                i => new VsiEditModel
+                {
+                    Contacts = i.Contacts.Select(c => new VsiContactModel
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        Role = c.Role,
+                        Organisation = c.Organisation,
+                        Email = c.Email,
+                        PhoneNumber = c.PhoneNumber
+                    })
+                },
+                cancellationToken);
+            return model == null ? NotFound() : View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Section3_Step3(
+            [FromServices] VsiRepository db,
+            [FromRoute] int studyId,
+            [FromForm] VsiEditModel model,
+            CancellationToken cancellationToken)
+        {
+            VsiValidator validator = new VsiValidator();
+            validator.ValidateSpecificProperties(model, i => i.ExternalWebsiteUrl).AddToModelState(ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var vsi = await db.GetCurrentVsi(studyId, cancellationToken);
+            if (vsi == null)
+            {
+                return NotFound();
+            }
+
+            vsi.ExternalWebsiteUrl = model.ExternalWebsiteUrl;
+            await db.SaveChangesAsync(cancellationToken);
+            return RedirectToAction("Section3_Step4", new { studyId });
+        }
+
+        #endregion
+      
+        #region Section3_Step4
+
+        [HttpGet]
+        public async Task<IActionResult> Section3_Step4([FromServices] VsiRepository vsiRepository, int studyId,
+            CancellationToken cancellationToken)
+        {
+            var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+            if (currentVsi == null)
+            {
+                return NotFound();
+            }
+            SetContext(currentVsi, Resources.Section3Name, Url.Action("Section2_Step4", new { id = currentVsi.StudyId }));
+            
+            var model = await vsiRepository.GetCurrentVsi(studyId,
+                i => new VsiEditModel
+                {
+                    InfoToRegisterByEmail = i.InfoToRegisterByEmail
+                },
+                cancellationToken);
+            return model == null ? NotFound() : View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Section3_Step4(
+            [FromServices] VsiRepository db,
+            [FromRoute] int studyId,
+            [FromForm] VsiEditModel model,
+            CancellationToken cancellationToken)
+        {
+            VsiValidator validator = new VsiValidator();
+            validator.ValidateSpecificProperties(model, i => i.InfoToRegisterByEmail).AddToModelState(ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var vsi = await db.GetCurrentVsi(studyId, cancellationToken);
+            if (vsi == null)
+            {
+                return NotFound();
+            }
+
+            vsi.InfoToRegisterByEmail = model.InfoToRegisterByEmail;
+            await db.SaveChangesAsync(cancellationToken);
+            return RedirectToAction("Section4", new { studyId });
+        }
+
+        #endregion
+
+    #endregion
+    
+    [HttpGet]
+    public async Task<IActionResult> Section4([FromServices] VsiRepository vsiRepository, int studyId,
+        CancellationToken cancellationToken)
+    {
+        var currentVsi = await vsiRepository.GetCurrentVsi(studyId, cancellationToken);
+        if (currentVsi == null)
+        {
+            return NotFound();
+        }
+        SetContext(currentVsi, Resources.Section3Name, Url.Action("Section2_Step4", new { id = currentVsi.StudyId }));
+            
+        var model = await vsiRepository.GetCurrentVsi(studyId,
+            i => new VsiEditModel
+            {
+                Contacts = i.Contacts.Select(c => new VsiContactModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Role = c.Role,
+                    Organisation = c.Organisation,
+                    Email = c.Email,
+                    PhoneNumber = c.PhoneNumber
+                })
+            },
+            cancellationToken);
+        return model == null ? NotFound() : View(model);
     }
 }

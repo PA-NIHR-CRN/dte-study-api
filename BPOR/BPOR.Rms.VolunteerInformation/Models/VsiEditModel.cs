@@ -37,6 +37,5 @@ public class VsiEditModel
     public IEnumerable<VsiSiteModel> Sites { get; set; } = [];
     
     public IEnumerable<VsiGroupModel> Groups { get; set; } = [];
-    public VolunteerStudyInformationStatusId Status { get; set; }
-    public int StudyId { get; set; }
+    public IEnumerable<VsiContactModel> Contacts { get; set; } = [];
 }

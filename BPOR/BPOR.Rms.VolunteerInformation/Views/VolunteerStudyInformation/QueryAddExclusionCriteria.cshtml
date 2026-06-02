@@ -1,0 +1,13 @@
+﻿@model BPOR.Rms.VolunteerInformation.Models.VsiGroupModel
+
+@{
+    Layout = "_VsiEditLayoutForm";
+}
+
+<h1>Would you like to add exclusion criteria?</h1>
+<form method="post">
+    <radio-set name="addExclusionCriteria">
+        <radio value="@true">Yes</radio>
+        <radio value="@true">No</radio>
+    </radio-set>
+</form>

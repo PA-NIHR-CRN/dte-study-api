@@ -2,7 +2,7 @@
 @model BPOR.Rms.VolunteerInformation.Models.VsiGroupModel
 
 @{
-    ViewBag.SectionName = "Section 1: Overview";
+    VsiEditContext context = ViewBag.Context;
 }
 
 <h1>Add inclusion criteria</h1>
@@ -12,11 +12,11 @@
 {
     <div>
         <p>@criterion.Criteria</p>
-        <form asp-action="RemoveCriteria" asp-route-studyId="@Model.StudyId" asp-route-id="@criterion.Id">
+        <form asp-action="RemoveCriteria" asp-route-studyId="@context.Vsi.StudyId" asp-route-id="@criterion.Id">
             <button type="submit">Delete</button>
         </form>
     </div>
 }
 
-<a asp-action="CreateCriterion" asp-route-studyid="@Model.StudyId" asp-route-id="@Model.Id">Add more criteria</a>
-<a asp-action="ExclusionCriteria" asp-route-studyid="@Model.StudyId" asp-route-id="@Model.Id" class="govuk-button" data-module="govuk-button">Continue</a>
+<a asp-action="CreateInclusionCriterion" asp-route-studyid="@context.Vsi.StudyId" asp-route-id="@Model.Id">Add more criteria</a>
+<a asp-action="QueryAddExclusionCriteria" asp-route-studyid="@context.Vsi.StudyId" asp-route-groupid="@Model.Id" class="govuk-button" data-module="govuk-button">Continue</a>

@@ -1,4 +1,4 @@
-﻿namespace BPOR.Domain.Settings;
+﻿namespace BPOR.Rms.VolunteerInformation.Settings;
 
 public class VsiSettings
 {
