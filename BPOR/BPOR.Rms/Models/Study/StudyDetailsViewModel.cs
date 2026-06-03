@@ -19,6 +19,7 @@ public class StudyDetailsViewModel
     public IEnumerable<Campaign> Campaigns { get; set; }
     public int TotalNotificationsSent => Campaigns.Sum(e => e.TotalCampaignNotificationsSent);
     public int TotalRegisteredInterest => Campaigns.Sum(e => e.TotalCampaignRegisteredInterest);
+    public IEnumerable<ResearcherEmail> ResearcherEmails { get; set; }
     public List<ActionLink> ActionLinks { get; set; } = [];
     public class ActionLink
     {
@@ -59,5 +60,13 @@ public class CampaignParticipant
     public DateTime? SentAt { get; set; }
     public DateTime? DeliveredAt { get; set; }
     public DateTime? RegisteredInterestAt { get; set; }
+    public int? DeliveryStatusId { get; set; }
+}
+
+public class ResearcherEmail
+{
+    public string ResearcherEmailAddress { get; set; }
+    public string? EmailTemplate { get; set; }
+    public DateTime SentAt { get; set; }
     public int? DeliveryStatusId { get; set; }
 }

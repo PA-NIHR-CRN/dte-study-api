@@ -16,21 +16,21 @@
             <input asp-for="IsEligibilityCriteriaComplete" type="hidden" />
             <input asp-for="IsEligibleForPrescreener" type="hidden" />
             
-            <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedEmail"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedEmailId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <fieldset class="govuk-fieldset" id="SelectedEmailQuestion">
-                    @if (Html.ViewData.ModelState["SelectedEmail"]?.Errors.Count > 0)
+                    @if (Html.ViewData.ModelState["SelectedEmailId"]?.Errors.Count > 0)
                     {
-                        <span id="SelectedEmail-error" class="govuk-error-message">
+                        <span id="SelectedEmailId-error" class="govuk-error-message">
                             <span class="govuk-visually-hidden">Error:</span>
-                            @Html.ValidationMessageFor(model => model.SelectedEmail)
+                            @Html.ValidationMessageFor(model => model.SelectedEmailId)
                         </span>
                     }
                     <div class="govuk-radios" data-module="govuk-radios">
                         @for (int i = 0; i < Model.ResearcherEmailOptions.Count; i++)
                         {
                             <div class="govuk-radios__item">
-                                @Html.RadioButtonFor(m => m.SelectedEmail, Model.ResearcherEmailOptions[i]["value"], new { @class = "govuk-radios__input", id = "SelectedEmail" + (i == 0 ? "" : i) })
-                                @Html.Label("SelectedEmail" + (i == 0 ? "" : i), Model.ResearcherEmailOptions[i]["label"], new { @class = "govuk-label govuk-radios__label" })
+                                @Html.RadioButtonFor(m => m.SelectedEmailId, Model.ResearcherEmailOptions[i]["value"], new { @class = "govuk-radios__input", id = "SelectedEmailId" + (i == 0 ? "" : i) })
+                                @Html.Label("SelectedEmailId" + (i == 0 ? "" : i), Model.ResearcherEmailOptions[i]["label"], new { @class = "govuk-label govuk-radios__label" })
                             </div>
                         }
                     </div>

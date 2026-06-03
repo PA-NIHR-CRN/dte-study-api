@@ -13,7 +13,7 @@ using NetTopologySuite.Geometries;
 namespace BPOR.Domain.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20260601150105_CRNCC-3072-StudyResearcherEmail-tables")]
+    [Migration("20260602111413_CRNCC-3072-StudyResearcherEmail-tables")]
     partial class CRNCC3072StudyResearcherEmailtables
     {
         /// <inheritdoc />
@@ -10110,17 +10110,32 @@ namespace BPOR.Domain.Migrations
                     b.Property<int>("CreatedById")
                         .HasColumnType("int");
 
+                    b.Property<int>("DeliveryStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StudyResearcherEmailAddress")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<int>("StudyResearcherEmailOptionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("StudyResearcherId")
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudyResearcherEmailOptionId");
+                    b.HasIndex("DeliveryStatusId");
 
-                    b.HasIndex("StudyResearcherId");
+                    b.HasIndex("StudyId");
+
+                    b.HasIndex("StudyResearcherEmailOptionId");
 
                     b.ToTable("StudyResearcherEmails");
                 });
@@ -10761,19 +10776,27 @@ namespace BPOR.Domain.Migrations
 
             modelBuilder.Entity("BPOR.Domain.Entities.StudyResearcherEmail", b =>
                 {
+                    b.HasOne("BPOR.Domain.Entities.RefData.DeliveryStatus", "DeliveryStatus")
+                        .WithMany()
+                        .HasForeignKey("DeliveryStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BPOR.Domain.Entities.Study", "Study")
+                        .WithMany("StudyResearcherEmails")
+                        .HasForeignKey("StudyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BPOR.Domain.Entities.RefData.StudyResearcherEmailOptions", "StudyResearcherEmailOption")
                         .WithMany()
                         .HasForeignKey("StudyResearcherEmailOptionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BPOR.Domain.Entities.StudyResearcher", "StudyResearcher")
-                        .WithMany()
-                        .HasForeignKey("StudyResearcherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("DeliveryStatus");
 
-                    b.Navigation("StudyResearcher");
+                    b.Navigation("Study");
 
                     b.Navigation("StudyResearcherEmailOption");
                 });
@@ -10900,6 +10923,8 @@ namespace BPOR.Domain.Migrations
                     b.Navigation("ManualEnrollments");
 
                     b.Navigation("StudyParticipantEnrollments");
+
+                    b.Navigation("StudyResearcherEmails");
 
                     b.Navigation("StudyResearchers");
 

@@ -38,18 +38,28 @@ namespace BPOR.Domain.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    StudyResearcherId = table.Column<int>(type: "int", nullable: false),
+                    StudyResearcherEmailAddress = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     StudyResearcherEmailOptionId = table.Column<int>(type: "int", nullable: false),
+                    DeliveryStatusId = table.Column<int>(type: "int", nullable: false),
+                    StudyId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    CreatedById = table.Column<int>(type: "int", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedById = table.Column<int>(type: "int", nullable: false),
+                    UpdatedById = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StudyResearcherEmails", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StudyResearcherEmails_StudyResearcher_StudyResearcherId",
-                        column: x => x.StudyResearcherId,
-                        principalTable: "StudyResearcher",
+                        name: "FK_StudyResearcherEmails_Studies_StudyId",
+                        column: x => x.StudyId,
+                        principalTable: "Studies",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_StudyResearcherEmails_SysRefDeliveryStatus_DeliveryStatusId",
+                        column: x => x.DeliveryStatusId,
+                        principalTable: "SysRefDeliveryStatus",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_StudyResearcherEmails_SysRefStudyResearcherEmailOptions_Stud~",
@@ -70,14 +80,19 @@ namespace BPOR.Domain.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_StudyResearcherEmails_DeliveryStatusId",
+                table: "StudyResearcherEmails",
+                column: "DeliveryStatusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudyResearcherEmails_StudyId",
+                table: "StudyResearcherEmails",
+                column: "StudyId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StudyResearcherEmails_StudyResearcherEmailOptionId",
                 table: "StudyResearcherEmails",
                 column: "StudyResearcherEmailOptionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StudyResearcherEmails_StudyResearcherId",
-                table: "StudyResearcherEmails",
-                column: "StudyResearcherId");
         }
 
         /// <inheritdoc />
@@ -88,7 +103,6 @@ namespace BPOR.Domain.Migrations
 
             migrationBuilder.DropTable(
                 name: "SysRefStudyResearcherEmailOptions");
-            
         }
     }
 }
