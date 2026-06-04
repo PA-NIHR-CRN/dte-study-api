@@ -382,28 +382,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
         ValidateMandatoryFields(model);
 
-        switch (model.Step)
-        {
-            case 2:
-                if (model.PortfolioSubmissionStatus == 1)
-                {
-                    model.OutcomeOfSubmission = null;
-                    model.Step = 3;
-                    return View(model);
-                }
-
-                break;
-            case 4:
-                if (model.HasFunding == true)
-                {
-                    model.FundingCode = string.Empty;
-                    model.Step = 5;
-                    return View(model);
-                }
-
-                break;
-        }
-
         if (ModelState.IsValid)
         {
             try
@@ -423,24 +401,35 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                         studyToUpdate.Sponsors = model.StudySponsors;
                         break;
                     case 2:
-                        studyToUpdate.SubmittedId = model.PortfolioSubmissionStatus;
-                        if (model.PortfolioSubmissionStatus != 1)
+                        if (model.PortfolioSubmissionStatus == 1)
                         {
+                            model.Step = 3;
                             model.OutcomeOfSubmission = null;
+                            return View(model);
                         }
+
+                        studyToUpdate.SubmittedId = model.PortfolioSubmissionStatus;
+                        studyToUpdate.SubmissionOutcomeId = null;
+                        studyToUpdate.CpmsId = null;
                         break;
                     case 3:
+                        studyToUpdate.SubmittedId = 1;
                         studyToUpdate.SubmissionOutcomeId = model.OutcomeOfSubmission;
                         studyToUpdate.CpmsId = model.CPMSId;
                         break;
                     case 4:
-                        studyToUpdate.HasNihrFunding = model.HasFunding;
-                        if (model.HasFunding != true)
+                        if (model.HasFunding == true)
                         {
-                            model.FundingCode = null;
+                            model.Step = 5;
+                            model.FundingCode = string.Empty;
+                            return View(model);
                         }
+
+                        studyToUpdate.HasNihrFunding = model.HasFunding;
+                        studyToUpdate.FundingCode = null;
                         break;
                     case 5:
+                        studyToUpdate.HasNihrFunding = true;
                         studyToUpdate.FundingCode = model.FundingCode;
                         break;
                     case 6:
@@ -454,7 +443,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                             model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
                         break;
                 }
-
 
                 await context.SaveChangesAsync();
             }
