@@ -3,17 +3,25 @@ using BPOR.Domain.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.ResearcherEmail;
 using BPOR.Rms.Startup;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BPOR.Rms.Controllers;
 
 public class ResearcherEmailController(ParticipantDbContext context,
+    ICurrentUserProvider<User> currentUserProvider,
     ILogger<ResearcherEmailController> logger) : Controller
 {
     // GET
     public async Task<IActionResult> Index(int studyId, CancellationToken cancellationToken)
     {
+        bool isAdmin = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Admin);
+        if (!isAdmin)
+        {
+            return View("Unauthorised");
+        }
+        
         ResearcherEmailViewModel model = new ResearcherEmailViewModel();
         model.StudyId = studyId;
         
@@ -37,6 +45,12 @@ public class ResearcherEmailController(ParticipantDbContext context,
     [HttpPost]
     public async Task<IActionResult> SendEmail(ResearcherEmailViewModel model, CancellationToken cancellationToken)
     {
+        bool isAdmin = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Admin);
+        if (!isAdmin)
+        {
+            return View("Unauthorised");
+        }
+        
         if (model.SelectedEmailId == 0)
         {
             ModelState.AddModelError(
