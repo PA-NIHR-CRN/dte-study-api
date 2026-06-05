@@ -44,7 +44,32 @@ public class ResearcherEmailController(ParticipantDbContext context,
                 "Please select an email to send to the researcher.");
         }
         
-        if (!model.IsEligibleForPrescreener &&
+        var study = await context.Studies
+            .Where(s => s.Id == model.StudyId)
+            .Select(s => new Study
+            {
+                EmailAddress = s.EmailAddress,
+                HasMultipleResearchLocations = s.HasMultipleResearchLocations,
+                SinglePersonResponsibleForRecruiting = s.SinglePersonResponsibleForRecruiting
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+        
+        if (study == null)
+        {
+            logger.LogWarning("[HttpPost]ResearcherEmail.SendEmail cannot find study: {StudyId}", model.StudyId);
+            return NotFound();
+        }
+        
+        var isEligibilityCriteriaComplete =
+            study.HasMultipleResearchLocations.HasValue &&
+            study.SinglePersonResponsibleForRecruiting.HasValue;
+
+        var isEligibleForPrescreener =
+            isEligibilityCriteriaComplete &&
+            !(study.HasMultipleResearchLocations!.Value &&
+              study.SinglePersonResponsibleForRecruiting!.Value);
+        
+        if (!isEligibleForPrescreener  &&
             (ResearcherEmailOptions)model.SelectedEmailId == ResearcherEmailOptions.NextStepOfferPreScreener)
         {
             ModelState.AddModelError(
@@ -56,21 +81,10 @@ public class ResearcherEmailController(ParticipantDbContext context,
         {
             return View("Index", model);
         }
-        
-        var emailAddress = await context.Studies
-            .Where(s => s.Id == model.StudyId)
-            .Select(s => s.EmailAddress)
-            .SingleOrDefaultAsync(cancellationToken);
-        
-        if (string.IsNullOrEmpty(emailAddress))
-        {
-            logger.LogWarning("[HttpPost]ResearcherEmail.SendEmail cannot find researcher email for study: {StudyId}", model.StudyId);
-            return NotFound();
-        }
 
         var studyResearcherEmail = new StudyResearcherEmail
         {
-            StudyResearcherEmailAddress = emailAddress,
+            StudyResearcherEmailAddress = study.EmailAddress,
             StudyResearcherEmailOptionId = model.SelectedEmailId,
             DeliveryStatusId = (int)DeliveryStatus.Pending,
             StudyId = model.StudyId
