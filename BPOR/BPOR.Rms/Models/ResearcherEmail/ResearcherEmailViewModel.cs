@@ -6,8 +6,7 @@ namespace BPOR.Rms.Models.ResearcherEmail;
 public class ResearcherEmailViewModel
 {
     public int StudyId { get; set; }
-    [Required(ErrorMessage = "Please select an email to send to the researcher.")]
-    public string? SelectedEmailId { get; set; }
+    public int SelectedEmailId { get; set; }
     public bool IsEligibilityCriteriaComplete { get; set; }
     public bool IsEligibleForPrescreener { get; set; }
     public int ResearcherUserId { get; set; }

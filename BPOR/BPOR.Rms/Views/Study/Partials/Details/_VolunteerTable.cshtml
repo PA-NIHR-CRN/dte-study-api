@@ -4,12 +4,6 @@
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 @inject ICurrentUserProvider<User> CurrentUserProvider
 
-@{
-    var isIdentifiable = Model.Study.IsRecruitingIdentifiableParticipants;
-    var isAdmin = CurrentUserProvider.User.HasRole(UserRole.Admin);
-    var isResearcher = CurrentUserProvider.User.HasRole(UserRole.Researcher);
-}
-
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">

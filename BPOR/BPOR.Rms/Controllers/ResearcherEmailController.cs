@@ -37,13 +37,18 @@ public class ResearcherEmailController(ParticipantDbContext context,
     [HttpPost]
     public async Task<IActionResult> SendEmail(ResearcherEmailViewModel model, CancellationToken cancellationToken)
     {
-        if (Enum.TryParse<ResearcherEmailOptions>(
-                model.SelectedEmailId,
-                out var selectedEmail) &&
-            !model.IsEligibleForPrescreener &&
-            selectedEmail == ResearcherEmailOptions.NextStepOfferPreScreener)
+        if (model.SelectedEmailId == 0)
         {
-            ModelState.AddModelError(nameof(model.SelectedEmailId), 
+            ModelState.AddModelError(
+                nameof(model.SelectedEmailId),
+                "Please select an email to send to the researcher.");
+        }
+        
+        if (!model.IsEligibleForPrescreener &&
+            (ResearcherEmailOptions)model.SelectedEmailId == ResearcherEmailOptions.NextStepOfferPreScreener)
+        {
+            ModelState.AddModelError(
+                nameof(model.SelectedEmailId),
                 "We’re sorry, this study is not eligible for a pre-screener. Update the qualification criteria and try again");
         }
 
@@ -63,15 +68,10 @@ public class ResearcherEmailController(ParticipantDbContext context,
             return NotFound();
         }
 
-        if (!int.TryParse(model.SelectedEmailId, out var selectedEmailId))
-        {
-            throw new ArgumentException("SelectedEmailId is not a valid integer.");
-        }
-
         var studyResearcherEmail = new StudyResearcherEmail
         {
             StudyResearcherEmailAddress = emailAddress,
-            StudyResearcherEmailOptionId = selectedEmailId,
+            StudyResearcherEmailOptionId = model.SelectedEmailId,
             DeliveryStatusId = (int)DeliveryStatus.Pending,
             StudyId = model.StudyId
         };
