@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BPOR.Rms.Controllers;
 
 public class ResearcherEmailController(ParticipantDbContext context,
-    ILogger<StudyController> logger) : Controller
+    ILogger<ResearcherEmailController> logger) : Controller
 {
     // GET
     public async Task<IActionResult> Index(int studyId, CancellationToken cancellationToken)

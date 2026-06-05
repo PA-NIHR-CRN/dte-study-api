@@ -16,7 +16,7 @@ public class ResearcherEmailViewModel
     {
         get
         {
-            return Constants.ResearcherEmails.getResearcherEmailOptions();
+            return Constants.ResearcherEmails.GetResearcherEmailOptions();
         }
     }
     

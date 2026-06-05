@@ -2,10 +2,6 @@
 
 public class ResearcherEmails
 {
-    public ResearcherEmails()
-    {
-    }
-    
     private static List<Dictionary<string, string>> ResearcherEmailOptions = new List<Dictionary<string, string>>
     {
 
@@ -15,7 +11,7 @@ public class ResearcherEmails
 
     };
 
-    public static List<Dictionary<string, string>> getResearcherEmailOptions()
+    public static List<Dictionary<string, string>> GetResearcherEmailOptions()
     {
         return ResearcherEmailOptions;
     }
