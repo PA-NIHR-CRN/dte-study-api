@@ -2,6 +2,7 @@
 @using Microsoft.Extensions.Options
 
 @{
+    VsiEditContext context = ViewBag.Context;
     Layout = "_VsiEditLayout";
 }
 
@@ -33,3 +34,9 @@
     on the RMS.</p>
 
 <p>Click on ‘Find volunteers’, and enter the criteria to start</p>
+
+<div class="govuk-!-margin-top-5">
+    <a class="govuk-button" asp-controller="Study" asp-action="Details" asp-route-id="@context.StudyId">
+        Return to Study Details
+    </a>
+</div>

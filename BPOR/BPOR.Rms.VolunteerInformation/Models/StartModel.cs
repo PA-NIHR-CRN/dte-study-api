@@ -1,6 +1,10 @@
-﻿namespace BPOR.Rms.VolunteerInformation.Models;
+﻿using BPOR.Rms.Abstractions.Enums;
+
+namespace BPOR.Rms.VolunteerInformation.Models;
 
 public class StartModel
 {
-    public long VolunteerStudyInformationPageId { get; set; }
+    public int StudyId { get; set; }
+    public VsiStatus? Status  { get; set; }
 }
+

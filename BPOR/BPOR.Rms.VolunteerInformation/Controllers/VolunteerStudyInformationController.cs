@@ -48,9 +48,11 @@ public class VolunteerStudyInformationController : VsiControllerBase
 
     [HttpGet]
     [DoNotRequireVsi]
-    public IActionResult Start()
+    public async Task<IActionResult> Start(int studyId, CancellationToken cancellationToken)
     {
-        return View();
+        var currentVsi = (await VsiRepository.GetCurrentVsi(studyId, cancellationToken));
+
+        return View(new StartModel{Status = currentVsi?.Status, StudyId = studyId});
     }
 
     [HttpPost]

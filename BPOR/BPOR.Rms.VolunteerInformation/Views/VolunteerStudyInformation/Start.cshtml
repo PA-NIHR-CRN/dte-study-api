@@ -1,23 +1,50 @@
-﻿@using BPOR.Rms.VolunteerInformation.Settings
-@using Microsoft.Extensions.Options
+﻿@using BPOR.Rms.Abstractions.Enums
 
+@model StartModel
 @inject IOptions<VsiSettings> Options;
 
-<h1>Volunteer study information page creation</h1>
-<h3>Overview</h3>
-<p>
-    After collaborating with the researcher and finalising the content of the <a href="@Options.Value.GoogleDocUri">‘volunteer study information’</a> form, you
-    will need to fill out this form.
-</p>
-<p>
-    This form has the same questions in the same order as the volunteer study information form. Make sure you have it 
-    open, as you will need to copy-paste most of the information.
-</p>
-<p>
-    Not all fields are required, you can skip those that are not applicable to the study you’re filling the form for.
-</p>
-<div>
-    <form method="post">
-        <button class="govuk-button" data_module="govuk-button" type="submit">Start</button>
-    </form>
-</div>
+@if (Model.Status == VsiStatus.Active)
+{
+    <div class="govuk-error-summary" data-module="govuk-error-summary">
+        <div role="alert">
+            <h2 class="govuk-error-summary__title">
+                There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+                <p>A Volunteer Study Information Page has already been created for this study. </p>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <h1>Volunteer study information page creation</h1>
+    <h3>Overview</h3>
+    <p>
+        After collaborating with the researcher and finalising the content of the <a href="@Options.Value.GoogleDocUri">‘volunteer study information’</a> form, you
+        will need to fill out this form.
+    </p>
+    <p>
+        This form has the same questions in the same order as the volunteer study information form. Make sure you have it
+        open, as you will need to copy-paste most of the information.
+    </p>
+    <p>
+        Not all fields are required, you can skip those that are not applicable to the study you’re filling the form for.
+    </p>
+    @if (Model.Status == null)
+    {
+        <div>
+            <form method="post">
+                <button class="govuk-button" data_module="govuk-button" type="submit">Start</button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div>
+            <form method="post" asp-action="Resume" asp-route-studyId="@Model.StudyId">
+                <button class="govuk-button" data_module="govuk-button" type="submit">Resume</button>
+            </form>
+        </div>
+    }
+}
