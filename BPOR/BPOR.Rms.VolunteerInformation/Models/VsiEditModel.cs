@@ -12,7 +12,7 @@ public class VsiEditModel
     public VsiStudyTypeId? StudyType { get; set; }
     
     [Display(Name = "What will you do?", Description = "A brief explanation about what the volunteer is expected to do immediately after recruitment.")]
-    public string? WhatWillYouDo { get; set; }
+    public string? WhatYouWillDo { get; set; }
     
     [Display(Name = "Will volunteers be reimbursed for travel and inconvenience costs?")]
     public bool? CostReimbursement { get; set; }
@@ -30,7 +30,10 @@ public class VsiEditModel
     public string? OtherDetails  { get; set; }
     [Display(Name = "Link to external website:", Description = "Copy and paste the link here")]
     public string? ExternalWebsiteUrl { get; set; }
+    [Display(Name = "Information to register by email", 
+        Description = "If you want the volunteer to email you to register their interest, what information should they provide in the email?\n")]
     public string? InfoToRegisterByEmail { get; set; }
+    [Display(Name = "Link to the pre-screener:", Description = "Copy and paste the link here")]
     public string? StagedPreScreenerUrl { get; set; }
 
     [Display(Name = "Research location")]

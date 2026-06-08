@@ -60,6 +60,24 @@ namespace BPOR.Rms.VolunteerInformation {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exclude.
+        /// </summary>
+        internal static string CriteriaType_Exclude {
+            get {
+                return ResourceManager.GetString("CriteriaType_Exclude", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Include.
+        /// </summary>
+        internal static string CriteriaType_Include {
+            get {
+                return ResourceManager.GetString("CriteriaType_Include", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Section 1: Overview.
         /// </summary>
         internal static string Section1Name {

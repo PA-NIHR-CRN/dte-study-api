@@ -29,9 +29,9 @@ public class VolunteerStudyInformation : ISoftDelete, IAudit
     public int CreatedById { get; set; }
     public int UpdatedById { get; set; } 
     
-    public ICollection<VolunteerStudyInformationContact> Contacts { get; } = new List<VolunteerStudyInformationContact>();
-    public ICollection<VolunteerStudyInformationGroup> Groups { get; } = new List<VolunteerStudyInformationGroup>();
-    public ICollection<VolunteerStudyInformationSite> Sites { get; } = new List<VolunteerStudyInformationSite>();
+    public ICollection<VolunteerStudyInformationContact> Contacts { get; set; } = new List<VolunteerStudyInformationContact>();
+    public ICollection<VolunteerStudyInformationGroup> Groups { get; set; } = new List<VolunteerStudyInformationGroup>();
+    public ICollection<VolunteerStudyInformationSite> Sites { get; set; } = new List<VolunteerStudyInformationSite>();
 
     public Study Study { get; set; }
 

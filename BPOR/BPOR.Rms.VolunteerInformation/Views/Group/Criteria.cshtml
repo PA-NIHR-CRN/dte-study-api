@@ -1,0 +1,41 @@
+﻿@using BPOR.Domain.Enums
+@using BPOR.Rms.VolunteerInformation.Utility
+@model BPOR.Rms.VolunteerInformation.Models.CriteriaListModel
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    context.SectionName = BPOR.Rms.VolunteerInformation.Resources.Section1Name;
+}
+<h1>Add @Model.Type.GetNoun() criteria</h1>
+<p>You have added the following criteria for @Model.VsiGroup.Name:</p>
+
+<table class="govuk-table">
+    <tbody class="govuk-table__body">
+    @foreach (var criterion in Model.VsiGroup.Criteria)
+    {
+        <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header">@criterion.Criteria</th>
+            <td class="govuk-table__cell">
+                <form asp-action="RemoveCriteria" asp-route-studyId="@context.Vsi.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
+                      asp-route-criteriaId="@criterion.Id" asp-route-type="@Model.Type">
+                    <button class="govuk-link" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr> 
+    }
+    </tbody>
+</table>
+
+<a asp-action="CreateCriterion" asp-route-studyid="@context.Vsi.StudyId" asp-route-groupid="@Model.VsiGroup.Id" 
+   asp-route-type="@Model.Type">Add more criteria</a>
+
+@if (Model.Type == VolunteerStudyInformationGroupCriteriaTypeId.Include)
+{
+    <a asp-action="QueryAddExclusionCriteria" asp-route-studyid="@context.Vsi.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
+       class="govuk-button" data-module="govuk-button">Continue</a>
+}
+else
+{
+    <a asp-action="Section1_Step4" asp-controller="VolunteerStudyInformation" asp-route-studyid="@context.Vsi.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
+       class="govuk-button" data-module="govuk-button">Continue</a>
+}

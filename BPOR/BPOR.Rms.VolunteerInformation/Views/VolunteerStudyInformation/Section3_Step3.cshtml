@@ -2,44 +2,34 @@
 
 @{
     VsiEditContext context = ViewBag.Context;
+    context.SectionName = Resources.Section3Name;
+    ViewData.SetBackLinkOverride( Url.Action("Section3_Step2", new { id = context.Vsi.StudyId }));
     Layout = "_VsiEditLayout";
 }
 
-@if (Model.Contacts.Any())
-{
-    <p>You have selected the following location(s)</p>
+<h1>Contact Details</h1>
+<p>Email and/or telephone numbers for volunteers to contact researchers or members of the study team</p>
+<table class="govuk-table">
+    <tbody class="govuk-table__body">
     @foreach (var contact in Model.Contacts)
     {
-        <div>
-            <div>
-                <h4>Name:</h4>
-                <p>@contact.Name</p>
-                <h4>Role:</h4>
-                <p>@contact.Role</p>
-                <h4>Organisation:</h4>
-                <p>@contact.Organisation</p>
-                <h4>Email:</h4>
-                <p>@contact.Email</p>
-                <h4>Phone Number:</h4>
-                <p>@contact.PhoneNumber</p>
-            </div>
-            <div>
-                <form method="post" asp-action="RemoveContact" asp-route-studyId="@context.Vsi.StudyId" asp-route-siteId="@contact.Id">
-                    <button type="submit">Remove</button>
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">
+                <partial name="_ContactCard" model="contact"/>
+            </td>
+            <td class="govuk-table__cell">
+                <form method="post" asp-action="RemoveContact" asp-route-studyId="@context.Vsi.StudyId" asp-route-contactid="@contact.Id">
+                    <button class="govuk-link" type="submit">Delete</button>
                 </form>
-            </div>
-        </div>
+            </td>
+        </tr>
     }
-    
-    <a asp-action="CreateContact" asp-route-studyId="@context.Vsi.StudyId">Add another contact</a>
+    </tbody>
+</table>
+
+<div class="govuk-!-margin-4">
+    <a class="govuk-link" asp-action="CreateContact" asp-route-studyId="@context.Vsi.StudyId">Add another contact</a>
+</div>
+<div>
     <a asp-action="Section3_Step4" class="govuk-button" asp-route-studyId="@context.Vsi.StudyId">Continue</a>
-}
-else
-{
-    <form method="get" asp-action="SiteSearch" asp-route-studyId="@context.Vsi.StudyId">
-        <partial name="Shared/_ContactEditor" model="@(new VsiContactModel())"/>
-        <button type="submit" class="govuk-button">Submit</button>
-    </form>
-    
-    <a asp-action="Section3_Step4" asp-route-studyId="@context.Vsi.StudyId">Skip</a>
-}
+</div>

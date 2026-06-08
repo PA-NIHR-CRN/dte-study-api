@@ -54,6 +54,8 @@ public static class DependencyInjection
             });
         });
 
+        services.AddMemoryCache();
+
         services.Configure<VolunteerFilterServiceOptions>(configuration.GetSection("VolunteerFilterService"));
 
         services.AddScoped<IVolunteerFilterService, VolunteerFilterService>();

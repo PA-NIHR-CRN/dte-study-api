@@ -17,8 +17,11 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
 
         public bool IncludeChildErrors { get; set; }
 
+        public string? Description { get; set; } = null;
         public string? Label { get; set; } = null;
         public string LabelLevel { get; set; } = "h3";
+        
+        public string? LabelClass { get; set; }
 
         private readonly IHtmlGenerator _generator;
 
@@ -42,7 +45,7 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
             output.TagName = "div";
             output.AddClass("govuk-form-group", HtmlEncoder.Default);
 
-            var label = _generator.GenerateLabel(ViewContext, For.ModelExplorer, For.Name, Label, new { @class = "govuk-label govuk-label--l" });
+            var label = _generator.GenerateLabel(ViewContext, For.ModelExplorer, For.Name, Label, new { @class = LabelClass ?? "govuk-label govuk-label--l" });
 
 
             var modelName = label.Attributes["for"]?.Replace('_', '.') ?? string.Empty;
@@ -69,13 +72,14 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
 
             output.PreContent.AppendHtml(labelWrapper);
 
-            if (!string.IsNullOrEmpty(For.Metadata.Description))
+            var resolvedDescription = Description ?? For.Metadata.Description;
+            if (!string.IsNullOrEmpty(resolvedDescription))
             {
                 var hintBuilder = new TagBuilder("div");
                 hintBuilder.AddCssClass("govuk-hint");
                 hintBuilder.GenerateId($"{For.Name}-hint", "-");
 
-                hintBuilder.InnerHtml.AppendHtml(For.Metadata.Description);
+                hintBuilder.InnerHtml.AppendHtml(resolvedDescription);
 
                 output.PreContent.AppendHtml(hintBuilder);
             }

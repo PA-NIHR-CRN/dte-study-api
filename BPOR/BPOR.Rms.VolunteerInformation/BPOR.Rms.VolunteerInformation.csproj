@@ -24,7 +24,6 @@
       <AdditionalFiles Include="Views\VolunteerStudyInformation\Section1_Step3.cshtml" />
       <AdditionalFiles Include="Views\VolunteerStudyInformation\Section2_Step1.cshtml" />
       <AdditionalFiles Include="Views\VolunteerStudyInformation\Start.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\_VsiEditLayout.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -40,6 +39,10 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>Resources.resx</DependentUpon>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Views\VolunteerStudyInformation\Shared\_ContactEditor.cshtml" />
     </ItemGroup>
 
 </Project>

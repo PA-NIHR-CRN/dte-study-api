@@ -1,8 +1,14 @@
-﻿@{
+﻿@model VsiContactModel
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    context.SectionName = Resources.Section3Name;
+    context.SkipUrl = Url.Action("Section3_Step4", new { context.StudyId });
     Layout = "_VsiEditLayoutForm";
 }
 
-<form method="post">
-    <partial name="Shared/_ContactEditor" model="@(new VsiContactModel())"/>
-    <button type="submit" class="govuk-button">Submit</button>
-</form>
+<h1>Contact details:</h1>
+
+<p>Email and/or telephone numbers for volunteers to contact researchers or members of the study team</p>
+
+<partial name="_ContactEditor"/>

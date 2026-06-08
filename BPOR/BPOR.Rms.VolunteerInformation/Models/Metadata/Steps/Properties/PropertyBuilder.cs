@@ -20,9 +20,3 @@ public abstract class PropertyBuilder<T, TProp> : IPropertyBuilder<T>
 
     public IProperty<T> Build() => Build(_options);
 }
-
-public class PropertyOptions<T, TProp>
-{
-    public string Caption { get; set; }
-    public Expression<Func<T, TProp>> PropExpr { get; set; }
-}

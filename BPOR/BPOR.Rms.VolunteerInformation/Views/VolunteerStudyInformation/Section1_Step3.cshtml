@@ -2,42 +2,57 @@
 
 @{
     VsiEditContext context = ViewBag.Context;
+    context.SectionName = Resources.Section1Name;
+    ViewData.SetBackLinkOverride(Url.Action("Section1_Step2", new{ context.Vsi.StudyId }));
     Layout = "_VsiEditLayout";
 }
 
 @if (Model.Sites.Any())
 {
     <p>You have selected the following location(s)</p>
-    @foreach (var site in Model.Sites)
-    {
-        <div>
-            <div>
-                <p>@site.AddressLine1</p>
-                <p>@site.AddressLine2</p>
-                <p>@site.AddressLine3</p>
-                <p>@site.AddressLine4</p>
-                <p>@site.AddressLine5</p>
-                <p>@site.Postcode</p>
-            </div>
-            <div>
-                <form method="post" asp-action="RemoveSite" asp-route-studyId="@context.Vsi.StudyId" asp-route-siteId="@site.Id">
-                    <button type="submit">Remove</button>
-                </form>
-            </div>
-        </div>
-    }
-    
-    <a asp-action="SiteSearch" asp-route-studyId="@context.Vsi.StudyId">Add another research location</a>
-    <a asp-action="Section1_Step4" asp-route-studyId="@context.Vsi.StudyId">Continue</a>
+    <table class="govuk-table">
+        <tbody class="govuk-table__body">
+        @foreach (var site in Model.Sites)
+        {
+            <tr class="govuk-table__row">
+                <td class="govuk-table__cell">
+                    <p class="govuk-body govuk-!-margin-0">@site.AddressLine1</p>
+                    <p class="govuk-body govuk-!-margin-0">@site.AddressLine2</p>
+                    <p class="govuk-body govuk-!-margin-0">@site.AddressLine3</p>
+                    <p class="govuk-body govuk-!-margin-0">@site.AddressLine4</p>
+                    <p class="govuk-body govuk-!-margin-0">@site.AddressLine5</p>
+                    <p class="govuk-body govuk-!-margin-0">@site.Postcode</p>
+                </td>
+                <td class="govuk-table__cell">
+                    <form method="post" asp-action="RemoveSite" asp-route-studyId="@context.Vsi.StudyId"
+                          asp-route-siteId="@site.Id">
+                        <button class="govuk-link" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <div>
+        <a class="govuk-link" asp-action="SiteSearch" asp-route-studyId="@context.Vsi.StudyId">Add another research
+            location</a>
+    </div>
+    <div class="govuk-!-margin-top-3">
+        <a class="govuk-button" asp-action="Section1_Step4" asp-route-studyId="@context.Vsi.StudyId">Continue</a>
+    </div>
 }
 else
 {
     <form method="get" asp-action="SiteSearch" asp-route-studyId="@context.Vsi.StudyId">
-        <form-group label="Enter a postcode to select one or multiple research locations">
+        <form-group for="Sites"
+                    label-class="govuk-heading-xl"
+                    description="Enter a postcode to select one or multiple research locations">
             <input class="govuk-input" name="searchTerm" type="text">
         </form-group>
-        <button type="submit">Search postcode</button>
+        <button class="govuk-button" type="submit">Search postcode</button>
     </form>
-    
-    <a asp-action="ManualSiteEntry" asp-route-studyId="@context.Vsi.StudyId">Add address manually</a>
+
+    <div class="govuk-!-margin-top-3">
+        <a asp-action="ManualSiteEntry" asp-route-studyId="@context.Vsi.StudyId">Add address manually</a>
+    </div>
 }

@@ -1,10 +1,12 @@
 ﻿@model VsiEditModel
 
 @{
-    Layout = "_VsiEditLayout";
+    VsiEditContext context = ViewBag.Context;
+    context.SectionName = Resources.Section2Name;
+    Layout = "_VsiEditLayoutForm";
 }
 
-<form-group for="HasIncentive">
+<form-group for="HasIncentive" label-class="govuk-heading-xl">
     <radio-set for="HasIncentive">
         <radio value="@true">Yes</radio>
         <radio value="@false">No</radio>

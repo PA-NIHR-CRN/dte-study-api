@@ -12,9 +12,6 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
         [ViewContext]
         public ViewContext ViewContext { get; set; } = null!;
         
-        [HtmlAttributeName("href")]
-        public string? Href { get; set; }
-
         public override int Order => 100;
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
@@ -22,7 +19,7 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
             var referer = ViewContext.HttpContext.Request.Headers.Referer.FirstOrDefault();
             var showBackLink = ViewContext.ViewData.IsBackLinkEnabled();
 
-            var url = Href ?? referer;
+            var url = ViewContext.ViewData.GetBackLinkOverride() ?? referer;
             
             if (ViewContext.ViewData["_BackLinkForm"] is not null)
             {
@@ -45,7 +42,7 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
 
                 output.AddClass("govuk-back-link", HtmlEncoder.Default);
                 output.AddClass("govuk-link", HtmlEncoder.Default);
-                output.Attributes.SetAttribute("url", referer);
+                output.Attributes.SetAttribute("href", url);
 
                 output.Content.SetContent("Back");
             }

@@ -10,7 +10,9 @@ public static class DiExtensions
 {
     public static void AddVolunteerInformation(this IServiceCollection services)
     {
-        services.AddScoped<VsiRepository>();
+        services.AddOptions<LocalVsiFileRepositoryOptions>().Configure(i => i.Path = "c:\\temp");
+        services.AddScoped<IVsiRepository, LocalVsiFileRepository>();
+        services.AddScoped<IStudyRepository, TestStudyRepository>();
         services.AddOptions<VsiSettings>().BindConfiguration("Vsi");
     }
 }

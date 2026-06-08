@@ -8,5 +8,5 @@ public class VolunteerStudyInformationGroup
 
     public VolunteerStudyInformation VolunteerStudyInformation { get; set; }
     
-    public ICollection<VolunteerStudyInformationGroupCriteria> Criteria { get; } = new List<VolunteerStudyInformationGroupCriteria>();
+    public ICollection<VolunteerStudyInformationGroupCriteria> Criteria { get; set; } = new List<VolunteerStudyInformationGroupCriteria>();
 }

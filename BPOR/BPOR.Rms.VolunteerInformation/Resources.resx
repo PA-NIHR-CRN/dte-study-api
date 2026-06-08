@@ -27,4 +27,10 @@
     <data name="Section2Name" xml:space="preserve">
         <value>Section 2: What does the study involve?</value>
     </data>
+    <data name="CriteriaType_Include" xml:space="preserve">
+        <value>Include</value>
+    </data>
+    <data name="CriteriaType_Exclude" xml:space="preserve">
+        <value>Exclude</value>
+    </data>
 </root>

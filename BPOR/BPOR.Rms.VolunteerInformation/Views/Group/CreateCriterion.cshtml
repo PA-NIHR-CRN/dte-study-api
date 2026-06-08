@@ -1,0 +1,21 @@
+﻿@using BPOR.Domain.Enums
+@model CreateCriterionModel
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    context.SectionName = Resources.Section1Name;
+    Layout = "_VsiEditLayout";
+}
+
+<h1>Add @(Model.Type switch {
+    VolunteerStudyInformationGroupCriteriaTypeId.Include => "inclusion",
+    VolunteerStudyInformationGroupCriteriaTypeId.Exclude => "exclusion",
+    _ => throw new ArgumentOutOfRangeException()
+        }) criteria</h1>
+
+<p>For <b>@Model.GroupName</b>, enter one criterion, click "Submit", and then add more.</p>
+
+<form method="post">
+    <input class="govuk-input" asp-for="Criterion" type="text"></input>
+    <button class="govuk-button" type="submit">Submit</button>
+</form>

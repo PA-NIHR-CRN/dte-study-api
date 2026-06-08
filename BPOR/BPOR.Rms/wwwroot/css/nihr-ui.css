@@ -375,3 +375,10 @@ button.govuk-back-link {
 .govuk-button.govuk-input__suffix {
     border-radius: 0px 4.2px 4.2px 0px !important;
 }
+
+button.govuk-link{
+    background: none !important;
+    border: none;
+    font-size: unset;
+    padding: 0;
+}

@@ -9,9 +9,9 @@
 <h1>Check the details you've provided</h1>
 <h2>Study Overview</h2>
 <dl class="govuk-summary-list">
-    <gov-uk-summary-list-item for="Description"><a class="govuk-link" asp-action="Section1_Step1">Change</a>
+    <gov-uk-summary-list-item for="Description"><a class="govuk-link" asp-action="Section1_Step1" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    <gov-uk-summary-list-item for="StudyType"><a class="govuk-link" asp-action="Section1_Step1">Change</a>
+    <gov-uk-summary-list-item for="StudyType"><a class="govuk-link" asp-action="Section1_Step1" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
 </dl>
 
@@ -30,7 +30,7 @@
             </ul>
         </dd>
         <dd class="govuk-summary-list__actions">
-            <a class="govuk-link" asp-action="GroupOverview">Change</a>
+            <a class="govuk-link" asp-action="Section1_Step4" asp-route-studyId="@context.StudyId">Change</a>
         </dd>
     </div>
     @foreach (var group in Model.Groups)
@@ -48,8 +48,8 @@
                 </ul>
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" asp-action="InclusionCriteria" asp-route-studyId="@context.Vsi.StudyId"
-                   asp-route-id="@group.Id">Change</a>
+                <a class="govuk-link" asp-action="Criteria" asp-controller="Group" asp-route-studyId="@context.StudyId"
+                   asp-route-groupid="@group.Id" asp-route-type="Include">Change</a>
             </dd>
         </div>
         <div class="govuk-summary-list__row">
@@ -65,8 +65,8 @@
                 </ul>
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" asp-action="ExclusionCriteria" asp-route-studyId="@context.Vsi.StudyId"
-                   asp-route-id="@group.Id">Change</a>
+                <a class="govuk-link" asp-action="Criteria" asp-controller="Group" asp-route-studyId="@context.StudyId"
+                   asp-route-groupid="@group.Id" asp-route-type="Exclude">Change</a>
             </dd>
         </div>
     }
@@ -74,31 +74,49 @@
 
 <h2>What does the study involve?</h2>
 <dl class="govuk-summary-list">
-    <gov-uk-summary-list-item for="WhatWillYouDo"><a class="govuk-link" asp-action="Section2_Step1">Change</a>
+    <gov-uk-summary-list-item for="WhatYouWillDo"><a class="govuk-link" asp-action="Section2_Step1" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    <gov-uk-summary-list-item for="CostReimbursement"><a class="govuk-link" asp-action="Section2_Step2">Change</a>
+    <gov-uk-summary-list-item for="CostReimbursement"><a class="govuk-link" asp-action="Section2_Step2" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    <gov-uk-summary-list-item for="HasIncentive"><a class="govuk-link" asp-action="Section2_Step3">Change</a>
+    <gov-uk-summary-list-item for="HasIncentive"><a class="govuk-link" asp-action="Section2_Step3" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    <gov-uk-summary-list-item for="IncentiveDetails"><a class="govuk-link" asp-action="Section2_Step3">Change</a>
+    <gov-uk-summary-list-item for="IncentiveDetails"><a class="govuk-link" asp-action="Section2_Step3" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    <gov-uk-summary-list-item for="NumberOfVisits"><a class="govuk-link" asp-action="Section2_Step4">Change</a>
+    <gov-uk-summary-list-item for="NumberOfVisits"><a class="govuk-link" asp-action="Section2_Step4" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    <gov-uk-summary-list-item for="StudyDuration"><a class="govuk-link" asp-action="Section2_Step5">Change</a>
+    <gov-uk-summary-list-item for="StudyDuration"><a class="govuk-link" asp-action="Section2_Step5" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    <gov-uk-summary-list-item for="StudyFormat"><a class="govuk-link" asp-action="Section2_Step6">Change</a>
+    <gov-uk-summary-list-item for="StudyFormat"><a class="govuk-link" asp-action="Section2_Step6" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    <gov-uk-summary-list-item for="OtherDetails"><a class="govuk-link" asp-action="Section2_Step7">Change</a>
+    <gov-uk-summary-list-item for="OtherDetails"><a class="govuk-link" asp-action="Section2_Step7" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
 </dl>
 
 <h2>Taking part in this study</h2>
 <dl class="govuk-summary-list">
-    <gov-uk-summary-list-item for="StagedPreScreenerUrl"><a class="govuk-link" asp-action="Section3_Step1">Change</a>
+    <gov-uk-summary-list-item for="StagedPreScreenerUrl"><a class="govuk-link" asp-action="Section3_Step1" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    <gov-uk-summary-list-item for="ExternalWebsiteUrl"><a class="govuk-link" asp-action="Section3_Step2">Change</a>
+    <gov-uk-summary-list-item for="ExternalWebsiteUrl"><a class="govuk-link" asp-action="Section3_Step2" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    <gov-uk-summary-list-item for="InfoToRegisterByEmail"><a class="govuk-link" asp-action="Section3_Step4">Change</a>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            Contact details
+        </dt>
+        <dd class="govuk-summary-list__value">
+            <ul>
+                @foreach (var contact in Model.Contacts)
+                {
+                    <li>
+                        <partial name="_ContactCard" model="contact"/>
+                    </li>
+                }
+            </ul>
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <a class="govuk-link" asp-action="Section3_Step3" asp-route-studyId="@context.StudyId">Change</a>
+        </dd>
+    </div>
+    <gov-uk-summary-list-item for="InfoToRegisterByEmail"><a class="govuk-link" asp-action="Section3_Step4" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
 </dl>
 
