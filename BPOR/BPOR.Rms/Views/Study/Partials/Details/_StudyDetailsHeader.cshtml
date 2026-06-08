@@ -5,34 +5,14 @@
 @inject ICurrentUserProvider<User> CurrentUserProvider
 
 <div class="govuk-grid-row">
-    @if (CurrentUserProvider.IsAdmin())
-    {
-        if (Model.Study.IsEligibilityCriteriaComplete)
-        {
-            <div class="govuk-!-margin-bottom-5 govuk-!-margin-left-2">
-                @if (Model.Study.IsEligibleForPrescreener)
-                {
-                    <govuk-tag colour="Purple">Pre-Screener Eligible</govuk-tag>
-                }
-                else
-                {
-                    <govuk-tag colour="Red">Pre-Screener Ineligible</govuk-tag>
-                }
-            </div>
-        }
-        
-        <a asp-controller="VolunteerStudyInformation" asp-action="Start" asp-route-studyId="@Model.Study.Id">Create volunteer study information page</a>
-    }
+    <partial name="Partials/Details/_PreScreenerEligibility" model="Model.PreScreenerViewModel" />
+    
     <div class="govuk-grid-column-one-half">
         <h1 class="govuk-heading-l">
             @Html.DisplayFor(model => model.Study.StudyName)
         </h1>
     </div>
-    <role exclude="Researcher">
-        <div class="govuk-grid-column-one-half right-align-buttons-desktop">
-            <div class="govuk-button-group govuk-!-margin-bottom-0">
-                @Html.ActionLink("Find volunteers", "Index", "Filter", new { studyId = Model.Study.Id }, new { @class = "govuk-button", data_module = "govuk-button" })
-            </div>
-        </div>
-    </role>
+    
 </div>
+
+<partial name="Partials/Details/_StudyDetailsActionMenu" />

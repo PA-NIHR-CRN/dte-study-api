@@ -42,6 +42,7 @@ public class Study : ISoftDelete, IAudit
     public ICollection<FilterCriteria> FilterCriterias { get; set; }  = new List<FilterCriteria>();
     public ICollection<StudyResearcher> StudyResearchers { get; set; } = new List<StudyResearcher>();
     public ICollection<VolunteerStudyInformation> VolunteerStudyInformation { get; } = new List<VolunteerStudyInformation>();
+    public ICollection<StudyResearcherEmail>  StudyResearcherEmails { get; } = new List<StudyResearcherEmail>(); 
 
     public bool? HasMultipleResearchLocations { get; set; }
     public bool? SinglePersonResponsibleForRecruiting { get; set; }

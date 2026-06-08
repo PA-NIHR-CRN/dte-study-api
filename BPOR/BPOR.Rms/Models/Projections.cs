@@ -158,7 +158,17 @@ public static class Projections
                         })
                         .ToList(),
                 }),
-            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any()),
+            ResearcherEmails = s.StudyResearcherEmails
+                .Select(re => new Study.ResearcherEmail
+                {
+                    ResearcherEmailAddress = re.StudyResearcherEmailAddress,
+                    EmailTemplate = re.StudyResearcherEmailOption.Description,
+                    SentAt = re.CreatedAt,
+                    DeliveryStatusId = re.DeliveryStatus.Id
+                })
+                .OrderByDescending(re => re.SentAt)
+                .ToList()
         };
     }
 

@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.AspNetCore.Validation;
 using NIHR.Infrastructure.Paging;
+using UserRole = BPOR.Domain.Enums.UserRole;
 
 namespace BPOR.Rms.Controllers;
 
@@ -82,6 +83,51 @@ public class StudyController(
         {
             logger.LogWarning("[HttpGet]Details called with non-existent study: {StudyId}", id);
             return NotFound();
+        }
+        
+        var isAdmin = currentUserProvider.User.HasRole(UserRole.Admin);
+        var isResearcher = currentUserProvider.User.HasRole(UserRole.Researcher);
+        var isIdentifiable = study.Study.IsRecruitingIdentifiableParticipants;
+        var updateRecruitmentAction = isIdentifiable ? "UpdateRecruited" : "UpdateAnonymousRecruited";
+        var updateRecruitmentButtonText = isIdentifiable ? "Add enrolments" : "Update recruitment total";
+
+        var canUpdateRecruitmentTotal = isIdentifiable
+            ? study.HasCampaigns
+            : isAdmin || (study.HasCampaigns && isResearcher);
+
+        study.ActionLinks =
+        [
+            new StudyDetailsViewModel.ActionLink
+            {
+                Text = "Create volunteer study information page",
+                Url = Url.Action("CreateVolunteerStudyInformationPage", "Study")
+            }
+        ];
+
+        if (canUpdateRecruitmentTotal)
+        {
+            study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+            {
+                Text = updateRecruitmentButtonText,
+                Url = Url.Action(updateRecruitmentAction, "Volunteer", new { studyId = id })
+            });
+        }
+
+        if (isAdmin)
+        {
+            study.ActionLinks.AddRange(
+            [
+                new StudyDetailsViewModel.ActionLink
+                {
+                    Text = "Find volunteers",
+                    Url = Url.Action("Index", "Filter", new { studyId = id })
+                },
+                new StudyDetailsViewModel.ActionLink
+                {
+                    Text = "Send an email",
+                    Url = Url.Action("Index", "ResearcherEmail", new { studyId = id })
+                }
+            ]);
         }
 
         return View(study);

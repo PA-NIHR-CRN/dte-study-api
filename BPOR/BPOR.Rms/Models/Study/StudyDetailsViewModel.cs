@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Enums;
+using BPOR.Rms.Models.PreScreenerEligibility;
 using BPOR.Rms.Models.Volunteer;
 
 namespace BPOR.Rms.Models.Study;
@@ -18,6 +19,25 @@ public class StudyDetailsViewModel
     public IEnumerable<Campaign> Campaigns { get; set; }
     public int TotalNotificationsSent => Campaigns.Sum(e => e.TotalCampaignNotificationsSent);
     public int TotalRegisteredInterest => Campaigns.Sum(e => e.TotalCampaignRegisteredInterest);
+    public IEnumerable<ResearcherEmail> ResearcherEmails { get; set; }
+    public List<ActionLink> ActionLinks { get; set; } = [];
+    public class ActionLink
+    {
+        public string Text { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
+    }
+
+    public PreScreenerEligibilityViewModel PreScreenerViewModel
+    {
+        get
+        {
+            return new PreScreenerEligibilityViewModel
+            {
+                IsEligibilityCriteriaComplete = Study.IsEligibilityCriteriaComplete,
+                IsEligibleForPrescreener = Study.IsEligibleForPrescreener
+            };
+        }
+    }
 }
 
 public class Campaign
@@ -40,5 +60,13 @@ public class CampaignParticipant
     public DateTime? SentAt { get; set; }
     public DateTime? DeliveredAt { get; set; }
     public DateTime? RegisteredInterestAt { get; set; }
+    public int? DeliveryStatusId { get; set; }
+}
+
+public class ResearcherEmail
+{
+    public string ResearcherEmailAddress { get; set; }
+    public string? EmailTemplate { get; set; }
+    public DateTime SentAt { get; set; }
     public int? DeliveryStatusId { get; set; }
 }
