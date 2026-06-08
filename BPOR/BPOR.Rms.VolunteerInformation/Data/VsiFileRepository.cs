@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using BPOR.Domain.Entities;
-using BPOR.Domain.Enums;
+using BPOR.Rms.Abstractions.Entities;
+using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Utility;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -15,7 +15,7 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
     protected abstract Task<Stream?> OpenReadStream(long studyId, CancellationToken cancellationToken);
     protected abstract Task<Stream> OpenWriteStream(long studyId, CancellationToken cancellationToken);
 
-    private async Task<VolunteerStudyInformation?> Load(long studyId, CancellationToken cancellationToken)
+    private async Task<VsiPage?> Load(long studyId, CancellationToken cancellationToken)
     {
         return await cache.GetOrCreateAsync(new CacheKey(studyId), async cacheEntry =>
         {
@@ -23,19 +23,15 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
             await using var stream = await OpenReadStream(studyId, cancellationToken);
             cacheEntry.AbsoluteExpirationRelativeToNow = _cacheTtl;
             var jsonSerializerOptions = new JsonSerializerOptions();
-            jsonSerializerOptions.Converters.Add(new ListICollectionConverter<VolunteerStudyInformationContact>());
-            jsonSerializerOptions.Converters.Add(new ListICollectionConverter<VolunteerStudyInformationGroup>());
-            jsonSerializerOptions.Converters.Add(new ListICollectionConverter<VolunteerStudyInformationGroupCriteria>());
-            jsonSerializerOptions.Converters.Add(new ListICollectionConverter<VolunteerStudyInformationSite>());
             var result = stream == null
                 ? null
-                : await JsonSerializer.DeserializeAsync<VolunteerStudyInformation>(stream, jsonSerializerOptions,
+                : await JsonSerializer.DeserializeAsync<VsiPage>(stream, jsonSerializerOptions,
                     cancellationToken: cancellationToken);
             return result;
         });
     }
 
-    private async Task Save(long studyId, VolunteerStudyInformation data, CancellationToken cancellationToken)
+    private async Task Save(long studyId, VsiPage data, CancellationToken cancellationToken)
     {
         await using var stream = await OpenWriteStream(studyId, cancellationToken);
         await JsonSerializer.SerializeAsync(stream, data, cancellationToken: cancellationToken);
@@ -49,12 +45,12 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
         throw new NotImplementedException();
     }
 
-    public Task<VolunteerStudyInformation?> GetCurrentVsi(int studyId, CancellationToken cancellationToken)
+    public Task<VsiPage?> GetCurrentVsi(int studyId, CancellationToken cancellationToken)
     {
         return Load(studyId, cancellationToken);
     }
 
-    public async Task<T?> GetCurrentVsi<T>(long studyId, Expression<Func<VolunteerStudyInformation, T>> selector,
+    public async Task<T?> GetCurrentVsi<T>(long studyId, Expression<Func<VsiPage, T>> selector,
         CancellationToken cancellationToken)
     {
         var vsi = await Load(studyId, cancellationToken);
@@ -62,7 +58,7 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
     }
 
     public async Task<T?> GetCurrentVsiGroup<T>(long studyId, long groupId,
-        Expression<Func<VolunteerStudyInformationGroup, T>> selector, CancellationToken cancellationToken)
+        Expression<Func<VsiGroup, T>> selector, CancellationToken cancellationToken)
     {
         var vsi = await Load(studyId, cancellationToken);
         var group = vsi?.Groups.SingleOrDefault(g => g.Id == groupId);
@@ -102,7 +98,7 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
     }
 
     public async Task<bool> CreateCriterion(int studyId, int groupId,
-        VolunteerStudyInformationGroupCriteria newCriteria, CancellationToken cancellationToken)
+        VsiGroupCriterion newCriteria, CancellationToken cancellationToken)
     {
         return await UpdateGroup(studyId, groupId, group =>
         {
@@ -111,7 +107,7 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
         }, cancellationToken);
     }
 
-    public async Task<bool> UpdateVsi(int studyId, Action<VolunteerStudyInformation> action,
+    public async Task<bool> UpdateVsi(int studyId, Action<VsiPage> action,
         CancellationToken cancellationToken)
     {
         return await UpdateVsi(
@@ -124,7 +120,7 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
             cancellationToken);
     }
 
-    public async Task<T?> UpdateVsi<T>(int studyId, Func<VolunteerStudyInformation, T> action,
+    public async Task<T?> UpdateVsi<T>(int studyId, Func<VsiPage, T> action,
         CancellationToken cancellationToken)
     {
         var vsi = await Load(studyId, cancellationToken);
@@ -155,7 +151,7 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
     {
         return (await UpdateVsi(studyId, vsi =>
         {
-            VolunteerStudyInformationGroup group = new()
+            VsiGroup group = new()
             {
                 Name = groupName,
                 Id = vsi.Groups.MaxOrDefault(i => i.Id) + 1
@@ -165,7 +161,7 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
         }, cancellationToken))?.Id;
     }
 
-    public async Task<int?> CreateSite(int studyId, VolunteerStudyInformationSite newSite,
+    public async Task<int?> CreateSite(int studyId, VsiSite newSite,
         CancellationToken cancellationToken)
     {
         return (await UpdateVsi(studyId, vsi =>
@@ -176,18 +172,16 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
         }, cancellationToken))?.Id;
     }
 
-    public async Task CreateVsi(int studyId, VolunteerStudyInformationStatusId status, CancellationToken cancellationToken)
+    public async Task CreateVsi(int studyId, VsiStatus status, CancellationToken cancellationToken)
     {
-        VolunteerStudyInformation vsi = new VolunteerStudyInformation()
+        VsiPage vsi = new VsiPage()
         {
-            StudyId = studyId,
-            Id = 0,
-            StatusId = status
+            Status = status
         };
         await Save(studyId, vsi, cancellationToken);
     }
 
-    public async Task<int?> CreateContact(int studyId, VolunteerStudyInformationContact newContact, CancellationToken cancellationToken)
+    public async Task<int?> CreateContact(int studyId, VsiContact newContact, CancellationToken cancellationToken)
     {
         return (await UpdateVsi(studyId, vsi =>
         {
@@ -209,7 +203,7 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
         return false;
     }
 
-    public async Task<bool> UpdateGroup(int studyId, int groupId, Action<VolunteerStudyInformationGroup> action,
+    public async Task<bool> UpdateGroup(int studyId, int groupId, Action<VsiGroup> action,
         CancellationToken cancellationToken)
     {
         var vsi = await Load(studyId, cancellationToken);

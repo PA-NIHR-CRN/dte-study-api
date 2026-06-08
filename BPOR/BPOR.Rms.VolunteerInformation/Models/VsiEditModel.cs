@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using BPOR.Domain.Enums;
+using BPOR.Rms.Abstractions.Enums;
 
 namespace BPOR.Rms.VolunteerInformation.Models;
 
@@ -9,7 +9,7 @@ public class VsiEditModel
     public string? Description { get; set; }
     
     [Display(Name = "Select the type of study")]
-    public VsiStudyTypeId? StudyType { get; set; }
+    public VsiStudyType? StudyType { get; set; }
     
     [Display(Name = "What will you do?", Description = "A brief explanation about what the volunteer is expected to do immediately after recruitment.")]
     public string? WhatYouWillDo { get; set; }

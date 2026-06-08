@@ -100,7 +100,7 @@ public class StudyController(
             new StudyDetailsViewModel.ActionLink
             {
                 Text = "Create volunteer study information page",
-                Url = Url.Action("CreateVolunteerStudyInformationPage", "Study")
+                Url = Url.Action("Start", "VolunteerStudyInformation", new {studyId = id })
             }
         ];
 

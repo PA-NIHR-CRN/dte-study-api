@@ -1,9 +1,8 @@
-﻿using BPOR.Domain.Enums;
 using BPOR.Rms.Abstractions.Enums;
 
-namespace BPOR.Rms.VolunteerInformation.Models;
+namespace BPOR.Rms.Abstractions.Entities;
 
-public class VsiGroupCriteriaModel
+public class VsiGroupCriterion
 {
     public int Id { get; set; }
     public string Description { get; set; }

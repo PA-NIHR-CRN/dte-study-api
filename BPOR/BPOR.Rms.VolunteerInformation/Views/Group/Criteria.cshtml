@@ -1,4 +1,5 @@
 ﻿@using BPOR.Domain.Enums
+@using BPOR.Rms.Abstractions.Enums
 @using BPOR.Rms.VolunteerInformation.Utility
 @model BPOR.Rms.VolunteerInformation.Models.CriteriaListModel
 
@@ -14,9 +15,9 @@
     @foreach (var criterion in Model.VsiGroup.Criteria)
     {
         <tr class="govuk-table__row">
-            <th scope="row" class="govuk-table__header">@criterion.Criteria</th>
+            <th scope="row" class="govuk-table__header">@criterion.Description</th>
             <td class="govuk-table__cell">
-                <form asp-action="RemoveCriteria" asp-route-studyId="@context.Vsi.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
+                <form asp-action="RemoveCriteria" asp-route-studyId="@context.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
                       asp-route-criteriaId="@criterion.Id" asp-route-type="@Model.Type">
                     <button class="govuk-link" type="submit">Delete</button>
                 </form>
@@ -26,16 +27,18 @@
     </tbody>
 </table>
 
-<a asp-action="CreateCriterion" asp-route-studyid="@context.Vsi.StudyId" asp-route-groupid="@Model.VsiGroup.Id" 
+<div class="govuk-!-margin-4">
+<a class="govuk-link" asp-action="CreateCriterion" asp-route-studyid="@context.StudyId" asp-route-groupid="@Model.VsiGroup.Id" 
    asp-route-type="@Model.Type">Add more criteria</a>
+</div>
 
-@if (Model.Type == VolunteerStudyInformationGroupCriteriaTypeId.Include)
+@if (Model.Type == VsiGroupCriteronType.Include)
 {
-    <a asp-action="QueryAddExclusionCriteria" asp-route-studyid="@context.Vsi.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
+    <a asp-action="QueryAddExclusionCriteria" asp-route-studyid="@context.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
        class="govuk-button" data-module="govuk-button">Continue</a>
 }
 else
 {
-    <a asp-action="Section1_Step4" asp-controller="VolunteerStudyInformation" asp-route-studyid="@context.Vsi.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
+    <a asp-action="Section1_Step4" asp-controller="VolunteerStudyInformation" asp-route-studyid="@context.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
        class="govuk-button" data-module="govuk-button">Continue</a>
 }

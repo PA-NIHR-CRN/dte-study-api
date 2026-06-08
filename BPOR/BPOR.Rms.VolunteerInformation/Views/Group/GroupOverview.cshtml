@@ -1,4 +1,5 @@
 ﻿@using BPOR.Domain.Enums
+@using BPOR.Rms.Abstractions.Enums
 @model BPOR.Rms.VolunteerInformation.Models.VsiGroupModel
 
 @{
@@ -34,9 +35,9 @@
         </dt>
         <dd class="govuk-summary-list__value">
             <ul>
-                @foreach (var criterion in Model.Criteria.Where(i => i.Type == VolunteerStudyInformationGroupCriteriaTypeId.Include))
+                @foreach (var criterion in Model.Criteria.Where(i => i.Type == VsiGroupCriteronType.Include))
                 {
-                    <li>@criterion.Criteria</li>
+                    <li>@criterion.Description</li>
                 }
             </ul>
         </dd>
@@ -54,9 +55,9 @@
         </dt>
         <dd class="govuk-summary-list__value">
             <ul>
-                @foreach (var criterion in Model.Criteria.Where(i => i.Type == VolunteerStudyInformationGroupCriteriaTypeId.Exclude))
+                @foreach (var criterion in Model.Criteria.Where(i => i.Type == VsiGroupCriteronType.Exclude))
                 {
-                    <li>@criterion.Criteria</li>
+                    <li>@criterion.Description</li>
                 }
             </ul>
         </dd>
@@ -67,10 +68,10 @@
 </dl>
 
 <div class="govuk-!-margin-3">
-    <a asp-action="CreateGroup" asp-controller="VolunteerStudyInformation" asp-route-studyid="@context.Vsi.StudyId" 
+    <a asp-action="CreateGroup" asp-controller="VolunteerStudyInformation" asp-route-studyid="@context.StudyId" 
        class="govuk-link" >Add another group</a>
 </div>
 <div>
-<a asp-action="Section2_Step1" asp-controller="VolunteerStudyInformation" asp-route-studyid="@context.Vsi.StudyId" 
+<a asp-action="Section2_Step1" asp-controller="VolunteerStudyInformation" asp-route-studyid="@context.StudyId" 
    class="govuk-button" data-module="govuk-button">Continue</a>
 </div>

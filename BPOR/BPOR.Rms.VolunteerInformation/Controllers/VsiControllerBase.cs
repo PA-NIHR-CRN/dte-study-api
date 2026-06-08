@@ -29,13 +29,16 @@ public abstract class VsiControllerBase : Controller
     {
         var actionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
         var studyIdValue = context.RouteData.Values["studyId"];
-        VolunteerStudyInformation? currentVsi;
-        
-        if (!actionDescriptor.MethodInfo.HasAttribute<DoNotRequireVsiAttribute>() 
-            && studyIdValue is string studyIdString 
-            && int.TryParse(studyIdString, out var studyId))
+
+        if (actionDescriptor.MethodInfo.HasAttribute<DoNotRequireVsiAttribute>())
         {
-            currentVsi = await VsiRepository.GetCurrentVsi(studyId, context.HttpContext.RequestAborted);
+            // do nothing.
+        }
+        else if (studyIdValue is string studyIdString 
+                 && int.TryParse(studyIdString, out var studyId))
+        {
+            EditContext = new VsiEditContext { StudyId = studyId };
+            var currentVsi = await VsiRepository.GetCurrentVsi(studyId, context.HttpContext.RequestAborted);
             if (currentVsi == null)
             {
                 context.Result = new NotFoundResult();
@@ -44,10 +47,9 @@ public abstract class VsiControllerBase : Controller
         }
         else
         {
-            currentVsi = null;
+            context.Result = new NotFoundResult();
         }
           
-        EditContext = new VsiEditContext { Vsi = currentVsi };
 
         await base.OnActionExecutionAsync(context, next);
     }

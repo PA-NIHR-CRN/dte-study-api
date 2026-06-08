@@ -1,9 +1,8 @@
-﻿namespace BPOR.Domain.Entities;
+﻿namespace BPOR.Rms.Abstractions.Entities;
 
-public class VolunteerStudyInformationSite
+public class VsiSite
 {
     public int Id { get; set; }
-    public int VolunteerStudyInformationId { get; set; }
     
     public string AddressLine1 { get; set; }
     public string? AddressLine2 { get; set; }
@@ -11,6 +10,4 @@ public class VolunteerStudyInformationSite
     public string? AddressLine4 { get; set; }
     public string? AddressLine5 { get; set; }
     public string Postcode { get; set; }
-    
-    public VolunteerStudyInformation VolunteerStudyInformation { get; set; }
 }

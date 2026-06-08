@@ -1,5 +1,5 @@
-using BPOR.Domain.Entities;
-using BPOR.Domain.Enums;
+using BPOR.Rms.Abstractions.Entities;
+using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Models;
 using BPOR.Rms.VolunteerInformation.Validators;
@@ -14,7 +14,7 @@ namespace BPOR.Rms.VolunteerInformation.Controllers;
 public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(vsiRepository)
 {
     [HttpGet]
-    public async Task<IActionResult> CreateCriterion(int studyId, int groupId, VolunteerStudyInformationGroupCriteriaTypeId type, 
+    public async Task<IActionResult> CreateCriterion(int studyId, int groupId, VsiGroupCriteronType type, 
         CancellationToken cancellationToken)
     {
         var group = await vsiRepository.GetCurrentVsiGroup(studyId, groupId,
@@ -32,7 +32,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
     public async Task<IActionResult> CreateCriterion(
         int studyId,
         int groupId,
-        VolunteerStudyInformationGroupCriteriaTypeId type,
+        VsiGroupCriteronType type,
         [FromForm] CreateCriterionPostbackModel model,
         CancellationToken cancellationToken)
     {
@@ -44,10 +44,10 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
             return View(new CreateCriterionModel{Criterion = model.Criterion, GroupName = group.Name, Type = type});
         }
 
-        var newCriteria = new VolunteerStudyInformationGroupCriteria()
+        var newCriteria = new VsiGroupCriterion()
         {
-            Criteria = model.Criterion,
-            TypeId = type
+            Description = model.Criterion,
+            Type = type
         };
         
         await vsiRepository.CreateCriterion(studyId, groupId, newCriteria, cancellationToken);
@@ -57,7 +57,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
 
     [HttpGet]
     public async Task<IActionResult> Criteria(
-        int studyId, int groupId, VolunteerStudyInformationGroupCriteriaTypeId type,
+        int studyId, int groupId, VsiGroupCriteronType type,
         CancellationToken cancellationToken)
     {
         var group = await vsiRepository.GetCurrentVsiGroup(studyId, groupId, 
@@ -65,11 +65,11 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
                 {
                     Id = i.Id,
                     Name = i.Name,
-                    Criteria = i.Criteria.Where(c => c.TypeId == type).Select(c => new VsiGroupCriteriaModel
+                    Criteria = i.Criteria.Where(c => c.Type == type).Select(c => new VsiGroupCriteriaModel
                     {
                         Id = c.Id,
-                        Criteria = c.Criteria,
-                        Type = c.TypeId
+                        Description = c.Description,
+                        Type = c.Type
                     }).ToList()
                 }, cancellationToken
             );
@@ -88,7 +88,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
     {
         if (addExclusionCriteria)
         {
-            return RedirectToAction("CreateCriterion", new { studyId, groupId, type = VolunteerStudyInformationGroupCriteriaTypeId.Exclude });
+            return RedirectToAction("CreateCriterion", new { studyId, groupId, type = VsiGroupCriteronType.Exclude });
         }
         else
         {
@@ -113,7 +113,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
         int studyId,
         int groupId,
         [FromQuery] int criteriaId,
-        VolunteerStudyInformationGroupCriteriaTypeId type,
+        VsiGroupCriteronType type,
         CancellationToken cancellationToken)
     {
         bool result = await vsiRepository.RemoveCriteria(studyId, groupId, criteriaId, cancellationToken);
@@ -125,20 +125,14 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
         return RedirectToAction("Criteria", new { studyId, groupId, type });
     }
     
-    /*[HttpGet]
-    public async Task<IActionResult> GroupOverview(int studyId, int groupId,
+    [HttpGet]
+    public async Task<IActionResult> CreateGroupCheck(int studyId, int groupId,
         CancellationToken cancellationToken)
     {
         var group = await vsiRepository.GetCurrentVsiGroup(studyId, groupId, i => new VsiGroupModel()
                 {
                     Id = i.Id,
-                    Name = i.Name,
-                    Criteria = i.Criteria.Select(c => new VsiGroupCriteriaModel
-                    {
-                        Id = c.Id,
-                        Criteria = c.Criteria,
-                        Type = c.TypeId
-                    }).ToList()
+                    Name = i.Name
                 }, cancellationToken
             );
 
@@ -148,5 +142,5 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
         }
         
         return View(group);
-    }*/
+    }
 }

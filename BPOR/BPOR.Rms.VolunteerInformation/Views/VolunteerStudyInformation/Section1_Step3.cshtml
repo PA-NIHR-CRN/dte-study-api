@@ -3,7 +3,7 @@
 @{
     VsiEditContext context = ViewBag.Context;
     context.SectionName = Resources.Section1Name;
-    ViewData.SetBackLinkOverride(Url.Action("Section1_Step2", new{ context.Vsi.StudyId }));
+    ViewData.SetBackLinkOverride(Url.Action("Section1_Step2", new{ context.StudyId }));
     Layout = "_VsiEditLayout";
 }
 
@@ -24,7 +24,7 @@
                     <p class="govuk-body govuk-!-margin-0">@site.Postcode</p>
                 </td>
                 <td class="govuk-table__cell">
-                    <form method="post" asp-action="RemoveSite" asp-route-studyId="@context.Vsi.StudyId"
+                    <form method="post" asp-action="RemoveSite" asp-route-studyId="@context.StudyId"
                           asp-route-siteId="@site.Id">
                         <button class="govuk-link" type="submit">Delete</button>
                     </form>
@@ -34,16 +34,16 @@
         </tbody>
     </table>
     <div>
-        <a class="govuk-link" asp-action="SiteSearch" asp-route-studyId="@context.Vsi.StudyId">Add another research
+        <a class="govuk-link" asp-action="SiteSearch" asp-route-studyId="@context.StudyId">Add another research
             location</a>
     </div>
     <div class="govuk-!-margin-top-3">
-        <a class="govuk-button" asp-action="Section1_Step4" asp-route-studyId="@context.Vsi.StudyId">Continue</a>
+        <a class="govuk-button" asp-action="Section1_Step4" asp-route-studyId="@context.StudyId">Continue</a>
     </div>
 }
 else
 {
-    <form method="get" asp-action="SiteSearch" asp-route-studyId="@context.Vsi.StudyId">
+    <form method="get" asp-action="SiteSearch" asp-route-studyId="@context.StudyId">
         <form-group for="Sites"
                     label-class="govuk-heading-xl"
                     description="Enter a postcode to select one or multiple research locations">
@@ -53,6 +53,6 @@ else
     </form>
 
     <div class="govuk-!-margin-top-3">
-        <a asp-action="ManualSiteEntry" asp-route-studyId="@context.Vsi.StudyId">Add address manually</a>
+        <a asp-action="ManualSiteEntry" asp-route-studyId="@context.StudyId">Add address manually</a>
     </div>
 }

@@ -1,4 +1,5 @@
 ﻿@using BPOR.Domain.Enums
+@using BPOR.Rms.Abstractions.Enums
 @model VsiEditModel
 
 @{
@@ -41,9 +42,9 @@
             </dt>
             <dd class="govuk-summary-list__value">
                 <ul>
-                    @foreach (var criteria in group.Criteria.Where(i => i.Type == VolunteerStudyInformationGroupCriteriaTypeId.Include))
+                    @foreach (var criteria in group.Criteria.Where(i => i.Type == VsiGroupCriteronType.Include))
                     {
-                        <li>@criteria.Criteria</li>
+                        <li>@criteria.Description</li>
                     }
                 </ul>
             </dd>
@@ -58,9 +59,9 @@
             </dt>
             <dd class="govuk-summary-list__value">
                 <ul>
-                    @foreach (var criteria in group.Criteria.Where(i => i.Type == VolunteerStudyInformationGroupCriteriaTypeId.Exclude))
+                    @foreach (var criteria in group.Criteria.Where(i => i.Type == VsiGroupCriteronType.Exclude))
                     {
-                        <li>@criteria.Criteria</li>
+                        <li>@criteria.Description</li>
                     }
                 </ul>
             </dd>

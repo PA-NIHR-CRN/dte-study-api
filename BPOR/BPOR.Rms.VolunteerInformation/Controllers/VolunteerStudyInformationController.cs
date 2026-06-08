@@ -1,16 +1,14 @@
-using BPOR.Domain.Entities;
-using BPOR.Domain.Enums;
+using BPOR.Rms.Abstractions.Entities;
+using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Models;
 using BPOR.Rms.VolunteerInformation.Validators;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NIHR.Infrastructure.AspNetCore.Validation;
 using NIHR.Rts.Client;
 
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
-[AllowAnonymous]
 [Route("Study/{studyId:int}/VolunteerInformation/[action]")]
 public class VolunteerStudyInformationController : VsiControllerBase
 {
@@ -75,7 +73,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return BadRequest();
         }
 
-        await VsiRepository.CreateVsi(studyId, VolunteerStudyInformationStatusId.Draft, cancellationToken);
+        await VsiRepository.CreateVsi(studyId, VsiStatus.Draft, cancellationToken);
         
         return RedirectToAction("Section1_Step1", new { studyId = studyId });
     }
@@ -135,7 +133,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
         var model = await VsiRepository.GetCurrentVsi(studyId,
             i => new VsiEditModel
             {
-                StudyType = i.StudyTypeId
+                StudyType = i.StudyType
             },
             cancellationToken);
         return model == null ? NotFound() : View(model);
@@ -153,7 +151,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, i => i.StudyTypeId = model.StudyType, cancellationToken);
+        await VsiRepository.UpdateVsi(studyId, i => i.StudyType = model.StudyType, cancellationToken);
         return RedirectToAction("Section1_Step3", new { studyId });
     }
 
@@ -217,7 +215,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
 
     private async Task<IActionResult> AddSite(RtsAddress addressToAdd, int studyId, CancellationToken cancellationToken)
     {
-        var site = new VolunteerStudyInformationSite()
+        var site = new VsiSite()
         {
             AddressLine1 = addressToAdd.AddressLine1,
             AddressLine2 = addressToAdd.AddressLine2,
@@ -297,8 +295,8 @@ public class VolunteerStudyInformationController : VsiControllerBase
                     Name = g.Name,
                     Criteria = g.Criteria.Select(c => new VsiGroupCriteriaModel()
                     {
-                        Criteria = c.Criteria,
-                        Type = c.TypeId
+                        Description = c.Description,
+                        Type = c.Type
                     })
                 })
             },
@@ -340,8 +338,8 @@ public class VolunteerStudyInformationController : VsiControllerBase
         int? groupId = await VsiRepository.CreateGroup(studyId, model.Name, cancellationToken);
         return groupId == null
             ? NotFound()
-            : RedirectToAction("CreateCriterion", "Group",
-                new { studyId, groupId, type = VolunteerStudyInformationGroupCriteriaTypeId.Include });
+            : RedirectToAction("CreateGroupCheck", "Group",
+                new { studyId, groupId });
     }
 
     #endregion
@@ -735,7 +733,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
         
-        await VsiRepository.CreateContact(studyId, new VolunteerStudyInformationContact
+        await VsiRepository.CreateContact(studyId, new VsiContact
         {
             Name = model.Name,
             Email = model.Email,
@@ -808,7 +806,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             i => new VsiEditModel
             {
                 Description = i.Description,
-                StudyType = i.StudyTypeId,
+                StudyType = i.StudyType,
                WhatYouWillDo = i.WhatYouWillDo,
                CostReimbursement = i.CostReimbursement,
                HasIncentive = i.CostReimbursement,
@@ -837,8 +835,8 @@ public class VolunteerStudyInformationController : VsiControllerBase
                     Criteria = g.Criteria.Select(c => new VsiGroupCriteriaModel
                     {
                         Id = c.Id,
-                        Criteria = c.Criteria,
-                        Type = c.TypeId
+                        Description = c.Description,
+                        Type = c.Type
                     })
                 }),
                 Sites = i.Sites.Select(s => new VsiSiteModel
@@ -859,7 +857,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpPost]
     public async Task<IActionResult> Section4(int studyId, CancellationToken cancellationToken, bool commit = true)
     {
-        await VsiRepository.UpdateVsi(studyId, i => i.StatusId = VolunteerStudyInformationStatusId.Active, cancellationToken);
+        await VsiRepository.UpdateVsi(studyId, i => i.Status = VsiStatus.Active, cancellationToken);
         return RedirectToAction("NextSteps", new { studyId });
     }
 

@@ -55,17 +55,20 @@ namespace BPOR.Domain.Migrations
                         name: "FK_StudyResearcherEmails_Studies_StudyId",
                         column: x => x.StudyId,
                         principalTable: "Studies",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StudyResearcherEmails_SysRefDeliveryStatus_DeliveryStatusId",
                         column: x => x.DeliveryStatusId,
                         principalTable: "SysRefDeliveryStatus",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StudyResearcherEmails_SysRefStudyResearcherEmailOptions_Stud~",
                         column: x => x.StudyResearcherEmailOptionId,
                         principalTable: "SysRefStudyResearcherEmailOptions",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
