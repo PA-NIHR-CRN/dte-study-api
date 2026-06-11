@@ -15,6 +15,7 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
+using BPOR.Rms.VolunteerInformation;
 using Ganss.Xss;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Settings;
@@ -52,6 +53,8 @@ public static class DependencyInjection
                     .GetRequiredService<ErrorLoggingHttpMessageHandler>());
             });
         });
+
+        services.AddMemoryCache();
 
         services.Configure<VolunteerFilterServiceOptions>(configuration.GetSection("VolunteerFilterService"));
 
@@ -147,8 +150,7 @@ public static class DependencyInjection
             services.RegisterDevelopmentServices(configuration);
         }
 
-        services.AddScoped<VsiRepository>();
-        services.AddOptions<VsiSettings>().BindConfiguration("Vsi");
+        services.AddVolunteerInformation();
         services.AddSingleton<IRtsAddressSource, TestRtsAddressSource>();
 
         return services;

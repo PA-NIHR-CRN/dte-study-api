@@ -9737,6 +9737,54 @@ namespace Dynamo.Stream.Handler.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BPOR.Domain.Entities.RefData.StudyResearcherEmailOptions", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SysRefStudyResearcherEmailOptions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "Introductory Email",
+                            Description = "Introductory email",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "Offer Pre-Screener",
+                            Description = "Offer Pre-Screener",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "Without Pre-Screener",
+                            Description = "Without Pre-Screener",
+                            IsDeleted = false
+                        });
+                });
+
             modelBuilder.Entity("BPOR.Domain.Entities.RefData.SubmissionOutcome", b =>
                 {
                     b.Property<int>("Id")
@@ -10039,6 +10087,50 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.ToTable("StudyResearcher");
                 });
 
+            modelBuilder.Entity("BPOR.Domain.Entities.StudyResearcherEmail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DeliveryStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StudyResearcherEmailAddress")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("StudyResearcherEmailOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeliveryStatusId");
+
+                    b.HasIndex("StudyId");
+
+                    b.HasIndex("StudyResearcherEmailOptionId");
+
+                    b.ToTable("StudyResearcherEmails");
+                });
+
             modelBuilder.Entity("BPOR.Domain.Entities.System.SysConfiguration", b =>
                 {
                     b.Property<int>("Id")
@@ -10144,219 +10236,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserRole");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool?>("CostReimbursement")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
-
-                    b.Property<string>("ExternalWebsiteUrl")
-                        .HasMaxLength(2048)
-                        .HasColumnType("varchar(2048)");
-
-                    b.Property<bool?>("HasIncentive")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("IncentiveDetails")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<string>("InfoToRegisterByEmail")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("NumberOfVisits")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<string>("OtherDetails")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<string>("StagedPreScreenerUrl")
-                        .HasMaxLength(2048)
-                        .HasColumnType("varchar(2048)");
-
-                    b.Property<long?>("StatusId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("StudyDuration")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<string>("StudyFormat")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<int>("StudyId")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("StudyTypeId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("UpdatedById")
-                        .HasColumnType("int");
-
-                    b.Property<string>("WhatYouWillDo")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudyId");
-
-                    b.ToTable("VolunteerStudyInformation");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformationContact", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Organisation")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("VolunteerStudyInformationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VolunteerStudyInformationId");
-
-                    b.ToTable("VolunteerStudyInformationContact");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformationGroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("VolunteerStudyInformationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VolunteerStudyInformationId");
-
-                    b.ToTable("VolunteerStudyInformationGroup");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformationGroupCriteria", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Criteria")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<long>("TypeId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("VolunteerStudyInformationGroupId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VolunteerStudyInformationGroupId");
-
-                    b.ToTable("VolunteerStudyInformationGroupCriteria");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformationSite", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AddressLine1")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("AddressLine2")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("AddressLine3")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("AddressLine4")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("AddressLine5")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("Postcode")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
-
-                    b.Property<int>("VolunteerStudyInformationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VolunteerStudyInformationId");
-
-                    b.ToTable("VolunteerStudyInformationSite");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.Campaign", b =>
@@ -10673,6 +10552,33 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BPOR.Domain.Entities.StudyResearcherEmail", b =>
+                {
+                    b.HasOne("BPOR.Domain.Entities.RefData.DeliveryStatus", "DeliveryStatus")
+                        .WithMany()
+                        .HasForeignKey("DeliveryStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BPOR.Domain.Entities.Study", "Study")
+                        .WithMany("StudyResearcherEmails")
+                        .HasForeignKey("StudyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BPOR.Domain.Entities.RefData.StudyResearcherEmailOptions", "StudyResearcherEmailOption")
+                        .WithMany()
+                        .HasForeignKey("StudyResearcherEmailOptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DeliveryStatus");
+
+                    b.Navigation("Study");
+
+                    b.Navigation("StudyResearcherEmailOption");
+                });
+
             modelBuilder.Entity("BPOR.Domain.Entities.UserRole", b =>
                 {
                     b.HasOne("BPOR.Domain.Entities.RefData.Role", "Role")
@@ -10690,61 +10596,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformation", b =>
-                {
-                    b.HasOne("BPOR.Domain.Entities.Study", "Study")
-                        .WithMany("VolunteerStudyInformation")
-                        .HasForeignKey("StudyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Study");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformationContact", b =>
-                {
-                    b.HasOne("BPOR.Domain.Entities.VolunteerStudyInformation", "VolunteerStudyInformation")
-                        .WithMany("Contacts")
-                        .HasForeignKey("VolunteerStudyInformationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("VolunteerStudyInformation");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformationGroup", b =>
-                {
-                    b.HasOne("BPOR.Domain.Entities.VolunteerStudyInformation", "VolunteerStudyInformation")
-                        .WithMany("Groups")
-                        .HasForeignKey("VolunteerStudyInformationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("VolunteerStudyInformation");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformationGroupCriteria", b =>
-                {
-                    b.HasOne("BPOR.Domain.Entities.VolunteerStudyInformationGroup", "Group")
-                        .WithMany("Criteria")
-                        .HasForeignKey("VolunteerStudyInformationGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Group");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformationSite", b =>
-                {
-                    b.HasOne("BPOR.Domain.Entities.VolunteerStudyInformation", "VolunteerStudyInformation")
-                        .WithMany("Sites")
-                        .HasForeignKey("VolunteerStudyInformationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("VolunteerStudyInformation");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.Campaign", b =>
@@ -10796,9 +10647,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Navigation("StudyParticipantEnrollments");
 
-                    b.Navigation("StudyResearchers");
+                    b.Navigation("StudyResearcherEmails");
 
-                    b.Navigation("VolunteerStudyInformation");
+                    b.Navigation("StudyResearchers");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.User", b =>
@@ -10808,20 +10659,6 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("StudyResearchers");
 
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformation", b =>
-                {
-                    b.Navigation("Contacts");
-
-                    b.Navigation("Groups");
-
-                    b.Navigation("Sites");
-                });
-
-            modelBuilder.Entity("BPOR.Domain.Entities.VolunteerStudyInformationGroup", b =>
-                {
-                    b.Navigation("Criteria");
                 });
 #pragma warning restore 612, 618
         }

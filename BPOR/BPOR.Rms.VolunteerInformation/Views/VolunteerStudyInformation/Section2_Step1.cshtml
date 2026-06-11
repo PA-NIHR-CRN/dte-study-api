@@ -1,9 +1,12 @@
 ﻿@model BPOR.Rms.VolunteerInformation.Models.VsiEditModel
 
 @{
-    Layout = "_VsiEditLayout";
+    VsiEditContext context = ViewBag.Context;
+    context.SectionName = Resources.Section2Name;
+    ViewData.SetBackLinkOverride(Url.Action("Section1_Step4", new { context.StudyId }));
+    Layout = "_VsiEditLayoutForm";
 }
 
-<form-group for="WhatWillYouDo">
-    <input class="govuk-input" asp-for="WhatWillYouDo" type="text">
+<form-group for="WhatYouWillDo" label-class="govuk-heading-xl">
+    <input class="govuk-input" asp-for="WhatYouWillDo" type="text">
 </form-group>

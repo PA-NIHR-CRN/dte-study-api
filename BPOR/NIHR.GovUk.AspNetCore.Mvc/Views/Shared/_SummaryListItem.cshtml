@@ -1,0 +1,13 @@
+@model NIHR.GovUk.AspNetCore.Mvc.Models.GovUkSummaryListItemModel
+
+<div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+        @Model.Name
+    </dt>
+    <dd class="govuk-summary-list__value">
+        @Model.Value
+    </dd>
+    <dd class="govuk-summary-list__actions">
+        @Model.InnerContent
+    </dd>
+</div>

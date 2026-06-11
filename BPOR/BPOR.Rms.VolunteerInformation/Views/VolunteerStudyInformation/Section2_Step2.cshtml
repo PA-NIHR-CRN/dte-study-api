@@ -1,9 +1,14 @@
 ﻿@model BPOR.Rms.VolunteerInformation.Models.VsiEditModel
 
 @{
-    Layout = "_VsiEditLayout";
+    VsiEditContext context = ViewBag.Context;
+    context.SectionName = Resources.Section2Name;
+    Layout = "_VsiEditLayoutForm";
 }
  
-<form-group for="WhatWillYouDo">
-    <input class="govuk-input" asp-for="WhatWillYouDo" type="text">
+<form-group for="CostReimbursement" label-class="govuk-heading-xl">
+    <radio-set for="CostReimbursement">
+        <radio value="@true">Yes</radio>
+        <radio value="@false">No</radio>
+    </radio-set>
 </form-group>

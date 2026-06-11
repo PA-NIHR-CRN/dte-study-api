@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Abstractions\BPOR.Rms.Abstractions.csproj" />
       <ProjectReference Include="..\NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj" />
       <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
       <ProjectReference Include="..\NIHR.Rts.Client\NIHR.Rts.Client.csproj" />
@@ -24,13 +25,25 @@
       <AdditionalFiles Include="Views\VolunteerStudyInformation\Section1_Step3.cshtml" />
       <AdditionalFiles Include="Views\VolunteerStudyInformation\Section2_Step1.cshtml" />
       <AdditionalFiles Include="Views\VolunteerStudyInformation\Start.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Step10.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Step4.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Step6.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Step7.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Step8.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Step9.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\_VsiEditLayout.cshtml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Views\VolunteerStudyInformation\Shared\_ContactEditor.cshtml" />
     </ItemGroup>
 
 </Project>

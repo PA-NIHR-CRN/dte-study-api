@@ -1,0 +1,35 @@
+﻿@model VsiEditModel
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    context.SectionName = Resources.Section3Name;
+    ViewData.SetBackLinkOverride( Url.Action("Section3_Step2", new { id = context.StudyId }));
+    Layout = "_VsiEditLayout";
+}
+
+<h1>Contact Details</h1>
+<p>Email and/or telephone numbers for volunteers to contact researchers or members of the study team</p>
+<table class="govuk-table">
+    <tbody class="govuk-table__body">
+    @foreach (var contact in Model.Contacts)
+    {
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">
+                <partial name="_ContactCard" model="contact"/>
+            </td>
+            <td class="govuk-table__cell">
+                <form method="post" asp-action="RemoveContact" asp-route-studyId="@context.StudyId" asp-route-contactid="@contact.Id">
+                    <button class="govuk-link" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<div class="govuk-!-margin-4">
+    <a class="govuk-link" asp-action="CreateContact" asp-route-studyId="@context.StudyId">Add another contact</a>
+</div>
+<div>
+    <a asp-action="Section3_Step4" class="govuk-button" asp-route-studyId="@context.StudyId">Continue</a>
+</div>

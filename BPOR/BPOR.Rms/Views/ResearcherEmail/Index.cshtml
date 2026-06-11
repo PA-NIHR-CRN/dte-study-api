@@ -1,0 +1,47 @@
+﻿@model BPOR.Rms.Models.ResearcherEmail.ResearcherEmailViewModel
+
+@{
+    ViewData["Title"] = "Send Researcher Email";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<partial name="~/Views/Study/Partials/Details/_PreScreenerEligibility.cshtml" model="Model.PreScreenerViewModel" />
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds govuk-grid-column-one-half-from-desktop">
+        <h1 class="govuk-heading-xl">Send email</h1>
+
+        <form asp-action="SendEmail">
+            <input asp-for="StudyId" type="hidden" />
+            <input asp-for="IsEligibilityCriteriaComplete" type="hidden" />
+            <input asp-for="IsEligibleForPrescreener" type="hidden" />
+            
+            <div class="govuk-form-group @(Html.ViewData.ModelState["SelectedEmailId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset" id="SelectedEmailQuestion">
+                    @if (Html.ViewData.ModelState["SelectedEmailId"]?.Errors.Count > 0)
+                    {
+                        <span id="SelectedEmailId-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @Html.ValidationMessageFor(model => model.SelectedEmailId)
+                        </span>
+                    }
+                    <div class="govuk-radios" data-module="govuk-radios">
+                        @for (int i = 0; i < Model.ResearcherEmailOptions.Count; i++)
+                        {
+                            <div class="govuk-radios__item">
+                                @Html.RadioButtonFor(m => m.SelectedEmailId, Model.ResearcherEmailOptions[i]["value"], new { @class = "govuk-radios__input", id = "SelectedEmailId" + (i == 0 ? "" : i) })
+                                @Html.Label("SelectedEmailId" + (i == 0 ? "" : i), Model.ResearcherEmailOptions[i]["label"], new { @class = "govuk-label govuk-radios__label" })
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+            
+            <div class="govuk-button-group govuk-!-margin-bottom-0">
+                <button type="submit" name="action" value="SendEmail" class="govuk-button" data_module="govuk-button">Send</button>
+                @Html.ActionLink("Cancel", "Details", "Study", new { id = Model.StudyId }, new { @class = "govuk-link" })
+            </div>
+        </form>
+
+    </div>
+</div>
