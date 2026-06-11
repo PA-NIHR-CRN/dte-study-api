@@ -24,7 +24,7 @@ public sealed class ApiKeyAuthenticationHandler(
             return Task.FromResult(AuthenticateResult.NoResult());
         }
 
-        if (string.IsNullOrEmpty(Options.ApiKey))
+        if (string.IsNullOrEmpty(options.CurrentValue.ApiKey))
         {
             return Task.FromResult(
                 AuthenticateResult.Fail("API key is not configured on the server."));
@@ -39,7 +39,7 @@ public sealed class ApiKeyAuthenticationHandler(
         }
         
         var providedBytes = Encoding.UTF8.GetBytes(providedParts[1]);
-        var expectedBytes = Encoding.UTF8.GetBytes(Options.ApiKey);
+        var expectedBytes = Encoding.UTF8.GetBytes(options.CurrentValue.ApiKey);
 
         if (providedBytes.Length != expectedBytes.Length ||
             !CryptographicOperations.FixedTimeEquals(providedBytes, expectedBytes))
