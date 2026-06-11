@@ -1,5 +1,6 @@
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Startup;
+using BPOR.Rms.VolunteerInformation;
 using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication
@@ -15,6 +16,8 @@ builder.AddIdgAuthentication(authOptions =>
             .Build();
     }
 );
+
+builder.Services.AddVolunteerInformationPages();
 
 builder.AddAWSSystemsManagerDataProtection("/BPOR/RMS");
 
