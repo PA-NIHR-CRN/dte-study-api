@@ -1,20 +1,47 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using NIHR.Rts.Client;
 using NIHR.Rts.Client.Settings;
 
-public class TokenService
+public class TokenService : ITokenService
 {
     private readonly HttpClient _httpClient;
     private readonly RtsApiSettings _settings;
+    private readonly IMemoryCache _cache;
+    private const string _cacheKey = "rts-access-token";
 
-    public TokenService(HttpClient httpClient, IOptions<RtsApiSettings> settings)
+
+    public TokenService(HttpClient httpClient, IOptions<RtsApiSettings> settings, IMemoryCache cache)
     {
         _httpClient = httpClient;
         _settings = settings.Value;
+        _cache = cache;
+    }
+    
+    public async Task<string> GetAccessTokenAsync(
+        CancellationToken cancellationToken)
+    {
+        return await _cache.GetOrCreateAsync(
+            _cacheKey,
+            async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(Convert.ToDouble(_settings.TokenCacheTimeSpanHours));
+
+                return await RequestTokenAsync(cancellationToken);
+            }) ?? throw new InvalidOperationException("Failed to obtain token");
     }
 
-    public async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken)
+    public async Task<string> RefreshAccessTokenAsync(
+        CancellationToken cancellationToken)
+    {
+        _cache.Remove(_cacheKey);
+
+        return await GetAccessTokenAsync(cancellationToken);
+    }
+
+    public async Task<string> RequestTokenAsync(CancellationToken cancellationToken)
     {
         var request = new FormUrlEncodedContent(new[]
         {

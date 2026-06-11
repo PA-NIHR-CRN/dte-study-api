@@ -17,7 +17,7 @@ public static class DiExtensions
             client.BaseAddress = new Uri(rtsApiSettings.Value.BaseUrl);
         });
 
-        services.AddHttpClient<TokenService>(client =>
+        services.AddHttpClient<ITokenService, TokenService>(client =>
         {
             client.BaseAddress = new Uri(rtsApiSettings.Value.TokenUrl);
         });
