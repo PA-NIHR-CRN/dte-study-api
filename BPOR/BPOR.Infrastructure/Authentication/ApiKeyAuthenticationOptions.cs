@@ -7,5 +7,5 @@ public sealed class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
     public const string DefaultScheme = "ApiKey";
     public const string HeaderName = "Authorization";
 
-    public string ApiKey { get; set; } = "QCuvqKsDZeJJaanAzRTvgUTr";
+    public string ApiKey { get; set; }
 }
