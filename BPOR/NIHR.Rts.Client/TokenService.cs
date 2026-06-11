@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -32,15 +33,7 @@ public class TokenService : ITokenService
                 return await RequestTokenAsync(cancellationToken);
             }) ?? throw new InvalidOperationException("Failed to obtain token");
     }
-
-    public async Task<string> RefreshAccessTokenAsync(
-        CancellationToken cancellationToken)
-    {
-        _cache.Remove(_cacheKey);
-
-        return await GetAccessTokenAsync(cancellationToken);
-    }
-
+    
     public async Task<string> RequestTokenAsync(CancellationToken cancellationToken)
     {
         var request = new FormUrlEncodedContent(new[]
@@ -52,14 +45,30 @@ public class TokenService : ITokenService
         });
 
         var response = await _httpClient.PostAsync("oauth2/token", request, cancellationToken);
+        
+        if (response.StatusCode is HttpStatusCode.Unauthorized
+            or HttpStatusCode.Forbidden)
+        {
+            _cache.Remove(_cacheKey);
+
+            throw new UnauthorizedAccessException(
+                "Token request was unauthorized (401/403). Cache invalidated.");
+        }
 
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
         var tokenResponse = JsonSerializer.Deserialize<TokenResponse>(json);
+        
+        if (tokenResponse?.access_token is null)
+        {
+            _cache.Remove(_cacheKey);
 
-        return tokenResponse!.access_token;
+            throw new InvalidOperationException("Token response was invalid.");
+        }
+
+        return tokenResponse.access_token;
     }
 }
 

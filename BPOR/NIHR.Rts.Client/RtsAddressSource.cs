@@ -94,26 +94,6 @@ public class RtsAddressSource : IRtsAddressSource
             request,
             cancellationToken);
 
-        if (response.StatusCode is HttpStatusCode.Unauthorized
-            or HttpStatusCode.Forbidden)
-        {
-            response.Dispose();
-
-            token = await _tokenService.RefreshAccessTokenAsync(
-                cancellationToken);
-
-            using var retryRequest = new HttpRequestMessage(
-                HttpMethod.Get,
-                requestUri);
-
-            retryRequest.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
-
-            response = await _httpClient.SendAsync(
-                retryRequest,
-                cancellationToken);
-        }
-
         response.EnsureSuccessStatusCode();
 
         return response;
