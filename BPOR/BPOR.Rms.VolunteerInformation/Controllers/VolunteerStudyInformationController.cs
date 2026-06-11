@@ -1,3 +1,4 @@
+using BPOR.Domain;
 using BPOR.Rms.Abstractions.Entities;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Data;
@@ -165,7 +166,6 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> SiteSearch(
         [FromServices] IRtsAddressSource addressSource,
-        [FromServices] IMemoryCache cache,
         [FromRoute] int studyId,
         string searchTerm,
         CancellationToken cancellationToken)
@@ -178,18 +178,15 @@ public class VolunteerStudyInformationController : VsiControllerBase
         {
             return View(model);
         }
-
-        model.SearchResult = (await addressSource.SearchByPostcode(model.SearchTerm, cancellationToken)).ToArray();
+        
+        var parsedPostcode = ParsePostcode(model.SearchTerm);
+        model.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
+        
         if (model.SearchResult.Length == 0)
         {
             ModelState.AddModelError(nameof(SiteSearchModel.SearchTerm),
                 "The postcode you've entered cannot be found.");
         }
-        
-        cache.Set(
-            $"site-search:{searchTerm}",
-            model.SearchResult,
-            TimeSpan.FromMinutes(10));
 
         return View(model);
     }
@@ -197,7 +194,6 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpPost]
     public async Task<IActionResult> SiteSearch(
         [FromServices] IRtsAddressSource addressSource,
-        [FromServices] IMemoryCache cache,
         [FromRoute] int studyId,
         SiteSearchModel model,
         CancellationToken cancellationToken)
@@ -208,21 +204,12 @@ public class VolunteerStudyInformationController : VsiControllerBase
 
         if (!ModelState.IsValid)
         {
-            model.SearchResult = (await addressSource.SearchByPostcode(model.SearchTerm, cancellationToken)).ToArray();
+            var parsedPostcode = ParsePostcode(model.SearchTerm);
+            model.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
             return View(model);
         }
 
-        RtsAddress? result = null;
-
-        if (cache.TryGetValue(
-                $"site-search:{model.SearchTerm}",
-                out RtsAddress[]? cachedResults))
-        {
-            result = cachedResults
-                .FirstOrDefault(x => x.Identifier == model.SelectedRtsId);
-        }
-
-        result ??= await addressSource.GetById(
+        var result = await addressSource.GetById(
             model.SelectedRtsId,
             cancellationToken);
         
@@ -233,6 +220,16 @@ public class VolunteerStudyInformationController : VsiControllerBase
         }
 
         return await AddSite(result, studyId, cancellationToken);
+    }
+    
+    public Postcode ParsePostcode(string modelPostcode)
+    {
+        if (!Postcode.TryParse(modelPostcode, out var parsedPostcode))
+        {
+            throw new ArgumentException($"'{modelPostcode}' is not a valid postcode", nameof(modelPostcode));
+        }
+
+        return parsedPostcode;
     }
 
     private async Task<IActionResult> AddSite(RtsAddress addressToAdd, int studyId, CancellationToken cancellationToken)
