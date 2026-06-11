@@ -9,5 +9,5 @@ public class SiteSearchModel
     public string SearchTerm { get; set; }
     public RtsAddress[] SearchResult { get; set; }
     
-    public int? SelectedRtsId { get; set; }
+    public string? SelectedRtsId { get; set; }
 }

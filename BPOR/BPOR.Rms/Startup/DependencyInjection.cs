@@ -30,6 +30,7 @@ using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
 using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Rts.Client;
+using NIHR.Rts.Client.Settings;
 
 namespace BPOR.Rms.Startup;
 
@@ -151,7 +152,16 @@ public static class DependencyInjection
         }
 
         services.AddVolunteerInformation();
-        services.AddSingleton<IRtsAddressSource, TestRtsAddressSource>();
+        
+        var rtsApiSettings = services.GetSectionAndValidate<RtsApiSettings>(configuration);
+        services.AddHttpClient<IRtsAddressSource, RtsAddressSource>(client =>
+        {
+            client.BaseAddress = new Uri(rtsApiSettings.Value.BaseUrl);
+        });
+        services.AddHttpClient<TokenService>(client =>
+        {
+            client.BaseAddress = new Uri(rtsApiSettings.Value.TokenUrl);
+        });
 
         return services;
     }

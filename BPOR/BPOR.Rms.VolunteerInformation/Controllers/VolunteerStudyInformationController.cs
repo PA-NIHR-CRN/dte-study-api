@@ -4,6 +4,7 @@ using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Models;
 using BPOR.Rms.VolunteerInformation.Validators;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using NIHR.Infrastructure.AspNetCore.Validation;
 using NIHR.Rts.Client;
 
@@ -164,6 +165,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> SiteSearch(
         [FromServices] IRtsAddressSource addressSource,
+        [FromServices] IMemoryCache cache,
         [FromRoute] int studyId,
         string searchTerm,
         CancellationToken cancellationToken)
@@ -183,7 +185,11 @@ public class VolunteerStudyInformationController : VsiControllerBase
             ModelState.AddModelError(nameof(SiteSearchModel.SearchTerm),
                 "The postcode you've entered cannot be found.");
         }
-
+        
+        cache.Set(
+            $"site-search:{searchTerm}",
+            model.SearchResult,
+            TimeSpan.FromMinutes(10));
 
         return View(model);
     }
@@ -191,6 +197,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpPost]
     public async Task<IActionResult> SiteSearch(
         [FromServices] IRtsAddressSource addressSource,
+        [FromServices] IMemoryCache cache,
         [FromRoute] int studyId,
         SiteSearchModel model,
         CancellationToken cancellationToken)
@@ -205,7 +212,20 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        var result = await addressSource.GetById(model.SelectedRtsId!.Value, cancellationToken);
+        RtsAddress? result = null;
+
+        if (cache.TryGetValue(
+                $"site-search:{model.SearchTerm}",
+                out RtsAddress[]? cachedResults))
+        {
+            result = cachedResults
+                .FirstOrDefault(x => x.Id == model.SelectedRtsId);
+        }
+
+        result ??= await addressSource.GetById(
+            model.SelectedRtsId,
+            cancellationToken);
+        
         if (result == null)
         {
             ModelState.AddModelError(nameof(model.SelectedRtsId), "The selected address has been removed from RTS");

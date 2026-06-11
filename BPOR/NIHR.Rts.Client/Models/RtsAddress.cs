@@ -1,4 +1,6 @@
-﻿namespace NIHR.Rts.Client;
+﻿using System.Text.Json.Serialization;
+
+namespace NIHR.Rts.Client;
 
 public class RtsAddress
 {
@@ -6,9 +8,9 @@ public class RtsAddress
     {
     }
 
-    public RtsAddress(int id, string addressLine1, string? addressLine2, string? addressLine3, string? addressLine4, string? addressLine5, string postcode)
+    public RtsAddress(string identifier, string addressLine1, string? addressLine2, string? addressLine3, string? addressLine4, string? addressLine5, string postcode)
     {
-        Id = id;
+        Id = identifier;
         AddressLine1 = addressLine1;
         AddressLine2 = addressLine2;
         AddressLine3 = addressLine3;
@@ -23,7 +25,8 @@ public class RtsAddress
     public string? AddressLine4 { get; set; }
     public string? AddressLine5 { get; set; }
     public string Postcode { get; set; }
-    public int Id { get; set; }
+    [JsonPropertyName("Identifier")]
+    public string Id { get; set; }
 
     public override string ToString()
     {

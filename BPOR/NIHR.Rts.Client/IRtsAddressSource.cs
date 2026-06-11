@@ -3,5 +3,5 @@
 public interface IRtsAddressSource
 {
     Task<IEnumerable<RtsAddress>> SearchByPostcode(string postcode, CancellationToken cancellationToken);
-    Task<RtsAddress?> GetById(int rtsAddressId, CancellationToken cancellationToken);
+    Task<RtsAddress?> GetById(string rtsAddressId, CancellationToken cancellationToken);
 }
