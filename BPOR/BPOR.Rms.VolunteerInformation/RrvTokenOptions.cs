@@ -2,6 +2,7 @@ namespace BPOR.Rms.VolunteerInformation;
 
 public class RrvTokenOptions
 {
+    public bool EnableRrvApi { get; set; } = false;
     public TimeSpan Ttl { get; set; } = TimeSpan.FromMinutes(5);
     public string Issuer { get; set; } = "RMS";
     public string Audience { get; set; } = "RRV";

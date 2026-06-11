@@ -4,6 +4,7 @@ using BPOR.Rms.VolunteerInformation.Models.Volunteer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Participant = BPOR.Rms.VolunteerInformation.Models.Volunteer.Participant;
 using Study = BPOR.Rms.VolunteerInformation.Models.Volunteer.Study;
 
@@ -12,28 +13,23 @@ namespace BPOR.Rms.VolunteerInformation.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize(AuthenticationSchemes = ApiKeyAuthenticationOptions.DefaultScheme)]
-public class VolunteerController() : ControllerBase
+public class VolunteerController(IOptions<RrvTokenOptions> options) : ControllerBase
 {
     private const int staticCheckValue = 155156040;
 
     [HttpGet("generatetesttoken/{participantId:long}")]
     public ActionResult<GetTestTokenResponse> GetTestTokenAsync(        
         [FromServices] IRrvTokenGenerator rrvTokenGenerator, 
-        long participantId,
-        bool staticToken = false)
+        long participantId)
     {
-        if (staticToken)
+        if (!options.Value.EnableRrvApi)
         {
-            return Ok(new GetTestTokenResponse
-            {
-                Token = new Guid(staticCheckValue, 0, 0, BitConverter.GetBytes(participantId)).ToString("N")
-            });
+            return NotFound();
         }
         
-        var token = rrvTokenGenerator.GenerateToken(participantId);
         return Ok(new GetTestTokenResponse
         {
-            Token = token
+            Token = new Guid(staticCheckValue, 0, 0, BitConverter.GetBytes(participantId)).ToString("N")
         });
     }
     
@@ -44,6 +40,11 @@ public class VolunteerController() : ControllerBase
         string token,
         CancellationToken cancellationToken)
     {
+        if (!options.Value.EnableRrvApi)
+        {
+            return NotFound();
+        }
+        
         long campaignParticipantId;
         
         if (Guid.TryParse(token, out var guid))
@@ -58,11 +59,8 @@ public class VolunteerController() : ControllerBase
         }
         else
         {
-            if (!rrvTokenGenerator.TryValidateToken(token, out campaignParticipantId))
-            {
-                // TODO: Include error detail?
-                return BadRequest();
-            }
+            // TODO: Include error detail?
+            return BadRequest();
         }
 
         var result = await context.CampaignParticipant
