@@ -153,15 +153,7 @@ public static class DependencyInjection
 
         services.AddVolunteerInformation();
         
-        var rtsApiSettings = services.GetSectionAndValidate<RtsApiSettings>(configuration);
-        services.AddHttpClient<IRtsAddressSource, RtsAddressSource>(client =>
-        {
-            client.BaseAddress = new Uri(rtsApiSettings.Value.BaseUrl);
-        });
-        services.AddHttpClient<TokenService>(client =>
-        {
-            client.BaseAddress = new Uri(rtsApiSettings.Value.TokenUrl);
-        });
+        services.AddRtsServices(configuration);
 
         return services;
     }

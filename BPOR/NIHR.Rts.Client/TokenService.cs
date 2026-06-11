@@ -14,7 +14,7 @@ public class TokenService
         _settings = settings.Value;
     }
 
-    public async Task<string> GetAccessTokenAsync()
+    public async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken)
     {
         var request = new FormUrlEncodedContent(new[]
         {
@@ -24,11 +24,11 @@ public class TokenService
             new KeyValuePair<string, string>("scope", "openid profile email")
         });
 
-        var response = await _httpClient.PostAsync("oauth2/token", request);
+        var response = await _httpClient.PostAsync("oauth2/token", request, cancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
         var tokenResponse = JsonSerializer.Deserialize<TokenResponse>(json);
 

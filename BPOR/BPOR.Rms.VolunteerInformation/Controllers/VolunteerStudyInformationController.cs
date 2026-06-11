@@ -219,7 +219,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
                 out RtsAddress[]? cachedResults))
         {
             result = cachedResults
-                .FirstOrDefault(x => x.Id == model.SelectedRtsId);
+                .FirstOrDefault(x => x.Identifier == model.SelectedRtsId);
         }
 
         result ??= await addressSource.GetById(

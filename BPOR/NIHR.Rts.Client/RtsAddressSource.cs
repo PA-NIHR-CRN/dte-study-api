@@ -19,7 +19,7 @@ public class RtsAddressSource : IRtsAddressSource
         string postcode,
         CancellationToken cancellationToken)
     {
-        var accessToken = await _tokenService.GetAccessTokenAsync();
+        var accessToken = await _tokenService.GetAccessTokenAsync(cancellationToken);
 
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue(
@@ -43,7 +43,7 @@ public class RtsAddressSource : IRtsAddressSource
         string rtsAddressId,
         CancellationToken cancellationToken)
     {
-        var accessToken = await _tokenService.GetAccessTokenAsync();
+        var accessToken = await _tokenService.GetAccessTokenAsync(cancellationToken);
 
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue(
