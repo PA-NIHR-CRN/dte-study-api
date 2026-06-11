@@ -171,8 +171,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         return View(model);
     }
 
-   
-
 
     private void ValidateMandatoryFields(ResearcherStudyFormViewModel model)
     {
@@ -181,6 +179,10 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             if (String.IsNullOrEmpty(model.ShortName))
             {
                 ModelState.AddModelError("ShortName", "Enter the study short name");
+            }
+            else if (model.ShortName.Length > 255)
+            {
+                ModelState.AddModelError("ShortName", "Study short name must be less than 255 characters");
             }
 
             if (String.IsNullOrEmpty(model.ChiefInvestigator))
@@ -246,30 +248,32 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
         if (model.Step == 7)
         {
-            ValidateRecruitmentDates(model);
+            var startValid = ValidateDate(model.RecruitmentStartDate, nameof(model.RecruitmentStartDate),
+                "Recruitment start date (UK)");
+            var endValid = ValidateDate(model.RecruitmentEndDate, nameof(model.RecruitmentEndDate),
+                "Recruitment end date (UK)");
 
-            if (ModelState["RecruitmentStartDate.Day"].Errors.Count == 0 &&
-                ModelState["RecruitmentStartDate.Month"].Errors.Count == 0 &&
-                ModelState["RecruitmentStartDate.Year"].Errors.Count == 0 &&
-                ModelState["RecruitmentEndDate.Day"].Errors.Count == 0 &&
-                ModelState["RecruitmentEndDate.Month"].Errors.Count == 0 &&
-                ModelState["RecruitmentEndDate.Year"].Errors.Count == 0)
+            if (startValid && endValid)
             {
                 DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+
                 if (model.RecruitmentEndDate.ToDateOnly() < today)
                 {
-                    ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must be in the future");
+                    ModelState.AddModelError("RecruitmentEndDate.Day",
+                        "Recruitment end date (UK) must be in the future");
                 }
 
                 if (model.RecruitmentStartDate.ToDateOnly() > model.RecruitmentEndDate.ToDateOnly())
                 {
-                    ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must be the same as or after Recruitment start date (UK)");
+                    ModelState.AddModelError("RecruitmentEndDate.Day",
+                        "Recruitment end date (UK) must be the same as or after Recruitment start date (UK)");
                 }
             }
 
             if (model.RecruitingIdentifiableVolunteers == null)
             {
-                ModelState.AddModelError("RecruitingIdentifiableVolunteers", "Select whether participants in the study will be recruited as named individual volunteers");
+                ModelState.AddModelError("RecruitingIdentifiableVolunteers",
+                    "Select whether participants in the study will be recruited as named individual volunteers");
             }
         }
     }
@@ -279,174 +283,73 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         return View(viewModel);
     }
 
-    public void ValidateRecruitmentDates(ResearcherStudyFormViewModel model)
+    public bool ValidateDate(GovUkDate value, string propertyPath, string propertyCaption)
     {
-        // Recruitment Start Date
-
-        if (model.RecruitmentStartDate.Day == null)
+        // All 3 values missing...
+        if (value.Day == null && value.Month == null && value.Year == null)
         {
-            ModelState.AddModelError("RecruitmentStartDate.Day", "Recruitment start date (UK) must include a day");
+            ModelState.AddModelError($"{propertyPath}.Day", $"Enter {propertyCaption}");
+            return false;
         }
 
-        if (model.RecruitmentStartDate.Month == null)
+        // 2 values missing...
+        if (value.Day != null && value.Month == null && value.Year == null)
         {
-            ModelState.AddModelError("RecruitmentStartDate.Month", "Recruitment start date (UK) must include a month");
+            ModelState.AddModelError($"{propertyPath}.Day", $"{propertyCaption} must include a month and year");
+            return false;
         }
 
-        if (model.RecruitmentStartDate.Year == null)
+        if (value.Day == null && value.Month != null && value.Year == null)
         {
-            ModelState.AddModelError("RecruitmentStartDate.Year", "Recruitment start date (UK) must include a year");
+            ModelState.AddModelError($"{propertyPath}.Day", $"{propertyCaption} must include a day and year");
+            return false;
         }
 
-        if (model.RecruitmentStartDate.Day != null && model.RecruitmentStartDate.Month == null && model.RecruitmentStartDate.Year == null)
+        if (value.Day == null && value.Month == null && value.Year != null)
         {
-            ClearRecruitmentStartDateStates();
-            ModelState.AddModelError("RecruitmentStartDate.Day", "Recruitment start date (UK) must include a month and year");
+            ModelState.AddModelError($"{propertyPath}.Day", $"{propertyCaption} must include a day and month");
+            return false;
         }
 
-        if (model.RecruitmentStartDate.Day == null && model.RecruitmentStartDate.Month != null && model.RecruitmentStartDate.Year == null)
+        // 1 values missing...
+        if (value.Day == null)
         {
-            ClearRecruitmentStartDateStates();
-            ModelState.AddModelError("RecruitmentStartDate.Day", "Recruitment start date (UK) must include a day and year");
+            ModelState.AddModelError($"{propertyPath}.Day", $"{propertyCaption} must include a day");
+            return false;
         }
 
-        if (model.RecruitmentStartDate.Day == null && model.RecruitmentStartDate.Month == null && model.RecruitmentStartDate.Year != null)
+        if (value.Month == null)
         {
-            ClearRecruitmentStartDateStates();
-            ModelState.AddModelError("RecruitmentStartDate.Day", "Recruitment start date (UK) must include a day and month");
+            ModelState.AddModelError($"{propertyPath}.Month", $"{propertyCaption} must include a month");
+            return false;
         }
 
-        int startDateErrorCount = 0;
-
-        if (model.RecruitmentStartDate.Day > 31)
+        if (value.Year == null)
         {
-            startDateErrorCount++;
-            ModelState.AddModelError("RecruitmentStartDate.Day", "Recruitment start date (UK) Day must be a real date");
+            ModelState.AddModelError($"{propertyPath}.Year", $"{propertyCaption} must include a year");
+            return false;
         }
 
-        if (model.RecruitmentStartDate.Month > 12)
+        // Numeric ranges...
+        if (value.Year < 1900 ||
+            value.Year > 9999 ||
+            value.Month < 1 ||
+            value.Month > 12 ||
+            value.Day < 1 ||
+            value.Day > DateTime.DaysInMonth(value.Year.Value, value.Month.Value))
         {
-            startDateErrorCount++;
-            ModelState.AddModelError("RecruitmentStartDate.Month", "Recruitment start date (UK) Month must be a real date");
+            ModelState.AddModelError($"{propertyPath}.Day", $"{propertyCaption} Day must be a real date");
+            return false;
         }
 
-        if (model.RecruitmentStartDate.Year.ToString().Length > 4)
-        {
-            startDateErrorCount++;
-            ModelState.AddModelError("RecruitmentStartDate.Year", "Recruitment start date (UK) Year must be 4 numbers");
-        }
-
-        if (model.RecruitmentStartDate.Year < 1900)
-        {
-            startDateErrorCount++;
-            ModelState.AddModelError("RecruitmentStartDate.Year", "Recruitment start date (UK) Year must be later than 1900");
-        }
-
-        if (startDateErrorCount > 1)
-        {
-            ClearRecruitmentStartDateStates();
-            ModelState.AddModelError("RecruitmentStartDate.Day", "Recruitment start date (UK) must be a real date");
-        }
-
-        if (model.RecruitmentStartDate.Day == null && model.RecruitmentStartDate.Month == null && model.RecruitmentStartDate.Year == null)
-        {
-            ClearRecruitmentStartDateStates();
-            ModelState.AddModelError("RecruitmentStartDate.Day", "Enter the recruitment start date (UK)");
-        }
-
-        // Recruitment End Date
-
-        if (model.RecruitmentEndDate.Day == null)
-        {
-            ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must include a day");
-        }
-
-        if (model.RecruitmentEndDate.Month == null)
-        {
-            ModelState.AddModelError("RecruitmentEndDate.Month", "Recruitment end date (UK) must include a month");
-        }
-
-        if (model.RecruitmentEndDate.Year == null)
-        {
-            ModelState.AddModelError("RecruitmentEndDate.Year", "Recruitment end date (UK) must include a year");
-        }
-
-        if (model.RecruitmentEndDate.Day != null && model.RecruitmentEndDate.Month == null && model.RecruitmentEndDate.Year == null)
-        {
-            ClearRecruitmentEndDateStates();
-            ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must include a month and year");
-        }
-
-        if (model.RecruitmentEndDate.Day == null && model.RecruitmentEndDate.Month != null && model.RecruitmentEndDate.Year == null)
-        {
-            ClearRecruitmentEndDateStates();
-            ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must include a day and year");
-        }
-
-        if (model.RecruitmentEndDate.Day == null && model.RecruitmentEndDate.Month == null && model.RecruitmentEndDate.Year != null)
-        {
-            ClearRecruitmentEndDateStates();
-            ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must include a day and month");
-        }
-
-        int endDateErrorCount = 0;
-
-        if (model.RecruitmentEndDate.Day > 31)
-        {
-            endDateErrorCount++;
-            ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) Day must be a real date");
-        }
-
-        if (model.RecruitmentEndDate.Month > 12)
-        {
-            endDateErrorCount++;
-            ModelState.AddModelError("RecruitmentEndDate.Month", "Recruitment end date (UK) Month must be a real date");
-        }
-
-        if (model.RecruitmentEndDate.Year.ToString().Length > 4)
-        {
-            endDateErrorCount++;
-            ModelState.AddModelError("RecruitmentEndDate.Year", "Recruitment end date (UK) Year must be 4 numbers");
-        }
-
-        if (model.RecruitmentEndDate.Year < 1900)
-        {
-            endDateErrorCount++;
-            ModelState.AddModelError("RecruitmentEndDate.Year", "Recruitment end date (UK) Year must be later than 1900");
-        }
-
-        if (endDateErrorCount > 1)
-        {
-            ClearRecruitmentEndDateStates();
-            ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must be a real date");
-        }
-
-        if (model.RecruitmentEndDate.Day == null && model.RecruitmentEndDate.Month == null && model.RecruitmentEndDate.Year == null)
-        {
-            ClearRecruitmentEndDateStates();
-            ModelState.AddModelError("RecruitmentEndDate.Day", "Enter the recruitment end date (UK)");
-        }
-    }
-
-    public void ClearRecruitmentStartDateStates()
-    {
-        ModelState["RecruitmentStartDate.Day"].Errors.Clear();
-        ModelState["RecruitmentStartDate.Month"].Errors.Clear();
-        ModelState["RecruitmentStartDate.Year"].Errors.Clear();
-    }
-
-    public void ClearRecruitmentEndDateStates()
-    {
-        ModelState["RecruitmentEndDate.Day"].Errors.Clear();
-        ModelState["RecruitmentEndDate.Month"].Errors.Clear();
-        ModelState["RecruitmentEndDate.Year"].Errors.Clear();
+        return true;
     }
 
     public async Task<IActionResult> Edit(int id, int field)
     {
         var studyModel = await context.Studies
-        .AsResearcherFormViewModel()
-        .FirstOrDefaultAsync(s => s.Id == id);
+            .AsResearcherFormViewModel()
+            .FirstOrDefaultAsync(s => s.Id == id);
 
         if (studyModel == null)
         {
@@ -468,7 +371,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
         [Bind("ShortName,ChiefInvestigator,StudySponsors,CPMSId,PortfolioSubmissionStatus,OutcomeOfSubmission," +
-        "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,RecruitingIdentifiableVolunteers,Step")]
+              "HasFunding,FundingCode,UKRecruitmentTarget,TargetPopulation,RecruitmentStartDate,RecruitmentEndDate,RecruitingIdentifiableVolunteers,Step")]
         ResearcherStudyFormViewModel model)
     {
         model.Id = id;
@@ -478,43 +381,6 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
         ModelState.Remove("IsRecruitingIdentifiableParticipants");
 
         ValidateMandatoryFields(model);
-
-        switch (model.Step)
-        {
-            case 2:
-                if (model.PortfolioSubmissionStatus == 1)
-                {
-                    model.OutcomeOfSubmission = null;
-                    model.Step = 3;
-                    return View(model);
-                }
-                break;
-            case 4:
-                if (model.HasFunding == true)
-                {
-                    model.FundingCode = string.Empty;
-                    model.Step = 5;
-                    return View(model);
-                }
-                break;
-        }
-
-        if (model.ShortName?.Length > 255)
-        {
-            ModelState.AddModelError("ShortName", "Study short name must be less than 255 characters");
-        }
-
-        ValidateRecruitmentDates(model);
-        DateOnly today = DateOnly.FromDateTime(DateTime.Now);
-        if (model.RecruitmentEndDate.ToDateOnly() < today)
-        {
-            ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must be in the future");
-        }
-
-        if (model.RecruitmentStartDate.ToDateOnly() > model.RecruitmentEndDate.ToDateOnly())
-        {
-            ModelState.AddModelError("RecruitmentEndDate.Day", "Recruitment end date (UK) must be the same as or after Recruitment start date (UK)");
-        }
 
         if (ModelState.IsValid)
         {
@@ -527,28 +393,56 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                     return NotFound();
                 }
 
-                if (model.HasFunding == false || model.HasFunding == null)
+                switch (model.Step)
                 {
-                    model.FundingCode = null;
-                }
+                    case 1:
+                        studyToUpdate.StudyName = model.ShortName;
+                        studyToUpdate.ChiefInvestigator = model.ChiefInvestigator;
+                        studyToUpdate.Sponsors = model.StudySponsors;
+                        break;
+                    case 2:
+                        if (model.PortfolioSubmissionStatus == 1)
+                        {
+                            model.Step = 3;
+                            model.OutcomeOfSubmission = null;
+                            return View(model);
+                        }
 
-                if (model.PortfolioSubmissionStatus != 1)
-                {
-                    model.OutcomeOfSubmission = null;
-                }
+                        studyToUpdate.SubmittedId = model.PortfolioSubmissionStatus;
+                        studyToUpdate.SubmissionOutcomeId = null;
+                        studyToUpdate.CpmsId = null;
+                        break;
+                    case 3:
+                        studyToUpdate.SubmittedId = 1;
+                        studyToUpdate.SubmissionOutcomeId = model.OutcomeOfSubmission;
+                        studyToUpdate.CpmsId = model.CPMSId;
+                        break;
+                    case 4:
+                        if (model.HasFunding == true)
+                        {
+                            model.Step = 5;
+                            model.FundingCode = string.Empty;
+                            return View(model);
+                        }
 
-                studyToUpdate.StudyName = model.ShortName;
-                studyToUpdate.CpmsId = model.CPMSId;
-                studyToUpdate.ChiefInvestigator = model.ChiefInvestigator;
-                studyToUpdate.Sponsors = model.StudySponsors;
-                studyToUpdate.SubmittedId = model.PortfolioSubmissionStatus;
-                studyToUpdate.SubmissionOutcomeId = model.OutcomeOfSubmission;
-                studyToUpdate.HasNihrFunding = model.HasFunding;
-                studyToUpdate.FundingCode = model.FundingCode;
-                studyToUpdate.RecruitmentTarget = model.UKRecruitmentTarget;
-                studyToUpdate.TargetPopulation = model.TargetPopulation;
-                studyToUpdate.RecruitmentStartDate = model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
-                studyToUpdate.RecruitmentEndDate = model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
+                        studyToUpdate.HasNihrFunding = model.HasFunding;
+                        studyToUpdate.FundingCode = null;
+                        break;
+                    case 5:
+                        studyToUpdate.HasNihrFunding = true;
+                        studyToUpdate.FundingCode = model.FundingCode;
+                        break;
+                    case 6:
+                        studyToUpdate.RecruitmentTarget = model.UKRecruitmentTarget;
+                        studyToUpdate.TargetPopulation = model.TargetPopulation;
+                        break;
+                    case 7:
+                        studyToUpdate.RecruitmentStartDate =
+                            model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
+                        studyToUpdate.RecruitmentEndDate =
+                            model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue);
+                        break;
+                }
 
                 await context.SaveChangesAsync();
             }

@@ -87,7 +87,7 @@ public static class Extensions
 
             if (!schemes.Contains(uri.Scheme, StringComparer.OrdinalIgnoreCase))
             {
-                context.AddFailure($"The link must start with {string.Join(" or ", schemes.Select(i => $"{i}://"))}");
+                context.AddFailure($"The link you entered isn’t in the correct format - it must start with {string.Join(" or ", schemes.Select(i => $"{i}://"))}");
             }
         });
     }
