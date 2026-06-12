@@ -174,12 +174,13 @@ public class VolunteerStudyInformationController : VsiControllerBase
         ModelState.Clear();
         new SiteSearchModelValidator().ValidateSpecificProperties(model, i => i.SearchTerm).AddToModelState(ModelState);
 
+        var parsedPostcode = ParsePostcode(model);
+        
         if (!ModelState.IsValid)
         {
             return View(model);
         }
         
-        var parsedPostcode = ParsePostcode(model.SearchTerm);
         model.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
         
         if (model.SearchResult.Length == 0)
@@ -201,10 +202,11 @@ public class VolunteerStudyInformationController : VsiControllerBase
         ModelState.Clear();
         new SiteSearchModelValidator().ValidateSpecificProperties(model, i => i.SelectedRtsId)
             .AddToModelState(ModelState);
+        
+        var parsedPostcode = ParsePostcode(model);
 
         if (!ModelState.IsValid)
         {
-            var parsedPostcode = ParsePostcode(model.SearchTerm);
             model.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
             return View(model);
         }
@@ -222,11 +224,12 @@ public class VolunteerStudyInformationController : VsiControllerBase
         return await AddSite(result, studyId, cancellationToken);
     }
     
-    public Postcode ParsePostcode(string modelPostcode)
+    public Postcode ParsePostcode(SiteSearchModel model)
     {
-        if (!Postcode.TryParse(modelPostcode, out var parsedPostcode))
+        if (!Postcode.TryParse(model.SearchTerm, out var parsedPostcode))
         {
-            throw new ArgumentException($"'{modelPostcode}' is not a valid postcode", nameof(modelPostcode));
+            ModelState.AddModelError(nameof(SiteSearchModel.SearchTerm),
+                "Please enter a valid postcode.");
         }
 
         return parsedPostcode;
