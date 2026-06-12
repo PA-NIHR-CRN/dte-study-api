@@ -27,7 +27,7 @@ public class TokenService : ITokenService
             _cacheKey,
             async entry =>
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(Convert.ToDouble(_settings.TokenCacheTimeSpanHours));
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(_settings.TokenCacheTtlMinutes);
 
                 return await RequestTokenAsync(cancellationToken);
             }) ?? throw new InvalidOperationException("Failed to obtain token");

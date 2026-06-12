@@ -38,8 +38,7 @@ public class RtsAddressSource : IRtsAddressSource
                    async entry =>
                    {
                        entry.AbsoluteExpirationRelativeToNow =
-                           TimeSpan.FromMinutes(
-                               Convert.ToDouble(_settings.AddressCacheTimeSpanMinutes));
+                           TimeSpan.FromMinutes(_settings.AddressCacheTtlMinutes);
 
                        var response = await SendWithTokenRetryAsync(
                            $"api/v2/Rts/GetOrganisationList?postcode={postcode}",
@@ -63,8 +62,7 @@ public class RtsAddressSource : IRtsAddressSource
             async entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow =
-                    TimeSpan.FromMinutes(
-                        Convert.ToDouble(_settings.AddressCacheTimeSpanMinutes));
+                    TimeSpan.FromMinutes(_settings.AddressCacheTtlMinutes);
 
                 var response = await SendWithTokenRetryAsync(
                     $"api/v2/Rts/GetOrganisationList?identifier={Uri.EscapeDataString(rtsAddressId)}",
