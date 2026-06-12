@@ -6,6 +6,7 @@ using BPOR.Rms.VolunteerInformation.Models;
 using BPOR.Rms.VolunteerInformation.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using NIHR.Infrastructure.AspNetCore;
 using NIHR.Infrastructure.AspNetCore.Validation;
 using NIHR.Rts.Client;
 
@@ -167,10 +168,9 @@ public class VolunteerStudyInformationController : VsiControllerBase
     public async Task<IActionResult> SiteSearch(
         [FromServices] IRtsAddressSource addressSource,
         [FromRoute] int studyId,
-        string searchTerm,
+        SiteSearchModel model,
         CancellationToken cancellationToken)
     {
-        SiteSearchModel model = new SiteSearchModel { SearchTerm = searchTerm };
         ModelState.Clear();
         new SiteSearchModelValidator().ValidateSpecificProperties(model, i => i.SearchTerm).AddToModelState(ModelState);
 
@@ -181,9 +181,10 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
         
-        model.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
+        SiteSearchResultsModel viewModel = new SiteSearchResultsModel(){SearchTerm = model.SearchTerm};
+        viewModel.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
         
-        if (model.SearchResult.Length == 0)
+        if (viewModel.SearchResult.Length == 0)
         {
             ModelState.AddModelError(nameof(SiteSearchModel.SearchTerm),
                 "The postcode you've entered cannot be found.");
@@ -196,11 +197,11 @@ public class VolunteerStudyInformationController : VsiControllerBase
     public async Task<IActionResult> SiteSearch(
         [FromServices] IRtsAddressSource addressSource,
         [FromRoute] int studyId,
-        SiteSearchModel model,
+        SiteSearchResultsModel model,
         CancellationToken cancellationToken)
     {
         ModelState.Clear();
-        new SiteSearchModelValidator().ValidateSpecificProperties(model, i => i.SelectedRtsId)
+        new SiteSearchResultsModelValidator().ValidateSpecificProperties(model, i => i.SelectedRtsId)
             .AddToModelState(ModelState);
         
         var parsedPostcode = ParsePostcode(model);

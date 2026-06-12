@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using BPOR.Domain;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.AspNetCore;
 using NIHR.Rts.Client.Settings;
 
 namespace NIHR.Rts.Client;
@@ -47,8 +48,15 @@ public class RtsAddressSource : IRtsAddressSource
                        var result = await response.Content.ReadFromJsonAsync<RtsResponse>(
                            cancellationToken: cancellationToken);
 
-                       return result?.Result.RtsOrganisations?.ToArray()
-                              ?? Array.Empty<RtsAddress>();
+                       var rtsAddresses = result?.Result.RtsOrganisations.ToArray() ?? [];
+
+                       foreach (var address in rtsAddresses)
+                       {
+                           _cache.Set(new AddressLookupCacheKey(address.Identifier), address,
+                               TimeSpan.FromMinutes(_settings.AddressCacheTtlMinutes));
+                       }
+                       
+                       return rtsAddresses;
                    })
                ?? Array.Empty<RtsAddress>();
     }

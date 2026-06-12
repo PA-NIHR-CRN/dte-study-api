@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace BPOR.Domain;
+namespace NIHR.Infrastructure.AspNetCore;
 
 public record Postcode
 {

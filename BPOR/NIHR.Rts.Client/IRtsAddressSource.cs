@@ -1,4 +1,5 @@
 ﻿using BPOR.Domain;
+using NIHR.Infrastructure.AspNetCore;
 
 namespace NIHR.Rts.Client;
 
