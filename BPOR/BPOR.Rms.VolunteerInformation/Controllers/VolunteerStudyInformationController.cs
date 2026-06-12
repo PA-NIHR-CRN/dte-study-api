@@ -171,17 +171,18 @@ public class VolunteerStudyInformationController : VsiControllerBase
         SiteSearchModel model,
         CancellationToken cancellationToken)
     {
+        SiteSearchResultsModel viewModel = new SiteSearchResultsModel(){SearchTerm = model.SearchTerm};
+        
         ModelState.Clear();
-        new SiteSearchModelValidator().ValidateSpecificProperties(model, i => i.SearchTerm).AddToModelState(ModelState);
+        new SiteSearchModelValidator().ValidateSpecificProperties(viewModel, i => i.SearchTerm).AddToModelState(ModelState);
 
-        var parsedPostcode = ParsePostcode(model);
+        var parsedPostcode = ParsePostcode(viewModel);
         
         if (!ModelState.IsValid)
         {
-            return View(model);
+            return View(viewModel);
         }
         
-        SiteSearchResultsModel viewModel = new SiteSearchResultsModel(){SearchTerm = model.SearchTerm};
         viewModel.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
         
         if (viewModel.SearchResult.Length == 0)
@@ -190,7 +191,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
                 "The postcode you've entered cannot be found.");
         }
 
-        return View(model);
+        return View(viewModel);
     }
 
     [HttpPost]
@@ -227,12 +228,8 @@ public class VolunteerStudyInformationController : VsiControllerBase
     
     public Postcode ParsePostcode(SiteSearchModel model)
     {
-        if (!Postcode.TryParse(model.SearchTerm, out var parsedPostcode))
-        {
-            ModelState.AddModelError(nameof(SiteSearchModel.SearchTerm),
-                "Please enter a valid postcode.");
-        }
-
+        Postcode.TryParse(model.SearchTerm, out var parsedPostcode);
+        
         return parsedPostcode;
     }
 
