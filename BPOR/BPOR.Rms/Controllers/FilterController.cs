@@ -9,6 +9,7 @@ using BPOR.Rms.Startup;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Domain.Enums;
 using BPOR.Rms.Services;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Controllers;
 
@@ -105,7 +106,7 @@ public class FilterController(ParticipantDbContext context,
             model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
 
             if (!model.ShowPreferredContactFilter) {
-                model.SelectedVolunteersPreferredContact = (int)ContactMethodId.Email;
+                model.SelectedVolunteersPreferredContact = (int)GovUkNotifyContactMethod.Email;
             }
         }
     }
@@ -115,8 +116,8 @@ public class FilterController(ParticipantDbContext context,
     {
         await PopulateStudyDetails(model, cancellationToken);
 
-        if (!model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Email) && 
-            !model.SelectedVolunteersPreferredContact.Equals((int)ContactMethodId.Letter) && 
+        if (!model.SelectedVolunteersPreferredContact.Equals((int)GovUkNotifyContactMethod.Email) && 
+            !model.SelectedVolunteersPreferredContact.Equals((int)GovUkNotifyContactMethod.Letter) && 
             model.ShowPreferredContactFilter)
         {
             ModelState.AddModelError(nameof(model.SelectedVolunteersPreferredContact), "Select if the volunteers preferred contact method is email or letter");
@@ -159,7 +160,7 @@ public class FilterController(ParticipantDbContext context,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
             StudyName = model.StudyName,
-            ContactMethod = (ContactMethodId)model.SelectedVolunteersPreferredContact,
+            ContactMethod = (GovUkNotifyContactMethod)model.SelectedVolunteersPreferredContact,
         };
 
         return RedirectToAction("Setup", "Campaign", campaignDetails);

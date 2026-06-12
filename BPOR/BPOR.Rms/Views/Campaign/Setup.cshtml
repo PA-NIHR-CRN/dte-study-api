@@ -1,5 +1,6 @@
 @using BPOR.Rms.Models.Email
 @using BPOR.Domain.Enums;
+@using NIHR.NotificationService.Enums
 @model SetupCampaignViewModel
 
 @{
@@ -30,7 +31,7 @@
         <input type="hidden" asp-for="ContactMethod" />
         <partial name="Partials/_TemplateSelect" />
 
-        @if (Model.ContactMethod == ContactMethodId.Email)
+        @if (Model.ContactMethod == GovUkNotifyContactMethod.Email)
         {
             <partial name="Partials/_Preview" />
         }

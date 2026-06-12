@@ -1,5 +1,6 @@
 @using BPOR.Domain.Enums
 @using NIHR.Infrastructure.Paging
+@using NIHR.NotificationService.Enums
 @model IEnumerable<BPOR.Rms.Models.Study.Campaign>
 
 @{
@@ -37,7 +38,7 @@
 
 
                 <td class="govuk-table__cell">
-                    @if (@campaign.TypeId == ContactMethodId.Letter)
+                    @if (@campaign.TypeId == GovUkNotifyContactMethod.Letter)
                     {
                         @:Not applicable
                     }
@@ -49,7 +50,7 @@
 
 
                 <td class="govuk-table__cell">
-                    @if (@campaign.TypeId == ContactMethodId.Letter)
+                    @if (@campaign.TypeId == GovUkNotifyContactMethod.Letter)
                     {
                         @:Not applicable
                     }

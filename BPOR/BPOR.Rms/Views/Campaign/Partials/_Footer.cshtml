@@ -3,12 +3,13 @@
 @using Microsoft.Extensions.Options
 @using BPOR.Rms.Models.Email
 @using BPOR.Domain.Enums;
+@using NIHR.NotificationService.Enums
 
 @model SetupCampaignViewModel
 @inject IOptions<RmsSettings> rmsOptions
 
 
-@if (Model.ContactMethod == ContactMethodId.Email)
+@if (Model.ContactMethod == GovUkNotifyContactMethod.Email)
 {
     <div class="govuk-inset-text">
         <strong>Please note:</strong> GOV UK Notify has an email allowance of 250,000 per day. This includes all email
@@ -31,7 +32,7 @@
     </p>
 }
 
-@if (Model.ContactMethod == ContactMethodId.Letter)
+@if (Model.ContactMethod == GovUkNotifyContactMethod.Letter)
 {
     <div class="govuk-inset-text">
         <strong>Please note:</strong> GOV UK Notify has a maximum daily limit of 20,000 letters. This includes all letter campaigns sent by our team.

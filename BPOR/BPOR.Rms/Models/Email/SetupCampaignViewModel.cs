@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using Humanizer;
+using NIHR.NotificationService.Enums;
 using Notify.Models.Responses;
 
 namespace BPOR.Rms.Models.Email;
@@ -17,7 +18,7 @@ public class SetupCampaignViewModel
 
     public string? StudyName { get; set; }
     public string? EmailAddress { get; set; }
-    public ContactMethodId ContactMethod { get; set; }
+    public GovUkNotifyContactMethod ContactMethod { get; set; }
 
     public int FilterCriteriaId { get; set; }
 
@@ -35,8 +36,8 @@ public class SetupCampaignViewModel
 
     public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries)?.Select(x => x.Trim()) ?? Enumerable.Empty<string>();
 
-    public string GetArticle(ContactMethodId method)
+    public string GetArticle(GovUkNotifyContactMethod method)
     {
-        return (method == ContactMethodId.Email) ? "an" : "a";
+        return (method == GovUkNotifyContactMethod.Email) ? "an" : "a";
     }
 }

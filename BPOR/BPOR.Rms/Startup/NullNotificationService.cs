@@ -1,4 +1,4 @@
-﻿using NIHR.NotificationService.Context;
+﻿using NIHR.NotificationService.Entities;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 using Notify.Models.Responses;
@@ -25,6 +25,16 @@ namespace BPOR.Rms.Startup
         public Task<TemplateList> GetTemplatesAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(new TemplateList());
+        }
+
+        public Task SendNotificationAsync(SendNotificationRequest notification, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ProcessDeliveryCallback(NotifyCallbackMessage message, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

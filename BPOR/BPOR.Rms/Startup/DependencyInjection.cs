@@ -19,7 +19,6 @@ using BPOR.Rms.VolunteerInformation;
 using Ganss.Xss;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Settings;
-using NIHR.NotificationService.Context;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
 using NIHR.NotificationService.Settings;
@@ -29,6 +28,9 @@ using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
 using NIHR.GovUk.AspNetCore.Mvc;
+using NIHR.Infrastructure.DependencyInjection;
+using NIHR.NotificationService;
+using NIHR.NotificationService.Entities;
 using NIHR.Rts.Client;
 
 namespace BPOR.Rms.Startup;
@@ -38,6 +40,8 @@ public static class DependencyInjection
     public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration,
         IHostEnvironment hostEnvironment)
     {
+        services.AddKeyedServiceDictionary();
+        
         services.AddSingleton(TimeProvider.System);
 
         services.AddControllersWithViews().AddRazorRuntimeCompilation();
@@ -70,8 +74,7 @@ public static class DependencyInjection
         services.AddTransient<IEmailService, EmailService>();
         services.AddTransient<ITransactionalEmailService, TransactionalEmailService>();
         services.GetSectionAndValidate<EmailSettings>(configuration);
-
-        services.AddTransient<INotificationService, NotificationService>();
+        
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
 
         services.AddDistributedMemoryCache();
@@ -128,12 +131,10 @@ public static class DependencyInjection
             return new RmsTaskQueue(100, rmsTaskQueueLogger);
         });
 
-        services.AddHostedService<HostedNotificationQueueService>();
         services.AddHostedService<HostedCampaignQueueService>();
-
-        var govNotifySettings = services.GetSectionAndValidate<NotificationServiceSettings>(configuration);
-        services.AddSingleton(new NotificationClient(govNotifySettings.Value.ApiKey));
-
+        
+        services.AddNotificationService();
+        
         services.AddGovUk(options =>
         {
             options.ServiceName = "Be Part of Research";
@@ -152,6 +153,8 @@ public static class DependencyInjection
 
         services.AddVolunteerInformation();
         services.AddSingleton<IRtsAddressSource, TestRtsAddressSource>();
+        services.AddKeyedScoped<INotificationStatusSink, CampaignParticipantNotificationStatusSink>(
+            CampaignParticipantNotificationStatusSink.Key);
 
         return services;
     }

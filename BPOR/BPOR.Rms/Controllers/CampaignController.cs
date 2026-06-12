@@ -17,6 +17,8 @@ using Notify.Exceptions;
 using Notify.Models.Responses;
 using BPOR.Rms.Exceptions;
 using BPOR.Rms.Constants;
+using NIHR.NotificationService;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Controllers;
 
@@ -77,7 +79,7 @@ public class CampaignController(
             var selectedTemplate =
                 model.Templates.First(t => t.id == model.SelectedTemplateId);
 
-            if (!Enum.TryParse<ContactMethodId>(selectedTemplate.type, true, out var contactMethod))
+            if (!Enum.TryParse<GovUkNotifyContactMethod>(selectedTemplate.type, true, out var contactMethod))
             {
                 throw new InvalidContactMethodException(selectedTemplate.type);
             }
@@ -118,7 +120,7 @@ public class CampaignController(
                 sendParams["contactMethod"] = campaign.TypeId;
                 templateId = "email-rms-campaign-sent"; // note: to be renamed in contentful after release as to not impact current production campaigns
             }
-            else if (campaign.TypeId == ContactMethodId.Letter)
+            else if (campaign.TypeId == GovUkNotifyContactMethod.Letter)
             {
                 notificationRecipients.Add(rmsOptions.Value.CampaignNotificationEmailAddress);
                 sendParams["templateName"] = selectedTemplate.name;
@@ -228,7 +230,7 @@ public class CampaignController(
                         EmailAddress = email,
                         TemplateId = model.SelectedTemplateId,
                         Personalisation = personalisationData[email],
-                        Reference = "PreviewEmailReference"
+                        Reference = new NotificationReference("PreviewEmailReference")
                     }, cancellationToken);
                 }
                 catch (NotifyClientException e)

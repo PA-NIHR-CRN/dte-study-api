@@ -1,30 +1,22 @@
-using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NIHR.NotificationService.Context;
+using NIHR.NotificationService.Entities;
+using NIHR.NotificationService.Enums;
 using NIHR.NotificationService.Interfaces;
-using BPOR.Domain.Enums;
-using BPOR.Rms.Constants;
+using NIHR.NotificationService.Models;
 
 namespace NIHR.NotificationService.Services
 {
-    public class HostedNotificationQueueService : BackgroundService
+    public class HostedNotificationQueueService(
+        ILogger<HostedNotificationQueueService> logger,
+        IServiceProvider serviceProvider)
+        : BackgroundService
     {
-        private readonly ILogger<HostedNotificationQueueService> _logger;
-        private readonly IServiceProvider _serviceProvider;
-
-        public HostedNotificationQueueService(ILogger<HostedNotificationQueueService> logger,
-            IServiceProvider serviceProvider)
-        {
-            _logger = logger;
-            _serviceProvider = serviceProvider;
-        }
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Hosted Notification Queue Service is running");
+            logger.LogInformation("Hosted Notification Queue Service is running");
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -34,7 +26,7 @@ namespace NIHR.NotificationService.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "An error occurred while processing notifications");
+                    logger.LogError(ex, "An error occurred while processing notifications");
                 }
 
                 // Wait for a certain period before polling again
@@ -44,9 +36,8 @@ namespace NIHR.NotificationService.Services
 
         private async Task ProcessNotificationsAsync(CancellationToken stoppingToken)
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
-            var participantDbContext = scope.ServiceProvider.GetRequiredService<ParticipantDbContext>();
 
             var notifications = await context.Notifications
                 .Where(n => !n.IsProcessed)
@@ -56,68 +47,111 @@ namespace NIHR.NotificationService.Services
 
             if (notifications.Count > 0)
             {
-                _logger.LogInformation("Processing {NotificationsCount} notifications", notifications.Count);
+                logger.LogInformation("Processing {NotificationsCount} notifications", notifications.Count);
 
                 var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
                 try
                 {
-                    await notificationService.SendBatchNotificationAsync(notifications, stoppingToken);
-
                     foreach (var notification in notifications)
                     {
-                        await UpdateDeliveryStatusForLetterAsync(notification, participantDbContext);
+                        var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
+                        var sendNotificationRequest = CreateSendNotificationRequest(personalisation);
+                        await notificationService.SendNotificationAsync(sendNotificationRequest, stoppingToken);
                         notification.IsProcessed = true;
+                        await context.SaveChangesAsync(stoppingToken); // Persist IsProcessed on a per-record basis
                     }
 
-
-                    await context.SaveChangesAsync(stoppingToken);
-                    await participantDbContext.SaveChangesAsync(stoppingToken);
 
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred while sending notification emails");
+                    logger.LogError(ex, "Error occurred while sending notification emails");
                 }
             }
         }
 
-        public override async Task StopAsync(CancellationToken stoppingToken)
+        private static SendNotificationRequest CreateSendNotificationRequest(Dictionary<string, string> personalisation)
         {
-            _logger.LogInformation("Hosted Notification Queue Service is stopping");
-            await base.StopAsync(stoppingToken);
+            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignParticipantId, out var reference))
+            {
+                throw new KeyNotFoundException("campaignParticipantId not found in personalisation data.");
+            }
+
+            if (!personalisation.TryGetValue(PersonalisationKeys.TemplateId, out var templateId))
+            {
+                throw new KeyNotFoundException("templateId not found in personalisation data.");
+            }
+
+            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignTypeId, out var campaignTypeIdStr))
+            {
+                throw new KeyNotFoundException("campaignTypeId not found in personalisation data.");
+            }
+
+            if (!int.TryParse(campaignTypeIdStr, out var campaignTypeId))
+            {
+                throw new ArgumentException($"campaignTypeId '{campaignTypeIdStr}' is not a valid integer.");
+            }
+
+            var request = new SendNotificationRequest
+            {
+                TemplateId = templateId,
+                Personalisation = personalisation,
+                Reference = new NotificationReference("CampaignSendOut", reference),
+                ContactMethod = (GovUkNotifyContactMethod)campaignTypeId
+            };
+
+            var contactMethod = (GovUkNotifyContactMethod)int.Parse(personalisation[PersonalisationKeys.CampaignTypeId]);
+
+            switch (contactMethod)
+            {
+                case GovUkNotifyContactMethod.Email:
+                    if (!request.Personalisation.TryGetValue("email", out var email) ||
+                        string.IsNullOrWhiteSpace(email))
+                    {
+                        throw new ArgumentException(
+                            "EmailAddress is required in personalisation for email notifications.");
+                    }
+
+                    request.EmailAddress = email;
+                    break;
+
+                case GovUkNotifyContactMethod.Letter:
+                    if (!personalisation.TryGetValue("address_line_1", out var addressLine1) ||
+                        !personalisation.TryGetValue("address_line_5", out var town) ||
+                        !personalisation.TryGetValue("address_line_6", out var postcode))
+                    {
+                        throw new KeyNotFoundException("Letter notifications require at least 3 address lines");
+                    }
+
+                    request.Personalisation["address_line_1"] = addressLine1;
+
+                    for (int i = 2; i <= 4; i++) // assign optional address fields
+                    {
+                        var key = $"address_line_{i}";
+                        if (personalisation.TryGetValue(key, out var value))
+                        {
+                            request.Personalisation[key] = value;
+                        }
+                    }
+
+                    request.Personalisation["address_line_5"] = town;
+                    request.Personalisation["address_line_6"] = postcode;
+                    request.Personalisation["address_postcode"] = postcode;
+                    break;
+
+                default:
+                    throw new NotSupportedException($"Contact method {contactMethod} is not supported.");
+            }
+
+            return request;
         }
 
-        private async Task UpdateDeliveryStatusForLetterAsync(Notification notification, ParticipantDbContext context)
+
+        public override async Task StopAsync(CancellationToken stoppingToken)
         {
-            var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
-
-            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignTypeId, out var ctValue)
-                || !int.TryParse(ctValue, out var campaignType)
-                || campaignType != (int)ContactMethodId.Letter)
-            {
-                return;
-            }
-
-            if (!personalisation.TryGetValue(PersonalisationKeys.CampaignParticipantId, out var campaignParticipantIdValue)
-                || !int.TryParse(campaignParticipantIdValue, out var campaignParticipantId))
-            {
-                _logger.LogWarning(
-                    "Notification ID {NotificationId}: Missing or invalid campaignParticipantId: '{CampaignParticipantIdValue}'",
-                    notification.Id,
-                    campaignParticipantIdValue);
-                return;
-            }
-
-            var participant = await context.CampaignParticipant.FirstOrDefaultAsync(x => x.Id == campaignParticipantId);
-            if (participant == null)
-            {
-                _logger.LogWarning("Notification ID {NotificationId}: Participant ID {ParticipantId} not found", notification.Id, campaignParticipantId);
-                return;
-            }
-
-            participant.DeliveredAt = DateTime.UtcNow;
-            participant.DeliveryStatusId = (int)DeliveryStatus.Delivered;
+            logger.LogInformation("Hosted Notification Queue Service is stopping");
+            await base.StopAsync(stoppingToken);
         }
     }
 }

@@ -1,5 +1,6 @@
 @using BPOR.Rms.Models.Email
 @using BPOR.Domain.Enums;
+@using NIHR.NotificationService.Enums
 @model BPOR.Rms.Models.Email.EmailSuccessViewModel
 
 @{
@@ -8,7 +9,7 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.StudyName))
 {
-    @if (Model.ContactMethod == ContactMethodId.Email)
+    @if (Model.ContactMethod == GovUkNotifyContactMethod.Email)
     {
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-one-half-from-desktop">
@@ -20,7 +21,7 @@
             </div>
         </div>
     }
-    @if (Model.ContactMethod == ContactMethodId.Letter)
+    @if (Model.ContactMethod == GovUkNotifyContactMethod.Letter)
     {
 
         <div class="govuk-grid-row">

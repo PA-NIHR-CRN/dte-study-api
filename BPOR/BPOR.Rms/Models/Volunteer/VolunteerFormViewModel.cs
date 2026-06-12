@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using NIHR.Infrastructure;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Models.Volunteer;
 
@@ -86,9 +87,9 @@ public class VolunteerFormViewModel : IValidatableObject
     public bool ManualAddressEntry { get; set; }
     public string? lastAction { get; set; }
 
-    public List<ContactMethodId> GetPrefferdContactMethodValues{
+    public List<GovUkNotifyContactMethod> GetPrefferdContactMethodValues{
         get { 
-        return Enum.GetValues<ContactMethodId>().ToList();
+        return Enum.GetValues<GovUkNotifyContactMethod>().ToList();
         }
 
     }
@@ -175,7 +176,7 @@ public class VolunteerFormViewModel : IValidatableObject
         {
             yield return new ValidationResult("Enter a mobile phone number in the correct format, like 07700 900 982", [nameof(Mobile)]);
         }
-        if (PreferredContactMethod != null && PreferredContactMethod == (int)ContactMethodId.Email && String.IsNullOrEmpty(EmailAddress))
+        if (PreferredContactMethod != null && PreferredContactMethod == (int)GovUkNotifyContactMethod.Email && String.IsNullOrEmpty(EmailAddress))
         {
             yield return new ValidationResult("Email address cannot be blank", [nameof(EmailAddress)]);
         }

@@ -3,6 +3,7 @@ using BPOR.Rms.Models;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Enums;
 using NIHR.Infrastructure.Paging;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Controllers;
 
@@ -17,7 +18,7 @@ public class NonStudyCampaignsController(
         var campaigns = await context.FilterCriterias
             .Where(fc => fc.StudyId == null)
             .SelectMany(fc => fc.Campaign)
-            .Where(cp => cp.TypeId == ContactMethodId.Email)
+            .Where(cp => cp.TypeId == GovUkNotifyContactMethod.Email)
             .AsCampaignModel()
             .OrderByDescending(ec => ec.CreatedAt)
             .PageAsync(paginationService, cancellationToken);

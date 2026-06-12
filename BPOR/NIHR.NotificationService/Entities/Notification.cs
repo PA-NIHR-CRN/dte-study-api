@@ -1,4 +1,4 @@
-namespace NIHR.NotificationService.Context;
+namespace NIHR.NotificationService.Entities;
 
 public class Notification
 {

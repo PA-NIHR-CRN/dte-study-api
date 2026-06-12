@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Enums;
 using BPOR.Rms.Models.PreScreenerEligibility;
 using BPOR.Rms.Models.Volunteer;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Models.Study;
 
@@ -50,7 +51,7 @@ public class Campaign
     public int TotalCampaignNotificationsSent => CampaignParticipants.Where(e => e.DeliveryStatusId == 3).Count();
     public int TotalContactAttemptsFailed => CampaignParticipants.Where(e => e.DeliveryStatusId == 5).Count();
     public int TotalCampaignRegisteredInterest => CampaignParticipants.Where(p => p.RegisteredInterestAt != null).Count();
-    public ContactMethodId TypeId { get; set; }
+    public GovUkNotifyContactMethod TypeId { get; set; }
 
 }
 

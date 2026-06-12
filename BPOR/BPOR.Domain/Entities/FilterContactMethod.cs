@@ -1,4 +1,5 @@
 ﻿using BPOR.Domain.Entities.RefData;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Domain.Entities
 {
@@ -7,6 +8,6 @@ namespace BPOR.Domain.Entities
         public int Id { get; set; }
         public int FilterCriteriaId { get; set; }
         public int ContactMethodId { get; set; }
-        public ContactMethod ContactMethod { get; set; }
+        public GovUkNotifyContactMethod ContactMethod { get; set; }
     }
 }

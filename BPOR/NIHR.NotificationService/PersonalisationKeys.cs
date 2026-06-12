@@ -1,4 +1,4 @@
-namespace BPOR.Rms.Constants;
+namespace NIHR.NotificationService;
 
 public static class PersonalisationKeys
 {
@@ -10,5 +10,4 @@ public static class PersonalisationKeys
     public const string TemplateId = "templateId";
     public const string UniqueReference = "uniqueReference";
     public const string Email = "email";
-
 }

@@ -14,13 +14,15 @@ using NIHR.Infrastructure;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 using NIHR.Infrastructure.Interfaces;
 using Polly;
-using NIHR.NotificationService.Context;
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Extensions;
+using NIHR.NotificationService;
+using NIHR.NotificationService.Entities;
+using NIHR.NotificationService.Enums;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -252,12 +254,12 @@ public class CampaignService(
 
             switch (campaign.TypeId)
             {
-                case ContactMethodId.Email:
+                case GovUkNotifyContactMethod.Email:
                     notification.PrimaryIdentifier = volunteer.Email;
                     notification.NotificationDatas.Add(new NotificationData { Key = PersonalisationKeys.Email, Value = volunteer.Email });
                     break;
 
-                case ContactMethodId.Letter:
+                case GovUkNotifyContactMethod.Letter:
 
                     notification.PrimaryIdentifier = $"ParticipantAddress({volunteer.Address.Id})";
 
@@ -295,7 +297,7 @@ public class CampaignService(
         await notificationContext.SaveChangesAsync(cancellationToken);
     }
 
-    private IEnumerable<ValidationResult> ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, ContactMethodId campaignTypeId)
+    private IEnumerable<ValidationResult> ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, GovUkNotifyContactMethod campaignTypeId)
     {
         if (string.IsNullOrWhiteSpace(volunteer.FirstName))
             yield return new ValidationResult("FirstName cannot be null, empty or whitespace");
@@ -304,11 +306,11 @@ public class CampaignService(
 
         switch (campaignTypeId)
         {
-            case ContactMethodId.Email:
+            case GovUkNotifyContactMethod.Email:
                 if (string.IsNullOrWhiteSpace(volunteer.Email))
                     yield return new ValidationResult("Email cannot be null, empty or whitespace");
                 break;
-            case ContactMethodId.Letter:
+            case GovUkNotifyContactMethod.Letter:
                 if (volunteer.Address == null)
                     yield return new ValidationResult("Address cannot be null");
                 else

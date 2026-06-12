@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using BPOR.Domain.Entities.RefData;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using BPOR.Domain.Enums;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Domain.Entities;
 
@@ -10,7 +12,7 @@ public class Campaign : IAudit, ISoftDelete
     public int Id { get; set; }
     public int FilterCriteriaId { get; set; }
     public Guid TemplateId { get; set; }
-    public ContactMethodId TypeId { get; set; }
+    public GovUkNotifyContactMethod TypeId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? PreviewRecipients { get; set; }

@@ -16,6 +16,7 @@
       <ProjectReference Include="..\BPOR.Rms.Abstractions\BPOR.Rms.Abstractions.csproj" />
       <ProjectReference Include="..\NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj" />
       <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
+      <ProjectReference Include="..\NIHR.NotificationService\NIHR.NotificationService.csproj" />
       <ProjectReference Include="..\NIHR.Rts.Client\NIHR.Rts.Client.csproj" />
     </ItemGroup>
 
