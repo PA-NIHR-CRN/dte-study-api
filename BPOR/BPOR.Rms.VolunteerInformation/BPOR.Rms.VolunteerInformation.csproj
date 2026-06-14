@@ -33,6 +33,8 @@
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       </EmbeddedResource>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -46,5 +48,4 @@
     <ItemGroup>
       <UpToDateCheckInput Remove="Views\VolunteerStudyInformation\Shared\_ContactEditor.cshtml" />
     </ItemGroup>
-
 </Project>

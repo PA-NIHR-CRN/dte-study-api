@@ -4,7 +4,6 @@ using BPOR.Domain.Entities.System;
 using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure.Exceptions;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace BPOR.Domain.Entities;
 
@@ -16,9 +15,8 @@ public class ParticipantDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        
         base.OnConfiguring(optionsBuilder);
-        
+
         optionsBuilder.UseNihrConventions(options =>
         {
             // For backwards compatibility with existing VS reporting schema,
@@ -57,6 +55,7 @@ public class ParticipantDbContext : DbContext
     public DbSet<StudyResearcherEmail> StudyResearcherEmails { get; set; } = null!;
     public DbSet<User> User { get; set; } = null!;
     public DbSet<UserRole> UserRole { get; set; } = null!;
+    
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
