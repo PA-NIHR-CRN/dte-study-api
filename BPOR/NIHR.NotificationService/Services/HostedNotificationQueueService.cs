@@ -97,7 +97,7 @@ namespace NIHR.NotificationService.Services
             {
                 TemplateId = templateId,
                 Personalisation = personalisation,
-                Reference = new NotificationReference("CampaignSendOut", reference),
+                Reference = new NotificationReference("CMP", reference),
                 ContactMethod = (GovUkNotifyContactMethod)campaignTypeId
             };
 

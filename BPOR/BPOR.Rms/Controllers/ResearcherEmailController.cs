@@ -3,9 +3,10 @@ using BPOR.Domain.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.ResearcherEmail;
 using BPOR.Rms.Startup;
-using Microsoft.AspNetCore.Authorization;
+using BPOR.Rms.VolunteerInformation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NIHR.NotificationService.Interfaces;
 
 namespace BPOR.Rms.Controllers;
 
@@ -43,7 +44,10 @@ public class ResearcherEmailController(ParticipantDbContext context,
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendEmail(ResearcherEmailViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> SendEmail(
+        [FromServices] INotificationService<ResearcherEmailNotificationDeliveryHandler> notificationService,
+        ResearcherEmailViewModel model,
+        CancellationToken cancellationToken)
     {
         bool isAdmin = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Admin);
         if (!isAdmin)
@@ -106,6 +110,26 @@ public class ResearcherEmailController(ParticipantDbContext context,
 
         context.StudyResearcherEmails.Add(studyResearcherEmail);
         await context.SaveChangesAsync(cancellationToken);
+
+        string templateId = model.SelectedEmailId switch
+        {
+            1 => "ResearcherIntroductoryEmail",
+            2 => "ResearcherVipReadyWithPrescreenerEmail",
+            3 => "ResearcherVipReadyWithoutPrescreenerEmail",
+            _ => throw new ArgumentOutOfRangeException(nameof(model.SelectedEmailId), model.SelectedEmailId, null)
+        };
+
+        await notificationService.SendEmail(studyResearcherEmail.Id.ToString(),
+            new Dictionary<string, string>()
+            {
+                ["RmsStudyId"] = study.Id.ToString(),
+                ["StudyName"] = study.FullName,
+                ["SenderName"] = User.Identity.Name,
+                ["VipGoogleDocUrl"] = "https://docs.google.com/document/d/11diU2-gtufQ5UjwWqrggQrFgv7XVCz8rADXCJde28-s/edit?usp=sharing"
+            },
+            templateId,
+            study.EmailAddress,
+            cancellationToken);
         
         return RedirectToAction(
             "Details",

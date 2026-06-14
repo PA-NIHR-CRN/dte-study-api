@@ -7,10 +7,10 @@ using NIHR.NotificationService.Interfaces;
 
 namespace BPOR.Rms.Services;
 
-public class CampaignParticipantNotificationStatusSink(
+public class CampaignParticipantNotificationDeliveryHandler(
     ParticipantDbContext context,
     IRefDataService refDataService,
-    ILogger<CampaignParticipantNotificationStatusSink> logger) : INotificationStatusSink
+    ILogger<CampaignParticipantNotificationDeliveryHandler> logger) : INotificationDeliveryHandler
 {
     public const string Key = "CMP";
     

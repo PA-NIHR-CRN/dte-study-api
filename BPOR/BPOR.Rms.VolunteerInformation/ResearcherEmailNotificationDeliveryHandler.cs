@@ -7,10 +7,9 @@ using DeliveryStatus = BPOR.Domain.Enums.DeliveryStatus;
 
 namespace BPOR.Rms.VolunteerInformation;
 
-public class ResearcherEmailNotificationStatusSink(ParticipantDbContext db) : INotificationStatusSink
+public class ResearcherEmailNotificationDeliveryHandler(ParticipantDbContext db) 
+    : INotificationDeliveryHandler<ResearcherEmailNotificationDeliveryHandler>
 {
-    public const string Key = "RSR";
-    
     public async Task HandleStatusChanged(string reference, NotificationDeliveryStatus currentStatus,
         CancellationToken cancellationToken)
     {
@@ -38,4 +37,6 @@ public class ResearcherEmailNotificationStatusSink(ParticipantDbContext db) : IN
             await db.SaveChangesAsync(cancellationToken);
         }
     }
+
+    public static string Key { get; } = "RSR";
 }

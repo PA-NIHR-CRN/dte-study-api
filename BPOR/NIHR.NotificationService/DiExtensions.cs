@@ -21,4 +21,11 @@ public static class DiExtensions
             return new NotificationClient(options.Value.ApiKey);
         });
     }
+
+    public static void AddNotificationDeliveryHandler<THandler>(this IServiceCollection services)
+        where THandler : class, INotificationDeliveryHandler<THandler>
+    {
+        services.AddKeyedScoped<INotificationDeliveryHandler, THandler>(THandler.Key);
+        services.AddScoped<INotificationService<THandler>, NotificationServiceForHandler<THandler>>();
+    }
 }

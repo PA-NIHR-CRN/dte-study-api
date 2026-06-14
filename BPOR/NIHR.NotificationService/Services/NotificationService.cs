@@ -12,10 +12,10 @@ namespace NIHR.NotificationService.Services
     {
         private readonly NotificationClient _client;
         private readonly ILogger<NotificationService> _logger;
-        private readonly IReadOnlyDictionary<string, INotificationStatusSink> _notificationStatusSinks;
+        private readonly IReadOnlyDictionary<string, INotificationDeliveryHandler> _notificationStatusSinks;
 
         public NotificationService(NotificationClient client, ILogger<NotificationService> logger,
-            IReadOnlyDictionary<string, INotificationStatusSink> notificationStatusSinks)
+            IReadOnlyDictionary<string, INotificationDeliveryHandler> notificationStatusSinks)
         {
             _client = client;
             _logger = logger;
