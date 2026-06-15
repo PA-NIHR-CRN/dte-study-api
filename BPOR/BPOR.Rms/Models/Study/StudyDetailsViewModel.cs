@@ -70,4 +70,6 @@ public class ResearcherEmail
     public string? EmailTemplate { get; set; }
     public DateTime SentAt { get; set; }
     public int? DeliveryStatusId { get; set; }
+    public int StudyId { get; set; }
+    public int EmailTemplateId { get; set; }
 }

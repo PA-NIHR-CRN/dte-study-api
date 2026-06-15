@@ -59,11 +59,23 @@
                     }
                 </td>
                 <td class="govuk-table__cell">
-                    <a class="govuk-link"
-                       asp-action="Resend"
-                       asp-route-id="">
-                        Resend
-                    </a>
+                    <form asp-controller="ResearcherEmail"
+                          asp-action="SendEmail"
+                          method="post"
+                          style="display:inline;">
+                        
+                        <input type="hidden" name="StudyId" value="@email.StudyId" />
+                        <input type="hidden" name="SelectedEmailId" value="@email.EmailTemplateId" />
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="govuk-link"
+                                style="background:none;border:none;padding:0;cursor:pointer;">
+                            Resend
+                        </button>
+
+                    </form>
                 </td>
             </tr>
         }
