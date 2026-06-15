@@ -7,14 +7,14 @@ namespace BPOR.Rms.VolunteerInformation.Data;
 
 public interface IVsiRepository
 {
-    Task<VsiPage?> GetCurrentVsi(int studyId,
+    Task<VsiPage?> GetPage(int studyId,
         CancellationToken cancellationToken);
 
-    Task<T?> GetCurrentVsi<T>(long studyId,
+    Task<T?> GetPage<T>(long studyId,
         Expression<Func<VsiPage, T>> selector,
         CancellationToken cancellationToken);
 
-    Task<T?> GetCurrentVsiGroup<T>(long studyId, long groupId,
+    Task<T?> GetGroup<T>(long studyId, long groupId,
         Expression<Func<VsiGroup, T>> selector,
         CancellationToken cancellationToken);
 
@@ -27,9 +27,13 @@ public interface IVsiRepository
     Task<bool> RemoveSite(int studyId, int siteId, CancellationToken cancellationToken);
     Task<int?> CreateGroup(int studyId, string groupName, CancellationToken cancellationToken);
     Task<int?> CreateSite(int studyId, VsiSite newSite, CancellationToken cancellationToken);
-    Task CreateVsi(int studyId, VsiStatus status, CancellationToken cancellationToken);
+    Task CreatePage(int studyId, VsiStatus status, CancellationToken cancellationToken);
+    Task CreatePage(int studyId, VsiPage data, CancellationToken cancellationToken);
+    
+    Task ResetPage(int studyId, CancellationToken cancellationToken);
 
     Task<int?> CreateContact(int studyId, VsiContact newContact,
         CancellationToken cancellationToken);
     Task<bool> RemoveContact(int studyId, int contactId, CancellationToken cancellationToken);
+    Task<VsiStatus?> GetVipStatus(int studyId, CancellationToken cancellationToken);
 }

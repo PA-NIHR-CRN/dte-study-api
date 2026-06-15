@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 
-namespace BPOR.Infrastructure.Authentication;
+namespace NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
 
 public sealed class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
 {
     public const string DefaultScheme = "ApiKey";
     public const string HeaderName = "Authorization";
-
-    public string ApiKey { get; set; }
+    
+    public List<FixedApiKey> FixedApiKeys { get; set; }
 }

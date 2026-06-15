@@ -64,8 +64,11 @@ public class ResearcherEmailController(ParticipantDbContext context,
         
         var study = await context.Studies
             .Where(s => s.Id == model.StudyId)
-            .Select(s => new Study
+            .Select(s => new
             {
+                Id = s.Id,
+                StudyName = s.StudyName,
+                FullName = s.FullName,
                 EmailAddress = s.EmailAddress,
                 HasMultipleResearchLocations = s.HasMultipleResearchLocations,
                 SinglePersonResponsibleForRecruiting = s.SinglePersonResponsibleForRecruiting
@@ -113,9 +116,9 @@ public class ResearcherEmailController(ParticipantDbContext context,
 
         string templateId = model.SelectedEmailId switch
         {
-            1 => "ResearcherIntroductoryEmail",
-            2 => "ResearcherVipReadyWithPrescreenerEmail",
-            3 => "ResearcherVipReadyWithoutPrescreenerEmail",
+            1 => "1994ffdf-71e1-4b63-8895-6e09b7fadda4",
+            2 => "ab9dfbf4-53ca-4853-bf62-c22e4650a0de",
+            3 => "96c407c6-f373-48b0-a90b-f4ba56e55be9",
             _ => throw new ArgumentOutOfRangeException(nameof(model.SelectedEmailId), model.SelectedEmailId, null)
         };
 
@@ -123,8 +126,9 @@ public class ResearcherEmailController(ParticipantDbContext context,
             new Dictionary<string, string>()
             {
                 ["RmsStudyId"] = study.Id.ToString(),
-                ["StudyName"] = study.FullName,
-                ["SenderName"] = User.Identity.Name,
+                ["StudyName"] = study.StudyName,
+                ["SenderName"] = currentUserProvider?.User?.ContactFullName ?? "BPOR Team",
+                ["RecipientName"] = study.FullName ?? "Researcher",
                 ["VipGoogleDocUrl"] = "https://docs.google.com/document/d/11diU2-gtufQ5UjwWqrggQrFgv7XVCz8rADXCJde28-s/edit?usp=sharing"
             },
             templateId,

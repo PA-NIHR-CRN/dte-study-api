@@ -2,9 +2,18 @@ using NIHR.NotificationService.Enums;
 
 namespace NIHR.NotificationService.Models;
 
-public class SendNotificationRequest
+public class SendNotificationRequest : SendNotificationRequestBase
 {
     public NotificationReference Reference { get; set; }
+}
+
+public class UnkeyedSendNotificationRequest: SendNotificationRequestBase
+{
+    public string Reference { get; set; }
+}
+
+public class SendNotificationRequestBase
+{
     public Dictionary<string, string> Personalisation { get; set; } = new Dictionary<string, string>();
     public string TemplateId { get; set; } = string.Empty;
     public string? EmailAddress { get; set; }

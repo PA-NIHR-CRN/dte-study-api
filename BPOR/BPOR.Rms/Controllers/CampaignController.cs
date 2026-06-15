@@ -225,8 +225,9 @@ public class CampaignController(
             {
                 try
                 {
-                    await notificationService.SendPreviewEmailAsync(new SendNotificationRequest
+                    await notificationService.SendNotification(new SendNotificationRequest
                     {
+                        ContactMethod = GovUkNotifyContactMethod.Email,
                         EmailAddress = email,
                         TemplateId = model.SelectedTemplateId,
                         Personalisation = personalisationData[email],
@@ -264,7 +265,7 @@ public class CampaignController(
             return JsonConvert.DeserializeObject<TemplateList>(jsonData).templates;
         }
 
-        var templates = await notificationService.GetTemplatesAsync(cancellationToken);
+        var templates = await notificationService.GetTemplates(cancellationToken);
         await CacheTemplates(templates, cancellationToken);
         return templates.templates;
     }

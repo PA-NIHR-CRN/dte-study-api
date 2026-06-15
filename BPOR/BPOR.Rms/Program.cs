@@ -17,8 +17,6 @@ builder.AddIdgAuthentication(authOptions =>
     }
 );
 
-builder.Services.AddVolunteerInformationPages();
-
 builder.AddAWSSystemsManagerDataProtection("/BPOR/RMS");
 
 builder.Services.RegisterServices(builder.Configuration, builder.Environment);

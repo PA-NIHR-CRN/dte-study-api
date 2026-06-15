@@ -17,7 +17,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
     public async Task<IActionResult> CreateCriterion(int studyId, int groupId, VsiGroupCriteronType type, 
         CancellationToken cancellationToken)
     {
-        var group = await vsiRepository.GetCurrentVsiGroup(studyId, groupId,
+        var group = await vsiRepository.GetGroup(studyId, groupId,
             i => new VsiGroupModel()
             {
                 Id = i.Id,
@@ -36,7 +36,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
         [FromForm] CreateCriterionPostbackModel model,
         CancellationToken cancellationToken)
     {
-        var group = await vsiRepository.GetCurrentVsiGroup(studyId, groupId, i => i, cancellationToken);
+        var group = await vsiRepository.GetGroup(studyId, groupId, i => i, cancellationToken);
 
         (await new CreateCriterionModelValidator().ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
         if (!ModelState.IsValid)
@@ -60,7 +60,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
         int studyId, int groupId, VsiGroupCriteronType type,
         CancellationToken cancellationToken)
     {
-        var group = await vsiRepository.GetCurrentVsiGroup(studyId, groupId, 
+        var group = await vsiRepository.GetGroup(studyId, groupId, 
                 i => new VsiGroupModel()
                 {
                     Id = i.Id,
@@ -129,7 +129,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
     public async Task<IActionResult> CreateGroupCheck(int studyId, int groupId,
         CancellationToken cancellationToken)
     {
-        var group = await vsiRepository.GetCurrentVsiGroup(studyId, groupId, i => new VsiGroupModel()
+        var group = await vsiRepository.GetGroup(studyId, groupId, i => new VsiGroupModel()
                 {
                     Id = i.Id,
                     Name = i.Name

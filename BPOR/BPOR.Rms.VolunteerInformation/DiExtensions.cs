@@ -1,4 +1,8 @@
+using BPOR.Rms.VolunteerInformation.Data;
+using BPOR.Rms.VolunteerInformation.Services;
+using BPOR.Rms.VolunteerInformation.Settings;
 using Microsoft.Extensions.DependencyInjection;
+using NIHR.NotificationService;
 
 namespace BPOR.Rms.VolunteerInformation;
 
@@ -15,5 +19,7 @@ public static class DiExtensions
         services.AddOptions<VsiSettings>().BindConfiguration("Vsi");
 
         services.AddNotificationDeliveryHandler<ResearcherEmailNotificationDeliveryHandler>();
+
+        services.AddScoped<InternalVipTokenService>();
     }
 }

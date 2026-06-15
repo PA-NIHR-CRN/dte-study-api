@@ -9,16 +9,19 @@ public interface INotificationService<THandler>
 {
     Task SendEmail(string reference, Dictionary<string, string> personalisation, string templateId, string emailAddress,
         CancellationToken cancellationToken);
-
+    
+    Task SendNotifications(IEnumerable<UnkeyedSendNotificationRequest> notifications, CancellationToken cancellationToken);
 }
+
 
 public interface INotificationService
 {
-    Task SendPreviewEmailAsync(SendNotificationRequest request, CancellationToken cancellationToken);
+    Task<TemplateList> GetTemplates(CancellationToken cancellationToken);
     
-    Task<TemplateList> GetTemplatesAsync(CancellationToken cancellationToken);
+    Task SendNotifications(IEnumerable<SendNotificationRequest> notifications, CancellationToken cancellationToken);
     
-    Task SendNotificationAsync(SendNotificationRequest notification, CancellationToken cancellationToken);
+    Task SendNotification(SendNotificationRequest notification, CancellationToken cancellationToken)
+        => SendNotifications([notification], cancellationToken);
 
     Task ProcessDeliveryCallback(NotifyCallbackMessage message,
         CancellationToken cancellationToken);

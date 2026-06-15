@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using NIHR.NotificationService.Enums;
 using NIHR.NotificationService.Interfaces;
@@ -22,38 +21,42 @@ namespace NIHR.NotificationService.Services
             _notificationStatusSinks = notificationStatusSinks;
         }
 
-        public async Task SendNotificationAsync(SendNotificationRequest request, CancellationToken cancellationToken)
+        public async Task SendNotifications(IEnumerable<SendNotificationRequest> notifications,
+            CancellationToken cancellationToken)
         {
-            request.Validate();
+            foreach (var request in notifications)
+            {
+                request.Validate();
 
-            var stopwatch = Stopwatch.StartNew();
-            try
-            {
-                var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
-                
-                switch (request.ContactMethod)
+                try
                 {
-                    case GovUkNotifyContactMethod.Email:
-                        await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation, request.Reference.ToString());
-                        break;
-                    case GovUkNotifyContactMethod.Letter:
-                        await _client.SendLetterAsync(request.TemplateId, personalisation, request.Reference.ToString());
-                        // Mark letters as delivered immediately.
-                        await ProcessDeliveryCallback(request.Reference, NotificationDeliveryStatus.Delivered, cancellationToken); 
-                        break;
-                    default:
-                        throw new NotSupportedException($"Contact method {request.ContactMethod} is not supported.");
+                    var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
+
+                    switch (request.ContactMethod)
+                    {
+                        case GovUkNotifyContactMethod.Email:
+                            await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation,
+                                request.Reference.ToString());
+                            break;
+                        case GovUkNotifyContactMethod.Letter:
+                            await _client.SendLetterAsync(request.TemplateId, personalisation,
+                                request.Reference.ToString());
+                            // Mark letters as delivered immediately.
+                            await ProcessDeliveryCallback(request.Reference, NotificationDeliveryStatus.Delivered,
+                                cancellationToken);
+                            break;
+                        default:
+                            throw new NotSupportedException(
+                                $"Contact method {request.ContactMethod} is not supported.");
+                    }
                 }
-            }
-            catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-            {
-                _logger.LogError(httpEx, "429 Rate Limit Exceeded error while sending notification");
-                throw new InvalidOperationException("429 Rate Limit Exceeded error while sending notification.", httpEx);
-            }
-            finally
-            {
-                stopwatch.Stop();
-                _logger.LogInformation("Request for {Reference} took {ElapsedMilliseconds} ms", request.Reference, stopwatch.ElapsedMilliseconds);
+                catch (HttpRequestException httpEx) when
+                    (httpEx.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    _logger.LogError(httpEx, "429 Rate Limit Exceeded error while sending notification");
+                    throw new InvalidOperationException("429 Rate Limit Exceeded error while sending notification.",
+                        httpEx);
+                }
             }
         }
 
@@ -65,7 +68,7 @@ namespace NIHR.NotificationService.Services
                 personalisation, request.Reference.ToString());
         }
         
-        public async Task<TemplateList> GetTemplatesAsync(CancellationToken cancellationToken)
+        public async Task<TemplateList> GetTemplates(CancellationToken cancellationToken)
         {
             return await _client.GetAllTemplatesAsync();
         }
@@ -87,16 +90,6 @@ namespace NIHR.NotificationService.Services
             
             var status = message.Status switch
             {
-                "accepted" => NotificationDeliveryStatus.Accepted,
-                "cancelled" => NotificationDeliveryStatus.Cancelled,
-                "pending-virus-check" => NotificationDeliveryStatus.PendingVirusCheck,
-                "virus-scan-failed" => NotificationDeliveryStatus.VirusScanFailed,
-                "validation-failed" => NotificationDeliveryStatus.VirusScanFailed,
-                "created" => NotificationDeliveryStatus.Created,
-                "sending" => NotificationDeliveryStatus.Sending,
-                "pending" => NotificationDeliveryStatus.Pending,
-                "sent" => NotificationDeliveryStatus.Sent,
-                "received" => NotificationDeliveryStatus.Received,
                 "delivered" => NotificationDeliveryStatus.Delivered,
                 "temporary-failure" => NotificationDeliveryStatus.TemporaryFailure,
                 "permanent-failure" => NotificationDeliveryStatus.PermanentFailure,
@@ -110,8 +103,6 @@ namespace NIHR.NotificationService.Services
         private async Task ProcessDeliveryCallback(NotificationReference reference,
             NotificationDeliveryStatus status, CancellationToken cancellationToken)
         {
-
-            
             if (!_notificationStatusSinks.TryGetValue(reference.UpstreamProviderKey, out var upstreamSink))
             {
                 throw new Exception("Upstream sink not found");

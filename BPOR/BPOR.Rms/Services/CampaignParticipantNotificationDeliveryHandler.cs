@@ -10,10 +10,9 @@ namespace BPOR.Rms.Services;
 public class CampaignParticipantNotificationDeliveryHandler(
     ParticipantDbContext context,
     IRefDataService refDataService,
-    ILogger<CampaignParticipantNotificationDeliveryHandler> logger) : INotificationDeliveryHandler
+    ILogger<CampaignParticipantNotificationDeliveryHandler> logger) 
+    : INotificationDeliveryHandler<CampaignParticipantNotificationDeliveryHandler>
 {
-    public const string Key = "CMP";
-    
     public async Task HandleStatusChanged(string reference, NotificationDeliveryStatus currentStatus,
         CancellationToken cancellationToken)
     {
@@ -48,4 +47,6 @@ public class CampaignParticipantNotificationDeliveryHandler(
         
         await context.SaveChangesAsync(cancellationToken);
     }
+
+    public static string Key => "CMP";
 }

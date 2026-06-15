@@ -1,34 +1,29 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using NIHR.NotificationService.Enums;
+using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
-using NIHR.NotificationService.Settings;
 
 namespace NIHR.NotificationService.Controllers;
 
-[AllowAnonymous]
+[ApiKeyAuthentication]
 [ApiController]
 [Route("NotifyCallback")]
 public class NotifyCallbackController(
-    IOptions<NotificationServiceSettings> settings,
     ILogger<NotifyCallbackController> logger,
     INotificationService notificationService
 ) : ControllerBase
 {
+    public const string RoleNameGovUkNotifyCallback = "GovUkNotifyCallback";
+
     [HttpPost]
     [Route("ReceiveCallback")]
+    [Authorize(Roles = RoleNameGovUkNotifyCallback)]
     public async Task<IActionResult> ReceiveCallback([FromBody] NotifyCallbackMessage message,
         CancellationToken cancellationToken)
     {
         logger.LogDebug("NotifyCallbackMessage {@message}", message);
-        var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-        if (token != settings.Value.BearerToken)
-        {
-            return Unauthorized();
-        }
 
         if (message.Reference == "PreviewEmailReference")
         {

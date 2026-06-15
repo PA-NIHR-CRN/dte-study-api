@@ -46,5 +46,15 @@ else
                 <button class="govuk-button" data_module="govuk-button" type="submit">Resume</button>
             </form>
         </div>
+        <div>
+            <form method="post" asp-action="Reset" asp-route-studyId="@Model.StudyId">
+                <button class="govuk-button--secondary" data_module="govuk-button" type="submit">Reset</button>
+            </form>
+        </div>
     }
+    <div>
+        <form method="post" asp-action="CreateSample" asp-route-studyId="@Model.StudyId">
+            <button class="govuk-button--inverse" data_module="govuk-button" type="submit">Create Sample Page</button>
+        </form>
+    </div>
 }

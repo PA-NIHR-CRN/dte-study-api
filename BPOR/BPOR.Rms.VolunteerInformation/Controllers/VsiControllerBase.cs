@@ -38,7 +38,7 @@ public abstract class VsiControllerBase : Controller
                  && int.TryParse(studyIdString, out var studyId))
         {
             EditContext = new VsiEditContext { StudyId = studyId };
-            var currentVsi = await VsiRepository.GetCurrentVsi(studyId, context.HttpContext.RequestAborted);
+            var currentVsi = await VsiRepository.GetPage(studyId, context.HttpContext.RequestAborted);
             if (currentVsi == null)
             {
                 context.Result = new NotFoundResult();

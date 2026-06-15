@@ -57,7 +57,7 @@ namespace NIHR.NotificationService.Services
                     {
                         var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
                         var sendNotificationRequest = CreateSendNotificationRequest(personalisation);
-                        await notificationService.SendNotificationAsync(sendNotificationRequest, stoppingToken);
+                        await notificationService.SendNotification(sendNotificationRequest, stoppingToken);
                         notification.IsProcessed = true;
                         await context.SaveChangesAsync(stoppingToken); // Persist IsProcessed on a per-record basis
                     }

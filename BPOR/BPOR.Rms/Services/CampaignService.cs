@@ -1,28 +1,20 @@
-using BPOR.Domain.Enums;
 using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
-using BPOR.Rms;
 using BPOR.Rms.Constants;
-using BPOR.Rms.Mappers;
-using BPOR.Rms.Models;
 using BPOR.Rms.Models.Volunteer;
 using BPOR.Rms.Services;
 using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using NIHR.Infrastructure;
-using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 using NIHR.Infrastructure.Interfaces;
 using Polly;
-using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
-using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
-using BPOR.Domain.Extensions;
 using NIHR.NotificationService;
-using NIHR.NotificationService.Entities;
 using NIHR.NotificationService.Enums;
+using NIHR.NotificationService.Interfaces;
+using NIHR.NotificationService.Models;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -30,7 +22,7 @@ public class CampaignService(
     ParticipantDbContext context,
     IEncryptionService encryptionService,
     IReferenceGenerator referenceGenerator,
-    NotificationDbContext notificationContext,
+    INotificationService<CampaignParticipantNotificationDeliveryHandler> notificationService,
     IVolunteerFilterService volunteerFilterService
     )
     : ICampaignService
@@ -74,7 +66,6 @@ public class CampaignService(
             .IncludeAllFilterProperties()
             .FirstOrDefaultAsync(fc => fc.Id == campaign.FilterCriteriaId, cancellationToken);
     }
-
 
     private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)
@@ -202,6 +193,8 @@ public class CampaignService(
     private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         List<ProcessingResults> queue, string callback, CancellationToken cancellationToken)
     {
+        List<UnkeyedSendNotificationRequest> notificationRequests = new();
+
         foreach (var volunteer in volunteers)
         {
             var validationResults = ValidateParticipantForCampaignType(volunteer, campaign.TypeId).ToArray();
@@ -238,31 +231,28 @@ public class CampaignService(
 
             var uriWithQuery = new Uri(QueryHelpers.AddQueryString(baseUri.ToString(), queryParams));
             var link = uriWithQuery.ToString();
-            var notification = new Notification
+            var notification = new UnkeyedSendNotificationRequest()
             {
-                NotificationDatas = new List<NotificationData>
+                Personalisation =
                 {
-                    new() { Key = PersonalisationKeys.CampaignParticipantId, Value = campaignParticipant.Id.ToString() },
-                    new() { Key = PersonalisationKeys.CampaignTypeId, Value = ((int)campaignParticipant.CampaignTypeId).ToString() },
-                    new() { Key = PersonalisationKeys.FirstName, Value = volunteer.FirstName },
-                    new() { Key = PersonalisationKeys.LastName, Value = volunteer.LastName },
-                    new() { Key = PersonalisationKeys.UniqueLink, Value = link },
-                    new() { Key = PersonalisationKeys.TemplateId, Value = campaign.TemplateId.ToString() },
-                    new() { Key = PersonalisationKeys.UniqueReference, Value = reference }
+                    [PersonalisationKeys.CampaignParticipantId] = campaignParticipant.Id.ToString(),
+                    [PersonalisationKeys.CampaignTypeId] = ((int)campaignParticipant.CampaignTypeId).ToString(),
+                    [PersonalisationKeys.FirstName] = volunteer.FirstName,
+                    [PersonalisationKeys.LastName] = volunteer.LastName,
+                    [PersonalisationKeys.UniqueLink] = link,
+                    [PersonalisationKeys.TemplateId] = campaign.TemplateId.ToString(),
+                    [PersonalisationKeys.UniqueReference] = reference
                 }
             };
 
             switch (campaign.TypeId)
             {
                 case GovUkNotifyContactMethod.Email:
-                    notification.PrimaryIdentifier = volunteer.Email;
-                    notification.NotificationDatas.Add(new NotificationData { Key = PersonalisationKeys.Email, Value = volunteer.Email });
+                    notification.EmailAddress = volunteer.Email;
+                    notification.Personalisation[PersonalisationKeys.Email] = volunteer.Email;
                     break;
 
                 case GovUkNotifyContactMethod.Letter:
-
-                    notification.PrimaryIdentifier = $"ParticipantAddress({volunteer.Address.Id})";
-
                     var addressFields = new Dictionary<string, string?>
                     {
                         { "address_line_1", volunteer.Address.AddressLine1 },
@@ -277,50 +267,62 @@ public class CampaignService(
                     {
                         if (!string.IsNullOrWhiteSpace(field.Value))
                         {
-                            notification.NotificationDatas.Add(new NotificationData
-                            {
-                                Key = field.Key,
-                                Value = field.Value
-                            });
+                            notification.Personalisation[field.Key] = field.Value;
                         }
                     }
 
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_postcode", Value = volunteer.Address.Postcode });
-
+                    notification.Personalisation["address_postcode"] = volunteer.Address.Postcode;
                     break;
             }
-
-            await notificationContext.Notifications.AddAsync(notification, cancellationToken);
-
+            
+            notificationRequests.Add(notification);
         }
 
-        await notificationContext.SaveChangesAsync(cancellationToken);
+        await notificationService.SendNotifications(notificationRequests, cancellationToken);
     }
 
     private IEnumerable<ValidationResult> ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, GovUkNotifyContactMethod campaignTypeId)
     {
         if (string.IsNullOrWhiteSpace(volunteer.FirstName))
+        {
             yield return new ValidationResult("FirstName cannot be null, empty or whitespace");
+        }
+
         if (string.IsNullOrWhiteSpace(volunteer.LastName))
+        {
             yield return new ValidationResult("LastName cannot be null, empty or whitespace");
+        }
 
         switch (campaignTypeId)
         {
             case GovUkNotifyContactMethod.Email:
                 if (string.IsNullOrWhiteSpace(volunteer.Email))
+                {
                     yield return new ValidationResult("Email cannot be null, empty or whitespace");
+                }
+
                 break;
             case GovUkNotifyContactMethod.Letter:
                 if (volunteer.Address == null)
+                {
                     yield return new ValidationResult("Address cannot be null");
+                }
                 else
                 {
                     if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1))
+                    {
                         yield return new ValidationResult("AddressLine1 cannot be null, empty or whitespace");
+                    }
+
                     if (string.IsNullOrWhiteSpace(volunteer.Address.Town))
+                    {
                         yield return new ValidationResult("Town cannot be null, empty or whitespace");
+                    }
+
                     if (string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
+                    {
                         yield return new ValidationResult("Postcode cannot be nnull, empty or whitespaceull");
+                    }
                 }
                 break;
             default:

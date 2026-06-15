@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using BPOR.Rms.Abstractions.Entities;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Utility;
@@ -45,19 +44,19 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
         throw new NotImplementedException();
     }
 
-    public Task<VsiPage?> GetCurrentVsi(int studyId, CancellationToken cancellationToken)
+    public Task<VsiPage?> GetPage(int studyId, CancellationToken cancellationToken)
     {
         return Load(studyId, cancellationToken);
     }
 
-    public async Task<T?> GetCurrentVsi<T>(long studyId, Expression<Func<VsiPage, T>> selector,
+    public async Task<T?> GetPage<T>(long studyId, Expression<Func<VsiPage, T>> selector,
         CancellationToken cancellationToken)
     {
         var vsi = await Load(studyId, cancellationToken);
         return vsi == null ? default : selector.Compile()(vsi);
     }
 
-    public async Task<T?> GetCurrentVsiGroup<T>(long studyId, long groupId,
+    public async Task<T?> GetGroup<T>(long studyId, long groupId,
         Expression<Func<VsiGroup, T>> selector, CancellationToken cancellationToken)
     {
         var vsi = await Load(studyId, cancellationToken);
@@ -172,13 +171,23 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
         }, cancellationToken))?.Id;
     }
 
-    public async Task CreateVsi(int studyId, VsiStatus status, CancellationToken cancellationToken)
+    public async Task CreatePage(int studyId, VsiStatus status, CancellationToken cancellationToken)
     {
         VsiPage vsi = new VsiPage()
         {
             Status = status
         };
         await Save(studyId, vsi, cancellationToken);
+    }
+
+    public async Task CreatePage(int studyId, VsiPage data, CancellationToken cancellationToken)
+    {
+        await Save(studyId, data, cancellationToken);
+    }
+
+    public async Task ResetPage(int studyId, CancellationToken cancellationToken)
+    {
+        await CreatePage(studyId, VsiStatus.Draft, cancellationToken);
     }
 
     public async Task<int?> CreateContact(int studyId, VsiContact newContact, CancellationToken cancellationToken)
@@ -203,6 +212,12 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
         return false;
     }
 
+    public async Task<VsiStatus?> GetVipStatus(int studyId, CancellationToken cancellationToken)
+    {
+        var vsi = await Load(studyId, cancellationToken);
+        return vsi?.Status;
+    }
+
     public async Task<bool> UpdateGroup(int studyId, int groupId, Action<VsiGroup> action,
         CancellationToken cancellationToken)
     {
@@ -216,18 +231,5 @@ public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
         action(group);
         await Save(studyId, vsi, cancellationToken);
         return true;
-    }
-}
-
-public class ListICollectionConverter<TElement> : JsonConverter<ICollection<TElement>>
-{
-    public override ICollection<TElement> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {            
-        return JsonSerializer.Deserialize<List<TElement>>(ref reader, options);
-    }
-
-    public override void Write(Utf8JsonWriter writer, ICollection<TElement> value, JsonSerializerOptions options)    
-    {           
-        JsonSerializer.Serialize(writer, value.ToList(), options);
     }
 }

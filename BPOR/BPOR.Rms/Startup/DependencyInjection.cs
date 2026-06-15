@@ -153,8 +153,7 @@ public static class DependencyInjection
 
         services.AddVolunteerInformation();
         services.AddSingleton<IRtsAddressSource, TestRtsAddressSource>();
-        services.AddKeyedScoped<INotificationDeliveryHandler, CampaignParticipantNotificationDeliveryHandler>(
-            CampaignParticipantNotificationDeliveryHandler.Key);
+        services.AddNotificationDeliveryHandler<CampaignParticipantNotificationDeliveryHandler>();
 
         return services;
     }

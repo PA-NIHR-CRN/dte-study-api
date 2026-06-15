@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
+using NIHR.NotificationService.Controllers;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Services;
 using NIHR.NotificationService.Settings;
@@ -15,6 +17,8 @@ public static class DiExtensions
         services.AddTransient<INotificationService, Services.NotificationService>();
         
         services.AddOptions<NotificationServiceSettings>().BindConfiguration("NotificationServiceSettings"); // TODO: Validation
+        services.AddApiKeyRoleFromOptions<NotificationServiceSettings>(i => i.BearerToken,
+            NotifyCallbackController.RoleNameGovUkNotifyCallback);
         services.AddSingleton(s =>
         {
             var options = s.GetRequiredService<IOptions<NotificationServiceSettings>>();

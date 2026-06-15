@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
+      <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
       <ProjectReference Include="..\BPOR.Rms.Abstractions\BPOR.Rms.Abstractions.csproj" />
       <ProjectReference Include="..\NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj" />
       <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
