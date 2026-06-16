@@ -7,12 +7,13 @@ namespace NIHR.NotificationService.Interfaces;
 public interface INotificationService<THandler>
     where THandler : class, INotificationDeliveryHandler<THandler>
 {
-    Task SendEmail(string reference, Dictionary<string, string> personalisation, string templateId, string emailAddress,
-        CancellationToken cancellationToken);
-    
     Task SendNotifications(IEnumerable<UnkeyedSendNotificationRequest> notifications, CancellationToken cancellationToken);
 }
 
+public interface INotificationQueueService
+{
+    Task ProcessBatch(int batchSize, CancellationToken cancellationToken);
+}
 
 public interface INotificationService
 {

@@ -42,6 +42,7 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
     [Authorize(Roles = RoleBporContent)]
     [HttpGet("informationpage/{token}")]
     public async Task<ActionResult<GetVolunteerInformationPageResponse>> GetInformationPage(
+        [FromServices] IStudyRepository studyRepository,
         [FromServices] IVsiRepository repository,
         [FromServices] InternalVipTokenService tokenService,
         string token,
@@ -50,6 +51,12 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
         if (!tokenService.TryValidateVipAccessToken(token, out var validationResult))
         {
             return BadRequest();
+        }
+
+        var study = await studyRepository.GetStudy(validationResult.studyId, cancellationToken);
+        if (study == null)
+        {
+            return NotFound();
         }
 
         var vsiPage = await repository.GetPage(validationResult.studyId, cancellationToken);
@@ -61,7 +68,8 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
         GetVolunteerInformationPageResponse response = new()
         {
             Audience = validationResult.audience,
-            VolunteerInformation = vsiPage
+            VolunteerInformation = vsiPage,
+            StudyName = study.StudyName
         };
 
         return new JsonResult(response);

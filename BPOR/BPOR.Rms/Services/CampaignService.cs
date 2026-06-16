@@ -236,7 +236,7 @@ public class CampaignService(
                 Personalisation =
                 {
                     [PersonalisationKeys.CampaignParticipantId] = campaignParticipant.Id.ToString(),
-                    [PersonalisationKeys.CampaignTypeId] = ((int)campaignParticipant.CampaignTypeId).ToString(),
+                    [PersonalisationKeys.ContactMethod] = ((int)campaignParticipant.CampaignTypeId).ToString(),
                     [PersonalisationKeys.FirstName] = volunteer.FirstName,
                     [PersonalisationKeys.LastName] = volunteer.LastName,
                     [PersonalisationKeys.UniqueLink] = link,
@@ -248,7 +248,6 @@ public class CampaignService(
             switch (campaign.TypeId)
             {
                 case GovUkNotifyContactMethod.Email:
-                    notification.EmailAddress = volunteer.Email;
                     notification.Personalisation[PersonalisationKeys.Email] = volunteer.Email;
                     break;
 

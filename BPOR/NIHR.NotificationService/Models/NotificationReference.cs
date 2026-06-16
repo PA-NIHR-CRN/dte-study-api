@@ -32,4 +32,9 @@ public class NotificationReference
     {
         return $"{UpstreamProviderKey}:{UpstreamReference}";
     }
+
+    public static NotificationReference Parse(string value)
+    {
+        return TryParse(value, out var result) ? result : throw new FormatException();
+    }
 }

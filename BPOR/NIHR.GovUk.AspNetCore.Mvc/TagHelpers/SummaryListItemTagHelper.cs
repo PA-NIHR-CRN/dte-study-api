@@ -15,7 +15,7 @@ public class GovUkSummaryListItemTagHelper(IHtmlHelper htmlHelper) : PartialTagH
         output.TagName = null;
         var innerContent = await output.GetChildContentAsync();
         var content = await RenderPartialAsync("_SummaryListItem", 
-            new GovUkSummaryListItemModel(For?.Name, For?.Model, innerContent));
+            new GovUkSummaryListItemModel(For?.Metadata.DisplayName, For?.Model, innerContent));
         output.Content.SetHtmlContent(content);
     }
 }

@@ -35,7 +35,8 @@ namespace NIHR.NotificationService.Services
                     switch (request.ContactMethod)
                     {
                         case GovUkNotifyContactMethod.Email:
-                            await _client.SendEmailAsync(request.EmailAddress, request.TemplateId, personalisation,
+                            var emailAddress = request.Personalisation[PersonalisationKeys.Email];
+                            await _client.SendEmailAsync(emailAddress, request.TemplateId, personalisation,
                                 request.Reference.ToString());
                             break;
                         case GovUkNotifyContactMethod.Letter:
@@ -58,14 +59,6 @@ namespace NIHR.NotificationService.Services
                         httpEx);
                 }
             }
-        }
-
-        public async Task SendPreviewEmailAsync(SendNotificationRequest request, CancellationToken cancellationToken)
-        {
-            var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
-
-            await _client.SendEmailAsync(request.EmailAddress, request.TemplateId,
-                personalisation, request.Reference.ToString());
         }
         
         public async Task<TemplateList> GetTemplates(CancellationToken cancellationToken)
