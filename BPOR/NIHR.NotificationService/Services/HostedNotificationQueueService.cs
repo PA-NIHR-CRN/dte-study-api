@@ -1,12 +1,13 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NIHR.NotificationService.Interfaces;
 
 namespace NIHR.NotificationService.Services
 {
-    public class HostedNotificationQueueService(
+    internal class HostedNotificationQueueService(
         ILogger<HostedNotificationQueueService> logger,
-        INotificationQueueService notificationQueueService)
+        IServiceProvider serviceProvider)
         : BackgroundService
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -17,7 +18,10 @@ namespace NIHR.NotificationService.Services
             {
                 try
                 {
-                    await notificationQueueService.ProcessBatch(1000, stoppingToken);
+                    using (var scope = serviceProvider.CreateScope())
+                    {
+                        await scope.ServiceProvider.GetRequiredService<INotificationQueueService>().ProcessBatch(1000, stoppingToken);
+                    }
                 }
                 catch (Exception ex)
                 {

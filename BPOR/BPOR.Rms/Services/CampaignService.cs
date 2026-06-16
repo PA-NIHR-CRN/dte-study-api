@@ -6,11 +6,13 @@ using BPOR.Rms.Models.Volunteer;
 using BPOR.Rms.Services;
 using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using NIHR.Infrastructure.Interfaces;
 using Polly;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Rms.VolunteerInformation;
+using BPOR.Rms.VolunteerInformation.Settings;
+using Microsoft.Extensions.Options;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Enums;
 using NIHR.NotificationService.Interfaces;
@@ -20,10 +22,11 @@ public class CampaignService(
     ILogger<CampaignService> logger,
     IRefDataService refDataService,
     ParticipantDbContext context,
-    IEncryptionService encryptionService,
     IReferenceGenerator referenceGenerator,
     INotificationService<CampaignParticipantNotificationDeliveryHandler> notificationService,
-    IVolunteerFilterService volunteerFilterService
+    IVolunteerFilterService volunteerFilterService,
+    IVipTokenGenerator tokenGenerator,
+    IOptions<VsiSettings> vsiSettings
     )
     : ICampaignService
 {
@@ -31,6 +34,7 @@ public class CampaignService(
     {
         var campaign = await context.Campaign
             .AsNoTracking()
+            .Include(i => i.FilterCriteria).ThenInclude(i => i.Study)
             .FirstOrDefaultAsync(c => c.Id == item.Id, cancellationToken);
         var deliveryStatusId = GetDeliveryStatusId();
 
@@ -49,7 +53,7 @@ public class CampaignService(
             return;
         }
 
-        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, deliveryStatusId, item.Callback, cancellationToken);
+        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, deliveryStatusId, cancellationToken);
     }
 
     private int GetDeliveryStatusId()
@@ -68,7 +72,7 @@ public class CampaignService(
     }
 
     private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
-        FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)
+        FilterCriteria dbFilter, int deliveryStatusId, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
 
@@ -93,7 +97,7 @@ public class CampaignService(
 
         await SaveChangesWithRetryAsync(queue, cancellationToken);
 
-        await QueueNotificationsAsync(volunteers, campaign, queue, callback, cancellationToken);
+        await QueueNotificationsAsync(volunteers, campaign, queue, cancellationToken);
     }
 
     private async Task SaveChangesWithRetryAsync(List<ProcessingResults> emailQueue,
@@ -157,6 +161,7 @@ public class CampaignService(
     private void ProcessVolunteer(CampaignParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int deliveryStatusId)
     {
+        
         processingResult.CampaignParticipant.Add(new CampaignParticipant
         {
             CampaignId = campaign.Id,
@@ -164,6 +169,7 @@ public class CampaignService(
             ParticipantId = volunteer.Id,
             DeliveryStatusId = deliveryStatusId,
             SentAt = DateTime.UtcNow,
+            TokenIv = tokenGenerator.GenerateIvString()
         });
 
         if (dbFilter is { Study.IsRecruitingIdentifiableParticipants: true, StudyId: not null })
@@ -191,7 +197,7 @@ public class CampaignService(
     }
 
     private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
-        List<ProcessingResults> queue, string callback, CancellationToken cancellationToken)
+        List<ProcessingResults> queue, CancellationToken cancellationToken)
     {
         List<UnkeyedSendNotificationRequest> notificationRequests = new();
 
@@ -223,25 +229,24 @@ public class CampaignService(
                 reference = $"no-study.{campaignParticipant.Id}";
             }
 
-            var baseUri = new Uri(callback);
             var queryParams = new Dictionary<string, string>
             {
-                { "reference", encryptionService.Encrypt(campaignParticipant.Id.ToString()) }
+                { "token", tokenGenerator.GenerateToken(VipTokenPurpose.Volunteer, campaignParticipant.Id, campaignParticipant.TokenIv) }
             };
 
-            var uriWithQuery = new Uri(QueryHelpers.AddQueryString(baseUri.ToString(), queryParams));
-            var link = uriWithQuery.ToString();
+            var link = QueryHelpers.AddQueryString(vsiSettings.Value.BporVipUri, queryParams);
             var notification = new UnkeyedSendNotificationRequest()
             {
+                Reference = campaignParticipant.Id.ToString(),
+                ContactMethod = campaignParticipant.CampaignTypeId,
+                TemplateId = campaign.TemplateId.ToString(),
                 Personalisation =
                 {
                     [PersonalisationKeys.CampaignParticipantId] = campaignParticipant.Id.ToString(),
-                    [PersonalisationKeys.ContactMethod] = ((int)campaignParticipant.CampaignTypeId).ToString(),
                     [PersonalisationKeys.FirstName] = volunteer.FirstName,
                     [PersonalisationKeys.LastName] = volunteer.LastName,
                     [PersonalisationKeys.UniqueLink] = link,
-                    [PersonalisationKeys.TemplateId] = campaign.TemplateId.ToString(),
-                    [PersonalisationKeys.UniqueReference] = reference
+                    ["studyName"] = campaign.FilterCriteria.Study.StudyName
                 }
             };
 

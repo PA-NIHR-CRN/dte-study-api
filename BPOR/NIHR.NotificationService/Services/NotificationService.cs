@@ -1,107 +1,127 @@
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NIHR.NotificationService.Entities;
 using NIHR.NotificationService.Enums;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
-using Notify.Client;
 using Notify.Models.Responses;
 
-namespace NIHR.NotificationService.Services
+namespace NIHR.NotificationService.Services;
+
+public class NotificationService(IDownstreamNotificationService downstreamService,
+    ILogger<NotificationService> logger,
+    NotificationDbContext db,
+    IReadOnlyDictionary<string, INotificationDeliveryHandler> notificationStatusSinks) 
+    : INotificationQueueService, INotificationService
 {
-    public class NotificationService : INotificationService
+    public Task<TemplateList> GetTemplates(CancellationToken cancellationToken) 
+        => downstreamService.GetTemplates(cancellationToken);
+
+    public Task SendNotification(SendNotificationRequest notification, CancellationToken cancellationToken)
+        => SendNotifications([notification], cancellationToken);
+
+    public async Task SendNotifications(IEnumerable<SendNotificationRequest> notifications, CancellationToken cancellationToken)
     {
-        private readonly NotificationClient _client;
-        private readonly ILogger<NotificationService> _logger;
-        private readonly IReadOnlyDictionary<string, INotificationDeliveryHandler> _notificationStatusSinks;
-
-        public NotificationService(NotificationClient client, ILogger<NotificationService> logger,
-            IReadOnlyDictionary<string, INotificationDeliveryHandler> notificationStatusSinks)
+        foreach (var request in notifications)
         {
-            _client = client;
-            _logger = logger;
-            _notificationStatusSinks = notificationStatusSinks;
-        }
+            request.Validate();
 
-        public async Task SendNotifications(IEnumerable<SendNotificationRequest> notifications,
-            CancellationToken cancellationToken)
-        {
-            foreach (var request in notifications)
-            {
-                request.Validate();
+            request.Personalisation[PersonalisationKeys.UniqueReference] = request.Reference.ToString();
+            request.Personalisation[PersonalisationKeys.TemplateId] = request.TemplateId;
+            request.Personalisation[PersonalisationKeys.ContactMethod] = request.ContactMethod.ToString();
 
-                try
-                {
-                    var personalisation = request.Personalisation.ToDictionary(x => x.Key, x => (dynamic)x.Value);
-
-                    switch (request.ContactMethod)
-                    {
-                        case GovUkNotifyContactMethod.Email:
-                            var emailAddress = request.Personalisation[PersonalisationKeys.Email];
-                            await _client.SendEmailAsync(emailAddress, request.TemplateId, personalisation,
-                                request.Reference.ToString());
-                            break;
-                        case GovUkNotifyContactMethod.Letter:
-                            await _client.SendLetterAsync(request.TemplateId, personalisation,
-                                request.Reference.ToString());
-                            // Mark letters as delivered immediately.
-                            await ProcessDeliveryCallback(request.Reference, NotificationDeliveryStatus.Delivered,
-                                cancellationToken);
-                            break;
-                        default:
-                            throw new NotSupportedException(
-                                $"Contact method {request.ContactMethod} is not supported.");
-                    }
-                }
-                catch (HttpRequestException httpEx) when
-                    (httpEx.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                {
-                    _logger.LogError(httpEx, "429 Rate Limit Exceeded error while sending notification");
-                    throw new InvalidOperationException("429 Rate Limit Exceeded error while sending notification.",
-                        httpEx);
-                }
-            }
-        }
-        
-        public async Task<TemplateList> GetTemplates(CancellationToken cancellationToken)
-        {
-            return await _client.GetAllTemplatesAsync();
-        }
-
-        public async Task ProcessDeliveryCallback(NotifyCallbackMessage message,
-            CancellationToken cancellationToken)
-        {
-            NotificationReference notificationReference;
-
-            if (int.TryParse(message.Reference, out _))
-            {
-                // This clause is to support the transition to the new notification reference scheme
-                notificationReference = new NotificationReference("CMP", message.Reference);
-            }
-            else if (!NotificationReference.TryParse(message.Reference, out notificationReference!)) // This is the new reference format: "{upstream-key}:{upstream-ref}"
-            {
-                throw new Exception("Invalid reference");
-            }
             
-            var status = message.Status switch
+            Notification dbNotification = new()
             {
-                "delivered" => NotificationDeliveryStatus.Delivered,
-                "temporary-failure" => NotificationDeliveryStatus.TemporaryFailure,
-                "permanent-failure" => NotificationDeliveryStatus.PermanentFailure,
-                "technical-failure" => NotificationDeliveryStatus.TechnicalFailure,
-                _ => throw new ArgumentOutOfRangeException(nameof(message.Status), message.Status, null)
+                IsProcessed = false,
+                NotificationDatas = new List<NotificationData>(request.Personalisation.Select(i =>
+                    new NotificationData { Key = i.Key, Value = i.Value }))
             };
-
-            await ProcessDeliveryCallback(notificationReference, status, cancellationToken);
+            db.Notifications.Add(dbNotification);
         }
+        await db.SaveChangesAsync(cancellationToken);
+    }
 
-        private async Task ProcessDeliveryCallback(NotificationReference reference,
-            NotificationDeliveryStatus status, CancellationToken cancellationToken)
+    public async Task ProcessBatch(int batchSize, CancellationToken cancellationToken)
+    {
+        var notifications = await db.Notifications
+            .Where(n => !n.IsProcessed)
+            .OrderBy(n => n.Id)
+            .Take(1000).Include(n => n.NotificationDatas)
+            .ToListAsync(cancellationToken);
+
+        if (notifications.Count > 0)
         {
-            if (!_notificationStatusSinks.TryGetValue(reference.UpstreamProviderKey, out var upstreamSink))
+            logger.LogInformation("Processing {NotificationsCount} notifications", notifications.Count);
+            
+            try
             {
-                throw new Exception("Upstream sink not found");
+                foreach (var notification in notifications)
+                {
+                    var sendNotificationRequest = CreateSendNotificationRequest(notification);
+                    var deliveryStatus = await downstreamService.SendNotification(sendNotificationRequest, cancellationToken);
+                    notification.IsProcessed = true;
+                    await db.SaveChangesAsync(cancellationToken); // Persist IsProcessed on a per-record basis
+                    await ProcessDeliveryCallback(sendNotificationRequest.Reference, deliveryStatus, cancellationToken);
+                }
             }
-
-            await upstreamSink.HandleStatusChanged(reference.UpstreamReference, status, cancellationToken);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while sending notification emails");
+            }
         }
+    }
+
+    private static SendNotificationRequest CreateSendNotificationRequest(Notification notification)
+    {
+        var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
+        var result = new SendNotificationRequest()
+        {
+            Reference = NotificationReference.Parse(personalisation[PersonalisationKeys.UniqueReference]),
+            Personalisation = personalisation,
+            ContactMethod = Enum.Parse<GovUkNotifyContactMethod>(personalisation[PersonalisationKeys.ContactMethod]),
+            TemplateId = personalisation[PersonalisationKeys.TemplateId]
+        };
+
+        result.Validate();
+        return result;
+    }
+    
+    public async Task ProcessDeliveryCallback(NotifyCallbackMessage message,
+        CancellationToken cancellationToken)
+    {
+        NotificationReference notificationReference;
+
+        if (int.TryParse(message.Reference, out _))
+        {
+            // This clause is to support the transition to the new notification reference scheme
+            notificationReference = new NotificationReference("CMP", message.Reference);
+        }
+        else if (!NotificationReference.TryParse(message.Reference, out notificationReference!)) // This is the new reference format: "{upstream-key}:{upstream-ref}"
+        {
+            throw new Exception("Invalid reference");
+        }
+            
+        var status = message.Status switch
+        {
+            "delivered" => NotificationDeliveryStatus.Delivered,
+            "temporary-failure" => NotificationDeliveryStatus.TemporaryFailure,
+            "permanent-failure" => NotificationDeliveryStatus.PermanentFailure,
+            "technical-failure" => NotificationDeliveryStatus.TechnicalFailure,
+            _ => throw new ArgumentOutOfRangeException(nameof(message.Status), message.Status, null)
+        };
+
+        await ProcessDeliveryCallback(notificationReference, status, cancellationToken);
+    }
+
+    private async Task ProcessDeliveryCallback(NotificationReference reference,
+        NotificationDeliveryStatus status, CancellationToken cancellationToken)
+    {
+        if (!notificationStatusSinks.TryGetValue(reference.UpstreamProviderKey, out var upstreamSink))
+        {
+            throw new Exception("Upstream sink not found");
+        }
+
+        await upstreamSink.HandleStatusChanged(reference.UpstreamReference, status, cancellationToken);
     }
 }

@@ -8,6 +8,6 @@ namespace BPOR.Domain.Entities
         public int Id { get; set; }
         public int FilterCriteriaId { get; set; }
         public int ContactMethodId { get; set; }
-        public GovUkNotifyContactMethod ContactMethod { get; set; }
+        public ContactMethod ContactMethod { get; set; }
     }
 }

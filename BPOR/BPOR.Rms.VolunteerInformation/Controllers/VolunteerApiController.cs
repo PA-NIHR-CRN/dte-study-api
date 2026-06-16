@@ -1,10 +1,11 @@
 ﻿using BPOR.Domain.Entities;
+using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.Abstractions.Models;
 using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Models.Volunteer;
-using BPOR.Rms.VolunteerInformation.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
@@ -14,18 +15,20 @@ using Study = BPOR.Rms.VolunteerInformation.Models.Volunteer.Study;
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("Volunteer")]
 [ApiKeyAuthentication]
 public class VolunteerController(IOptions<RrvTokenOptions> options) : ControllerBase
 {
-    private const int staticCheckValue = 155156040;
     private const string RoleRrvPrescreener = "RrvPrescreener";
     private const string RoleBporContent = "BporContent";
+    
+    // Fixed IV for RRV testing.
+    private readonly byte[] testIv = [0xae, 0x64, 0xa4, 0x66, 0x24, 0x34, 0x0e, 0x59, 0x35, 0xb7, 0xbb, 0x6c, 0x62, 0x19, 0x42, 0xa5];
 
     [Authorize(Roles = RoleRrvPrescreener)]
     [HttpGet("generatetesttoken/{participantId:long}")]
     public ActionResult<GetTestTokenResponse> GetTestTokenAsync(        
-        [FromServices] IRrvTokenGenerator rrvTokenGenerator, 
+        [FromServices] IVipTokenGenerator vipTokenGenerator, 
         long participantId)
     {
         if (!options.Value.EnableRrvApi)
@@ -35,41 +38,79 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
         
         return Ok(new GetTestTokenResponse
         {
-            Token = new Guid(staticCheckValue, 0, 0, BitConverter.GetBytes(participantId)).ToString("N")
+            Token = vipTokenGenerator.GenerateToken(VipTokenPurpose.Volunteer, participantId, testIv),
         });
     }
 
     [Authorize(Roles = RoleBporContent)]
     [HttpGet("informationpage/{token}")]
     public async Task<ActionResult<GetVolunteerInformationPageResponse>> GetInformationPage(
+        [FromServices] ParticipantDbContext context, 
         [FromServices] IStudyRepository studyRepository,
         [FromServices] IVsiRepository repository,
-        [FromServices] InternalVipTokenService tokenService,
+        [FromServices] IVipTokenGenerator tokenGenerator,
         string token,
         CancellationToken cancellationToken)
     {
-        if (!tokenService.TryValidateVipAccessToken(token, out var validationResult))
+        if (!tokenGenerator.TryValidateToken(token, out var validatedToken))
         {
-            return BadRequest();
+            return Unauthorized();
         }
 
-        var study = await studyRepository.GetStudy(validationResult.studyId, cancellationToken);
+        int? studyId;
+        VolunteerInformationAudience audience;
+        
+        switch (validatedToken.purpose)
+        {
+            case VipTokenPurpose.Volunteer:
+                audience = VolunteerInformationAudience.Volunteer;
+                studyId = await context.CampaignParticipant
+                    .Where(cp => cp.Id == validatedToken.Id)
+                    .Select(i => i.Campaign.FilterCriteria.StudyId)
+                    .SingleOrDefaultAsync(cancellationToken);
+                break;
+            case VipTokenPurpose.Researcher:
+                audience = VolunteerInformationAudience.Researcher;
+                studyId = (int)validatedToken.Id;
+                break;
+            case VipTokenPurpose.AdminPreview:
+                audience = VolunteerInformationAudience.Admin;
+                studyId = (int)validatedToken.Id;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        if (studyId == null)
+        {
+            return NotFound();
+        }
+
+        var study = await studyRepository.GetStudy(studyId.Value, cancellationToken);
         if (study == null)
         {
             return NotFound();
         }
 
-        var vsiPage = await repository.GetPage(validationResult.studyId, cancellationToken);
+        var vsiPage = await repository.GetPage(studyId.Value, cancellationToken);
         if (vsiPage == null)
         {
             return NotFound();
         }
+
+        var fullPrescreenerUrl = study.PreScreenerUrl == null
+            ? null
+            : QueryHelpers.AddQueryString(study.PreScreenerUrl, new Dictionary<string, string>()
+            {
+                ["token"] = token
+            }!);
         
         GetVolunteerInformationPageResponse response = new()
         {
-            Audience = validationResult.audience,
+            Audience = audience,
             VolunteerInformation = vsiPage,
-            StudyName = study.StudyName
+            StudyName = study.StudyName,
+            FullPrescreenerLink = fullPrescreenerUrl
         };
 
         return new JsonResult(response);
@@ -79,7 +120,7 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
     [HttpGet("information/{token}")]
     public async Task<ActionResult<GetInformationResponse>> GetInformation(
         [FromServices] ParticipantDbContext context, 
-        [FromServices] IRrvTokenGenerator rrvTokenGenerator, 
+        [FromServices] IVipTokenGenerator vipTokenGenerator, 
         string token,
         CancellationToken cancellationToken)
     {
@@ -88,26 +129,13 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
             return NotFound();
         }
         
-        long campaignParticipantId;
-        
-        if (Guid.TryParse(token, out var guid))
+        if (!vipTokenGenerator.TryValidateToken(token, out var validatedToken) || validatedToken.purpose != VipTokenPurpose.Volunteer)
         {
-            var bytes = guid.ToByteArray();
-            int check = BitConverter.ToInt32(bytes, 0);
-            if (check != staticCheckValue)
-            {
-                return BadRequest("Invalid static Token");
-            }
-            campaignParticipantId = BitConverter.ToInt64(bytes, 8);
-        }
-        else
-        {
-            // TODO: Include error detail?
-            return BadRequest();
+            return Unauthorized();
         }
 
         var result = await context.CampaignParticipant
-            .Where(cp => cp.Id == campaignParticipantId)
+            .Where(cp => cp.Id == validatedToken.Id)
             .Select (i => new GetInformationResponse()
             {
                 CampaignParticipantId = i.Id,

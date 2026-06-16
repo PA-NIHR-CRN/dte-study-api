@@ -1,9 +1,9 @@
-﻿using NIHR.NotificationService.Enums;
+﻿using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 
-namespace NIHR.NotificationService.Interfaces;
+namespace NIHR.NotificationService.Services;
 
-public class NotificationServiceForHandler<THandler>(INotificationService notificationService) : INotificationService<THandler>
+internal class NotificationServiceForHandler<THandler>(INotificationService notificationService) : INotificationService<THandler>
     where THandler : class, INotificationDeliveryHandler<THandler>
 {
     public Task SendNotifications(IEnumerable<UnkeyedSendNotificationRequest> notifications, CancellationToken cancellationToken)

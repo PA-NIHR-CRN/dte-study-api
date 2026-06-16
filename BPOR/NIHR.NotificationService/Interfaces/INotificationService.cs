@@ -1,4 +1,5 @@
 using NIHR.NotificationService.Controllers;
+using NIHR.NotificationService.Enums;
 using NIHR.NotificationService.Models;
 using Notify.Models.Responses;
 
@@ -8,6 +9,9 @@ public interface INotificationService<THandler>
     where THandler : class, INotificationDeliveryHandler<THandler>
 {
     Task SendNotifications(IEnumerable<UnkeyedSendNotificationRequest> notifications, CancellationToken cancellationToken);
+    
+    Task SendNotification(UnkeyedSendNotificationRequest notification, CancellationToken cancellationToken)
+        => SendNotifications([notification], cancellationToken);
 }
 
 public interface INotificationQueueService
@@ -26,4 +30,11 @@ public interface INotificationService
 
     Task ProcessDeliveryCallback(NotifyCallbackMessage message,
         CancellationToken cancellationToken);
+}
+
+public interface IDownstreamNotificationService
+{
+    Task<TemplateList> GetTemplates(CancellationToken cancellationToken);
+
+    Task<NotificationDeliveryStatus> SendNotification(SendNotificationRequest notification, CancellationToken cancellationToken);
 }

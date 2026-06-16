@@ -17,6 +17,7 @@ using Notify.Exceptions;
 using Notify.Models.Responses;
 using BPOR.Rms.Exceptions;
 using BPOR.Rms.Constants;
+using BPOR.Rms.VolunteerInformation;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Enums;
 
@@ -31,7 +32,8 @@ public class CampaignController(
     IEncryptionService encryptionService,
     LinkGenerator linkGenerator,
     ITransactionalEmailService transactionalEmailService,
-    IOptions<RmsSettings> rmsOptions
+    IOptions<RmsSettings> rmsOptions,
+    IVipTokenGenerator tokenGenerator
 )
     : Controller
 {
@@ -228,7 +230,6 @@ public class CampaignController(
                     await notificationService.SendNotification(new SendNotificationRequest
                     {
                         ContactMethod = GovUkNotifyContactMethod.Email,
-                        EmailAddress = email,
                         TemplateId = model.SelectedTemplateId,
                         Personalisation = personalisationData[email],
                         Reference = new NotificationReference("PreviewEmailReference")

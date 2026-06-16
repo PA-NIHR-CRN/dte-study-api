@@ -2,7 +2,6 @@ using BPOR.Rms.Abstractions.Entities;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Models;
-using BPOR.Rms.VolunteerInformation.Services;
 using BPOR.Rms.VolunteerInformation.Settings;
 using BPOR.Rms.VolunteerInformation.Validators;
 using Microsoft.AspNetCore.Mvc;
@@ -889,14 +888,14 @@ public class VolunteerStudyInformationController : VsiControllerBase
         return View();
     }
 
-    public IActionResult RedirectionToVip(
-        [FromServices] InternalVipTokenService internalVipTokenService,
+    public IActionResult PreviewVip(
+        [FromServices] IVipTokenGenerator tokenGenerator,
         [FromServices] IOptions<VsiSettings> options,
         int studyId)
     {
         var uri = QueryHelpers.AddQueryString(options.Value.BporVipUri, new Dictionary<string, string?>
         {
-            ["token"] =  internalVipTokenService.CreateInternalVipAccessToken(VolunteerInformationAudience.Admin, studyId),
+            ["token"] =  tokenGenerator.GenerateToken(VipTokenPurpose.AdminPreview, studyId),
         });
         
         return Redirect(uri);

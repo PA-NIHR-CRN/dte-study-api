@@ -14,7 +14,9 @@ public static class DiExtensions
     public static void AddNotificationService(this IServiceCollection services)
     {
         services.AddHostedService<HostedNotificationQueueService>();
+        services.AddTransient<IDownstreamNotificationService, GovUkNotificationService>();
         services.AddTransient<INotificationService, Services.NotificationService>();
+        services.AddTransient<INotificationQueueService, Services.NotificationService>();
         
         services.AddOptions<NotificationServiceSettings>().BindConfiguration("NotificationServiceSettings"); // TODO: Validation
         services.AddApiKeyRoleFromOptions<NotificationServiceSettings>(i => i.BearerToken,

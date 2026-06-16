@@ -26,4 +26,6 @@ public class CampaignParticipant : IAudit, ISoftDelete
     public DeliveryStatus DeliveryStatus { get; set; }
     public Campaign Campaign { get; set; }
     public Participant Participant { get; set; }
+    
+    public string TokenIv { get; set; }
 }

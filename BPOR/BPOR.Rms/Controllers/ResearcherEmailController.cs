@@ -6,7 +6,9 @@ using BPOR.Rms.Startup;
 using BPOR.Rms.VolunteerInformation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NIHR.NotificationService.Enums;
 using NIHR.NotificationService.Interfaces;
+using NIHR.NotificationService.Models;
 
 namespace BPOR.Rms.Controllers;
 
@@ -122,17 +124,21 @@ public class ResearcherEmailController(ParticipantDbContext context,
             _ => throw new ArgumentOutOfRangeException(nameof(model.SelectedEmailId), model.SelectedEmailId, null)
         };
 
-        await notificationService.SendEmail(studyResearcherEmail.Id.ToString(),
-            new Dictionary<string, string>()
+        await notificationService.SendNotification(
+            new UnkeyedSendNotificationRequest()
             {
-                ["RmsStudyId"] = study.Id.ToString(),
-                ["StudyName"] = study.StudyName,
-                ["SenderName"] = currentUserProvider?.User?.ContactFullName ?? "BPOR Team",
-                ["RecipientName"] = study.FullName ?? "Researcher",
-                ["VipGoogleDocUrl"] = "https://docs.google.com/document/d/11diU2-gtufQ5UjwWqrggQrFgv7XVCz8rADXCJde28-s/edit?usp=sharing"
+                ContactMethod = GovUkNotifyContactMethod.Email,
+                Personalisation = new Dictionary<string, string>()
+                                              {
+                                                  ["RmsStudyId"] = study.Id.ToString(),
+                                                  ["StudyName"] = study.StudyName,
+                                                  ["SenderName"] = currentUserProvider?.User?.ContactFullName ?? "BPOR Team",
+                                                  ["RecipientName"] = study.FullName ?? "Researcher",
+                                                  ["VipGoogleDocUrl"] = "https://docs.google.com/document/d/11diU2-gtufQ5UjwWqrggQrFgv7XVCz8rADXCJde28-s/edit?usp=sharing"
+                                              },
+                Reference = studyResearcherEmail.Id.ToString(),
+                TemplateId = templateId
             },
-            templateId,
-            study.EmailAddress,
             cancellationToken);
         
         return RedirectToAction(

@@ -10,7 +10,7 @@ public static class DiExtensions
 {
      public static void AddVolunteerInformation(this IServiceCollection services)
     {
-        services.AddSingleton<IRrvTokenGenerator, RrvTokenGenerator>();
+        services.AddSingleton<IVipTokenGenerator, VipTokenGenerator>();
         services.AddOptions<RrvTokenOptions>().BindConfiguration("RrvToken");
       
         services.AddOptions<LocalVsiFileRepositoryOptions>().Configure(i => i.Path = "c:\\temp");

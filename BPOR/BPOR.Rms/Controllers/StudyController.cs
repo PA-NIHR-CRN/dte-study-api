@@ -121,7 +121,7 @@ public class StudyController(
                 study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
                 {
                     Text = "Preview volunteer study information page",
-                    Url = Url.Action("RedirectionToVip", "VolunteerStudyInformation", new { studyId = id.Value })
+                    Url = Url.Action("PreviewVip", "VolunteerStudyInformation", new { studyId = id.Value })
                 });
                 break;
         }
