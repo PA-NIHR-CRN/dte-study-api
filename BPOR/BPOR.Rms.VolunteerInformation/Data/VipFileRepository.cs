@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace BPOR.Rms.VolunteerInformation.Data;
 
-public abstract class VsiFileRepository(IMemoryCache cache) : IVsiRepository
+public abstract class VipFileRepository(IMemoryCache cache) : IVipRepository
 {
     private readonly TimeSpan _cacheTtl = TimeSpan.FromMinutes(5);
 

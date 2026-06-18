@@ -1,6 +1,6 @@
 ﻿namespace BPOR.Rms.VolunteerInformation.Data;
 
-public class LocalVsiFileRepositoryOptions
+public class LocalVipFileRepositoryOptions
 {
     public string Path { get; set; }
 }

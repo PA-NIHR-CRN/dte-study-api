@@ -18,6 +18,7 @@ using Notify.Models.Responses;
 using BPOR.Rms.Exceptions;
 using BPOR.Rms.Constants;
 using BPOR.Rms.VolunteerInformation;
+using BPOR.Rms.VolunteerInformation.Tokens;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Enums;
 

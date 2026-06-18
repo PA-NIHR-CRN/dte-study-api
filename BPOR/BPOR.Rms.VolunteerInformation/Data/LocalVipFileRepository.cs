@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace BPOR.Rms.VolunteerInformation.Data;
 
-public class TempFolderVsiFileRepository (IMemoryCache memoryCache) : VsiFileRepository(memoryCache)
+public class LocalVipFileRepository (IOptions<LocalVipFileRepositoryOptions> options, IMemoryCache memoryCache) : VipFileRepository(memoryCache)
 {
     protected override async Task<Stream?> OpenReadStream(long studyId, CancellationToken cancellationToken)
     {
@@ -14,9 +14,7 @@ public class TempFolderVsiFileRepository (IMemoryCache memoryCache) : VsiFileRep
 
     private string GetPath(long studyId)
     {
-        string folder = Path.Combine(Path.GetTempPath(), "__rms_vsi");
-        Directory.CreateDirectory(folder);
-        return Path.Combine(folder, $"vsi_{studyId}.json");
+        return Path.Combine(options.Value.Path, $"vsi_{studyId}.json");
     }
 
     protected override async Task<Stream?> OpenWriteStream(long studyId, CancellationToken cancellationToken)

@@ -27,5 +27,5 @@ public class CampaignParticipant : IAudit, ISoftDelete
     public Campaign Campaign { get; set; }
     public Participant Participant { get; set; }
     
-    public string TokenIv { get; set; }
+    public string? Token { get; set; }
 }

@@ -6,6 +6,7 @@ using BPOR.Rms.Startup;
 using BPOR.Rms.VolunteerInformation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NIHR.NotificationService;
 using NIHR.NotificationService.Enums;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
@@ -130,6 +131,7 @@ public class ResearcherEmailController(ParticipantDbContext context,
                 ContactMethod = GovUkNotifyContactMethod.Email,
                 Personalisation = new Dictionary<string, string>()
                                               {
+                                                  [PersonalisationKeys.Email] = study.EmailAddress,
                                                   ["RmsStudyId"] = study.Id.ToString(),
                                                   ["StudyName"] = study.StudyName,
                                                   ["SenderName"] = currentUserProvider?.User?.ContactFullName ?? "BPOR Team",

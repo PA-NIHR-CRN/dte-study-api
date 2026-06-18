@@ -69,7 +69,7 @@ public class StudyController(
 
 
     // GET: Study/Details/5
-    public async Task<IActionResult> Details([FromServices] IVsiRepository repository, int? id,
+    public async Task<IActionResult> Details([FromServices] IVipRepository repository, int? id,
         CancellationToken cancellationToken)
     {
         if (id == null)

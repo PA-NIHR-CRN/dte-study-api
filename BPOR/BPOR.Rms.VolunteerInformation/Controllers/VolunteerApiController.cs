@@ -2,22 +2,23 @@
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.Abstractions.Models;
 using BPOR.Rms.VolunteerInformation.Data;
-using BPOR.Rms.VolunteerInformation.Models.Volunteer;
+using BPOR.Rms.VolunteerInformation.Settings;
+using BPOR.Rms.VolunteerInformation.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
-using Participant = BPOR.Rms.VolunteerInformation.Models.Volunteer.Participant;
-using Study = BPOR.Rms.VolunteerInformation.Models.Volunteer.Study;
+using Participant = BPOR.Rms.Abstractions.Models.Participant;
+using Study = BPOR.Rms.Abstractions.Models.Study;
 
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [ApiController]
 [Route("Volunteer")]
 [ApiKeyAuthentication]
-public class VolunteerController(IOptions<RrvTokenOptions> options) : ControllerBase
+public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
 {
     private const string RoleRrvPrescreener = "RrvPrescreener";
     private const string RoleBporContent = "BporContent";
@@ -26,33 +27,51 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
     private readonly byte[] testIv = [0xae, 0x64, 0xa4, 0x66, 0x24, 0x34, 0x0e, 0x59, 0x35, 0xb7, 0xbb, 0x6c, 0x62, 0x19, 0x42, 0xa5];
 
     [Authorize(Roles = RoleRrvPrescreener)]
-    [HttpGet("generatetesttoken/{participantId:long}")]
-    public ActionResult<GetTestTokenResponse> GetTestTokenAsync(        
+    [HttpGet("generatetesttoken/{campaignParticipantId:long}")]
+    public async Task<ActionResult<GetTestTokenResponse>> GetTestTokenAsync(       
+        [FromServices] ParticipantDbContext db,
         [FromServices] IVipTokenGenerator vipTokenGenerator, 
-        long participantId)
+        long campaignParticipantId,
+        CancellationToken cancellationToken)
     {
         if (!options.Value.EnableRrvApi)
         {
             return NotFound();
         }
+
+        var campaignParticipant = await db.CampaignParticipant.SingleOrDefaultAsync(
+            i => i.Id == campaignParticipantId, cancellationToken);
+
+        if (campaignParticipant == null)
+        {
+            return NotFound();
+        }
+
+        if (string.IsNullOrWhiteSpace(campaignParticipant.Token))
+        {
+            campaignParticipant.Token = vipTokenGenerator.GenerateVolunteerToken();
+            await db.SaveChangesAsync(cancellationToken);
+        }
         
         return Ok(new GetTestTokenResponse
         {
-            Token = vipTokenGenerator.GenerateToken(VipTokenPurpose.Volunteer, participantId, testIv),
+            Token = campaignParticipant.Token
         });
     }
+    
 
     [Authorize(Roles = RoleBporContent)]
     [HttpGet("informationpage/{token}")]
     public async Task<ActionResult<GetVolunteerInformationPageResponse>> GetInformationPage(
         [FromServices] ParticipantDbContext context, 
         [FromServices] IStudyRepository studyRepository,
-        [FromServices] IVsiRepository repository,
+        [FromServices] IVipRepository repository,
         [FromServices] IVipTokenGenerator tokenGenerator,
         string token,
         CancellationToken cancellationToken)
     {
-        if (!tokenGenerator.TryValidateToken(token, out var validatedToken))
+        var validatedToken = await tokenGenerator.ValidateToken(token, cancellationToken);
+        if (validatedToken == null)
         {
             return Unauthorized();
         }
@@ -60,7 +79,7 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
         int? studyId;
         VolunteerInformationAudience audience;
         
-        switch (validatedToken.purpose)
+        switch (validatedToken.Purpose)
         {
             case VipTokenPurpose.Volunteer:
                 audience = VolunteerInformationAudience.Volunteer;
@@ -69,7 +88,7 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
                     .Select(i => i.Campaign.FilterCriteria.StudyId)
                     .SingleOrDefaultAsync(cancellationToken);
                 break;
-            case VipTokenPurpose.Researcher:
+            case VipTokenPurpose.ResearcherPreview:
                 audience = VolunteerInformationAudience.Researcher;
                 studyId = (int)validatedToken.Id;
                 break;
@@ -97,14 +116,28 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
         {
             return NotFound();
         }
-
-        var fullPrescreenerUrl = study.PreScreenerUrl == null
-            ? null
-            : QueryHelpers.AddQueryString(study.PreScreenerUrl, new Dictionary<string, string>()
-            {
-                ["token"] = token
-            }!);
         
+        string? fullPrescreenerUrl;
+        if (study.PreScreenerUrl == null)
+        {
+            fullPrescreenerUrl = null;
+        }
+        else
+        {
+            fullPrescreenerUrl = validatedToken.Purpose switch
+            {
+                VipTokenPurpose.Volunteer => QueryHelpers.AddQueryString(study.PreScreenerUrl, new Dictionary<string, string>()
+                                                                {
+                                                                    ["token"] = token
+                                                                }!),
+                VipTokenPurpose.ResearcherPreview => "#",
+                VipTokenPurpose.AdminPreview => "#",
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            
+            
+        }
+
         GetVolunteerInformationPageResponse response = new()
         {
             Audience = audience,
@@ -128,8 +161,9 @@ public class VolunteerController(IOptions<RrvTokenOptions> options) : Controller
         {
             return NotFound();
         }
-        
-        if (!vipTokenGenerator.TryValidateToken(token, out var validatedToken) || validatedToken.purpose != VipTokenPurpose.Volunteer)
+
+        var validatedToken = await vipTokenGenerator.ValidateToken(token, cancellationToken);
+        if (validatedToken is not { Purpose: VipTokenPurpose.Volunteer })
         {
             return Unauthorized();
         }

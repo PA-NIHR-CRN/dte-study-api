@@ -114,8 +114,7 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<DateTime?>("SentAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("TokenIv")
-                        .IsRequired()
+                    b.Property<string>("Token")
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedAt")

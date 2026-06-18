@@ -5,7 +5,7 @@ namespace BPOR.Rms.VolunteerInformation.Data;
 
 public static class Extensions
 {
-    public static async Task CreateSampleVolunteerInformation(this IVsiRepository repository, int studyId, CancellationToken cancellationToken)
+    public static async Task CreateSampleVolunteerInformation(this IVipRepository repository, int studyId, CancellationToken cancellationToken)
     {
         await repository.CreatePage(studyId,
             new VsiPage
@@ -122,7 +122,17 @@ public static class Extensions
                                If you have any questions about the study, your participation, or how your data will be 
                                used, you will be provided with contact details for the research team and the appropriate 
                                ethics review body before deciding whether to take part.
-                               """
+                               """,
+                Contacts = [
+                new VsiContact()
+                {
+                    Id = 1,
+                    Email = "test001@nihr.ac.uk",
+                    Name = "Nihr Test User",
+                    Organisation = "Nihr",
+                    PhoneNumber = "1234567890",
+                    Role = "Mock test user"
+                }]
                 
             },
             cancellationToken);

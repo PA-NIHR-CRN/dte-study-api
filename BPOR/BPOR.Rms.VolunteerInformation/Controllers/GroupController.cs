@@ -11,13 +11,13 @@ namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [AllowAnonymous]
 [Route("Study/{studyId:int}/VolunteerInformation/groups/{groupId:int}/[action]")]
-public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(vsiRepository)
+public class GroupController(IVipRepository vipRepository) : VipControllerBase(vipRepository)
 {
     [HttpGet]
     public async Task<IActionResult> CreateCriterion(int studyId, int groupId, VsiGroupCriteronType type, 
         CancellationToken cancellationToken)
     {
-        var group = await vsiRepository.GetGroup(studyId, groupId,
+        var group = await vipRepository.GetGroup(studyId, groupId,
             i => new VsiGroupModel()
             {
                 Id = i.Id,
@@ -36,7 +36,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
         [FromForm] CreateCriterionPostbackModel model,
         CancellationToken cancellationToken)
     {
-        var group = await vsiRepository.GetGroup(studyId, groupId, i => i, cancellationToken);
+        var group = await vipRepository.GetGroup(studyId, groupId, i => i, cancellationToken);
 
         (await new CreateCriterionModelValidator().ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
         if (!ModelState.IsValid)
@@ -50,7 +50,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
             Type = type
         };
         
-        await vsiRepository.CreateCriterion(studyId, groupId, newCriteria, cancellationToken);
+        await vipRepository.CreateCriterion(studyId, groupId, newCriteria, cancellationToken);
 
         return RedirectToAction("Criteria", new { studyId, groupId, type });
     }
@@ -60,7 +60,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
         int studyId, int groupId, VsiGroupCriteronType type,
         CancellationToken cancellationToken)
     {
-        var group = await vsiRepository.GetGroup(studyId, groupId, 
+        var group = await vipRepository.GetGroup(studyId, groupId, 
                 i => new VsiGroupModel()
                 {
                     Id = i.Id,
@@ -100,7 +100,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
     [HttpPost]
     public async Task<IActionResult> RemoveGroup(int studyId, int groupId, CancellationToken cancellationToken)
     {
-        if (!await vsiRepository.RemoveGroup(studyId, groupId, cancellationToken))
+        if (!await vipRepository.RemoveGroup(studyId, groupId, cancellationToken))
         {
             return NotFound();
         }
@@ -116,7 +116,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
         VsiGroupCriteronType type,
         CancellationToken cancellationToken)
     {
-        bool result = await vsiRepository.RemoveCriteria(studyId, groupId, criteriaId, cancellationToken);
+        bool result = await vipRepository.RemoveCriteria(studyId, groupId, criteriaId, cancellationToken);
         if (!result)
         {
             return NotFound();
@@ -129,7 +129,7 @@ public class GroupController(IVsiRepository vsiRepository) : VsiControllerBase(v
     public async Task<IActionResult> CreateGroupCheck(int studyId, int groupId,
         CancellationToken cancellationToken)
     {
-        var group = await vsiRepository.GetGroup(studyId, groupId, i => new VsiGroupModel()
+        var group = await vipRepository.GetGroup(studyId, groupId, i => new VsiGroupModel()
                 {
                     Id = i.Id,
                     Name = i.Name

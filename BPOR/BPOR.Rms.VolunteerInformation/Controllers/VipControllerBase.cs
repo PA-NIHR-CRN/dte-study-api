@@ -10,13 +10,13 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [AllowAnonymous]
-public abstract class VsiControllerBase : Controller
+public abstract class VipControllerBase : Controller
 {
-    protected IVsiRepository VsiRepository { get; }
+    protected IVipRepository VipRepository { get; }
 
-    protected VsiControllerBase(IVsiRepository vsiRepository)
+    protected VipControllerBase(IVipRepository vipRepository)
     {
-        VsiRepository = vsiRepository;
+        VipRepository = vipRepository;
     }
 
     protected VsiEditContext EditContext
@@ -38,7 +38,7 @@ public abstract class VsiControllerBase : Controller
                  && int.TryParse(studyIdString, out var studyId))
         {
             EditContext = new VsiEditContext { StudyId = studyId };
-            var currentVsi = await VsiRepository.GetPage(studyId, context.HttpContext.RequestAborted);
+            var currentVsi = await VipRepository.GetPage(studyId, context.HttpContext.RequestAborted);
             if (currentVsi == null)
             {
                 context.Result = new NotFoundResult();

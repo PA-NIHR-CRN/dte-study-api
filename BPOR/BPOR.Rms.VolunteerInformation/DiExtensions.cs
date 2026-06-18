@@ -1,6 +1,6 @@
 using BPOR.Rms.VolunteerInformation.Data;
-using BPOR.Rms.VolunteerInformation.Services;
 using BPOR.Rms.VolunteerInformation.Settings;
+using BPOR.Rms.VolunteerInformation.Tokens;
 using Microsoft.Extensions.DependencyInjection;
 using NIHR.NotificationService;
 
@@ -10,16 +10,13 @@ public static class DiExtensions
 {
      public static void AddVolunteerInformation(this IServiceCollection services)
     {
-        services.AddSingleton<IVipTokenGenerator, VipTokenGenerator>();
-        services.AddOptions<RrvTokenOptions>().BindConfiguration("RrvToken");
+        services.AddScoped<IVipTokenGenerator, VipTokenGenerator>();
       
-        services.AddOptions<LocalVsiFileRepositoryOptions>().Configure(i => i.Path = "c:\\temp");
-        services.AddScoped<IVsiRepository, TempFolderVsiFileRepository>();
+        services.AddOptions<LocalVipFileRepositoryOptions>().Configure(i => i.Path = "c:\\temp");
+        services.AddScoped<IVipRepository, TempFolderVipFileRepository>();
         services.AddScoped<IStudyRepository, StudyDbRepository>();
-        services.AddOptions<VsiSettings>().BindConfiguration("Vsi");
+        services.AddOptions<VipSettings>().BindConfiguration("Vip");
 
         services.AddNotificationDeliveryHandler<ResearcherEmailNotificationDeliveryHandler>();
-
-        services.AddScoped<InternalVipTokenService>();
     }
 }

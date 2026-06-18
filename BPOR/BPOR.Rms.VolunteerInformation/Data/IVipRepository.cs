@@ -5,7 +5,7 @@ using BPOR.Rms.Abstractions.Enums;
 
 namespace BPOR.Rms.VolunteerInformation.Data;
 
-public interface IVsiRepository
+public interface IVipRepository
 {
     Task<VsiPage?> GetPage(int studyId,
         CancellationToken cancellationToken);

@@ -10,8 +10,8 @@ using Polly;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
-using BPOR.Rms.VolunteerInformation;
 using BPOR.Rms.VolunteerInformation.Settings;
+using BPOR.Rms.VolunteerInformation.Tokens;
 using Microsoft.Extensions.Options;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Enums;
@@ -26,7 +26,7 @@ public class CampaignService(
     INotificationService<CampaignParticipantNotificationDeliveryHandler> notificationService,
     IVolunteerFilterService volunteerFilterService,
     IVipTokenGenerator tokenGenerator,
-    IOptions<VsiSettings> vsiSettings
+    IOptions<VipSettings> vsiSettings
     )
     : ICampaignService
 {
@@ -169,7 +169,7 @@ public class CampaignService(
             ParticipantId = volunteer.Id,
             DeliveryStatusId = deliveryStatusId,
             SentAt = DateTime.UtcNow,
-            TokenIv = tokenGenerator.GenerateIvString()
+            Token = tokenGenerator.GenerateVolunteerToken()
         });
 
         if (dbFilter is { Study.IsRecruitingIdentifiableParticipants: true, StudyId: not null })
@@ -231,7 +231,7 @@ public class CampaignService(
 
             var queryParams = new Dictionary<string, string>
             {
-                { "token", tokenGenerator.GenerateToken(VipTokenPurpose.Volunteer, campaignParticipant.Id, campaignParticipant.TokenIv) }
+                { "token", campaignParticipant.Token }
             };
 
             var link = QueryHelpers.AddQueryString(vsiSettings.Value.BporVipUri, queryParams);

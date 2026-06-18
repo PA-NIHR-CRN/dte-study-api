@@ -3,6 +3,7 @@ using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Models;
 using BPOR.Rms.VolunteerInformation.Settings;
+using BPOR.Rms.VolunteerInformation.Tokens;
 using BPOR.Rms.VolunteerInformation.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -13,10 +14,10 @@ using NIHR.Rts.Client;
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [Route("Study/{studyId:int}/VolunteerInformation/[action]")]
-public class VolunteerStudyInformationController : VsiControllerBase
+public class VolunteerStudyInformationController : VipControllerBase
 {
 
-    public VolunteerStudyInformationController(IVsiRepository vsiRepository) : base(vsiRepository)
+    public VolunteerStudyInformationController(IVipRepository vipRepository) : base(vipRepository)
     {
     }
     // static VolunteerStudyInformationController()
@@ -53,7 +54,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [DoNotRequireVsi]
     public async Task<IActionResult> Start(int studyId, CancellationToken cancellationToken)
     {
-        var currentVsi = (await VsiRepository.GetPage(studyId, cancellationToken));
+        var currentVsi = (await VipRepository.GetPage(studyId, cancellationToken));
 
         return View(new StartModel{Status = currentVsi?.Status, StudyId = studyId});
     }
@@ -71,14 +72,14 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return NotFound();
         }
 
-        var currentVsi = (await VsiRepository.GetPage(studyId, cancellationToken));
+        var currentVsi = (await VipRepository.GetPage(studyId, cancellationToken));
         if (currentVsi != null)
         {
             // TODO: there is an existing active draft ... Cope with this better!!
             return BadRequest();
         }
 
-        await VsiRepository.CreatePage(studyId, VsiStatus.Draft, cancellationToken);
+        await VipRepository.CreatePage(studyId, VsiStatus.Draft, cancellationToken);
         
         return RedirectToAction("Section1_Step1", new { studyId = studyId });
     }
@@ -86,7 +87,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpPost]
     public async Task<IActionResult> Resume(int studyId, CancellationToken cancellationToken)
     {
-        var currentVsi = await VsiRepository.GetPage(studyId, cancellationToken);
+        var currentVsi = await VipRepository.GetPage(studyId, cancellationToken);
         return currentVsi == null
             ? NotFound()
             :
@@ -98,7 +99,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [DoNotRequireVsi]
     public async Task<IActionResult> Reset(int studyId, CancellationToken cancellationToken)
     {
-        await VsiRepository.ResetPage(studyId, cancellationToken);
+        await VipRepository.ResetPage(studyId, cancellationToken);
         return RedirectToAction("Section1_Step1", new { studyId });
     }
     
@@ -106,7 +107,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [DoNotRequireVsi]
     public async Task<IActionResult> CreateSample(int studyId, CancellationToken cancellationToken)
     {
-        await VsiRepository.CreateSampleVolunteerInformation(studyId, cancellationToken);
+        await VipRepository.CreateSampleVolunteerInformation(studyId, cancellationToken);
         return RedirectToAction("Section4", new { studyId });
     }
 
@@ -118,7 +119,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section1_Step1(int studyId, CancellationToken cancellationToken)
     {
-        var data = await VsiRepository.GetPage(studyId,
+        var data = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 Description = i.Description
@@ -141,7 +142,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
         
-        await VsiRepository.UpdateVsi(studyId, i => i.Description = model.Description, cancellationToken);
+        await VipRepository.UpdateVsi(studyId, i => i.Description = model.Description, cancellationToken);
         return RedirectToAction("Section1_Step2", new { studyId });
     }
 
@@ -152,7 +153,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section1_Step2(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 StudyType = i.StudyType
@@ -173,8 +174,18 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, i => i.StudyType = model.StudyType, cancellationToken);
-        return RedirectToAction("Section1_Step3", new { studyId });
+        await VipRepository.UpdateVsi(studyId, i => i.StudyType = model.StudyType, cancellationToken);
+
+        switch (model.StudyType)
+        {
+            case VsiStudyType.Remote:
+                return RedirectToAction("Section1_Step4", new { studyId });
+            case VsiStudyType.InPerson:
+            case VsiStudyType.Hybrid:
+                return RedirectToAction("Section1_Step3", new { studyId });
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     #endregion
@@ -246,14 +257,14 @@ public class VolunteerStudyInformationController : VsiControllerBase
             AddressLine5 = addressToAdd.AddressLine5,
             Postcode = addressToAdd.Postcode
         };
-        int? result = await VsiRepository.CreateSite(studyId, site, cancellationToken);
+        int? result = await VipRepository.CreateSite(studyId, site, cancellationToken);
         return result.HasValue ? RedirectToAction("Section1_Step3", new { studyId }) : NotFound();
     }
 
     [HttpGet]
     public async Task<IActionResult> Section1_Step3(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 Sites = i.Sites.Select(site => new VsiSiteModel
@@ -274,7 +285,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpPost]
     public async Task<IActionResult> RemoveSite(int studyId, int siteId, CancellationToken cancellationToken)
     {
-        bool result = await VsiRepository.RemoveSite(studyId, siteId, cancellationToken);
+        bool result = await VipRepository.RemoveSite(studyId, siteId, cancellationToken);
         return result ? RedirectToAction("Section1_Step3", new { studyId, id = siteId }) : NotFound();
     }
 
@@ -308,7 +319,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section1_Step4(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 Groups = i.Groups.Select(g => new VsiGroupModel
@@ -357,7 +368,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
         
-        int? groupId = await VsiRepository.CreateGroup(studyId, model.Name, cancellationToken);
+        int? groupId = await VipRepository.CreateGroup(studyId, model.Name, cancellationToken);
         return groupId == null
             ? NotFound()
             : RedirectToAction("CreateGroupCheck", "Group",
@@ -373,7 +384,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section2_Step1(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 WhatYouWillDo = i.WhatYouWillDo
@@ -397,7 +408,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, vsi => vsi.WhatYouWillDo = model.WhatYouWillDo,
+        await VipRepository.UpdateVsi(studyId, vsi => vsi.WhatYouWillDo = model.WhatYouWillDo,
             cancellationToken);
         return RedirectToAction("Section2_Step2", new { studyId });
     }
@@ -409,7 +420,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section2_Step2(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 CostReimbursement = i.CostReimbursement
@@ -433,7 +444,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, vsi => vsi.CostReimbursement = model.CostReimbursement,
+        await VipRepository.UpdateVsi(studyId, vsi => vsi.CostReimbursement = model.CostReimbursement,
             cancellationToken);
         return RedirectToAction("Section2_Step3", new { studyId });
     }
@@ -445,7 +456,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section2_Step3(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 IncentiveDetails = i.IncentiveDetails,
@@ -469,7 +480,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, vsi =>
+        await VipRepository.UpdateVsi(studyId, vsi =>
             {
                 vsi.IncentiveDetails = model.IncentiveDetails;
                 vsi.HasIncentive = model.HasIncentive;
@@ -485,7 +496,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section2_Step4(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 NumberOfVisits = i.NumberOfVisits
@@ -507,7 +518,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
         {
             return View(model);
         }
-        await VsiRepository.UpdateVsi(studyId, vsi => vsi.NumberOfVisits = model.NumberOfVisits,
+        await VipRepository.UpdateVsi(studyId, vsi => vsi.NumberOfVisits = model.NumberOfVisits,
             cancellationToken);
         return RedirectToAction("Section2_Step5", new { studyId });
     }
@@ -519,7 +530,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section2_Step5(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 StudyDuration = i.StudyDuration
@@ -542,7 +553,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, vsi => vsi.StudyDuration = model.StudyDuration,
+        await VipRepository.UpdateVsi(studyId, vsi => vsi.StudyDuration = model.StudyDuration,
             cancellationToken);
         return RedirectToAction("Section2_Step6", new { studyId });
     }
@@ -554,7 +565,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section2_Step6(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 StudyFormat = i.StudyFormat
@@ -577,7 +588,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, vsi => vsi.StudyFormat = model.StudyFormat,
+        await VipRepository.UpdateVsi(studyId, vsi => vsi.StudyFormat = model.StudyFormat,
             cancellationToken);
         return RedirectToAction("Section2_Step7", new { studyId });
     }
@@ -589,7 +600,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section2_Step7(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 OtherDetails = i.OtherDetails
@@ -612,7 +623,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, vsi => vsi.OtherDetails = model.OtherDetails,
+        await VipRepository.UpdateVsi(studyId, vsi => vsi.OtherDetails = model.OtherDetails,
             cancellationToken);
         return RedirectToAction("Section3_Step1", new { studyId });
     }
@@ -627,7 +638,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section3_Step1(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 StagedPreScreenerUrl = i.StagedPreScreenerUrl
@@ -657,7 +668,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, vsi => vsi.StagedPreScreenerUrl = model.StagedPreScreenerUrl,
+        await VipRepository.UpdateVsi(studyId, vsi => vsi.StagedPreScreenerUrl = model.StagedPreScreenerUrl,
             cancellationToken);
         return RedirectToAction("Section3_Step2", new { studyId });
     }
@@ -669,7 +680,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section3_Step2(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 ExternalWebsiteUrl = i.ExternalWebsiteUrl
@@ -699,7 +710,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, vsi => vsi.ExternalWebsiteUrl = model.ExternalWebsiteUrl,
+        await VipRepository.UpdateVsi(studyId, vsi => vsi.ExternalWebsiteUrl = model.ExternalWebsiteUrl,
             cancellationToken);
         return RedirectToAction("Section3_Step3", new { studyId });
     }
@@ -711,7 +722,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section3_Step3(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 Contacts = i.Contacts.Select(c => new VsiContactModel
@@ -755,7 +766,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
         
-        await VsiRepository.CreateContact(studyId, new VsiContact
+        await VipRepository.CreateContact(studyId, new VsiContact
         {
             Name = model.Name,
             Email = model.Email,
@@ -770,7 +781,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpPost]
     public async Task<IActionResult> RemoveContact(int studyId, int contactId, CancellationToken cancellationToken)
     {
-        await VsiRepository.RemoveContact(studyId, contactId, cancellationToken);
+        await VipRepository.RemoveContact(studyId, contactId, cancellationToken);
         
         return RedirectToAction("Section3_Step3", new { studyId });
     }
@@ -782,7 +793,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section3_Step4(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 InfoToRegisterByEmail = i.InfoToRegisterByEmail
@@ -812,7 +823,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
             return View(model);
         }
 
-        await VsiRepository.UpdateVsi(studyId, vsi => vsi.InfoToRegisterByEmail = model.InfoToRegisterByEmail,
+        await VipRepository.UpdateVsi(studyId, vsi => vsi.InfoToRegisterByEmail = model.InfoToRegisterByEmail,
             cancellationToken);
         return RedirectToAction("Section4", new { studyId });
     }
@@ -824,7 +835,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpGet]
     public async Task<IActionResult> Section4(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VsiRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
                 Description = i.Description,
@@ -879,7 +890,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
     [HttpPost]
     public async Task<IActionResult> Section4(int studyId, CancellationToken cancellationToken, bool commit = true)
     {
-        await VsiRepository.UpdateVsi(studyId, i => i.Status = VsiStatus.Active, cancellationToken);
+        await VipRepository.UpdateVsi(studyId, i => i.Status = VsiStatus.Active, cancellationToken);
         return RedirectToAction("NextSteps", new { studyId });
     }
 
@@ -890,7 +901,7 @@ public class VolunteerStudyInformationController : VsiControllerBase
 
     public IActionResult PreviewVip(
         [FromServices] IVipTokenGenerator tokenGenerator,
-        [FromServices] IOptions<VsiSettings> options,
+        [FromServices] IOptions<VipSettings> options,
         int studyId)
     {
         var uri = QueryHelpers.AddQueryString(options.Value.BporVipUri, new Dictionary<string, string?>
