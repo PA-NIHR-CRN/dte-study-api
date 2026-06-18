@@ -48,13 +48,7 @@ public static class Extensions
                 context.AddFailure("The link must be less that 2049 characters");
             }
 
-            if (!System.Uri.TryCreate(value, uriKind, out var uri))
-            {
-                context.AddFailure("The link you entered isn’t in the correct format");
-                return;
-            }
-
-            if (!schemes.Contains(uri.Scheme, StringComparer.OrdinalIgnoreCase))
+            if (!System.Uri.TryCreate(value, uriKind, out var uri) || !schemes.Contains(uri.Scheme, StringComparer.OrdinalIgnoreCase))
             {
                 context.AddFailure($"The link you entered isn’t in the correct format - it must start with {string.Join(" or ", schemes.Select(i => $"{i}://"))}");
             }
