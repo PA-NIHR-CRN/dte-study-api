@@ -13,11 +13,34 @@
 
 <div style="display:flex;gap: 40px; flex-direction: column; width: 100%">
     <partial name="Partials/Details/_StudyStatistics" />
-    <partial name="Partials/Details/_ResearcherEmailsTable" model="Model.ResearcherEmails" />
-    <h2 class="govuk-heading-l govuk-!-margin-bottom-4">
-        Campaigns sent
-    </h2>
-    <partial name="Partials/_CampaignTable" model="Model.Campaigns" />
+    
+    <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-default">
+      <div class="govuk-accordion__section">
+        <div class="govuk-accordion__section-header">
+          <h2 class="govuk-accordion__section-heading">
+            <span class="govuk-accordion__section-button" id="accordion-default-heading-1">
+              Set up emails sent
+            </span>
+          </h2>
+        </div>
+        <div id="accordion-default-content-1" class="govuk-accordion__section-content">
+          <partial name="Partials/Details/_ResearcherEmailsTable" model="Model.ResearcherEmails" />
+        </div>
+      </div>
+      <div class="govuk-accordion__section">
+        <div class="govuk-accordion__section-header">
+          <h2 class="govuk-accordion__section-heading">
+            <span class="govuk-accordion__section-button" id="accordion-default-heading-2">
+                Campaigns sent
+            </span>
+          </h2>
+        </div>
+        <div id="accordion-default-content-2" class="govuk-accordion__section-content">
+          <partial name="Partials/_CampaignTable" model="Model.Campaigns" />
+        </div>
+      </div>
+    </div>
+    
     <partial name="Partials/Details/_VolunteerTable" />
     
     <partial name="Partials/Details/_StudyDetails" />
