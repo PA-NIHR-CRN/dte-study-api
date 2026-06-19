@@ -44,6 +44,13 @@ public static class Extensions
 
         return result;
     }
+    
+    
+    /// <summary>
+    /// Validates a URI as per RFC 3986 and, per convention, allows a maximum of 2048 characters.
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> Postcode<T>(this IRuleBuilder<T, string?> ruleBuilder) =>
+        ruleBuilder.SetValidator(new PostcodeValidator<T>());
 
     /// <summary>
     /// Validates a URI as per RFC 3986 and, per convention, allows a maximum of 2048 characters.

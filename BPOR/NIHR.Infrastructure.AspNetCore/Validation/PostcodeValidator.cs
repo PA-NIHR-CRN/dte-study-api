@@ -1,16 +1,16 @@
 ﻿using FluentValidation;
 using FluentValidation.Validators;
-using NIHR.Infrastructure.AspNetCore.Validation;
+using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.Validators;
 
-public class MaxWordValidator<T>(int maxWordCount) : PropertyValidator<T, string?>
+public class PostcodeValidator<T> : PropertyValidator<T, string?>, INotEmptyValidator
 {
-    public override string Name => "NotEmptyValidator";
+    public override string Name => "PostcodeValidator";
 
     public override bool IsValid(ValidationContext<T> context, string? value)
     {
-        return value == null || value.CountWords() <= maxWordCount;
+        return string.IsNullOrEmpty(value) || Postcode.TryParse(value, out _);
     }
 
     protected override string GetDefaultMessageTemplate(string errorCode) {

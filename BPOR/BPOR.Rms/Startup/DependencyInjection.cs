@@ -32,6 +32,7 @@ using NIHR.Infrastructure.DependencyInjection;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Entities;
 using NIHR.Rts.Client;
+using NIHR.Rts.Client.Settings;
 
 namespace BPOR.Rms.Startup;
 
@@ -152,7 +153,8 @@ public static class DependencyInjection
         }
 
         services.AddVolunteerInformation();
-        services.AddSingleton<IRtsAddressSource, TestRtsAddressSource>();
+        
+        services.AddRtsServices(configuration);
         services.AddNotificationDeliveryHandler<CampaignParticipantNotificationDeliveryHandler>();
 
         return services;

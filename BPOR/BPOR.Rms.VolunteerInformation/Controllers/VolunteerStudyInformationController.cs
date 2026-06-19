@@ -1,3 +1,4 @@
+using BPOR.Domain;
 using BPOR.Rms.Abstractions.Entities;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Data;
@@ -8,6 +9,8 @@ using BPOR.Rms.VolunteerInformation.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
+using NIHR.Infrastructure.AspNetCore;
 using NIHR.Infrastructure.AspNetCore.Validation;
 using NIHR.Rts.Client;
 
@@ -196,47 +199,55 @@ public class VolunteerStudyInformationController : VipControllerBase
     public async Task<IActionResult> SiteSearch(
         [FromServices] IRtsAddressSource addressSource,
         [FromRoute] int studyId,
-        string searchTerm,
+        SiteSearchModel model,
         CancellationToken cancellationToken)
     {
-        SiteSearchModel model = new SiteSearchModel { SearchTerm = searchTerm };
+        SiteSearchResultsModel viewModel = new SiteSearchResultsModel(){SearchTerm = model.SearchTerm};
+        
         ModelState.Clear();
-        new SiteSearchModelValidator().ValidateSpecificProperties(model, i => i.SearchTerm).AddToModelState(ModelState);
+        new SiteSearchModelValidator().ValidateSpecificProperties(viewModel, i => i.SearchTerm).AddToModelState(ModelState);
 
+        var parsedPostcode = ParsePostcode(viewModel);
+        
         if (!ModelState.IsValid)
         {
-            return View(model);
+            return View(viewModel);
         }
-
-        model.SearchResult = (await addressSource.SearchByPostcode(model.SearchTerm, cancellationToken)).ToArray();
-        if (model.SearchResult.Length == 0)
+        
+        viewModel.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
+        
+        if (viewModel.SearchResult.Length == 0)
         {
             ModelState.AddModelError(nameof(SiteSearchModel.SearchTerm),
                 "The postcode you've entered cannot be found.");
         }
 
-
-        return View(model);
+        return View(viewModel);
     }
 
     [HttpPost]
     public async Task<IActionResult> SiteSearch(
         [FromServices] IRtsAddressSource addressSource,
         [FromRoute] int studyId,
-        SiteSearchModel model,
+        SiteSearchResultsModel model,
         CancellationToken cancellationToken)
     {
         ModelState.Clear();
-        new SiteSearchModelValidator().ValidateSpecificProperties(model, i => i.SelectedRtsId)
+        new SiteSearchResultsModelValidator().ValidateSpecificProperties(model, i => i.SelectedRtsId)
             .AddToModelState(ModelState);
+        
+        var parsedPostcode = ParsePostcode(model);
 
         if (!ModelState.IsValid)
         {
-            model.SearchResult = (await addressSource.SearchByPostcode(model.SearchTerm, cancellationToken)).ToArray();
+            model.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
             return View(model);
         }
 
-        var result = await addressSource.GetById(model.SelectedRtsId!.Value, cancellationToken);
+        var result = await addressSource.GetById(
+            model.SelectedRtsId,
+            cancellationToken);
+        
         if (result == null)
         {
             ModelState.AddModelError(nameof(model.SelectedRtsId), "The selected address has been removed from RTS");
@@ -244,6 +255,13 @@ public class VolunteerStudyInformationController : VipControllerBase
         }
 
         return await AddSite(result, studyId, cancellationToken);
+    }
+    
+    public Postcode ParsePostcode(SiteSearchModel model)
+    {
+        Postcode.TryParse(model.SearchTerm, out var parsedPostcode);
+        
+        return parsedPostcode;
     }
 
     private async Task<IActionResult> AddSite(RtsAddress addressToAdd, int studyId, CancellationToken cancellationToken)

@@ -1,4 +1,4 @@
-﻿@model BPOR.Rms.VolunteerInformation.Models.SiteSearchModel
+﻿@model BPOR.Rms.VolunteerInformation.Models.SiteSearchResultsModel
 
 @{
     VsiEditContext context = ViewBag.Context;
@@ -23,7 +23,7 @@
                 <radio-set for="SelectedRtsId">
                     @foreach (var result in Model.SearchResult)
                     {
-                        <radio value="@result.Id">@result.ToString()</radio>
+                        <radio value="@result.Identifier">@result.ToString()</radio>
                     }
                 </radio-set>
             </fieldset>
