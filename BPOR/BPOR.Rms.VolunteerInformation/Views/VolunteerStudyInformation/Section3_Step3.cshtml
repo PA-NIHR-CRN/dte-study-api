@@ -2,8 +2,8 @@
 
 @{
     VsiEditContext context = ViewBag.Context;
-    context.SectionName = Resources.Section3Name;
-    ViewData.SetBackLinkOverride( Url.Action("Section3_Step2", new { id = context.StudyId }));
+    ViewData.SetBackLinkOverride(Url.FlowNext(context, "Section3_Step2"));
+    ViewData.SetSectionName(Resources.Section3Name);
     Layout = "_VsiEditLayout";
 }
 
@@ -18,7 +18,7 @@
                 <partial name="_ContactCard" model="contact"/>
             </td>
             <td class="govuk-table__cell">
-                <form method="post" asp-action="RemoveContact" asp-route-studyId="@context.StudyId" asp-route-contactid="@contact.Id">
+                <form method="post" asp-action="RemoveContact" asp-all-route-data="@context.ToRouteData()" asp-route-contactid="@contact.Id">
                     <button class="govuk-link" type="submit">Delete</button>
                 </form>
             </td>
@@ -28,8 +28,8 @@
 </table>
 
 <div class="govuk-!-margin-4">
-    <a class="govuk-link" asp-action="CreateContact" asp-route-studyId="@context.StudyId">Add another contact</a>
+    <a class="govuk-link" asp-action="CreateContact" asp-all-route-data="@context.ToRouteData()">Add another contact</a>
 </div>
 <div>
-    <a asp-action="Section3_Step4" class="govuk-button" asp-route-studyId="@context.StudyId">Continue</a>
+    <a class="govuk-button" href="@Url.FlowNext(context, "Section3_Step4")">Continue</a>
 </div>

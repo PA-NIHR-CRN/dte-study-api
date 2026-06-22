@@ -48,6 +48,12 @@ public class VsiValidator : AbstractValidator<VsiEditModel>
 {
     public VsiValidator()
     {
+        RuleFor(i => i)
+            .Must(i => i.Contacts.Any() || !string.IsNullOrWhiteSpace(i.StagedPreScreenerUrl) ||
+                       !string.IsNullOrWhiteSpace(i.ExternalWebsiteUrl))
+            .WithMessage(
+                "You must provide at least one contact method for the volunteer to get in touch with the study team.");
+            
         RuleFor(i => i.Description)
             .NotEmpty().WithMessage("You must enter a description of your study.")
             .MaxWords(60).WithMessage("You can add up to 60 words.");

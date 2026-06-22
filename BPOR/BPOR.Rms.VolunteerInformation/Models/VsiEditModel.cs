@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Rms.Abstractions.Enums;
+using BPOR.Rms.VolunteerInformation.Controllers;
 
 namespace BPOR.Rms.VolunteerInformation.Models;
 
@@ -41,4 +42,6 @@ public class VsiEditModel
     
     public IEnumerable<VsiGroupModel> Groups { get; set; } = [];
     public IEnumerable<VsiContactModel> Contacts { get; set; } = [];
+    
+    public VipFlowMode FlowMode { get; set; }
 }

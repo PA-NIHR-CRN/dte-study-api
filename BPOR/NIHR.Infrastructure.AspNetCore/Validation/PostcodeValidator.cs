@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using FluentValidation.Validators;
-using NIHR.Infrastructure.AspNetCore;
+using Rbec.Postcodes;
 
 namespace BPOR.Rms.Validators;
 

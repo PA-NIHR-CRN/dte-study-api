@@ -2,13 +2,16 @@
 
 @{
     VsiEditContext context = ViewBag.Context;
-    context.SectionName = Resources.Section3Name;
-    context.SkipUrl = Url.Action("Section3_Step4", new { context.StudyId });
-    Layout = "_VsiEditLayoutForm";
+    ViewData.SetSectionName(Resources.Section1Name);
+    ViewData.SetSkipLink(Url.FlowNext(context, url => url.Action("Section3_Step4", context )));
+    Layout = "_VsiEditLayout";
 }
 
-<h1>Contact details:</h1>
+<h1 class="govuk-heading-l">Contact details:</h1>
 
-<p>Email and/or telephone numbers for volunteers to contact researchers or members of the study team</p>
+<body-text>Email and/or telephone numbers for volunteers to contact researchers or members of the study team</body-text>
 
-<partial name="_ContactEditor"/>
+<form method="post">
+    <partial name="_ContactEditor"/>
+    <govuk-button button-type="Secondary" type="submit">Submit</govuk-button>
+</form>

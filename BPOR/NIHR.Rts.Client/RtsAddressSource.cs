@@ -1,11 +1,10 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using BPOR.Domain;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using NIHR.Infrastructure.AspNetCore;
 using NIHR.Rts.Client.Settings;
+using Rbec.Postcodes;
 
 namespace NIHR.Rts.Client;
 
@@ -48,7 +47,7 @@ public class RtsAddressSource : IRtsAddressSource
                        var result = await response.Content.ReadFromJsonAsync<RtsResponse>(
                            cancellationToken: cancellationToken);
 
-                       var rtsAddresses = result?.Result.RtsOrganisations.ToArray() ?? [];
+                       var rtsAddresses = result?.Result.RtsOrganisations?.ToArray() ?? [];
 
                        foreach (var address in rtsAddresses)
                        {

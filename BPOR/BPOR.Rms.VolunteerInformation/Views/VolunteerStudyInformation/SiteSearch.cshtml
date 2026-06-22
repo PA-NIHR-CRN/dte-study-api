@@ -1,16 +1,16 @@
-﻿@model BPOR.Rms.VolunteerInformation.Models.SiteSearchResultsModel
+﻿@model BPOR.Rms.VolunteerInformation.Models.SiteSearchModel
 
 @{
     VsiEditContext context = ViewBag.Context;
-    context.SectionName = Resources.Section1Name;
+    ViewData.SetSectionName(Resources.Section1Name);
+    ViewData.SetBackLinkOverride(Url.Action("Section1_Step3", context));
 }
 
-<h1>Research Location</h1>
-
 <form>
-    <form-group for="SearchTerm" label="Research location" label-class="govuk-heading-xl"
+    <form-group for="SearchTerm" label="Research location" label-class="govuk-heading-l"
                 description="Enter a postcode to select one or multiple research locations">
         <input class="govuk-input" asp-for="SearchTerm" type="text">
+        <input asp-for="IsSearching" type="hidden" value="@true">
     </form-group>
     <button class="govuk-button" type="submit">Search postcode</button>
 </form>
@@ -18,7 +18,7 @@
 @if (Model.SearchResult?.Any() == true)
 {
     <form method="post">
-        <div class="govuk-form-group">
+        <div class="govuk-form-group govuk-!-margin-top-4">
             <fieldset class="govuk-fieldset">
                 <radio-set for="SelectedRtsId">
                     @foreach (var result in Model.SearchResult)
@@ -28,9 +28,11 @@
                 </radio-set>
             </fieldset>
         </div>
-        <button class="govuk-button" type="submit">submit</button>
+        <button class="govuk-button govuk-button--secondary" type="submit">Submit</button>
     </form>
 }
 
-<a class="govuk-link" asp-action="ManualSiteEntry" asp-route-studyId="@context.StudyId">Add address manually</a>
+<div class="govuk-!-margin-top-4">
+    <a class="govuk-link" asp-action="ManualSiteEntry" asp-all-route-data="@context.ToRouteData()">Add address manually</a>
+</div>
 

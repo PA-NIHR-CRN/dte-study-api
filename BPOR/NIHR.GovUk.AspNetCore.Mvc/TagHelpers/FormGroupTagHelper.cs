@@ -22,6 +22,8 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
         public string LabelLevel { get; set; } = "h3";
         
         public string? LabelClass { get; set; }
+        
+        public bool LabelAsHeading { get; set; } = true;
 
         private readonly IHtmlGenerator _generator;
 
@@ -66,11 +68,17 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
                 output.AddClass("govuk-form-group--error", HtmlEncoder.Default);
             }
 
-            var labelWrapper = new TagBuilder(LabelLevel);
-            labelWrapper.AddCssClass("govuk-label-wrapper");
-            labelWrapper.InnerHtml.SetHtmlContent(label);
-
-            output.PreContent.AppendHtml(labelWrapper);
+            if (LabelAsHeading)
+            {
+                var labelWrapper = new TagBuilder(LabelLevel);
+                labelWrapper.AddCssClass("govuk-label-wrapper");
+                labelWrapper.InnerHtml.SetHtmlContent(label);
+                output.PreContent.AppendHtml(labelWrapper);
+            }
+            else
+            {
+                output.PreContent.AppendHtml(label);
+            }
 
             var resolvedDescription = Description ?? For.Metadata.Description;
             if (!string.IsNullOrEmpty(resolvedDescription))

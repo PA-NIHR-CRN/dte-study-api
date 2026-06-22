@@ -1,11 +1,29 @@
 ﻿using BPOR.Domain.Entities;
+using BPOR.Rms.VolunteerInformation.Controllers;
 
 namespace BPOR.Rms.VolunteerInformation.Models;
 
 public class VsiEditContext
 {
-
-    public string? SkipUrl { get; set; }
-    public string? SectionName { get; set; }
     public int StudyId { get; set; }
+    public VipFlowMode FlowMode { get; set; }
+
+    public virtual Dictionary<string, string> ToRouteData() =>
+        new Dictionary<string, string>
+        {
+            [nameof(StudyId)] = StudyId.ToString(),
+            [nameof(FlowMode)] = FlowMode.ToString()
+        };
+}
+
+public class VsiGroupEditContext : VsiEditContext
+{
+    public int GroupId { get; set; }
+
+    public override Dictionary<string, string> ToRouteData()
+    {
+        var result = base.ToRouteData();
+        result.Add(nameof(GroupId), GroupId.ToString());
+        return result;
+    }
 }

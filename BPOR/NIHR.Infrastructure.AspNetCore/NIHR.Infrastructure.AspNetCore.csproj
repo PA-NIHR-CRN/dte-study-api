@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="10.3.6" />
+    <PackageReference Include="Rbec.Postcodes" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,9 +3,9 @@
 
 @{
     VsiEditContext context = ViewBag.Context;
-    context.SectionName = Resources.Section3Name;
-    ViewData.SetBackLinkOverride(Url.Action("Section2_Step7", new { context.StudyId }));
-    context.SkipUrl = Url.Action("Section3_Step2", new { context.StudyId });
+    ViewData.SetBackLinkOverride(Url.FlowNext(context, "Section2_Step7"));
+    ViewData.SetSectionName(Resources.Section3Name);
+    ViewData.SetSkipLink(Url.FlowNext(context, "Section3_Step2"));
     Layout = "_VsiEditLayoutForm";
 }
 

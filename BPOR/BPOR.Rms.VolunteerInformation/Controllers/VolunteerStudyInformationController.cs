@@ -1,4 +1,3 @@
-using BPOR.Domain;
 using BPOR.Rms.Abstractions.Entities;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Data;
@@ -6,50 +5,22 @@ using BPOR.Rms.VolunteerInformation.Models;
 using BPOR.Rms.VolunteerInformation.Settings;
 using BPOR.Rms.VolunteerInformation.Tokens;
 using BPOR.Rms.VolunteerInformation.Validators;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Caching.Memory;
-using NIHR.Infrastructure.AspNetCore;
 using NIHR.Infrastructure.AspNetCore.Validation;
 using NIHR.Rts.Client;
+using Rbec.Postcodes;
 
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [Route("Study/{studyId:int}/VolunteerInformation/[action]")]
-public class VolunteerStudyInformationController : VipControllerBase
+public class VolunteerStudyInformationController : VipControllerBase<VsiEditContext>
 {
-
     public VolunteerStudyInformationController(IVipRepository vipRepository) : base(vipRepository)
     {
     }
-    // static VolunteerStudyInformationController()
-    // {
-    //     var metadata = new MultistepFormBuilder<VsiEditModel>()
-    //         .AddSection("Section 1. Overview", section => section
-    //             .AddPropertyStep("About the Study", step => step
-    //                 .AddProperty(i => i.Description))
-    //             .AddPropertyStep("Select the type of study", step => step
-    //                 .AddRadioProperty(i => i.StudyType, radio => radio
-    //                     .AddOption(VsiStudyTypeId.InPerson, "In Person")
-    //                     .AddOption(VsiStudyTypeId.Remote, "Remote")
-    //                     .AddOption(VsiStudyTypeId.Hybrid, "Hybrid"))
-    //                 .WithPostAction("SelectStudyType"))
-    //             .AddCustomActionStep("ResearchLocation", step => step
-    //                 .ShowOnlyIf(i => i.StudyType is VsiStudyTypeId.InPerson or VsiStudyTypeId.Hybrid))
-    //             .AddCustomActionStep("VolunteerGroups"))
-    //         .AddSection("Section 2: What does the study involve?", section => section
-    //             .AddPropertyStep("What you will do", step => step
-    //                 .WithDescription(
-    //                     "A brief explanation about what the volunteer is expected to do immediately after recruitment")
-    //                 .AddProperty(i => i.WhatWillYouDo))
-    //             .AddPropertyStep("Will volunteers be offered an incentive for taking part?", step => step
-    //                 .AddYesNoProperty(i => i.HasIncentive)
-    //                 .AddProperty(i => i.IncentiveDetails, prop => prop
-    //                     .WithCaption(
-    //                         "If yes please provide details of the incentives the volunteer will receive for taking part.")))
-    //         ).Build();
-    // }
 
     #region Start
 
@@ -59,7 +30,7 @@ public class VolunteerStudyInformationController : VipControllerBase
     {
         var currentVsi = (await VipRepository.GetPage(studyId, cancellationToken));
 
-        return View(new StartModel{Status = currentVsi?.Status, StudyId = studyId});
+        return View(new StartModel { Status = currentVsi?.Status, StudyId = studyId });
     }
 
     [HttpPost]
@@ -83,10 +54,10 @@ public class VolunteerStudyInformationController : VipControllerBase
         }
 
         await VipRepository.CreatePage(studyId, VsiStatus.Draft, cancellationToken);
-        
-        return RedirectToAction("Section1_Step1", new { studyId = studyId });
+
+        return RedirectToAction("Section1_Step1", new { studyId = studyId, flowMode = VipFlowMode.Create });
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> Resume(int studyId, CancellationToken cancellationToken)
     {
@@ -95,36 +66,39 @@ public class VolunteerStudyInformationController : VipControllerBase
             ? NotFound()
             :
             // TODO: figure out which step to resume on.
-            RedirectToAction("Section1_Step1", new { studyId });
+            RedirectToAction("Section1_Step1", new { studyId, flowMode = VipFlowMode.Create });
     }
-    
+
     [HttpPost]
     [DoNotRequireVsi]
     public async Task<IActionResult> Reset(int studyId, CancellationToken cancellationToken)
     {
         await VipRepository.ResetPage(studyId, cancellationToken);
-        return RedirectToAction("Section1_Step1", new { studyId });
+        return RedirectToAction("Section1_Step1", new { studyId, flowMode = VipFlowMode.Create });
     }
-    
+
     [HttpPost]
     [DoNotRequireVsi]
     public async Task<IActionResult> CreateSample(int studyId, CancellationToken cancellationToken)
     {
         await VipRepository.CreateSampleVolunteerInformation(studyId, cancellationToken);
-        return RedirectToAction("Section4", new { studyId });
+        return RedirectToAction("Section4", new { studyId, flowMode = VipFlowMode.Create });
     }
 
     #endregion
 
     #region Section1
+
     #region Section1_Step1
 
     [HttpGet]
-    public async Task<IActionResult> Section1_Step1(int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section1_Step1(int studyId, VipFlowMode flowMode,
+        CancellationToken cancellationToken)
     {
         var data = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
+                FlowMode = flowMode,
                 Description = i.Description
             },
             cancellationToken);
@@ -135,7 +109,6 @@ public class VolunteerStudyInformationController : VipControllerBase
 
     [HttpPost]
     public async Task<IActionResult> Section1_Step1(
-        [FromRoute] int studyId,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
@@ -144,9 +117,10 @@ public class VolunteerStudyInformationController : VipControllerBase
         {
             return View(model);
         }
-        
-        await VipRepository.UpdateVsi(studyId, i => i.Description = model.Description, cancellationToken);
-        return RedirectToAction("Section1_Step2", new { studyId });
+
+        await VipRepository.UpdateVsi(EditContext.StudyId, i => i.Description = model.Description, cancellationToken);
+
+        return RedirectNextStep("Section1_Step2");
     }
 
     #endregion
@@ -154,12 +128,14 @@ public class VolunteerStudyInformationController : VipControllerBase
     #region Section1_Step2
 
     [HttpGet]
-    public async Task<IActionResult> Section1_Step2(int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section1_Step2(int studyId, VipFlowMode flowMode,
+        CancellationToken cancellationToken)
     {
         var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
-                StudyType = i.StudyType
+                StudyType = i.StudyType,
+                FlowMode = flowMode
             },
             cancellationToken);
         return model == null ? NotFound() : View(model);
@@ -168,6 +144,7 @@ public class VolunteerStudyInformationController : VipControllerBase
     [HttpPost]
     public async Task<IActionResult> Section1_Step2(
         [FromRoute] int studyId,
+        VipFlowMode flowMode,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
@@ -179,16 +156,12 @@ public class VolunteerStudyInformationController : VipControllerBase
 
         await VipRepository.UpdateVsi(studyId, i => i.StudyType = model.StudyType, cancellationToken);
 
-        switch (model.StudyType)
+        return model.StudyType switch
         {
-            case VsiStudyType.Remote:
-                return RedirectToAction("Section1_Step4", new { studyId });
-            case VsiStudyType.InPerson:
-            case VsiStudyType.Hybrid:
-                return RedirectToAction("Section1_Step3", new { studyId });
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            VsiStudyType.Remote => RedirectNextStep("Section1_Step4"),
+            VsiStudyType.InPerson or VsiStudyType.Hybrid => RedirectToAction("Section1_Step3"),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     #endregion
@@ -202,69 +175,65 @@ public class VolunteerStudyInformationController : VipControllerBase
         SiteSearchModel model,
         CancellationToken cancellationToken)
     {
-        SiteSearchResultsModel viewModel = new SiteSearchResultsModel(){SearchTerm = model.SearchTerm};
-        
         ModelState.Clear();
-        new SiteSearchModelValidator().ValidateSpecificProperties(viewModel, i => i.SearchTerm).AddToModelState(ModelState);
+        new SiteSearchResultsModelValidator().ValidateSpecificProperties(model, i => i.SearchTerm)
+            .AddToModelState(ModelState);
 
-        var parsedPostcode = ParsePostcode(viewModel);
-        
         if (!ModelState.IsValid)
         {
-            return View(viewModel);
-        }
-        
-        viewModel.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
-        
-        if (viewModel.SearchResult.Length == 0)
-        {
-            ModelState.AddModelError(nameof(SiteSearchModel.SearchTerm),
-                "The postcode you've entered cannot be found.");
+            return View(model);
         }
 
-        return View(viewModel);
+        if (model.IsSearching)
+        {
+            var parsedPostcode = Postcode.Parse(model.SearchTerm);
+
+            model.SearchResult =
+                (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
+
+            if (model.SearchResult.Length == 0)
+            {
+                ModelState.AddModelError(nameof(SiteSearchModel.SearchTerm),
+                    "The postcode you've entered cannot be found.");
+            }
+        }
+
+        return View(model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> SiteSearch(
+    [ActionName(nameof(SiteSearch))]
+    public async Task<IActionResult> SiteSearchPostBack(
         [FromServices] IRtsAddressSource addressSource,
         [FromRoute] int studyId,
-        SiteSearchResultsModel model,
+        SiteSearchModel model,
         CancellationToken cancellationToken)
     {
         ModelState.Clear();
         new SiteSearchResultsModelValidator().ValidateSpecificProperties(model, i => i.SelectedRtsId)
             .AddToModelState(ModelState);
-        
-        var parsedPostcode = ParsePostcode(model);
 
         if (!ModelState.IsValid)
         {
-            model.SearchResult = (await addressSource.SearchByPostcode(parsedPostcode, cancellationToken)).ToArray();
+            var postcode = Postcode.Parse(model.SearchTerm);
+            model.SearchResult = (await addressSource.SearchByPostcode(postcode, cancellationToken)).ToArray();
             return View(model);
         }
 
         var result = await addressSource.GetById(
             model.SelectedRtsId,
             cancellationToken);
-        
+
         if (result == null)
         {
             ModelState.AddModelError(nameof(model.SelectedRtsId), "The selected address has been removed from RTS");
             return View(model);
         }
 
-        return await AddSite(result, studyId, cancellationToken);
-    }
-    
-    public Postcode ParsePostcode(SiteSearchModel model)
-    {
-        Postcode.TryParse(model.SearchTerm, out var parsedPostcode);
-        
-        return parsedPostcode;
+        return await AddSite(result, cancellationToken);
     }
 
-    private async Task<IActionResult> AddSite(RtsAddress addressToAdd, int studyId, CancellationToken cancellationToken)
+    private async Task<IActionResult> AddSite(RtsAddress addressToAdd, CancellationToken cancellationToken)
     {
         var site = new VsiSite()
         {
@@ -275,12 +244,13 @@ public class VolunteerStudyInformationController : VipControllerBase
             AddressLine5 = addressToAdd.AddressLine5,
             Postcode = addressToAdd.Postcode
         };
-        int? result = await VipRepository.CreateSite(studyId, site, cancellationToken);
-        return result.HasValue ? RedirectToAction("Section1_Step3", new { studyId }) : NotFound();
+        int? result = await VipRepository.CreateSite(EditContext.StudyId, site, cancellationToken);
+        return result.HasValue ? RedirectToAction("Section1_Step3", EditContext) : NotFound();
     }
 
     [HttpGet]
-    public async Task<IActionResult> Section1_Step3(int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section1_Step3(int studyId, VipFlowMode flowMode, bool isNavigateBack,
+        CancellationToken cancellationToken)
     {
         var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
@@ -297,7 +267,23 @@ public class VolunteerStudyInformationController : VipControllerBase
                 })
             },
             cancellationToken);
-        return model == null ? NotFound() : View(model);
+
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        if (model.Sites.Any())
+        {
+            return View(model);
+        }
+
+        if (isNavigateBack)
+        {
+            return RedirectNextStep("Section1_Step2");
+        }
+
+        return RedirectToAction("SiteSearch", EditContext);
     }
 
     [HttpPost]
@@ -315,7 +301,6 @@ public class VolunteerStudyInformationController : VipControllerBase
 
     [HttpPost]
     public async Task<IActionResult> ManualSiteEntry(
-        int studyId,
         [FromForm] ManualSiteEntryModel model,
         CancellationToken cancellationToken)
     {
@@ -327,7 +312,7 @@ public class VolunteerStudyInformationController : VipControllerBase
             return View(model);
         }
 
-        return await AddSite(model.Address, studyId, cancellationToken);
+        return await AddSite(model.Address, cancellationToken);
     }
 
     #endregion
@@ -363,7 +348,7 @@ public class VolunteerStudyInformationController : VipControllerBase
             return View(model);
         }
 
-        return RedirectToAction("CreateGroup", new { studyId });
+        return RedirectToAction("CreateGroup", EditContext);
     }
 
 
@@ -375,7 +360,6 @@ public class VolunteerStudyInformationController : VipControllerBase
 
     [HttpPost]
     public async Task<IActionResult> CreateGroup(
-        int studyId,
         [FromForm] CreateGroupModel model,
         CancellationToken cancellationToken)
     {
@@ -385,22 +369,25 @@ public class VolunteerStudyInformationController : VipControllerBase
         {
             return View(model);
         }
-        
-        int? groupId = await VipRepository.CreateGroup(studyId, model.Name, cancellationToken);
+
+        int? groupId = await VipRepository.CreateGroup(EditContext.StudyId, model.Name, cancellationToken);
         return groupId == null
             ? NotFound()
             : RedirectToAction("CreateGroupCheck", "Group",
-                new { studyId, groupId });
+                new { EditContext.StudyId, EditContext.FlowMode, groupId });
     }
 
     #endregion
+
     #endregion
-    
+
     #region Section2
+
     #region Section2_Step1
 
     [HttpGet]
-    public async Task<IActionResult> Section2_Step1(int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section2_Step1(int studyId, VipFlowMode flowMode,
+        CancellationToken cancellationToken)
     {
         var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
@@ -415,6 +402,7 @@ public class VolunteerStudyInformationController : VipControllerBase
     [HttpPost]
     public async Task<IActionResult> Section2_Step1(
         [FromRoute] int studyId,
+        VipFlowMode flowMode,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
@@ -428,7 +416,8 @@ public class VolunteerStudyInformationController : VipControllerBase
 
         await VipRepository.UpdateVsi(studyId, vsi => vsi.WhatYouWillDo = model.WhatYouWillDo,
             cancellationToken);
-        return RedirectToAction("Section2_Step2", new { studyId });
+
+        return RedirectNextStep("Section2_Step2");
     }
 
     #endregion
@@ -451,6 +440,7 @@ public class VolunteerStudyInformationController : VipControllerBase
     [HttpPost]
     public async Task<IActionResult> Section2_Step2(
         [FromRoute] int studyId,
+        VipFlowMode flowMode,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
@@ -464,7 +454,8 @@ public class VolunteerStudyInformationController : VipControllerBase
 
         await VipRepository.UpdateVsi(studyId, vsi => vsi.CostReimbursement = model.CostReimbursement,
             cancellationToken);
-        return RedirectToAction("Section2_Step3", new { studyId });
+
+        return RedirectNextStep("Section2_Step3");
     }
 
     #endregion
@@ -487,11 +478,13 @@ public class VolunteerStudyInformationController : VipControllerBase
     [HttpPost]
     public async Task<IActionResult> Section2_Step3(
         [FromRoute] int studyId,
+        VipFlowMode flowMode,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
         VsiValidator validator = new VsiValidator();
-        validator.ValidateSpecificProperties(model, i => i.IncentiveDetails, i => i.HasIncentive).AddToModelState(ModelState);
+        validator.ValidateSpecificProperties(model, i => i.IncentiveDetails, i => i.HasIncentive)
+            .AddToModelState(ModelState);
 
         if (!ModelState.IsValid)
         {
@@ -504,7 +497,8 @@ public class VolunteerStudyInformationController : VipControllerBase
                 vsi.HasIncentive = model.HasIncentive;
             },
             cancellationToken);
-        return RedirectToAction("Section2_Step4", new { studyId });
+
+        return RedirectNextStep("Section2_Step4");
     }
 
     #endregion
@@ -526,6 +520,7 @@ public class VolunteerStudyInformationController : VipControllerBase
     [HttpPost]
     public async Task<IActionResult> Section2_Step4(
         [FromRoute] int studyId,
+        VipFlowMode flowMode,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
@@ -536,9 +531,11 @@ public class VolunteerStudyInformationController : VipControllerBase
         {
             return View(model);
         }
+
         await VipRepository.UpdateVsi(studyId, vsi => vsi.NumberOfVisits = model.NumberOfVisits,
             cancellationToken);
-        return RedirectToAction("Section2_Step5", new { studyId });
+
+        return RedirectNextStep("Section2_Step5");
     }
 
     #endregion
@@ -560,6 +557,7 @@ public class VolunteerStudyInformationController : VipControllerBase
     [HttpPost]
     public async Task<IActionResult> Section2_Step5(
         [FromRoute] int studyId,
+        VipFlowMode flowMode,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
@@ -573,7 +571,8 @@ public class VolunteerStudyInformationController : VipControllerBase
 
         await VipRepository.UpdateVsi(studyId, vsi => vsi.StudyDuration = model.StudyDuration,
             cancellationToken);
-        return RedirectToAction("Section2_Step6", new { studyId });
+
+        return RedirectNextStep("Section2_Step6");
     }
 
     #endregion
@@ -595,6 +594,7 @@ public class VolunteerStudyInformationController : VipControllerBase
     [HttpPost]
     public async Task<IActionResult> Section2_Step6(
         [FromRoute] int studyId,
+        VipFlowMode flowMode,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
@@ -608,7 +608,8 @@ public class VolunteerStudyInformationController : VipControllerBase
 
         await VipRepository.UpdateVsi(studyId, vsi => vsi.StudyFormat = model.StudyFormat,
             cancellationToken);
-        return RedirectToAction("Section2_Step7", new { studyId });
+
+        return RedirectNextStep("Section2_Step7");
     }
 
     #endregion
@@ -630,6 +631,7 @@ public class VolunteerStudyInformationController : VipControllerBase
     [HttpPost]
     public async Task<IActionResult> Section2_Step7(
         [FromRoute] int studyId,
+        VipFlowMode flowMode,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
@@ -643,12 +645,14 @@ public class VolunteerStudyInformationController : VipControllerBase
 
         await VipRepository.UpdateVsi(studyId, vsi => vsi.OtherDetails = model.OtherDetails,
             cancellationToken);
-        return RedirectToAction("Section3_Step1", new { studyId });
+
+        return RedirectNextStep("Section3_Step1");
     }
 
     #endregion
-    
+
     #endregion
+
     #region Section3
 
     #region Section3_Step1
@@ -667,17 +671,16 @@ public class VolunteerStudyInformationController : VipControllerBase
 
     [HttpPost]
     public async Task<IActionResult> Section3_Step1(
-        [FromRoute] int studyId,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
         VsiValidator validator = new VsiValidator();
         validator.ValidateSpecificProperties(model, i => i.StagedPreScreenerUrl).AddToModelState(ModelState);
-        
+
         // Do this properly - this property is optional in general but mandatory on this one action.
         if (string.IsNullOrWhiteSpace(model.StagedPreScreenerUrl))
         {
-            ModelState.AddModelError(nameof(model.StagedPreScreenerUrl), 
+            ModelState.AddModelError(nameof(model.StagedPreScreenerUrl),
                 "Enter information to Continue. If this is not relevant to your study, skip this question.");
         }
 
@@ -686,9 +689,36 @@ public class VolunteerStudyInformationController : VipControllerBase
             return View(model);
         }
 
-        await VipRepository.UpdateVsi(studyId, vsi => vsi.StagedPreScreenerUrl = model.StagedPreScreenerUrl,
+        await VipRepository.UpdateVsi(EditContext.StudyId, vsi => vsi.StagedPreScreenerUrl = model.StagedPreScreenerUrl,
             cancellationToken);
-        return RedirectToAction("Section3_Step2", new { studyId });
+
+        return RedirectNextStep("Section3_Step2");
+    }
+
+    private new IActionResult RedirectToAction([AspMvcAction] string action)
+        => RedirectToAction(action, EditContext);
+
+    private IActionResult RedirectNextStep([AspMvcAction] string action)
+        => RedirectNextStep(action, EditContext);
+
+    private IActionResult RedirectNextStep([AspMvcAction] string action, [AspMvcModelType] object route)
+    {
+        return EditContext.FlowMode switch
+        {
+            VipFlowMode.Create => RedirectToAction(action, route),
+            VipFlowMode.Edit => RedirectToAction("Section4"),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    private IActionResult RedirectNextStep(IActionResult createFlow)
+    {
+        return EditContext.FlowMode switch
+        {
+            VipFlowMode.Create => createFlow,
+            VipFlowMode.Edit => RedirectToAction("Section4", EditContext),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     #endregion
@@ -715,11 +745,11 @@ public class VolunteerStudyInformationController : VipControllerBase
     {
         VsiValidator validator = new VsiValidator();
         validator.ValidateSpecificProperties(model, i => i.ExternalWebsiteUrl).AddToModelState(ModelState);
-        
+
         // Do this properly - this property is optional in general but mandatory on this one action.
         if (string.IsNullOrWhiteSpace(model.ExternalWebsiteUrl))
         {
-            ModelState.AddModelError(nameof(model.ExternalWebsiteUrl), 
+            ModelState.AddModelError(nameof(model.ExternalWebsiteUrl),
                 "Enter information to Continue. If this is not relevant to your study, skip this question.");
         }
 
@@ -730,7 +760,8 @@ public class VolunteerStudyInformationController : VipControllerBase
 
         await VipRepository.UpdateVsi(studyId, vsi => vsi.ExternalWebsiteUrl = model.ExternalWebsiteUrl,
             cancellationToken);
-        return RedirectToAction("Section3_Step3", new { studyId });
+
+        return RedirectNextStep(RedirectToAction("Section3_Step3", EditContext));
     }
 
     #endregion
@@ -758,12 +789,12 @@ public class VolunteerStudyInformationController : VipControllerBase
         {
             return NotFound();
         }
-        
+
         if (model.Contacts.Any())
         {
             return View(model);
         }
-        
+
         return RedirectToAction("CreateContact", new { studyId });
     }
 
@@ -772,9 +803,10 @@ public class VolunteerStudyInformationController : VipControllerBase
     {
         return View(new VsiContactModel());
     }
-    
+
     [HttpPost]
-    public async Task<IActionResult> CreateContact(int studyId, VsiContactModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateContact(int studyId, VsiContactModel model,
+        CancellationToken cancellationToken)
     {
         ModelState.Clear();
         (await new VsiContactModelValidator().ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
@@ -783,7 +815,7 @@ public class VolunteerStudyInformationController : VipControllerBase
         {
             return View(model);
         }
-        
+
         await VipRepository.CreateContact(studyId, new VsiContact
         {
             Name = model.Name,
@@ -792,18 +824,18 @@ public class VolunteerStudyInformationController : VipControllerBase
             Organisation = model.Organisation,
             Role = model.Role
         }, cancellationToken);
-        
+
         return RedirectToAction("Section3_Step3", new { studyId });
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> RemoveContact(int studyId, int contactId, CancellationToken cancellationToken)
     {
         await VipRepository.RemoveContact(studyId, contactId, cancellationToken);
-        
+
         return RedirectToAction("Section3_Step3", new { studyId });
     }
-    
+
     #endregion
 
     #region Section3_Step4
@@ -828,11 +860,11 @@ public class VolunteerStudyInformationController : VipControllerBase
     {
         VsiValidator validator = new VsiValidator();
         validator.ValidateSpecificProperties(model, i => i.InfoToRegisterByEmail).AddToModelState(ModelState);
-        
+
         // Do this properly - this property is optional in general but mandatory on this one action.
         if (string.IsNullOrWhiteSpace(model.InfoToRegisterByEmail))
         {
-            ModelState.AddModelError(nameof(model.InfoToRegisterByEmail), 
+            ModelState.AddModelError(nameof(model.InfoToRegisterByEmail),
                 "Enter information to Continue. If this is not relevant to your study, skip this question.");
         }
 
@@ -858,18 +890,18 @@ public class VolunteerStudyInformationController : VipControllerBase
             {
                 Description = i.Description,
                 StudyType = i.StudyType,
-               WhatYouWillDo = i.WhatYouWillDo,
-               CostReimbursement = i.CostReimbursement,
-               HasIncentive = i.CostReimbursement,
-               IncentiveDetails  = i.IncentiveDetails,
-               NumberOfVisits = i.NumberOfVisits,
-               StudyDuration = i.StudyDuration,
-               StudyFormat = i.StudyFormat,
-               OtherDetails  = i.OtherDetails,
-               ExternalWebsiteUrl = i.ExternalWebsiteUrl,
-               InfoToRegisterByEmail = i.InfoToRegisterByEmail,
-               StagedPreScreenerUrl = i.StagedPreScreenerUrl,
-                
+                WhatYouWillDo = i.WhatYouWillDo,
+                CostReimbursement = i.CostReimbursement,
+                HasIncentive = i.CostReimbursement,
+                IncentiveDetails = i.IncentiveDetails,
+                NumberOfVisits = i.NumberOfVisits,
+                StudyDuration = i.StudyDuration,
+                StudyFormat = i.StudyFormat,
+                OtherDetails = i.OtherDetails,
+                ExternalWebsiteUrl = i.ExternalWebsiteUrl,
+                InfoToRegisterByEmail = i.InfoToRegisterByEmail,
+                StagedPreScreenerUrl = i.StagedPreScreenerUrl,
+
                 Contacts = i.Contacts.Select(c => new VsiContactModel
                 {
                     Id = c.Id,
@@ -902,12 +934,73 @@ public class VolunteerStudyInformationController : VipControllerBase
                 })
             },
             cancellationToken);
+
+        ModelState.Clear();
+        (await new VsiValidator().ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
+
         return model == null ? NotFound() : View(model);
     }
 
     [HttpPost]
     public async Task<IActionResult> Section4(int studyId, CancellationToken cancellationToken, bool commit = true)
     {
+        var model = await VipRepository.GetPage(studyId,
+            i => new VsiEditModel
+            {
+                Description = i.Description,
+                StudyType = i.StudyType,
+                WhatYouWillDo = i.WhatYouWillDo,
+                CostReimbursement = i.CostReimbursement,
+                HasIncentive = i.CostReimbursement,
+                IncentiveDetails = i.IncentiveDetails,
+                NumberOfVisits = i.NumberOfVisits,
+                StudyDuration = i.StudyDuration,
+                StudyFormat = i.StudyFormat,
+                OtherDetails = i.OtherDetails,
+                ExternalWebsiteUrl = i.ExternalWebsiteUrl,
+                InfoToRegisterByEmail = i.InfoToRegisterByEmail,
+                StagedPreScreenerUrl = i.StagedPreScreenerUrl,
+
+                Contacts = i.Contacts.Select(c => new VsiContactModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Role = c.Role,
+                    Organisation = c.Organisation,
+                    Email = c.Email,
+                    PhoneNumber = c.PhoneNumber
+                }),
+                Groups = i.Groups.Select(g => new VsiGroupModel
+                {
+                    Id = g.Id,
+                    Name = g.Name,
+                    Criteria = g.Criteria.Select(c => new VsiGroupCriteriaModel
+                    {
+                        Id = c.Id,
+                        Description = c.Description,
+                        Type = c.Type
+                    })
+                }),
+                Sites = i.Sites.Select(s => new VsiSiteModel
+                {
+                    AddressLine1 = s.AddressLine1,
+                    AddressLine2 = s.AddressLine2,
+                    AddressLine3 = s.AddressLine3,
+                    AddressLine4 = s.AddressLine4,
+                    AddressLine5 = s.AddressLine5,
+                    Postcode = s.Postcode,
+                    Id = s.Id
+                })
+            },
+            cancellationToken);
+        
+        ModelState.Clear();
+        (await new VsiValidator().ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
         await VipRepository.UpdateVsi(studyId, i => i.Status = VsiStatus.Active, cancellationToken);
         return RedirectToAction("NextSteps", new { studyId });
     }
@@ -924,9 +1017,15 @@ public class VolunteerStudyInformationController : VipControllerBase
     {
         var uri = QueryHelpers.AddQueryString(options.Value.BporVipUri, new Dictionary<string, string?>
         {
-            ["token"] =  tokenGenerator.GenerateToken(VipTokenPurpose.AdminPreview, studyId),
+            ["token"] = tokenGenerator.GenerateToken(VipTokenPurpose.AdminPreview, studyId),
         });
-        
+
         return Redirect(uri);
     }
+}
+
+public enum VipFlowMode
+{
+    Create,
+    Edit,
 }

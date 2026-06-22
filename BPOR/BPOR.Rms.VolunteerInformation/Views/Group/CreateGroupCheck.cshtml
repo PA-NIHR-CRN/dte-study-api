@@ -2,8 +2,8 @@
 @model BPOR.Rms.VolunteerInformation.Models.VsiGroupModel
 
 @{
-    VsiEditContext context = ViewBag.Context;
-    context.SectionName = Resources.Section1Name;
+    VsiGroupEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section1Name);
     Layout = "_VsiEditLayout";
 }
 
@@ -16,7 +16,7 @@
             @Model.Name
         </dt>
         <dd class="govuk-summary-list__actions">
-            <form method="post" asp-action="RemoveGroup" asp-route-studyId="@context.StudyId" asp-route-groupId="@Model.Id">
+            <form method="post" asp-action="RemoveGroup" asp-all-route-data="@context.ToRouteData()">
                 <button class="govuk-link" type="submit">Delete</button>
             </form>
         </dd>
@@ -24,5 +24,5 @@
 </dl>
 
 <div>
-    <a class="govuk-button" asp-action="CreateCriterion" asp-route-studyId="@context.StudyId" asp-route-groupId="@Model.Id" asp-route-type="Include">Continue</a>
+    <a class="govuk-button" asp-action="CreateCriterion" asp-all-route-data="@context.ToRouteData()" asp-route-type="Include">Continue</a>
 </div>

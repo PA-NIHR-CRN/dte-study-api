@@ -7,6 +7,6 @@ public class RtsApiSettings
     public string TokenUrl { get; set; }
     public string ClientId { get; set; }
     public string ClientSecret { get; set; }
-    public double AddressCacheTtlMinutes { get; set; }
-    public double TokenCacheTtlMinutes { get; set; }
+    public double AddressCacheTtlMinutes { get; set; } = 5;
+    public double TokenCacheTtlMinutes { get; set; } = 30;
 }

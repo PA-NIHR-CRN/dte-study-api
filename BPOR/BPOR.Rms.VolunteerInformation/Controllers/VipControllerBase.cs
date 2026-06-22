@@ -1,5 +1,4 @@
-﻿using BPOR.Domain.Entities;
-using BPOR.Rms.VolunteerInformation.Data;
+﻿using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Models;
 using BPOR.Rms.VolunteerInformation.Utility;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +9,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [AllowAnonymous]
-public abstract class VipControllerBase : Controller
+public abstract class VipControllerBase<TContext> : Controller
+    where TContext : VsiEditContext, new()
 {
     protected IVipRepository VipRepository { get; }
 
@@ -19,7 +19,7 @@ public abstract class VipControllerBase : Controller
         VipRepository = vipRepository;
     }
 
-    protected VsiEditContext EditContext
+    protected TContext EditContext
     {
         get => ViewBag.Context;
         set => ViewBag.Context = value;
@@ -27,8 +27,25 @@ public abstract class VipControllerBase : Controller
     
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        var editContext = new TContext();
+        context.Result = await InitialiseEditContext(context, editContext, context.HttpContext.RequestAborted);
+        EditContext = editContext;
+
+        await base.OnActionExecutionAsync(context, next);
+    }
+
+    protected virtual async Task<IActionResult?> InitialiseEditContext(ActionExecutingContext context, TContext editContext,
+        CancellationToken cancellationToken)
+    {
         var actionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
         var studyIdValue = context.RouteData.Values["studyId"];
+
+        var flowModeString = context.HttpContext.Request.Query["flowMode"].FirstOrDefault();
+            
+        editContext.FlowMode =
+            !string.IsNullOrWhiteSpace(flowModeString) && Enum.TryParse<VipFlowMode>(flowModeString, out var flowMode)
+                ? flowMode
+                : VipFlowMode.Edit;
 
         if (actionDescriptor.MethodInfo.HasAttribute<DoNotRequireVsiAttribute>())
         {
@@ -37,21 +54,19 @@ public abstract class VipControllerBase : Controller
         else if (studyIdValue is string studyIdString 
                  && int.TryParse(studyIdString, out var studyId))
         {
-            EditContext = new VsiEditContext { StudyId = studyId };
-            var currentVsi = await VipRepository.GetPage(studyId, context.HttpContext.RequestAborted);
+            editContext.StudyId = studyId;
+            var currentVsi = await VipRepository.GetPage(studyId, cancellationToken); // TODO: Optimise
             if (currentVsi == null)
             {
-                context.Result = new NotFoundResult();
-                return;
+                return new NotFoundResult();
             }
         }
         else
         {
-            context.Result = new NotFoundResult();
+            return new NotFoundResult();
         }
-          
 
-        await base.OnActionExecutionAsync(context, next);
+        return null;
     }
 }
 

@@ -1,13 +1,14 @@
 ﻿@model BPOR.Rms.VolunteerInformation.Models.VsiGroupModel
 
 @{
-    VsiEditContext context = ViewBag.Context;
-    context.SectionName = Resources.Section1Name;
+    VsiGroupEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section1Name);
     Layout = "_VsiEditLayoutForm";
 }
 
-<h1>Would you like to add exclusion criteria?</h1>
-<radio-set name="addExclusionCriteria">
-    <radio value="@true">Yes</radio>
-    <radio value="@false">No</radio>
-</radio-set>
+<form-group for="Criteria" label="Would you like to add exclusion criteria?" label-class="govuk-heading-l">
+    <radio-set name="addExclusionCriteria">
+        <radio value="@true">Yes</radio>
+        <radio value="@false">No</radio>
+    </radio-set>
+</form-group>

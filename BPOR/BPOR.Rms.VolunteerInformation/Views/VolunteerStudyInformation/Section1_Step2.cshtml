@@ -1,15 +1,14 @@
-﻿@using BPOR.Domain.Enums
-@using BPOR.Rms.Abstractions.Enums
+﻿@using BPOR.Rms.Abstractions.Enums
 @model VsiEditModel
 
 @{
     VsiEditContext context = ViewBag.Context;
-    ViewData.SetBackLinkOverride(Url.Action("Section1_Step1", new{ context.StudyId }));
-    context.SectionName = Resources.Section1Name;
+    ViewData.SetBackLinkOverride(Url.FlowNext(context, "Section1_Step1"));
+    ViewData.SetSectionName(Resources.Section1Name);
     Layout = "_VsiEditLayoutForm";
 }
 
-<form-group for="StudyType" label-class="govuk-heading-xl">
+<form-group for="StudyType" label-class="govuk-heading-l">
     <radio-set for="StudyType">
         <radio value="@VsiStudyType.InPerson">In Person / On Site</radio>
         <radio value="@VsiStudyType.Remote">Remote / Online</radio>

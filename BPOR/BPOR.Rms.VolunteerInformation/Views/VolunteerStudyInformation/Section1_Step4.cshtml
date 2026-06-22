@@ -4,14 +4,19 @@
 
 @{
     VsiEditContext context = ViewBag.Context;
-    context.SectionName = Resources.Section1Name;
+    ViewData.SetSectionName(Resources.Section1Name);
+    ViewData.SetBackLinkOverride(Url.FlowNext(context, url => url.Action("Section1_Step3", new
+    {
+        context.StudyId, context.FlowMode, Direction = "back"
+    })));
+    
     Layout = "_VsiEditLayout";
 }
 
 <h1>Check the details you've provided</h1>
 @foreach (var group in Model.Groups)
 {
-    <h2>Create Volunteer Groups</h2>
+    <h1 class="govuk-heading-l">Create Volunteer Groups</h1>
     <dl class="govuk-summary-list">
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
@@ -21,7 +26,7 @@
                 @group.Name
             </dd>
             <dd class="govuk-summary-list__actions">
-                <form method="post" asp-action="RemoveGroup" asp-controller="Group" asp-route-studyId="@context.StudyId" asp-route-groupId="@group.Id">
+                <form method="post" asp-action="RemoveGroup" asp-controller="Group" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id">
                     <button class="govuk-link" type="submit">Delete</button>
                 </form>
             </dd>
@@ -43,7 +48,7 @@
                 </ul>
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a asp-action="Criteria" asp-controller="Group" asp-route-studyId="@context.StudyId" asp-route-groupId="@group.Id" asp-route-type="Include">Change</a>
+                <a asp-action="Criteria" asp-controller="Group" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Include">Change</a>
             </dd>
         </div>
     </dl>
@@ -63,17 +68,17 @@
                 </ul>
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a asp-action="Criteria" asp-controller="Group" asp-route-studyId="@context.StudyId" asp-route-groupId="@group.Id" asp-route-type="Exclude">Change</a>
+                <a asp-action="Criteria" asp-controller="Group" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Exclude">Change</a>
             </dd>
         </div>
     </dl>
 }
 
 <div class="govuk-!-margin-3">
-    <a asp-action="CreateGroup" asp-route-studyid="@context.StudyId" 
+    <a asp-action="CreateGroup" asp-all-route-data="@context.ToRouteData()" 
        class="govuk-link" >Add another group</a>
 </div>
 <div>
-<a asp-action="Section2_Step1" asp-route-studyid="@context.StudyId" 
+<a asp-action="Section2_Step1" asp-all-route-data="@context.ToRouteData()" 
    class="govuk-button" data-module="govuk-button">Continue</a>
 </div>

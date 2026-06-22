@@ -114,7 +114,7 @@ public class StudyController(
                 study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
                 {
                     Text = "Resume volunteer study information page",
-                    Url = Url.Action("Resume", "VolunteerStudyInformation", new { studyId = id.Value })
+                    Url = Url.Action("Start", "VolunteerStudyInformation", new { studyId = id.Value })
                 });
                 break;
             case VsiStatus.Active:

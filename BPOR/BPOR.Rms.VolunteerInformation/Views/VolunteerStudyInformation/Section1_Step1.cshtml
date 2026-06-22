@@ -2,11 +2,12 @@
 
 @{
     VsiEditContext context = ViewBag.Context;
-    context.SectionName = Resources.Section1Name;
+    ViewData.SetSectionName(Resources.Section1Name);
+    ViewData.SetBackLinkOverride(Url.FlowNext(context, "Start"));
     Layout = "_VsiEditLayoutForm";
 }
 
-<form-group for="Description" label-class="govuk-heading-xl">
+<form-group for="Description" label-class="govuk-heading-l">
     <textarea rows="5" class="govuk-textarea" asp-for="Description"></textarea>
     <p>You can add up to 60 words</p>
 </form-group>

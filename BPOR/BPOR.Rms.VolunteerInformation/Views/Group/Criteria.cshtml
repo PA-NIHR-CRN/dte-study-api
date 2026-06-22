@@ -1,14 +1,13 @@
 ﻿@using BPOR.Domain.Enums
 @using BPOR.Rms.Abstractions.Enums
-@using BPOR.Rms.VolunteerInformation.Utility
 @model BPOR.Rms.VolunteerInformation.Models.CriteriaListModel
 
 @{
-    VsiEditContext context = ViewBag.Context;
-    context.SectionName = BPOR.Rms.VolunteerInformation.Resources.Section1Name;
+    VsiGroupEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section1Name);
 }
-<h1>Add @Model.Type.GetNoun() criteria</h1>
-<p>You have added the following criteria for @Model.VsiGroup.Name:</p>
+<h1 class="govuk-heading-l">Add @Model.Type.GetNoun() criteria</h1>
+<body-text>You have added the following criteria for @Model.VsiGroup.Name:</body-text>
 
 <table class="govuk-table">
     <tbody class="govuk-table__body">
@@ -17,7 +16,7 @@
         <tr class="govuk-table__row">
             <th scope="row" class="govuk-table__header">@criterion.Description</th>
             <td class="govuk-table__cell">
-                <form asp-action="RemoveCriteria" asp-route-studyId="@context.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
+                <form asp-action="RemoveCriteria" asp-all-route-data="@context.ToRouteData()"
                       asp-route-criteriaId="@criterion.Id" asp-route-type="@Model.Type">
                     <button class="govuk-link" type="submit">Delete</button>
                 </form>
@@ -28,17 +27,17 @@
 </table>
 
 <div class="govuk-!-margin-4">
-<a class="govuk-link" asp-action="CreateCriterion" asp-route-studyid="@context.StudyId" asp-route-groupid="@Model.VsiGroup.Id" 
+<a class="govuk-link" asp-action="CreateCriterion" asp-all-route-data="@context.ToRouteData()" 
    asp-route-type="@Model.Type">Add more criteria</a>
 </div>
 
 @if (Model.Type == VsiGroupCriteronType.Include)
 {
-    <a asp-action="QueryAddExclusionCriteria" asp-route-studyid="@context.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
+    <a asp-action="QueryAddExclusionCriteria" asp-all-route-data="@context.ToRouteData()"
        class="govuk-button" data-module="govuk-button">Continue</a>
 }
 else
 {
-    <a asp-action="Section1_Step4" asp-controller="VolunteerStudyInformation" asp-route-studyid="@context.StudyId" asp-route-groupid="@Model.VsiGroup.Id"
+    <a asp-action="Section1_Step4" asp-controller="VolunteerStudyInformation" asp-all-route-data="@context.ToRouteData()"
        class="govuk-button" data-module="govuk-button">Continue</a>
 }
