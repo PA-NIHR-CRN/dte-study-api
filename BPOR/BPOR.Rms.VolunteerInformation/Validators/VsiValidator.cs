@@ -56,11 +56,11 @@ public class VsiValidator : AbstractValidator<VsiEditModel>
             
         RuleFor(i => i.Description)
             .NotEmpty().WithMessage("You must enter a description of your study.")
-            .MaxWords(60).WithMessage("You can add up to 60 words.");
+            .MaximumLength(2000).WithMessage("You can add up to 2000 letters.");
         RuleFor(i => i.StudyType)
             .NotNull().WithMessage("Select an option to continue");
         RuleFor(i => i.WhatYouWillDo)
-            .MaximumLength(200).WithMessage("You have entered more than 200 characters")
+            .MaximumLength(2000).WithMessage("You have entered more than 2000 characters")
             .NotNull().WithMessage("Provide a brief description of what the volunteer will be doing as part of the study.");
         RuleFor(i => i.CostReimbursement)
             .NotNull().WithMessage("Select an option to continue");
@@ -77,10 +77,10 @@ public class VsiValidator : AbstractValidator<VsiEditModel>
             .MaximumLength(200).WithMessage("You can add up to 200 characters")
             .NotNull().WithMessage("Provide details of how long this study is expected to last. This can be days, months, years, or specific dates (if any).");
         RuleFor(i => i.StudyFormat)
-            .MaximumLength(200).WithMessage("You can add up to 200 characters")
+            .MaximumLength(2000).WithMessage("You can add up to 2000 characters")
             .NotNull().WithMessage("Describe the different stages of the study, including treatments and follow-up appointments.");
         RuleFor(i => i.OtherDetails)
-            .MaximumLength(200).WithMessage("You can add up to 200 characters")
+            .MaximumLength(2500).WithMessage("You can add up to 2500 characters")
             /*.NotNull().WithMessage("Enter information to Continue. If this is not relevant to your study, Skip this question")*/;
         RuleFor(i => i.StagedPreScreenerUrl)
             .Uri()

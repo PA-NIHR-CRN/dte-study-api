@@ -94,6 +94,7 @@ public static class Extensions
                 HasIncentive = true,
                 IncentiveDetails = "you will be given a £50 gift voucher upon completion of this study",
                 NumberOfVisits = "2 visits to the research facility per year for ever",
+                StudyDuration = "2 years",
                 OtherDetails = """
                                Taking part in this study is entirely voluntary. Choosing not to participate, or deciding 
                                to withdraw from the study at any point, will not result in any penalty or disadvantage. 
@@ -132,7 +133,14 @@ public static class Extensions
                     Organisation = "Nihr",
                     PhoneNumber = "1234567890",
                     Role = "Mock test user"
-                }]
+                }],
+                StudyFormat = """
+                              The study will be a series of diabolical laboratory experiments, involving torture,
+                              ritual incantations and 1000mg of paracetamol administered twice daily.
+                              
+                              Following the final session there will be a patient satisfaction survey followed by
+                              coffee and petit-fours in the waiting area.
+                              """
                 
             },
             cancellationToken);
