@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
@@ -27,5 +28,5 @@ public class CampaignParticipant : IAudit, ISoftDelete
     public Campaign Campaign { get; set; }
     public Participant Participant { get; set; }
     
-    public string? Token { get; set; }
+    [MaxLength(255)] public string? Token { get; set; }
 }
