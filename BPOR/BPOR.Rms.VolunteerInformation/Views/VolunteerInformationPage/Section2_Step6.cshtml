@@ -8,5 +8,6 @@
 }
 
 <form-group for="StudyFormat" label-class="govuk-heading-l">
-    <textarea rows="5" class="govuk-textarea" asp-for="StudyFormat"></textarea>
+    <textarea rows="5" class="govuk-textarea" asp-for="StudyFormat"  maxlength="@Constants.StudyFormatMaxLength"></textarea>
+    <body-text>You can add up to @Constants.StudyFormatMaxLength characters</body-text>
 </form-group>

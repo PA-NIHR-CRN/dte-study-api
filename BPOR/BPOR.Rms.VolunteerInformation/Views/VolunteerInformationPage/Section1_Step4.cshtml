@@ -26,9 +26,10 @@
                 @group.Name
             </dd>
             <dd class="govuk-summary-list__actions">
-                <form method="post" asp-action="RemoveGroup" asp-controller="VolunteerInformationGroup" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id">
-                    <button class="govuk-link" type="submit">Delete</button>
-                </form>
+                <a class="govuk-link" asp-action="RemoveGroup" asp-controller="VolunteerInformationGroup"
+                   asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id" type="submit">
+                    Delete
+                </a>
             </dd>
         </div>
     </dl>

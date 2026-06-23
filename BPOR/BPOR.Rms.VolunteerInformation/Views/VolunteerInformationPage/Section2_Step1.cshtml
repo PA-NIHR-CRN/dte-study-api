@@ -8,5 +8,6 @@
 }
 
 <form-group for="WhatYouWillDo" label-class="govuk-heading-l">
-    <textarea rows="5" class="govuk-textarea" asp-for="WhatYouWillDo"></textarea>
+    <textarea rows="5" class="govuk-textarea" asp-for="WhatYouWillDo" maxlength="@Constants.WhatYouWillDoMaxLength"></textarea>
+    <body-text>You can add up to @Constants.WhatYouWillDoMaxLength characters</body-text>
 </form-group>

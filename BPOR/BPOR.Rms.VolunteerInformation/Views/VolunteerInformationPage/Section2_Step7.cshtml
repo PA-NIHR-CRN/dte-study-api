@@ -9,5 +9,7 @@
 }
 
 <form-group for="OtherDetails" label-class="govuk-heading-l">
-    <textarea rows="5" class="govuk-textarea" asp-for="OtherDetails"></textarea>
+    <textarea rows="5" class="govuk-textarea" asp-for="OtherDetails"  maxlength="@Constants.OtherDetailsMaxLength"></textarea>
+    <body-text>You can add up to @Constants.OtherDetailsMaxLength characters</body-text>
+    <partial name="_MarkdownHelp"/>
 </form-group>

@@ -9,5 +9,6 @@
 }
 
 <form-group for="InfoToRegisterByEmail" label-class="govuk-heading-l">
-    <input class="govuk-input" asp-for="InfoToRegisterByEmail" type="text">
+    <input class="govuk-input" asp-for="InfoToRegisterByEmail" type="text" maxlength="@Constants.InfoToRegisterByEmailMaxLength">
+    <body-text>You can add up to @Constants.InfoToRegisterByEmailMaxLength characters</body-text>
 </form-group>

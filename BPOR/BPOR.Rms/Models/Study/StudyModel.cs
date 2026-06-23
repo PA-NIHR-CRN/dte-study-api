@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Rms.Utilities;
+using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.Models.Study;
 

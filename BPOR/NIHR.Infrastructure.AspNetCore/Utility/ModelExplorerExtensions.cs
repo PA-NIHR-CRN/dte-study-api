@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace BPOR.Rms.Utilities;
+namespace NIHR.Infrastructure.AspNetCore;
 
 public static class ModelExplorerExtensions
 {

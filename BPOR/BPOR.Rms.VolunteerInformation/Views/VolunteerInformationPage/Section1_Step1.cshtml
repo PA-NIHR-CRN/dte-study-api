@@ -8,6 +8,6 @@
 }
 
 <form-group for="Description" label-class="govuk-heading-l">
-    <textarea rows="5" class="govuk-textarea" asp-for="Description"></textarea>
-    <p>You can add up to 60 words</p>
+    <textarea rows="5" class="govuk-textarea" asp-for="Description" maxlength="@Constants.AboutTheStudyMaxLength"></textarea>
+    <body-text>You can add up to @Constants.AboutTheStudyMaxLength characters</body-text>
 </form-group>

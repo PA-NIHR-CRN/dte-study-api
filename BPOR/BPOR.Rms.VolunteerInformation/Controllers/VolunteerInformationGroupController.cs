@@ -108,6 +108,11 @@ public class VolunteerInformationGroupController(IVipRepository vipRepository) :
         }
     }
     
+    [HttpGet]
+    public IActionResult RemoveGroup()
+    {
+        return View();
+    }
 
     [HttpPost]
     public async Task<IActionResult> RemoveGroup(int groupId, CancellationToken cancellationToken)

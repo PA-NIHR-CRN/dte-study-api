@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Controllers;
+using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.VolunteerInformation.Models;
 
@@ -16,8 +17,10 @@ public class VsiEditModel
     public string? WhatYouWillDo { get; set; }
     
     [Display(Name = "Will volunteers be reimbursed for travel and inconvenience costs?")]
+    [ValueDisplayFormatter(typeof(YesNoFormatter))]
     public bool? CostReimbursement { get; set; }
     [Display(Name = "Will volunteers be offered an incentive for taking part?")]
+    [ValueDisplayFormatter(typeof(YesNoFormatter))]
     public bool? HasIncentive { get; set; }
     [Display(Name = "If yes please provide details of the incentives the volunteer will receive for taking part.")]
     public string? IncentiveDetails { get; set; }

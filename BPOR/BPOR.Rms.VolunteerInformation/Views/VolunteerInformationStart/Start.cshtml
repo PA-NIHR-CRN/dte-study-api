@@ -48,13 +48,13 @@ else
         </div>
         <div class="govuk-!-margin-top-4">
             <form method="post" asp-action="Reset" asp-controller="VolunteerInformationPage" asp-route-studyId="@Model.StudyId">
-                <govuk-button button-type="Secondary" type="submit">Reset</govuk-button>
+                <govuk-button button-type="Secondary" type="submit">Clear form</govuk-button>
             </form>
         </div>
     }
     <div class="govuk-!-margin-top-4">
         <form method="post" asp-action="CreateSample" asp-route-studyId="@Model.StudyId">
-            <govuk-button button-type="Secondary" type="submit">Create Sample Page</govuk-button>
+            <govuk-button button-type="Secondary" type="submit">Create sample page</govuk-button>
         </form>
     </div>
 }

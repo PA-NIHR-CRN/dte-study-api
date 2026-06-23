@@ -20,9 +20,7 @@
             @Model.Name
         </dd>
         <dd class="govuk-summary-list__actions">
-            <form method="post" asp-action="RemoveGroup" asp-all-route-data="@context.ToRouteData()">
-                <button class="govuk-link" type="submit">Delete</button>
-            </form>
+            <a class="govuk-link" asp-action="RemoveGroup" asp-all-route-data="@context.ToRouteData()" type="submit">Delete</a>
         </dd>
     </div>
 </dl>

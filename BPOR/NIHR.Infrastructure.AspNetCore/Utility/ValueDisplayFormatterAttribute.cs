@@ -1,4 +1,4 @@
-﻿namespace BPOR.Rms.Utilities;
+﻿namespace NIHR.Infrastructure.AspNetCore;
 
 public class ValueDisplayFormatterAttribute : Attribute
 {

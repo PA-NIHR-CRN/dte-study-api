@@ -29,11 +29,11 @@
                 </radio-set>
             </fieldset>
         </div>
-        <button class="govuk-button govuk-button--secondary" type="submit">Submit</button>
+        <govuk-button button-type="Secondary" type="submit" value="SelectAddress">Submit</govuk-button>
     </form>
 }
 
 <div class="govuk-!-margin-top-4">
-    <a class="govuk-link" asp-action="ManualSiteEntry" asp-all-route-data="@context.ToRouteData()">Add address manually</a>
+    <a class="govuk-link" asp-action="ManualSiteEntry" asp-all-route-data="@context.ToRouteData()">Enter address manually</a>
 </div>
 
