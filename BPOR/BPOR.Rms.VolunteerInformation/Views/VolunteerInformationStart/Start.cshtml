@@ -18,43 +18,43 @@
 }
 else
 {
-    <h1>Volunteer study information page creation</h1>
-    <h3>Overview</h3>
-    <p>
+    <h1 class="govuk-heading-l">Volunteer study information page creation</h1>
+    <h2 class="govuk-heading-m">Overview</h2>
+    <body-text>
         After collaborating with the researcher and finalising the content of the <a href="@Options.Value.GoogleDocUri">‘volunteer study information’</a> form, you
         will need to fill out this form.
-    </p>
-    <p>
+    </body-text>
+    <body-text>
         This form has the same questions in the same order as the volunteer study information form. Make sure you have it
         open, as you will need to copy-paste most of the information.
-    </p>
-    <p>
+    </body-text>
+    <body-text>
         Not all fields are required, you can skip those that are not applicable to the study you’re filling the form for.
-    </p>
+    </body-text>
     @if (Model.Status == null)
     {
         <div>
             <form method="post">
-                <button class="govuk-button" data_module="govuk-button" type="submit">Start</button>
+                <govuk-button type="submit">Start</govuk-button>
             </form>
         </div>
     }
     else
     {
         <div>
-            <form method="post" asp-action="Resume" asp-route-studyId="@Model.StudyId">
-                <button class="govuk-button" data_module="govuk-button" type="submit">Resume</button>
+            <form method="post" asp-action="Resume" asp-controller="VolunteerInformationPage" asp-route-studyId="@Model.StudyId">
+                <govuk-button type="submit">Resume</govuk-button>
             </form>
         </div>
-        <div>
-            <form method="post" asp-action="Reset" asp-route-studyId="@Model.StudyId">
-                <button class="govuk-button--secondary" data_module="govuk-button" type="submit">Reset</button>
+        <div class="govuk-!-margin-top-4">
+            <form method="post" asp-action="Reset" asp-controller="VolunteerInformationPage" asp-route-studyId="@Model.StudyId">
+                <govuk-button button-type="Secondary" type="submit">Reset</govuk-button>
             </form>
         </div>
     }
-    <div>
+    <div class="govuk-!-margin-top-4">
         <form method="post" asp-action="CreateSample" asp-route-studyId="@Model.StudyId">
-            <button class="govuk-button--inverse" data_module="govuk-button" type="submit">Create Sample Page</button>
+            <govuk-button button-type="Secondary" type="submit">Create Sample Page</govuk-button>
         </form>
     </div>
 }

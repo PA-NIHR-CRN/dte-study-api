@@ -12,6 +12,14 @@ namespace BPOR.Rms.VolunteerInformation.Utility;
 
 public static class UrlHelperExtensions
 {
+    public static string? BackAction(this IUrlHelper helper, VsiEditContext context,
+        [AspMvcAction] string actionName)
+    {
+        var routeData = context.ToRouteData();
+        routeData.Add("isNavigateBack", true.ToString());
+        return helper.Action(actionName, routeData);
+    }
+    
     public static string? FlowNext(this IUrlHelper helper, VsiEditContext context,
         [AspMvcAction] string actionName)
     {

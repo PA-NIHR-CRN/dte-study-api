@@ -16,76 +16,11 @@ using Rbec.Postcodes;
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [Route("Study/{studyId:int}/VolunteerInformation/[action]")]
-public class VolunteerStudyInformationController : VipControllerBase<VsiEditContext>
+public class VolunteerInformationPageController : VipControllerBase<VsiEditContext>
 {
-    public VolunteerStudyInformationController(IVipRepository vipRepository) : base(vipRepository)
+    public VolunteerInformationPageController(IVipRepository vipRepository) : base(vipRepository)
     {
     }
-
-    #region Start
-
-    [HttpGet]
-    [DoNotRequireVsi]
-    public async Task<IActionResult> Start(int studyId, CancellationToken cancellationToken)
-    {
-        var currentVsi = (await VipRepository.GetPage(studyId, cancellationToken));
-
-        return View(new StartModel { Status = currentVsi?.Status, StudyId = studyId });
-    }
-
-    [HttpPost]
-    [DoNotRequireVsi]
-    public async Task<IActionResult> Start(
-        [FromServices] IStudyRepository studyRepository,
-        int studyId,
-        CancellationToken cancellationToken)
-    {
-        var study = await studyRepository.GetStudy(studyId, cancellationToken);
-        if (study == null)
-        {
-            return NotFound();
-        }
-
-        var currentVsi = (await VipRepository.GetPage(studyId, cancellationToken));
-        if (currentVsi != null)
-        {
-            // TODO: there is an existing active draft ... Cope with this better!!
-            return BadRequest();
-        }
-
-        await VipRepository.CreatePage(studyId, VsiStatus.Draft, cancellationToken);
-
-        return RedirectToAction("Section1_Step1", new { studyId = studyId, flowMode = VipFlowMode.Create });
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Resume(int studyId, CancellationToken cancellationToken)
-    {
-        var currentVsi = await VipRepository.GetPage(studyId, cancellationToken);
-        return currentVsi == null
-            ? NotFound()
-            :
-            // TODO: figure out which step to resume on.
-            RedirectToAction("Section1_Step1", new { studyId, flowMode = VipFlowMode.Create });
-    }
-
-    [HttpPost]
-    [DoNotRequireVsi]
-    public async Task<IActionResult> Reset(int studyId, CancellationToken cancellationToken)
-    {
-        await VipRepository.ResetPage(studyId, cancellationToken);
-        return RedirectToAction("Section1_Step1", new { studyId, flowMode = VipFlowMode.Create });
-    }
-
-    [HttpPost]
-    [DoNotRequireVsi]
-    public async Task<IActionResult> CreateSample(int studyId, CancellationToken cancellationToken)
-    {
-        await VipRepository.CreateSampleVolunteerInformation(studyId, cancellationToken);
-        return RedirectToAction("Section4", new { studyId, flowMode = VipFlowMode.Create });
-    }
-
-    #endregion
 
     #region Section1
 
@@ -373,7 +308,7 @@ public class VolunteerStudyInformationController : VipControllerBase<VsiEditCont
         int? groupId = await VipRepository.CreateGroup(EditContext.StudyId, model.Name, cancellationToken);
         return groupId == null
             ? NotFound()
-            : RedirectToAction("CreateGroupCheck", "Group",
+            : RedirectToAction("CreateGroupCheck", "VolunteerInformationGroup",
                 new { EditContext.StudyId, EditContext.FlowMode, groupId });
     }
 
@@ -769,7 +704,8 @@ public class VolunteerStudyInformationController : VipControllerBase<VsiEditCont
     #region Section3_Step3
 
     [HttpGet]
-    public async Task<IActionResult> Section3_Step3(int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section3_Step3(int studyId, bool isNavigateBack,
+        CancellationToken cancellationToken)
     {
         var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
@@ -794,8 +730,13 @@ public class VolunteerStudyInformationController : VipControllerBase<VsiEditCont
         {
             return View(model);
         }
+        
+        if (isNavigateBack)
+        {
+            return RedirectNextStep("Section3_Step2");
+        }
 
-        return RedirectToAction("CreateContact", new { studyId });
+        return RedirectToAction("CreateContact", EditContext);
     }
 
     [HttpGet]
@@ -885,114 +826,25 @@ public class VolunteerStudyInformationController : VipControllerBase<VsiEditCont
     [HttpGet]
     public async Task<IActionResult> Section4(int studyId, CancellationToken cancellationToken)
     {
-        var model = await VipRepository.GetPage(studyId,
-            i => new VsiEditModel
-            {
-                Description = i.Description,
-                StudyType = i.StudyType,
-                WhatYouWillDo = i.WhatYouWillDo,
-                CostReimbursement = i.CostReimbursement,
-                HasIncentive = i.CostReimbursement,
-                IncentiveDetails = i.IncentiveDetails,
-                NumberOfVisits = i.NumberOfVisits,
-                StudyDuration = i.StudyDuration,
-                StudyFormat = i.StudyFormat,
-                OtherDetails = i.OtherDetails,
-                ExternalWebsiteUrl = i.ExternalWebsiteUrl,
-                InfoToRegisterByEmail = i.InfoToRegisterByEmail,
-                StagedPreScreenerUrl = i.StagedPreScreenerUrl,
-
-                Contacts = i.Contacts.Select(c => new VsiContactModel
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Role = c.Role,
-                    Organisation = c.Organisation,
-                    Email = c.Email,
-                    PhoneNumber = c.PhoneNumber
-                }),
-                Groups = i.Groups.Select(g => new VsiGroupModel
-                {
-                    Id = g.Id,
-                    Name = g.Name,
-                    Criteria = g.Criteria.Select(c => new VsiGroupCriteriaModel
-                    {
-                        Id = c.Id,
-                        Description = c.Description,
-                        Type = c.Type
-                    })
-                }),
-                Sites = i.Sites.Select(s => new VsiSiteModel
-                {
-                    AddressLine1 = s.AddressLine1,
-                    AddressLine2 = s.AddressLine2,
-                    AddressLine3 = s.AddressLine3,
-                    AddressLine4 = s.AddressLine4,
-                    AddressLine5 = s.AddressLine5,
-                    Postcode = s.Postcode,
-                    Id = s.Id
-                })
-            },
-            cancellationToken);
-
+        var model = await GetFullPageModel(studyId, cancellationToken);
+        if (model == null)
+        {
+            return NotFound();
+        }
+        
         ModelState.Clear();
         (await new VsiValidator().ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
-
-        return model == null ? NotFound() : View(model);
+        return  View(model);
     }
 
     [HttpPost]
     public async Task<IActionResult> Section4(int studyId, CancellationToken cancellationToken, bool commit = true)
     {
-        var model = await VipRepository.GetPage(studyId,
-            i => new VsiEditModel
-            {
-                Description = i.Description,
-                StudyType = i.StudyType,
-                WhatYouWillDo = i.WhatYouWillDo,
-                CostReimbursement = i.CostReimbursement,
-                HasIncentive = i.CostReimbursement,
-                IncentiveDetails = i.IncentiveDetails,
-                NumberOfVisits = i.NumberOfVisits,
-                StudyDuration = i.StudyDuration,
-                StudyFormat = i.StudyFormat,
-                OtherDetails = i.OtherDetails,
-                ExternalWebsiteUrl = i.ExternalWebsiteUrl,
-                InfoToRegisterByEmail = i.InfoToRegisterByEmail,
-                StagedPreScreenerUrl = i.StagedPreScreenerUrl,
-
-                Contacts = i.Contacts.Select(c => new VsiContactModel
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Role = c.Role,
-                    Organisation = c.Organisation,
-                    Email = c.Email,
-                    PhoneNumber = c.PhoneNumber
-                }),
-                Groups = i.Groups.Select(g => new VsiGroupModel
-                {
-                    Id = g.Id,
-                    Name = g.Name,
-                    Criteria = g.Criteria.Select(c => new VsiGroupCriteriaModel
-                    {
-                        Id = c.Id,
-                        Description = c.Description,
-                        Type = c.Type
-                    })
-                }),
-                Sites = i.Sites.Select(s => new VsiSiteModel
-                {
-                    AddressLine1 = s.AddressLine1,
-                    AddressLine2 = s.AddressLine2,
-                    AddressLine3 = s.AddressLine3,
-                    AddressLine4 = s.AddressLine4,
-                    AddressLine5 = s.AddressLine5,
-                    Postcode = s.Postcode,
-                    Id = s.Id
-                })
-            },
-            cancellationToken);
+        var model = await GetFullPageModel(studyId, cancellationToken);
+        if (model == null)
+        {
+            return NotFound();
+        }
         
         ModelState.Clear();
         (await new VsiValidator().ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
@@ -1005,11 +857,82 @@ public class VolunteerStudyInformationController : VipControllerBase<VsiEditCont
         return RedirectToAction("NextSteps", new { studyId });
     }
 
-    public async Task<IActionResult> NextSteps(int studyId, CancellationToken cancellationToken)
+    private async Task<VsiEditModel?> GetFullPageModel(int studyId, CancellationToken cancellationToken)
+    {
+        return await VipRepository.GetPage(studyId,
+            i => new VsiEditModel
+            {
+                Description = i.Description,
+                StudyType = i.StudyType,
+                WhatYouWillDo = i.WhatYouWillDo,
+                CostReimbursement = i.CostReimbursement,
+                HasIncentive = i.HasIncentive,
+                IncentiveDetails = i.IncentiveDetails,
+                NumberOfVisits = i.NumberOfVisits,
+                StudyDuration = i.StudyDuration,
+                StudyFormat = i.StudyFormat,
+                OtherDetails = i.OtherDetails,
+                ExternalWebsiteUrl = i.ExternalWebsiteUrl,
+                InfoToRegisterByEmail = i.InfoToRegisterByEmail,
+                StagedPreScreenerUrl = i.StagedPreScreenerUrl,
+
+                Contacts = i.Contacts.Select(c => new VsiContactModel
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Role = c.Role,
+                    Organisation = c.Organisation,
+                    Email = c.Email,
+                    PhoneNumber = c.PhoneNumber
+                }),
+                Groups = i.Groups.Select(g => new VsiGroupModel
+                {
+                    Id = g.Id,
+                    Name = g.Name,
+                    Criteria = g.Criteria.Select(c => new VsiGroupCriteriaModel
+                    {
+                        Id = c.Id,
+                        Description = c.Description,
+                        Type = c.Type
+                    })
+                }),
+                Sites = i.Sites.Select(s => new VsiSiteModel
+                {
+                    AddressLine1 = s.AddressLine1,
+                    AddressLine2 = s.AddressLine2,
+                    AddressLine3 = s.AddressLine3,
+                    AddressLine4 = s.AddressLine4,
+                    AddressLine5 = s.AddressLine5,
+                    Postcode = s.Postcode,
+                    Id = s.Id
+                })
+            },
+            cancellationToken);
+    }
+
+    public IActionResult NextSteps()
     {
         return View();
     }
+    
+    [HttpPost]
+    public async Task<IActionResult> Resume(int studyId, CancellationToken cancellationToken)
+    {
+        var currentVsi = await VipRepository.GetPage(studyId, cancellationToken);
+        return currentVsi == null
+            ? NotFound()
+            :
+            // TODO: figure out which step to resume on.
+            RedirectToAction("Section1_Step1", new { studyId, flowMode = VipFlowMode.Create });
+    }
 
+    [HttpPost]
+    public async Task<IActionResult> Reset(int studyId, CancellationToken cancellationToken)
+    {
+        await VipRepository.ResetPage(studyId, cancellationToken);
+        return RedirectToAction("Section1_Step1", new { studyId, flowMode = VipFlowMode.Create });
+    }
+    
     public IActionResult PreviewVip(
         [FromServices] IVipTokenGenerator tokenGenerator,
         [FromServices] IOptions<VipSettings> options,
@@ -1022,10 +945,4 @@ public class VolunteerStudyInformationController : VipControllerBase<VsiEditCont
 
         return Redirect(uri);
     }
-}
-
-public enum VipFlowMode
-{
-    Create,
-    Edit,
 }

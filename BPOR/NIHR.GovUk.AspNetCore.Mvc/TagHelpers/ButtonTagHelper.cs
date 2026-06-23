@@ -16,6 +16,7 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
         {
             output.TagName = "button";
             output.AddClass("govuk-button", HtmlEncoder.Default);
+            output.Attributes.Add("data_module", "govuk-button");
             
             switch (ButtonType)
             {

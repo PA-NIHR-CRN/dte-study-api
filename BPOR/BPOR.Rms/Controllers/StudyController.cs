@@ -107,21 +107,21 @@ public class StudyController(
                 study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
                 {
                     Text = "Create volunteer study information page",
-                    Url = Url.Action("Start", "VolunteerStudyInformation", new { studyId = id.Value })
+                    Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
                 });
                 break;
             case VsiStatus.Draft:
                 study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
                 {
                     Text = "Resume volunteer study information page",
-                    Url = Url.Action("Start", "VolunteerStudyInformation", new { studyId = id.Value })
+                    Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
                 });
                 break;
             case VsiStatus.Active:
                 study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
                 {
                     Text = "Preview volunteer study information page",
-                    Url = Url.Action("PreviewVip", "VolunteerStudyInformation", new { studyId = id.Value })
+                    Url = Url.Action("PreviewVip", "VolunteerInformationPage", new { studyId = id.Value })
                 });
                 break;
         }

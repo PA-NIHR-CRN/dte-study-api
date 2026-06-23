@@ -22,11 +22,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Section1_Step1.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Section1_Step2.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Section1_Step3.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Section2_Step1.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerStudyInformation\Start.cshtml" />
+      <AdditionalFiles Include="Views\VolunteerInformationPage\Section1_Step1.cshtml" />
+      <AdditionalFiles Include="Views\VolunteerInformationPage\Section1_Step2.cshtml" />
+      <AdditionalFiles Include="Views\VolunteerInformationPage\Section1_Step3.cshtml" />
+      <AdditionalFiles Include="Views\VolunteerInformationPage\Section2_Step1.cshtml" />
+      <AdditionalFiles Include="Views\VolunteerInformationPage\Start.cshtml" />
     </ItemGroup>
 
     <ItemGroup>

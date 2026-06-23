@@ -13,10 +13,10 @@
     Layout = "_VsiEditLayout";
 }
 
-<h1>Check the details you've provided</h1>
+<h1 class="govuk-heading-l">Check the details you've provided</h1>
 @foreach (var group in Model.Groups)
 {
-    <h1 class="govuk-heading-l">Create Volunteer Groups</h1>
+    <h2 class="govuk-heading-m">Create Volunteer Groups</h2>
     <dl class="govuk-summary-list">
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
@@ -26,14 +26,14 @@
                 @group.Name
             </dd>
             <dd class="govuk-summary-list__actions">
-                <form method="post" asp-action="RemoveGroup" asp-controller="Group" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id">
+                <form method="post" asp-action="RemoveGroup" asp-controller="VolunteerInformationGroup" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id">
                     <button class="govuk-link" type="submit">Delete</button>
                 </form>
             </dd>
         </div>
     </dl>
 
-    <h2>Add inclusion Criteria</h2>
+    <h3 class="govuk-heading-s">Add inclusion Criteria</h3>
     <dl class="govuk-summary-list">
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
@@ -48,12 +48,12 @@
                 </ul>
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a asp-action="Criteria" asp-controller="Group" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Include">Change</a>
+                <a asp-action="Criteria" asp-controller="VolunteerInformationGroup" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Include">Change</a>
             </dd>
         </div>
     </dl>
 
-    <h2>Add exclusion Criteria</h2>
+    <h3 class="govuk-heading-s">Add exclusion Criteria</h3>
     <dl class="govuk-summary-list">
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
@@ -68,7 +68,7 @@
                 </ul>
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a asp-action="Criteria" asp-controller="Group" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Exclude">Change</a>
+                <a asp-action="Criteria" asp-controller="VolunteerInformationGroup" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Exclude">Change</a>
             </dd>
         </div>
     </dl>

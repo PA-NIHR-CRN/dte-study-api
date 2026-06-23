@@ -15,15 +15,3 @@ public class VsiEditContext
             [nameof(FlowMode)] = FlowMode.ToString()
         };
 }
-
-public class VsiGroupEditContext : VsiEditContext
-{
-    public int GroupId { get; set; }
-
-    public override Dictionary<string, string> ToRouteData()
-    {
-        var result = base.ToRouteData();
-        result.Add(nameof(GroupId), GroupId.ToString());
-        return result;
-    }
-}

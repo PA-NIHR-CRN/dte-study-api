@@ -12,7 +12,7 @@ namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [AllowAnonymous]
 [Route("Study/{studyId:int}/VolunteerInformation/groups/{groupId:int}/[action]")]
-public class GroupController(IVipRepository vipRepository) : VipControllerBase<VsiGroupEditContext>(vipRepository)
+public class VolunteerInformationGroupController(IVipRepository vipRepository) : VipControllerBase<VsiGroupEditContext>(vipRepository)
 {
     protected override Task<IActionResult?> InitialiseEditContext(ActionExecutingContext context, VsiGroupEditContext editContext,
         CancellationToken cancellationToken)
@@ -104,7 +104,7 @@ public class GroupController(IVipRepository vipRepository) : VipControllerBase<V
         }
         else
         {
-            return RedirectToAction("Section1_Step4", "VolunteerStudyInformation", EditContext );
+            return RedirectToAction("Section1_Step4", "VolunteerInformationPage", EditContext );
         }
     }
     
@@ -117,7 +117,7 @@ public class GroupController(IVipRepository vipRepository) : VipControllerBase<V
             return NotFound();
         }
 
-        return RedirectToAction("Section1_Step4", "VolunteerStudyInformation", EditContext);
+        return RedirectToAction("Section1_Step4", "VolunteerInformationPage", EditContext);
     }
 
     [HttpPost]

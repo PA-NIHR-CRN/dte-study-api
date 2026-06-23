@@ -8,9 +8,9 @@
     Layout = "_VsiEditLayout";
 }
 
-<h1>Check the details you've provided</h1>
+<h1 class="govuk-heading-l">Check the details you've provided</h1>
 
-<h2>Create Volunteer Groups</h2>
+<h2 class="govuk-heading-m">Create Volunteer Groups</h2>
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
@@ -27,7 +27,7 @@
     </div>
 </dl>
 
-<h2>Add inclusion Criteria</h2>
+<h2 class="govuk-heading-m">Add inclusion Criteria</h2>
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
@@ -47,7 +47,7 @@
     </div>
 </dl>
 
-<h2>Add exclusion Criteria</h2>
+<h2 class="govuk-heading-m">Add exclusion Criteria</h2>
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
@@ -68,10 +68,10 @@
 </dl>
 
 <div class="govuk-!-margin-3">
-    <a asp-action="CreateGroup" asp-controller="VolunteerStudyInformation" asp-all-route-data="@context.ToRouteData()" 
+    <a asp-action="CreateGroup" asp-controller="VolunteerInformationPage" asp-all-route-data="@context.ToRouteData()" 
        class="govuk-link" >Add another group</a>
 </div>
 <div>
-<a asp-action="Section2_Step1" asp-controller="VolunteerStudyInformation" asp-all-route-data="@context.ToRouteData()" 
+<a asp-action="Section2_Step1" asp-controller="VolunteerInformationPage" asp-all-route-data="@context.ToRouteData()" 
    class="govuk-button" data-module="govuk-button">Continue</a>
 </div>

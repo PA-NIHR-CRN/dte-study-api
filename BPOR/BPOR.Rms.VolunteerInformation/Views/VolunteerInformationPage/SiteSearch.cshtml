@@ -3,7 +3,7 @@
 @{
     VsiEditContext context = ViewBag.Context;
     ViewData.SetSectionName(Resources.Section1Name);
-    ViewData.SetBackLinkOverride(Url.Action("Section1_Step3", context));
+    ViewData.SetBackLinkOverride(Url.BackAction(context, "Section1_Step3"));
 }
 
 <form>
@@ -11,8 +11,9 @@
                 description="Enter a postcode to select one or multiple research locations">
         <input class="govuk-input" asp-for="SearchTerm" type="text">
         <input asp-for="IsSearching" type="hidden" value="@true">
+        <input name="FlowMode" type="hidden" value="@context.FlowMode">
     </form-group>
-    <button class="govuk-button" type="submit">Search postcode</button>
+    <govuk-button type="submit">Search postcode</govuk-button>
 </form>
 
 @if (Model.SearchResult?.Any() == true)

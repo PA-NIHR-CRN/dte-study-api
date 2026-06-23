@@ -37,21 +37,15 @@ public abstract class VipControllerBase<TContext> : Controller
     protected virtual async Task<IActionResult?> InitialiseEditContext(ActionExecutingContext context, TContext editContext,
         CancellationToken cancellationToken)
     {
-        var actionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
         var studyIdValue = context.RouteData.Values["studyId"];
-
         var flowModeString = context.HttpContext.Request.Query["flowMode"].FirstOrDefault();
             
         editContext.FlowMode =
             !string.IsNullOrWhiteSpace(flowModeString) && Enum.TryParse<VipFlowMode>(flowModeString, out var flowMode)
                 ? flowMode
                 : VipFlowMode.Edit;
-
-        if (actionDescriptor.MethodInfo.HasAttribute<DoNotRequireVsiAttribute>())
-        {
-            // do nothing.
-        }
-        else if (studyIdValue is string studyIdString 
+        
+        if (studyIdValue is string studyIdString 
                  && int.TryParse(studyIdString, out var studyId))
         {
             editContext.StudyId = studyId;
@@ -68,9 +62,4 @@ public abstract class VipControllerBase<TContext> : Controller
 
         return null;
     }
-}
-
-public class DoNotRequireVsiAttribute : Attribute
-{
-    
 }
