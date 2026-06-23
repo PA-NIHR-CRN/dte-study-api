@@ -1,4 +1,7 @@
+@using BPOR.Domain.Entities
+@using BPOR.Rms.Startup
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
+@inject ICurrentUserProvider<User> UserProvider;
 
 @{
     ViewData["Title"] = "Study details";
@@ -13,11 +16,19 @@
 
 <div style="display:flex;gap: 40px; flex-direction: column; width: 100%">
     <partial name="Partials/Details/_StudyStatistics" />
-    <partial name="Partials/Details/_ResearcherEmailsTable" model="Model.ResearcherEmails" />
-    <h2 class="govuk-heading-l govuk-!-margin-bottom-4">
-        Campaigns sent
-    </h2>
-    <partial name="Partials/_CampaignTable" model="Model.Campaigns" />
+    
+    <accordion>
+        @if (UserProvider.IsAdmin())
+        {
+            <accordion-section caption="Researcher emails">
+                <partial name="Partials/Details/_ResearcherEmailsTable" model="Model.ResearcherEmails"/>
+            </accordion-section>
+        }
+        <accordion-section caption="Campaigns sent">
+            <partial name="Partials/_CampaignTable" model="Model.Campaigns"/>
+        </accordion-section>
+    </accordion>
+    
     <partial name="Partials/Details/_VolunteerTable" />
     
     <partial name="Partials/Details/_StudyDetails" />

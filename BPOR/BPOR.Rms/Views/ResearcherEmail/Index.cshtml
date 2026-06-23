@@ -38,7 +38,7 @@
             </div>
             
             <div class="govuk-button-group govuk-!-margin-bottom-0">
-                <button type="submit" name="action" value="SendEmail" class="govuk-button" data_module="govuk-button">Send</button>
+                <govuk-button type="submit">Submit and send email</govuk-button>
                 @Html.ActionLink("Cancel", "Details", "Study", new { id = Model.StudyId }, new { @class = "govuk-link" })
             </div>
         </form>
