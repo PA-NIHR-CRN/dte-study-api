@@ -13,19 +13,19 @@ public class StudyResearcherEmailOptionsConfiguration : IEntityTypeConfiguration
             {
                 Id = 1,
                 Code = "Introductory Email",
-                Description = "Introductory email",
+                Description = "Introduction email",
             },
             new StudyResearcherEmailOptions
             {
                 Id = 2,
                 Code = "Offer Pre-Screener",
-                Description = "Offer Pre-Screener",
+                Description = "Next steps email with pre-screener",
             },
             new StudyResearcherEmailOptions
             {
                 Id = 3,
                 Code = "Without Pre-Screener",
-                Description = "Without Pre-Screener",
+                Description = "Next steps email with NO pre-screener",
             });
     }
 }
