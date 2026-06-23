@@ -20,15 +20,7 @@
       <ProjectReference Include="..\NIHR.NotificationService\NIHR.NotificationService.csproj" />
       <ProjectReference Include="..\NIHR.Rts.Client\NIHR.Rts.Client.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <AdditionalFiles Include="Views\VolunteerInformationPage\Section1_Step1.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerInformationPage\Section1_Step2.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerInformationPage\Section1_Step3.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerInformationPage\Section2_Step1.cshtml" />
-      <AdditionalFiles Include="Views\VolunteerInformationPage\Start.cshtml" />
-    </ItemGroup>
-
+    
     <ItemGroup>
       <EmbeddedResource Update="Resources.resx">
         <Generator>ResXFileCodeGenerator</Generator>
