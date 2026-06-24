@@ -118,7 +118,7 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
         }
         
         string? fullPrescreenerUrl;
-        if (study.PreScreenerUrl == null)
+        if (vsiPage.PreScreenerUrl == null)
         {
             fullPrescreenerUrl = null;
         }
@@ -126,7 +126,7 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
         {
             fullPrescreenerUrl = validatedToken.Purpose switch
             {
-                VipTokenPurpose.Volunteer => QueryHelpers.AddQueryString(study.PreScreenerUrl, new Dictionary<string, string>()
+                VipTokenPurpose.Volunteer => QueryHelpers.AddQueryString(vsiPage.PreScreenerUrl, new Dictionary<string, string>()
                                                                 {
                                                                     ["token"] = token
                                                                 }!),
