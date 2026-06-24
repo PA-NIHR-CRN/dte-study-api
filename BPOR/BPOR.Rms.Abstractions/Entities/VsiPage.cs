@@ -18,7 +18,7 @@ public class VsiPage
     public string? OtherDetails  { get; set; }
     public string? ExternalWebsiteUrl { get; set; }
     public string? InfoToRegisterByEmail { get; set; }
-    public string? StagedPreScreenerUrl { get; set; }
+    public string? PreScreenerUrl { get; set; }
     
     public List<VsiContact> Contacts { get; set; } = new();
     public List<VsiGroup> Groups { get; set; } = new();

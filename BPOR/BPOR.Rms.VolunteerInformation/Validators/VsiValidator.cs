@@ -50,7 +50,7 @@ public class VsiValidator : AbstractValidator<VsiEditModel>
     public VsiValidator()
     {
         RuleFor(i => i)
-            .Must(i => i.Contacts.Any() || !string.IsNullOrWhiteSpace(i.StagedPreScreenerUrl) ||
+            .Must(i => i.Contacts.Any() || !string.IsNullOrWhiteSpace(i.PreScreenerUrl) ||
                        !string.IsNullOrWhiteSpace(i.ExternalWebsiteUrl))
             .WithMessage(
                 "You must provide at least one contact method for the volunteer to get in touch with the study team.");
@@ -83,7 +83,7 @@ public class VsiValidator : AbstractValidator<VsiEditModel>
         RuleFor(i => i.OtherDetails)
             .MaximumLengthWithStandardMessage(Constants.OtherDetailsMaxLength)
             /*.NotNull().WithMessage("Enter information to Continue. If this is not relevant to your study, Skip this question")*/;
-        RuleFor(i => i.StagedPreScreenerUrl)
+        RuleFor(i => i.PreScreenerUrl)
             .Uri()
             /*.NotNull().WithMessage("Enter information to Continue. If this is not relevant to your study, Skip this question")*/;
         RuleFor(i => i.ExternalWebsiteUrl)

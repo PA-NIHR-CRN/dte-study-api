@@ -184,7 +184,8 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
     }
 
     [HttpGet]
-    public async Task<IActionResult> Section1_Step3(int studyId, VipFlowMode flowMode, CancellationToken cancellationToken)
+    public async Task<IActionResult> Section1_Step3(int studyId, VipFlowMode flowMode,
+        CancellationToken cancellationToken)
     {
         var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
@@ -281,7 +282,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         {
             return View(model);
         }
-        
+
         if (Direction == FlowDirection.Back)
         {
             return RedirectToAction("Section1_Step2");
@@ -602,7 +603,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
-                StagedPreScreenerUrl = i.StagedPreScreenerUrl
+                PreScreenerUrl = i.PreScreenerUrl
             },
             cancellationToken);
         return model == null ? NotFound() : View(model);
@@ -614,12 +615,12 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         CancellationToken cancellationToken)
     {
         VsiValidator validator = new VsiValidator();
-        validator.ValidateSpecificProperties(model, i => i.StagedPreScreenerUrl).AddToModelState(ModelState);
+        validator.ValidateSpecificProperties(model, i => i.PreScreenerUrl).AddToModelState(ModelState);
 
         // Do this properly - this property is optional in general but mandatory on this one action.
-        if (string.IsNullOrWhiteSpace(model.StagedPreScreenerUrl))
+        if (string.IsNullOrWhiteSpace(model.PreScreenerUrl))
         {
-            ModelState.AddModelError(nameof(model.StagedPreScreenerUrl),
+            ModelState.AddModelError(nameof(model.PreScreenerUrl),
                 "Enter information to Continue. If this is not relevant to your study, skip this question.");
         }
 
@@ -628,7 +629,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
             return View(model);
         }
 
-        await VipRepository.UpdateVsi(EditContext.StudyId, vsi => vsi.StagedPreScreenerUrl = model.StagedPreScreenerUrl,
+        await VipRepository.UpdateVsi(EditContext.StudyId, vsi => vsi.PreScreenerUrl = model.PreScreenerUrl,
             cancellationToken);
 
         return RedirectNextStep("Section3_Step2");
@@ -733,7 +734,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         {
             return View(model);
         }
-        
+
         if (Direction == FlowDirection.Back)
         {
             return RedirectNextStep("Section3_Step2");
@@ -834,10 +835,10 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         {
             return NotFound();
         }
-        
+
         ModelState.Clear();
         (await new VsiValidator().ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
-        return  View(model);
+        return View(model);
     }
 
     [HttpPost]
@@ -848,7 +849,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         {
             return NotFound();
         }
-        
+
         ModelState.Clear();
         (await new VsiValidator().ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
         if (!ModelState.IsValid)
@@ -877,7 +878,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
                 OtherDetails = i.OtherDetails,
                 ExternalWebsiteUrl = i.ExternalWebsiteUrl,
                 InfoToRegisterByEmail = i.InfoToRegisterByEmail,
-                StagedPreScreenerUrl = i.StagedPreScreenerUrl,
+                PreScreenerUrl = i.PreScreenerUrl,
 
                 Contacts = i.Contacts.Select(c => new VsiContactModel
                 {
@@ -917,7 +918,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
     {
         return View();
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> Resume(int studyId, CancellationToken cancellationToken)
     {
@@ -930,12 +931,18 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
     }
 
     [HttpPost]
-    public async Task<IActionResult> Reset(int studyId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Reset([FromServices] IStudyRepository studyRepository, int studyId,
+        CancellationToken cancellationToken)
     {
-        await VipRepository.ResetPage(studyId, cancellationToken);
+        var study = await studyRepository.GetStudy(studyId, cancellationToken);
+        if (study == null)
+        {
+            return NotFound();
+        }
+        await VipRepository.ResetPage(studyId, study.PreScreenerUrl, cancellationToken);
         return RedirectToAction("Section1_Step1", new { studyId, flowMode = VipFlowMode.Create });
     }
-    
+
     public IActionResult PreviewVip(
         [FromServices] IVipTokenGenerator tokenGenerator,
         [FromServices] IOptions<VipSettings> options,

@@ -35,7 +35,7 @@ public class VolunteerInformationStartController(IVipRepository vipRepository) :
             return BadRequest();
         }
 
-        await vipRepository.CreatePage(studyId, VsiStatus.Draft, cancellationToken);
+        await vipRepository.CreatePage(studyId, VsiStatus.Draft, study.PreScreenerUrl, cancellationToken);
 
         return RedirectToAction("Section1_Step1", "VolunteerInformationPage", new { studyId = studyId, flowMode = VipFlowMode.Create });
     }

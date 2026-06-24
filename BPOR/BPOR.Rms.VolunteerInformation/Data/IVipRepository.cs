@@ -27,10 +27,10 @@ public interface IVipRepository
     Task<bool> RemoveSite(int studyId, int siteId, CancellationToken cancellationToken);
     Task<int?> CreateGroup(int studyId, string groupName, CancellationToken cancellationToken);
     Task<int?> CreateSite(int studyId, VsiSite newSite, CancellationToken cancellationToken);
-    Task CreatePage(int studyId, VsiStatus status, CancellationToken cancellationToken);
+    Task CreatePage(int studyId, VsiStatus status, string? preFilledPrescreenerUrl, CancellationToken cancellationToken);
     Task CreatePage(int studyId, VsiPage data, CancellationToken cancellationToken);
     
-    Task ResetPage(int studyId, CancellationToken cancellationToken);
+    Task ResetPage(int studyId, string? preFilledPrescreenerUrl, CancellationToken cancellationToken);
 
     Task<int?> CreateContact(int studyId, VsiContact newContact,
         CancellationToken cancellationToken);

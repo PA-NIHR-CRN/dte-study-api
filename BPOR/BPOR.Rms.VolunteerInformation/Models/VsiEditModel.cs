@@ -38,7 +38,7 @@ public class VsiEditModel
         Description = "If you want the volunteer to email you to register their interest, what information should they provide in the email?\n")]
     public string? InfoToRegisterByEmail { get; set; }
     [Display(Name = "Link to the pre-screener:", Description = "Copy and paste the link here")]
-    public string? StagedPreScreenerUrl { get; set; }
+    public string? PreScreenerUrl { get; set; }
 
     [Display(Name = "Research location")]
     public IEnumerable<VsiSiteModel> Sites { get; set; } = [];

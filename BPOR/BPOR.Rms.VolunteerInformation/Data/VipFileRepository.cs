@@ -171,11 +171,13 @@ public abstract class VipFileRepository(IMemoryCache cache) : IVipRepository
         }, cancellationToken))?.Id;
     }
 
-    public async Task CreatePage(int studyId, VsiStatus status, CancellationToken cancellationToken)
+    public async Task CreatePage(int studyId, VsiStatus status, string? preFilledPrescreenerUrl,
+        CancellationToken cancellationToken)
     {
         VsiPage vsi = new VsiPage()
         {
-            Status = status
+            Status = status,
+            PreScreenerUrl = preFilledPrescreenerUrl
         };
         await Save(studyId, vsi, cancellationToken);
     }
@@ -185,9 +187,9 @@ public abstract class VipFileRepository(IMemoryCache cache) : IVipRepository
         await Save(studyId, data, cancellationToken);
     }
 
-    public async Task ResetPage(int studyId, CancellationToken cancellationToken)
+    public async Task ResetPage(int studyId, string? preFilledPrescreenerUrl, CancellationToken cancellationToken)
     {
-        await CreatePage(studyId, VsiStatus.Draft, cancellationToken);
+        await CreatePage(studyId, VsiStatus.Draft, preFilledPrescreenerUrl, cancellationToken);
     }
 
     public async Task<int?> CreateContact(int studyId, VsiContact newContact, CancellationToken cancellationToken)
