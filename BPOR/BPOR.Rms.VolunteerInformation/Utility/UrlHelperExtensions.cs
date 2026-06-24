@@ -25,7 +25,7 @@ public static class UrlHelperExtensions
     {
         return context.FlowMode switch
         {
-            VipFlowMode.Edit => helper.Action(new UrlActionContext(){Action = "Section4", Controller = "VolunteerStudyInformation", Values = context}),
+            VipFlowMode.Edit => helper.Action(new UrlActionContext(){Action = "Section4", Controller = "VolunteerInformationPage", Values = context}),
             VipFlowMode.Create => helper.Action(new UrlActionContext(){Action = actionName, Values = context}),
             _ => throw new ArgumentOutOfRangeException()
         };
@@ -36,7 +36,7 @@ public static class UrlHelperExtensions
     {
         return context.FlowMode switch
         {
-            VipFlowMode.Edit => helper.Action(new UrlActionContext(){Action = "Section4", Controller = "VolunteerStudyInformation", Values = context}),
+            VipFlowMode.Edit => helper.Action(new UrlActionContext(){Action = "Section4", Controller = "VolunteerInformationPage", Values = context}),
             VipFlowMode.Create => createAction(helper),
             _ => throw new ArgumentOutOfRangeException()
         };
