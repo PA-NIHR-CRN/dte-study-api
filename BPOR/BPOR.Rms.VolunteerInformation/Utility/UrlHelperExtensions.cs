@@ -19,14 +19,28 @@ public static class UrlHelperExtensions
         routeData.Add("isNavigateBack", true.ToString());
         return helper.Action(actionName, routeData);
     }
-    
+
     public static string? FlowNext(this IUrlHelper helper, VsiEditContext context,
-        [AspMvcAction] string actionName)
+        [AspMvcAction] string actionName, [AspMvcController] string? controller = null)
+        => Flow(helper, context, FlowDirection.Forward, actionName, controller);
+    
+    public static string? FlowBack(this IUrlHelper helper, VsiEditContext context,
+        [AspMvcAction] string actionName, [AspMvcController] string? controller = null)
+        => Flow(helper, context, FlowDirection.Back, actionName, controller);
+    
+    private static string? Flow(this IUrlHelper helper, VsiEditContext context, FlowDirection direction, 
+        [AspMvcAction] string actionName, [AspMvcController] string? controller = null)
     {
+        var values = context.ToRouteData();
+        if (direction != FlowDirection.Forward)
+        {
+            values.Add("direction", direction.ToString());
+        }
+        
         return context.FlowMode switch
         {
-            VipFlowMode.Edit => helper.Action(new UrlActionContext(){Action = "Section4", Controller = "VolunteerInformationPage", Values = context}),
-            VipFlowMode.Create => helper.Action(new UrlActionContext(){Action = actionName, Values = context}),
+            VipFlowMode.Edit => helper.Action(new UrlActionContext(){Action = "Section4", Controller = "VolunteerInformationPage", Values = values}),
+            VipFlowMode.Create => helper.Action(new UrlActionContext(){Action = actionName, Controller = controller, Values = values}),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

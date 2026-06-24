@@ -1,9 +1,9 @@
-﻿@using NIHR.GovUk.AspNetCore.Mvc
-@model VsiEditModel
+﻿@model VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
 
 @{
     VsiEditContext context = ViewBag.Context;
-    ViewData.SetBackLinkOverride(Url.FlowNext(context, "Section2_Step7"));
+    SetFlowBackAction("Section2_Step7");
     ViewData.SetSectionName(Resources.Section3Name);
     ViewData.SetSkipLink(Url.FlowNext(context, "Section3_Step2"));
     Layout = "_VsiEditLayoutForm";

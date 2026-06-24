@@ -9,9 +9,15 @@ public class VsiEditContext
     public VipFlowMode FlowMode { get; set; }
 
     public virtual Dictionary<string, string> ToRouteData() =>
-        new Dictionary<string, string>
+        new()
         {
             [nameof(StudyId)] = StudyId.ToString(),
             [nameof(FlowMode)] = FlowMode.ToString()
         };
+}
+
+public enum FlowDirection
+{
+    Forward,
+    Back,
 }

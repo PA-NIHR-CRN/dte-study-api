@@ -184,8 +184,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
     }
 
     [HttpGet]
-    public async Task<IActionResult> Section1_Step3(int studyId, VipFlowMode flowMode, bool isNavigateBack,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Section1_Step3(int studyId, VipFlowMode flowMode, CancellationToken cancellationToken)
     {
         var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
@@ -213,7 +212,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
             return View(model);
         }
 
-        if (isNavigateBack)
+        if (Direction == FlowDirection.Back)
         {
             return RedirectNextStep("Section1_Step2");
         }
@@ -281,6 +280,11 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         if (model.Groups.Any())
         {
             return View(model);
+        }
+        
+        if (Direction == FlowDirection.Back)
+        {
+            return RedirectToAction("Section1_Step2");
         }
 
         return RedirectToAction("CreateGroup", EditContext);
@@ -704,8 +708,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
     #region Section3_Step3
 
     [HttpGet]
-    public async Task<IActionResult> Section3_Step3(int studyId, bool isNavigateBack,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Section3_Step3(int studyId, CancellationToken cancellationToken)
     {
         var model = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
@@ -731,7 +734,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
             return View(model);
         }
         
-        if (isNavigateBack)
+        if (Direction == FlowDirection.Back)
         {
             return RedirectNextStep("Section3_Step2");
         }

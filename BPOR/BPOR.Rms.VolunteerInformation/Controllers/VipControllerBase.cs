@@ -13,6 +13,8 @@ public abstract class VipControllerBase<TContext> : Controller
     where TContext : VsiEditContext, new()
 {
     protected IVipRepository VipRepository { get; }
+    
+    protected FlowDirection Direction { get; set; }
 
     protected VipControllerBase(IVipRepository vipRepository)
     {
@@ -34,16 +36,22 @@ public abstract class VipControllerBase<TContext> : Controller
         await base.OnActionExecutionAsync(context, next);
     }
 
+
     protected virtual async Task<IActionResult?> InitialiseEditContext(ActionExecutingContext context, TContext editContext,
         CancellationToken cancellationToken)
     {
         var studyIdValue = context.RouteData.Values["studyId"];
         var flowModeString = context.HttpContext.Request.Query["flowMode"].FirstOrDefault();
-            
+        var directionString = context.HttpContext.Request.Query["direction"].FirstOrDefault();
+
         editContext.FlowMode =
             !string.IsNullOrWhiteSpace(flowModeString) && Enum.TryParse<VipFlowMode>(flowModeString, out var flowMode)
                 ? flowMode
                 : VipFlowMode.Edit;
+        Direction =
+            !string.IsNullOrWhiteSpace(directionString) && Enum.TryParse<FlowDirection>(directionString, out var direction)
+                ? direction
+                : FlowDirection.Forward;
         
         if (studyIdValue is string studyIdString 
                  && int.TryParse(studyIdString, out var studyId))

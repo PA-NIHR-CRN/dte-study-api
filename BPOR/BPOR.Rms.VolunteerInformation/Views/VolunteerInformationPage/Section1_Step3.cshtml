@@ -1,9 +1,9 @@
 ﻿@model VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
 
 @{
-    VsiEditContext context = ViewBag.Context;
     ViewData.SetSectionName(Resources.Section1Name);
-    ViewData.SetBackLinkOverride(Url.Action("Section1_Step2", context));
+    SetFlowBackAction("Section1_Step2");
     Layout = "_VsiEditLayout";
 }
 
@@ -23,7 +23,7 @@
                 <p class="govuk-body govuk-!-margin-0">@site.Postcode</p>
             </td>
             <td class="govuk-table__cell">
-                <form method="post" asp-action="RemoveSite" asp-route-studyId="@context.StudyId"
+                <form method="post" asp-action="RemoveSite" asp-all-route-data="@EditContext.ToRouteData()"
                       asp-route-siteId="@site.Id">
                     <button class="govuk-link" type="submit">Delete</button>
                 </form>
@@ -33,9 +33,9 @@
     </tbody>
 </table>
 <div>
-    <a class="govuk-link" asp-action="SiteSearch" asp-all-route-data="@context.ToRouteData()">Add another research
+    <a class="govuk-link" asp-action="SiteSearch" asp-all-route-data="@EditContext.ToRouteData()">Add another research
         location</a>
 </div>
 <div class="govuk-!-margin-top-3">
-    <a class="govuk-button" asp-action="Section1_Step4" asp-all-route-data="@context.ToRouteData()">Continue</a>
+    <a href="@Url.FlowNext(EditContext, "Section1_Step4")" class="govuk-button" data-module="govuk-button">Continue</a>
 </div>

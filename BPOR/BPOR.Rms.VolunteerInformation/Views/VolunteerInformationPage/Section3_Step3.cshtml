@@ -1,8 +1,9 @@
 ﻿@model VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
 
 @{
     VsiEditContext context = ViewBag.Context;
-    ViewData.SetBackLinkOverride(Url.FlowNext(context, "Section3_Step2"));
+    SetFlowBackAction("Section3_Step2");
     ViewData.SetSectionName(Resources.Section3Name);
     Layout = "_VsiEditLayout";
 }

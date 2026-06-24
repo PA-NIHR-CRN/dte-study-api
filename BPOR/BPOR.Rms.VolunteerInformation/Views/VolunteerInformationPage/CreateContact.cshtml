@@ -3,7 +3,7 @@
 @{
     VsiEditContext context = ViewBag.Context;
     ViewData.SetSectionName(Resources.Section1Name);
-    ViewData.SetSkipLink(Url.FlowNext(context, url => url.Action("Section3_Step4", context )));
+    ViewData.SetSkipLink(Url.FlowNext(context, "Section3_Step4"));
     Layout = "_VsiEditLayout";
 }
 

@@ -1,15 +1,10 @@
-﻿@using BPOR.Domain.Enums
-@using BPOR.Rms.Abstractions.Enums
+﻿@using BPOR.Rms.Abstractions.Enums
 @model BPOR.Rms.VolunteerInformation.Models.VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
 
 @{
-    VsiEditContext context = ViewBag.Context;
     ViewData.SetSectionName(Resources.Section1Name);
-    ViewData.SetBackLinkOverride(Url.FlowNext(context, url => url.Action("Section1_Step3", new
-    {
-        context.StudyId, context.FlowMode, Direction = "back"
-    })));
-    
+    SetFlowBackAction("Section1_Step3");
     Layout = "_VsiEditLayout";
 }
 
@@ -27,7 +22,7 @@
             </dd>
             <dd class="govuk-summary-list__actions">
                 <a class="govuk-link" asp-action="RemoveGroup" asp-controller="VolunteerInformationGroup"
-                   asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id" type="submit">
+                   asp-all-route-data="@EditContext.ToRouteData()" asp-route-groupId="@group.Id" type="submit">
                     Delete
                 </a>
             </dd>
@@ -49,7 +44,7 @@
                 </ul>
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a asp-action="Criteria" asp-controller="VolunteerInformationGroup" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Include">Change</a>
+                <a asp-action="Criteria" asp-controller="VolunteerInformationGroup" asp-all-route-data="@EditContext.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Include">Change</a>
             </dd>
         </div>
     </dl>
@@ -69,17 +64,16 @@
                 </ul>
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a asp-action="Criteria" asp-controller="VolunteerInformationGroup" asp-all-route-data="@context.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Exclude">Change</a>
+                <a asp-action="Criteria" asp-controller="VolunteerInformationGroup" asp-all-route-data="@EditContext.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Exclude">Change</a>
             </dd>
         </div>
     </dl>
 }
 
 <div class="govuk-!-margin-3">
-    <a asp-action="CreateGroup" asp-all-route-data="@context.ToRouteData()" 
+    <a asp-action="CreateGroup" asp-all-route-data="@EditContext.ToRouteData()" 
        class="govuk-link" >Add another group</a>
 </div>
 <div>
-<a asp-action="Section2_Step1" asp-all-route-data="@context.ToRouteData()" 
-   class="govuk-button" data-module="govuk-button">Continue</a>
+    <a href="@Url.FlowNext(EditContext, "Section2_Step1")" class="govuk-button" data-module="govuk-button">Continue</a>
 </div>

@@ -1,8 +1,8 @@
 ﻿@model VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
 
 @{
-    VsiEditContext context = ViewBag.Context;
-    ViewData.SetBackLinkOverride(Url.FlowNext(context, "Section2_Step2"));
+    SetFlowBackAction("Section2_Step2");
     ViewData.SetSectionName(Resources.Section2Name);
     Layout = "_VsiEditLayoutForm";
 }
@@ -15,6 +15,6 @@
 </form-group>
 
 <form-group for="IncentiveDetails" label-as-heading="false" label-class="govuk-label">
-    <input class="govuk-input" asp-for="IncentiveDetails" type="text"  maxlength="@Constants.IncentiveDetailsMaxLength">
+    <textarea rows="5" class="govuk-textarea" asp-for="IncentiveDetails" maxlength="@Constants.IncentiveDetailsMaxLength"></textarea>
     <body-text>You can add up to @Constants.IncentiveDetailsMaxLength characters</body-text>
 </form-group>
