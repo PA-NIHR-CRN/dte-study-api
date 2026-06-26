@@ -4,11 +4,12 @@
 
 @{
     VsiEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section4Name);
     Layout = "_VsiEditLayoutForm";
 }
 
-<h1>Check the details you've provided</h1>
-<h2>Study Overview</h2>
+<h1 class="govuk-heading-l">Check the details you've provided</h1>
+<h2 class="govuk-heading-m">Study Overview</h2>
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
@@ -25,7 +26,7 @@
     </gov-uk-summary-list-item>
 </dl>
 
-<h2>Who can participate</h2>
+<h2 class="govuk-heading-m">Who can participate</h2>
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
@@ -82,7 +83,7 @@
     }
 </dl>
 
-<h2>What does the study involve?</h2>
+<h2 class="govuk-heading-m">What does the study involve?</h2>
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
@@ -126,7 +127,7 @@
     </div>
 </dl>
 
-<h2>Taking part in this study</h2>
+<h2 class="govuk-heading-m">Taking part in this study</h2>
 <dl class="govuk-summary-list">
     <gov-uk-summary-list-item for="PreScreenerUrl"><a class="govuk-link" asp-route-flowmode="@VipFlowMode.Edit" asp-action="Section3_Step1" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
@@ -154,6 +155,15 @@
     </gov-uk-summary-list-item>
 </dl>
 
-<h2>Create Study Information page</h2>
+@if (Model.Status == VsiStatus.Draft)
+{
+    <h2 class="govuk-heading-m">Create Study Information page</h2>
 
-<p>If you're sure of the information above, click the button below to crate the study page.</p>
+    <body-text>If you're sure of the information above, click the button below to crate the study page.</body-text>
+}
+else
+{
+    <div class="govuk-!-margin-bottom-4">
+        <a asp-action="PreviewVip" asp-route-studyId="@context.StudyId" class="govuk-button govuk-button--secondary" target="_blank">Preview</a>
+    </div>
+}

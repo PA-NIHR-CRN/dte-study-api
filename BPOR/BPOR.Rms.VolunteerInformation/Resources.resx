@@ -33,4 +33,7 @@
     <data name="CriteriaType_Exclude" xml:space="preserve">
         <value>Exclude</value>
     </data>
+    <data name="Section4Name" xml:space="preserve">
+        <value>Section 4: Check your details</value>
+    </data>
 </root>

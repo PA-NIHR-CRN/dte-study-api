@@ -26,6 +26,7 @@
       <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
       <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
       <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
+      <ProjectReference Include="..\NIHR.NotificationService.GovukNotify\NIHR.NotificationService.GovukNotify.csproj" />
       <ProjectReference Include="..\NIHR.NotificationService\NIHR.NotificationService.csproj" />
       <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
       <ProjectReference Include="..\NIHR.Rts.Client\NIHR.Rts.Client.csproj" />

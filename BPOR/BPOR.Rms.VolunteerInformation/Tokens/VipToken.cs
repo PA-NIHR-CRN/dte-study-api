@@ -9,14 +9,20 @@ public class VipToken
     {
     }
 
-    public VipToken(VipTokenPurpose purpose, long id)
+    public VipToken(VipTokenPurpose purpose, int campaignId, int participantId, int studyId)
     {
         Purpose = purpose;
-        Id = id;
+        CampaignId = campaignId;
+        ParticipantId = participantId;
+        StudyId = studyId;
     }
 
     [ProtoMember(1)]
     public VipTokenPurpose Purpose { get; set; }
     [ProtoMember(2)]
-    public long Id { get; set; }
+    public int CampaignId { get; set; }
+    [ProtoMember(3)]
+    public int ParticipantId { get; set; }
+    [ProtoMember(4)]
+    public int StudyId { get; set; }
 }

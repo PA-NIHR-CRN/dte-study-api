@@ -103,5 +103,14 @@ namespace BPOR.Rms.VolunteerInformation {
                 return ResourceManager.GetString("Section3Name", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Section 4: Check your details.
+        /// </summary>
+        internal static string Section4Name {
+            get {
+                return ResourceManager.GetString("Section4Name", resourceCulture);
+            }
+        }
     }
 }

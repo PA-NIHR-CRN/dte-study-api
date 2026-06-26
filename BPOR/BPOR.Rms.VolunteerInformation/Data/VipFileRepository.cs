@@ -11,29 +11,28 @@ public abstract class VipFileRepository(IMemoryCache cache) : IVipRepository
 {
     private readonly TimeSpan _cacheTtl = TimeSpan.FromMinutes(5);
 
-    protected abstract Task<Stream?> OpenReadStream(long studyId, CancellationToken cancellationToken);
-    protected abstract Task<Stream> OpenWriteStream(long studyId, CancellationToken cancellationToken);
+    protected abstract Task<string?> Read(long studyId, CancellationToken cancellationToken);
+    protected abstract Task CreateOrUpdate(long studyId, string content, CancellationToken cancellationToken);
 
     private async Task<VsiPage?> Load(long studyId, CancellationToken cancellationToken)
     {
         return await cache.GetOrCreateAsync(new CacheKey(studyId), async cacheEntry =>
         {
             
-            await using var stream = await OpenReadStream(studyId, cancellationToken);
+            var content = await Read(studyId, cancellationToken);
             cacheEntry.AbsoluteExpirationRelativeToNow = _cacheTtl;
             var jsonSerializerOptions = new JsonSerializerOptions();
-            var result = stream == null
+            var result = content == null
                 ? null
-                : await JsonSerializer.DeserializeAsync<VsiPage>(stream, jsonSerializerOptions,
-                    cancellationToken: cancellationToken);
+                : JsonSerializer.Deserialize<VsiPage>(content, jsonSerializerOptions);
             return result;
         });
     }
 
     private async Task Save(long studyId, VsiPage data, CancellationToken cancellationToken)
     {
-        await using var stream = await OpenWriteStream(studyId, cancellationToken);
-        await JsonSerializer.SerializeAsync(stream, data, cancellationToken: cancellationToken);
+        var content = JsonSerializer.Serialize(data);
+        await CreateOrUpdate(studyId, content, cancellationToken);
         cache.Set(new CacheKey(studyId), data, _cacheTtl);
     }
 

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities.RefData;
 using NIHR.Infrastructure.EntityFrameworkCore;
@@ -46,4 +47,7 @@ public class Study : ISoftDelete, IAudit
     public bool? HasMultipleResearchLocations { get; set; }
     public bool? SinglePersonResponsibleForRecruiting { get; set; }
     [MaxLength(2048)] public string? PreScreenerUrl { get; set; }
+    
+    [DefaultValue(false)]
+    public bool HasVip {get; set;}
 }

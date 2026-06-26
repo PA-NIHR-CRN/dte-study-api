@@ -26,6 +26,8 @@
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       </EmbeddedResource>
+      <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
+      <PackageReference Include="AWSSDK.S3" Version="3.7.511.8" />
       <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
       <PackageReference Include="protobuf-net" Version="3.2.56" />
       <PackageReference Include="Rbec.Postcodes" Version="1.0.0" />

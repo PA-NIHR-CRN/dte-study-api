@@ -101,29 +101,33 @@ public class StudyController(
         var vsiStatus = await repository.GetVipStatus(id.Value, cancellationToken);
         
         study.ActionLinks = new();
-        switch (vsiStatus)
+
+        if (isAdmin)
         {
-            case null:
-                study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
-                {
-                    Text = "Create volunteer study information page",
-                    Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
-                });
-                break;
-            case VsiStatus.Draft:
-                study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
-                {
-                    Text = "Resume volunteer study information page",
-                    Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
-                });
-                break;
-            case VsiStatus.Active:
-                study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
-                {
-                    Text = "Preview volunteer study information page",
-                    Url = Url.Action("PreviewVip", "VolunteerInformationPage", new { studyId = id.Value })
-                });
-                break;
+            switch (vsiStatus)
+            {
+                case null:
+                    study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+                    {
+                        Text = "Create volunteer study information page",
+                        Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
+                    });
+                    break;
+                case VsiStatus.Draft:
+                    study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+                    {
+                        Text = "Resume volunteer study information page",
+                        Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
+                    });
+                    break;
+                case VsiStatus.Active:
+                    study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+                    {
+                        Text = "Preview volunteer study information page",
+                        Url = Url.Action("PreviewVip", "VolunteerInformationPage", new { studyId = id.Value })
+                    });
+                    break;
+            }
         }
 
         if (canUpdateRecruitmentTotal)

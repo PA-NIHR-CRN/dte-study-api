@@ -29,4 +29,8 @@ public class CampaignParticipant : IAudit, ISoftDelete
     public Participant Participant { get; set; }
     
     [MaxLength(255)] public string? Token { get; set; }
+    
+    public DateTime? VipEmailLinkClickedAtUtc { get; set; }
+    public DateTime? VipExternalLinkClickedAtUtc { get; set; }
+    public DateTime? VipPrescreenerLinkClickedAtUtc { get; set; }
 }

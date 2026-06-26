@@ -47,7 +47,7 @@ public class NotificationService(IDownstreamNotificationService downstreamServic
         var notifications = await db.Notifications
             .Where(n => !n.IsProcessed)
             .OrderBy(n => n.Id)
-            .Take(1000).Include(n => n.NotificationDatas)
+            .Take(batchSize).Include(n => n.NotificationDatas)
             .ToListAsync(cancellationToken);
 
         if (notifications.Count > 0)
@@ -59,10 +59,27 @@ public class NotificationService(IDownstreamNotificationService downstreamServic
                 foreach (var notification in notifications)
                 {
                     var sendNotificationRequest = CreateSendNotificationRequest(notification);
-                    var deliveryStatus = await downstreamService.SendNotification(sendNotificationRequest, cancellationToken);
-                    notification.IsProcessed = true;
-                    await db.SaveChangesAsync(cancellationToken); // Persist IsProcessed on a per-record basis
-                    await ProcessDeliveryCallback(sendNotificationRequest.Reference, deliveryStatus, cancellationToken);
+                    var result = await downstreamService.SendNotification(sendNotificationRequest, cancellationToken);
+                    switch (result.Status)
+                    {
+                        case SendNotificationStatus.Success:
+                            notification.IsProcessed = true;
+                            await db.SaveChangesAsync(cancellationToken);
+                            await ProcessDeliveryCallback(sendNotificationRequest.Reference, result.DeliveryStatus!.Value, cancellationToken);
+                            break;
+                        case SendNotificationStatus.TemporaryFailure:
+                            // Implement back pressure mechanism and/or limit retries. For now
+                            // abandon the rest of the batch so that the hosted service retries
+                            // after a short interval.
+                            return;
+                        case SendNotificationStatus.PermanentFailure:
+                            notification.IsProcessed = true;
+                            await db.SaveChangesAsync(cancellationToken);
+                            await ProcessDeliveryCallback(sendNotificationRequest.Reference, NotificationDeliveryStatus.PermanentFailure, cancellationToken);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                 }
             }
             catch (Exception ex)

@@ -25,7 +25,7 @@ public class RmsTaskQueue : IRmsTaskQueue
     {
         _logger.LogInformation("Queueing background work item");
         ArgumentNullException.ThrowIfNull(id);
-        var item = new CampaignServiceQueueItem { Id = id };
+        var item = new CampaignServiceQueueItem { Id = id, Callback = callback };
         await _queue.Writer.WriteAsync(item, cancellationToken);
     }
 

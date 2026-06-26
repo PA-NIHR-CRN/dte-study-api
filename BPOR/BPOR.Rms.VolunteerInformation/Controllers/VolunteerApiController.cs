@@ -23,9 +23,6 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
     private const string RoleRrvPrescreener = "RrvPrescreener";
     private const string RoleBporContent = "BporContent";
     
-    // Fixed IV for RRV testing.
-    private readonly byte[] testIv = [0xae, 0x64, 0xa4, 0x66, 0x24, 0x34, 0x0e, 0x59, 0x35, 0xb7, 0xbb, 0x6c, 0x62, 0x19, 0x42, 0xa5];
-
     [Authorize(Roles = RoleRrvPrescreener)]
     [HttpGet("generatetesttoken/{campaignParticipantId:long}")]
     public async Task<ActionResult<GetTestTokenResponse>> GetTestTokenAsync(       
@@ -39,8 +36,9 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
             return NotFound();
         }
 
-        var campaignParticipant = await db.CampaignParticipant.SingleOrDefaultAsync(
-            i => i.Id == campaignParticipantId, cancellationToken);
+        var campaignParticipant = await db.CampaignParticipant
+            .Include(i => i.Campaign).ThenInclude(i => i.FilterCriteria)
+            .SingleOrDefaultAsync(i => i.Id == campaignParticipantId, cancellationToken);
 
         if (campaignParticipant == null)
         {
@@ -49,7 +47,9 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
 
         if (string.IsNullOrWhiteSpace(campaignParticipant.Token))
         {
-            campaignParticipant.Token = vipTokenGenerator.GenerateVolunteerToken();
+            campaignParticipant.Token = vipTokenGenerator.GenerateToken(new VipToken(VipTokenPurpose.Volunteer,
+                campaignParticipant.CampaignId, campaignParticipant.ParticipantId,
+                campaignParticipant.Campaign.FilterCriteria.StudyId.Value));
             await db.SaveChangesAsync(cancellationToken);
         }
         
@@ -60,6 +60,30 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
     }
     
 
+    [Authorize(Roles = RoleRrvPrescreener)]
+    [HttpGet("information/trackevent")]
+    public async Task<IActionResult> TrackEvent(
+        [FromServices] ICampaignParticipantRepository repository, 
+        [FromServices] IVipTokenGenerator tokenGenerator,
+        string token,
+        CampaignParticipantEventType eventType,
+        CancellationToken cancellationToken)
+    {
+        var validatedToken = await tokenGenerator.ValidateToken(token, cancellationToken);
+        if (validatedToken == null)
+        {
+            return Unauthorized();
+        }
+        
+        if (validatedToken.Purpose == VipTokenPurpose.Volunteer)
+        {
+            await repository.TrackEvent(validatedToken.CampaignId, validatedToken.ParticipantId,
+                eventType, cancellationToken);
+        }
+
+        return Ok();
+    }
+    
     [Authorize(Roles = RoleBporContent)]
     [HttpGet("informationpage/{token}")]
     public async Task<ActionResult<GetVolunteerInformationPageResponse>> GetInformationPage(
@@ -75,43 +99,31 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
         {
             return Unauthorized();
         }
-
-        int? studyId;
+        
         VolunteerInformationAudience audience;
         
         switch (validatedToken.Purpose)
         {
             case VipTokenPurpose.Volunteer:
                 audience = VolunteerInformationAudience.Volunteer;
-                studyId = await context.CampaignParticipant
-                    .Where(cp => cp.Id == validatedToken.Id)
-                    .Select(i => i.Campaign.FilterCriteria.StudyId)
-                    .SingleOrDefaultAsync(cancellationToken);
                 break;
             case VipTokenPurpose.ResearcherPreview:
                 audience = VolunteerInformationAudience.Researcher;
-                studyId = (int)validatedToken.Id;
                 break;
             case VipTokenPurpose.AdminPreview:
                 audience = VolunteerInformationAudience.Admin;
-                studyId = (int)validatedToken.Id;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
-
-        if (studyId == null)
-        {
-            return NotFound();
-        }
-
-        var study = await studyRepository.GetStudy(studyId.Value, cancellationToken);
+        
+        var study = await studyRepository.GetStudy(validatedToken.StudyId, cancellationToken);
         if (study == null)
         {
             return NotFound();
         }
 
-        var vsiPage = await repository.GetPage(studyId.Value, cancellationToken);
+        var vsiPage = await repository.GetPage(validatedToken.StudyId, cancellationToken);
         if (vsiPage == null)
         {
             return NotFound();
@@ -134,8 +146,6 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
                 VipTokenPurpose.AdminPreview => "#",
                 _ => throw new ArgumentOutOfRangeException()
             };
-            
-            
         }
 
         GetVolunteerInformationPageResponse response = new()
@@ -169,7 +179,7 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
         }
 
         var result = await context.CampaignParticipant
-            .Where(cp => cp.Id == validatedToken.Id)
+            .Where(cp => cp.CampaignId == validatedToken.CampaignId && cp.ParticipantId == validatedToken.ParticipantId)
             .Select (i => new GetInformationResponse()
             {
                 CampaignParticipantId = i.Id,

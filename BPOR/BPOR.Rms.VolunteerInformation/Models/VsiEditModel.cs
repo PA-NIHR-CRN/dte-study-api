@@ -45,6 +45,6 @@ public class VsiEditModel
     
     public IEnumerable<VsiGroupModel> Groups { get; set; } = [];
     public IEnumerable<VsiContactModel> Contacts { get; set; } = [];
-    
-    public VipFlowMode FlowMode { get; set; }
+
+    public VsiStatus Status { get; set; }
 }

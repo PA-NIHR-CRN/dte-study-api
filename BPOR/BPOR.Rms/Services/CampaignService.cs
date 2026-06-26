@@ -13,6 +13,7 @@ using System.ComponentModel.DataAnnotations;
 using BPOR.Rms.VolunteerInformation.Settings;
 using BPOR.Rms.VolunteerInformation.Tokens;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Enums;
 using NIHR.NotificationService.Interfaces;
@@ -22,6 +23,7 @@ public class CampaignService(
     ILogger<CampaignService> logger,
     IRefDataService refDataService,
     ParticipantDbContext context,
+    IEncryptionService encryptionService,
     IReferenceGenerator referenceGenerator,
     INotificationService<CampaignParticipantNotificationDeliveryHandler> notificationService,
     IVolunteerFilterService volunteerFilterService,
@@ -53,7 +55,7 @@ public class CampaignService(
             return;
         }
 
-        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, deliveryStatusId, cancellationToken);
+        await ProcessAndQueueVolunteersAsync(volunteers, campaign, dbFilter, deliveryStatusId, item.Callback, cancellationToken);
     }
 
     private int GetDeliveryStatusId()
@@ -72,7 +74,7 @@ public class CampaignService(
     }
 
     private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
-        FilterCriteria dbFilter, int deliveryStatusId, CancellationToken cancellationToken)
+        FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)
     {
         const int batchSize = 1000;
 
@@ -97,7 +99,7 @@ public class CampaignService(
 
         await SaveChangesWithRetryAsync(queue, cancellationToken);
 
-        await QueueNotificationsAsync(volunteers, campaign, queue, cancellationToken);
+        await QueueNotificationsAsync(volunteers, campaign, queue, callback, cancellationToken);
     }
 
     private async Task SaveChangesWithRetryAsync(List<ProcessingResults> emailQueue,
@@ -169,7 +171,8 @@ public class CampaignService(
             ParticipantId = volunteer.Id,
             DeliveryStatusId = deliveryStatusId,
             SentAt = DateTime.UtcNow,
-            Token = tokenGenerator.GenerateVolunteerToken()
+            Token = tokenGenerator.GenerateToken(new VipToken(
+                VipTokenPurpose.Volunteer,campaign.Id, volunteer.Id, dbFilter.StudyId.Value ))
         });
 
         if (dbFilter is { Study.IsRecruitingIdentifiableParticipants: true, StudyId: not null })
@@ -197,7 +200,7 @@ public class CampaignService(
     }
 
     private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
-        List<ProcessingResults> queue, CancellationToken cancellationToken)
+        List<ProcessingResults> queue, string callback, CancellationToken cancellationToken)
     {
         List<UnkeyedSendNotificationRequest> notificationRequests = new();
 
@@ -229,12 +232,29 @@ public class CampaignService(
                 reference = $"no-study.{campaignParticipant.Id}";
             }
 
-            var queryParams = new Dictionary<string, string>
+            string link;
+            
+            if (campaign.FilterCriteria.Study.HasVip)
             {
-                { "token", campaignParticipant.Token }
-            };
+                var queryParams = new Dictionary<string, string>
+                {
+                    { "token", campaignParticipant.Token }
+                };
 
-            var link = QueryHelpers.AddQueryString(vsiSettings.Value.BporVipUri, queryParams);
+                link = QueryHelpers.AddQueryString(vsiSettings.Value.BporVipUri, queryParams);
+            }
+            else
+            {
+                var baseUri = new Uri(callback);
+                var queryParams = new Dictionary<string, string>
+                {
+                    { "reference", encryptionService.Encrypt(campaignParticipant.Id.ToString()) }
+                };
+
+                var uriWithQuery = new Uri(QueryHelpers.AddQueryString(baseUri.ToString(), queryParams));
+                link = uriWithQuery.ToString();
+            }
+
             var notification = new UnkeyedSendNotificationRequest()
             {
                 Reference = campaignParticipant.Id.ToString(),

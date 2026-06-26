@@ -1,15 +1,14 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 
 namespace BPOR.Rms.VolunteerInformation.Data;
 
 public class TempFolderVipFileRepository (IMemoryCache memoryCache) : VipFileRepository(memoryCache)
 {
-    protected override async Task<Stream?> OpenReadStream(long studyId, CancellationToken cancellationToken)
+    protected override async Task<string?> Read(long studyId, CancellationToken cancellationToken)
     {
         string path = GetPath(studyId);
         return File.Exists(path) ? // It is exceptional behaviour for the file is deleted between now and opening the read stream.
-            File.OpenRead(path) : null;
+            await File.ReadAllTextAsync(path, cancellationToken) : null;
     }
 
     private string GetPath(long studyId)
@@ -19,9 +18,10 @@ public class TempFolderVipFileRepository (IMemoryCache memoryCache) : VipFileRep
         return Path.Combine(folder, $"vsi_{studyId}.json");
     }
 
-    protected override async Task<Stream?> OpenWriteStream(long studyId, CancellationToken cancellationToken)
+    protected override async Task CreateOrUpdate(long studyId,
+        string content, CancellationToken cancellationToken)
     {
         string path = GetPath(studyId);
-        return File.Create(path);
+        await File.WriteAllTextAsync(path, content, cancellationToken);
     }
 }

@@ -21,7 +21,7 @@ namespace NIHR.NotificationService.Services
             _notificationStatusSinks = notificationStatusSinks;
         }
 
-        public async Task<NotificationDeliveryStatus> SendNotification(SendNotificationRequest request, CancellationToken cancellationToken)
+        public async Task<SendNotificationResult> SendNotification(SendNotificationRequest request, CancellationToken cancellationToken)
         {
             request.Validate();
             try
@@ -34,12 +34,12 @@ namespace NIHR.NotificationService.Services
                         var emailAddress = request.Personalisation[PersonalisationKeys.Email];
                         await _client.SendEmailAsync(emailAddress, request.TemplateId, personalisation,
                             request.Reference.ToString());
-                        return NotificationDeliveryStatus.Pending;
+                        return SendNotificationResult.Success(NotificationDeliveryStatus.Pending);
                     case GovUkNotifyContactMethod.Letter:
                         await _client.SendLetterAsync(request.TemplateId, personalisation,
                             request.Reference.ToString());
                         // Mark letters as delivered immediately.
-                        return NotificationDeliveryStatus.Delivered;
+                        return SendNotificationResult.Success(NotificationDeliveryStatus.Delivered);
                     default:
                         throw new NotSupportedException(
                             $"Contact method {request.ContactMethod} is not supported.");
@@ -48,9 +48,13 @@ namespace NIHR.NotificationService.Services
             catch (HttpRequestException httpEx) when
                 (httpEx.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
-                _logger.LogError(httpEx, "429 Rate Limit Exceeded error while sending notification");
-                throw new InvalidOperationException("429 Rate Limit Exceeded error while sending notification.",
-                    httpEx);
+                _logger.LogWarning(httpEx, "429 Rate Limit Exceeded error while sending notification");
+                return SendNotificationResult.TemporaryFailure("Rate limit exceeded");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Unable to send notification");
+                return SendNotificationResult.PermanentFailure("Rate limit exceeded");
             }
         }
 

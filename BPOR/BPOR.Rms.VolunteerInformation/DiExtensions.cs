@@ -1,6 +1,8 @@
+using Amazon.S3;
 using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Settings;
 using BPOR.Rms.VolunteerInformation.Tokens;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NIHR.NotificationService;
 
@@ -12,11 +14,13 @@ public static class DiExtensions
     {
         services.AddScoped<IVipTokenGenerator, VipTokenGenerator>();
       
-        services.AddOptions<LocalVipFileRepositoryOptions>().Configure(i => i.Path = "c:\\temp");
-        services.AddScoped<IVipRepository, TempFolderVipFileRepository>();
+        services.AddScoped<IVipRepository, S3VipRepository>();
         services.AddScoped<IStudyRepository, StudyDbRepository>();
         services.AddOptions<VipSettings>().BindConfiguration("Vip");
 
         services.AddNotificationDeliveryHandler<ResearcherEmailNotificationDeliveryHandler>();
+
+        services.AddDefaultAWSOptions(i => i.GetRequiredService<IConfiguration>().GetAWSOptions());
+        services.AddAWSService<IAmazonS3>();
     }
 }

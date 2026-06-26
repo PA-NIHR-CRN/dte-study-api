@@ -20,7 +20,8 @@ namespace NIHR.NotificationService.Services
                 {
                     using (var scope = serviceProvider.CreateScope())
                     {
-                        await scope.ServiceProvider.GetRequiredService<INotificationQueueService>().ProcessBatch(1000, stoppingToken);
+                        await scope.ServiceProvider.GetRequiredService<INotificationQueueService>()
+                            .ProcessBatch(1000, stoppingToken);
                     }
                 }
                 catch (Exception ex)

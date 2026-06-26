@@ -33,7 +33,6 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         var data = await VipRepository.GetPage(studyId,
             i => new VsiEditModel
             {
-                FlowMode = flowMode,
                 Description = i.Description
             },
             cancellationToken);
@@ -63,14 +62,12 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
     #region Section1_Step2
 
     [HttpGet]
-    public async Task<IActionResult> Section1_Step2(int studyId, VipFlowMode flowMode,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Section1_Step2(CancellationToken cancellationToken)
     {
-        var model = await VipRepository.GetPage(studyId,
+        var model = await VipRepository.GetPage(EditContext.StudyId,
             i => new VsiEditModel
             {
-                StudyType = i.StudyType,
-                FlowMode = flowMode
+                StudyType = i.StudyType
             },
             cancellationToken);
         return model == null ? NotFound() : View(model);
@@ -78,8 +75,6 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
 
     [HttpPost]
     public async Task<IActionResult> Section1_Step2(
-        [FromRoute] int studyId,
-        VipFlowMode flowMode,
         [FromForm] VsiEditModel model,
         CancellationToken cancellationToken)
     {
@@ -89,7 +84,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
             return View(model);
         }
 
-        await VipRepository.UpdateVsi(studyId, i => i.StudyType = model.StudyType, cancellationToken);
+        await VipRepository.UpdateVsi(EditContext.StudyId, i => i.StudyType = model.StudyType, cancellationToken);
 
         return model.StudyType switch
         {
@@ -842,7 +837,8 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
     }
 
     [HttpPost]
-    public async Task<IActionResult> Section4(int studyId, CancellationToken cancellationToken, bool commit = true)
+    [ActionName(nameof(Section4))]
+    public async Task<IActionResult> Section4Postback([FromServices] IStudyRepository studyRepository, int studyId, CancellationToken cancellationToken)
     {
         var model = await GetFullPageModel(studyId, cancellationToken);
         if (model == null)
@@ -850,6 +846,12 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
             return NotFound();
         }
 
+
+        if (model.Status == VsiStatus.Active)
+        {
+            return RedirectToAction("Details", "Study", new { id = studyId });
+        }
+        
         ModelState.Clear();
         (await new VsiValidator().ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
         if (!ModelState.IsValid)
@@ -858,6 +860,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         }
 
         await VipRepository.UpdateVsi(studyId, i => i.Status = VsiStatus.Active, cancellationToken);
+        await studyRepository.UpdateStudy(studyId, i => i.HasVip = true, CancellationToken.None);
         return RedirectToAction("NextSteps", new { studyId });
     }
 
@@ -879,6 +882,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
                 ExternalWebsiteUrl = i.ExternalWebsiteUrl,
                 InfoToRegisterByEmail = i.InfoToRegisterByEmail,
                 PreScreenerUrl = i.PreScreenerUrl,
+                Status = i.Status,
 
                 Contacts = i.Contacts.Select(c => new VsiContactModel
                 {
@@ -950,7 +954,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
     {
         var uri = QueryHelpers.AddQueryString(options.Value.BporVipUri, new Dictionary<string, string?>
         {
-            ["token"] = tokenGenerator.GenerateToken(VipTokenPurpose.AdminPreview, studyId),
+            ["token"] = tokenGenerator.GenerateToken(new VipToken(VipTokenPurpose.AdminPreview, 0, 0, studyId)),
         });
 
         return Redirect(uri);
