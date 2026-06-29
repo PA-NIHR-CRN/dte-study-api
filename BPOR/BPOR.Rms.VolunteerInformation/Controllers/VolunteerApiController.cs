@@ -31,11 +31,6 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
         long campaignParticipantId,
         CancellationToken cancellationToken)
     {
-        if (!options.Value.EnableRrvApi)
-        {
-            return NotFound();
-        }
-
         var campaignParticipant = await db.CampaignParticipant
             .Include(i => i.Campaign).ThenInclude(i => i.FilterCriteria)
             .SingleOrDefaultAsync(i => i.Id == campaignParticipantId, cancellationToken);
@@ -167,11 +162,6 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
         string token,
         CancellationToken cancellationToken)
     {
-        if (!options.Value.EnableRrvApi)
-        {
-            return NotFound();
-        }
-
         var validatedToken = await vipTokenGenerator.ValidateToken(token, cancellationToken);
         if (validatedToken is not { Purpose: VipTokenPurpose.Volunteer })
         {

@@ -52,9 +52,13 @@ else
             </form>
         </div>
     }
-    <div class="govuk-!-margin-top-4">
-        <form method="post" asp-action="CreateSample" asp-route-studyId="@Model.StudyId">
-            <govuk-button button-type="Secondary" type="submit">Create sample page</govuk-button>
-        </form>
-    </div>
+    
+    @if(Options.Value.EnableDevelopmentFeatures)
+    {
+        <div class="govuk-!-margin-top-4">
+            <form method="post" asp-action="CreateSample" asp-route-studyId="@Model.StudyId">
+                <govuk-button button-type="Secondary" type="submit">Create sample page</govuk-button>
+            </form>
+        </div>
+    }
 }
