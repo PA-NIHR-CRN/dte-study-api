@@ -35,7 +35,7 @@
     @if (Model.Templates != null && Model.Templates.Any())
     {
         <template-select for="@Model.SelectedTemplateId"
-                         contact-method="@Model.ContactMethod"
+                         contact-method="@CampaignService.ToNotificationContactMethod(Model.ContactMethod)"
                          templates="@Model.Templates" />
     }
     else
