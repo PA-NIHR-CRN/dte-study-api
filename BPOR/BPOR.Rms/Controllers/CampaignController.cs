@@ -12,7 +12,6 @@ using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
-using Notify.Exceptions;
 using BPOR.Rms.VolunteerInformation.Tokens;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Enums;
@@ -226,11 +225,12 @@ public class CampaignController(
                         Reference = new NotificationReference("PreviewEmailReference")
                     }, cancellationToken);
                 }
-                catch (NotifyClientException e)
+                catch (Exception e)
                 {
+                    // TODO: synchronous priority sending
                     logger.LogError(e, "Error sending preview email");
                     ModelState.AddModelError(nameof(model.PreviewEmails),
-                        "Gov Notify does not accept the email address(es) provided.");
+                        "Unable to send preview email.");
                     return View(nameof(Setup), model);
                 }
             }

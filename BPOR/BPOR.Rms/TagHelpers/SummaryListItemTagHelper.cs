@@ -8,9 +8,6 @@ using BPOR.Rms.Models.Study;
 using BPOR.Rms.Controllers;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using System.Text.Encodings.Web;
-using BPOR.Rms.Utilities;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.TagHelpers;
