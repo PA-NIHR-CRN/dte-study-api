@@ -9,7 +9,6 @@ using BPOR.Registration.Stream.Handler.Services;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure;
-using NIHR.NotificationService.Enums;
 
 namespace BPOR.Registration.Stream.Handler.Mappers;
 
@@ -68,7 +67,7 @@ public class ParticipantMapper : IParticipantMapper
         {
             participant.ContactMethodId.Add(new ParticipantContactMethod()
             {
-                ContactMethodId = (int)NotificationContactMethod.Email,
+                ContactMethodId = (int)ContactMethodId.Email,
 
             });
         }
