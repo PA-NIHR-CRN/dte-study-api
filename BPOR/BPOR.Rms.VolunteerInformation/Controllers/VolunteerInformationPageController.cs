@@ -6,6 +6,7 @@ using BPOR.Rms.VolunteerInformation.Settings;
 using BPOR.Rms.VolunteerInformation.Tokens;
 using BPOR.Rms.VolunteerInformation.Validators;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
@@ -16,6 +17,7 @@ using Rbec.Postcodes;
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [Route("Study/{studyId:int}/VolunteerInformation/[action]")]
+[Authorize(Roles = "Admin")]
 public class VolunteerInformationPageController : VipControllerBase<VsiEditContext>
 {
     public VolunteerInformationPageController(IVipRepository vipRepository) : base(vipRepository)
@@ -860,7 +862,6 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         }
 
         await VipRepository.UpdateVsi(studyId, i => i.Status = VsiStatus.Active, cancellationToken);
-        await studyRepository.UpdateStudy(studyId, i => i.HasVip = true, CancellationToken.None);
         return RedirectToAction("NextSteps", new { studyId });
     }
 

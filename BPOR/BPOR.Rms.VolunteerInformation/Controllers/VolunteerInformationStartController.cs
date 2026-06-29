@@ -1,11 +1,13 @@
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
 [Route("Study/{studyId:int}/VolunteerInformation/[action]")]
+[Authorize(Roles = "Admin")]
 public class VolunteerInformationStartController(IVipRepository vipRepository) : Controller
 {
     [HttpGet]

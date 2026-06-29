@@ -10,8 +10,8 @@ using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
-[AllowAnonymous]
 [Route("Study/{studyId:int}/VolunteerInformation/groups/{groupId:int}/[action]")]
+[Authorize(Roles = "Admin")]
 public class VolunteerInformationGroupController(IVipRepository vipRepository) : VipControllerBase<VsiGroupEditContext>(vipRepository)
 {
     protected override Task<IActionResult?> InitialiseEditContext(ActionExecutingContext context, VsiGroupEditContext editContext,
