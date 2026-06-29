@@ -68,7 +68,7 @@ public class ParticipantMapper : IParticipantMapper
         {
             participant.ContactMethodId.Add(new ParticipantContactMethod()
             {
-                ContactMethodId = (int)GovUkNotifyContactMethod.Email,
+                ContactMethodId = (int)NotificationContactMethod.Email,
 
             });
         }

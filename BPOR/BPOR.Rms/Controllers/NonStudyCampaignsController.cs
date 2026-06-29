@@ -18,7 +18,7 @@ public class NonStudyCampaignsController(
         var campaigns = await context.FilterCriterias
             .Where(fc => fc.StudyId == null)
             .SelectMany(fc => fc.Campaign)
-            .Where(cp => cp.TypeId == GovUkNotifyContactMethod.Email)
+            .Where(cp => cp.TypeId == ContactMethodId.Email)
             .AsCampaignModel()
             .OrderByDescending(ec => ec.CreatedAt)
             .PageAsync(paginationService, cancellationToken);

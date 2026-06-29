@@ -6,5 +6,5 @@ public class Template
 {
     public string Id {get; set;}
     public string Name { get; set; }
-    public GovUkNotifyContactMethod ContactMethod { get; set; }
+    public NotificationContactMethod ContactMethod { get; set; }
 }

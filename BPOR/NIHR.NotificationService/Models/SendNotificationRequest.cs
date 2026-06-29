@@ -16,7 +16,7 @@ public class SendNotificationRequestBase
 {
     public Dictionary<string, string> Personalisation { get; set; } = new();
     public string TemplateId { get; set; } = string.Empty;
-    public GovUkNotifyContactMethod ContactMethod { get; set; }
+    public NotificationContactMethod ContactMethod { get; set; }
     
     private bool HasPersonalisation(string key) => 
         Personalisation.TryGetValue(key, out var value) || !string.IsNullOrWhiteSpace(value);
@@ -30,8 +30,8 @@ public class SendNotificationRequestBase
 
         string[] requiredPersonalisations = ContactMethod switch
         {
-            GovUkNotifyContactMethod.Email => [PersonalisationKeys.Email],
-            GovUkNotifyContactMethod.Letter =>
+            NotificationContactMethod.Email => [PersonalisationKeys.Email],
+            NotificationContactMethod.Letter =>
                 [PersonalisationKeys.AddressLine1, PersonalisationKeys.AddressLine5, PersonalisationKeys.Postcode],
             _ => throw new ArgumentOutOfRangeException()
         };

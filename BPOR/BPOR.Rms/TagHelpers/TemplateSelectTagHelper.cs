@@ -9,7 +9,7 @@ namespace BPOR.Rms.TagHelpers
 {
     public class TemplateSelectTagHelper : TagHelper
     {
-        public GovUkNotifyContactMethod ContactMethod { get; set; }
+        public NotificationContactMethod ContactMethod { get; set; }
         public string SelectedTemplateId { get; set; }
         public List<Template> Templates { get; set; } = new();
         public ModelExpression For { get; set; }

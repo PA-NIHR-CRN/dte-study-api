@@ -87,9 +87,9 @@ public class VolunteerFormViewModel : IValidatableObject
     public bool ManualAddressEntry { get; set; }
     public string? lastAction { get; set; }
 
-    public List<GovUkNotifyContactMethod> GetPrefferdContactMethodValues{
+    public List<NotificationContactMethod> GetPrefferdContactMethodValues{
         get { 
-        return Enum.GetValues<GovUkNotifyContactMethod>().ToList();
+        return Enum.GetValues<NotificationContactMethod>().ToList();
         }
 
     }
@@ -176,7 +176,7 @@ public class VolunteerFormViewModel : IValidatableObject
         {
             yield return new ValidationResult("Enter a mobile phone number in the correct format, like 07700 900 982", [nameof(Mobile)]);
         }
-        if (PreferredContactMethod != null && PreferredContactMethod == (int)GovUkNotifyContactMethod.Email && String.IsNullOrEmpty(EmailAddress))
+        if (PreferredContactMethod != null && PreferredContactMethod == (int)NotificationContactMethod.Email && String.IsNullOrEmpty(EmailAddress))
         {
             yield return new ValidationResult("Email address cannot be blank", [nameof(EmailAddress)]);
         }

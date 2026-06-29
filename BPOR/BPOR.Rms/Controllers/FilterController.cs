@@ -106,7 +106,7 @@ public class FilterController(ParticipantDbContext context,
             model.ShowPreferredContactFilter = selectedStudy.IsRecruitingIdentifiableParticipants;
 
             if (!model.ShowPreferredContactFilter) {
-                model.SelectedVolunteersPreferredContact = (int)GovUkNotifyContactMethod.Email;
+                model.SelectedVolunteersPreferredContact = (int)NotificationContactMethod.Email;
             }
         }
     }
@@ -116,8 +116,8 @@ public class FilterController(ParticipantDbContext context,
     {
         await PopulateStudyDetails(model, cancellationToken);
 
-        if (!model.SelectedVolunteersPreferredContact.Equals((int)GovUkNotifyContactMethod.Email) && 
-            !model.SelectedVolunteersPreferredContact.Equals((int)GovUkNotifyContactMethod.Letter) && 
+        if (!model.SelectedVolunteersPreferredContact.Equals((int)NotificationContactMethod.Email) && 
+            !model.SelectedVolunteersPreferredContact.Equals((int)NotificationContactMethod.Letter) && 
             model.ShowPreferredContactFilter)
         {
             ModelState.AddModelError(nameof(model.SelectedVolunteersPreferredContact), "Select if the volunteers preferred contact method is email or letter");
@@ -160,7 +160,7 @@ public class FilterController(ParticipantDbContext context,
             StudyId = model.StudyId,
             MaxNumbers = model.VolunteerCount == null ? 0 : model.VolunteerCount.Value,
             StudyName = model.StudyName,
-            ContactMethod = (GovUkNotifyContactMethod)model.SelectedVolunteersPreferredContact,
+            ContactMethod = (NotificationContactMethod)model.SelectedVolunteersPreferredContact,
         };
 
         return RedirectToAction("Setup", "Campaign", campaignDetails);

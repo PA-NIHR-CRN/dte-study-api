@@ -1,10 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using NIHR.Infrastructure.EntityFrameworkCore;
-using NIHR.NotificationService.Enums;
-using DeliveryStatus = BPOR.Domain.Entities.RefData.DeliveryStatus;
 
 namespace BPOR.Domain.Entities;
 
@@ -13,7 +10,7 @@ public class CampaignParticipant : IAudit, ISoftDelete
 {
     public int Id { get; set; }
     public int CampaignId { get; set; }
-    public GovUkNotifyContactMethod CampaignTypeId { get; set; }
+    public ContactMethodId CampaignTypeId { get; set; }
     public int ParticipantId { get; set; }
     public int? DeliveryStatusId { get; set; }
     public DateTime? SentAt { get; set; }

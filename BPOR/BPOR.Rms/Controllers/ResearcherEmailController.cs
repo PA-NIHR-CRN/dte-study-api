@@ -130,7 +130,7 @@ public class ResearcherEmailController(ParticipantDbContext context,
         await notificationService.SendNotification(
             new UnkeyedSendNotificationRequest()
             {
-                ContactMethod = GovUkNotifyContactMethod.Email,
+                ContactMethod = NotificationContactMethod.Email,
                 Personalisation = new Dictionary<string, string>()
                                               {
                                                   [PersonalisationKeys.Email] = study.EmailAddress,

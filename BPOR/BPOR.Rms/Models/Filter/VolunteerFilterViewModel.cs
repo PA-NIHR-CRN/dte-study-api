@@ -97,8 +97,8 @@ public class VolunteerFilterViewModel : IValidatableObject
         var items = new List<SelectListItem>
     {
         new SelectListItem { Value = string.Empty, Text = "No preference" },
-        new SelectListItem { Value = ((int)GovUkNotifyContactMethod.Email).ToString(), Text = "Email" },
-        new SelectListItem { Value = ((int)GovUkNotifyContactMethod.Letter).ToString(), Text = "Letter" }
+        new SelectListItem { Value = ((int)NotificationContactMethod.Email).ToString(), Text = "Email" },
+        new SelectListItem { Value = ((int)NotificationContactMethod.Letter).ToString(), Text = "Letter" }
     };
 
         return items;

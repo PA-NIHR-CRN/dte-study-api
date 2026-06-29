@@ -1,5 +1,4 @@
 ﻿using BPOR.Domain.Entities.RefData;
-using NIHR.NotificationService.Enums;
 
 namespace BPOR.Domain.Entities
 {

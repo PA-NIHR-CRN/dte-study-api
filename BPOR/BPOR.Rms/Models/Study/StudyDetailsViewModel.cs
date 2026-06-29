@@ -51,7 +51,7 @@ public class Campaign
     public int TotalCampaignNotificationsSent => CampaignParticipants.Where(e => e.DeliveryStatusId == 3).Count();
     public int TotalContactAttemptsFailed => CampaignParticipants.Where(e => e.DeliveryStatusId == 5).Count();
     public int TotalCampaignRegisteredInterest => CampaignParticipants.Where(p => p.RegisteredInterestAt != null).Count();
-    public GovUkNotifyContactMethod TypeId { get; set; }
+    public ContactMethodId TypeId { get; set; }
 
 }
 

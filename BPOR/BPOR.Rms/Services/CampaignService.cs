@@ -10,6 +10,7 @@ using Polly;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Settings;
@@ -201,6 +202,22 @@ public class CampaignService(
             studyParticipant.Reference = newReference;
         }
     }
+    
+    public static ContactMethodId ToContactMethodId(NotificationContactMethod contactMethodId) =>
+        contactMethodId switch
+        {
+            NotificationContactMethod.Email => ContactMethodId.Email,
+            NotificationContactMethod.Letter => ContactMethodId.Letter,
+            _ => throw new ArgumentOutOfRangeException(nameof(contactMethodId), contactMethodId, null)
+        };
+
+    public static NotificationContactMethod ToNotificationContactMethod(ContactMethodId contactMethodId) =>
+        contactMethodId switch
+        {
+            ContactMethodId.Email => NotificationContactMethod.Email,
+            ContactMethodId.Letter => NotificationContactMethod.Letter,
+            _ => throw new ArgumentOutOfRangeException(nameof(contactMethodId), contactMethodId, null)
+        };
 
     private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         List<ProcessingResults> queue, string callback, CancellationToken cancellationToken)
@@ -209,7 +226,7 @@ public class CampaignService(
 
         foreach (var volunteer in volunteers)
         {
-            var validationResults = ValidateParticipantForCampaignType(volunteer, campaign.TypeId).ToArray();
+            var validationResults = ValidateParticipantForCampaignType(volunteer, ToNotificationContactMethod(campaign.TypeId)).ToArray();
             if (validationResults.Any())
             {
                 string reason = string.Join("; ", validationResults.Select(i => i.ErrorMessage));
@@ -262,7 +279,7 @@ public class CampaignService(
             var notification = new UnkeyedSendNotificationRequest()
             {
                 Reference = campaignParticipant.Id.ToString(),
-                ContactMethod = campaignParticipant.CampaignTypeId,
+                ContactMethod = ToNotificationContactMethod(campaignParticipant.CampaignTypeId),
                 TemplateId = campaign.TemplateId.ToString(),
                 Personalisation =
                 {
@@ -277,11 +294,11 @@ public class CampaignService(
 
             switch (campaign.TypeId)
             {
-                case GovUkNotifyContactMethod.Email:
+                case ContactMethodId.Email:
                     notification.Personalisation[PersonalisationKeys.Email] = volunteer.Email;
                     break;
 
-                case GovUkNotifyContactMethod.Letter:
+                case ContactMethodId.Letter:
                     var addressFields = new Dictionary<string, string?>
                     {
                         [PersonalisationKeys.AddressLine1] = volunteer.Address.AddressLine1,
@@ -310,7 +327,7 @@ public class CampaignService(
         await notificationService.SendNotifications(notificationRequests, cancellationToken);
     }
 
-    private IEnumerable<ValidationResult> ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, GovUkNotifyContactMethod campaignTypeId)
+    private IEnumerable<ValidationResult> ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, NotificationContactMethod campaignTypeId)
     {
         if (string.IsNullOrWhiteSpace(volunteer.FirstName))
         {
@@ -324,14 +341,14 @@ public class CampaignService(
 
         switch (campaignTypeId)
         {
-            case GovUkNotifyContactMethod.Email:
+            case NotificationContactMethod.Email:
                 if (string.IsNullOrWhiteSpace(volunteer.Email))
                 {
                     yield return new ValidationResult("Email cannot be null, empty or whitespace");
                 }
 
                 break;
-            case GovUkNotifyContactMethod.Letter:
+            case NotificationContactMethod.Letter:
                 if (volunteer.Address == null)
                 {
                     yield return new ValidationResult("Address cannot be null");

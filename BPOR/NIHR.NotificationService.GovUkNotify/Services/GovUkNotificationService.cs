@@ -30,12 +30,12 @@ namespace NIHR.NotificationService.GovUkNotify.Services
 
                 switch (request.ContactMethod)
                 {
-                    case GovUkNotifyContactMethod.Email:
+                    case NotificationContactMethod.Email:
                         var emailAddress = request.Personalisation[PersonalisationKeys.Email];
                         await client.SendEmailAsync(emailAddress, request.TemplateId, personalisation,
                             request.Reference.ToString());
                         return SendNotificationResult.Success(NotificationDeliveryStatus.Pending);
-                    case GovUkNotifyContactMethod.Letter:
+                    case NotificationContactMethod.Letter:
                         await client.SendLetterAsync(request.TemplateId, personalisation,
                             request.Reference.ToString());
                         // Mark letters as delivered immediately.
@@ -78,11 +78,11 @@ namespace NIHR.NotificationService.GovUkNotify.Services
             return result;
         }
 
-        public GovUkNotifyContactMethod? ParseContactMethod(string templateType) =>
+        public NotificationContactMethod? ParseContactMethod(string templateType) =>
             templateType switch
             {
-                "email" => GovUkNotifyContactMethod.Email,
-                "letter" => GovUkNotifyContactMethod.Letter,
+                "email" => NotificationContactMethod.Email,
+                "letter" => NotificationContactMethod.Letter,
                 _ => null
             };
     }

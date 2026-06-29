@@ -19,7 +19,7 @@ public class SetupCampaignViewModel
 
     public string? StudyName { get; set; }
     public string? EmailAddress { get; set; }
-    public GovUkNotifyContactMethod ContactMethod { get; set; }
+    public NotificationContactMethod ContactMethod { get; set; }
 
     public int FilterCriteriaId { get; set; }
 
@@ -37,8 +37,8 @@ public class SetupCampaignViewModel
 
     public IEnumerable<string> GetPreviewEmailAddresses() => PreviewEmails?.Split(_emailListDelimiters, StringSplitOptions.RemoveEmptyEntries)?.Select(x => x.Trim()) ?? Enumerable.Empty<string>();
 
-    public string GetArticle(GovUkNotifyContactMethod method)
+    public string GetArticle(NotificationContactMethod method)
     {
-        return (method == GovUkNotifyContactMethod.Email) ? "an" : "a";
+        return (method == NotificationContactMethod.Email) ? "an" : "a";
     }
 }

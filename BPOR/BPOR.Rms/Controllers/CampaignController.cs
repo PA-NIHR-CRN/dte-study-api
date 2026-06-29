@@ -88,7 +88,7 @@ public class CampaignController(
                 TargetGroupSize = model.TotalVolunteers,
                 TemplateId = new Guid(model.SelectedTemplateId!),
                 Name = selectedTemplate.Name,
-                TypeId = selectedTemplate.ContactMethod
+                TypeId = CampaignService.ToContactMethodId(selectedTemplate.ContactMethod)
             };
 
             await AddCampaignToContextAsync(campaign, cancellationToken);
@@ -118,7 +118,7 @@ public class CampaignController(
                 sendParams["contactMethod"] = campaign.TypeId;
                 templateId = "email-rms-campaign-sent"; // note: to be renamed in contentful after release as to not impact current production campaigns
             }
-            else if (campaign.TypeId == GovUkNotifyContactMethod.Letter)
+            else if (campaign.TypeId == ContactMethodId.Letter)
             {
                 notificationRecipients.Add(rmsOptions.Value.CampaignNotificationEmailAddress);
                 sendParams["templateName"] = selectedTemplate.Name;
@@ -225,7 +225,7 @@ public class CampaignController(
                 {
                     await notificationService.SendNotification(new SendNotificationRequest
                     {
-                        ContactMethod = GovUkNotifyContactMethod.Email,
+                        ContactMethod = NotificationContactMethod.Email,
                         TemplateId = model.SelectedTemplateId,
                         Personalisation = personalisationData[email],
                         Reference = new NotificationReference("PreviewEmailReference")

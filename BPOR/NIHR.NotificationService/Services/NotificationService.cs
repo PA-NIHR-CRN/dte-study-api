@@ -95,7 +95,7 @@ public class NotificationService(IDownstreamNotificationService downstreamServic
         {
             Reference = NotificationReference.Parse(personalisation[PersonalisationKeys.NotificationReference]),
             Personalisation = personalisation,
-            ContactMethod = Enum.Parse<GovUkNotifyContactMethod>(personalisation[PersonalisationKeys.ContactMethod]),
+            ContactMethod = Enum.Parse<NotificationContactMethod>(personalisation[PersonalisationKeys.ContactMethod]),
             TemplateId = personalisation[PersonalisationKeys.TemplateId]
         };
 
