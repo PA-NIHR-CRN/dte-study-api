@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using BPOR.Domain.Enums;
+using BPOR.Domain.Entities.RefData;
 using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
@@ -10,7 +10,7 @@ public class CampaignParticipant : IAudit, ISoftDelete
 {
     public int Id { get; set; }
     public int CampaignId { get; set; }
-    public ContactMethodId CampaignTypeId { get; set; }
+    public Enums.ContactMethodId CampaignTypeId { get; set; }
     public int ParticipantId { get; set; }
     public int? DeliveryStatusId { get; set; }
     public DateTime? SentAt { get; set; }

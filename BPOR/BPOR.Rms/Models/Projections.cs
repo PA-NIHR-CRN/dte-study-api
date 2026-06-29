@@ -103,7 +103,7 @@ public static class Projections
                 .Select(p => new CampaignParticipant
                 {
                     SentAt = p.SentAt,
-                    RegisteredInterestAt = p.RegisteredInterestAt,
+                    RegisteredInterestAt = p.RegisteredInterestAt ?? p.VipEmailLinkClickedAtUtc,
                     DeliveredAt = p.DeliveredAt,
                     DeliveryStatusId = p.DeliveryStatusId
                 })
@@ -152,7 +152,7 @@ public static class Projections
                         .Select(p => new CampaignParticipant
                         {
                             SentAt = p.SentAt,
-                            RegisteredInterestAt = p.RegisteredInterestAt,
+                            RegisteredInterestAt = p.RegisteredInterestAt ?? p.VipEmailLinkClickedAtUtc,
                             DeliveredAt = p.DeliveredAt,
                             DeliveryStatusId = p.DeliveryStatusId
                         })
