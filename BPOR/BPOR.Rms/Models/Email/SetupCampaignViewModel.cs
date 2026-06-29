@@ -1,10 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
-using Humanizer;
-using NIHR.NotificationService.Enums;
 using NIHR.NotificationService.Interfaces;
-using Notify.Models.Responses;
 
 namespace BPOR.Rms.Models.Email;
 

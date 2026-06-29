@@ -2,8 +2,6 @@ using System.Reflection;
 using Amazon;
 using Amazon.SimpleEmail;
 using BPOR.Domain.Entities;
-using BPOR.Domain.Repositories;
-using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Clients;
 using BPOR.Rms.Services;
 using Dte.Common.Authentication;
@@ -19,10 +17,6 @@ using BPOR.Rms.VolunteerInformation;
 using Ganss.Xss;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Settings;
-using NIHR.NotificationService.Interfaces;
-using NIHR.NotificationService.Services;
-using NIHR.NotificationService.Settings;
-using Notify.Client;
 using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
 using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
@@ -33,7 +27,6 @@ using NIHR.NotificationService;
 using NIHR.NotificationService.Entities;
 using NIHR.NotificationService.GovUkNotify;
 using NIHR.Rts.Client;
-using NIHR.Rts.Client.Settings;
 
 namespace BPOR.Rms.Startup;
 
