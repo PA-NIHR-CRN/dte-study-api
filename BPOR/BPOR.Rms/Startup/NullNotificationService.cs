@@ -7,22 +7,22 @@ namespace BPOR.Rms.Startup
     {
         public Task<IEnumerable<Template>> GetTemplates(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(Array.Empty<Template>().AsEnumerable());
         }
 
         public Task SendNotifications(IEnumerable<SendNotificationRequest> notifications, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public Task SendNotification(SendNotificationRequest notification, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public Task ProcessDeliveryCallback(NotifyCallbackMessage message, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
     }
 }
