@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Rms.Abstractions.Enums;
+using BPOR.Rms.VolunteerInformation.Controllers;
+using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.VolunteerInformation.Models;
 
@@ -15,8 +17,10 @@ public class VsiEditModel
     public string? WhatYouWillDo { get; set; }
     
     [Display(Name = "Will volunteers be reimbursed for travel and inconvenience costs?")]
+    [ValueDisplayFormatter(typeof(YesNoFormatter))]
     public bool? CostReimbursement { get; set; }
     [Display(Name = "Will volunteers be offered an incentive for taking part?")]
+    [ValueDisplayFormatter(typeof(YesNoFormatter))]
     public bool? HasIncentive { get; set; }
     [Display(Name = "If yes please provide details of the incentives the volunteer will receive for taking part.")]
     public string? IncentiveDetails { get; set; }
@@ -34,11 +38,13 @@ public class VsiEditModel
         Description = "If you want the volunteer to email you to register their interest, what information should they provide in the email?\n")]
     public string? InfoToRegisterByEmail { get; set; }
     [Display(Name = "Link to the pre-screener:", Description = "Copy and paste the link here")]
-    public string? StagedPreScreenerUrl { get; set; }
+    public string? PreScreenerUrl { get; set; }
 
     [Display(Name = "Research location")]
     public IEnumerable<VsiSiteModel> Sites { get; set; } = [];
     
     public IEnumerable<VsiGroupModel> Groups { get; set; } = [];
     public IEnumerable<VsiContactModel> Contacts { get; set; } = [];
+
+    public VsiStatus Status { get; set; }
 }

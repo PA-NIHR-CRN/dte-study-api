@@ -1,4 +1,5 @@
 using BPOR.Domain.Enums;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Models.Email;
 

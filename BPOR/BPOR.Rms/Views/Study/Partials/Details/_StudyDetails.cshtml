@@ -16,8 +16,24 @@
         <summary-list-item for="Study.InformationUrl"/>
         <summary-list-item for="Study.PreScreenerUrl" 
                            show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.PreScreenerUrl)"/>
-        <summary-list-item for="Study.VolunteerInformationUrl" 
-                           show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.VolunteerInformationUrl)"/>
+        
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                Volunteer study information page
+            </dt>
+            <dd class="govuk-summary-list__value">
+            </dd>
+            <dd class="govuk-summary-list__actions">
+                <ul class="govuk-summary-list__actions-list">
+                    <li class="govuk-summary-list__actions-list-item">
+                        <a class="govuk-link" asp-controller="VolunteerInformationPage" asp-action="PreviewVip" asp-route-studyid="@Model.Study.Id" >View</a>
+                    </li>
+                    <li class="govuk-summary-list__actions-list-item">
+                        <a class="govuk-link" asp-controller="VolunteerInformationPage" asp-action="Section4" asp-route-studyid="@Model.Study.Id">Change</a>
+                    </li>
+                </ul>
+            </dd>
+        </div>
         <summary-list-item for="Study.ChiefInvestigator"/>
         <summary-list-item for="Study.StudySponsors"/>
         <summary-list-item for="Study.PortfolioSubmissionStatus"/>

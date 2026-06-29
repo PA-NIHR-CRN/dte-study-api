@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Enums;
 using BPOR.Rms.Models.PreScreenerEligibility;
 using BPOR.Rms.Models.Volunteer;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Models.Study;
 
@@ -69,4 +70,6 @@ public class ResearcherEmail
     public string? EmailTemplate { get; set; }
     public DateTime SentAt { get; set; }
     public int? DeliveryStatusId { get; set; }
+    public int StudyId { get; set; }
+    public int EmailTemplateId { get; set; }
 }

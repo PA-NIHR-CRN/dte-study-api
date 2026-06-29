@@ -1,0 +1,33 @@
+﻿@model BPOR.Rms.VolunteerInformation.Models.ManualSiteEntryModel
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section1Name);
+    ViewData.SetBackLinkOverride(Url.Action("SiteSearch", context));
+}
+
+<h1 class="govuk-heading-l">Research Location</h1>
+
+<form method="post">
+    <p class="govuk-body">Add an item</p>
+    <form-group label="Address Line one" for="Address.AddressLine1" label-as-heading="false" label-class="govuk-label">
+        <input class="govuk-input" asp-for="Address.AddressLine1" type="text">
+    </form-group>
+    <form-group label="Address Line two (optional)" for="Address.AddressLine2" label-as-heading="false" label-class="govuk-label">
+        <input class="govuk-input" asp-for="Address.AddressLine2" type="text">
+    </form-group>
+    <form-group label="Address Line three (optional)" for="Address.AddressLine3" label-as-heading="false" label-class="govuk-label">
+        <input class="govuk-input" asp-for="Address.AddressLine3" type="text">
+    </form-group>
+    <form-group label="Town or city" for="Address.AddressLine4" label-as-heading="false" label-class="govuk-label">
+        <input class="govuk-input" asp-for="Address.AddressLine4" type="text">
+    </form-group>
+    <form-group label="County (optional)" for="Address.AddressLine5" label-as-heading="false" label-class="govuk-label">
+        <input class="govuk-input" asp-for="Address.AddressLine5" type="text">
+    </form-group>
+    <form-group label="Post code" for="Address.Postcode" label-as-heading="false" label-class="govuk-label">
+        <input class="govuk-input" asp-for="Address.Postcode" type="text">
+    </form-group>
+
+    <govuk-button button-type="Secondary" type="submit">Submit</govuk-button>
+</form>

@@ -114,11 +114,24 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<DateTime?>("SentAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("Token")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("UpdatedById")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("VipEmailLinkClickedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("VipExternalLinkClickedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("VipPrescreenerLinkClickedAtUtc")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -9766,21 +9779,21 @@ namespace Dynamo.Stream.Handler.Migrations
                         {
                             Id = 1,
                             Code = "Introductory Email",
-                            Description = "Introductory email",
+                            Description = "Introduction email",
                             IsDeleted = false
                         },
                         new
                         {
                             Id = 2,
                             Code = "Offer Pre-Screener",
-                            Description = "Offer Pre-Screener",
+                            Description = "Next steps email with pre-screener",
                             IsDeleted = false
                         },
                         new
                         {
                             Id = 3,
                             Code = "Without Pre-Screener",
-                            Description = "Without Pre-Screener",
+                            Description = "Next steps email with NO pre-screener",
                             IsDeleted = false
                         });
                 });
@@ -9944,6 +9957,9 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool?>("HasNihrFunding")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("HasVip")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("InformationUrl")

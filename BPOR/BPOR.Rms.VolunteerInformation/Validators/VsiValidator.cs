@@ -1,4 +1,5 @@
-﻿using BPOR.Rms.VolunteerInformation.Models;
+﻿using System.Reflection.Metadata;
+using BPOR.Rms.VolunteerInformation.Models;
 using FluentValidation;
 using NIHR.Infrastructure.AspNetCore.Validation;
 
@@ -48,42 +49,48 @@ public class VsiValidator : AbstractValidator<VsiEditModel>
 {
     public VsiValidator()
     {
+        RuleFor(i => i)
+            .Must(i => i.Contacts.Any() || !string.IsNullOrWhiteSpace(i.PreScreenerUrl) ||
+                       !string.IsNullOrWhiteSpace(i.ExternalWebsiteUrl))
+            .WithMessage(
+                "You must provide at least one contact method for the volunteer to get in touch with the study team.");
+            
         RuleFor(i => i.Description)
             .NotEmpty().WithMessage("You must enter a description of your study.")
-            .MaxWords(60).WithMessage("You can add up to 60 words.");
+            .MaximumLengthWithStandardMessage(Constants.AboutTheStudyMaxLength);
         RuleFor(i => i.StudyType)
             .NotNull().WithMessage("Select an option to continue");
         RuleFor(i => i.WhatYouWillDo)
-            .MaximumLength(200).WithMessage("You have entered more than 200 characters")
+            .MaximumLengthWithStandardMessage(Constants.WhatYouWillDoMaxLength)
             .NotNull().WithMessage("Provide a brief description of what the volunteer will be doing as part of the study.");
         RuleFor(i => i.CostReimbursement)
             .NotNull().WithMessage("Select an option to continue");
         RuleFor(i => i.HasIncentive)
             .NotNull().WithMessage("Select an option to continue");
         RuleFor(i => i.IncentiveDetails)
-            .MaximumLength(200).WithMessage("You can add up to 200 characters")
+            .MaximumLengthWithStandardMessage(Constants.IncentiveDetailsMaxLength)
             .NotNull().WithMessage("Provide details of the incentive that will be provided to the volunteer.\n")
             .When(i => i.HasIncentive == true);
         RuleFor(i => i.NumberOfVisits)
-            .MaximumLength(200).WithMessage("You can add up to 200 characters")
+            .MaximumLengthWithStandardMessage(Constants.NumberOfVisitsMaxLength)
             .NotNull().WithMessage("Provide the number of times a person would need to visit the place of research.");
         RuleFor(i => i.StudyDuration)
-            .MaximumLength(200).WithMessage("You can add up to 200 characters")
+            .MaximumLengthWithStandardMessage(Constants.StudyDurationMaxLength)
             .NotNull().WithMessage("Provide details of how long this study is expected to last. This can be days, months, years, or specific dates (if any).");
         RuleFor(i => i.StudyFormat)
-            .MaximumLength(200).WithMessage("You can add up to 200 characters")
+            .MaximumLengthWithStandardMessage(Constants.StudyFormatMaxLength)
             .NotNull().WithMessage("Describe the different stages of the study, including treatments and follow-up appointments.");
         RuleFor(i => i.OtherDetails)
-            .MaximumLength(200).WithMessage("You can add up to 200 characters")
+            .MaximumLengthWithStandardMessage(Constants.OtherDetailsMaxLength)
             /*.NotNull().WithMessage("Enter information to Continue. If this is not relevant to your study, Skip this question")*/;
-        RuleFor(i => i.StagedPreScreenerUrl)
+        RuleFor(i => i.PreScreenerUrl)
             .Uri()
             /*.NotNull().WithMessage("Enter information to Continue. If this is not relevant to your study, Skip this question")*/;
         RuleFor(i => i.ExternalWebsiteUrl)
             .Uri()
             /*.NotNull().WithMessage("Enter information to Continue. If this is not relevant to your study, Skip this question")*/;
         RuleFor(i => i.InfoToRegisterByEmail)
-            .MaximumLength(200).WithMessage("You can add up to 200 characters")
+            .MaximumLengthWithStandardMessage(Constants.InfoToRegisterByEmailMaxLength)
             /*.NotNull().WithMessage("Enter information to Continue. If this is not relevant to your study, Skip this question")*/;
     }
 }

@@ -1,7 +1,7 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using BPOR.Domain.Enums;
 using NIHR.Infrastructure.EntityFrameworkCore;
-using DeliveryStatus = BPOR.Domain.Entities.RefData.DeliveryStatus;
 
 namespace BPOR.Domain.Entities;
 
@@ -24,4 +24,10 @@ public class CampaignParticipant : IAudit, ISoftDelete
     public DeliveryStatus DeliveryStatus { get; set; }
     public Campaign Campaign { get; set; }
     public Participant Participant { get; set; }
+    
+    [MaxLength(255)] public string? Token { get; set; }
+    
+    public DateTime? VipEmailLinkClickedAtUtc { get; set; }
+    public DateTime? VipExternalLinkClickedAtUtc { get; set; }
+    public DateTime? VipPrescreenerLinkClickedAtUtc { get; set; }
 }

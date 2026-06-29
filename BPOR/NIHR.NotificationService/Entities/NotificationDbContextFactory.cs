@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using NIHR.NotificationService.Settings;
 
-namespace NIHR.NotificationService.Context;
+namespace NIHR.NotificationService.Entities;
 
 public class NotificationDbContextFactory : IDesignTimeDbContextFactory<NotificationDbContext>
 {

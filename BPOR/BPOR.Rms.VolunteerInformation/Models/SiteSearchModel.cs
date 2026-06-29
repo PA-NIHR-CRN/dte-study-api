@@ -7,7 +7,10 @@ public class SiteSearchModel
 {
     [Display(Description = "Enter a postcode to select one or multiple research locations")]
     public string SearchTerm { get; set; }
+    
+    public bool IsSearching { get; set; }
+        
     public RtsAddress[] SearchResult { get; set; }
     
-    public int? SelectedRtsId { get; set; }
+    public string? SelectedRtsId { get; set; }
 }

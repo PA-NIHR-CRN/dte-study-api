@@ -4,7 +4,7 @@ using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Validators;
 
-public class MaxWordValidator<T>(int maxWordCount) : PropertyValidator<T, string?>, INotEmptyValidator
+public class MaxWordValidator<T>(int maxWordCount) : PropertyValidator<T, string?>
 {
     public override string Name => "NotEmptyValidator";
 

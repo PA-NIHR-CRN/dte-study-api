@@ -1,0 +1,16 @@
+﻿@model BPOR.Rms.VolunteerInformation.Models.VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
+
+@{
+    SetFlowBackAction("Section2_Step1");
+    ViewData.SetSectionName(Resources.Section2Name);
+
+    Layout = "_VsiEditLayoutForm";
+}
+ 
+<form-group for="CostReimbursement" label-class="govuk-heading-l">
+    <radio-set for="CostReimbursement">
+        <radio value="@true">Yes</radio>
+        <radio value="@false">No</radio>
+    </radio-set>
+</form-group>

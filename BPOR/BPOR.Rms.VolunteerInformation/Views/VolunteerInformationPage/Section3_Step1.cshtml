@@ -1,0 +1,14 @@
+﻿@model VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    SetFlowBackAction("Section2_Step7");
+    ViewData.SetSectionName(Resources.Section3Name);
+    ViewData.SetSkipLink(Url.FlowNext(context, "Section3_Step2"));
+    Layout = "_VsiEditLayoutForm";
+}
+
+<form-group for="PreScreenerUrl" label-class="govuk-heading-l">
+    <input class="govuk-input" asp-for="PreScreenerUrl" type="text">
+</form-group>

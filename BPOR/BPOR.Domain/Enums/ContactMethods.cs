@@ -1,4 +1,4 @@
-namespace BPOR.Domain.Enums;
+﻿namespace BPOR.Domain.Enums;
 
 public enum ContactMethodId
 {

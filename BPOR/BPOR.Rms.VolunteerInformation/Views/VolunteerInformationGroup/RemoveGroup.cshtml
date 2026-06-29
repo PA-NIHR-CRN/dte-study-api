@@ -1,0 +1,31 @@
+﻿@using BPOR.Domain.Enums
+@using BPOR.Rms.Abstractions.Enums
+@model BPOR.Rms.VolunteerInformation.Models.VsiGroupModel
+
+@{
+    VsiGroupEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section1Name);
+    Layout = "_VsiEditLayout";
+}
+
+<form method="post">
+    <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title"
+         data-module="govuk-notification-banner">
+        <div class="govuk-notification-banner__header">
+            <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                Important
+            </h2>
+        </div>
+        <div class="govuk-notification-banner__content">
+            <p class="govuk-notification-banner__heading">
+                Deleting this group will delete both inclusion and exclusion criteria.
+            </p>
+        </div>
+    </div>
+
+    <div class="govuk-button-group">
+        <govuk-button type="submit">Confirm Deletion</govuk-button>
+        <a class="govuk-link" asp-controller="VolunteerInformationPage" asp-action="Section1_Step4"
+           asp-all-route-data="@context.ToRouteData()">Cancel</a>
+    </div>
+</form>

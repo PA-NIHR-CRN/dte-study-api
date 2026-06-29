@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="~/css/nihr-typography.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/nihr-component-ui.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/bpor.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/moj-frontend.min.css" asp-append-version="true" />
 
     @* <link rel="stylesheet" href="~/{APP ASSEMBLY}.styles.css" /> *@
 
@@ -47,11 +48,13 @@
     <partial name="_Footer" />
 
     <script type="module" src="~/js/govuk-frontend-5.4.0.min.js"></script>
+    <script src="~/js/moj-frontend.min.js"></script>
     <script type="module">
-        import {
-            initAll
-        } from '/js/govuk-frontend-5.4.0.min.js'
-        initAll()
+        import { initAll as govukInitAll } from '/js/govuk-frontend-5.4.0.min.js'
+        import { initAll as mojInitAll } from '/js/moj-frontend.min.js'
+
+        govukInitAll()
+        mojInitAll()
     </script>
     <script src="~/js/nihr-ui.js" asp-append-version="true"></script>
     <script src="~/_content/NIHR.GovUk.AspNetCore.Mvc/javascripts/cookies.min.js" asp-append-version="true"></script>

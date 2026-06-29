@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using Humanizer;
+using NIHR.NotificationService.Enums;
+using NIHR.NotificationService.Interfaces;
 using Notify.Models.Responses;
 
 namespace BPOR.Rms.Models.Email;
@@ -21,7 +23,7 @@ public class SetupCampaignViewModel
 
     public int FilterCriteriaId { get; set; }
 
-    public List<TemplateResponse> Templates { get; set; } = new List<TemplateResponse>();
+    public List<Template> Templates { get; set; } = new();
 
     public string? SelectedTemplateId { get; set; }
 

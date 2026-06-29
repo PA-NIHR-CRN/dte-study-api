@@ -165,7 +165,9 @@ public static class Projections
                     ResearcherEmailAddress = re.StudyResearcherEmailAddress,
                     EmailTemplate = re.StudyResearcherEmailOption.Description,
                     SentAt = re.CreatedAt,
-                    DeliveryStatusId = re.DeliveryStatus.Id
+                    DeliveryStatusId = re.DeliveryStatus.Id,
+                    StudyId = re.StudyId,
+                    EmailTemplateId = re.StudyResearcherEmailOptionId
                 })
                 .OrderByDescending(re => re.SentAt)
                 .ToList()

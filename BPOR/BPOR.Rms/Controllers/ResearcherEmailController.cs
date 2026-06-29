@@ -3,15 +3,21 @@ using BPOR.Domain.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.ResearcherEmail;
 using BPOR.Rms.Startup;
-using Microsoft.AspNetCore.Authorization;
+using BPOR.Rms.VolunteerInformation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using NIHR.NotificationService;
+using NIHR.NotificationService.Enums;
+using NIHR.NotificationService.Interfaces;
+using NIHR.NotificationService.Models;
 
 namespace BPOR.Rms.Controllers;
 
 public class ResearcherEmailController(ParticipantDbContext context,
     ICurrentUserProvider<User> currentUserProvider,
-    ILogger<ResearcherEmailController> logger) : Controller
+    ILogger<ResearcherEmailController> logger,
+    IOptions<RmsSettings> options) : Controller
 {
     // GET
     public async Task<IActionResult> Index(int studyId, CancellationToken cancellationToken)
@@ -43,7 +49,10 @@ public class ResearcherEmailController(ParticipantDbContext context,
     }
 
     [HttpPost]
-    public async Task<IActionResult> SendEmail(ResearcherEmailViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> SendEmail(
+        [FromServices] INotificationService<ResearcherEmailNotificationDeliveryHandler> notificationService,
+        ResearcherEmailViewModel model,
+        CancellationToken cancellationToken)
     {
         bool isAdmin = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Admin);
         if (!isAdmin)
@@ -60,8 +69,11 @@ public class ResearcherEmailController(ParticipantDbContext context,
         
         var study = await context.Studies
             .Where(s => s.Id == model.StudyId)
-            .Select(s => new Study
+            .Select(s => new
             {
+                Id = s.Id,
+                StudyName = s.StudyName,
+                FullName = s.FullName,
                 EmailAddress = s.EmailAddress,
                 HasMultipleResearchLocations = s.HasMultipleResearchLocations,
                 SinglePersonResponsibleForRecruiting = s.SinglePersonResponsibleForRecruiting
@@ -106,6 +118,32 @@ public class ResearcherEmailController(ParticipantDbContext context,
 
         context.StudyResearcherEmails.Add(studyResearcherEmail);
         await context.SaveChangesAsync(cancellationToken);
+
+        string templateId = model.SelectedEmailId switch
+        {
+            1 => options.Value.ReasearchIntroductoryTemplateId,
+            2 => options.Value.ReasearchNextStepsWithPrescreenerTemplateId,
+            3 => options.Value.ReasearchNextStepsWithoutPrescreenerTemplateId,
+            _ => throw new ArgumentOutOfRangeException(nameof(model.SelectedEmailId), model.SelectedEmailId, null)
+        };
+
+        await notificationService.SendNotification(
+            new UnkeyedSendNotificationRequest()
+            {
+                ContactMethod = NotificationContactMethod.Email,
+                Personalisation = new Dictionary<string, string>()
+                                              {
+                                                  [PersonalisationKeys.Email] = study.EmailAddress,
+                                                  ["RmsStudyId"] = study.Id.ToString(),
+                                                  ["StudyName"] = study.StudyName,
+                                                  ["SenderName"] = currentUserProvider?.User?.ContactFullName ?? "BPOR Team",
+                                                  ["RecipientName"] = study.FullName ?? "Researcher",
+                                                  ["VipGoogleDocUrl"] = "https://docs.google.com/document/d/11diU2-gtufQ5UjwWqrggQrFgv7XVCz8rADXCJde28-s/edit?usp=sharing"
+                                              },
+                Reference = studyResearcherEmail.Id.ToString(),
+                TemplateId = templateId
+            },
+            cancellationToken);
         
         return RedirectToAction(
             "Details",

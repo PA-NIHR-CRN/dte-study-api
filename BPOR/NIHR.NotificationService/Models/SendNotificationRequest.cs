@@ -1,43 +1,46 @@
-using BPOR.Domain.Enums;
+using NIHR.NotificationService.Enums;
 
 namespace NIHR.NotificationService.Models;
 
-public class SendNotificationRequest
+public class SendNotificationRequest : SendNotificationRequestBase
 {
-    public string Reference { get; set; } = string.Empty;
-    public Dictionary<string, string> Personalisation { get; set; } = new Dictionary<string, string>();
+    public NotificationReference Reference { get; set; }
+}
+
+public class UnkeyedSendNotificationRequest: SendNotificationRequestBase
+{
+    public string Reference { get; set; }
+}
+
+public class SendNotificationRequestBase
+{
+    public Dictionary<string, string> Personalisation { get; set; } = new();
     public string TemplateId { get; set; } = string.Empty;
-    public string? EmailAddress { get; set; }
-    public ContactMethodId ContactMethod { get; set; }
+    public NotificationContactMethod ContactMethod { get; set; }
+    
+    private bool HasPersonalisation(string key) => 
+        Personalisation.TryGetValue(key, out var value) || !string.IsNullOrWhiteSpace(value);
 
     public void Validate()
     {
-
         if (string.IsNullOrWhiteSpace(TemplateId))
         {
             throw new ArgumentException("TemplateId is required for all notifications.");
         }
 
-        switch (ContactMethod)
+        string[] requiredPersonalisations = ContactMethod switch
         {
-            case ContactMethodId.Email:
-                if (string.IsNullOrWhiteSpace(EmailAddress))
-                    throw new ArgumentException("EmailAddress is required for email notifications.");
-                if (string.IsNullOrWhiteSpace(TemplateId))
-                    throw new ArgumentException("TemplateId is required for email notifications.");
-                break;
-
-            case ContactMethodId.Letter:
-                if (!Personalisation.TryGetValue("address_line_1", out var addressLine1) || string.IsNullOrWhiteSpace(addressLine1))
-                {
-                    throw new ArgumentException("Address line 1 is required for letter notifications.");
-                }
-                if (string.IsNullOrWhiteSpace(TemplateId))
-                    throw new ArgumentException("TemplateId is required for letter notifications.");
-                break;
-
-            default:
-                throw new NotSupportedException($"Contact method {ContactMethod} is not supported.");
+            NotificationContactMethod.Email => [PersonalisationKeys.Email],
+            NotificationContactMethod.Letter =>
+                [PersonalisationKeys.AddressLine1, PersonalisationKeys.AddressLine5, PersonalisationKeys.Postcode],
+            _ => throw new ArgumentOutOfRangeException()
+        };
+            
+        var missingPersonalsations = requiredPersonalisations.Where(i => !HasPersonalisation(i)).ToArray();
+            
+        if (missingPersonalsations.Any())
+        {
+            throw new ArgumentException($"{string.Join(", ", missingPersonalsations)} is required for {ContactMethod} notifications.");
         }
     }
 }

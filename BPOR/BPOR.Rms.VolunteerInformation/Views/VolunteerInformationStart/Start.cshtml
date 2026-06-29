@@ -1,0 +1,60 @@
+﻿@using BPOR.Rms.Abstractions.Enums
+
+@model StartModel
+@inject IOptions<VipSettings> Options;
+
+@if (Model.Status == VsiStatus.Active)
+{
+    <div class="govuk-error-summary" data-module="govuk-error-summary">
+        <div role="alert">
+            <h2 class="govuk-error-summary__title">
+                There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+                <p>A Volunteer Study Information Page has already been created for this study. </p>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <h1 class="govuk-heading-l">Volunteer study information page creation</h1>
+    <h2 class="govuk-heading-m">Overview</h2>
+    <body-text>
+        After collaborating with the researcher and finalising the content of the <a href="@Options.Value.GoogleDocUri">‘volunteer study information’</a> form, you
+        will need to fill out this form.
+    </body-text>
+    <body-text>
+        This form has the same questions in the same order as the volunteer study information form. Make sure you have it
+        open, as you will need to copy-paste most of the information.
+    </body-text>
+    <body-text>
+        Not all fields are required, you can skip those that are not applicable to the study you’re filling the form for.
+    </body-text>
+    @if (Model.Status == null)
+    {
+        <div>
+            <form method="post">
+                <govuk-button type="submit">Start</govuk-button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div>
+            <form method="post" asp-action="Resume" asp-controller="VolunteerInformationPage" asp-route-studyId="@Model.StudyId">
+                <govuk-button type="submit">Resume</govuk-button>
+            </form>
+        </div>
+        <div class="govuk-!-margin-top-4">
+            <form method="post" asp-action="Reset" asp-controller="VolunteerInformationPage" asp-route-studyId="@Model.StudyId">
+                <govuk-button button-type="Secondary" type="submit">Clear form</govuk-button>
+            </form>
+        </div>
+    }
+    <div class="govuk-!-margin-top-4">
+        <form method="post" asp-action="CreateSample" asp-route-studyId="@Model.StudyId">
+            <govuk-button button-type="Secondary" type="submit">Create sample page</govuk-button>
+        </form>
+    </div>
+}

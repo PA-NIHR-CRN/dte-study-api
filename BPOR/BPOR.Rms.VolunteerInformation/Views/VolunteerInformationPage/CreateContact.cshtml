@@ -1,0 +1,17 @@
+﻿@model VsiContactModel
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section1Name);
+    ViewData.SetSkipLink(Url.FlowNext(context, "Section3_Step4"));
+    Layout = "_VsiEditLayout";
+}
+
+<h1 class="govuk-heading-l">Contact details:</h1>
+
+<body-text>Email and/or telephone numbers for volunteers to contact researchers or members of the study team</body-text>
+
+<form method="post">
+    <partial name="_ContactEditor"/>
+    <govuk-button button-type="Secondary" type="submit">Submit</govuk-button>
+</form>

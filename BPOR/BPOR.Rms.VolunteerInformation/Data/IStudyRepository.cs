@@ -1,4 +1,5 @@
 ﻿using BPOR.Domain.Entities;
+using BPOR.Rms.Abstractions.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace BPOR.Rms.VolunteerInformation.Data;
@@ -6,30 +7,45 @@ namespace BPOR.Rms.VolunteerInformation.Data;
 public interface IStudyRepository
 {
     Task<Study?> GetStudy(int studyId, CancellationToken cancellationToken);
+    
+    Task<bool> UpdateStudy(int studyId, Action<Study> action, CancellationToken cancellationToken);
 }
 
-public class StudyDbRepository(ParticipantDbContext db) : IStudyRepository
+public interface ICampaignParticipantRepository
 {
-    public async Task<Study?> GetStudy(int studyId, CancellationToken cancellationToken)
-    {
-        return await db.Studies.SingleOrDefaultAsync(i => i.Id == studyId && !i.IsDeleted,
-            cancellationToken: cancellationToken);
-    }
+    Task<bool> TrackEvent(int campaignid, int participantId, CampaignParticipantEventType eventType,
+        CancellationToken cancellationToken);
 }
 
-public class TestStudyRepository : IStudyRepository
+public class CampaignParticipantRepository(ParticipantDbContext db) : ICampaignParticipantRepository
 {
-    public Task<Study?> GetStudy(int studyId, CancellationToken cancellationToken)
+    public async Task<bool> TrackEvent(int campaignid, int participantId, CampaignParticipantEventType eventType,
+        CancellationToken cancellationToken)
     {
-        return Task.FromResult(
-            studyId switch
-            {
-                154 => new Study
-                {
-                    Id = studyId,
-                    StudyName = "Investigation into transmission of the common cold from Veliociraptor Mongoliensis"
-                },
-                _ => null
-            });
+        var campaignParticipant = await db.CampaignParticipant.SingleOrDefaultAsync(i =>
+            i.CampaignId == campaignid && i.ParticipantId == participantId, cancellationToken: cancellationToken);
+
+        if (campaignParticipant == null)
+        {
+            return false;
+        }
+        
+        switch (eventType)
+        {
+            case CampaignParticipantEventType.CampaignEmailLinkClick:
+                campaignParticipant.VipEmailLinkClickedAtUtc = DateTime.UtcNow;
+                break;
+            case CampaignParticipantEventType.ExternalWebsiteLinkClick:
+                campaignParticipant.VipExternalLinkClickedAtUtc = DateTime.UtcNow;
+                break;
+            case CampaignParticipantEventType.PrescreenerLinkClick:
+                campaignParticipant.VipPrescreenerLinkClickedAtUtc = DateTime.UtcNow;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(eventType), eventType, null);
+        }
+        
+        await db.SaveChangesAsync(cancellationToken);
+        return true;
     }
 }

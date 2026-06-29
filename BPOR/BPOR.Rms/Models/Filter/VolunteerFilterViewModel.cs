@@ -4,6 +4,7 @@ using BPOR.Domain.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NIHR.Infrastructure.Paging;
 using System.ComponentModel.DataAnnotations;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Models.Filter;
 
@@ -96,8 +97,8 @@ public class VolunteerFilterViewModel : IValidatableObject
         var items = new List<SelectListItem>
     {
         new SelectListItem { Value = string.Empty, Text = "No preference" },
-        new SelectListItem { Value = ((int)ContactMethodId.Email).ToString(), Text = "Email" },
-        new SelectListItem { Value = ((int)ContactMethodId.Letter).ToString(), Text = "Letter" }
+        new SelectListItem { Value = ((int)NotificationContactMethod.Email).ToString(), Text = "Email" },
+        new SelectListItem { Value = ((int)NotificationContactMethod.Letter).ToString(), Text = "Letter" }
     };
 
         return items;

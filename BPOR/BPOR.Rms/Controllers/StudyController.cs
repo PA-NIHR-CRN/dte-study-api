@@ -1,8 +1,10 @@
 using BPOR.Domain.Entities;
+using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Startup;
 using BPOR.Rms.Validators;
+using BPOR.Rms.VolunteerInformation.Data;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -67,7 +69,8 @@ public class StudyController(
 
 
     // GET: Study/Details/5
-    public async Task<IActionResult> Details(int? id)
+    public async Task<IActionResult> Details([FromServices] IVipRepository repository, int? id,
+        CancellationToken cancellationToken)
     {
         if (id == null)
         {
@@ -77,7 +80,7 @@ public class StudyController(
         var study = await context.Studies
             .Where(s => s.Id == id)
             .AsStudyDetailsViewModel()
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (study == null)
         {
@@ -95,14 +98,37 @@ public class StudyController(
             ? study.HasCampaigns
             : isAdmin || (study.HasCampaigns && isResearcher);
 
-        study.ActionLinks =
-        [
-            new StudyDetailsViewModel.ActionLink
+        var vsiStatus = await repository.GetVipStatus(id.Value, cancellationToken);
+        
+        study.ActionLinks = new();
+
+        if (isAdmin)
+        {
+            switch (vsiStatus)
             {
-                Text = "Create volunteer study information page",
-                Url = Url.Action("Start", "VolunteerStudyInformation", new {studyId = id })
+                case null:
+                    study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+                    {
+                        Text = "Create volunteer study information page",
+                        Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
+                    });
+                    break;
+                case VsiStatus.Draft:
+                    study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+                    {
+                        Text = "Resume volunteer study information page",
+                        Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
+                    });
+                    break;
+                case VsiStatus.Active:
+                    study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+                    {
+                        Text = "Preview volunteer study information page",
+                        Url = Url.Action("PreviewVip", "VolunteerInformationPage", new { studyId = id.Value })
+                    });
+                    break;
             }
-        ];
+        }
 
         if (canUpdateRecruitmentTotal)
         {
