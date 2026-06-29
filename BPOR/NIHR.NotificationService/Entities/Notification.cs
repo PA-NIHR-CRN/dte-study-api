@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using NIHR.NotificationService.Enums;
 
 namespace NIHR.NotificationService.Entities;

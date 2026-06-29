@@ -31,6 +31,7 @@ using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.DependencyInjection;
 using NIHR.NotificationService;
 using NIHR.NotificationService.Entities;
+using NIHR.NotificationService.GovUkNotify;
 using NIHR.Rts.Client;
 using NIHR.Rts.Client.Settings;
 
@@ -135,6 +136,7 @@ public static class DependencyInjection
         services.AddHostedService<HostedCampaignQueueService>();
         
         services.AddNotificationService();
+        services.AddGovUkNotify();
         
         services.AddGovUk(options =>
         {

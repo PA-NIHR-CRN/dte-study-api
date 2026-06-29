@@ -10,6 +10,8 @@ using Polly;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Rms.Abstractions.Enums;
+using BPOR.Rms.VolunteerInformation.Data;
 using BPOR.Rms.VolunteerInformation.Settings;
 using BPOR.Rms.VolunteerInformation.Tokens;
 using Microsoft.Extensions.Options;
@@ -28,7 +30,8 @@ public class CampaignService(
     INotificationService<CampaignParticipantNotificationDeliveryHandler> notificationService,
     IVolunteerFilterService volunteerFilterService,
     IVipTokenGenerator tokenGenerator,
-    IOptions<VipSettings> vsiSettings
+    IOptions<VipSettings> vsiSettings,
+    IVipRepository vipRepository
     )
     : ICampaignService
 {
@@ -233,8 +236,9 @@ public class CampaignService(
             }
 
             string link;
-            
-            if (campaign.FilterCriteria.Study.HasVip)
+
+            var vipStatus = await vipRepository.GetVipStatus(campaign.FilterCriteria.StudyId.Value, cancellationToken);
+            if (vipStatus == VsiStatus.Active)
             {
                 var queryParams = new Dictionary<string, string>
                 {
@@ -262,11 +266,12 @@ public class CampaignService(
                 TemplateId = campaign.TemplateId.ToString(),
                 Personalisation =
                 {
-                    [PersonalisationKeys.CampaignParticipantId] = campaignParticipant.Id.ToString(),
-                    [PersonalisationKeys.FirstName] = volunteer.FirstName,
-                    [PersonalisationKeys.LastName] = volunteer.LastName,
-                    [PersonalisationKeys.UniqueLink] = link,
-                    ["studyName"] = campaign.FilterCriteria.Study.StudyName
+                    [CampaignPersonalisationKeys.CampaignParticipantId] = campaignParticipant.Id.ToString(),
+                    [CampaignPersonalisationKeys.FirstName] = volunteer.FirstName,
+                    [CampaignPersonalisationKeys.LastName] = volunteer.LastName,
+                    [CampaignPersonalisationKeys.UniqueLink] = link,
+                    [CampaignPersonalisationKeys.StudyName] = campaign.FilterCriteria.Study.StudyName,
+                    [CampaignPersonalisationKeys.UniqueReference] = reference
                 }
             };
 
@@ -279,12 +284,12 @@ public class CampaignService(
                 case GovUkNotifyContactMethod.Letter:
                     var addressFields = new Dictionary<string, string?>
                     {
-                        { "address_line_1", volunteer.Address.AddressLine1 },
-                        { "address_line_2", volunteer.Address.AddressLine2 },
-                        { "address_line_3", volunteer.Address.AddressLine3 },
-                        { "address_line_4", volunteer.Address.AddressLine4 },
-                        { "address_line_5", volunteer.Address.Town },
-                        { "address_line_6", volunteer.Address.Postcode }
+                        [PersonalisationKeys.AddressLine1] = volunteer.Address.AddressLine1,
+                        [PersonalisationKeys.AddressLine2] = volunteer.Address.AddressLine2,
+                        [PersonalisationKeys.AddressLine3] = volunteer.Address.AddressLine3,
+                        [PersonalisationKeys.AddressLine4] = volunteer.Address.AddressLine4,
+                        [PersonalisationKeys.AddressLine5] = volunteer.Address.Town,
+                        [PersonalisationKeys.AddressLine6] = volunteer.Address.Postcode
                     };
 
                     foreach (var field in addressFields)

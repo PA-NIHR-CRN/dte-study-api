@@ -5,7 +5,7 @@ using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 
-namespace NIHR.NotificationService.Controllers;
+namespace NIHR.NotificationService.GovUkNotify.Controllers;
 
 [ApiKeyAuthentication]
 [ApiController]

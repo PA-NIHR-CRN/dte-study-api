@@ -60,8 +60,8 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
     }
     
 
-    [Authorize(Roles = RoleRrvPrescreener)]
-    [HttpGet("information/trackevent")]
+    [Authorize(Roles = RoleBporContent)]
+    [HttpGet("trackevent/{token}")]
     public async Task<IActionResult> TrackEvent(
         [FromServices] ICampaignParticipantRepository repository, 
         [FromServices] IVipTokenGenerator tokenGenerator,

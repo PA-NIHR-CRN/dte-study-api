@@ -53,6 +53,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.PrescreenerMock", "BPO
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Rms.ApiClient", "BPOR.Rms.ApiClient\BPOR.Rms.ApiClient.csproj", "{5C11AF3B-E768-4991-9550-FC8C29EBFAC9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.NotificationService.GovUkNotify", "NIHR.NotificationService.GovUkNotify\NIHR.NotificationService.GovUkNotify.csproj", "{886BF9DF-7A62-45E0-9549-85407ABFA1F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -151,6 +153,10 @@ Global
 		{5C11AF3B-E768-4991-9550-FC8C29EBFAC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C11AF3B-E768-4991-9550-FC8C29EBFAC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C11AF3B-E768-4991-9550-FC8C29EBFAC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{886BF9DF-7A62-45E0-9549-85407ABFA1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{886BF9DF-7A62-45E0-9549-85407ABFA1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{886BF9DF-7A62-45E0-9549-85407ABFA1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{886BF9DF-7A62-45E0-9549-85407ABFA1F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

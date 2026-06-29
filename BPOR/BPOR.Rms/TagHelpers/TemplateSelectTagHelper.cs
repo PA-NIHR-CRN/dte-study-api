@@ -1,9 +1,8 @@
-﻿using BPOR.Domain.Enums;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using NIHR.NotificationService.Enums;
-using Notify.Models.Responses;
+using NIHR.NotificationService.Interfaces;
 
 
 namespace BPOR.Rms.TagHelpers
@@ -12,7 +11,7 @@ namespace BPOR.Rms.TagHelpers
     {
         public GovUkNotifyContactMethod ContactMethod { get; set; }
         public string SelectedTemplateId { get; set; }
-        public List<TemplateResponse> Templates { get; set; } = new List<TemplateResponse>();
+        public List<Template> Templates { get; set; } = new();
         public ModelExpression For { get; set; }
 
         [HtmlAttributeNotBound]
@@ -48,9 +47,8 @@ namespace BPOR.Rms.TagHelpers
                 new SelectListItem { Value = "", Text = "Select template", Disabled = true, Selected = true }
             };
             filteredTemplates.AddRange(Templates
-                .Where(t => (ContactMethod == GovUkNotifyContactMethod.Email && t.@type == "email") ||
-                            (ContactMethod == GovUkNotifyContactMethod.Letter && t.@type == "letter"))
-                .Select(t => new SelectListItem { Value = t.id.ToString(), Text = t.name })
+                .Where(t => t.ContactMethod == ContactMethod)
+                .Select(t => new SelectListItem { Value = t.Id, Text = t.Name })
             );
 
             var selectList = Generator.GenerateSelect(

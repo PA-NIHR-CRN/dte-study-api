@@ -7,6 +7,7 @@ namespace NIHR.NotificationService.Settings
         public static string SectionName => "NotificationServiceSettings";
         public string ApiKey { get; set; }
         public string BearerToken { get; set; }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (string.IsNullOrWhiteSpace(ApiKey))

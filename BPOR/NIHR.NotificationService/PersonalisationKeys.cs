@@ -1,14 +1,13 @@
 namespace NIHR.NotificationService;
 
+// TODO: Figure out how to decouple this from GovUkNotify - so have standard keys for email, address, phone etc.;
+// TODO: handle templating/routing in a provider-agnostic fashion;
 public static class PersonalisationKeys
 {
-    public const string CampaignParticipantId = "campaignParticipantId";
-    public const string ContactMethod = "contact_method";
-    public const string FirstName = "firstName";
-    public const string LastName = "lastName";
-    public const string UniqueLink = "uniqueLink";
-    public const string TemplateId = "templateId";
-    public const string UniqueReference = "uniqueReference";
+    public const string ContactMethod = "__contact_method";
+    public const string TemplateId = "__template_id";
+    public const string NotificationReference = "__notification_reference";
+    
     public const string Email = "email";
     
     public const string AddressLine1 = "address_line_1";

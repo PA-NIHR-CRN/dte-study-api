@@ -4,7 +4,6 @@ using NIHR.NotificationService.Entities;
 using NIHR.NotificationService.Enums;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
-using Notify.Models.Responses;
 
 namespace NIHR.NotificationService.Services;
 
@@ -14,7 +13,7 @@ public class NotificationService(IDownstreamNotificationService downstreamServic
     IReadOnlyDictionary<string, INotificationDeliveryHandler> notificationStatusSinks) 
     : INotificationQueueService, INotificationService
 {
-    public Task<TemplateList> GetTemplates(CancellationToken cancellationToken) 
+    public Task<IEnumerable<Template>> GetTemplates(CancellationToken cancellationToken) 
         => downstreamService.GetTemplates(cancellationToken);
 
     public Task SendNotification(SendNotificationRequest notification, CancellationToken cancellationToken)
@@ -26,7 +25,7 @@ public class NotificationService(IDownstreamNotificationService downstreamServic
         {
             request.Validate();
 
-            request.Personalisation[PersonalisationKeys.UniqueReference] = request.Reference.ToString();
+            request.Personalisation[PersonalisationKeys.NotificationReference] = request.Reference.ToString();
             request.Personalisation[PersonalisationKeys.TemplateId] = request.TemplateId;
             request.Personalisation[PersonalisationKeys.ContactMethod] = request.ContactMethod.ToString();
 
@@ -94,7 +93,7 @@ public class NotificationService(IDownstreamNotificationService downstreamServic
         var personalisation = notification.NotificationDatas.ToDictionary(x => x.Key, x => x.Value);
         var result = new SendNotificationRequest()
         {
-            Reference = NotificationReference.Parse(personalisation[PersonalisationKeys.UniqueReference]),
+            Reference = NotificationReference.Parse(personalisation[PersonalisationKeys.NotificationReference]),
             Personalisation = personalisation,
             ContactMethod = Enum.Parse<GovUkNotifyContactMethod>(personalisation[PersonalisationKeys.ContactMethod]),
             TemplateId = personalisation[PersonalisationKeys.TemplateId]
@@ -134,11 +133,20 @@ public class NotificationService(IDownstreamNotificationService downstreamServic
     private async Task ProcessDeliveryCallback(NotificationReference reference,
         NotificationDeliveryStatus status, CancellationToken cancellationToken)
     {
-        if (!notificationStatusSinks.TryGetValue(reference.UpstreamProviderKey, out var upstreamSink))
+        if (notificationStatusSinks.TryGetValue(reference.UpstreamProviderKey, out var upstreamSink))
         {
-            throw new Exception("Upstream sink not found");
+            try
+            {
+                await upstreamSink.HandleStatusChanged(reference.UpstreamReference, status, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error occurred while handling notification delivery status");
+            }
         }
-
-        await upstreamSink.HandleStatusChanged(reference.UpstreamReference, status, cancellationToken);
+        else
+        {
+            logger.LogError("Upstream delivery status handler not found");
+        }
     }
 }

@@ -17,8 +17,10 @@ public class DevelopmentEmailService(
         if (developmentSettings.Value.ShouldBypassEmail)
         {
             logger.LogInformation(
-                "Email sending is disabled. Email not sent to {Receiver} with subject {Subject} and body {Body}",
-                to, subject, body);
+                "Email sending is disabled. Email not sent to {Receiver} with subject {Subject}",
+                to, subject);
+            logger.LogDebug(
+                "Email content: {Body}", body);
         }
         else
         {

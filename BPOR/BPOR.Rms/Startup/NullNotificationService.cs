@@ -1,14 +1,13 @@
 ﻿using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
-using Notify.Models.Responses;
 
 namespace BPOR.Rms.Startup
 {
     public class NullNotificationService : INotificationService
     {
-        public Task<TemplateList> GetTemplates(CancellationToken cancellationToken)
+        public Task<IEnumerable<Template>> GetTemplates(CancellationToken cancellationToken)
         {
-            return Task.FromResult(new TemplateList());
+            throw new NotImplementedException();
         }
 
         public Task SendNotifications(IEnumerable<SendNotificationRequest> notifications, CancellationToken cancellationToken)

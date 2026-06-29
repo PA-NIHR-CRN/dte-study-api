@@ -16,6 +16,8 @@ public static class DiExtensions
       
         services.AddScoped<IVipRepository, S3VipRepository>();
         services.AddScoped<IStudyRepository, StudyDbRepository>();
+        services.AddScoped<ICampaignParticipantRepository, CampaignParticipantRepository>();
+
         services.AddOptions<VipSettings>().BindConfiguration("Vip");
 
         services.AddNotificationDeliveryHandler<ResearcherEmailNotificationDeliveryHandler>();
