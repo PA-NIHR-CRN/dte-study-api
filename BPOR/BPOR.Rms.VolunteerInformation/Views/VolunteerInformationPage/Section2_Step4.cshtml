@@ -8,6 +8,6 @@
 }
 
 <form-group for="NumberOfVisits" label-class="govuk-heading-l">
-    <input class="govuk-input" asp-for="NumberOfVisits" type="text"  maxlength="@Constants.NumberOfVisitsMaxLength">
+    <textarea rows="5" class="govuk-textarea" asp-for="NumberOfVisits" maxlength="@Constants.NumberOfVisitsMaxLength"></textarea>
     <body-text>You can add up to @Constants.NumberOfVisitsMaxLength characters</body-text>
 </form-group>
