@@ -3,6 +3,10 @@
 @model StartModel
 @inject IOptions<VipSettings> Options;
 
+@{
+    ViewData.SetBackLinkOverride(Url.Action("Details", "Study", new { id = Model.StudyId}));
+}
+
 @if (Model.Status == VsiStatus.Active)
 {
     <div class="govuk-error-summary" data-module="govuk-error-summary">

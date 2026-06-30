@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BPOR.Rms.VolunteerInformation.Data;
 
-public class StudyDbRepository(ParticipantDbContext db) : IStudyRepository
+public class DbStudyRepository(ParticipantDbContext db) : IStudyRepository
 {
     public async Task<Study?> GetStudy(int studyId, CancellationToken cancellationToken)
     {

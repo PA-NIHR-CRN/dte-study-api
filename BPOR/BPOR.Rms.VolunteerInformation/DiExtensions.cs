@@ -4,6 +4,7 @@ using BPOR.Rms.VolunteerInformation.Settings;
 using BPOR.Rms.VolunteerInformation.Tokens;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
 using NIHR.NotificationService;
 
 namespace BPOR.Rms.VolunteerInformation;
@@ -15,12 +16,15 @@ public static class DiExtensions
         services.AddScoped<IVipTokenGenerator, VipTokenGenerator>();
       
         services.AddScoped<IVipRepository, S3VipRepository>();
-        services.AddScoped<IStudyRepository, StudyDbRepository>();
-        services.AddScoped<ICampaignParticipantRepository, CampaignParticipantRepository>();
+        services.AddScoped<IStudyRepository, DbStudyRepository>();
+        services.AddScoped<ICampaignParticipantRepository, DbCampaignParticipantRepository>();
 
         services.AddOptions<VipSettings>().BindConfiguration("Vip");
 
         services.AddNotificationDeliveryHandler<ResearcherEmailNotificationDeliveryHandler>();
+
+        services.AddApiKeyRoleFromOptions<VipSettings>(i => i.BporContentApiKey, Roles.RoleBporContent);
+        services.AddApiKeyRoleFromOptions<VipSettings>(i => i.RrvPrescreenerApiKey, Roles.RoleRrvPrescreener);
 
         services.AddDefaultAWSOptions(i => i.GetRequiredService<IConfiguration>().GetAWSOptions());
         services.AddAWSService<IAmazonS3>();

@@ -2,13 +2,11 @@
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.Abstractions.Models;
 using BPOR.Rms.VolunteerInformation.Data;
-using BPOR.Rms.VolunteerInformation.Settings;
 using BPOR.Rms.VolunteerInformation.Tokens;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
 using Participant = BPOR.Rms.Abstractions.Models.Participant;
 using Study = BPOR.Rms.Abstractions.Models.Study;
@@ -18,12 +16,9 @@ namespace BPOR.Rms.VolunteerInformation.Controllers;
 [ApiController]
 [Route("Volunteer")]
 [ApiKeyAuthentication]
-public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
+public class VolunteerController : ControllerBase
 {
-    private const string RoleRrvPrescreener = "RrvPrescreener";
-    private const string RoleBporContent = "BporContent";
-    
-    [Authorize(Roles = RoleRrvPrescreener)]
+    [Authorize(Roles = Roles.RoleRrvPrescreener)]
     [HttpGet("generatetesttoken/{campaignParticipantId:long}")]
     public async Task<ActionResult<GetTestTokenResponse>> GetTestTokenAsync(       
         [FromServices] ParticipantDbContext db,
@@ -55,7 +50,7 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
     }
     
 
-    [Authorize(Roles = RoleBporContent)]
+    [Authorize(Roles = Roles.RoleBporContent)]
     [HttpGet("trackevent/{token}")]
     public async Task<IActionResult> TrackEvent(
         [FromServices] ICampaignParticipantRepository repository, 
@@ -79,7 +74,7 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
         return Ok();
     }
     
-    [Authorize(Roles = RoleBporContent)]
+    [Authorize(Roles = Roles.RoleBporContent)]
     [HttpGet("informationpage/{token}")]
     public async Task<ActionResult<GetVolunteerInformationPageResponse>> GetInformationPage(
         [FromServices] ParticipantDbContext context, 
@@ -154,7 +149,7 @@ public class VolunteerController(IOptions<VipSettings> options) : ControllerBase
         return new JsonResult(response);
     }
 
-    [Authorize(Roles = RoleRrvPrescreener)]
+    [Authorize(Roles = Roles.RoleRrvPrescreener)]
     [HttpGet("information/{token}")]
     public async Task<ActionResult<GetInformationResponse>> GetInformation(
         [FromServices] ParticipantDbContext context, 
