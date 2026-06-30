@@ -36,4 +36,7 @@ public interface IVipRepository
         CancellationToken cancellationToken);
     Task<bool> RemoveContact(int studyId, int contactId, CancellationToken cancellationToken);
     Task<VsiStatus?> GetVipStatus(int studyId, CancellationToken cancellationToken);
+    
+    async Task<bool> IsVipActive(int studyId, CancellationToken cancellationToken)
+        => (await GetVipStatus(studyId, cancellationToken)) == VsiStatus.Active;
 }
