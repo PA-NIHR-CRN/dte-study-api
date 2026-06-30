@@ -1,4 +1,6 @@
+@using BPOR.Rms.VolunteerInformation.Data
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
+@inject IVipRepository VipRepository
 
 <div>
     <h2 class="govuk-heading-l govuk-!-margin-bottom-3">Study details</h2>
@@ -17,23 +19,29 @@
         <summary-list-item for="Study.PreScreenerUrl" 
                            show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.PreScreenerUrl)"/>
         
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key">
-                Volunteer study information page
-            </dt>
-            <dd class="govuk-summary-list__value">
-            </dd>
-            <dd class="govuk-summary-list__actions">
-                <ul class="govuk-summary-list__actions-list">
-                    <li class="govuk-summary-list__actions-list-item">
-                        <a class="govuk-link" asp-controller="VolunteerInformationPage" asp-action="PreviewVip" asp-route-studyid="@Model.Study.Id" >View</a>
-                    </li>
-                    <li class="govuk-summary-list__actions-list-item">
-                        <a class="govuk-link" asp-controller="VolunteerInformationPage" asp-action="Section4" asp-route-studyid="@Model.Study.Id">Change</a>
-                    </li>
-                </ul>
-            </dd>
-        </div>
+        <role role-include="Admin">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    Volunteer study information page
+                </dt>
+                <dd class="govuk-summary-list__value">
+                </dd>
+                <dd class="govuk-summary-list__actions">
+                    <ul class="govuk-summary-list__actions-list">
+                        @if(await VipRepository.IsVipActive(Model.Study.Id, Context.RequestAborted))
+                        {
+                            <li class="govuk-summary-list__actions-list-item">
+                                <a class="govuk-link" asp-controller="VolunteerInformationPage" asp-action="PreviewVip" asp-route-studyid="@Model.Study.Id">View</a>
+                            </li>
+                            <li class="govuk-summary-list__actions-list-item">
+                                <a class="govuk-link" asp-controller="VolunteerInformationPage" asp-action="Section4" asp-route-studyid="@Model.Study.Id">Change</a>
+                            </li>
+                        }
+                    </ul>
+                </dd>
+            </div>
+        </role>
+        
         <summary-list-item for="Study.ChiefInvestigator"/>
         <summary-list-item for="Study.StudySponsors"/>
         <summary-list-item for="Study.PortfolioSubmissionStatus"/>
