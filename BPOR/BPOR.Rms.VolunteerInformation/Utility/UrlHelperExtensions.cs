@@ -5,7 +5,6 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.EntityFrameworkCore.Metadata;
 using NIHR.GovUk.AspNetCore.Mvc;
 
 namespace BPOR.Rms.VolunteerInformation.Utility;
@@ -16,7 +15,7 @@ public static class UrlHelperExtensions
         [AspMvcAction] string actionName)
     {
         var routeData = context.ToRouteData();
-        routeData.Add("isNavigateBack", true.ToString());
+        routeData.Add("direction", nameof(FlowDirection.Back));
         return helper.Action(actionName, routeData);
     }
 
