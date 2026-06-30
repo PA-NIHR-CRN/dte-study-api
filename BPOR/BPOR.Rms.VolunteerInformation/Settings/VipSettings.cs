@@ -8,5 +8,5 @@ public class VipSettings
     public string S3BucketName { get; set; }
     
     public bool EnableDevelopmentFeatures { get; set; }
-
+    public string VipGoogleDocUrl { get; set; }
 }

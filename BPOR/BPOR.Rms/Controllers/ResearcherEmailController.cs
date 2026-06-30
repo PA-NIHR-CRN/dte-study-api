@@ -4,6 +4,7 @@ using BPOR.Rms.Models;
 using BPOR.Rms.Models.ResearcherEmail;
 using BPOR.Rms.Startup;
 using BPOR.Rms.VolunteerInformation;
+using BPOR.Rms.VolunteerInformation.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -17,7 +18,8 @@ namespace BPOR.Rms.Controllers;
 public class ResearcherEmailController(ParticipantDbContext context,
     ICurrentUserProvider<User> currentUserProvider,
     ILogger<ResearcherEmailController> logger,
-    IOptions<RmsSettings> options) : Controller
+    IOptions<VipSettings> vipOptions,
+    IOptions<RmsSettings> rmsOptions) : Controller
 {
     // GET
     public async Task<IActionResult> Index(int studyId, CancellationToken cancellationToken)
@@ -121,9 +123,9 @@ public class ResearcherEmailController(ParticipantDbContext context,
 
         string templateId = model.SelectedEmailId switch
         {
-            1 => options.Value.ReasearchIntroductoryTemplateId,
-            2 => options.Value.ReasearchNextStepsWithPrescreenerTemplateId,
-            3 => options.Value.ReasearchNextStepsWithoutPrescreenerTemplateId,
+            1 => rmsOptions.Value.ReasearchIntroductoryTemplateId,
+            2 => rmsOptions.Value.ReasearchNextStepsWithPrescreenerTemplateId,
+            3 => rmsOptions.Value.ReasearchNextStepsWithoutPrescreenerTemplateId,
             _ => throw new ArgumentOutOfRangeException(nameof(model.SelectedEmailId), model.SelectedEmailId, null)
         };
 
@@ -138,7 +140,7 @@ public class ResearcherEmailController(ParticipantDbContext context,
                                                   ["StudyName"] = study.StudyName,
                                                   ["SenderName"] = currentUserProvider?.User?.ContactFullName ?? "BPOR Team",
                                                   ["RecipientName"] = study.FullName ?? "Researcher",
-                                                  ["VipGoogleDocUrl"] = "https://docs.google.com/document/d/11diU2-gtufQ5UjwWqrggQrFgv7XVCz8rADXCJde28-s/edit?usp=sharing"
+                                                  ["VipGoogleDocUrl"] = vipOptions.Value.VipGoogleDocUrl
                                               },
                 Reference = studyResearcherEmail.Id.ToString(),
                 TemplateId = templateId

@@ -16,13 +16,13 @@ internal class RmsApiClient(HttpClient httpClient) : IRmsApiClient
             new JsonSerializerOptions(){PropertyNameCaseInsensitive = true});
     }
     
-    public async Task<GetVolunteerInformationPageResponse> GetVolunteerInformationPage(string token)
+    public async Task<GetVolunteerInformationPageResponse> GetVolunteerInformationPage(string token, CancellationToken cancellationToken)
     {
-        using HttpResponseMessage response = await httpClient.GetAsync("volunteer/informationpage/" + token);
+        using HttpResponseMessage response = await httpClient.GetAsync("volunteer/informationpage/" + token, cancellationToken);
 
         response.EnsureSuccessStatusCode();
     
-        var jsonResponse = await response.Content.ReadAsStringAsync();
+        var jsonResponse = await response.Content.ReadAsStringAsync(cancellationToken);
         return JsonSerializer.Deserialize<GetVolunteerInformationPageResponse>(jsonResponse,
             new JsonSerializerOptions(){PropertyNameCaseInsensitive = true});
     }
