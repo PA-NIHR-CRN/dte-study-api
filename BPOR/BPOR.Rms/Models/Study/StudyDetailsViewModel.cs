@@ -22,11 +22,6 @@ public class StudyDetailsViewModel
     public int TotalRegisteredInterest => Campaigns.Sum(e => e.TotalCampaignRegisteredInterest);
     public IEnumerable<ResearcherEmail> ResearcherEmails { get; set; }
     public List<ActionLink> ActionLinks { get; set; } = [];
-    public class ActionLink
-    {
-        public string Text { get; set; } = string.Empty;
-        public string Url { get; set; } = string.Empty;
-    }
 
     public PreScreenerEligibilityViewModel PreScreenerViewModel
     {

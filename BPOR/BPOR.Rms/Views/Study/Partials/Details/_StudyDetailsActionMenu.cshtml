@@ -1,4 +1,5 @@
-﻿@model BPOR.Rms.Models.Study.StudyDetailsViewModel
+﻿@using BPOR.Rms.Extensions
+@model BPOR.Rms.Models.Study.StudyDetailsViewModel
 
 <div class="govuk-button-group govuk-!-margin-bottom-0">
     <div class="moj-button-menu"
@@ -12,7 +13,8 @@
                role="button"
                draggable="false"
                class="govuk-button moj-button-menu__item govuk-button--secondary"
-               data-module="govuk-button">
+               data-module="govuk-button"
+               target="@link.Target.ToAttributeValue()">
                 @link.Text
             </a>
         }

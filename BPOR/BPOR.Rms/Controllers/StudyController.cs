@@ -107,24 +107,25 @@ public class StudyController(
             switch (vsiStatus)
             {
                 case null:
-                    study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+                    study.ActionLinks.Add(new ActionLink
                     {
                         Text = "Create volunteer study information page",
                         Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
                     });
                     break;
                 case VsiStatus.Draft:
-                    study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+                    study.ActionLinks.Add(new ActionLink
                     {
                         Text = "Resume volunteer study information page",
                         Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
                     });
                     break;
                 case VsiStatus.Active:
-                    study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+                    study.ActionLinks.Add(new ActionLink
                     {
                         Text = "Preview volunteer study information page",
-                        Url = Url.Action("PreviewVip", "VolunteerInformationPage", new { studyId = id.Value })
+                        Url = Url.Action("PreviewVip", "VolunteerInformationPage", new { studyId = id.Value }),
+                        Target = HyperlinkTarget.Blank
                     });
                     break;
             }
@@ -132,7 +133,7 @@ public class StudyController(
 
         if (canUpdateRecruitmentTotal)
         {
-            study.ActionLinks.Add(new StudyDetailsViewModel.ActionLink
+            study.ActionLinks.Add(new ActionLink
             {
                 Text = updateRecruitmentButtonText,
                 Url = Url.Action(updateRecruitmentAction, "Volunteer", new { studyId = id })
@@ -143,12 +144,12 @@ public class StudyController(
         {
             study.ActionLinks.AddRange(
             [
-                new StudyDetailsViewModel.ActionLink
+                new ActionLink
                 {
                     Text = "Find volunteers",
                     Url = Url.Action("Index", "Filter", new { studyId = id })
                 },
-                new StudyDetailsViewModel.ActionLink
+                new ActionLink
                 {
                     Text = "Send an email",
                     Url = Url.Action("Index", "ResearcherEmail", new { studyId = id })
