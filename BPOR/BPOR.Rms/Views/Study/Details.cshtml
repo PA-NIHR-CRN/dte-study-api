@@ -17,17 +17,24 @@
 <div style="display:flex;gap: 40px; flex-direction: column; width: 100%">
     <partial name="Partials/Details/_StudyStatistics" />
     
-    <accordion>
-        @if (UserProvider.IsAdmin())
-        {
+    @if (UserProvider.IsAdmin())
+    {
+        <accordion>
             <accordion-section caption="Researcher emails">
                 <partial name="Partials/Details/_ResearcherEmailsTable" model="Model.ResearcherEmails"/>
             </accordion-section>
-        }
-        <accordion-section caption="Campaigns sent">
-            <partial name="Partials/_CampaignTable" model="Model.Campaigns"/>
-        </accordion-section>
-    </accordion>
+
+            <accordion-section caption="Campaigns sent">
+                <partial name="Partials/_CampaignTable" model="Model.Campaigns"/>
+            </accordion-section>
+        </accordion>
+    }
+    else
+    {
+        <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Campaigns sent</h2>
+        <partial name="Partials/_CampaignTable" model="Model.Campaigns"/>
+    }
+
     
     <partial name="Partials/Details/_VolunteerTable" />
     
