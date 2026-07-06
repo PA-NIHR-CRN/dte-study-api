@@ -112,5 +112,32 @@ namespace BPOR.Rms.VolunteerInformation {
                 return ResourceManager.GetString("Section4Name", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Both online and in-person.
+        /// </summary>
+        internal static string VsiStudyTypeHybrid {
+            get {
+                return ResourceManager.GetString("VsiStudyTypeHybrid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In-person or on-site.
+        /// </summary>
+        internal static string VsiStudyTypeInPerson {
+            get {
+                return ResourceManager.GetString("VsiStudyTypeInPerson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Online or remote.
+        /// </summary>
+        internal static string VsiStudyTypeRemote {
+            get {
+                return ResourceManager.GetString("VsiStudyTypeRemote", resourceCulture);
+            }
+        }
     }
 }

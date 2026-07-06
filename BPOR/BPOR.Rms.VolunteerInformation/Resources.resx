@@ -36,4 +36,13 @@
     <data name="Section4Name" xml:space="preserve">
         <value>Section 4: Check your details</value>
     </data>
+    <data name="VsiStudyTypeRemote" xml:space="preserve">
+        <value>Online or remote</value>
+    </data>
+    <data name="VsiStudyTypeInPerson" xml:space="preserve">
+        <value>In-person or on-site</value>
+    </data>
+    <data name="VsiStudyTypeHybrid" xml:space="preserve">
+        <value>Both online and in-person</value>
+    </data>
 </root>

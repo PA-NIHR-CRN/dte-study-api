@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Controllers;
+using BPOR.Rms.VolunteerInformation.Utility;
 using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.VolunteerInformation.Models;
@@ -10,6 +11,7 @@ public class VsiEditModel
     [Display(Name = "About the study", Description = "Provide a short description of the study")]
     public string? Description { get; set; }
     
+    [ValueDisplayFormatter(typeof(StudyTypeFormatter))]
     [Display(Name = "Select the type of study")]
     public VsiStudyType? StudyType { get; set; }
     
