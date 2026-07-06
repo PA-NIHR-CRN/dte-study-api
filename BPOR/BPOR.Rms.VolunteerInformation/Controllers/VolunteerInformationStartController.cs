@@ -41,11 +41,4 @@ public class VolunteerInformationStartController(IVipRepository vipRepository) :
 
         return RedirectToAction("Section1_Step1", "VolunteerInformationPage", new { studyId = studyId, flowMode = VipFlowMode.Create });
     }
-    
-    [HttpPost]
-    public async Task<IActionResult> CreateSample(int studyId, CancellationToken cancellationToken)
-    {
-        await vipRepository.CreateSampleVolunteerInformation(studyId, cancellationToken);
-        return RedirectToAction("Section4", "VolunteerInformationPage",  new { studyId, flowMode = VipFlowMode.Create });
-    }
 }

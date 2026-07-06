@@ -12,19 +12,24 @@ public class VipSyncInterceptor(IVipRepository vipRepository) : ISaveChangesInte
     private readonly List<StudyValues> _updatedRecords = new();
         
     public ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
-        var studies = eventData.Context.ChangeTracker.Entries<Study>();
-        foreach (var study in studies.Where(s => s.State == EntityState.Modified
-                 && HaveAnyChanged(s, nameof(Study.StudyName), nameof(Study.RecruitmentEndDate))))
+        if (eventData.Context != null)
         {
-            _updatedRecords.Add(new StudyValues(study.Entity.Id, study.Entity.StudyName, study.Entity.RecruitmentEndDate));
+            var studies = eventData.Context.ChangeTracker.Entries<Study>();
+            foreach (var study in studies.Where(s => s.State == EntityState.Modified
+                                                     && HaveAnyChanged(s, nameof(Study.StudyName),
+                                                         nameof(Study.RecruitmentEndDate))))
+            {
+                _updatedRecords.Add(new StudyValues(study.Entity.Id, study.Entity.StudyName,
+                    study.Entity.RecruitmentEndDate));
+            }
         }
 
         return ValueTask.FromResult(result);
     }
 
-    private bool HaveAnyChanged(EntityEntry entry, params string[] propertyNames)
+    private static bool HaveAnyChanged(EntityEntry entry, params string[] propertyNames)
     {
         foreach (var propertyName in propertyNames)
         {
@@ -39,7 +44,7 @@ public class VipSyncInterceptor(IVipRepository vipRepository) : ISaveChangesInte
     }
 
     public async ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         foreach (var updatedRecord in _updatedRecords)
         {

@@ -21,7 +21,7 @@ public class VsiPage
     public string? PreScreenerUrl { get; set; }
     
     // Data copied from study to allow for the BPOR -> RMS dependency to be removed in future:
-    public string StudyName { get; set; }
+    public required string StudyName { get; set; }
     public DateTime? StudyRecruitmentEndDate { get; set; }
     
     public List<VsiContact> Contacts { get; set; } = new();
