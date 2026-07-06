@@ -20,6 +20,10 @@ public class VsiPage
     public string? InfoToRegisterByEmail { get; set; }
     public string? PreScreenerUrl { get; set; }
     
+    // Data copied from study to allow for the BPOR -> RMS dependency to be removed in future:
+    public required string StudyName { get; set; }
+    public DateTime? StudyRecruitmentEndDate { get; set; }
+    
     public List<VsiContact> Contacts { get; set; } = new();
     public List<VsiGroup> Groups { get; set; } = new();
     public List<VsiSite> Sites { get; set; } = new();

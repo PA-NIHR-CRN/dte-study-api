@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-
+using BPOR.Domain.Entities;
 using BPOR.Rms.Abstractions.Entities;
 using BPOR.Rms.Abstractions.Enums;
 
@@ -24,13 +24,16 @@ public interface IVipRepository
         CancellationToken cancellationToken);
     
     Task<bool> UpdateVsi(int studyId, Action<VsiPage> action, CancellationToken cancellationToken);
+
+    Task<bool> UpdateVsiIfExists(int studyId, Action<VsiPage> action, CancellationToken cancellationToken);
+
     Task<bool> RemoveSite(int studyId, int siteId, CancellationToken cancellationToken);
     Task<int?> CreateGroup(int studyId, string groupName, CancellationToken cancellationToken);
     Task<int?> CreateSite(int studyId, VsiSite newSite, CancellationToken cancellationToken);
-    Task CreatePage(int studyId, VsiStatus status, string? preFilledPrescreenerUrl, CancellationToken cancellationToken);
+    Task CreatePage(Study study, VsiStatus status, CancellationToken cancellationToken);
     Task CreatePage(int studyId, VsiPage data, CancellationToken cancellationToken);
     
-    Task ResetPage(int studyId, string? preFilledPrescreenerUrl, CancellationToken cancellationToken);
+    Task ResetPage(Study study, CancellationToken cancellationToken);
 
     Task<int?> CreateContact(int studyId, VsiContact newContact,
         CancellationToken cancellationToken);

@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Text.Json;
+using BPOR.Domain.Entities;
 using BPOR.Rms.Abstractions.Entities;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Utility;
@@ -118,6 +119,19 @@ public abstract class VipFileRepository(IMemoryCache cache) : IVipRepository
             cancellationToken);
     }
 
+    public async Task<bool> UpdateVsiIfExists(int studyId, Action<VsiPage> action, CancellationToken cancellationToken)
+    {
+        var vip = await Load(studyId, cancellationToken);
+        if (vip != null)
+        {
+            action(vip);
+            await Save(studyId, vip, cancellationToken);
+            return true;
+        }
+
+        return false;
+    }
+
     public async Task<T?> UpdateVsi<T>(int studyId, Func<VsiPage, T> action,
         CancellationToken cancellationToken)
     {
@@ -170,15 +184,16 @@ public abstract class VipFileRepository(IMemoryCache cache) : IVipRepository
         }, cancellationToken))?.Id;
     }
 
-    public async Task CreatePage(int studyId, VsiStatus status, string? preFilledPrescreenerUrl,
-        CancellationToken cancellationToken)
+    public async Task CreatePage(Study study, VsiStatus status, CancellationToken cancellationToken)
     {
         VsiPage vsi = new VsiPage()
         {
             Status = status,
-            PreScreenerUrl = preFilledPrescreenerUrl
+            PreScreenerUrl = study.PreScreenerUrl,
+            StudyName = study.StudyName,
+            StudyRecruitmentEndDate = study.RecruitmentEndDate
         };
-        await Save(studyId, vsi, cancellationToken);
+        await Save(study.Id, vsi, cancellationToken);
     }
 
     public async Task CreatePage(int studyId, VsiPage data, CancellationToken cancellationToken)
@@ -186,9 +201,9 @@ public abstract class VipFileRepository(IMemoryCache cache) : IVipRepository
         await Save(studyId, data, cancellationToken);
     }
 
-    public async Task ResetPage(int studyId, string? preFilledPrescreenerUrl, CancellationToken cancellationToken)
+    public async Task ResetPage(Study study, CancellationToken cancellationToken)
     {
-        await CreatePage(studyId, VsiStatus.Draft, preFilledPrescreenerUrl, cancellationToken);
+        await CreatePage(study, VsiStatus.Draft, cancellationToken);
     }
 
     public async Task<int?> CreateContact(int studyId, VsiContact newContact, CancellationToken cancellationToken)
