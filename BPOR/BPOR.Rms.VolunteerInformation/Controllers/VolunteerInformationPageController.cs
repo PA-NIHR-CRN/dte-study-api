@@ -944,7 +944,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         {
             return NotFound();
         }
-        await VipRepository.ResetPage(studyId, study.PreScreenerUrl, cancellationToken);
+        await VipRepository.ResetPage(study, cancellationToken);
         return RedirectToAction("Section1_Step1", new { studyId, flowMode = VipFlowMode.Create });
     }
 

@@ -14,6 +14,7 @@ using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
 using BPOR.Rms.VolunteerInformation;
+using BPOR.Rms.VolunteerInformation.Data;
 using Ganss.Xss;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Settings;
@@ -92,13 +93,14 @@ public static class DependencyInjection
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var participantConnectionString = dbSettings.Value.BuildConnectionString();
 
-        services.AddDbContext<ParticipantDbContext>(options =>
+        services.AddDbContext<ParticipantDbContext>((serviceProvider, options) =>
             options.UseMySql(participantConnectionString, ServerVersion.AutoDetect(participantConnectionString),
                 builder =>
                 {
                     builder.UseNetTopologySuite();
                     builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                }));
+                })
+                .AddVipSynchronisation(serviceProvider));
 
         var notificationConnectionString =
             dbSettings.Value.BuildConnectionString(dbSettings.Value.NotificationDatabase);
