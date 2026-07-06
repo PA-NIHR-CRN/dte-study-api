@@ -1,9 +1,11 @@
 ﻿@using BPOR.Domain.Entities
 @using BPOR.Domain.Enums
 @using BPOR.Rms.Startup
+@using NIHR.Infrastructure.Interfaces
 @model IEnumerable<BPOR.Rms.Models.Study.ResearcherEmail>
 
 @inject ICurrentUserProvider<User> CurrentUserProvider
+@inject ITimezoneProvider TimezoneProvider
 
 @if (CurrentUserProvider.IsAdmin())
 {
@@ -23,7 +25,7 @@
         {
             <tr class="govuk-table__row">
                 <td class="govuk-table__cell">
-                    @email.SentAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                    @(TimeZoneInfo.ConvertTimeFromUtc(email.SentAt, TimezoneProvider.GetCurrentTimezone()).ToString("dd/MM/yyyy HH:mm"))
                 </td>
                 <td class="govuk-table__cell">@email.EmailTemplate</td>
                 <td class="govuk-table__cell">@email.ResearcherEmailAddress</td>

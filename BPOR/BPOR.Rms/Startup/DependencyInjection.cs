@@ -39,7 +39,8 @@ public static class DependencyInjection
         services.AddKeyedServiceDictionary();
         
         services.AddSingleton(TimeProvider.System);
-
+        services.AddSingleton<ITimezoneProvider, UkTimezoneProvider>();
+        
         services.AddControllersWithViews().AddRazorRuntimeCompilation();
         services.AddHttpContextAccessor();
 
