@@ -767,7 +767,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
             Role = model.Role
         }, cancellationToken);
 
-        return RedirectToAction("Section3_Step3", new { studyId });
+        return RedirectToAction("Section3_Step3", EditContext);
     }
 
     [HttpPost]
@@ -775,7 +775,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
     {
         await VipRepository.RemoveContact(studyId, contactId, cancellationToken);
 
-        return RedirectToAction("Section3_Step3", new { studyId });
+        return RedirectToAction("Section3_Step3", EditContext);
     }
 
     #endregion
