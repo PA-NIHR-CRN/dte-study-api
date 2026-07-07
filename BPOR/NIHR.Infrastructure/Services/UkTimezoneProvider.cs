@@ -10,9 +10,13 @@ public class UkTimezoneProvider : ITimezoneProvider
     
     public UkTimezoneProvider()
     {
-        string[] desiredTimezoneNames = ["GMT Standard Time", "Europe/London"];
+        string[] desiredTimezoneNames = 
+        [
+            "GMT Standard Time", // Windows
+            "Europe/London" // Linux/Macos
+        ];
         var availableTimeZones = TimeZoneInfo.GetSystemTimeZones();
-        _timezone = availableTimeZones.FirstOrDefault(i => desiredTimezoneNames.Contains(i.StandardName)) ?? TimeZoneInfo.Utc;
+        _timezone = availableTimeZones.FirstOrDefault(i => desiredTimezoneNames.Contains(i.Id)) ?? TimeZoneInfo.Utc;
     }
 
     public TimeZoneInfo GetCurrentTimezone()
