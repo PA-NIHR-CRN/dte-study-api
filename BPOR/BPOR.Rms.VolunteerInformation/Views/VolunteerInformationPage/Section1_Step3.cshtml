@@ -32,10 +32,15 @@
     }
     </tbody>
 </table>
-<div>
-    <a class="govuk-link" asp-action="SiteSearch" asp-all-route-data="@EditContext.ToRouteData()">Add another research
-        location</a>
+
+<div class="govuk-!-margin-4">
+    <p class="govuk-body">
+        <a class="govuk-link" asp-action="SiteSearch" asp-all-route-data="@EditContext.ToRouteData()">
+            Add another research location
+        </a>
+    </p>
 </div>
+
 <div class="govuk-!-margin-top-3">
     <a href="@Url.FlowNext(EditContext, "Section1_Step4")" class="govuk-button" data-module="govuk-button">Continue</a>
 </div>

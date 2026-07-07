@@ -22,7 +22,7 @@
             </dd>
             <dd class="govuk-summary-list__actions">
                 <a class="govuk-link" asp-action="RemoveGroup" asp-controller="VolunteerInformationGroup"
-                   asp-all-route-data="@EditContext.ToRouteData()" asp-route-groupId="@group.Id" type="submit">
+                   asp-all-route-data="@EditContext.ToRouteData()" asp-route-groupId="@group.Id">
                     Delete
                 </a>
             </dd>
@@ -44,7 +44,9 @@
                 </ul>
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a asp-action="Criteria" asp-controller="VolunteerInformationGroup" asp-all-route-data="@EditContext.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Include">Change</a>
+                <a class="govuk-link" asp-action="Criteria" asp-controller="VolunteerInformationGroup"
+                   asp-all-route-data="@EditContext.ToRouteData()" asp-route-groupId="@group.Id" 
+                   asp-route-type="Include" asp-route-isGroupEdit="true">Change</a>
             </dd>
         </div>
     </dl>
@@ -64,16 +66,22 @@
                 </ul>
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a asp-action="Criteria" asp-controller="VolunteerInformationGroup" asp-all-route-data="@EditContext.ToRouteData()" asp-route-groupId="@group.Id" asp-route-type="Exclude">Change</a>
+                <a class="govuk-link" asp-action="Criteria" asp-controller="VolunteerInformationGroup" 
+                   asp-all-route-data="@EditContext.ToRouteData()" asp-route-groupId="@group.Id"
+                   asp-route-type="Exclude" asp-route-isGroupEdit="true">Change</a>
             </dd>
         </div>
     </dl>
 }
 
 <div class="govuk-!-margin-3">
-    <a asp-action="CreateGroup" asp-all-route-data="@EditContext.ToRouteData()" 
-       class="govuk-link" >Add another group</a>
+    <body-text>
+        <a asp-action="CreateGroup" asp-all-route-data="@EditContext.ToRouteData()" class="govuk-link">
+            Add another group
+        </a>
+    </body-text>
 </div>
+
 <div>
     <a href="@Url.FlowNext(EditContext, "Section2_Step1")" class="govuk-button" data-module="govuk-button">Continue</a>
 </div>

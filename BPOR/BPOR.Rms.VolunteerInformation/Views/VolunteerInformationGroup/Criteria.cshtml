@@ -17,7 +17,7 @@
             <th scope="row" class="govuk-table__header">@criterion.Description</th>
             <td class="govuk-table__cell">
                 <form asp-action="RemoveCriteria" asp-all-route-data="@context.ToRouteData()"
-                      asp-route-criteriaId="@criterion.Id" asp-route-type="@Model.Type">
+                      asp-route-criteriaId="@criterion.Id" asp-route-type="@Model.Type" asp-route-isGroupEdit="@Model.IsGroupEdit">
                     <button class="govuk-link" type="submit">Delete</button>
                 </form>
             </td>
@@ -27,11 +27,13 @@
 </table>
 
 <div class="govuk-!-margin-4">
-<a class="govuk-link" asp-action="CreateCriterion" asp-all-route-data="@context.ToRouteData()" 
-   asp-route-type="@Model.Type">Add more criteria</a>
+    <body-text>
+    <a class="govuk-link" asp-action="CreateCriterion" asp-all-route-data="@context.ToRouteData()"
+       asp-route-type="@Model.Type" asp-route-isGroupEdit="@Model.IsGroupEdit">Add more criteria</a>
+    </body-text>
 </div>
 
-@if (Model.Type == VsiGroupCriteronType.Include)
+@if (Model.Type == VsiGroupCriteronType.Include && context.FlowMode == VipFlowMode.Create && !Model.IsGroupEdit)
 {
     <a asp-action="QueryAddExclusionCriteria" asp-all-route-data="@context.ToRouteData()"
        class="govuk-button" data-module="govuk-button">Continue</a>

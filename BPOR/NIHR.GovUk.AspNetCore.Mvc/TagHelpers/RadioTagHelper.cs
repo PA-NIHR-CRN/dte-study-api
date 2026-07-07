@@ -11,6 +11,8 @@ public class RadioTagHelper(IHtmlHelper htmlHelper) : PartialTagHelperBase(htmlH
 {
     public string Value { get; set; }
     
+    public bool Autofocus { get; set; }
+    
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         var radiosContext = context.GetRequired<RadiosContext>(
@@ -19,7 +21,7 @@ public class RadioTagHelper(IHtmlHelper htmlHelper) : PartialTagHelperBase(htmlH
         output.TagName = null;
         var label = await output.GetChildContentAsync();
         var isSelected = string.Equals(radiosContext.ForValue?.ToString(), Value, StringComparison.OrdinalIgnoreCase);
-        var content = await RenderPartialAsync("_Radio", new GovUkRadioModel(radiosContext.ForName, Value, isSelected, label));
+        var content = await RenderPartialAsync("_Radio", new GovUkRadioModel(radiosContext.ForName, Value, isSelected, Autofocus, label));
         output.Content.SetHtmlContent(content);
     }
 }

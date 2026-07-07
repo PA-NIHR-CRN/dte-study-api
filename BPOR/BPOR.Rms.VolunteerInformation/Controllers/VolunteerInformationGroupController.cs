@@ -27,7 +27,7 @@ public class VolunteerInformationGroupController(IVipRepository vipRepository) :
     }
 
     [HttpGet]
-    public async Task<IActionResult> CreateCriterion(VsiGroupCriteronType type, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateCriterion(VsiGroupCriteronType type, bool isGroupEdit, CancellationToken cancellationToken)
     {
         var group = await vipRepository.GetGroup(EditContext.StudyId, EditContext.GroupId,
             i => new VsiGroupModel()
@@ -45,6 +45,7 @@ public class VolunteerInformationGroupController(IVipRepository vipRepository) :
         int studyId,
         int groupId,
         VsiGroupCriteronType type,
+        bool isGroupEdit,
         [FromForm] CreateCriterionPostbackModel model,
         CancellationToken cancellationToken)
     {
@@ -64,12 +65,12 @@ public class VolunteerInformationGroupController(IVipRepository vipRepository) :
         
         await vipRepository.CreateCriterion(studyId, groupId, newCriteria, cancellationToken);
 
-        return RedirectToAction("Criteria", new { EditContext.StudyId, EditContext.GroupId, EditContext.FlowMode, type });
+        return RedirectToAction("Criteria", new { EditContext.StudyId, EditContext.GroupId, EditContext.FlowMode, type, isGroupEdit });
     }
 
     [HttpGet]
     public async Task<IActionResult> Criteria(
-        int studyId, int groupId, VsiGroupCriteronType type,
+        int studyId, int groupId, VsiGroupCriteronType type, bool isGroupEdit,
         CancellationToken cancellationToken)
     {
         var group = await vipRepository.GetGroup(studyId, groupId, 
@@ -86,7 +87,7 @@ public class VolunteerInformationGroupController(IVipRepository vipRepository) :
                 }, cancellationToken
             );
 
-        return View(new CriteriaListModel{VsiGroup = group, Type = type});
+        return View(new CriteriaListModel{VsiGroup = group, Type = type, IsGroupEdit = isGroupEdit});
     }
 
     [HttpGet]
@@ -129,6 +130,7 @@ public class VolunteerInformationGroupController(IVipRepository vipRepository) :
     public async Task<IActionResult> RemoveCriteria(
         [FromQuery] int criteriaId,
         VsiGroupCriteronType type,
+        bool isGroupEdit,
         CancellationToken cancellationToken)
     {
         bool result = await vipRepository.RemoveCriteria(EditContext.StudyId, EditContext.GroupId, criteriaId, cancellationToken);
@@ -137,7 +139,7 @@ public class VolunteerInformationGroupController(IVipRepository vipRepository) :
             return NotFound();
         }
         
-        return RedirectToAction("Criteria", new { EditContext.StudyId, EditContext.GroupId, EditContext.FlowMode, type });
+        return RedirectToAction("Criteria", new { EditContext.StudyId, EditContext.GroupId, EditContext.FlowMode, type, isGroupEdit });
     }
     
     [HttpGet]

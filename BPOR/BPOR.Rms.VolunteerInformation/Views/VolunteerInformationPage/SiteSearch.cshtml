@@ -4,27 +4,29 @@
     VsiEditContext context = ViewBag.Context;
     ViewData.SetSectionName(Resources.Section1Name);
     ViewData.SetBackLinkOverride(Url.BackAction(context, "Section1_Step3"));
+    bool hasSearchResults = Model.SearchResult?.Any() == true;
 }
 
 <form>
     <form-group for="SearchTerm" label="Research location" label-class="govuk-heading-l"
                 description="Enter a postcode to select one or multiple research locations">
-        <input class="govuk-input" asp-for="SearchTerm" type="text">
+        <input class="govuk-input" asp-for="SearchTerm" type="text" autofocus="@(!hasSearchResults)">
         <input asp-for="IsSearching" type="hidden" value="@true">
         <input name="FlowMode" type="hidden" value="@context.FlowMode">
     </form-group>
     <govuk-button type="submit">Search postcode</govuk-button>
 </form>
 
-@if (Model.SearchResult?.Any() == true)
+@if (hasSearchResults)
 {
     <form method="post">
         <div class="govuk-form-group govuk-!-margin-top-4">
             <fieldset class="govuk-fieldset">
                 <radio-set for="SelectedRtsId">
-                    @foreach (var result in Model.SearchResult)
+                    @for (var index = 0; index < Model.SearchResult.Length; index++)
                     {
-                        <radio value="@result.Identifier">@result.ToString()</radio>
+                        var result = Model.SearchResult[index];
+                        <radio value="@result.Identifier" autofocus="@(index == 0)">@result.ToString()</radio>
                     }
                 </radio-set>
             </fieldset>
@@ -34,6 +36,10 @@
 }
 
 <div class="govuk-!-margin-top-4">
-    <a class="govuk-link" asp-action="ManualSiteEntry" asp-all-route-data="@context.ToRouteData()">Enter address manually</a>
-</div>
+    <body-text>
+        <a class="govuk-link" asp-action="ManualSiteEntry" asp-all-route-data="@context.ToRouteData()">
+            Enter address manually
+        </a>
+    </body-text>
+    </div>
 

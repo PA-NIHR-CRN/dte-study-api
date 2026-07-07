@@ -376,9 +376,17 @@ button.govuk-back-link {
     border-radius: 0px 4.2px 4.2px 0px !important;
 }
 
-button.govuk-link{
+button.govuk-link:not(:focus){
     background: none !important;
     border: none;
     font-size: unset;
     padding: 0;
+    text-decoration: underline;
+}
+
+button.govuk-link:focus{
+    border: none;
+    font-size: unset;
+    padding: 0;
+    text-decoration: none;
 }

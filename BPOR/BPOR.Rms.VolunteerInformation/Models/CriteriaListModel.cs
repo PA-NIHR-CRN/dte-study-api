@@ -8,4 +8,5 @@ public class CriteriaListModel
     public VsiGroupModel VsiGroup { get; set; }
     
     public VsiGroupCriteronType Type { get; set; }
+    public bool IsGroupEdit { get; set; }
 }
