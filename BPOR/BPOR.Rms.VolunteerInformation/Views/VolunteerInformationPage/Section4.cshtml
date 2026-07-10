@@ -24,6 +24,33 @@
     </div>
     <gov-uk-summary-list-item for="StudyType"><a class="govuk-link" asp-route-flowmode="@VipFlowMode.Edit" asp-action="Section1_Step2" asp-route-studyId="@context.StudyId">Change</a>
     </gov-uk-summary-list-item>
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            Study Sites
+        </dt>
+        <dd class="govuk-summary-list__value">
+            @if (Model.Sites.Any())
+            {
+                foreach (var site in Model.Sites)
+                {
+                    <address class="govuk-body govuk-!-margin-top-2">
+                        @foreach (var line in ((string?[])[site.AddressLine1, site.AddressLine2, site.AddressLine3, site.AddressLine4, site.AddressLine5, site.Postcode])
+                        .Where(i => !string.IsNullOrWhiteSpace(i)))
+                        {
+                        <text>@line<br/></text>
+                        }
+                    </address>
+                }
+            }
+            else
+            {
+                <body-text>None</body-text>
+            }
+        </dd>
+        <dd class="govuk-summary-list__actions">
+            <a class="govuk-link" asp-action="Section1_Step3" asp-route-flowmode="@VipFlowMode.Edit" asp-route-studyId="@context.StudyId">Change</a>
+        </dd>
+    </div>
 </dl>
 
 <h2 class="govuk-heading-m">Who can participate</h2>
