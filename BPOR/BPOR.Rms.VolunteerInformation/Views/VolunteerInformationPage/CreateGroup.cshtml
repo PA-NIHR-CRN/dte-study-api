@@ -1,0 +1,17 @@
+﻿@model CreateGroupModel
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section1Name);
+    ViewData.SetBackLinkOverride(Url.Action("Section1_Step3", new {context.StudyId, context.FlowMode, isNavigateBack = true }));
+    Layout = "_VsiEditLayout";
+}
+
+<form method="post">
+    <form-group for="Name" label="Create volunteer groups" label-class="govuk-heading-l">
+        <p>If your study requires multiple groups, you can add more after providing information for each group.</p>
+        <p>Enter a name for this group</p>
+        <input class="govuk-input" asp-for="Name" type="text">
+    </form-group>
+    <govuk-button button-type="Secondary" type="submit">Submit</govuk-button>
+</form>

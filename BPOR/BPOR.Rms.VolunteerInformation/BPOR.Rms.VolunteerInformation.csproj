@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
+      <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Abstractions\BPOR.Rms.Abstractions.csproj" />
+      <ProjectReference Include="..\NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj" />
+      <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
+      <ProjectReference Include="..\NIHR.NotificationService\NIHR.NotificationService.csproj" />
+      <ProjectReference Include="..\NIHR.Rts.Client\NIHR.Rts.Client.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <EmbeddedResource Update="Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.301" />
+      <PackageReference Include="AWSSDK.S3" Version="3.7.511.8" />
+      <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
+      <PackageReference Include="protobuf-net" Version="3.2.56" />
+      <PackageReference Include="Rbec.Postcodes" Version="1.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Views\VolunteerStudyInformation\Shared\_ContactEditor.cshtml" />
+    </ItemGroup>
+</Project>

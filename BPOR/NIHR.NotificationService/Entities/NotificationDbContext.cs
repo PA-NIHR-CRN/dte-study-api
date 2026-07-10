@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace NIHR.NotificationService.Context;
+namespace NIHR.NotificationService.Entities;
 
 public class NotificationDbContext : DbContext
 {

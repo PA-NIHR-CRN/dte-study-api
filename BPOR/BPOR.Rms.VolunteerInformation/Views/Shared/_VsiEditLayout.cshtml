@@ -1,0 +1,22 @@
+@{
+    Layout = "_Layout";
+    VsiEditContext context = ViewBag.Context;
+    ViewData["Title"] = ViewData.GetSectionName();
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-m">@ViewData.GetSectionName()</h1>
+        
+        
+        @RenderBody()   
+        
+        @if (ViewData.TryGetSkipLink(out var skipLink))
+        {
+            <div class="govuk-!-margin-4">
+                <a href="@skipLink" class="govuk-link">Skip</a>
+            </div>
+        }
+    </div>
+</div>

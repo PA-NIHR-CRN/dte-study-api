@@ -64,7 +64,10 @@ public static class Projections
             CpmsId = s.CpmsId,
             InformationUrl = s.InformationUrl,
             IsRecruitingIdentifiableParticipants = s.IsRecruitingIdentifiableParticipants,
-            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any()),
+            SinglePersonResponsibleForRecruiting = s.SinglePersonResponsibleForRecruiting,
+            HasMultipleResearchLocations = s.HasMultipleResearchLocations,
+            PreScreenerUrl = s.PreScreenerUrl
         };
     }
 
@@ -100,7 +103,7 @@ public static class Projections
                 .Select(p => new CampaignParticipant
                 {
                     SentAt = p.SentAt,
-                    RegisteredInterestAt = p.RegisteredInterestAt,
+                    RegisteredInterestAt = p.RegisteredInterestAt ?? p.VipEmailLinkClickedAtUtc,
                     DeliveredAt = p.DeliveredAt,
                     DeliveryStatusId = p.DeliveryStatusId
                 })
@@ -131,6 +134,9 @@ public static class Projections
                 RecruitmentStartDate = GovUkDate.FromDateTime(s.RecruitmentStartDate).UKDisplayDate(),
                 RecruitmentEndDate = GovUkDate.FromDateTime(s.RecruitmentEndDate).UKDisplayDate(),
                 InformationUrl = s.InformationUrl,
+                HasMultipleResearchLocations = s.HasMultipleResearchLocations,
+                SinglePersonResponsibleForRecruiting = s.SinglePersonResponsibleForRecruiting,
+                PreScreenerUrl = s.PreScreenerUrl
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 
@@ -146,13 +152,25 @@ public static class Projections
                         .Select(p => new CampaignParticipant
                         {
                             SentAt = p.SentAt,
-                            RegisteredInterestAt = p.RegisteredInterestAt,
+                            RegisteredInterestAt = p.RegisteredInterestAt ?? p.VipEmailLinkClickedAtUtc,
                             DeliveredAt = p.DeliveredAt,
                             DeliveryStatusId = p.DeliveryStatusId
                         })
                         .ToList(),
                 }),
-            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any())
+            HasCampaigns = s.FilterCriterias.Any(fc => fc.Campaign.Any()),
+            ResearcherEmails = s.StudyResearcherEmails
+                .Select(re => new Study.ResearcherEmail
+                {
+                    ResearcherEmailAddress = re.StudyResearcherEmailAddress,
+                    EmailTemplate = re.StudyResearcherEmailOption.Description,
+                    SentAt = re.CreatedAt,
+                    DeliveryStatusId = re.DeliveryStatus.Id,
+                    StudyId = re.StudyId,
+                    EmailTemplateId = re.StudyResearcherEmailOptionId
+                })
+                .OrderByDescending(re => re.SentAt)
+                .ToList()
         };
     }
 

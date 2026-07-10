@@ -1,6 +1,7 @@
 ﻿using BPOR.Rms.Models.Study;
 using FluentValidation;
 using FluentValidation.Validators;
+using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Validators;
 
@@ -22,7 +23,14 @@ public class StudyFormModelValidator : AbstractValidator<StudyFormEditModel>
             .NotNull().WithMessage("Select whether the study is recruiting identifiable participants")
             .When(i => i.AllowEditIsRecruitingIdentifiableParticipants);
         RuleFor(i => i.InformationUrl)
-            .UriOrNullOrWhitespace().WithMessage("The website you have tried to enter is not formatted correct")
-            .MaximumLength(2048).WithMessage("Website must be less than 2049 characters");
+            .Uri();
+        RuleFor(i => i.PreScreenerUrl)
+            .NotEmpty().WithMessage("Type or paste the link to the pre-screener")
+            .Uri();
+        RuleFor(i => i.HasMultipleResearchLocations)
+            .NotNull().WithMessage("Select yes or no");
+        RuleFor(i => i.SinglePersonResponsibleForRecruiting)
+            .NotNull().WithMessage("Select yes or no");
+        
     }
 }

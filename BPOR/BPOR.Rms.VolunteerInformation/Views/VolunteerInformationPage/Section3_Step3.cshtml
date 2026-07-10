@@ -1,0 +1,38 @@
+﻿@model VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    SetFlowBackAction("Section3_Step2");
+    ViewData.SetSectionName(Resources.Section3Name);
+    Layout = "_VsiEditLayout";
+}
+
+<h1 class="govuk-heading-l">Contact Details</h1>
+<body-text>Email and/or telephone numbers for volunteers to contact researchers or members of the study team</body-text>
+<table class="govuk-table">
+    <tbody class="govuk-table__body">
+    @foreach (var contact in Model.Contacts)
+    {
+        <tr class="govuk-table__row">
+            <td class="govuk-table__cell">
+                <partial name="_ContactCard" model="contact"/>
+            </td>
+            <td class="govuk-table__cell">
+                <form method="post" asp-action="RemoveContact" asp-all-route-data="@context.ToRouteData()" asp-route-contactid="@contact.Id">
+                    <button class="govuk-link" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<div class="govuk-!-margin-4">
+    <body-text>
+        <a class="govuk-link" asp-action="CreateContact" asp-all-route-data="@context.ToRouteData()">Add another contact</a>
+    </body-text>
+</div>
+<div>
+    <a class="govuk-button" href="@Url.FlowNext(context, "Section3_Step4")">Continue</a>
+</div>

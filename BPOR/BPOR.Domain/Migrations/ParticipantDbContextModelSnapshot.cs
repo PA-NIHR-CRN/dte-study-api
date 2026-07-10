@@ -114,11 +114,24 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<DateTime?>("SentAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("Token")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("UpdatedById")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("VipEmailLinkClickedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("VipExternalLinkClickedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("VipPrescreenerLinkClickedAtUtc")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -9737,6 +9750,54 @@ namespace Dynamo.Stream.Handler.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BPOR.Domain.Entities.RefData.StudyResearcherEmailOptions", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SysRefStudyResearcherEmailOptions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "Introductory Email",
+                            Description = "Introduction email",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "Offer Pre-Screener",
+                            Description = "Next steps email with pre-screener",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "Without Pre-Screener",
+                            Description = "Next steps email with NO pre-screener",
+                            IsDeleted = false
+                        });
+                });
+
             modelBuilder.Entity("BPOR.Domain.Entities.RefData.SubmissionOutcome", b =>
                 {
                     b.Property<int>("Id")
@@ -9892,7 +9953,13 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<string>("FundingCode")
                         .HasColumnType("longtext");
 
+                    b.Property<bool?>("HasMultipleResearchLocations")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool?>("HasNihrFunding")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("HasVip")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("InformationUrl")
@@ -9908,6 +9975,10 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<int?>("ParticipantsRecruited")
                         .HasColumnType("int");
 
+                    b.Property<string>("PreScreenerUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("varchar(2048)");
+
                     b.Property<DateTime?>("RecruitmentEndDate")
                         .HasColumnType("datetime(6)");
 
@@ -9916,6 +9987,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<string>("RecruitmentTarget")
                         .HasColumnType("longtext");
+
+                    b.Property<bool?>("SinglePersonResponsibleForRecruiting")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Sponsors")
                         .HasColumnType("longtext");
@@ -10027,6 +10101,50 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("StudyResearcher");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.StudyResearcherEmail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DeliveryStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StudyResearcherEmailAddress")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("StudyResearcherEmailOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("UpdatedById")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeliveryStatusId");
+
+                    b.HasIndex("StudyId");
+
+                    b.HasIndex("StudyResearcherEmailOptionId");
+
+                    b.ToTable("StudyResearcherEmails");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.System.SysConfiguration", b =>
@@ -10450,6 +10568,33 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BPOR.Domain.Entities.StudyResearcherEmail", b =>
+                {
+                    b.HasOne("BPOR.Domain.Entities.RefData.DeliveryStatus", "DeliveryStatus")
+                        .WithMany()
+                        .HasForeignKey("DeliveryStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BPOR.Domain.Entities.Study", "Study")
+                        .WithMany("StudyResearcherEmails")
+                        .HasForeignKey("StudyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BPOR.Domain.Entities.RefData.StudyResearcherEmailOptions", "StudyResearcherEmailOption")
+                        .WithMany()
+                        .HasForeignKey("StudyResearcherEmailOptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DeliveryStatus");
+
+                    b.Navigation("Study");
+
+                    b.Navigation("StudyResearcherEmailOption");
+                });
+
             modelBuilder.Entity("BPOR.Domain.Entities.UserRole", b =>
                 {
                     b.HasOne("BPOR.Domain.Entities.RefData.Role", "Role")
@@ -10517,6 +10662,8 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("ManualEnrollments");
 
                     b.Navigation("StudyParticipantEnrollments");
+
+                    b.Navigation("StudyResearcherEmails");
 
                     b.Navigation("StudyResearchers");
                 });

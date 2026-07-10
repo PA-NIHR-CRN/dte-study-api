@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NIHR.NotificationService.Context;
+using NIHR.NotificationService.Entities;
 
 #nullable disable
 

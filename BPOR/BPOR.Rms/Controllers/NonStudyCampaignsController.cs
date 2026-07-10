@@ -3,6 +3,7 @@ using BPOR.Rms.Models;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Enums;
 using NIHR.Infrastructure.Paging;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Controllers;
 

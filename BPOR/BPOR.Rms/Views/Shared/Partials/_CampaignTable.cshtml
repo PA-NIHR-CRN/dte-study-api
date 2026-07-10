@@ -1,6 +1,9 @@
 @using BPOR.Domain.Enums
+@using NIHR.Infrastructure
+@using NIHR.Infrastructure.Interfaces
 @using NIHR.Infrastructure.Paging
 @model IEnumerable<BPOR.Rms.Models.Study.Campaign>
+@inject ITimezoneProvider TimezoneProvider
 
 @{
     var hideCampaignType = (bool?)ViewData["CampaignTable.HideCampaignType"] ?? false;
@@ -26,7 +29,7 @@
         {
             <tr class="govuk-table__row">
                 <td class="govuk-table__cell">
-                    @campaign.CreatedAt.ToString("dd/MM/yyyy, HH:mm")
+                    @(TimezoneProvider.UtcToLocalTime(campaign.CreatedAt).ToString("dd/MM/yyyy, HH:mm"))
                 </td>
                 @if (!hideCampaignType)
                 {

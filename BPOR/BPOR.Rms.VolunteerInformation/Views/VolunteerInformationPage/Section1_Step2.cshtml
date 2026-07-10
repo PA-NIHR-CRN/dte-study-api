@@ -1,0 +1,17 @@
+﻿@using BPOR.Rms.Abstractions.Enums
+@model VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
+
+@{
+    SetFlowBackAction("Section1_Step1");
+    ViewData.SetSectionName(Resources.Section1Name);
+    Layout = "_VsiEditLayoutForm";
+}
+
+<form-group for="StudyType" label-class="govuk-heading-l">
+    <radio-set for="StudyType">
+        <radio value="@VsiStudyType.Remote">@Resources.VsiStudyTypeRemote</radio>
+        <radio value="@VsiStudyType.InPerson">@Resources.VsiStudyTypeInPerson</radio>
+        <radio value="@VsiStudyType.Hybrid">@Resources.VsiStudyTypeHybrid</radio>
+    </radio-set>
+</form-group>

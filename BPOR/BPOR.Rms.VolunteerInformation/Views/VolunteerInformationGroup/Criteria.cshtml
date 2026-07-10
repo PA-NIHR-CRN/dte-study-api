@@ -1,0 +1,45 @@
+﻿@using BPOR.Domain.Enums
+@using BPOR.Rms.Abstractions.Enums
+@model BPOR.Rms.VolunteerInformation.Models.CriteriaListModel
+
+@{
+    VsiGroupEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section1Name);
+}
+<h1 class="govuk-heading-l">Add @Model.Type.GetNoun() criteria</h1>
+<body-text>You have added the following criteria for @Model.VsiGroup.Name:</body-text>
+
+<table class="govuk-table">
+    <tbody class="govuk-table__body">
+    @foreach (var criterion in Model.VsiGroup.Criteria)
+    {
+        <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header">@criterion.Description</th>
+            <td class="govuk-table__cell">
+                <form asp-action="RemoveCriteria" asp-all-route-data="@context.ToRouteData()"
+                      asp-route-criteriaId="@criterion.Id" asp-route-type="@Model.Type" asp-route-isGroupEdit="@Model.IsGroupEdit">
+                    <button class="govuk-link" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr> 
+    }
+    </tbody>
+</table>
+
+<div class="govuk-!-margin-4">
+    <body-text>
+    <a class="govuk-link" asp-action="CreateCriterion" asp-all-route-data="@context.ToRouteData()"
+       asp-route-type="@Model.Type" asp-route-isGroupEdit="@Model.IsGroupEdit">Add more criteria</a>
+    </body-text>
+</div>
+
+@if (Model.Type == VsiGroupCriteronType.Include && context.FlowMode == VipFlowMode.Create && !Model.IsGroupEdit)
+{
+    <a asp-action="QueryAddExclusionCriteria" asp-all-route-data="@context.ToRouteData()"
+       class="govuk-button" data-module="govuk-button">Continue</a>
+}
+else
+{
+    <a asp-action="Section1_Step4" asp-controller="VolunteerInformationPage" asp-all-route-data="@context.ToRouteData()"
+       class="govuk-button" data-module="govuk-button">Continue</a>
+}

@@ -1,0 +1,15 @@
+﻿@model VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    SetFlowBackAction("Section2_Step6");
+    ViewData.SetSectionName(Resources.Section2Name);
+    ViewData.SetSkipLink(Url.FlowNext(context, "Section3_Step1"));
+    Layout = "_VsiEditLayoutForm";
+}
+
+<form-group for="OtherDetails" label-class="govuk-heading-l">
+    <textarea rows="5" class="govuk-textarea" asp-for="OtherDetails"  maxlength="@Constants.OtherDetailsMaxLength"></textarea>
+    <body-text>You can add up to @Constants.OtherDetailsMaxLength characters</body-text>
+</form-group>

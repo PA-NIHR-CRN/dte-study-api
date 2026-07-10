@@ -1,0 +1,22 @@
+﻿@using BPOR.Rms.Extensions
+@model BPOR.Rms.Models.Study.StudyDetailsViewModel
+
+<div class="govuk-button-group govuk-!-margin-bottom-0">
+    <div class="moj-button-menu"
+         data-module="moj-button-menu"
+         data-button-text="Action items"
+         data-button-classes="govuk-button--secondary">
+
+        @foreach (var link in Model.ActionLinks)
+        {
+            <a href="@link.Url"
+               role="button"
+               draggable="false"
+               class="govuk-button moj-button-menu__item govuk-button--secondary"
+               data-module="govuk-button"
+               target="@link.Target.ToAttributeValue()">
+                @link.Text
+            </a>
+        }
+    </div>
+</div>

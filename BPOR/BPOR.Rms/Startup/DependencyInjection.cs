@@ -13,19 +13,21 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
+using BPOR.Rms.VolunteerInformation;
+using BPOR.Rms.VolunteerInformation.Data;
 using Ganss.Xss;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Settings;
-using NIHR.NotificationService.Context;
-using NIHR.NotificationService.Interfaces;
-using NIHR.NotificationService.Services;
-using NIHR.NotificationService.Settings;
-using Notify.Client;
 using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
 using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
 using NIHR.GovUk.AspNetCore.Mvc;
+using NIHR.Infrastructure.DependencyInjection;
+using NIHR.NotificationService;
+using NIHR.NotificationService.Entities;
+using NIHR.NotificationService.GovUkNotify;
+using NIHR.Rts.Client;
 
 namespace BPOR.Rms.Startup;
 
@@ -34,8 +36,11 @@ public static class DependencyInjection
     public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration,
         IHostEnvironment hostEnvironment)
     {
+        services.AddKeyedServiceDictionary();
+        
         services.AddSingleton(TimeProvider.System);
-
+        services.AddSingleton<ITimezoneProvider, UkTimezoneProvider>();
+        
         services.AddControllersWithViews().AddRazorRuntimeCompilation();
         services.AddHttpContextAccessor();
 
@@ -49,6 +54,8 @@ public static class DependencyInjection
                     .GetRequiredService<ErrorLoggingHttpMessageHandler>());
             });
         });
+
+        services.AddMemoryCache();
 
         services.Configure<VolunteerFilterServiceOptions>(configuration.GetSection("VolunteerFilterService"));
 
@@ -64,8 +71,7 @@ public static class DependencyInjection
         services.AddTransient<IEmailService, EmailService>();
         services.AddTransient<ITransactionalEmailService, TransactionalEmailService>();
         services.GetSectionAndValidate<EmailSettings>(configuration);
-
-        services.AddTransient<INotificationService, NotificationService>();
+        
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
 
         services.AddDistributedMemoryCache();
@@ -88,13 +94,14 @@ public static class DependencyInjection
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var participantConnectionString = dbSettings.Value.BuildConnectionString();
 
-        services.AddDbContext<ParticipantDbContext>(options =>
+        services.AddDbContext<ParticipantDbContext>((serviceProvider, options) =>
             options.UseMySql(participantConnectionString, ServerVersion.AutoDetect(participantConnectionString),
                 builder =>
                 {
                     builder.UseNetTopologySuite();
                     builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                }));
+                })
+                .AddVipSynchronisation(serviceProvider));
 
         var notificationConnectionString =
             dbSettings.Value.BuildConnectionString(dbSettings.Value.NotificationDatabase);
@@ -104,7 +111,7 @@ public static class DependencyInjection
                 builder => { builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery); }));
 
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("BPOR.Rms");
-
+        
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
         if (clientsSettings?.Value?.LocationService?.BaseUrl is null)
         {
@@ -122,12 +129,11 @@ public static class DependencyInjection
             return new RmsTaskQueue(100, rmsTaskQueueLogger);
         });
 
-        services.AddHostedService<HostedNotificationQueueService>();
         services.AddHostedService<HostedCampaignQueueService>();
-
-        var govNotifySettings = services.GetSectionAndValidate<NotificationServiceSettings>(configuration);
-        services.AddSingleton(new NotificationClient(govNotifySettings.Value.ApiKey));
-
+        
+        services.AddNotificationService();
+        services.AddGovUkNotify();
+        
         services.AddGovUk(options =>
         {
             options.ServiceName = "Be Part of Research";
@@ -143,6 +149,11 @@ public static class DependencyInjection
         {
             services.RegisterDevelopmentServices(configuration);
         }
+
+        services.AddVolunteerInformation();
+        
+        services.AddRtsServices(configuration);
+        services.AddNotificationDeliveryHandler<CampaignParticipantNotificationDeliveryHandler>();
 
         return services;
     }

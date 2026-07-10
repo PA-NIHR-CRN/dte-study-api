@@ -8,6 +8,7 @@ using BPOR.Rms.Models.Study;
 using BPOR.Rms.Controllers;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using System.Text.Encodings.Web;
+using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.TagHelpers;
 
@@ -17,6 +18,12 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
 
     [HtmlAttributeName("show-when")]
     public bool Show { get; set; } = true;
+    
+    [HtmlAttributeName("show-admin-when")]
+    public bool ShowAdmin { get; set; } = true;
+    
+    [HtmlAttributeName("show-researcher-when")]
+    public bool ShowResearcher { get; set; } = true;
     
     [HtmlAttributeName("edit-when")]
     public bool Editable { get; set; } = true;
@@ -32,17 +39,20 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
         var researcherEdit = For.Metadata.ContainerType?.GetProperty(studyRelativeName)?.GetCustomAttribute<ResearcherEditAttribute>();
 
         var viewModel = For.ModelExplorer.Container.Model as StudyDetailsViewModel;
-        var isResearcherCompleted = !string.IsNullOrWhiteSpace(viewModel?.Study.ChiefInvestigator);
 
-        if (Show)
+        var visible = Show;
+        visible &= !currentUserProvider.IsAdmin() || ShowAdmin;
+        visible &= !currentUserProvider.IsResearcher() || ShowResearcher;
+
+        if (visible)
         {
             output.TagName = "div";
             output.TagMode = TagMode.StartTagAndEndTag;
             output.AddClass("govuk-summary-list__row", HtmlEncoder.Default);
 
             var displayName = For.Metadata.DisplayName ?? For.Name;
-            var displayValue = For.Model?.ToString() ?? string.Empty;
-
+            var displayValue = For.GetDisplayString();
+            
             var title = new TagBuilder("dt");
             title.AddCssClass("govuk-summary-list__key");
 
@@ -57,22 +67,17 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
 
             var field = studyEdit?.FieldId;
             var controller = nameof(StudyController);
-
-
-            if (isResearcherCompleted)
+            
+            if (researcherEdit is not null)
             {
-                if (researcherEdit is not null)
-                {
-                    field = researcherEdit.FieldId;
-                    controller = nameof(ResearcherController);
-                }
+                field = researcherEdit.FieldId;
+                controller = nameof(ResearcherController);
             }
-
-            if (
-                field is not null &&
+            
+            if (field is not null &&
                 viewModel is not null &&
-                Editable &&
-                (currentUserProvider?.User?.HasRole("Admin") ?? false))
+                Editable && 
+                currentUserProvider.IsAdmin())
             {
                 var url = linkGenerator.GetUriByAction(ViewContext.HttpContext, "Edit", controller.Replace("Controller", ""), new { id = viewModel.Study.Id, field });
 

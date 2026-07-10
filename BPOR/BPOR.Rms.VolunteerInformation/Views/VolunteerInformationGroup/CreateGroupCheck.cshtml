@@ -1,0 +1,28 @@
+﻿@using BPOR.Domain.Enums
+@model BPOR.Rms.VolunteerInformation.Models.VsiGroupModel
+
+@{
+    VsiGroupEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section1Name);
+    Layout = "_VsiEditLayout";
+}
+
+<h1 class="govuk-heading-l">Create Volunteer Groups</h1>
+
+<body-text>You can click 'Continue' to proceed with the form.</body-text>
+<dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            @Model.Name
+        </dt>
+        <dd class="govuk-summary-list__actions">
+            <form method="post" asp-action="RemoveGroup" asp-all-route-data="@context.ToRouteData()">
+                <button class="govuk-link" type="submit">Delete</button>
+            </form>
+        </dd>
+    </div>
+</dl>
+
+<div>
+    <a class="govuk-button" asp-action="CreateCriterion" asp-all-route-data="@context.ToRouteData()" asp-route-type="Include">Continue</a>
+</div>

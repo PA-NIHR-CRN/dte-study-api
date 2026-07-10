@@ -1,0 +1,14 @@
+﻿@model StartModel
+
+@{
+    ViewData["Title"] = "Mock Prescreener Landing Page";
+}
+
+<div>
+    <h2>Mock Prescreener Landing Page</h2>
+    <p><b>Prescreener ID:</b> @Model.Id</p>
+    <p><b>RMS Study ID:</b> @Model.Info.Study.StudyId</p>
+    <p><b>Volunteer Email:</b> @Model.Info.Participant.Email</p>
+    <p><b>Volunteer Name:</b> @Model.Info.Participant.Name</p>
+    <p><b>RMS Campaign-Participant-ID:</b> @Model.Info.CampaignParticipantId</p>
+</div>

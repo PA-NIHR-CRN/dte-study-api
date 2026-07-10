@@ -3,7 +3,6 @@ using BPOR.Domain.Entities;
 using BPOR.Rms.Models.Email;
 using BPOR.Rms.Services;
 using BPOR.Domain.Enums;
-using HandlebarsDotNet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -13,10 +12,9 @@ using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
-using Notify.Exceptions;
-using Notify.Models.Responses;
-using BPOR.Rms.Exceptions;
-using BPOR.Rms.Constants;
+using BPOR.Rms.VolunteerInformation.Tokens;
+using NIHR.NotificationService;
+using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Controllers;
 
@@ -29,7 +27,8 @@ public class CampaignController(
     IEncryptionService encryptionService,
     LinkGenerator linkGenerator,
     ITransactionalEmailService transactionalEmailService,
-    IOptions<RmsSettings> rmsOptions
+    IOptions<RmsSettings> rmsOptions,
+    IVipTokenGenerator tokenGenerator
 )
     : Controller
 {
@@ -75,20 +74,15 @@ public class CampaignController(
         if (ModelState.IsValid)
         {
             var selectedTemplate =
-                model.Templates.First(t => t.id == model.SelectedTemplateId);
-
-            if (!Enum.TryParse<ContactMethodId>(selectedTemplate.type, true, out var contactMethod))
-            {
-                throw new InvalidContactMethodException(selectedTemplate.type);
-            }
-
+                model.Templates.First(t => t.Id == model.SelectedTemplateId);
+            
             var campaign = new Campaign
             {
                 FilterCriteriaId = model.FilterCriteriaId,
                 TargetGroupSize = model.TotalVolunteers,
                 TemplateId = new Guid(model.SelectedTemplateId!),
-                Name = selectedTemplate.name,
-                TypeId = contactMethod
+                Name = selectedTemplate.Name,
+                TypeId = CampaignService.ToContactMethodId(selectedTemplate.ContactMethod)
             };
 
             await AddCampaignToContextAsync(campaign, cancellationToken);
@@ -121,7 +115,7 @@ public class CampaignController(
             else if (campaign.TypeId == ContactMethodId.Letter)
             {
                 notificationRecipients.Add(rmsOptions.Value.CampaignNotificationEmailAddress);
-                sendParams["templateName"] = selectedTemplate.name;
+                sendParams["templateName"] = selectedTemplate.Name;
                 templateId = "non-study-rms-campaign-sent";
             }
             else
@@ -157,7 +151,7 @@ public class CampaignController(
     CancellationToken cancellationToken = default)
     {
 
-        List<TemplateResponse> templateList = await FetchTemplates(forceRefresh, cancellationToken);
+        IEnumerable<Template> templateList = await FetchTemplates(forceRefresh, cancellationToken);
         model.Templates = templateList.ToList();
 
         if (model.StudyId is not null)
@@ -202,40 +196,41 @@ public class CampaignController(
 
         if (ModelState.IsValid)
         {
-            var selectedTemplateName = model.Templates.First(t => t.id == model.SelectedTemplateId).name;
+            var selectedTemplateName = model.Templates.First(t => t.Id == model.SelectedTemplateId).Name;
             var personalisationData = emailAddresses.ToDictionary(
                 email => email,
                 email => new Dictionary<string, string>
                 {
                     { PersonalisationKeys.Email, email },
-                    { PersonalisationKeys.CampaignParticipantId, "PreviewEmailReference" },
-                    { PersonalisationKeys.FirstName, "John" },
-                    { PersonalisationKeys.LastName, "Doe" },
+                    { CampaignPersonalisationKeys.CampaignParticipantId, "PreviewEmailReference" },
+                    { CampaignPersonalisationKeys.FirstName, "John" },
+                    { CampaignPersonalisationKeys.LastName, "Doe" },
                     {
-                        PersonalisationKeys.UniqueLink,
+                        CampaignPersonalisationKeys.UniqueLink,
                         linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest),
                             new { reference = encryptionService.Encrypt("0123456789101112") }) ?? string.Empty
                     },
-                    { PersonalisationKeys.UniqueReference, "0123456789101112" }
+                    { CampaignPersonalisationKeys.UniqueReference, "0123456789101112" }
                 });
 
             foreach (var email in emailAddresses)
             {
                 try
                 {
-                    await notificationService.SendPreviewEmailAsync(new SendNotificationRequest
+                    await notificationService.SendNotification(new SendNotificationRequest
                     {
-                        EmailAddress = email,
+                        ContactMethod = NotificationContactMethod.Email,
                         TemplateId = model.SelectedTemplateId,
                         Personalisation = personalisationData[email],
-                        Reference = "PreviewEmailReference"
+                        Reference = new NotificationReference("PreviewEmailReference")
                     }, cancellationToken);
                 }
-                catch (NotifyClientException e)
+                catch (Exception e)
                 {
+                    // TODO: synchronous priority sending
                     logger.LogError(e, "Error sending preview email");
                     ModelState.AddModelError(nameof(model.PreviewEmails),
-                        "Gov Notify does not accept the email address(es) provided.");
+                        "Unable to send preview email.");
                     return View(nameof(Setup), model);
                 }
             }
@@ -251,7 +246,7 @@ public class CampaignController(
                                                email.Equals(address.Address,
                                                    StringComparison.InvariantCultureIgnoreCase);
 
-    private async Task<List<TemplateResponse>> FetchTemplates(bool forceRefresh = false,
+    private async Task<IEnumerable<Template>> FetchTemplates(bool forceRefresh = false,
         CancellationToken cancellationToken = default)
 
     {
@@ -259,15 +254,15 @@ public class CampaignController(
         if (cachedData != null && !forceRefresh)
         {
             var jsonData = Encoding.UTF8.GetString(cachedData);
-            return JsonConvert.DeserializeObject<TemplateList>(jsonData).templates;
+            return JsonConvert.DeserializeObject<List<Template>>(jsonData);
         }
 
-        var templates = await notificationService.GetTemplatesAsync(cancellationToken);
+        var templates = await notificationService.GetTemplates(cancellationToken);
         await CacheTemplates(templates, cancellationToken);
-        return templates.templates;
+        return templates;
     }
 
-    private async Task CacheTemplates(TemplateList templates, CancellationToken cancellationToken = default)
+    private async Task CacheTemplates(IEnumerable<Template> templates, CancellationToken cancellationToken = default)
     {
         var jsonData = JsonConvert.SerializeObject(templates);
         var data = Encoding.UTF8.GetBytes(jsonData);

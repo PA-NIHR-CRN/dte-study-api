@@ -1,0 +1,21 @@
+namespace BPOR.Rms.Abstractions.Models;
+
+public class GetInformationResponse
+{
+    public long CampaignParticipantId { get; set; }
+    public Participant Participant { get; set; }
+    public Study Study { get; set; }
+}
+
+public class Participant
+{
+    public long Id { get; set; }
+    public string Email { get; set; }
+    public string Name { get; set; }
+}
+
+public class Study
+{
+    public long StudyId { get; set; }
+    public string PrescreenerUrl { get; set; }
+}

@@ -1,25 +1,58 @@
+@using BPOR.Rms.VolunteerInformation.Data
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
+@inject IVipRepository VipRepository
 
 <div>
     <h2 class="govuk-heading-l govuk-!-margin-bottom-3">Study details</h2>
     <dl class="govuk-summary-list">
-        <summary-list-item for="Study.Id" />
+        <summary-list-item for="Study.Id"/>
         <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"/>
-        <summary-list-item for="Study.StudyName" />
-        <summary-list-item for="Study.CpmsId" />
-        <summary-list-item for="Study.FullName" />
-        <summary-list-item for="Study.EmailAddress" />
+        <summary-list-item for="Study.StudyName"/>
+        <summary-list-item for="Study.CpmsId"/>
+        <summary-list-item for="Study.HasMultipleResearchLocations" 
+                           show-researcher-when="Model.Study.HasMultipleResearchLocations.HasValue"/>
+        <summary-list-item for="Study.SinglePersonResponsibleForRecruiting" 
+                           show-researcher-when="Model.Study.SinglePersonResponsibleForRecruiting.HasValue"/>       
+        <summary-list-item for="Study.FullName"/>
+        <summary-list-item for="Study.EmailAddress"/>
         <summary-list-item for="Study.InformationUrl"/>
+        <summary-list-item for="Study.PreScreenerUrl" 
+                           show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.PreScreenerUrl)"/>
+        
+        <role role-include="Admin">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    Volunteer study information page
+                </dt>
+                <dd class="govuk-summary-list__value">
+                </dd>
+                <dd class="govuk-summary-list__actions">
+                    <ul class="govuk-summary-list__actions-list">
+                        @if(await VipRepository.IsVipActive(Model.Study.Id, Context.RequestAborted))
+                        {
+                            <li class="govuk-summary-list__actions-list-item">
+                                <a class="govuk-link" asp-controller="VolunteerInformationPage" asp-action="PreviewVip" asp-route-studyid="@Model.Study.Id">View</a>
+                            </li>
+                            <li class="govuk-summary-list__actions-list-item">
+                                <a class="govuk-link" asp-controller="VolunteerInformationPage" asp-action="Section4" asp-route-studyid="@Model.Study.Id">Change</a>
+                            </li>
+                        }
+                    </ul>
+                </dd>
+            </div>
+        </role>
+        
+        <summary-list-item for="Study.ChiefInvestigator"/>
+        <summary-list-item for="Study.StudySponsors"/>
+        <summary-list-item for="Study.PortfolioSubmissionStatus"/>
+        <summary-list-item for="Study.OutcomeOfSubmission"
+                           show-when="@(Model.Study.PortfolioSubmissionStatus == "Yes")"/>
+        <summary-list-item for="Study.HasFundingDisplay"/>
+        <summary-list-item for="Study.FundingCode" show-when="@Model.Study.HasFunding ==true"/>
+        <summary-list-item for="Study.UKRecruitmentTarget"/>
 
-        <summary-list-item for="Study.ChiefInvestigator" />
-        <summary-list-item for="Study.StudySponsors" />
-        <summary-list-item for="Study.PortfolioSubmissionStatus" />
-        <summary-list-item for="Study.OutcomeOfSubmission" show-when="@(Model.Study.PortfolioSubmissionStatus == "Yes")" />
-        <summary-list-item for="Study.HasFundingDisplay" />
-        <summary-list-item for="Study.FundingCode" show-when="@Model.Study.HasFunding==true" />
-        <summary-list-item for="Study.UKRecruitmentTarget" />
-        <summary-list-item for="Study.TargetPopulation" />
-        <summary-list-item for="Study.RecruitmentStartDate" />
-        <summary-list-item for="Study.RecruitmentEndDate" />
+        <summary-list-item for="Study.TargetPopulation"/>
+        <summary-list-item for="Study.RecruitmentStartDate"/>
+        <summary-list-item for="Study.RecruitmentEndDate"/>
     </dl>
 </div>

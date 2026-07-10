@@ -1,0 +1,20 @@
+﻿@model VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
+
+@{
+    SetFlowBackAction("Section2_Step2");
+    ViewData.SetSectionName(Resources.Section2Name);
+    Layout = "_VsiEditLayoutForm";
+}
+
+<form-group for="HasIncentive" label-class="govuk-heading-l">
+    <radio-set for="HasIncentive">
+        <radio value="@true">Yes</radio>
+        <radio value="@false">No</radio>
+    </radio-set>
+</form-group>
+
+<form-group for="IncentiveDetails" label-as-heading="false" label-class="govuk-label">
+    <textarea rows="5" class="govuk-textarea" asp-for="IncentiveDetails" maxlength="@Constants.IncentiveDetailsMaxLength"></textarea>
+    <body-text>You can add up to @Constants.IncentiveDetailsMaxLength characters</body-text>
+</form-group>

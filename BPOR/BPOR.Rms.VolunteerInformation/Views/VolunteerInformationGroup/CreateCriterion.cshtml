@@ -1,0 +1,16 @@
+﻿@model CreateCriterionModel
+
+@{
+    VsiGroupEditContext context = ViewBag.Context;
+    ViewData.SetSectionName(Resources.Section1Name);
+    Layout = "_VsiEditLayout";
+}
+
+<h1 class="govuk-heading-l">Add @Model.Type.GetNoun() criteria</h1>
+<form method="post">
+    <form-group for="Criterion" label-class="govuk-heading-l">
+        <body-text>For <b>@Model.GroupName</b>, enter one criterion, click "Submit", and then add more.</body-text>
+        <input class="govuk-input" asp-for="Criterion" type="text"></input>
+    </form-group>
+    <govuk-button button-type="Secondary" type="submit">Submit</govuk-button>
+</form>

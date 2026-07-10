@@ -1,0 +1,15 @@
+﻿@model VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
+
+@{
+    VsiEditContext context = ViewBag.Context;
+    SetFlowBackAction("Section3_Step3");
+    ViewData.SetSectionName(Resources.Section3Name);
+    ViewData.SetSkipLink(Url.Action("Section4", context ));
+    Layout = "_VsiEditLayoutForm";
+}
+
+<form-group for="InfoToRegisterByEmail" label-class="govuk-heading-l">
+    <textarea rows="5" class="govuk-textarea" asp-for="InfoToRegisterByEmail" maxlength="@Constants.InfoToRegisterByEmailMaxLength"></textarea>
+    <body-text>You can add up to @Constants.InfoToRegisterByEmailMaxLength characters</body-text>
+</form-group>

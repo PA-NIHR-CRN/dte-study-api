@@ -1,26 +1,26 @@
-using BPOR.Domain.Enums;
 using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Services;
-using BPOR.Rms;
 using BPOR.Rms.Constants;
-using BPOR.Rms.Mappers;
-using BPOR.Rms.Models;
 using BPOR.Rms.Models.Volunteer;
 using BPOR.Rms.Services;
 using BPOR.Rms.Utilities.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using NIHR.Infrastructure;
-using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
-using NIHR.Infrastructure.Interfaces;
 using Polly;
-using NIHR.NotificationService.Context;
-using BPOR.Domain.Entities.Configuration;
 using BPOR.Rms.Models.Email;
 using Microsoft.AspNetCore.WebUtilities;
-using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
-using BPOR.Domain.Extensions;
+using BPOR.Domain.Enums;
+using BPOR.Rms.Abstractions.Enums;
+using BPOR.Rms.VolunteerInformation.Data;
+using BPOR.Rms.VolunteerInformation.Settings;
+using BPOR.Rms.VolunteerInformation.Tokens;
+using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.Interfaces;
+using NIHR.NotificationService;
+using NIHR.NotificationService.Enums;
+using NIHR.NotificationService.Interfaces;
+using NIHR.NotificationService.Models;
 
 public class CampaignService(
     ILogger<CampaignService> logger,
@@ -28,8 +28,11 @@ public class CampaignService(
     ParticipantDbContext context,
     IEncryptionService encryptionService,
     IReferenceGenerator referenceGenerator,
-    NotificationDbContext notificationContext,
-    IVolunteerFilterService volunteerFilterService
+    INotificationService<CampaignParticipantNotificationDeliveryHandler> notificationService,
+    IVolunteerFilterService volunteerFilterService,
+    IVipTokenGenerator tokenGenerator,
+    IOptions<VipSettings> vsiSettings,
+    IVipRepository vipRepository
     )
     : ICampaignService
 {
@@ -37,6 +40,7 @@ public class CampaignService(
     {
         var campaign = await context.Campaign
             .AsNoTracking()
+            .Include(i => i.FilterCriteria).ThenInclude(i => i.Study)
             .FirstOrDefaultAsync(c => c.Id == item.Id, cancellationToken);
         var deliveryStatusId = GetDeliveryStatusId();
 
@@ -72,7 +76,6 @@ public class CampaignService(
             .IncludeAllFilterProperties()
             .FirstOrDefaultAsync(fc => fc.Id == campaign.FilterCriteriaId, cancellationToken);
     }
-
 
     private async Task ProcessAndQueueVolunteersAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         FilterCriteria dbFilter, int deliveryStatusId, string callback, CancellationToken cancellationToken)
@@ -164,6 +167,7 @@ public class CampaignService(
     private void ProcessVolunteer(CampaignParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int deliveryStatusId)
     {
+        
         processingResult.CampaignParticipant.Add(new CampaignParticipant
         {
             CampaignId = campaign.Id,
@@ -171,6 +175,8 @@ public class CampaignService(
             ParticipantId = volunteer.Id,
             DeliveryStatusId = deliveryStatusId,
             SentAt = DateTime.UtcNow,
+            Token = tokenGenerator.GenerateToken(new VipToken(
+                VipTokenPurpose.Volunteer,campaign.Id, volunteer.Id, dbFilter.StudyId.Value ))
         });
 
         if (dbFilter is { Study.IsRecruitingIdentifiableParticipants: true, StudyId: not null })
@@ -196,13 +202,31 @@ public class CampaignService(
             studyParticipant.Reference = newReference;
         }
     }
+    
+    public static ContactMethodId ToContactMethodId(NotificationContactMethod contactMethodId) =>
+        contactMethodId switch
+        {
+            NotificationContactMethod.Email => ContactMethodId.Email,
+            NotificationContactMethod.Letter => ContactMethodId.Letter,
+            _ => throw new ArgumentOutOfRangeException(nameof(contactMethodId), contactMethodId, null)
+        };
+
+    public static NotificationContactMethod ToNotificationContactMethod(ContactMethodId contactMethodId) =>
+        contactMethodId switch
+        {
+            ContactMethodId.Email => NotificationContactMethod.Email,
+            ContactMethodId.Letter => NotificationContactMethod.Letter,
+            _ => throw new ArgumentOutOfRangeException(nameof(contactMethodId), contactMethodId, null)
+        };
 
     private async Task QueueNotificationsAsync(List<CampaignParticipantDetails> volunteers, Campaign campaign,
         List<ProcessingResults> queue, string callback, CancellationToken cancellationToken)
     {
+        List<UnkeyedSendNotificationRequest> notificationRequests = new();
+
         foreach (var volunteer in volunteers)
         {
-            var validationResults = ValidateParticipantForCampaignType(volunteer, campaign.TypeId).ToArray();
+            var validationResults = ValidateParticipantForCampaignType(volunteer, ToNotificationContactMethod(campaign.TypeId)).ToArray();
             if (validationResults.Any())
             {
                 string reason = string.Join("; ", validationResults.Select(i => i.ErrorMessage));
@@ -228,97 +252,123 @@ public class CampaignService(
                 reference = $"no-study.{campaignParticipant.Id}";
             }
 
-            var baseUri = new Uri(callback);
-            var queryParams = new Dictionary<string, string>
-            {
-                { "reference", encryptionService.Encrypt(campaignParticipant.Id.ToString()) }
-            };
+            string link;
 
-            var uriWithQuery = new Uri(QueryHelpers.AddQueryString(baseUri.ToString(), queryParams));
-            var link = uriWithQuery.ToString();
-            var notification = new Notification
+            var vipStatus = await vipRepository.GetVipStatus(campaign.FilterCriteria.StudyId.Value, cancellationToken);
+            if (vipStatus == VsiStatus.Active)
             {
-                NotificationDatas = new List<NotificationData>
+                var queryParams = new Dictionary<string, string>
                 {
-                    new() { Key = PersonalisationKeys.CampaignParticipantId, Value = campaignParticipant.Id.ToString() },
-                    new() { Key = PersonalisationKeys.CampaignTypeId, Value = ((int)campaignParticipant.CampaignTypeId).ToString() },
-                    new() { Key = PersonalisationKeys.FirstName, Value = volunteer.FirstName },
-                    new() { Key = PersonalisationKeys.LastName, Value = volunteer.LastName },
-                    new() { Key = PersonalisationKeys.UniqueLink, Value = link },
-                    new() { Key = PersonalisationKeys.TemplateId, Value = campaign.TemplateId.ToString() },
-                    new() { Key = PersonalisationKeys.UniqueReference, Value = reference }
+                    { "token", campaignParticipant.Token }
+                };
+
+                link = QueryHelpers.AddQueryString(vsiSettings.Value.BporVipUri, queryParams);
+            }
+            else
+            {
+                var baseUri = new Uri(callback);
+                var queryParams = new Dictionary<string, string>
+                {
+                    { "reference", encryptionService.Encrypt(campaignParticipant.Id.ToString()) }
+                };
+
+                var uriWithQuery = new Uri(QueryHelpers.AddQueryString(baseUri.ToString(), queryParams));
+                link = uriWithQuery.ToString();
+            }
+
+            var notification = new UnkeyedSendNotificationRequest()
+            {
+                Reference = campaignParticipant.Id.ToString(),
+                ContactMethod = ToNotificationContactMethod(campaignParticipant.CampaignTypeId),
+                TemplateId = campaign.TemplateId.ToString(),
+                Personalisation =
+                {
+                    [CampaignPersonalisationKeys.CampaignParticipantId] = campaignParticipant.Id.ToString(),
+                    [CampaignPersonalisationKeys.FirstName] = volunteer.FirstName,
+                    [CampaignPersonalisationKeys.LastName] = volunteer.LastName,
+                    [CampaignPersonalisationKeys.UniqueLink] = link,
+                    [CampaignPersonalisationKeys.StudyName] = campaign.FilterCriteria.Study.StudyName,
+                    [CampaignPersonalisationKeys.UniqueReference] = reference
                 }
             };
 
             switch (campaign.TypeId)
             {
                 case ContactMethodId.Email:
-                    notification.PrimaryIdentifier = volunteer.Email;
-                    notification.NotificationDatas.Add(new NotificationData { Key = PersonalisationKeys.Email, Value = volunteer.Email });
+                    notification.Personalisation[PersonalisationKeys.Email] = volunteer.Email;
                     break;
 
                 case ContactMethodId.Letter:
-
-                    notification.PrimaryIdentifier = $"ParticipantAddress({volunteer.Address.Id})";
-
                     var addressFields = new Dictionary<string, string?>
                     {
-                        { "address_line_1", volunteer.Address.AddressLine1 },
-                        { "address_line_2", volunteer.Address.AddressLine2 },
-                        { "address_line_3", volunteer.Address.AddressLine3 },
-                        { "address_line_4", volunteer.Address.AddressLine4 },
-                        { "address_line_5", volunteer.Address.Town },
-                        { "address_line_6", volunteer.Address.Postcode }
+                        [PersonalisationKeys.AddressLine1] = volunteer.Address.AddressLine1,
+                        [PersonalisationKeys.AddressLine2] = volunteer.Address.AddressLine2,
+                        [PersonalisationKeys.AddressLine3] = volunteer.Address.AddressLine3,
+                        [PersonalisationKeys.AddressLine4] = volunteer.Address.AddressLine4,
+                        [PersonalisationKeys.AddressLine5] = volunteer.Address.Town,
+                        [PersonalisationKeys.AddressLine6] = volunteer.Address.Postcode
                     };
 
                     foreach (var field in addressFields)
                     {
                         if (!string.IsNullOrWhiteSpace(field.Value))
                         {
-                            notification.NotificationDatas.Add(new NotificationData
-                            {
-                                Key = field.Key,
-                                Value = field.Value
-                            });
+                            notification.Personalisation[field.Key] = field.Value;
                         }
                     }
 
-                    notification.NotificationDatas.Add(new NotificationData { Key = "address_postcode", Value = volunteer.Address.Postcode });
-
+                    notification.Personalisation["address_postcode"] = volunteer.Address.Postcode;
                     break;
             }
-
-            await notificationContext.Notifications.AddAsync(notification, cancellationToken);
-
+            
+            notificationRequests.Add(notification);
         }
 
-        await notificationContext.SaveChangesAsync(cancellationToken);
+        await notificationService.SendNotifications(notificationRequests, cancellationToken);
     }
 
-    private IEnumerable<ValidationResult> ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, ContactMethodId campaignTypeId)
+    private IEnumerable<ValidationResult> ValidateParticipantForCampaignType(CampaignParticipantDetails volunteer, NotificationContactMethod campaignTypeId)
     {
         if (string.IsNullOrWhiteSpace(volunteer.FirstName))
+        {
             yield return new ValidationResult("FirstName cannot be null, empty or whitespace");
+        }
+
         if (string.IsNullOrWhiteSpace(volunteer.LastName))
+        {
             yield return new ValidationResult("LastName cannot be null, empty or whitespace");
+        }
 
         switch (campaignTypeId)
         {
-            case ContactMethodId.Email:
+            case NotificationContactMethod.Email:
                 if (string.IsNullOrWhiteSpace(volunteer.Email))
+                {
                     yield return new ValidationResult("Email cannot be null, empty or whitespace");
+                }
+
                 break;
-            case ContactMethodId.Letter:
+            case NotificationContactMethod.Letter:
                 if (volunteer.Address == null)
+                {
                     yield return new ValidationResult("Address cannot be null");
+                }
                 else
                 {
                     if (string.IsNullOrWhiteSpace(volunteer.Address.AddressLine1))
+                    {
                         yield return new ValidationResult("AddressLine1 cannot be null, empty or whitespace");
+                    }
+
                     if (string.IsNullOrWhiteSpace(volunteer.Address.Town))
+                    {
                         yield return new ValidationResult("Town cannot be null, empty or whitespace");
+                    }
+
                     if (string.IsNullOrWhiteSpace(volunteer.Address.Postcode))
+                    {
                         yield return new ValidationResult("Postcode cannot be nnull, empty or whitespaceull");
+                    }
                 }
                 break;
             default:

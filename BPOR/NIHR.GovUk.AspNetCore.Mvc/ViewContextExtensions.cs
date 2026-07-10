@@ -36,8 +36,11 @@ namespace NIHR.GovUk
                     {
                         errors.Add(new([int.MaxValue], errorKeyValuePair));
                     }
-
-                    errors.Add(GetNestedPropertyOrder(errorKeyValuePair, pathToErrorModelProperties, modelProperties));
+                    else
+                    {
+                        errors.Add(GetNestedPropertyOrder(errorKeyValuePair, pathToErrorModelProperties,
+                            modelProperties));
+                    }
                 }
             }
 

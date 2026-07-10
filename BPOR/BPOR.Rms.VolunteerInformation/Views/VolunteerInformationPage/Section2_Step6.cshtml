@@ -1,0 +1,13 @@
+﻿@model BPOR.Rms.VolunteerInformation.Models.VsiEditModel
+@inherits BPOR.Rms.VolunteerInformation.Views.VolunteerInformationPage.ViewBase<VsiEditModel>
+
+@{
+    SetFlowBackAction("Section2_Step5");
+    ViewData.SetSectionName(Resources.Section2Name);
+    Layout = "_VsiEditLayoutForm";
+}
+
+<form-group for="StudyFormat" label-class="govuk-heading-l">
+    <textarea rows="5" class="govuk-textarea" asp-for="StudyFormat"  maxlength="@Constants.StudyFormatMaxLength"></textarea>
+    <body-text>You can add up to @Constants.StudyFormatMaxLength characters</body-text>
+</form-group>

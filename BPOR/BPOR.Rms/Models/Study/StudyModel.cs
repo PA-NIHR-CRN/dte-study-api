@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using BPOR.Rms.Utilities;
+using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.Models.Study;
 
@@ -80,5 +82,30 @@ public class StudyModel
     [Display(Name = "Email campaign information URL")]
     [StudyEdit(3)]
     public string? InformationUrl { get; set; }
+    
+    [ValueDisplayFormatter(typeof(YesNoFormatter))]
+    [Display(Name = "Will this study have more than one research location in the UK?")]
+    [StudyEdit(4)]
+    public bool? HasMultipleResearchLocations { get; set; }
+    
 
+    [ValueDisplayFormatter(typeof(YesNoFormatter))]
+    [Display(Name = "Will one person be responsible for recruiting or screening for this study using Be Part of Research?")]
+    [StudyEdit(5)]
+    public bool? SinglePersonResponsibleForRecruiting { get; set; }
+    
+    [Display(Name = "Pre-screener link")]
+    [StudyEdit(6)]
+    public string? PreScreenerUrl { get; set; }
+    
+
+    public bool IsEligibilityCriteriaComplete =>
+        HasMultipleResearchLocations.HasValue && SinglePersonResponsibleForRecruiting.HasValue;
+
+    public bool IsEligibleForPrescreener =>
+        IsEligibilityCriteriaComplete && !(HasMultipleResearchLocations!.Value && SinglePersonResponsibleForRecruiting!.Value);
+
+    [Display(Name = "Volunteer study information page link")]
+    public string? VolunteerInformationUrl { get; set; }
 }
+

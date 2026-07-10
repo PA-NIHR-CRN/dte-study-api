@@ -1,13 +1,17 @@
 using BPOR.Domain.Entities;
+using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
 using BPOR.Rms.Startup;
 using BPOR.Rms.Validators;
+using BPOR.Rms.VolunteerInformation.Data;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NIHR.GovUk.AspNetCore.Mvc;
+using NIHR.Infrastructure.AspNetCore.Validation;
 using NIHR.Infrastructure.Paging;
+using UserRole = BPOR.Domain.Enums.UserRole;
 
 namespace BPOR.Rms.Controllers;
 
@@ -65,7 +69,8 @@ public class StudyController(
 
 
     // GET: Study/Details/5
-    public async Task<IActionResult> Details(int? id)
+    public async Task<IActionResult> Details([FromServices] IVipRepository repository, int? id,
+        CancellationToken cancellationToken)
     {
         if (id == null)
         {
@@ -75,12 +80,81 @@ public class StudyController(
         var study = await context.Studies
             .Where(s => s.Id == id)
             .AsStudyDetailsViewModel()
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (study == null)
         {
             logger.LogWarning("[HttpGet]Details called with non-existent study: {StudyId}", id);
             return NotFound();
+        }
+        
+        var isAdmin = currentUserProvider.User.HasRole(UserRole.Admin);
+        var isResearcher = currentUserProvider.User.HasRole(UserRole.Researcher);
+        var isIdentifiable = study.Study.IsRecruitingIdentifiableParticipants;
+        var updateRecruitmentAction = isIdentifiable ? "UpdateRecruited" : "UpdateAnonymousRecruited";
+        var updateRecruitmentButtonText = isIdentifiable ? "Add enrolments" : "Update recruitment total";
+
+        var canUpdateRecruitmentTotal = isIdentifiable
+            ? study.HasCampaigns
+            : isAdmin || (study.HasCampaigns && isResearcher);
+
+        var vsiStatus = await repository.GetVipStatus(id.Value, cancellationToken);
+        
+        study.ActionLinks = new();
+
+        if (isAdmin)
+        {
+            switch (vsiStatus)
+            {
+                case null:
+                    study.ActionLinks.Add(new ActionLink
+                    {
+                        Text = "Create volunteer study information page",
+                        Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
+                    });
+                    break;
+                case VsiStatus.Draft:
+                    study.ActionLinks.Add(new ActionLink
+                    {
+                        Text = "Resume volunteer study information page",
+                        Url = Url.Action("Start", "VolunteerInformationStart", new { studyId = id.Value })
+                    });
+                    break;
+                case VsiStatus.Active:
+                    study.ActionLinks.Add(new ActionLink
+                    {
+                        Text = "Preview volunteer study information page",
+                        Url = Url.Action("PreviewVip", "VolunteerInformationPage", new { studyId = id.Value }),
+                        Target = HyperlinkTarget.Blank
+                    });
+                    break;
+            }
+        }
+
+        if (canUpdateRecruitmentTotal)
+        {
+            study.ActionLinks.Add(new ActionLink
+            {
+                Text = updateRecruitmentButtonText,
+                Url = Url.Action(updateRecruitmentAction, "Volunteer", new { studyId = id })
+            });
+        }
+
+        if (isAdmin)
+        {
+            study.ActionLinks.AddRange(
+            [
+                new ActionLink
+                {
+                    Text = "Find volunteers",
+                    Url = Url.Action("Index", "Filter", new { studyId = id })
+                },
+                new ActionLink
+                {
+                    Text = "Send an email",
+                    Url = Url.Action("Index", "ResearcherEmail", new { studyId = id })
+                }
+            ]);
         }
 
         return View(study);
@@ -224,6 +298,12 @@ public class StudyController(
                 return validator.ValidateSpecificProperties(model, i => i.StudyName, i => i.IsRecruitingIdentifiableParticipants, i=>i.CpmsId);
             case 3:
                 return validator.ValidateSpecificProperties(model, i => i.InformationUrl);
+            case 4:
+                return validator.ValidateSpecificProperties(model, i => i.HasMultipleResearchLocations);
+            case 5:
+                return validator.ValidateSpecificProperties(model, i => i.SinglePersonResponsibleForRecruiting);
+            case 6:
+                return validator.ValidateSpecificProperties(model, i => i.PreScreenerUrl);
             default:
                 throw new ArgumentOutOfRangeException(nameof(model.Step));
         }
@@ -243,12 +323,15 @@ public class StudyController(
             {nameof(StudyFormViewModel.Step)},
             {nameof(StudyFormViewModel.InformationUrl)},
             {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)},
-            {nameof(StudyFormViewModel.IsRecruitingIdentifiableParticipants)}")]
+            {nameof(StudyFormViewModel.IsRecruitingIdentifiableParticipants)},
+            {nameof(StudyFormViewModel.SinglePersonResponsibleForRecruiting)},
+            {nameof(StudyFormViewModel.HasMultipleResearchLocations)},
+            {nameof(StudyFormViewModel.PreScreenerUrl)}")]
         StudyFormViewModel model)
     {
         model.Id = id;
 
-        if (model.Step is < 1 or > 3)
+        if (model.Step is < 1 or > 6)
         {
             logger.LogWarning("[HttpPost]Edit called with step out of range: {Step}", model.Step);
             return BadRequest($"Step out of range: {model.Step}");
@@ -308,6 +391,15 @@ public class StudyController(
                         ? null
                         : model.InformationUrl.Trim();
                     break;
+                case 4:
+                    studyToUpdate.HasMultipleResearchLocations = model.HasMultipleResearchLocations;
+                    break;
+                case 5:
+                    studyToUpdate.SinglePersonResponsibleForRecruiting = model.SinglePersonResponsibleForRecruiting;
+                    break;
+                case 6:
+                    studyToUpdate.PreScreenerUrl = model.PreScreenerUrl;
+                    break;
             }
                   
             studyToUpdate.UpdatedAt = DateTime.UtcNow;
@@ -341,5 +433,26 @@ public class StudyController(
     private bool StudyExists(int id)
     {
         return context.Studies.Any(e => e.Id == id);
+    }
+
+    public async Task<IActionResult> SendIntroductoryEmail(int id)
+    {
+        var studyModel = await context.Studies
+            .Where(s => s.Id == id)
+            .AsStudyDetailsViewModel()
+            .FirstOrDefaultAsync();
+
+        if (studyModel == null)
+        {
+            logger.LogWarning("[HttpGet]Edit called with non-existent study: {StudyId}", id);
+            return NotFound();
+        }
+
+        if (!studyModel.Study.IsEligibilityCriteriaComplete)
+        {
+            return BadRequest(ModelState);
+        }
+
+        return View(studyModel);
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using NIHR.Infrastructure.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace BPOR.Domain.Entities;
 
@@ -9,7 +10,7 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
 {
     public ParticipantDbContext CreateDbContext(string[] args)
     {
-        // TODO: make this more consistent. Base factory in NIHR.Infrastructure.EntityFrameworkCore.
+// TODO: make this more consistent. Base factory in NIHR.Infrastructure.EntityFrameworkCore.
         IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.user.json", optional: true)
@@ -31,7 +32,7 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
                 x.CommandTimeout(300);
             })
             .Options;
-
+        
 
         return new ParticipantDbContext(options);
     }

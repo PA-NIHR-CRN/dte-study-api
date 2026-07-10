@@ -20,8 +20,12 @@ COPY "BPOR/NIHR.Infrastructure.AspNetCore" "NIHR.Infrastructure.AspNetCore"
 COPY "BPOR/NIHR.Infrastructure.EntityFrameworkCore" "NIHR.Infrastructure.EntityFrameworkCore"
 COPY "BPOR/NIHR.Infrastructure.EntityFrameworkCore.MySql" "NIHR.Infrastructure.EntityFrameworkCore.MySql"
 COPY "BPOR/NIHR.NotificationService" "NIHR.NotificationService"
+COPY "BPOR/NIHR.NotificationService.GovUkNotify" "NIHR.NotificationService.GovUkNotify"
 COPY "BPOR/NIHR.GovUk.AspNetCore.Mvc" "NIHR.GovUk.AspNetCore.Mvc"
 COPY "BPOR/NIHR.Geometry" "NIHR.Geometry"
+COPY "BPOR/BPOR.Rms.VolunteerInformation" "BPOR.Rms.VolunteerInformation"
+COPY "BPOR/BPOR.Rms.Abstractions" "BPOR.Rms.Abstractions"
+COPY "BPOR/NIHR.Rts.Client" "NIHR.Rts.Client"
 
 WORKDIR "/src/BPOR.Rms"
 RUN dotnet build "BPOR.Rms.csproj" -c $BUILD_CONFIGURATION -o /app/build
