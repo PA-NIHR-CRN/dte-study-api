@@ -2,12 +2,20 @@ using System.Diagnostics;
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Infrastructure.Services.Development;
 using BPOR.Rms.Startup;
-using BPOR.Rms.VolunteerInformation;
 using Microsoft.AspNetCore.Authorization;
 using NIHR.Infrastructure.Interfaces;
+using Serilog;
 
 var builder = WebApplication
     .CreateBuilder(args);
+
+builder.Host.UseSerilog((context, config) =>
+{
+    config
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Console();
+});
 
 builder.AddNihrConfiguration();
 
