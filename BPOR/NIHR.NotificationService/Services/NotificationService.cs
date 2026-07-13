@@ -62,6 +62,8 @@ public class NotificationService(IDownstreamNotificationService downstreamServic
                     switch (result.Status)
                     {
                         case SendNotificationStatus.Success:
+                            logger.LogInformation("Notification {QueueId} {Reference} sent successfully", 
+                                notification.Id, sendNotificationRequest.Reference);
                             notification.IsProcessed = true;
                             await db.SaveChangesAsync(cancellationToken);
                             await ProcessDeliveryCallback(sendNotificationRequest.Reference, result.DeliveryStatus!.Value, cancellationToken);
@@ -70,8 +72,12 @@ public class NotificationService(IDownstreamNotificationService downstreamServic
                             // Implement back pressure mechanism and/or limit retries. For now
                             // abandon the rest of the batch so that the hosted service retries
                             // after a short interval.
+                            logger.LogWarning("Notification {QueueId} {Reference} rejected with temporary failure", 
+                                notification.Id, sendNotificationRequest.Reference);
                             return;
                         case SendNotificationStatus.PermanentFailure:
+                            logger.LogError("Notification {QueueId} {Reference} rejected with permanent failure: {ErrorMessage}", 
+                                notification.Id, sendNotificationRequest.Reference, result.ErrorMessage);
                             notification.IsProcessed = true;
                             await db.SaveChangesAsync(cancellationToken);
                             await ProcessDeliveryCallback(sendNotificationRequest.Reference, NotificationDeliveryStatus.PermanentFailure, cancellationToken);

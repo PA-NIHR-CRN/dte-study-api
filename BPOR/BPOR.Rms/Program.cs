@@ -5,6 +5,7 @@ using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authorization;
 using NIHR.Infrastructure.Interfaces;
 using Serilog;
+using Serilog.Formatting.Json;
 
 var builder = WebApplication
     .CreateBuilder(args);
@@ -13,8 +14,17 @@ builder.Host.UseSerilog((context, config) =>
 {
     config
         .ReadFrom.Configuration(context.Configuration)
-        .Enrich.FromLogContext()
-        .WriteTo.Console();
+        .Enrich.FromLogContext();
+    
+    if (builder.Environment.IsDevelopment())
+    {
+        config.WriteTo.Console();
+    }
+    else
+    {
+        // Use a JSON formatter for CloudWatch
+        config.WriteTo.Console(new JsonFormatter());
+    }
 });
 
 builder.AddNihrConfiguration();
