@@ -176,5 +176,8 @@ IHostEnvironment hostEnvironment)
 
             return instance;
         }
+
+        public static bool IsRunningInContainer(this IConfiguration configuration) => 
+            bool.TryParse(configuration["DOTNET_RUNNING_IN_CONTAINER"], out var value) && value;
     }
 }

@@ -7,6 +7,7 @@ using NIHR.Infrastructure.Interfaces;
 using Serilog;
 using Serilog.Formatting.Json;
 
+
 var builder = WebApplication
     .CreateBuilder(args);
 
@@ -15,10 +16,16 @@ builder.Host.UseSerilog((context, config) =>
     config
         .ReadFrom.Configuration(context.Configuration)
         .Enrich.FromLogContext();
-    
-    // Use a JSON formatter for CloudWatch
-    config.WriteTo.Console(new JsonFormatter());
-    
+
+    if (context.Configuration.IsRunningInContainer())
+    {
+        // Use a JSON formatter for CloudWatch
+        config.WriteTo.Console(new JsonFormatter());
+    }
+    else
+    {
+        config.WriteTo.Console();
+    }
 });
 
 builder.AddNihrConfiguration();
