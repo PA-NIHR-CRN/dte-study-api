@@ -16,15 +16,9 @@ builder.Host.UseSerilog((context, config) =>
         .ReadFrom.Configuration(context.Configuration)
         .Enrich.FromLogContext();
     
-    if (builder.Environment.IsDevelopment())
-    {
-        config.WriteTo.Console();
-    }
-    else
-    {
-        // Use a JSON formatter for CloudWatch
-        config.WriteTo.Console(new JsonFormatter());
-    }
+    // Use a JSON formatter for CloudWatch
+    config.WriteTo.Console(new JsonFormatter());
+    
 });
 
 builder.AddNihrConfiguration();
