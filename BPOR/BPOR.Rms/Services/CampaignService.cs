@@ -167,7 +167,7 @@ public class CampaignService(
     private void ProcessVolunteer(CampaignParticipantDetails volunteer, Campaign campaign, FilterCriteria dbFilter,
         ProcessingResults processingResult, int deliveryStatusId)
     {
-        
+
         processingResult.CampaignParticipant.Add(new CampaignParticipant
         {
             CampaignId = campaign.Id,
@@ -175,8 +175,10 @@ public class CampaignService(
             ParticipantId = volunteer.Id,
             DeliveryStatusId = deliveryStatusId,
             SentAt = DateTime.UtcNow,
-            Token = tokenGenerator.GenerateToken(new VipToken(
-                VipTokenPurpose.Volunteer,campaign.Id, volunteer.Id, dbFilter.StudyId.Value ))
+            Token = dbFilter.StudyId.HasValue
+                ? tokenGenerator.GenerateToken(new VipToken(
+                    VipTokenPurpose.Volunteer, campaign.Id, volunteer.Id, dbFilter.StudyId.Value))
+                : null
         });
 
         if (dbFilter is { Study.IsRecruitingIdentifiableParticipants: true, StudyId: not null })
@@ -202,7 +204,7 @@ public class CampaignService(
             studyParticipant.Reference = newReference;
         }
     }
-    
+
     public static ContactMethodId ToContactMethodId(NotificationContactMethod contactMethodId) =>
         contactMethodId switch
         {
@@ -252,28 +254,31 @@ public class CampaignService(
                 reference = $"no-study.{campaignParticipant.Id}";
             }
 
-            string link;
+            string link = string.Empty;
 
-            var vipStatus = await vipRepository.GetVipStatus(campaign.FilterCriteria.StudyId.Value, cancellationToken);
-            if (vipStatus == VsiStatus.Active)
+            if (campaign.FilterCriteria.StudyId.HasValue)
             {
-                var queryParams = new Dictionary<string, string>
+                var vipStatus = await vipRepository.GetVipStatus(campaign.FilterCriteria.StudyId.Value, cancellationToken);
+                if (vipStatus == VsiStatus.Active)
+                {
+                    var queryParams = new Dictionary<string, string>
                 {
                     { "token", campaignParticipant.Token }
                 };
 
-                link = QueryHelpers.AddQueryString(vsiSettings.Value.BporVipUri, queryParams);
-            }
-            else
-            {
-                var baseUri = new Uri(callback);
-                var queryParams = new Dictionary<string, string>
+                    link = QueryHelpers.AddQueryString(vsiSettings.Value.BporVipUri, queryParams);
+                }
+                else
+                {
+                    var baseUri = new Uri(callback);
+                    var queryParams = new Dictionary<string, string>
                 {
                     { "reference", encryptionService.Encrypt(campaignParticipant.Id.ToString()) }
                 };
 
-                var uriWithQuery = new Uri(QueryHelpers.AddQueryString(baseUri.ToString(), queryParams));
-                link = uriWithQuery.ToString();
+                    var uriWithQuery = new Uri(QueryHelpers.AddQueryString(baseUri.ToString(), queryParams));
+                    link = uriWithQuery.ToString();
+                }
             }
 
             var notification = new UnkeyedSendNotificationRequest()
@@ -287,7 +292,7 @@ public class CampaignService(
                     [CampaignPersonalisationKeys.FirstName] = volunteer.FirstName,
                     [CampaignPersonalisationKeys.LastName] = volunteer.LastName,
                     [CampaignPersonalisationKeys.UniqueLink] = link,
-                    [CampaignPersonalisationKeys.StudyName] = campaign.FilterCriteria.Study.StudyName,
+                    [CampaignPersonalisationKeys.StudyName] = campaign.FilterCriteria.Study?.StudyName ?? string.Empty,
                     [CampaignPersonalisationKeys.UniqueReference] = reference
                 }
             };
@@ -320,7 +325,7 @@ public class CampaignService(
                     notification.Personalisation["address_postcode"] = volunteer.Address.Postcode;
                     break;
             }
-            
+
             notificationRequests.Add(notification);
         }
 
@@ -372,7 +377,7 @@ public class CampaignService(
                 }
                 break;
             default:
-                yield return new ValidationResult( "Invalid campaign type id");
+                yield return new ValidationResult("Invalid campaign type id");
                 break;
         }
     }
