@@ -77,7 +77,7 @@ jobs:
             ecs_service: crnccs-ecs-uat-bpor-rms-service
             ecs_cluster: crnccs-ecs-uat-bpor-rms-cluster
             app_config_secret: ${{ secrets.BPOR_RMS_APP_CONFIG_SECRET_UAT }}
-            aspnetcore_environment: Development
+            aspnetcore_environment: Staging
           - env: OAT
             aws_access_key_id: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_ID }}
             aws_secret_access_key: ${{ secrets.CRNCC_PROD_IAM_ACCESS_KEY_SECRET }}
