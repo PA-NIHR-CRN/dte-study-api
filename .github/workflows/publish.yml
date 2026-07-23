@@ -1,0 +1,58 @@
+name: Publish RMS NuGet Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number for manual trigger (e.g., 1.0.0-preview)'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.x'  # Use your target .NET version
+
+      - name: Add GitHub Package Source
+        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name PA-NIHR-CRN "https://nuget.pkg.github.com/PA-NIHR-CRN/index.json"
+
+      - name: Restore dependencies
+        run: dotnet restore ./BPOR/BPOR.Rms.Packages.slnf
+
+      - name: Determine version from tag or input
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+              # Extract the version from the pushed tag (e.g., v1.0.0 -> 1.0.0)
+              echo "Extracting version from tag: ${GITHUB_REF#refs/tags/v}"
+              echo "##[set-output name=VERSION;]${GITHUB_REF#refs/tags/v}"
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+              # Extract the version from the pushed tag (e.g., v1.0.0 -> 1.0.0)
+              echo "Using fixed test version"
+              echo "VERSION='1.0.1-preview'" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ github.event.inputs.version }}" ]; then
+              # Use the version from the manual input
+              echo "Using manually provided version: ${{ github.event.inputs.version }}"
+              echo "##[set-output name=VERSION;]${{ github.event.inputs.version }}"
+          else
+              # Fail if no version is provided
+              echo "Error: No version provided via input or tag."
+              exit 1
+          fi
+
+      - name: Build the solution
+        run: dotnet build --configuration Release ./BPOR/BPOR.Rms.Packages.slnf
+
+      - name: Pack the NuGet package with dynamic version
+        run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.get_version.outputs.VERSION }} --output ./nupkgs ./BPOR/BPOR.Rms.Packages.slnf
+
+      - name: Push NuGet package to GitHub Packages
+        run: dotnet nuget push ./nupkgs/*.nupkg --source https://nuget.pkg.github.com/pa-nihr-crn/index.json --api-key ${{ secrets.GITHUB_TOKEN }}
