@@ -1,0 +1,9 @@
+﻿{
+  "solution": {
+    "path": "BPOR.sln",
+    "projects": [
+      "BPOR.Rms.Abstractions\\BPOR.Rms.Abstractions.csproj",
+      "BPOR.Rms.ApiClient\\BPOR.Rms.ApiClient.csproj"
+    ]
+  }
+}
