@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 
-[AllowAnonymous]
 public abstract class VipControllerBase<TContext> : Controller
     where TContext : VsiEditContext, new()
 {
