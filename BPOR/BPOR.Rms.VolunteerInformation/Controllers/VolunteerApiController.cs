@@ -35,7 +35,7 @@ public class VolunteerController : ControllerBase
             return NotFound();
         }
 
-        if (string.IsNullOrWhiteSpace(campaignParticipant.Token))
+        if (string.IsNullOrWhiteSpace(campaignParticipant.Token) && campaignParticipant.Campaign.FilterCriteria.StudyId.HasValue)
         {
             campaignParticipant.Token = vipTokenGenerator.GenerateToken(new VipToken(VipTokenPurpose.Volunteer,
                 campaignParticipant.CampaignId, campaignParticipant.ParticipantId,
