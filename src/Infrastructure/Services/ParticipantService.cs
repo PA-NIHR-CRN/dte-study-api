@@ -1,4 +1,3 @@
-using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -89,7 +88,7 @@ public class ParticipantService : IParticipantService
             NhsId = request.NhsId,
             NhsNumber = request.NhsNumber,
             Email = request.Email,
-            ParticipantId = request.NhsId,
+            ParticipantId = participant.ParticipantId,
             Firstname = request.Firstname,
             Lastname = request.Lastname,
             ConsentRegistration = participant.ConsentRegistration,
