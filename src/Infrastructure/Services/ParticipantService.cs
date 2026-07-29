@@ -1,10 +1,3 @@
-using System;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using Amazon.CognitoIdentityProvider;
-using Amazon.CognitoIdentityProvider.Model;
-using Application.Constants;
 using Application.Contracts;
 using Application.Mappings.Participants;
 using Application.Models.MFA;
@@ -104,8 +97,8 @@ public class ParticipantService : IParticipantService
             .GetParticipantDemographicsAsync(participant.Pk.Replace("PARTICIPANT#", ""));
         if (demographics.HasDemographics)
         {
+            entity.ApplyDemographics(demographics);
             await _participantRepository.CreateParticipantDetailsAsync(entity);
-            await _participantRepository.AddDemographicsToNhsUserAsync(demographics, entity.NhsId);
         }
         else if (participant.ConsentRegistration)
         {

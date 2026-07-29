@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Amazon.DynamoDBv2.DataModel;
 using Domain.Converters;
 
 namespace Domain.Entities.Participants;
@@ -39,4 +36,23 @@ public class Participant
     [DynamoDBProperty] public List<string> HealthConditionInterests { get; set; }
 
     public bool HasDemographics => SexRegisteredAtBirth != null;
+
+    public void ApplyDemographics(ParticipantDemographics demographics)
+    {
+        if (demographics == null)
+        {
+            return;
+        }
+
+        MobileNumber = demographics.MobileNumber;
+        LandlineNumber = demographics.LandlineNumber;
+        Address = demographics.Address;
+        SexRegisteredAtBirth = demographics.SexRegisteredAtBirth;
+        GenderIsSameAsSexRegisteredAtBirth = demographics.GenderIsSameAsSexRegisteredAtBirth;
+        EthnicGroup = demographics.EthnicGroup;
+        EthnicBackground = demographics.EthnicBackground;
+        Disability = demographics.Disability;
+        DisabilityDescription = demographics.DisabilityDescription;
+        HealthConditionInterests = demographics.HealthConditionInterests;
+    }
 }
