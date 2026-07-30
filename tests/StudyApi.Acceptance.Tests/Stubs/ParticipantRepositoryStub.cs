@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Contracts;
@@ -120,5 +121,19 @@ public class ParticipantRepositoryStub : IParticipantRepository
         var detail = _participantDetails.FirstOrDefault(x => x.NhsNumber == nhsNumber);
 
         return await Task.FromResult(detail);
+    }
+
+    public Task<IReadOnlyCollection<ParticipantDetails>> GetAllParticipantDetailsByEmailAsync(string email)
+    {
+        IReadOnlyCollection<ParticipantDetails> details =
+            _participantDetails
+                .Where(x =>
+                    string.Equals(
+                        x.Email,
+                        email,
+                        StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        return Task.FromResult(details);
     }
 }
