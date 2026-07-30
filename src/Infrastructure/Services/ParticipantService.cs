@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
-using Application.Constants;
 using Application.Contracts;
 using Application.Mappings.Participants;
 using Application.Models.MFA;
@@ -224,35 +223,40 @@ public class ParticipantService : IParticipantService
         try
         {
             var entity = await _participantRepository.GetParticipantDetailsAsync(participantId);
-            if (entity == null) return;
 
-            var linkedEmail = entity.Email;
-            await SaveAnonymisedDemographicParticipantDataAsync(entity);
-            await RemoveParticipantDataAsync(entity);
-
-
-            while (true)
+            if (entity == null)
             {
-                var linkedEntity = await GetParticipantDetailsByEmailAsync(linkedEmail);
-
-                if (linkedEntity == null)
-                {
-                    break;
-                }
-
-                await RemoveParticipantDataAsync(linkedEntity);
+                return;
             }
 
-             var contentfulEmailRequest = new EmailContentRequest
+            var email = entity.Email;
+            var selectedLocale = entity.SelectedLocale ?? SelectedLocale.Default;
+
+            await SaveAnonymisedDemographicParticipantDataAsync(entity);
+
+            var participants = await _participantRepository.GetAllParticipantDetailsByEmailAsync(email);
+
+            var participantsToDelete = participants
+                .Append(entity)
+                .Where(x => x != null)
+                .GroupBy(x => x.Pk)
+                .Select(x => x.First())
+                .ToList();
+
+            foreach (var participant in participantsToDelete)
+            {
+                await RemoveParticipantDataAsync(participant);
+            }
+
+            var contentfulEmailRequest = new EmailContentRequest
             {
                 EmailName = _contentfulSettings.EmailTemplates.DeleteAccount,
-                SelectedLocale = new CultureInfo(entity.SelectedLocale ?? SelectedLocale.Default)
+                SelectedLocale = new CultureInfo(selectedLocale)
             };
 
             var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
 
-            await _emailService.SendEmailAsync(entity.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
-
+            await _emailService.SendEmailAsync(email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
         }
         catch (Exception ex)
         {

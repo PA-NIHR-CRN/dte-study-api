@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
@@ -75,6 +74,55 @@ namespace Infrastructure.Persistence
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        public async Task<IReadOnlyCollection<ParticipantDetails>> GetAllParticipantDetailsByEmailAsync(string email)
+        {
+            var results = new List<ParticipantDetails>();
+            Dictionary<string, AttributeValue> lastEvaluatedKey = null;
+
+            do
+            {
+                var request = new QueryRequest
+                {
+                    TableName = _config.OverrideTableName,
+                    IndexName = "EmailIndex",
+                    KeyConditionExpression = "Email = :email",
+                    ExpressionAttributeValues =
+                        new Dictionary<string, AttributeValue>
+                        {
+                            [":email"] = new AttributeValue
+                            {
+                                S = email.ToLowerInvariant()
+                            }
+                        },
+                    ExclusiveStartKey = lastEvaluatedKey
+                };
+
+                var response = await _client.QueryAsync(request);
+
+                foreach (var item in response.Items)
+                {
+                    var indexParticipant = _context.FromDocument<ParticipantDetails>(Document.FromAttributeMap(item));
+
+                    var participantId = indexParticipant.Pk.Replace("PARTICIPANT#", "");
+
+                    var fullParticipant = await GetParticipantDetailsAsync(participantId);
+
+                    if (fullParticipant != null)
+                    {
+                        results.Add(fullParticipant);
+                    }
+                }
+
+                lastEvaluatedKey = response.LastEvaluatedKey?.Count > 0 ? response.LastEvaluatedKey : null;
+            }
+            while (lastEvaluatedKey != null);
+
+            return results
+                .GroupBy(x => x.Pk)
+                .Select(x => x.First())
+                .ToList();
         }
 
         public async Task<ParticipantDemographics> GetParticipantDemographicsAsync(string participantId)
