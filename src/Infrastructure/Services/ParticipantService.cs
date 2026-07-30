@@ -241,9 +241,17 @@ public class ParticipantService : IParticipantService
             await RemoveParticipantDataAsync(entity);
 
 
-            var linkedEntity = await GetParticipantDetailsByEmailAsync(linkedEmail);
-            if (linkedEntity == null) return;
-            await RemoveParticipantDataAsync(linkedEntity);
+            while (true)
+            {
+                var linkedEntity = await GetParticipantDetailsByEmailAsync(linkedEmail);
+
+                if (linkedEntity == null)
+                {
+                    break;
+                }
+
+                await RemoveParticipantDataAsync(linkedEntity);
+            }
         }
         catch (Exception ex)
         {
@@ -286,7 +294,16 @@ public class ParticipantService : IParticipantService
         var participantId = StripPrimaryKey(entity.Pk);
         if (entity.NhsId == null)
         {
-            await RemoveCognitoUserAsync(participantId);
+            try
+            {
+                await RemoveCognitoUserAsync(participantId);
+            }
+            catch (UserNotFoundException)
+            {
+                _logger.LogInformation(
+                    "Cognito user not found for participant {ParticipantId}.",
+                    participantId);
+            }
         }
 
         await _participantRepository.DeleteParticipantDetailsAsync(entity);
