@@ -86,9 +86,9 @@ namespace Infrastructure.Persistence
         public async Task CreateParticipantDetailsAsync(ParticipantDetails entity)
         {
             // TODO pull out this logic into a mapper
-            entity.Pk = ParticipantKey(string.IsNullOrEmpty(entity.ParticipantId)
-                ? entity.NhsId
-                : entity.ParticipantId);
+            entity.Pk = ParticipantKey(string.IsNullOrEmpty(entity.NhsId)
+                ? entity.ParticipantId
+                : entity.NhsId);
             entity.Sk = ParticipantKey();
 
             await _context.SaveAsync(entity, _config);
