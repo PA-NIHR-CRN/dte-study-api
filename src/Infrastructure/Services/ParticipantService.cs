@@ -226,16 +226,6 @@ public class ParticipantService : IParticipantService
             var entity = await _participantRepository.GetParticipantDetailsAsync(participantId);
             if (entity == null) return;
 
-            var contentfulEmailRequest = new EmailContentRequest
-            {
-                EmailName = _contentfulSettings.EmailTemplates.DeleteAccount,
-                SelectedLocale = new CultureInfo(entity.SelectedLocale ?? SelectedLocale.Default)
-            };
-
-            var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
-
-            await _emailService.SendEmailAsync(entity.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
-
             var linkedEmail = entity.Email;
             await SaveAnonymisedDemographicParticipantDataAsync(entity);
             await RemoveParticipantDataAsync(entity);
@@ -252,6 +242,17 @@ public class ParticipantService : IParticipantService
 
                 await RemoveParticipantDataAsync(linkedEntity);
             }
+
+             var contentfulEmailRequest = new EmailContentRequest
+            {
+                EmailName = _contentfulSettings.EmailTemplates.DeleteAccount,
+                SelectedLocale = new CultureInfo(entity.SelectedLocale ?? SelectedLocale.Default)
+            };
+
+            var contentfulEmail = await _contentfulService.GetEmailContentAsync(contentfulEmailRequest);
+
+            await _emailService.SendEmailAsync(entity.Email, contentfulEmail.EmailSubject, contentfulEmail.EmailBody);
+
         }
         catch (Exception ex)
         {
