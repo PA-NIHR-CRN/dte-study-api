@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.Model;
 using Domain.Entities.Participants;
@@ -16,5 +17,6 @@ namespace Application.Contracts
         Task DeleteParticipantDetailsAsync(ParticipantDetails entity);
         Task CreateAnonymisedDemographicParticipantDataAsync(ParticipantDetails entity);
         Task<ParticipantDetails> QueryIndexForParticipantDetailsAsync(string query, string colName);
+        Task<IReadOnlyCollection<ParticipantDetails>> GetAllParticipantDetailsByEmailAsync(string email);
     }
 }
