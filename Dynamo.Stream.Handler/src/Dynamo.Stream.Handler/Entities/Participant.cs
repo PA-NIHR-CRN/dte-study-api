@@ -75,5 +75,6 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
         HasLongTermCondition = null; // TODO: confirm we are clearing this but not DailyLifeImpact?
         Address?.Anonymise();
         HealthConditions.Clear();
+        NHSNumber = null;
     }
 }
