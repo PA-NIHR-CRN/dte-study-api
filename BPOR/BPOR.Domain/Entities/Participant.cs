@@ -76,9 +76,9 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
         LandlineNumber = null;
         RegistrationConsent = false;
         RemovalOfConsentRegistrationAtUtc = DateTime.UtcNow;
+        NHSNumber = null;
         HasLongTermCondition = null; // TODO: confirm we are clearing this but not DailyLifeImpact?
         Address?.Anonymise();
         HealthConditions?.Clear();
-        NHSNumber = null;
     }
 }
