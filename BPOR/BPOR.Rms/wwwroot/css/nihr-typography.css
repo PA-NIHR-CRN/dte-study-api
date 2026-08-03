@@ -36,9 +36,9 @@ a:focus {
 }
 
 .govuk-heading-l {
-    color: #193E72;
+    color: black;
     font-feature-settings: 'clig' off, 'liga' off;
-    font-size: 36px;
+    font-size: 50px;
     font-style: normal;
     font-weight: 700;
     line-height: 54px;
@@ -46,11 +46,11 @@ a:focus {
 }
 
 .govuk-heading-m {
-    color: #193E72;
+    color: grey;
     font-feature-settings: 'clig' off, 'liga' off;
     font-size: 24px;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 500;
     line-height: 36px;
 }
 
