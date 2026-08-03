@@ -235,18 +235,30 @@ public class ParticipantService : IParticipantService
 
             await SaveAnonymisedDemographicParticipantDataAsync(entity);
 
-            var participants = await _participantRepository.GetAllParticipantDetailsByEmailAsync(email);
+            var deletedPks = new HashSet<string>(StringComparer.Ordinal);
 
-            var participantsToDelete = participants
-                .Append(entity)
-                .Where(x => x != null)
-                .GroupBy(x => x.Pk)
-                .Select(x => x.First())
-                .ToList();
-
-            foreach (var participant in participantsToDelete)
+            while (true)
             {
-                await RemoveParticipantDataAsync(participant);
+                var participants = await _participantRepository.GetAllParticipantDetailsByEmailAsync(email);
+
+                var participantsToDelete = participants
+                    .Append(entity)
+                    .Where(x => x != null && !deletedPks.Contains(x.Pk))
+                    .GroupBy(x => x.Pk)
+                    .Select(x => x.First())
+                    .ToList();
+
+                if (participantsToDelete.Count == 0)
+                {
+                    break;
+                }
+
+                foreach (var participant in participantsToDelete)
+                {
+                    await RemoveParticipantDataAsync(participant);
+
+                    deletedPks.Add(participant.Pk);
+                }
             }
 
             var contentfulEmailRequest = new EmailContentRequest

@@ -104,15 +104,10 @@ namespace Infrastructure.Persistence
 
                 foreach (var item in response.Items)
                 {
-                    var indexParticipant = _context.FromDocument<ParticipantDetails>(Document.FromAttributeMap(item));
-
-                    var participantId = indexParticipant.Pk.Replace("PARTICIPANT#", "");
-
-                    var fullParticipant = await GetParticipantDetailsAsync(participantId);
-
-                    if (fullParticipant != null)
+                    var participant = _context.FromDocument<ParticipantDetails>(Document.FromAttributeMap(item));
+                    if (participant != null)
                     {
-                        results.Add(fullParticipant);
+                        results.Add(participant);
                     }
                 }
 
