@@ -69,6 +69,7 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
 
     public void Anonymise()
     {
+        NHSNumber = null;
         Email = null;
         FirstName = null;
         LastName = null;
@@ -76,7 +77,6 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
         LandlineNumber = null;
         RegistrationConsent = false;
         RemovalOfConsentRegistrationAtUtc = DateTime.UtcNow;
-        NHSNumber = null;
         HasLongTermCondition = null; // TODO: confirm we are clearing this but not DailyLifeImpact?
         Address?.Anonymise();
         HealthConditions?.Clear();
