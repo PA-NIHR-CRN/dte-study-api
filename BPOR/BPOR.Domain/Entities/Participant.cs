@@ -79,6 +79,6 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
         RemovalOfConsentRegistrationAtUtc = DateTime.UtcNow;
         HasLongTermCondition = null; // TODO: confirm we are clearing this but not DailyLifeImpact?
         Address?.Anonymise();
-        HealthConditions?.Clear();
+        HealthConditions.Clear();
     }
 }
