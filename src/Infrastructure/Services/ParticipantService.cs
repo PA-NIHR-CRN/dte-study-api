@@ -342,7 +342,7 @@ public class ParticipantService : IParticipantService
             EthnicGroup = entity.EthnicGroup,
             Disability = entity.Disability,
             Address = entity.Address.Clear(),
-            NHSNumber = null
+            NhsNumber = null
         };
 
         await _participantRepository.CreateAnonymisedDemographicParticipantDataAsync(anonEntity);
