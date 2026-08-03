@@ -341,8 +341,7 @@ public class ParticipantService : IParticipantService
             GenderIsSameAsSexRegisteredAtBirth = entity.GenderIsSameAsSexRegisteredAtBirth,
             EthnicGroup = entity.EthnicGroup,
             Disability = entity.Disability,
-            Address = entity.Address.Clear(),
-            NhsNumber = null
+            Address = entity.Address.Clear()
         };
 
         await _participantRepository.CreateAnonymisedDemographicParticipantDataAsync(anonEntity);
