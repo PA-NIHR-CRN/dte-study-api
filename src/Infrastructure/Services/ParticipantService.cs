@@ -97,7 +97,8 @@ public class ParticipantService : IParticipantService
             ConsentRegistrationAtUtc = participant.ConsentRegistration ? _clock.Now() : (DateTime?)null,
             RemovalOfConsentRegistrationAtUtc = (DateTime?)null,
             CreatedAtUtc = _clock.Now(),
-            SelectedLocale = request.SelectedLocale
+            SelectedLocale = request.SelectedLocale,
+            Stage2CompleteUtc = participant.Stage2CompleteUtc
         };
         // check if demographic data is complete
         var demographics = await _participantRepository
