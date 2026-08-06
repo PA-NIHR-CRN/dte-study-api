@@ -115,10 +115,7 @@ namespace Infrastructure.Persistence
             }
             while (lastEvaluatedKey != null);
 
-            return results
-                .GroupBy(x => x.Pk)
-                .Select(x => x.First())
-                .ToList();
+            return results;
         }
 
         public async Task<ParticipantDemographics> GetParticipantDemographicsAsync(string participantId)
@@ -146,14 +143,6 @@ namespace Infrastructure.Persistence
         public async Task CreateParticipantDemographicsAsync(ParticipantDemographics entity)
         {
             entity.Pk = ParticipantKey(entity.ParticipantId);
-            entity.Sk = ParticipantKey();
-
-            await _context.SaveAsync(entity, _config);
-        }
-
-        public async Task AddDemographicsToNhsUserAsync(ParticipantDemographics entity, string nhsId)
-        {
-            entity.Pk = ParticipantKey(nhsId);
             entity.Sk = ParticipantKey();
 
             await _context.SaveAsync(entity, _config);

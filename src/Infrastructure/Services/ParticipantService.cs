@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -235,33 +234,14 @@ public class ParticipantService : IParticipantService
             var selectedLocale = entity.SelectedLocale ?? SelectedLocale.Default;
 
             await SaveAnonymisedDemographicParticipantDataAsync(entity);
+            
+            var participants = await _participantRepository.GetAllParticipantDetailsByEmailAsync(email);
 
-            var deletedPks = new HashSet<string>(StringComparer.Ordinal);
-
-            while (true)
+            foreach (var participant in participants)
             {
-                var participants = await _participantRepository.GetAllParticipantDetailsByEmailAsync(email);
-
-                var participantsToDelete = participants
-                    .Append(entity)
-                    .Where(x => x != null && !deletedPks.Contains(x.Pk))
-                    .GroupBy(x => x.Pk)
-                    .Select(x => x.First())
-                    .ToList();
-
-                if (participantsToDelete.Count == 0)
-                {
-                    break;
-                }
-
-                foreach (var participant in participantsToDelete)
-                {
-                    await RemoveParticipantDataAsync(participant);
-
-                    deletedPks.Add(participant.Pk);
-                }
+                await RemoveParticipantDataAsync(participant);
             }
-
+            
             var contentfulEmailRequest = new EmailContentRequest
             {
                 EmailName = _contentfulSettings.EmailTemplates.DeleteAccount,
