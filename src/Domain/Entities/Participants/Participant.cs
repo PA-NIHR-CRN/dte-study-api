@@ -38,24 +38,26 @@ public class Participant
     [DynamoDBProperty] public string SelectedLocale { get; set; }
     [DynamoDBProperty] public List<string> HealthConditionInterests { get; set; }
 
-    public bool HasDemographics => SexRegisteredAtBirth != null;
+    public bool HasDemographics() => SexRegisteredAtBirth != null;
 
     public void ApplyDemographics(ParticipantDemographics demographics)
     {
-        if (demographics == null)
+        if (demographics == null || !demographics.HasDemographics())
         {
             return;
         }
 
-        MobileNumber = demographics.MobileNumber;
-        LandlineNumber = demographics.LandlineNumber;
+        EthnicGroup = demographics.EthnicGroup;
         Address = demographics.Address;
+        Disability = demographics.Disability;
+        EthnicBackground = demographics.EthnicBackground;
         SexRegisteredAtBirth = demographics.SexRegisteredAtBirth;
         GenderIsSameAsSexRegisteredAtBirth = demographics.GenderIsSameAsSexRegisteredAtBirth;
-        EthnicGroup = demographics.EthnicGroup;
-        EthnicBackground = demographics.EthnicBackground;
-        Disability = demographics.Disability;
-        DisabilityDescription = demographics.DisabilityDescription;
+        MobileNumber = demographics.MobileNumber;
         HealthConditionInterests = demographics.HealthConditionInterests;
+        DisabilityDescription = demographics.DisabilityDescription;
+        LandlineNumber = demographics.LandlineNumber;
+        SelectedLocale = demographics.SelectedLocale;
+        Stage2CompleteUtc = demographics.Stage2CompleteUtc;
     }
 }

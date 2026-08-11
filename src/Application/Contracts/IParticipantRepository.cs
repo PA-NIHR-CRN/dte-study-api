@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Amazon.DynamoDBv2.Model;
 using Domain.Entities.Participants;
 
 namespace Application.Contracts
@@ -12,7 +11,6 @@ namespace Application.Contracts
         Task CreateParticipantDetailsAsync(ParticipantDetails entity);
         Task UpdateParticipantDetailsAsync(ParticipantDetails entity);
         Task CreateParticipantDemographicsAsync(ParticipantDemographics entity);
-        Task AddDemographicsToNhsUserAsync(ParticipantDemographics entity, string nhsId);
         Task UpdateParticipantDemographicsAsync(ParticipantDemographics entity);
         Task DeleteParticipantDetailsAsync(ParticipantDetails entity);
         Task CreateAnonymisedDemographicParticipantDataAsync(ParticipantDetails entity);

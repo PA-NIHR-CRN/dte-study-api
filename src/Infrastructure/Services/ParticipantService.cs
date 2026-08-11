@@ -32,11 +32,10 @@ public class ParticipantService : IParticipantService
     private readonly IEmailService _emailService;
     private readonly IContentfulService _contentfulService;
     private readonly ContentfulSettings _contentfulSettings;
-    private readonly EmailSettings _emailSettings;
 
     public ParticipantService(IParticipantRepository participantRepository, IClock clock,
         IAmazonCognitoIdentityProvider provider, AwsSettings awsSettings,
-        ILogger<UserService> logger, EmailSettings emailSettings,
+        ILogger<UserService> logger,
         IEmailService emailService, IContentfulService contentfulService, ContentfulSettings contentfulSettings)
     {
         _participantRepository = participantRepository;
@@ -47,7 +46,6 @@ public class ParticipantService : IParticipantService
         _emailService = emailService;
         _contentfulService = contentfulService;
         _contentfulSettings = contentfulSettings;
-        _emailSettings = emailSettings;
     }
 
     private static string DeletedKey(Guid primaryKey) => $"DELETED#{primaryKey}";
@@ -89,7 +87,7 @@ public class ParticipantService : IParticipantService
             NhsId = request.NhsId,
             NhsNumber = request.NhsNumber,
             Email = request.Email,
-            ParticipantId = request.NhsId,
+            ParticipantId = participant.ParticipantId,
             Firstname = request.Firstname,
             Lastname = request.Lastname,
             ConsentRegistration = participant.ConsentRegistration,
@@ -98,32 +96,29 @@ public class ParticipantService : IParticipantService
             RemovalOfConsentRegistrationAtUtc = (DateTime?)null,
             CreatedAtUtc = _clock.Now(),
             SelectedLocale = request.SelectedLocale,
-            Stage2CompleteUtc = participant.Stage2CompleteUtc
         };
-        // check if demographic data is complete
+        
         var demographics = await _participantRepository
             .GetParticipantDemographicsAsync(participant.Pk.Replace("PARTICIPANT#", ""));
-        if (demographics.HasDemographics)
-        {
-            entity.ApplyDemographics(demographics);
-            await _participantRepository.CreateParticipantDetailsAsync(entity);
-        }
-        else if (participant.ConsentRegistration)
+
+        entity.ApplyDemographics(demographics);
+        
+        if (entity.ConsentRegistration)
         {
             // create new user with consent and deactivate the old user
             await _participantRepository.CreateParticipantDetailsAsync(entity);
-        }
+            var response = await _provider.AdminDisableUserAsync(new AdminDisableUserRequest
+            {
+                Username = participant.ParticipantId,
+                UserPoolId = _awsSettings.CognitoPoolId
+            }
+            );
 
-        var response = await _provider.AdminDisableUserAsync(new AdminDisableUserRequest
-        {
-            Username = participant.ParticipantId,
-            UserPoolId = _awsSettings.CognitoPoolId
-        }
-        );
-
-        if ((int)response.HttpStatusCode < 200 || (int)response.HttpStatusCode > 299)
-        {
-            throw new AmazonCognitoIdentityProviderException($"Unable to disable user account: {response}");
+            if ((int)response.HttpStatusCode < 200 || (int)response.HttpStatusCode > 299)
+            {
+                _logger.LogError("Unable to disable cognito user account for participantId: {participantId}. Response: {response}",
+                    participant.ParticipantId, response);
+            }
         }
     }
 
@@ -221,11 +216,11 @@ public class ParticipantService : IParticipantService
         await _participantRepository.UpdateParticipantDetailsAsync(participant);
     }
 
-    public async Task DeleteUserAsync(string participantId)
+    public async Task DeleteUserAsync(string requestParticipantId)
     {
         try
         {
-            var entity = await _participantRepository.GetParticipantDetailsAsync(participantId);
+            var entity = await _participantRepository.GetParticipantDetailsAsync(requestParticipantId);
 
             if (entity == null)
             {
@@ -239,28 +234,13 @@ public class ParticipantService : IParticipantService
 
             var deletedPks = new HashSet<string>(StringComparer.Ordinal);
 
-            while (true)
+            var participants = await _participantRepository.GetAllParticipantDetailsByEmailAsync(email);
+
+            foreach (var participant in participants)
             {
-                var participants = await _participantRepository.GetAllParticipantDetailsByEmailAsync(email);
+                await RemoveParticipantDataAsync(participant);
 
-                var participantsToDelete = participants
-                    .Append(entity)
-                    .Where(x => x != null && !deletedPks.Contains(x.Pk))
-                    .GroupBy(x => x.Pk)
-                    .Select(x => x.First())
-                    .ToList();
-
-                if (participantsToDelete.Count == 0)
-                {
-                    break;
-                }
-
-                foreach (var participant in participantsToDelete)
-                {
-                    await RemoveParticipantDataAsync(participant);
-
-                    deletedPks.Add(participant.Pk);
-                }
+                deletedPks.Add(participant.Pk);
             }
 
             var contentfulEmailRequest = new EmailContentRequest
@@ -314,16 +294,7 @@ public class ParticipantService : IParticipantService
         var participantId = StripPrimaryKey(entity.Pk);
         if (entity.NhsId == null)
         {
-            try
-            {
-                await RemoveCognitoUserAsync(participantId);
-            }
-            catch (UserNotFoundException)
-            {
-                _logger.LogInformation(
-                    "Cognito user not found for participant {ParticipantId}.",
-                    participantId);
-            }
+            await RemoveCognitoUserAsync(participantId);
         }
 
         await _participantRepository.DeleteParticipantDetailsAsync(entity);
@@ -331,11 +302,20 @@ public class ParticipantService : IParticipantService
 
     private async Task RemoveCognitoUserAsync(string username)
     {
-        await _provider.AdminDeleteUserAsync(new AdminDeleteUserRequest
+        try
         {
-            UserPoolId = _awsSettings.CognitoPoolId,
-            Username = username
-        });
+            await _provider.AdminDeleteUserAsync(new AdminDeleteUserRequest
+            {
+                UserPoolId = _awsSettings.CognitoPoolId,
+                Username = username
+            });
+        }
+        catch (UserNotFoundException ex)
+        {
+            _logger.LogError(ex,
+                "Cognito user not found for participant {ParticipantId}.",
+                username);
+        }
     }
 
     private async Task SaveAnonymisedDemographicParticipantDataAsync(ParticipantDetails entity)
@@ -359,7 +339,6 @@ public class ParticipantService : IParticipantService
         };
 
         await _participantRepository.CreateAnonymisedDemographicParticipantDataAsync(anonEntity);
-
     }
 
     public async Task<ParticipantDetails> GetParticipantDetailsAsync(string participantId)

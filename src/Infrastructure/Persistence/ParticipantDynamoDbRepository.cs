@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
@@ -10,7 +6,9 @@ using Application.Contracts;
 using Application.Settings;
 using Domain.Entities.Participants;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence
 {
@@ -40,44 +38,7 @@ namespace Infrastructure.Persistence
                 _config);
         }
 
-        public async Task<ParticipantDetails> QueryIndexForParticipantDetailsAsync(string query, string colName)
-        {
-            var request = new QueryRequest
-            {
-                TableName = _config.OverrideTableName,
-                KeyConditionExpression = $"{colName} = :value",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                {
-                    { ":value", new AttributeValue { S = query } }
-                },
-                IndexName = $"{colName}Index",
-            };
-
-            _logger.LogInformation("request: {@Request}", request);
-
-            try
-            {
-                var response = await _client.QueryAsync(request);
-
-                _logger.LogInformation("response: {@Response}", response);
-
-                var items = response.Items;
-                if (items.Count == 0) return null;
-                var item = items.OrderByDescending(x => DateTime.Parse(x["CreatedAtUtc"].S)).First();
-
-                _logger.LogInformation("item: {@Item}", item);
-
-                var participant = _context.FromDocument<ParticipantDetails>(Document.FromAttributeMap(item));
-                return await GetParticipantDetailsAsync(participant.Pk.Replace("PARTICIPANT#", ""));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-        }
-
-        public async Task<IReadOnlyCollection<ParticipantDetails>> GetAllParticipantDetailsByEmailAsync(string email)
+        private async Task<IEnumerable<ParticipantDetails>> QueryIndexAsync(string query, string colName)
         {
             var results = new List<ParticipantDetails>();
             Dictionary<string, AttributeValue> lastEvaluatedKey = null;
@@ -87,16 +48,13 @@ namespace Infrastructure.Persistence
                 var request = new QueryRequest
                 {
                     TableName = _config.OverrideTableName,
-                    IndexName = "EmailIndex",
-                    KeyConditionExpression = "Email = :email",
+                    KeyConditionExpression = $"{colName} = :value",
                     ExpressionAttributeValues =
                         new Dictionary<string, AttributeValue>
                         {
-                            [":email"] = new AttributeValue
-                            {
-                                S = email.ToLowerInvariant()
-                            }
+                            { ":value", new AttributeValue { S = query } }
                         },
+                    IndexName = $"{colName}Index",
                     ExclusiveStartKey = lastEvaluatedKey
                 };
 
@@ -115,10 +73,25 @@ namespace Infrastructure.Persistence
             }
             while (lastEvaluatedKey != null);
 
-            return results
-                .GroupBy(x => x.Pk)
-                .Select(x => x.First())
-                .ToList();
+            return results;
+        }
+
+
+        public async Task<ParticipantDetails> QueryIndexForParticipantDetailsAsync(string query, string colName)
+        {
+            var items = await QueryIndexAsync(query, colName);
+
+            if (!items.Any())
+            {
+                return null;
+            }
+
+            return items.OrderByDescending(x => x.CreatedAtUtc).First();
+        }
+
+        public async Task<IReadOnlyCollection<ParticipantDetails>> GetAllParticipantDetailsByEmailAsync(string email)
+        {
+            return (await QueryIndexAsync(email, "Email")).ToList().AsReadOnly();
         }
 
         public async Task<ParticipantDemographics> GetParticipantDemographicsAsync(string participantId)
@@ -146,14 +119,6 @@ namespace Infrastructure.Persistence
         public async Task CreateParticipantDemographicsAsync(ParticipantDemographics entity)
         {
             entity.Pk = ParticipantKey(entity.ParticipantId);
-            entity.Sk = ParticipantKey();
-
-            await _context.SaveAsync(entity, _config);
-        }
-
-        public async Task AddDemographicsToNhsUserAsync(ParticipantDemographics entity, string nhsId)
-        {
-            entity.Pk = ParticipantKey(nhsId);
             entity.Sk = ParticipantKey();
 
             await _context.SaveAsync(entity, _config);

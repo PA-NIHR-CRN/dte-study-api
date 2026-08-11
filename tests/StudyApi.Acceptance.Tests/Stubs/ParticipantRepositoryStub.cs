@@ -62,13 +62,6 @@ public class ParticipantRepositoryStub : IParticipantRepository
         await Task.CompletedTask;
     }
 
-    public Task AddDemographicsToNhsUserAsync(ParticipantDemographics entity, string nhsId)
-    {
-        _participantDemographics.Add(entity);
-
-        return Task.CompletedTask;
-    }
-
     public async Task UpdateParticipantDemographicsAsync(ParticipantDemographics entity)
     {
         var item = _participantDemographics.FirstOrDefault(x => x.ParticipantId == entity.ParticipantId);
