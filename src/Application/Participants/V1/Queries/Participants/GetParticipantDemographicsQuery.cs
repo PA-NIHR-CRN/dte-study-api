@@ -54,7 +54,7 @@ namespace Application.Participants.V1.Queries.Participants
                     }
                     
 
-                    if (!participantDemographics.HasDemographics)
+                    if (!participantDemographics.HasDemographics())
                     {
                         return Response<ParticipantDemographicsResponse>.CreateNotFoundResponse(
                             ProjectAssemblyNames.ApiAssemblyName, nameof(GetParticipantDemographicsQueryHandler), "err",
