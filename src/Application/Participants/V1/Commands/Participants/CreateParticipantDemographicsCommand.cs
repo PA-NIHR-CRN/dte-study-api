@@ -94,7 +94,7 @@ namespace Application.Participants.V1.Commands.Participants
 
                     _logger.LogInformation("Participant: {@entity}", entity);
 
-                    if (!entity.HasDemographics)
+                    if (!entity.HasDemographics())
                     {
                         var user = await _participantRepository.GetParticipantDetailsAsync(request.ParticipantId);
 

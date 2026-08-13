@@ -1,5 +1,4 @@
 using Application.Models.Participants;
-using Application.Participants.V1.Commands.Participants;
 using Application.Responses.V1.Participants;
 using Domain.Entities.Participants;
 
@@ -51,7 +50,7 @@ namespace Application.Mappings.Participants
                 Disability = source.Disability,
                 DisabilityDescription = source.DisabilityDescription,
                 HealthConditionInterests = source.HealthConditionInterests,
-                HasDemographics = source.HasDemographics,
+                HasDemographics = source.HasDemographics(),
                 SelectedLocale = source.SelectedLocale ?? "en-GB"
             };
         }
