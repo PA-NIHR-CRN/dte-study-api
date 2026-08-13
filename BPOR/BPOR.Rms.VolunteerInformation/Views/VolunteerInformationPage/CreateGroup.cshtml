@@ -3,7 +3,7 @@
 @{
     VsiEditContext context = ViewBag.Context;
     ViewData.SetSectionName(Resources.Section1Name);
-    ViewData.SetBackLinkOverride(Url.Action("Section1_Step3", new {context.StudyId, context.FlowMode, isNavigateBack = true }));
+    ViewData.SetBackLinkOverride(Url.BackAction(context, "Section1_Step3"));
     Layout = "_VsiEditLayout";
 }
 

@@ -91,7 +91,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
         return model.StudyType switch
         {
             VsiStudyType.Remote => RedirectNextStep("Section1_Step4"),
-            VsiStudyType.InPerson or VsiStudyType.Hybrid => RedirectToAction("Section1_Step3"),
+            VsiStudyType.InPerson or VsiStudyType.Hybrid => RedirectNextStep("Section1_Step3"),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -205,7 +205,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
             return NotFound();
         }
 
-        if (model.Sites.Any())
+        if (model.Sites.Any() || EditContext.FlowMode == VipFlowMode.Edit)
         {
             return View(model);
         }
@@ -222,7 +222,7 @@ public class VolunteerInformationPageController : VipControllerBase<VsiEditConte
     public async Task<IActionResult> RemoveSite(int studyId, int siteId, CancellationToken cancellationToken)
     {
         bool result = await VipRepository.RemoveSite(studyId, siteId, cancellationToken);
-        return result ? RedirectToAction("Section1_Step3", new { studyId, id = siteId }) : NotFound();
+        return result ? RedirectToAction("Section1_Step3", EditContext) : NotFound();
     }
 
     [HttpGet]

@@ -9,4 +9,10 @@ public class VsiSiteModel
     public string? AddressLine4 { get; set; }
     public string? AddressLine5 { get; set; }
     public string Postcode { get; set; }
+
+    public IEnumerable<string?> AllLines =>
+        [AddressLine1, AddressLine2, AddressLine3, AddressLine4, AddressLine5, Postcode];
+    
+    public IEnumerable<string> AllSignificantLines =>
+        AllLines.Where(i => !string.IsNullOrWhiteSpace(i))!;
 }

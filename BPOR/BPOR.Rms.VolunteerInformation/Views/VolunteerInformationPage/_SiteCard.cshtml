@@ -1,0 +1,8 @@
+﻿@model VsiSiteModel
+
+<address class="govuk-body">
+    @foreach (var line in Model.AllSignificantLines)
+    {
+        <text>@line<br/></text>
+    }
+</address>
