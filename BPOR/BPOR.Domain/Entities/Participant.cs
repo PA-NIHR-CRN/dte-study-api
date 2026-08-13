@@ -69,6 +69,7 @@ public class Participant : ISoftDelete, ITimestamped, IPersonalInformation
 
     public void Anonymise()
     {
+        NHSNumber = null;
         Email = null;
         FirstName = null;
         LastName = null;
