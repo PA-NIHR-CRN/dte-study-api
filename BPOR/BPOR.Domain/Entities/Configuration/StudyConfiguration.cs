@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 
 namespace BPOR.Domain.Entities.Configuration;
 
@@ -8,13 +9,14 @@ public class StudyConfiguration : IEntityTypeConfiguration<Study>
     public void Configure(EntityTypeBuilder<Study> builder)
     {
         builder.HasKey(s => s.Id);
-        
-        builder.Property(s => s.ChiefInvestigatorEmail).HasMaxLength(255);
-        builder.Property(s => s.FullName).HasMaxLength(255);
-        builder.Property(s => s.EmailAddress).HasMaxLength(255);
-        builder.Property(s => s.StudyName).HasMaxLength(255);
 
-        builder.Property(s => s.InformationUrl).HasMaxLength(2048);
-        builder.Property(s => s.PreScreenerUrl).HasMaxLength(2048);
+        builder.Property(s => s.FullName).Name();
+        builder.Property(s => s.StudyName).Name();
+
+        builder.Property(s => s.EmailAddress).Email();
+        builder.Property(s => s.ChiefInvestigatorEmail).Email();
+
+        builder.Property(s => s.InformationUrl).Url();
+        builder.Property(s => s.PreScreenerUrl).Url();
     }
 }

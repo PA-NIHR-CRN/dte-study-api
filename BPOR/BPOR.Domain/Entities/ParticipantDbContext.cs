@@ -55,6 +55,10 @@ public class ParticipantDbContext : DbContext
     public DbSet<SubmissionOutcome> SubmissionOutcome { get; set; } = null!;
     public DbSet<Submitted> Submitted { get; set; } = null!;
     public DbSet<SysConfiguration> SysConfigurations { get; set; } = null!;
+    public DbSet<StudyStatus> SysRefRejectedReason { get; set; } = null!;
+    public DbSet<StudyStatus> SysRefStudyStatus { get; set; } = null!;
+    public DbSet<StudyStatus> SysRefWithdrawnReason { get; set; } = null!;
+
     public DbSet<User> User { get; set; } = null!;
     public DbSet<UserRole> UserRole { get; set; } = null!;
 

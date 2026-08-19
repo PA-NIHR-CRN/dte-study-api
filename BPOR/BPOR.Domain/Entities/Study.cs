@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Enums;
 using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
@@ -29,7 +30,7 @@ public class Study : ISoftDelete, IAudit
     
     public int? SubmittedId { get; set; }
     public int? SubmissionOutcomeId { get; set; }
-    public int? StudyStatusId { get; set; }
+    public StudyStatusType? StudyStatusId { get; set; }
     
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -46,4 +47,5 @@ public class Study : ISoftDelete, IAudit
     public ICollection<FilterCriteria> FilterCriterias { get; set; } = new List<FilterCriteria>();
     public ICollection<StudyResearcher> StudyResearchers { get; set; } = new List<StudyResearcher>();
     public ICollection<StudyResearcherEmail> StudyResearcherEmails { get; } = new List<StudyResearcherEmail>();
+    public ICollection<StudyStatusHistory> StudyStatusHistories { get; } = new List<StudyStatusHistory>();
 }

@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Enums;
 using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
@@ -8,7 +9,7 @@ public class StudyStatusHistory : IAudit
     public int Id { get; set; }
     
     public int StudyId { get; set; }
-    public int StudyStatusId { get; set; }
+    public StudyStatusType StudyStatusId { get; set; }
     
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
