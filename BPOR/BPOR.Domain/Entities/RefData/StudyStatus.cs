@@ -3,4 +3,7 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities.RefData;
 
-public class StudyStatus : ReferenceData<StudyStatusType>;
+public class StudyStatus : ReferenceData<StudyStatusType>
+{
+    protected override int GetIdAsInt() => (int)Id;
+}

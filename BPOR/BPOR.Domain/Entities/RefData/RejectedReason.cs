@@ -3,4 +3,7 @@ using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities.RefData;
 
-public class RejectedReason : ReferenceData<RejectedReasonType>;
+public class RejectedReason : ReferenceData<RejectedReasonType>
+{
+    protected override int GetIdAsInt() => (int)Id;
+}
