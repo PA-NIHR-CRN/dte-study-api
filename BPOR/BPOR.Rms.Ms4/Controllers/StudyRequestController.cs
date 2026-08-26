@@ -2,6 +2,8 @@ using BPOR.Rms.Ms4.Models;
 using BPOR.Rms.Ms4.Models.Enums;
 using BPOR.Rms.Ms4.Validators.Details;
 using BPOR.Rms.Ms4.Validators.Overview;
+using BPOR.Rms.Ms4.Validators.ParticipantDetails;
+using BPOR.Rms.Ms4.Validators.Sponsorship;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using NIHR.GovUk.AspNetCore.Mvc;
@@ -232,7 +234,7 @@ public class StudyRequestController : Controller
             return RedirectToAction(nameof(MainContact));
         }
 
-        return RedirectToAction(nameof(Start));
+        return RedirectToAction(nameof(SponsorOrganisation));
     }
     
     [HttpGet]
@@ -250,6 +252,46 @@ public class StudyRequestController : Controller
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
             return View("Details/MainContact", model);
+        }
+
+        return RedirectToAction(nameof(SponsorOrganisation));
+    }
+    
+    [HttpGet]
+    public IActionResult SponsorOrganisation(CancellationToken cancellationToken)
+    {
+        return View("Sponsorship/SponsorOrganisation");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SponsorOrganisation(
+        SponsorshipViewModel model,
+        [FromServices] SponsorOrganisationValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (!await ValidateAsync(validator, model, cancellationToken))
+        {
+            return View("Sponsorship/SponsorOrganisation", model);
+        }
+
+        return RedirectToAction(nameof(ParticipantDetails));
+    }
+    
+    [HttpGet]
+    public IActionResult ParticipantDetails(CancellationToken cancellationToken)
+    {
+        return View("ParticipantDetails/ParticipantDetails");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ParticipantDetails(
+        ParticipantDetailsViewModel model,
+        [FromServices] ParticipantDetailsValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (!await ValidateAsync(validator, model, cancellationToken))
+        {
+            return View("ParticipantDetails/ParticipantDetails", model);
         }
 
         return RedirectToAction(nameof(Start));

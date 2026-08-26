@@ -1,0 +1,22 @@
+@model BPOR.Rms.Ms4.Models.SponsorshipViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+@section SectionTitle
+{
+    <text>Section 3: Sponsorship</text>
+}
+
+<h2 class="govuk-heading-l">Sponsor organisation</h2>
+
+<form-group for="@Model.SponsorName"
+            label=""
+            description="Enter the name of your sponsor organisation">
+
+    <input class="govuk-input"
+           asp-for="@Model.SponsorName"
+           type="text"/>
+
+</form-group>

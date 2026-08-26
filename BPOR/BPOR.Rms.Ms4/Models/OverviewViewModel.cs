@@ -2,7 +2,7 @@ using BPOR.Rms.Ms4.Models.Enums;
 
 namespace BPOR.Rms.Ms4.Models;
 
-public class OverviewViewModel
+public class OverviewViewModel : StudyRequestPageViewModel
 {
     public bool? HasEthicsApproval { get; set; }
     public InclusionInRdnPortfolioStatus? InclusionInRdnPortfolioStatus { get; set; }

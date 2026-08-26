@@ -1,6 +1,6 @@
 namespace BPOR.Rms.Ms4.Models;
 
-public class StudyDetailsViewModel
+public class StudyDetailsViewModel : StudyRequestPageViewModel
 {
     public string? StudyTitle { get; set; }
     public string? StudyDescription { get; set; }
