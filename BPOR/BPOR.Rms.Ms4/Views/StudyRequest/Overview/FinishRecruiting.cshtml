@@ -1,4 +1,4 @@
-@model BPOR.Rms.Ms4.Models.Overview.FinishRecruitingViewModel
+@model BPOR.Rms.Ms4.Models.OverviewViewModel
 
 @{
     Layout = "_StudyFormLayout";
@@ -9,8 +9,8 @@
     <text>Section 1: Overview</text>
 }
 
-<date-input day-for="@Model.Day"
-            month-for="@Model.Month"
-            year-for="@Model.Year"
+<date-input day-for="@Model.FinishRecruitingDay"
+            month-for="@Model.FinishRecruitingMonth"
+            year-for="@Model.FinishRecruitingYear"
             legend="When will you finish recruiting to this study?"
             hint="If you don't know the exact date, provide an estimated one." />

@@ -1,4 +1,4 @@
-namespace BPOR.Rms.Ms4.Models.Overview;
+namespace BPOR.Rms.Ms4.Models.Enums;
 
 public enum NihrFundingStatus
 {

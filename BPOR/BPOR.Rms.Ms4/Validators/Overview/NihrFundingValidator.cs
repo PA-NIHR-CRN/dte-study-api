@@ -1,12 +1,11 @@
 using BPOR.Rms.Ms4.Models;
-using BPOR.Rms.Ms4.Models.Overview;
 using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Overview;
 
-public class NihrFundingViewModelValidator : AbstractValidator<NihrFundingViewModel>
+public class NihrFundingValidator : AbstractValidator<OverviewViewModel>
 {
-    public NihrFundingViewModelValidator()
+    public NihrFundingValidator()
     {
         RuleFor(model => model.NihrFundingStatus)
             .NotNull()

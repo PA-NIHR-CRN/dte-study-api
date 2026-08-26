@@ -1,22 +1,21 @@
 using BPOR.Rms.Ms4.Models;
-using BPOR.Rms.Ms4.Models.Overview;
 using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Overview;
 
-public class FinishRecruitingViewModelValidator : AbstractValidator<FinishRecruitingViewModel>
+public class FinishRecruitingValidator : AbstractValidator<OverviewViewModel>
 {
-    public FinishRecruitingViewModelValidator()
+    public FinishRecruitingValidator()
     {
-        RuleFor(x => x.Day)
+        RuleFor(x => x.FinishRecruitingDay)
             .NotEmpty()
             .WithMessage("Enter the day recruitment will finish");
 
-        RuleFor(x => x.Month)
+        RuleFor(x => x.FinishRecruitingMonth)
             .NotEmpty()
             .WithMessage("Enter the month recruitment will finish");
 
-        RuleFor(x => x.Year)
+        RuleFor(x => x.FinishRecruitingYear)
             .NotEmpty()
             .WithMessage("Enter the year recruitment will finish");
 
@@ -24,9 +23,9 @@ public class FinishRecruitingViewModelValidator : AbstractValidator<FinishRecrui
             .Must(BeAValidDate)
             .WithMessage("Enter a valid recruitment end date")
             .When(x =>
-                !string.IsNullOrWhiteSpace(x.Day) &&
-                !string.IsNullOrWhiteSpace(x.Month) &&
-                !string.IsNullOrWhiteSpace(x.Year));
+                !string.IsNullOrWhiteSpace(x.FinishRecruitingDay) &&
+                !string.IsNullOrWhiteSpace(x.FinishRecruitingMonth) &&
+                !string.IsNullOrWhiteSpace(x.FinishRecruitingYear));
 
         RuleFor(x => x)
             .Must(BeInFuture)
@@ -34,17 +33,17 @@ public class FinishRecruitingViewModelValidator : AbstractValidator<FinishRecrui
             .When(BeAValidDate);
     }
 
-    private static bool BeAValidDate(FinishRecruitingViewModel model)
+    private static bool BeAValidDate(OverviewViewModel model)
     {
         return DateOnly.TryParse(
-            $"{model.Year}-{model.Month}-{model.Day}",
+            $"{model.FinishRecruitingYear}-{model.FinishRecruitingMonth}-{model.FinishRecruitingDay}",
             out _);
     }
 
-    private static bool BeInFuture(FinishRecruitingViewModel model)
+    private static bool BeInFuture(OverviewViewModel model)
     {
         if (!DateOnly.TryParse(
-                $"{model.Year}-{model.Month}-{model.Day}",
+                $"{model.FinishRecruitingYear}-{model.FinishRecruitingMonth}-{model.FinishRecruitingDay}",
                 out var date))
         {
             return false;

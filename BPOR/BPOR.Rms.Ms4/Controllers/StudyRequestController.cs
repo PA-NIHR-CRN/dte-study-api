@@ -1,6 +1,7 @@
 using BPOR.Rms.Ms4.Models;
-using BPOR.Rms.Ms4.Models.Details;
-using BPOR.Rms.Ms4.Models.Overview;
+using BPOR.Rms.Ms4.Models.Enums;
+using BPOR.Rms.Ms4.Validators.Details;
+using BPOR.Rms.Ms4.Validators.Overview;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using NIHR.GovUk.AspNetCore.Mvc;
@@ -23,11 +24,7 @@ public class StudyRequestController : Controller
         [FromServices] IValidator<StudyRequestStartViewModel> validator,
         CancellationToken cancellationToken)
     {
-        var result = await validator.ValidateAsync(model, cancellationToken);
-        
-        result.AddToModelState(ModelState);
-        
-        if (!ModelState.IsValid)
+        if (!await ValidateAsync(validator, model, cancellationToken))
         {
             return View(model);
         }
@@ -43,15 +40,11 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> EthicsApproval(
-        EthicsApprovalViewModel model,
-        [FromServices] IValidator<EthicsApprovalViewModel> validator,
+        OverviewViewModel model,
+        [FromServices] EthicsApprovalValidator validator,
         CancellationToken cancellationToken)
     {
-        var result = await validator.ValidateAsync(model, cancellationToken);
-        
-        result.AddToModelState(ModelState);
-        
-        if (!ModelState.IsValid)
+        if (!await ValidateAsync(validator, model, cancellationToken))
         {
             return View("Overview/EthicsApproval", model);
         }
@@ -67,15 +60,11 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> InclusionInRdnPortfolio(
-        InclusionInRdnPortfolioViewModel model,
-        [FromServices] IValidator<InclusionInRdnPortfolioViewModel> validator,
+        OverviewViewModel model,
+        [FromServices] InclusionInRdnPortfolioValidator validator,
         CancellationToken cancellationToken)
     {
-        var result = await validator.ValidateAsync(model, cancellationToken);
-        
-        result.AddToModelState(ModelState);
-        
-        if (!ModelState.IsValid)
+        if (!await ValidateAsync(validator, model, cancellationToken))
         {
             return View("Overview/InclusionInRdnPortfolio", model);
         }
@@ -91,15 +80,11 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> NihrFunding(
-        NihrFundingViewModel model,
-        [FromServices] IValidator<NihrFundingViewModel> validator,
+        OverviewViewModel model,
+        [FromServices] NihrFundingValidator validator,
         CancellationToken cancellationToken)
     {
-        var result = await validator.ValidateAsync(model, cancellationToken);
-        
-        result.AddToModelState(ModelState);
-        
-        if (!ModelState.IsValid)
+        if (!await ValidateAsync(validator, model, cancellationToken))
         {
             return View("Overview/NihrFunding", model);
         }
@@ -120,15 +105,11 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> FinishRecruiting(
-        FinishRecruitingViewModel model,
-        [FromServices] IValidator<FinishRecruitingViewModel> validator,
+        OverviewViewModel model,
+        [FromServices] FinishRecruitingValidator validator,
         CancellationToken cancellationToken)
     {
-        var result = await validator.ValidateAsync(model, cancellationToken);
-        
-        result.AddToModelState(ModelState);
-        
-        if (!ModelState.IsValid)
+        if (!await ValidateAsync(validator, model, cancellationToken))
         {
             return View("Overview/FinishRecruiting", model);
         }
@@ -157,19 +138,135 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> StudyDescription(
-        StudyDescriptionViewModel model,
-        [FromServices] IValidator<StudyDescriptionViewModel> validator,
+        StudyDetailsViewModel model,
+        [FromServices] StudyDescriptionValidator validator,
         CancellationToken cancellationToken)
     {
-        var result = await validator.ValidateAsync(model, cancellationToken);
-        
-        result.AddToModelState(ModelState);
-        
-        if (!ModelState.IsValid)
+        if (!await ValidateAsync(validator, model, cancellationToken))
         {
-            return View("Overview/FinishRecruiting", model);
+            return View("Details/StudyDescription", model);
+        }
+
+        return RedirectToAction(nameof(ResearchLocations));
+    }
+    
+    [HttpGet]
+    public IActionResult ResearchLocations(CancellationToken cancellationToken)
+    {
+        return View("Details/researchLocation");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResearchLocations(
+        StudyDetailsViewModel model,
+        [FromServices] ResearchLocationValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (!await ValidateAsync(validator, model, cancellationToken))
+        {
+            return View("Details/ResearchLocation", model);
+        }
+
+        return RedirectToAction(nameof(ResearchManager));
+    }
+    
+    [HttpGet]
+    public IActionResult ResearchManager(CancellationToken cancellationToken)
+    {
+        return View("Details/ResearchManager");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResearchManager(
+        StudyDetailsViewModel model,
+        [FromServices] ResearchManagerValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (!await ValidateAsync(validator, model, cancellationToken))
+        {
+            return View("Details/ResearchManager", model);
+        }
+
+        return RedirectToAction(nameof(ChiefInvestigator));
+    }
+    
+    [HttpGet]
+    public IActionResult ChiefInvestigator(CancellationToken cancellationToken)
+    {
+        return View("Details/ChiefInvestigator");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ChiefInvestigator(
+        StudyDetailsViewModel model,
+        [FromServices] ChiefInvestigatorValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (!await ValidateAsync(validator, model, cancellationToken))
+        {
+            return View("Details/ChiefInvestigator", model);
+        }
+
+        return RedirectToAction(nameof(ChiefInvestigatorContact));
+    }
+    
+    [HttpGet]
+    public IActionResult ChiefInvestigatorContact(CancellationToken cancellationToken)
+    {
+        return View("Details/ChiefInvestigatorContact");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ChiefInvestigatorContact(
+        StudyDetailsViewModel model,
+        [FromServices] ChiefInvestigatorContactValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (!await ValidateAsync(validator, model, cancellationToken))
+        {
+            return View("Details/ChiefInvestigatorContact", model);
+        }
+
+        if (!model.IsChiefInvestigatorMainContact!.Value)
+        {
+            return RedirectToAction(nameof(MainContact));
         }
 
         return RedirectToAction(nameof(Start));
+    }
+    
+    [HttpGet]
+    public IActionResult MainContact(CancellationToken cancellationToken)
+    {
+        return View("Details/MainContact");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> MainContact(
+        StudyDetailsViewModel model,
+        [FromServices] MainContactValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (!await ValidateAsync(validator, model, cancellationToken))
+        {
+            return View("Details/MainContact", model);
+        }
+
+        return RedirectToAction(nameof(Start));
+    }
+
+    private async Task<bool> ValidateAsync<TValidator, TModel>(
+        TValidator validator,
+        TModel model,
+        CancellationToken cancellationToken)
+        where TValidator : IValidator<TModel>
+    {
+        var result = await validator.ValidateAsync(
+            model,
+            cancellationToken);
+
+        result.AddToModelState(ModelState);
+
+        return result.IsValid;
     }
 }

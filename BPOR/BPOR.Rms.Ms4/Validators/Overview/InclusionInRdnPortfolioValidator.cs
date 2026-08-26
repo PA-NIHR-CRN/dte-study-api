@@ -1,12 +1,12 @@
 using BPOR.Rms.Ms4.Models;
-using BPOR.Rms.Ms4.Models.Overview;
+using BPOR.Rms.Ms4.Models.Enums;
 using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Overview;
 
-public class InclusionInRdnPortfolioViewModelValidator : AbstractValidator<InclusionInRdnPortfolioViewModel>
+public class InclusionInRdnPortfolioValidator : AbstractValidator<OverviewViewModel>
 {
-    public InclusionInRdnPortfolioViewModelValidator()
+    public InclusionInRdnPortfolioValidator()
     {
         RuleFor(model => model.InclusionInRdnPortfolioStatus)
             .NotNull()

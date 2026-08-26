@@ -1,0 +1,44 @@
+@model BPOR.Rms.Ms4.Models.StudyDetailsViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+@section SectionTitle
+{
+    <text>Section 2: Study details</text>
+}
+
+<h2 class="govuk-heading-l">Provide details of the main contact for this study.</h2>
+
+<form-group for="@Model.MainContactName"
+            label="Name"
+            label-class="govuk-label">
+
+    <input class="govuk-input"
+           asp-for="@Model.MainContactName"
+           type="text"/>
+
+</form-group>
+
+<form-group for="@Model.MainContactRole"
+            label="Role"
+            label-level="h2"
+            label-class="govuk-label">
+    
+    <input class="govuk-input"
+           asp-for="@Model.MainContactRole"
+           type="text"/>
+
+</form-group>
+
+<form-group for="@Model.MainContactEmail"
+            label="Email"
+            label-level="h2"
+            label-class="govuk-label">
+    
+    <input class="govuk-input"
+           asp-for="@Model.MainContactEmail"
+           type="text"/>
+
+</form-group>

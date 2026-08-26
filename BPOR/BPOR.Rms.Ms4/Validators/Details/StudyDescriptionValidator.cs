@@ -1,11 +1,11 @@
-using BPOR.Rms.Ms4.Models.Details;
+using BPOR.Rms.Ms4.Models;
 using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Details;
 
-public class StudyDescriptionViewModelValidator : AbstractValidator<StudyDescriptionViewModel>
+public class StudyDescriptionValidator : AbstractValidator<StudyDetailsViewModel>
 {
-    public StudyDescriptionViewModelValidator()
+    public StudyDescriptionValidator()
     {
         RuleFor(model => model.StudyTitle)
             .NotNull()

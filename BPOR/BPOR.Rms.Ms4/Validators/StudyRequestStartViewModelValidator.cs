@@ -1,7 +1,7 @@
 using BPOR.Rms.Ms4.Models;
 using FluentValidation;
 
-namespace BPOR.Rms.Ms4.Validators.Overview;
+namespace BPOR.Rms.Ms4.Validators;
 
 public class StudyRequestStartViewModelValidator : AbstractValidator<StudyRequestStartViewModel>
 {

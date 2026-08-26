@@ -1,0 +1,17 @@
+@model BPOR.Rms.Ms4.Models.StudyDetailsViewModel
+
+    @{
+    Layout = "_StudyFormLayout";
+}
+
+@section SectionTitle
+{
+    <text>Section 2: Study details</text>
+}
+        
+<h2 class="govuk-heading-l">Will one person be responsible for recruiting or screening for this study using Be Part of Research?</h2>
+
+    <radio-set for="@Model.HasOnePersonResponsibleForRecruiting">
+    <radio value="@true">Yes</radio>
+    <radio value="@false">No</radio>
+    </radio-set>

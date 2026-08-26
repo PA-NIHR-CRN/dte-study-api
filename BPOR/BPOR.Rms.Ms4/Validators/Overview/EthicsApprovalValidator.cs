@@ -1,12 +1,11 @@
 using BPOR.Rms.Ms4.Models;
-using BPOR.Rms.Ms4.Models.Overview;
 using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Overview;
 
-public class EthicsApprovalViewModelValidator : AbstractValidator<EthicsApprovalViewModel>
+public class EthicsApprovalValidator : AbstractValidator<OverviewViewModel>
 {
-    public EthicsApprovalViewModelValidator()
+    public EthicsApprovalValidator()
     {
         RuleFor(model => model.HasEthicsApproval)
             .NotNull()
