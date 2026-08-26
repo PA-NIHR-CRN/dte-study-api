@@ -30,8 +30,20 @@ public class RadioSet(IHtmlHelper htmlHelper) : PartialTagHelperBase(htmlHelper)
     {        
         output.TagName = null;
         var innerContent = await output.GetChildContentAsync();
-        var content = await RenderPartialAsync("_Radios", 
-            new GovUkRadiosModel(Size, Layout, innerContent));
+        
+        var errorMessage = ViewContext.ViewData.ModelState
+            .TryGetValue(For?.Name ?? string.Empty, out var modelState)
+                ? modelState.Errors.FirstOrDefault()?.ErrorMessage
+                : null;
+
+        var content = await RenderPartialAsync(
+            "_Radios",
+            new GovUkRadiosModel(
+                Size,
+                Layout,
+                innerContent,
+                errorMessage));
+        
         output.Content.SetHtmlContent(content);
     }
 }

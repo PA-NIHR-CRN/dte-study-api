@@ -1,0 +1,16 @@
+@model BPOR.Rms.Ms4.Models.Overview.FinishRecruitingViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+@section SectionTitle
+{
+    <text>Section 1: Overview</text>
+}
+
+<date-input day-for="@Model.Day"
+            month-for="@Model.Month"
+            year-for="@Model.Year"
+            legend="When will you finish recruiting to this study?"
+            hint="If you don't know the exact date, provide an estimated one." />

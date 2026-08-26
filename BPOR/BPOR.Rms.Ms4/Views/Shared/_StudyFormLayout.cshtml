@@ -1,0 +1,18 @@
+@{
+    Layout = "_StudyLayout";
+}
+
+@if (IsSectionDefined("SectionTitle"))
+{
+    <h1 class="govuk-heading-m">
+        @await RenderSectionAsync("SectionTitle")
+    </h1>
+}
+
+<form method="post">
+    @RenderBody()
+
+    <button class="govuk-button" type="submit">
+        Continue
+    </button>
+</form>

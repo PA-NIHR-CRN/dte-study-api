@@ -1,17 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using NIHR.GovUk.AspNetCore.Mvc.Models;
 
 namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers;
 
-public class RadioTagHelper(IHtmlHelper htmlHelper)
+public class RadioConditionalTagHelper(IHtmlHelper htmlHelper)
     : PartialTagHelperBase(htmlHelper)
 {
+    public string Id { get; set; } = string.Empty;
+
     public string Value { get; set; } = string.Empty;
-
-    public bool Autofocus { get; set; }
-
-    public string? ConditionalId { get; set; }
 
     public override async Task ProcessAsync(
         TagHelperContext context,
@@ -19,7 +17,7 @@ public class RadioTagHelper(IHtmlHelper htmlHelper)
     {
         var radiosContext = context.GetRequired<RadiosContext>(
             RadioSet.ContextVariableName,
-            "govuk-radio must be nested inside govuk-radios");
+            "radio-conditional must be nested inside radio-set");
 
         output.TagName = null;
 
@@ -30,15 +28,14 @@ public class RadioTagHelper(IHtmlHelper htmlHelper)
             Value,
             StringComparison.OrdinalIgnoreCase);
 
-        var model = new GovUkRadioModel(
-            Name: radiosContext.ForName,
-            Value: Value,
-            IsSelected: isSelected,
-            Autofocus: Autofocus,
-            InnerContent: innerContent,
-            ConditionalId: ConditionalId);
+        var model = new GovUkRadioConditionalModel(
+            Id: Id,
+            IsHidden: !isSelected,
+            InnerContent: innerContent);
 
-        var content = await RenderPartialAsync("_Radio", model);
+        var content = await RenderPartialAsync(
+            "_RadioConditional",
+            model);
 
         output.Content.SetHtmlContent(content);
     }

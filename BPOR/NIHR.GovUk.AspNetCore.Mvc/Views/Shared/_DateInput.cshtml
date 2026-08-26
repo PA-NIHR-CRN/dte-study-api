@@ -1,0 +1,106 @@
+@model NIHR.GovUk.AspNetCore.Mvc.Models.GovUkDateInputModel
+
+@{
+    var baseId = Model.DayId.EndsWith("_Day")
+        ? Model.DayId[..^4]
+        : Model.DayId;
+
+    var hintId = $"{baseId}-hint";
+    var errorId = $"{baseId}-error";
+
+    var hasHint = !string.IsNullOrWhiteSpace(Model.Hint);
+    var hasError = !string.IsNullOrWhiteSpace(Model.ErrorMessage);
+
+    var describedBy = string.Join(
+        " ",
+        new[]
+        {
+            hasHint ? hintId : null,
+            hasError ? errorId : null
+        }.Where(value => value is not null));
+
+    var formGroupClass = hasError
+        ? "govuk-form-group govuk-form-group--error"
+        : "govuk-form-group";
+}
+
+<div class="@formGroupClass">
+    <fieldset class="govuk-fieldset"
+              role="group"
+              aria-describedby="@(string.IsNullOrWhiteSpace(describedBy) ? null : describedBy)">
+
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            <h1 class="govuk-fieldset__heading">
+                @Model.Legend
+            </h1>
+        </legend>
+
+        @if (hasHint)
+        {
+            <div id="@hintId" class="govuk-hint">
+                @Model.Hint
+            </div>
+        }
+
+        @if (hasError)
+        {
+            <p id="@errorId" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span>
+                @Model.ErrorMessage
+            </p>
+        }
+
+        <div class="govuk-date-input" id="@baseId">
+            <div class="govuk-date-input__item">
+                <div class="govuk-form-group">
+                    <label class="govuk-label govuk-date-input__label"
+                           for="@Model.DayId">
+                        Day
+                    </label>
+
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-3 @(Model.DayHasError ? "govuk-input--error" : null)"
+                           id="@Model.DayId"
+                           name="@Model.DayName"
+                           type="text"
+                           inputmode="numeric"
+                           autocomplete="off"
+                           value="@Model.DayValue" />
+                </div>
+            </div>
+
+            <div class="govuk-date-input__item">
+                <div class="govuk-form-group">
+                    <label class="govuk-label govuk-date-input__label"
+                           for="@Model.MonthId">
+                        Month
+                    </label>
+
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-3 @(Model.MonthHasError ? "govuk-input--error" : null)"
+                           id="@Model.MonthId"
+                           name="@Model.MonthName"
+                           type="text"
+                           inputmode="numeric"
+                           autocomplete="off"
+                           value="@Model.MonthValue" />
+                </div>
+            </div>
+
+            <div class="govuk-date-input__item">
+                <div class="govuk-form-group">
+                    <label class="govuk-label govuk-date-input__label"
+                           for="@Model.YearId">
+                        Year
+                    </label>
+
+                    <input class="govuk-input govuk-date-input__input govuk-input--width-5 @(Model.YearHasError ? "govuk-input--error" : null)"
+                           id="@Model.YearId"
+                           name="@Model.YearName"
+                           type="text"
+                           inputmode="numeric"
+                           autocomplete="off"
+                           value="@Model.YearValue" />
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</div>

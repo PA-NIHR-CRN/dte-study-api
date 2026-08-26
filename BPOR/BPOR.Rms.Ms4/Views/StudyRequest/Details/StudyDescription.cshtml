@@ -1,0 +1,34 @@
+@model BPOR.Rms.Ms4.Models.Details.StudyDescriptionViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+@section SectionTitle
+{
+    <text>Section 2: Study details</text>
+}
+
+<form-group for="@Model.StudyTitle"
+            label="What is the title of your study?"
+            label-level="h2"
+            description="The title of your study helps members of the public understand what your study is about. It should be simple to read and easy to understand."
+            label-class="govuk-label">
+    
+    <input class="govuk-input"
+           asp-for="@Model.StudyTitle"
+           type="text"/>
+    
+</form-group>
+
+<form-group for="@Model.StudyDescription"
+            label="Provide a one-line description of your study"
+            label-level="h2"
+            description="This can be a basic overview of what the study deals with."
+            label-class="govuk-label">
+    
+    <input class="govuk-input"
+           asp-for="@Model.StudyDescription"
+           type="text"/>
+    
+</form-group>
