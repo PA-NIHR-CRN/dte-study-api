@@ -15,11 +15,10 @@
         <summary-list-item for="Study.HasMultipleResearchLocations" 
                            show-researcher-when="Model.Study.HasMultipleResearchLocations.HasValue"/>
         <summary-list-item for="Study.RecruitmentEndDate"/>
-        <summary-list-item for="Study.InformationUrl"/>
+        <summary-list-item for="Study.VolunteerInformationUrl"/>
         <summary-list-item for="Study.PreScreenerUrl" 
                            show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.PreScreenerUrl)"/>
-        @* <summary-list-item for="Study.WebsiteUrl"/> *@
-        
+        <summary-list-item for="Study.InformationUrl"/>
 
     </dl>
 </div>

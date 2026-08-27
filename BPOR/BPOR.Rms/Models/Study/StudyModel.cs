@@ -9,13 +9,13 @@ public class StudyModel
     [Display(Name = "Study ID")] public int Id { get; set; }
 
     [Required]
-    [Display(Name = "Main contact")]
+    [Display(Name = "Primary contact (s)")]
     [StudyEdit(1)]
     public string FullName { get; set; }
 
     [Required]
     [EmailAddress]
-    [Display(Name = "Email address")]
+    [Display(Name = "Primary contact (s) email address")]
     [StudyEdit(1)]
     public string EmailAddress { get; set; }
 
@@ -41,11 +41,11 @@ public class StudyModel
     [ResearcherEdit(1)]
     public string? ChiefInvestigator { get; set; }
 
-    [Display(Name = "Provide the name(s) of the study sponsor(s), funder(s) and CRO (if applicable)")]
+    [Display(Name = "Sponsor organisation")]
     [ResearcherEdit(1)]
     public string? StudySponsors { get; set; }
 
-    [Display(Name = "Has the study been submitted for inclusion on the NIHR CRN portfolio?")]
+    [Display(Name = "Have you applied for inclusion in the RDN portfolio?")]
     [ResearcherEdit(2)]
     public string? PortfolioSubmissionStatus { get; set; }
 
@@ -79,7 +79,7 @@ public class StudyModel
     [ResearcherEdit(4)]
     public string? HasFundingDisplay => HasFunding == null ? null : (HasFunding == true ? "Yes" : "No");
 
-    [Display(Name = "Email campaign information URL")]
+    [Display(Name = "Website link")]
     [StudyEdit(3)]
     public string? InformationUrl { get; set; }
     

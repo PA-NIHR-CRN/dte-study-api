@@ -4,8 +4,9 @@
     <h3 class="govuk-heading-s">Funding details</h3>
     <dl class="govuk-summary-list">
         
-        <summary-list-item for="Study.OutcomeOfSubmission"
-                           show-when="@(Model.Study.PortfolioSubmissionStatus == "Yes")"/>
-
+        <summary-list-item for="Study.PortfolioSubmissionStatus"/>
+        <summary-list-item for="Study.StudySponsors"/>
+        <summary-list-item for="Study.OutcomeOfSubmission" show-when="@(Model.Study.PortfolioSubmissionStatus == "Yes")"/>
+        
     </dl>
 </div>
