@@ -1,7 +1,10 @@
-@model BPOR.Rms.Ms4.Models.ParticipantDetailsViewModel
+@using BPOR.Domain.Entities.Configuration
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
     Layout = "_StudyFormLayout";
+    ViewData["Step"] = 12;
+    ViewData["TotalSteps"] = 14;
 }
 
 @section SectionTitle
@@ -11,12 +14,8 @@
 
 <h2 class="govuk-heading-l">Who will be included in this study?</h2>
 
-<form-group for="@Model.InclusionCriteria"
-            label=""
-            description="Write the most essential inclusion criteria.">
-
-    <input class="govuk-textarea"
-           asp-for="@Model.InclusionCriteria"
-           type="text"/>
-
-</form-group>
+<govuk-text-area
+    asp-for="@Model.InclusionCriteria"
+    label=""
+    hint="Write the most essential inclusion criteria."
+    max-length="@StudyConfiguration.InclusionCriteriaMaxLength" />

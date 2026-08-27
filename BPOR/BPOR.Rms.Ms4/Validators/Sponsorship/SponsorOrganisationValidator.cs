@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Sponsorship;
 
-public class SponsorOrganisationValidator : AbstractValidator<SponsorshipViewModel>
+public class SponsorOrganisationValidator : AbstractValidator<StudyRequestViewModel>
 {
     public SponsorOrganisationValidator()
     {

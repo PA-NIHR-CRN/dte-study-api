@@ -1,8 +1,10 @@
 @using BPOR.Rms.Ms4.Models.Enums
-@model BPOR.Rms.Ms4.Models.OverviewViewModel
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
     Layout = "_StudyFormLayout";
+    ViewData["Step"] = 2;
+    ViewData["TotalSteps"] = 14;
 }
 
 @section SectionTitle

@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Overview;
 
-public class NihrFundingValidator : AbstractValidator<OverviewViewModel>
+public class NihrFundingValidator : AbstractValidator<StudyRequestViewModel>
 {
     public NihrFundingValidator()
     {

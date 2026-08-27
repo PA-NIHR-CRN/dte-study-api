@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Overview;
 
-public class EthicsApprovalValidator : AbstractValidator<OverviewViewModel>
+public class EthicsApprovalValidator : AbstractValidator<StudyRequestViewModel>
 {
     public EthicsApprovalValidator()
     {

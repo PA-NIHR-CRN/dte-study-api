@@ -3,11 +3,11 @@ using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Details;
 
-public class ResearchLocationValidator : AbstractValidator<StudyDetailsViewModel>
+public class ResearchLocationValidator : AbstractValidator<StudyRequestViewModel>
 {
     public ResearchLocationValidator()
     {
-        RuleFor(model => model.HasMoreThanOneResearchLocation)
+        RuleFor(model => model.HasMultipleResearchLocations)
             .NotNull()
             .WithMessage("Select an option");
     }

@@ -1,8 +1,10 @@
 @using BPOR.Rms.Ms4.Models.Enums
-@model BPOR.Rms.Ms4.Models.OverviewViewModel
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
     Layout = "_StudyFormLayout";
+    ViewData["Step"] = 3;
+    ViewData["TotalSteps"] = 14;
 }
 
 @section SectionTitle
@@ -35,7 +37,10 @@
     </p>
 
     <p class="govuk-body">
-        If you are unsure of this, please contact bepartofresearch-volunteerservice@nihr.ac.uk.
+        If you are unsure of this, please contact 
+        <a href="mailto:bepartofresearch-volunteerservice@nihr.ac.uk">
+            bepartofresearch-volunteerservice@nihr.ac.uk
+        </a>
     </p>
     
 </inset-text>

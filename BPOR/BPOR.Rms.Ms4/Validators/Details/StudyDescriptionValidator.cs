@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Details;
 
-public class StudyDescriptionValidator : AbstractValidator<StudyDetailsViewModel>
+public class StudyDescriptionValidator : AbstractValidator<StudyRequestViewModel>
 {
     public StudyDescriptionValidator()
     {

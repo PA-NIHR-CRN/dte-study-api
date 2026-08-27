@@ -6,8 +6,6 @@ using BPOR.Rms.Ms4.Validators.ParticipantDetails;
 using BPOR.Rms.Ms4.Validators.Sponsorship;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using NIHR.GovUk.AspNetCore.Mvc;
-using NIHR.Infrastructure.AspNetCore;
 using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Ms4.Controllers;
@@ -42,7 +40,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> EthicsApproval(
-        OverviewViewModel model,
+        StudyRequestViewModel model,
         [FromServices] EthicsApprovalValidator validator,
         CancellationToken cancellationToken)
     {
@@ -62,7 +60,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> InclusionInRdnPortfolio(
-        OverviewViewModel model,
+        StudyRequestViewModel model,
         [FromServices] InclusionInRdnPortfolioValidator validator,
         CancellationToken cancellationToken)
     {
@@ -71,7 +69,7 @@ public class StudyRequestController : Controller
             return View("Overview/InclusionInRdnPortfolio", model);
         }
 
-        return RedirectToAction(nameof(NihrFunding));
+        return RedirectToAction(model.InclusionInRdnPortfolioStatus == InclusionInRdnPortfolioStatus.HasApproval ? nameof(FinishRecruiting) : nameof(NihrFunding));
     }
     
     [HttpGet]
@@ -82,7 +80,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> NihrFunding(
-        OverviewViewModel model,
+        StudyRequestViewModel model,
         [FromServices] NihrFundingValidator validator,
         CancellationToken cancellationToken)
     {
@@ -91,12 +89,7 @@ public class StudyRequestController : Controller
             return View("Overview/NihrFunding", model);
         }
 
-        if (model.NihrFundingStatus == NihrFundingStatus.NoNihrFunding)
-        {
-            return RedirectToAction(nameof(MoreInformationRequired));
-        }
-
-        return RedirectToAction(nameof(FinishRecruiting));
+        return RedirectToAction(model.NihrFundingStatus == NihrFundingStatus.NoNihrFunding ? nameof(MoreInformationRequired) : nameof(FinishRecruiting));
     }
     
     [HttpGet]
@@ -107,7 +100,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> FinishRecruiting(
-        OverviewViewModel model,
+        StudyRequestViewModel model,
         [FromServices] FinishRecruitingValidator validator,
         CancellationToken cancellationToken)
     {
@@ -122,14 +115,7 @@ public class StudyRequestController : Controller
     [HttpGet]
     public IActionResult MoreInformationRequired(CancellationToken cancellationToken)
     {
-        TempData.Put("Notification", new NotificationBannerModel
-        {
-            Title = "Important",
-            Heading = "More information needed",
-            IsSuccess = true
-        });
-        
-        return View("Overview/MoreInformationRequired");
+        return View("MoreInformationRequired");
     }
     
     [HttpGet]
@@ -140,7 +126,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> StudyDescription(
-        StudyDetailsViewModel model,
+        StudyRequestViewModel model,
         [FromServices] StudyDescriptionValidator validator,
         CancellationToken cancellationToken)
     {
@@ -160,7 +146,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> ResearchLocations(
-        StudyDetailsViewModel model,
+        StudyRequestViewModel model,
         [FromServices] ResearchLocationValidator validator,
         CancellationToken cancellationToken)
     {
@@ -180,7 +166,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> ResearchManager(
-        StudyDetailsViewModel model,
+        StudyRequestViewModel model,
         [FromServices] ResearchManagerValidator validator,
         CancellationToken cancellationToken)
     {
@@ -200,7 +186,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> ChiefInvestigator(
-        StudyDetailsViewModel model,
+        StudyRequestViewModel model,
         [FromServices] ChiefInvestigatorValidator validator,
         CancellationToken cancellationToken)
     {
@@ -220,7 +206,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> ChiefInvestigatorContact(
-        StudyDetailsViewModel model,
+        StudyRequestViewModel model,
         [FromServices] ChiefInvestigatorContactValidator validator,
         CancellationToken cancellationToken)
     {
@@ -245,7 +231,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> MainContact(
-        StudyDetailsViewModel model,
+        StudyRequestViewModel model,
         [FromServices] MainContactValidator validator,
         CancellationToken cancellationToken)
     {
@@ -265,7 +251,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> SponsorOrganisation(
-        SponsorshipViewModel model,
+        StudyRequestViewModel model,
         [FromServices] SponsorOrganisationValidator validator,
         CancellationToken cancellationToken)
     {
@@ -285,7 +271,7 @@ public class StudyRequestController : Controller
 
     [HttpPost]
     public async Task<IActionResult> ParticipantDetails(
-        ParticipantDetailsViewModel model,
+        StudyRequestViewModel model,
         [FromServices] ParticipantDetailsValidator validator,
         CancellationToken cancellationToken)
     {
@@ -294,7 +280,32 @@ public class StudyRequestController : Controller
             return View("ParticipantDetails/ParticipantDetails", model);
         }
 
+        return RedirectToAction(nameof(Summary));
+    }
+    
+    [HttpGet]
+    public IActionResult Summary(CancellationToken cancellationToken)
+    {
+        var test = new StudyRequestViewModel()
+        {
+            HasEthicsApproval = true
+        };
+        
+        return View(test);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Summary(
+        StudyRequestViewModel model,
+        CancellationToken cancellationToken)
+    {
         return RedirectToAction(nameof(Start));
+    }
+    
+    [HttpGet]
+    public IActionResult ApplicationSubmitted(CancellationToken cancellationToken)
+    {
+        return View();
     }
 
     private async Task<bool> ValidateAsync<TValidator, TModel>(

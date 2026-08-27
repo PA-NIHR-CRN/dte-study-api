@@ -1,0 +1,80 @@
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["Step"] = 13;
+    ViewData["TotalSteps"] = 14;
+}
+
+@section SectionTitle
+{
+    <text>Section 5: Check your answers</text>
+}
+
+<h2 class="govuk-heading-l">Before submitting your application check the details you’ve provided</h2>
+
+<h3 class="govuk-heading-m">You can change your answers from this page before saving the application.</h3>
+
+<h3 class="govuk-heading-m">Overview</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.HasEthicsApproval">
+        <a class="govuk-link" asp-action="EthicsApproval">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.InclusionInRdnPortfolioStatus">
+        <a class="govuk-link" asp-action="InclusionInRdnPortfolio">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.CpmsId">
+        <a class="govuk-link" asp-action="InclusionInRdnPortfolio">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.NihrFundingStatus">
+        <a class="govuk-link" asp-action="NihrFunding">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.FinishRecruitingDay">
+        <a class="govuk-link" asp-action="FinishRecruiting">Change</a>
+    </gov-uk-summary-list-item>
+</dl>
+
+<h3 class="govuk-heading-m">Study details</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.StudyTitle">
+        <a class="govuk-link" asp-action="StudyDescription">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.StudyDescription">
+        <a class="govuk-link" asp-action="StudyDescription">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.HasMultipleResearchLocations">
+        <a class="govuk-link" asp-action="ResearchLocations">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.HasOnePersonResponsibleForRecruiting">
+        <a class="govuk-link" asp-action="ResearchManager">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.ChiefInvestigatorName">
+        <a class="govuk-link" asp-action="ChiefInvestigator">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.MainContactName">
+        <a class="govuk-link" asp-action="MainContact">Change</a>
+    </gov-uk-summary-list-item>
+</dl>
+
+<h3 class="govuk-heading-m">Study sponsorship</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.SponsorName">
+        <a class="govuk-link" asp-action="SponsorOrganisation">Change</a>
+    </gov-uk-summary-list-item>
+</dl>
+
+<h3 class="govuk-heading-m">Participant details</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.InclusionCriteria">
+        <a class="govuk-link" asp-action="ParticipantDetails">Change</a>
+    </gov-uk-summary-list-item>
+</dl>

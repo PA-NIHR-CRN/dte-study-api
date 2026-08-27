@@ -1,7 +1,9 @@
-@model BPOR.Rms.Ms4.Models.StudyDetailsViewModel
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
     Layout = "_StudyFormLayout";
+    ViewData["Step"] = 5;
+    ViewData["TotalSteps"] = 14;
 }
 
 @section SectionTitle
@@ -9,9 +11,9 @@
     <text>Section 2: Study details</text>
 }
 
+<h2 class="govuk-heading-l">What is the title of your study?</h2>
 <form-group for="@Model.StudyTitle"
-            label="What is the title of your study?"
-            label-level="h2"
+            label=""
             description="The title of your study helps members of the public understand what your study is about. It should be simple to read and easy to understand."
             label-class="govuk-label">
     
@@ -21,9 +23,9 @@
     
 </form-group>
 
+<h2 class="govuk-heading-l">Provide a one-line description of your study</h2>
 <form-group for="@Model.StudyDescription"
-            label="Provide a one-line description of your study"
-            label-level="h2"
+            label=""
             description="This can be a basic overview of what the study deals with."
             label-class="govuk-label">
     

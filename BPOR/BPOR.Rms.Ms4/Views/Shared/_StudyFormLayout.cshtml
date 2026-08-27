@@ -4,12 +4,13 @@
 
 @if (IsSectionDefined("SectionTitle"))
 {
-    <h1 class="govuk-heading-m">
+    <h1 class="govuk-heading-s section-heading">
         @await RenderSectionAsync("SectionTitle")
     </h1>
 }
 
 <form method="post">
+    
     @RenderBody()
 
     <button class="govuk-button" type="submit">

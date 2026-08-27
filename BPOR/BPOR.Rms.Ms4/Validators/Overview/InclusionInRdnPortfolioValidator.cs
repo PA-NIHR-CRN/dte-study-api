@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Overview;
 
-public class InclusionInRdnPortfolioValidator : AbstractValidator<OverviewViewModel>
+public class InclusionInRdnPortfolioValidator : AbstractValidator<StudyRequestViewModel>
 {
     public InclusionInRdnPortfolioValidator()
     {
