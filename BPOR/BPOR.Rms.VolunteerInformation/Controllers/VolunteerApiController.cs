@@ -35,7 +35,7 @@ public class VolunteerController : ControllerBase
             return NotFound();
         }
 
-        if (string.IsNullOrWhiteSpace(campaignParticipant.Token) && campaignParticipant.Campaign.FilterCriteria.StudyId.HasValue)
+        if (/*string.IsNullOrWhiteSpace(campaignParticipant.Token) &&*/ campaignParticipant.Campaign.FilterCriteria.StudyId.HasValue)
         {
             campaignParticipant.Token = vipTokenGenerator.GenerateToken(new VipToken(VipTokenPurpose.Volunteer,
                 campaignParticipant.CampaignId, campaignParticipant.ParticipantId,
@@ -154,6 +154,7 @@ public class VolunteerController : ControllerBase
     public async Task<ActionResult<GetInformationResponse>> GetInformation(
         [FromServices] ParticipantDbContext context, 
         [FromServices] IVipTokenGenerator vipTokenGenerator, 
+        [FromServices] IVipRepository repository,
         string token,
         CancellationToken cancellationToken)
     {
@@ -173,11 +174,6 @@ public class VolunteerController : ControllerBase
                     Email = i.Participant.Email,
                     Id = i.ParticipantId,
                     Name = i.Participant.FirstName + " " + i.Participant.LastName
-                },
-                Study = new Study()
-                {
-                    StudyId = (long)i.Campaign.FilterCriteria.StudyId, // TODO: Why would this ever be null?
-                    PrescreenerUrl = i.Campaign.FilterCriteria.Study.PreScreenerUrl
                 }
             })
             .SingleOrDefaultAsync(cancellationToken);
@@ -186,6 +182,27 @@ public class VolunteerController : ControllerBase
         {
             return NotFound();
         }
+        
+        var vsiPage = await repository.GetPage(validatedToken.StudyId, cancellationToken);
+        if (vsiPage == null)
+        {
+            return NotFound();
+        }
+        
+        result.Study = new()
+        {
+            PrescreenerUrl = vsiPage.PreScreenerUrl!,
+            StudyId = validatedToken.StudyId
+        };
+        
+        var studyParticipantEnrollment = await context.StudyParticipantEnrollment
+            .OrderByDescending(spe => spe.Id)
+            .FirstOrDefaultAsync(spe => 
+                spe.StudyId == validatedToken.StudyId
+                && spe.ParticipantId == validatedToken.ParticipantId,
+                cancellationToken);
+
+        result.EnrolmentReferenceNumber = studyParticipantEnrollment?.Reference;
         
         return Ok(result);
     }
