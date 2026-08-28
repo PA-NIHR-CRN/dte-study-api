@@ -1,0 +1,19 @@
+﻿namespace FlowGraphTest.FlowGraph;
+
+public record MvcActionKey(string Controller, string Action);
+
+// public class RouteBuilder<TModel, TRoute, TTransition>
+//     where TTransition : IEquatable<TTransition>
+//     where TRoute : IEquatable<TRoute>
+// {
+//     private readonly TRoute _route;
+//     private Node<TModel, TRoute, TTransition> _currentNode;
+//
+//     public RouteBuilder(TRoute route, Node<TModel, TRoute, TTransition> currentNode)
+//     {
+//         _route = route;
+//         _currentNode = currentNode;
+//     }
+//     
+//     public 
+// }

@@ -55,6 +55,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Rms.ApiClient", "BPOR.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.NotificationService.GovUkNotify", "NIHR.NotificationService.GovUkNotify\NIHR.NotificationService.GovUkNotify.csproj", "{886BF9DF-7A62-45E0-9549-85407ABFA1F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowGraphTest", "FlowGraphTest\FlowGraphTest.csproj", "{963A3480-40CA-4F2E-B159-262EC54A12F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -157,6 +159,10 @@ Global
 		{886BF9DF-7A62-45E0-9549-85407ABFA1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{886BF9DF-7A62-45E0-9549-85407ABFA1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{886BF9DF-7A62-45E0-9549-85407ABFA1F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{963A3480-40CA-4F2E-B159-262EC54A12F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{963A3480-40CA-4F2E-B159-262EC54A12F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{963A3480-40CA-4F2E-B159-262EC54A12F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{963A3480-40CA-4F2E-B159-262EC54A12F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
