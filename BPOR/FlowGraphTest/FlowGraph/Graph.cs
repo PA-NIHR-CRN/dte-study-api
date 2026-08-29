@@ -18,6 +18,7 @@ public class Graph<TModel, TNodeKey, TContext, TAction>
     
     public Node AddRedirectNode() => new ContextualNode();
 
+    private readonly Dictionary<TNodeKey, LeafNode> _leafNodes = new();
     private readonly List<Node> _nodes = new();
     private readonly List<Transition> _transitions = new();
 
@@ -50,6 +51,10 @@ public class Graph<TModel, TNodeKey, TContext, TAction>
     public bool CanTransition(Node origin, TContext context,  TAction action)
         => GetTransition(origin, context, action) != null;
 
+    public (TContext newContext, TNodeKey newNode) ApplyTransition(TNodeKey origin, TContext context, TAction action)
+    {
+        
+    }
     public (TContext newContext, TNodeKey newNode) ApplyTransition(TNodeKey origin, TContext context, TAction action)
     {
         Node? currentNode = GetLeafNode(origin);
