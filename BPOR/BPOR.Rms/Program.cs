@@ -1,10 +1,12 @@
-using System.Diagnostics;
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Infrastructure.Services.Development;
+using BPOR.Rms.Jobs;
 using BPOR.Rms.Startup;
-using BPOR.Rms.VolunteerInformation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
+using NIHR.Quartz;
+using Quartz;
 
 var builder = WebApplication
     .CreateBuilder(args);
@@ -19,6 +21,19 @@ builder.AddIdgAuthentication(authOptions =>
             .Build();
     }
 );
+
+builder.Services.AddNihrQuartz(async (services, scheduler) =>
+    {
+        var job = JobBuilder.Create<RemoveStaleDraftStudiesJob>()
+            .Build();
+        var trigger = TriggerBuilder.Create()
+            .WithCronSchedule(services.GetRequiredService<IOptions<DraftStudiesSettings>>().Value.StaleDraftRemovalSchedule, cs => cs
+                .InTimeZone(TimeZoneInfo.Local)
+                .WithMisfireHandlingInstructionFireAndProceed())
+            .Build();
+        await scheduler.ScheduleJob(job, trigger);
+    }
+    );
 
 builder.AddAWSSystemsManagerDataProtection("/BPOR/RMS");
 
