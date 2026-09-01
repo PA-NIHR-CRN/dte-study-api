@@ -1,6 +1,6 @@
 namespace NIHR.GovUk.AspNetCore.Mvc.Models;
 
-public record GovUkCharacterCountModel(
+public record GovUkTextAreaModel(
     string Name,
     string Id,
     string? Label,

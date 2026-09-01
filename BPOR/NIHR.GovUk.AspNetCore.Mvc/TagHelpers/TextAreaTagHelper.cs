@@ -38,7 +38,7 @@ public class CharacterCountTagHelper(IHtmlHelper htmlHelper)
             .FirstOrDefault()?
             .ErrorMessage;
 
-        var model = new GovUkCharacterCountModel(
+        var model = new GovUkTextAreaModel(
             Name: name,
             Id: id,
             Label: Label,

@@ -1,5 +1,5 @@
+using BPOR.Rms.Ms4.Repositories;
 using BPOR.Rms.Ms4.Validators;
-using BPOR.Rms.Ms4.Validators.Overview;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,6 +9,7 @@ public static class DiExtensions
 {
     public static void AddStudyRequest(this IServiceCollection services)
     {
+        services.AddScoped<IStudyDraftRepository, StudyDraftRepository>();
         services.AddValidatorsFromAssemblyContaining<StudyRequestStartViewModelValidator>();    
     }
 }

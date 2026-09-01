@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using BPOR.Rms.Ms4.Models.Enums;
+using BPOR.Domain.Enums;
 
 namespace BPOR.Rms.Ms4.Models;
 
@@ -10,16 +10,19 @@ public class StudyRequestViewModel
     [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
     public bool? HasEthicsApproval { get; set; }
     
+    public SubmittedType? InclusionInRdnPortfolioStatus { get; set; }
     [Display(Name = "Have you applied for inclusion in the RDN portfolio")]
-    public InclusionInRdnPortfolioStatus? InclusionInRdnPortfolioStatus { get; set; }
+    public string? InclusionInRdnPortfolioStatusDisplay { get; set; }
     
+    public NihrFundingStatusType? NihrFundingStatus { get; set; }
     [Display(Name = "Does this study have NIHR funding?")]
-    public NihrFundingStatus? NihrFundingStatus { get; set; }
+    public string? NihrFundingStatusDisplay { get; set; }
     
     [Display(Name = "What is your CPMS ID?")]
     public long? CpmsId { get; set; }
     
     [Display(Name = "When will you finish recruiting to this study?")]
+    public DateTime? RecruitmentEndDate { get; set; }
     public int? FinishRecruitingDay { get; set; }
     public int? FinishRecruitingMonth { get; set; }
     public int? FinishRecruitingYear { get; set; }
@@ -34,7 +37,7 @@ public class StudyRequestViewModel
     public bool? HasMultipleResearchLocations { get; set; }
     
     [Display(Name = "Will this study be managed by more than one person?")]
-    public bool? HasOnePersonResponsibleForRecruiting { get; set; }
+    public bool? SinglePersonResponsibleForRecruiting { get; set; }
     
     [Display(Name = "Who is the chief investigator for your study?")]
     public string? ChiefInvestigatorName { get; set; }

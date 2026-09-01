@@ -1,4 +1,4 @@
-@using BPOR.Rms.Ms4.Models.Enums
+@using BPOR.Domain.Enums
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
@@ -20,21 +20,21 @@
 
     <radio-set for="@Model.InclusionInRdnPortfolioStatus">
 
-        <radio value="@InclusionInRdnPortfolioStatus.HasApproval"
+        <radio value="@SubmittedType.Yes"
                conditional-id="conditional-cpms-id">
             Yes
         </radio>
 
-        <radio value="@InclusionInRdnPortfolioStatus.NoApproval">
+        <radio value="@SubmittedType.No">
             No
         </radio>
 
-        <radio value="@InclusionInRdnPortfolioStatus.WillApply">
+        <radio value="@SubmittedType.NoButWillApply">
             No, but I will apply
         </radio>
 
         <radio-conditional id="conditional-cpms-id"
-                           value="@InclusionInRdnPortfolioStatus.HasApproval">
+                           value="@SubmittedType.Yes">
 
             <form-group for="@Model.CpmsId"
                         label="What is your CPMS ID?"

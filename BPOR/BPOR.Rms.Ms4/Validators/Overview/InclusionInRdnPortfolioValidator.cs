@@ -1,5 +1,5 @@
+using BPOR.Domain.Enums;
 using BPOR.Rms.Ms4.Models;
-using BPOR.Rms.Ms4.Models.Enums;
 using FluentValidation;
 
 namespace BPOR.Rms.Ms4.Validators.Overview;
@@ -15,6 +15,6 @@ public class InclusionInRdnPortfolioValidator : AbstractValidator<StudyRequestVi
         RuleFor(model => model.CpmsId)
             .NotEmpty()
             .WithMessage("Enter CPMS ID to continue")
-            .When(model => model.InclusionInRdnPortfolioStatus == InclusionInRdnPortfolioStatus.HasApproval);
+            .When(model => model.InclusionInRdnPortfolioStatus == SubmittedType.Yes);
     }
 }

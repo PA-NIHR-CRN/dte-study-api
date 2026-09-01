@@ -1,9 +1,9 @@
-﻿using NIHR.Infrastructure.EntityFrameworkCore;
 using BPOR.Domain.Enums;
+using NIHR.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities.RefData;
 
-public class Submitted : ReferenceData<SubmittedType>
+public class NihrFundingStatus : ReferenceData<NihrFundingStatusType>
 {
     protected override int GetIdAsInt() => (int)Id;
 }

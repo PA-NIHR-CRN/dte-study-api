@@ -14,6 +14,6 @@ public class ParticipantDetailsValidator : AbstractValidator<StudyRequestViewMod
         
         RuleFor(model => model.InclusionCriteria)
             .MaximumLength(StudyConfiguration.InclusionCriteriaMaxLength)
-            .WithMessage("You have entered more than 500 characters");
+            .WithMessage($"You have entered more than {StudyConfiguration.InclusionCriteriaMaxLength} characters");
     }
 }

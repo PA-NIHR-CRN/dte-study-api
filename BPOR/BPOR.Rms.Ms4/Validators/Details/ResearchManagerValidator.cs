@@ -7,7 +7,7 @@ public class ResearchManagerValidator : AbstractValidator<StudyRequestViewModel>
 {
     public ResearchManagerValidator()
     {
-        RuleFor(model => model.HasOnePersonResponsibleForRecruiting)
+        RuleFor(model => model.SinglePersonResponsibleForRecruiting)
             .NotNull()
             .WithMessage("Select an option");
     }

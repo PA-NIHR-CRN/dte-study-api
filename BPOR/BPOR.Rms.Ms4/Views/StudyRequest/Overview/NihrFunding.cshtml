@@ -1,4 +1,4 @@
-@using BPOR.Rms.Ms4.Models.Enums
+@using BPOR.Domain.Enums
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
@@ -16,16 +16,16 @@
 
 <radio-set for="@Model.NihrFundingStatus">
 
-    <radio value="@NihrFundingStatus.HasNihrFunding"
+    <radio value="@NihrFundingStatusType.Yes"
            conditional-id="conditional-cpms-id">
         Yes
     </radio>
 
-    <radio value="@NihrFundingStatus.NoNihrFunding">
+    <radio value="@NihrFundingStatusType.No">
         No
     </radio>
 
-    <radio value="@NihrFundingStatus.NoButHasAppliedForNihrFunding">
+    <radio value="@NihrFundingStatusType.NoButApplied">
         No, but I have applied for NIHR funding
     </radio>
 </radio-set>

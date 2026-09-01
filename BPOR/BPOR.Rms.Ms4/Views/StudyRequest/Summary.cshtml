@@ -17,64 +17,127 @@
 
 <h3 class="govuk-heading-m">Overview</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-    <gov-uk-summary-list-item for="@Model.HasEthicsApproval">
-        <a class="govuk-link" asp-action="EthicsApproval">Change</a>
+    <gov-uk-summary-list-item
+        name="Do you have ethics approval to use Be Part of Research?">
+
+        <summary-value>
+            @(Model.HasEthicsApproval!.Value ? "Yes" : "Not yet, I am awaiting an approval")
+        </summary-value>
+
+        <a class="govuk-link"
+           asp-action="EthicsApproval"
+           asp-route-studyId="@Model.StudyId">
+            Change
+        </a>
+
     </gov-uk-summary-list-item>
-    
-    <gov-uk-summary-list-item for="@Model.InclusionInRdnPortfolioStatus">
-        <a class="govuk-link" asp-action="InclusionInRdnPortfolio">Change</a>
+
+    <gov-uk-summary-list-item for="@Model.InclusionInRdnPortfolioStatusDisplay">
+        <a class="govuk-link" asp-action="InclusionInRdnPortfolio" asp-route-studyId="@Model.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    
+
     <gov-uk-summary-list-item for="@Model.CpmsId">
-        <a class="govuk-link" asp-action="InclusionInRdnPortfolio">Change</a>
+        <a class="govuk-link" asp-action="InclusionInRdnPortfolio" asp-route-studyId="@Model.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    
-    <gov-uk-summary-list-item for="@Model.NihrFundingStatus">
-        <a class="govuk-link" asp-action="NihrFunding">Change</a>
+
+    <gov-uk-summary-list-item for="@Model.NihrFundingStatusDisplay">
+        <a class="govuk-link" asp-action="NihrFunding" asp-route-studyId="@Model.StudyId">Change</a>
     </gov-uk-summary-list-item>
-    
-    <gov-uk-summary-list-item for="@Model.FinishRecruitingDay">
-        <a class="govuk-link" asp-action="FinishRecruiting">Change</a>
+
+    <gov-uk-summary-list-item
+        name="When will you finish recruiting to this study?">
+
+        <summary-value>
+            @Model.RecruitmentEndDate?.ToString("dd/MM/yyyy")
+        </summary-value>
+
+        <a class="govuk-link"
+           asp-action="FinishRecruiting"
+           asp-route-studyId="@Model.StudyId">
+            Change
+        </a>
+
     </gov-uk-summary-list-item>
 </dl>
 
 <h3 class="govuk-heading-m">Study details</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.StudyTitle">
-        <a class="govuk-link" asp-action="StudyDescription">Change</a>
+        <a class="govuk-link" asp-action="StudyDescription" asp-route-studyId="@Model.StudyId">Change</a>
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item for="@Model.StudyDescription">
-        <a class="govuk-link" asp-action="StudyDescription">Change</a>
+        <a class="govuk-link" asp-action="StudyDescription" asp-route-studyId="@Model.StudyId">Change</a>
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item for="@Model.HasMultipleResearchLocations">
-        <a class="govuk-link" asp-action="ResearchLocations">Change</a>
+        <a class="govuk-link" asp-action="ResearchLocations" asp-route-studyId="@Model.StudyId">Change</a>
     </gov-uk-summary-list-item>
     
-    <gov-uk-summary-list-item for="@Model.HasOnePersonResponsibleForRecruiting">
-        <a class="govuk-link" asp-action="ResearchManager">Change</a>
+    <gov-uk-summary-list-item for="@Model.SinglePersonResponsibleForRecruiting">
+        <a class="govuk-link" asp-action="ResearchManager" asp-route-studyId="@Model.StudyId">Change</a>
     </gov-uk-summary-list-item>
     
-    <gov-uk-summary-list-item for="@Model.ChiefInvestigatorName">
-        <a class="govuk-link" asp-action="ChiefInvestigator">Change</a>
+    <gov-uk-summary-list-item
+        name="Who is the chief investigator for your study?">
+
+        <summary-value>
+            <p class="govuk-body">
+                <strong>Name:</strong><br />
+                @Model.ChiefInvestigatorName
+            </p>
+
+            <p class="govuk-body">
+                <strong>Email:</strong><br />
+                @Model.ChiefInvestigatorEmail
+            </p>
+        </summary-value>
+
+        <a class="govuk-link"
+           asp-action="ChiefInvestigator"
+           asp-route-studyId="@Model.StudyId">
+            Change
+        </a>
     </gov-uk-summary-list-item>
     
-    <gov-uk-summary-list-item for="@Model.MainContactName">
-        <a class="govuk-link" asp-action="MainContact">Change</a>
+    <gov-uk-summary-list-item
+        name="Who is the main point of contact for the study?">
+
+        <summary-value>
+            <p class="govuk-body">
+                <strong>Name:</strong><br />
+                @Model.MainContactName
+            </p>
+
+            <p class="govuk-body">
+                <strong>Role:</strong><br />
+                @Model.MainContactRole
+            </p>
+
+            <p class="govuk-body">
+                <strong>Email:</strong><br />
+                @Model.MainContactEmail
+            </p>
+        </summary-value>
+
+        <a class="govuk-link"
+           asp-action="MainContact"
+           asp-route-studyId="@Model.StudyId">
+            Change
+        </a>
     </gov-uk-summary-list-item>
 </dl>
 
 <h3 class="govuk-heading-m">Study sponsorship</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.SponsorName">
-        <a class="govuk-link" asp-action="SponsorOrganisation">Change</a>
+        <a class="govuk-link" asp-action="SponsorOrganisation" asp-route-studyId="@Model.StudyId">Change</a>
     </gov-uk-summary-list-item>
 </dl>
 
 <h3 class="govuk-heading-m">Participant details</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.InclusionCriteria">
-        <a class="govuk-link" asp-action="ParticipantDetails">Change</a>
+        <a class="govuk-link" asp-action="ParticipantDetails" asp-route-studyId="@Model.StudyId">Change</a>
     </gov-uk-summary-list-item>
 </dl>

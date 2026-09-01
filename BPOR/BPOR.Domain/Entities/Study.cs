@@ -10,6 +10,7 @@ public class Study : ISoftDelete, IAudit
     public string? FullName { get; set; }
     public string? EmailAddress { get; set; }
     public string? StudyName { get; set; }
+    public string? Description { get; set; }
     public long? CpmsId { get; set; }
     public bool IsRecruitingIdentifiableParticipants { get; set; }
     public string? ChiefInvestigator { get; set; }
@@ -21,20 +22,19 @@ public class Study : ISoftDelete, IAudit
     public DateTime? RecruitmentEndDate { get; set; }
     public string? RecruitmentTarget { get; set; }
     public string? TargetPopulation { get; set; }
-    public bool? HasNihrFunding { get; set; }
     public string? FundingCode { get; set; }
     public string? InformationUrl { get; set; }
     public bool? HasMultipleResearchLocations { get; set; }
     public bool? SinglePersonResponsibleForRecruiting { get; set; }
     public string? PreScreenerUrl { get; set; }
     public bool? HasEthicsApproval { get; set; }
-    public string? StudyDescription { get; set; }
     public string? MainContactRole { get; set; }
     public string? InclusionCriteria { get; set; }
     
-    public int? SubmittedId { get; set; }
+    public SubmittedType? SubmittedId { get; set; }
     public int? SubmissionOutcomeId { get; set; }
     public StudyStatusType? StudyStatusId { get; set; }
+    public NihrFundingStatusType? HasNihrFunding { get; set; }
     
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -45,6 +45,7 @@ public class Study : ISoftDelete, IAudit
     public Submitted? Submitted { get; set; }
     public SubmissionOutcome? SubmissionOutcome { get; set; }
     public StudyStatus? StudyStatus { get; set; }
+    public NihrFundingStatus? NihrFundingStatus { get; set; }
     
     public ICollection<ManualEnrollment> ManualEnrollments { get; set; } = new List<ManualEnrollment>();
     public ICollection<StudyParticipantEnrollment> StudyParticipantEnrollments { get; set; } = new List<StudyParticipantEnrollment>();
