@@ -1,9 +1,10 @@
-using System.Diagnostics;
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Infrastructure.Services.Development;
 using BPOR.Rms.Startup;
-using BPOR.Rms.VolunteerInformation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
+using NIHR.Infrastructure.AspNetCore.Authorization;
 using NIHR.Infrastructure.Interfaces;
 
 var builder = WebApplication
@@ -17,6 +18,16 @@ builder.AddIdgAuthentication(authOptions =>
             .RequireAuthenticatedUser()
             .RequireRole(RoleConfiguration.GetRoles().Select(x => x.Code))
             .Build();
+        authOptions.AddPolicy("IsResearcherCreatingStudy", policy =>
+        {
+            policy.AuthenticationSchemes.Add(AccessTokenAuthenticationOptions.DefaultScheme);
+            policy.Requirements.Add(new AccessTokenRequirement("ResearcherCreateStudy"));
+        });
+        authOptions.AddPolicy("IsAdmin", policy =>
+        {
+            policy.AuthenticationSchemes.Add(AccessTokenAuthenticationOptions.DefaultScheme);
+            policy.Requirements.Add(new RolesAuthorizationRequirement(["Admin"]));
+        });
     }
 );
 
@@ -30,7 +41,14 @@ if (builder.Environment.IsDevelopment())
     builder.Services.Decorate<IEmailService, DevelopmentEmailService>();
 }
 
+builder.Services.AddScoped<AnyPolicyAuthorizationFilter>();
+
 builder.WebHost.UseStaticWebAssets();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<AnyPolicyAuthorizationFilter>();
+}).AddRazorRuntimeCompilation();
 
 var app = builder.Build();
 
