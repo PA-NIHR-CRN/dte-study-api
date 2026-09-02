@@ -3,6 +3,7 @@ namespace BPOR.Rms.Abstractions.Models;
 public class GetInformationResponse
 {
     public long CampaignParticipantId { get; set; }
+    public string? EnrolmentReferenceNumber { get; set; }
     public Participant Participant { get; set; }
     public Study Study { get; set; }
 }
