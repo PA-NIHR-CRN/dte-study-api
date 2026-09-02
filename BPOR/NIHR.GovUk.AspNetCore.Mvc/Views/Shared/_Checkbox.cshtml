@@ -1,3 +1,4 @@
+@using NIHR.GovUk.AspNetCore.Mvc.Extensions
 @model NIHR.GovUk.AspNetCore.Mvc.Models.GovUkCheckboxModel
 
 @{
@@ -30,7 +31,14 @@
 
             <label class="govuk-label govuk-checkboxes__label"
                    for="@Model.Id">
-                @Model.Label
+                @if (Model.LabelHtml is not null && !string.IsNullOrWhiteSpace(Model.LabelHtml.GetString()))
+                {
+                    @Model.LabelHtml
+                }
+                else
+                {
+                    @Model.Label
+                }
             </label>
         </div>
     </div>

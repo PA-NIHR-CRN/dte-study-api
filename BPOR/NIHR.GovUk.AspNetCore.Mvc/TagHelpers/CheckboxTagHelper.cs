@@ -6,8 +6,7 @@ using NIHR.GovUk.AspNetCore.Mvc.Models;
 namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers;
 
 [HtmlTargetElement("govuk-checkbox")]
-public class CheckboxTagHelper(IHtmlHelper htmlHelper)
-    : PartialTagHelperBase(htmlHelper)
+public class CheckboxTagHelper(IHtmlHelper htmlHelper) : PartialTagHelperBase(htmlHelper)
 {
     private readonly IHtmlHelper _htmlHelper = htmlHelper;
 
@@ -20,6 +19,8 @@ public class CheckboxTagHelper(IHtmlHelper htmlHelper)
         TagHelperContext context,
         TagHelperOutput output)
     {
+        var childContent = await output.GetChildContentAsync();
+
         output.TagName = null;
 
         var fullName = ViewContext.ViewData.TemplateInfo
@@ -44,6 +45,7 @@ public class CheckboxTagHelper(IHtmlHelper htmlHelper)
             Name: fullName,
             Id: id,
             Label: Label,
+            LabelHtml: childContent,
             Checked: isChecked,
             ErrorMessage: errorMessage);
 

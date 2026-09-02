@@ -26,8 +26,12 @@
         
 <div>
     <form method="post">
-        <govuk-checkbox asp-for="@Model.TermsAccepted"
-                        label="Click this button to confirm that you have read the terms and conditions" />
+        <govuk-checkbox asp-for="@Model.TermsAccepted">
+            Click this button to confirm that you have read the
+            <a href="https://bepartofresearch.nihr.ac.uk/site-policies/terms-and-conditions/">
+                terms and conditions
+            </a>
+        </govuk-checkbox>
 
         <govuk-button type="submit">
             Start form
