@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
 using Participant = BPOR.Rms.Abstractions.Models.Participant;
 using Study = BPOR.Rms.Abstractions.Models.Study;
@@ -23,9 +24,15 @@ public class VolunteerController : ControllerBase
     public async Task<ActionResult<GetTestTokenResponse>> GetTestTokenAsync(       
         [FromServices] ParticipantDbContext db,
         [FromServices] IVipTokenGenerator vipTokenGenerator, 
+        [FromServices] IHostEnvironment environment,
         long campaignParticipantId,
         CancellationToken cancellationToken)
     {
+        if (environment.IsProduction())
+        {
+            return Forbid();
+        }
+        
         var campaignParticipant = await db.CampaignParticipant
             .Include(i => i.Campaign).ThenInclude(i => i.FilterCriteria)
             .SingleOrDefaultAsync(i => i.Id == campaignParticipantId, cancellationToken);
