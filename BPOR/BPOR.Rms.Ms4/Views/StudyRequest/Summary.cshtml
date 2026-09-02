@@ -5,6 +5,7 @@
     ViewData["Step"] = 13;
     ViewData["TotalSteps"] = 14;
     ViewData["SubmitButtonText"] = "Submit application";
+    var accessToken = Context.Request.Query["accesstoken"].ToString();
 }
 
 @section SectionTitle
@@ -19,24 +20,24 @@
 <h3 class="govuk-heading-m">Overview</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.HasEthicsApprovalDisplay">
-        <a class="govuk-link" asp-action="Change" asp-route-actionName="EthicsApproval" asp-route-studyId="@Model.StudyId">Change</a>
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="EthicsApproval" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
     </gov-uk-summary-list-item>
 
     <gov-uk-summary-list-item for="@Model.InclusionInRdnPortfolioStatusDisplay">
-        <a class="govuk-link" asp-action="Change" asp-route-actionName="InclusionInRdnPortfolio" asp-route-studyId="@Model.StudyId">Change</a>
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="InclusionInRdnPortfolio" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
     </gov-uk-summary-list-item>
 
     @if (Model.CpmsId != null)
     {
         <gov-uk-summary-list-item for="@Model.CpmsId">
-            <a class="govuk-link" asp-action="Change" asp-route-actionName="InclusionInRdnPortfolio" asp-route-studyId="@Model.StudyId">Change</a>
+            <a class="govuk-link" asp-action="Change" asp-route-actionName="InclusionInRdnPortfolio" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
         </gov-uk-summary-list-item>
     }
 
     @if (Model.NihrFundingStatusDisplay != null)
     {
         <gov-uk-summary-list-item for="@Model.NihrFundingStatusDisplay">
-            <a class="govuk-link" asp-action="Change" asp-route-actionName="NihrFunding" asp-route-studyId="@Model.StudyId">Change</a>
+            <a class="govuk-link" asp-action="Change" asp-route-actionName="NihrFunding" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
         </gov-uk-summary-list-item>
     }
 
@@ -50,7 +51,8 @@
         <a class="govuk-link"
            asp-action="Change"
            asp-route-actionName="FinishRecruiting"
-           asp-route-studyId="@Model.StudyId">
+           asp-route-studyId="@Model.StudyId"
+           asp-route-accesstoken="@accessToken">
             Change
         </a>
 
@@ -60,19 +62,19 @@
 <h3 class="govuk-heading-m">Study details</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.StudyTitle">
-        <a class="govuk-link" asp-action="Change" asp-route-actionName="StudyDescription" asp-route-studyId="@Model.StudyId">Change</a>
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="StudyDescription" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item for="@Model.StudyDescription">
-        <a class="govuk-link" asp-action="Change" asp-route-actionName="StudyDescription" asp-route-studyId="@Model.StudyId">Change</a>
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="StudyDescription" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item for="@Model.HasMultipleResearchLocationsDisplay">
-        <a class="govuk-link" asp-action="Change" asp-route-actionName="ResearchLocations" asp-route-studyId="@Model.StudyId">Change</a>
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="ResearchLocations" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item for="@Model.SinglePersonResponsibleForRecruitingDisplay">
-        <a class="govuk-link" asp-action="Change" asp-route-actionName="ResearchManager" asp-route-studyId="@Model.StudyId">Change</a>
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="ResearchManager" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item
@@ -93,7 +95,8 @@
         <a class="govuk-link"
            asp-action="Change"
            asp-route-actionName="ChiefInvestigator"
-           asp-route-studyId="@Model.StudyId">
+           asp-route-studyId="@Model.StudyId" 
+           asp-route-accesstoken="@accessToken">
             Change
         </a>
     </gov-uk-summary-list-item>
@@ -123,7 +126,8 @@
             <a class="govuk-link"
                asp-action="Change"
                asp-route-actionName="MainContact"
-               asp-route-studyId="@Model.StudyId">
+               asp-route-studyId="@Model.StudyId"
+               asp-route-accesstoken="@accessToken">
                 Change
             </a>
         </gov-uk-summary-list-item>
@@ -133,13 +137,13 @@
 <h3 class="govuk-heading-m">Study sponsorship</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.SponsorName">
-        <a class="govuk-link" asp-action="Change" asp-route-actionName="SponsorOrganisation" asp-route-studyId="@Model.StudyId">Change</a>
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="SponsorOrganisation" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
     </gov-uk-summary-list-item>
 </dl>
 
 <h3 class="govuk-heading-m">Participant details</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.InclusionCriteria">
-        <a class="govuk-link" asp-action="Change" asp-route-actionName="ParticipantDetails" asp-route-studyId="@Model.StudyId">Change</a>
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="ParticipantDetails" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
     </gov-uk-summary-list-item>
 </dl>
