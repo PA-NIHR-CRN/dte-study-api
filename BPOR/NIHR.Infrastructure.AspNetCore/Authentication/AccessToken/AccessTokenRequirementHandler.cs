@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Options;
 
 namespace NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 
@@ -12,11 +13,13 @@ public class AccessTokenRequirementHandler(IAccessTokenService accessTokenServic
     {
         if (context.Resource is DefaultHttpContext defaultHttpContext)
         {
-            foreach (var claim in context.User.Claims.Where(i => i.Subject?.AuthenticationType == "AccessToken"
-                                                                 && i.Type == "access-token"))
+            foreach (var claim in context.User.Claims.Where(
+                         i => i.Subject?.AuthenticationType == AccessTokenAuthenticationOptions.AuthenticationScheme && 
+                              i.Type == AccessTokenAuthenticationOptions.ClaimType))
             {
                 var token = accessTokenService.DeserializeClaim(claim.Value);
-                if (IsAuthorizedRoute(token, defaultHttpContext.Request.RouteValues))
+                if (string.Equals(token.Role, requirement.TokenRole) &&
+                    IsAuthorizedRoute(token, defaultHttpContext.Request.RouteValues))
                 {
                     context.Succeed(requirement);
                 }

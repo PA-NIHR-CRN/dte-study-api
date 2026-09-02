@@ -1,14 +1,20 @@
-﻿namespace NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
+﻿using System.Text.Json.Serialization;
+
+namespace NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 
 public class AccessToken
 {
-    public AccessToken()
+    [JsonConstructor]
+    public AccessToken(string role,  Dictionary<string, string> routeValues)
     {
+        Role = role;
+        RouteValues = routeValues;
     }
 
     public AccessToken(string role)
     {
         Role = role;
+        RouteValues = new();
     }
 
     public AccessToken WithRoute(string routeName, string routeValue)
@@ -17,6 +23,6 @@ public class AccessToken
         return this;
     }
 
-    public string Role { get; set; }
-    public Dictionary<string, string> RouteValues { get; set; } = new();
+    public string Role { get; }
+    public Dictionary<string, string> RouteValues { get; }
 }

@@ -8,10 +8,8 @@ namespace BPOR.Rms.Controllers;
 
 public class TestController(ILogger<TestController> logger) : Controller
 {
-    private readonly ILogger<TestController> _logger = logger;
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.DefaultScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy("IsResearcherCreatingStudy", "IsAdmin")]
+    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
+    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
     [Route("[controller]/[action]/{id:int}")]
     public IActionResult Test1(int id)
     {

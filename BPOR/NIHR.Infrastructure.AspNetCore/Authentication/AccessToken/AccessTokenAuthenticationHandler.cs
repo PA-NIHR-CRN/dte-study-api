@@ -18,7 +18,7 @@ public sealed class AccessTokenAuthenticationHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var accessTokenValues = Request.Query[AccessTokenAuthenticationOptions.QueryParameterName];
+        var accessTokenValues = Request.Query[options.CurrentValue.QueryParameterName];
         if (accessTokenValues.Count != 1)
         {
             return AuthenticateResult.NoResult();
@@ -36,7 +36,7 @@ public sealed class AccessTokenAuthenticationHandler(
             return AuthenticateResult.Fail("Invalid access token");
         }
 
-        Claim[] claims = [new ("access-token", token)];
+        Claim[] claims = [new (AccessTokenAuthenticationOptions.ClaimType, token)];
         var identity = new ClaimsIdentity(claims, Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
         var ticket = new AuthenticationTicket(principal, Scheme.Name);

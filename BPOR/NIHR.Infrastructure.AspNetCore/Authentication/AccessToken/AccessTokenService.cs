@@ -7,8 +7,6 @@ namespace NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 public class AccessTokenService(IDataProtectionProvider dataProtectionProvider, 
     IOptions<AccessTokenAuthenticationOptions> options) : IAccessTokenService
 {
-    private const string protectionPurpose = "AccessToken";
-    
     public string EncryptAccessToken(AccessToken token, TimeSpan? lifetime = null)
     {
         string json = JsonSerializer.Serialize(token);
@@ -17,7 +15,7 @@ public class AccessTokenService(IDataProtectionProvider dataProtectionProvider,
 
     private ITimeLimitedDataProtector CreateProtector()
     {
-        return dataProtectionProvider.CreateProtector(protectionPurpose).ToTimeLimitedDataProtector();
+        return dataProtectionProvider.CreateProtector(options.Value.TokenPurpose).ToTimeLimitedDataProtector();
     }
 
     public string DecryptAccessToken(string token)
@@ -27,6 +25,6 @@ public class AccessTokenService(IDataProtectionProvider dataProtectionProvider,
 
     public AccessToken DeserializeClaim(string claim)
     {
-        return JsonSerializer.Deserialize<AccessToken>(claim);   
+        return JsonSerializer.Deserialize<AccessToken>(claim)!;   
     }
 }

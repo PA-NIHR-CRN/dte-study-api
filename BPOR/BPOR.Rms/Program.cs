@@ -1,5 +1,6 @@
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Infrastructure.Services.Development;
+using BPOR.Rms;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -18,14 +19,9 @@ builder.AddIdgAuthentication(authOptions =>
             .RequireAuthenticatedUser()
             .RequireRole(RoleConfiguration.GetRoles().Select(x => x.Code))
             .Build();
-        authOptions.AddPolicy("IsResearcherCreatingStudy", policy =>
+        authOptions.AddAccessTokenPolicy(PolicyNames.IsResearcherCreatingStudy, AccessTokenRoleNames.ResearcherCreateStudy);
+        authOptions.AddPolicy(PolicyNames.IsAdmin, policy =>
         {
-            policy.AuthenticationSchemes.Add(AccessTokenAuthenticationOptions.DefaultScheme);
-            policy.Requirements.Add(new AccessTokenRequirement("ResearcherCreateStudy"));
-        });
-        authOptions.AddPolicy("IsAdmin", policy =>
-        {
-            policy.AuthenticationSchemes.Add(AccessTokenAuthenticationOptions.DefaultScheme);
             policy.Requirements.Add(new RolesAuthorizationRequirement(["Admin"]));
         });
     }
