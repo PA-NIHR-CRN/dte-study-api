@@ -9,13 +9,13 @@ public class StudyModel
     [Display(Name = "Study ID")] public int Id { get; set; }
 
     [Required]
-    [Display(Name = "Primary contact (s)")]
+    [Display(Name = "Primary contact")]
     [StudyEdit(1)]
     public string FullName { get; set; }
 
     [Required]
     [EmailAddress]
-    [Display(Name = "Primary contact (s) email address")]
+    [Display(Name = "Primary contact email address")]
     [StudyEdit(1)]
     public string EmailAddress { get; set; }
 
@@ -105,7 +105,7 @@ public class StudyModel
     public bool IsEligibleForPrescreener =>
         IsEligibilityCriteriaComplete && !(HasMultipleResearchLocations!.Value && SinglePersonResponsibleForRecruiting!.Value);
 
-    [Display(Name = "Volunteer study information page link")]
+    [Display(Name = "Volunteer study information page")]
     public string? VolunteerInformationUrl { get; set; }
 }
 
