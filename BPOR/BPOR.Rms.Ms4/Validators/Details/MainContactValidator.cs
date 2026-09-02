@@ -16,7 +16,7 @@ public class MainContactValidator : AbstractValidator<StudyRequestViewModel>
         
         RuleFor(model => model.MainContactRole)
             .NotNull()
-            .WithMessage("Enter a name");
+            .WithMessage("Enter a role");
         
         RuleFor(model => model.MainContactEmail)
             .NotNull()

@@ -59,14 +59,4 @@ public sealed class StudyDraftRepository(ParticipantDbContext dbContext) : IStud
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }
-
-    public async Task RemoveStudyAsync(int id, CancellationToken cancellationToken)
-    {
-        var study = await dbContext.Studies
-            .SingleAsync(x => x.Id == id, cancellationToken);
-        
-        dbContext.Remove(study);
-
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
 }

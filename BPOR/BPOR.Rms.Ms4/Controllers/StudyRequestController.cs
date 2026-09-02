@@ -14,6 +14,8 @@ namespace BPOR.Rms.Ms4.Controllers;
 [Route("study-request")]
 public class StudyRequestController(IStudyDraftRepository studyDraftRepository) : Controller
 {
+    private static string GetReturnToSummaryKey(int studyId) => $"ReturnToSummary_{studyId}";
+
     [HttpGet("start")]
     public IActionResult Start()
     {
@@ -32,7 +34,6 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
         }
 
         var study = new Study();
-
         var studyId = await studyDraftRepository.CreateDraftStudyAsync(study, cancellationToken);
 
         return RedirectToAction(nameof(EthicsApproval), new { studyId });
@@ -42,17 +43,12 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     public async Task<IActionResult> EthicsApproval(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
-        var model = new StudyRequestViewModel
-        {
-            HasEthicsApproval = study.HasEthicsApproval
-        };
-
+        var model = new StudyRequestViewModel { HasEthicsApproval = study.HasEthicsApproval };
         return View("Overview/EthicsApproval", model);
     }
 
@@ -65,30 +61,26 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId)); // Keep flag on validation error
             return View("Overview/EthicsApproval", model);
         }
 
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
         study.HasEthicsApproval = model.HasEthicsApproval;
-
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
 
-        return RedirectToAction(nameof(InclusionInRdnPortfolio), new { studyId });
+        return GetNextAction(studyId, nameof(InclusionInRdnPortfolio));
     }
 
     [HttpGet("{studyId:int}/inclusion-in-rdn-portfolio")]
     public async Task<IActionResult> InclusionInRdnPortfolio(int studyId, CancellationToken cancellationToken)
     {
-        var study = await GetStudyAsync(
-            studyId,
-            cancellationToken);
-
+        var study = await GetStudyAsync(studyId, cancellationToken);
         if (study is null)
         {
             return NotFound();
@@ -112,45 +104,45 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("Overview/InclusionInRdnPortfolio", model);
         }
 
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
         
-        study.CpmsId = model.CpmsId;
         study.SubmittedId = model.InclusionInRdnPortfolioStatus;
+        study.CpmsId = model.InclusionInRdnPortfolioStatus == SubmittedType.Yes ? model.CpmsId : null;
+
+        if (model.InclusionInRdnPortfolioStatus == SubmittedType.Yes)
+        {
+            study.NihrFundingStatus = null;
+        }
 
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        var nextAction =
-            model.InclusionInRdnPortfolioStatus ==
-            SubmittedType.Yes
-                ? nameof(FinishRecruiting)
-                : nameof(NihrFunding);
-
-        return RedirectToAction(nextAction, new { studyId });
+        
+        if(model.InclusionInRdnPortfolioStatus != SubmittedType.Yes)
+        {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
+            return RedirectToAction(nameof(NihrFunding), new { studyId });
+        }
+        
+        return GetNextAction(studyId, nameof(FinishRecruiting));
     }
 
     [HttpGet("{studyId:int}/nihr-funding")]
     public async Task<IActionResult> NihrFunding(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
-        var model = new StudyRequestViewModel
-        {
-            NihrFundingStatus = study.NihrFundingStatus?.Id
-        };
-
+        var model = new StudyRequestViewModel { NihrFundingStatus = study.NihrFundingStatus?.Id };
         return View("Overview/NihrFunding", model);
     }
 
@@ -163,34 +155,31 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("Overview/NihrFunding", model);
         }
 
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
         study.HasNihrFunding = model.NihrFundingStatus;
-
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
 
-        var nextAction =
-            model.NihrFundingStatus ==
-            NihrFundingStatusType.No
-                ? nameof(MoreInformationRequired)
-                : nameof(FinishRecruiting);
-
-        return RedirectToAction(nextAction, new { studyId });
+        if (model.NihrFundingStatus == NihrFundingStatusType.No)
+        {
+            return RedirectToAction(nameof(MoreInformationRequired), new { studyId });
+        }
+        
+        return GetNextAction(studyId, nameof(FinishRecruiting));
     }
 
     [HttpGet("{studyId:int}/finish-recruiting")]
     public async Task<IActionResult> FinishRecruiting(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
@@ -215,11 +204,11 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("Overview/FinishRecruiting", model);
         }
 
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
@@ -232,21 +221,12 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
 
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
 
-        return RedirectToAction(nameof(StudyDescription), new { studyId });
+        return GetNextAction(studyId, nameof(StudyDescription));
     }
 
     [HttpGet("{studyId:int}/more-information-required")]
-    public async Task<IActionResult> MoreInformationRequired(int studyId, CancellationToken cancellationToken)
+    public IActionResult MoreInformationRequired(int studyId, CancellationToken cancellationToken)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-
-        if (study is null)
-        {
-            return NotFound();
-        }
-        
-        await studyDraftRepository.RemoveStudyAsync(study.Id, cancellationToken);
-
         return View("MoreInformationRequired");
     }
 
@@ -254,7 +234,6 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     public async Task<IActionResult> StudyDescription(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
@@ -278,11 +257,11 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("Details/StudyDescription", model);
         }
 
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
@@ -293,24 +272,19 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
 
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
         
-        return RedirectToAction(nameof(ResearchLocations), new { studyId });
+        return GetNextAction(studyId, nameof(ResearchLocations));
     }
 
     [HttpGet("{studyId:int}/research-locations")]
     public async Task<IActionResult> ResearchLocations(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
-        var model = new StudyRequestViewModel
-        {
-            HasMultipleResearchLocations = study.HasMultipleResearchLocations
-        };
-
+        var model = new StudyRequestViewModel { HasMultipleResearchLocations = study.HasMultipleResearchLocations };
         return View("Details/ResearchLocation", model);
     }
 
@@ -323,38 +297,32 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("Details/ResearchLocation", model);
         }
 
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
         study.HasMultipleResearchLocations = model.HasMultipleResearchLocations;
-
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
 
-        return RedirectToAction(nameof(ResearchManager), new { studyId });
+        return GetNextAction(studyId, nameof(ResearchManager));
     }
 
     [HttpGet("{studyId:int}/research-manager")]
     public async Task<IActionResult> ResearchManager(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
-        var model = new StudyRequestViewModel
-        {
-            SinglePersonResponsibleForRecruiting = study.SinglePersonResponsibleForRecruiting
-        };
-
+        var model = new StudyRequestViewModel { SinglePersonResponsibleForRecruiting = study.SinglePersonResponsibleForRecruiting };
         return View("Details/ResearchManager", model);
     }
 
@@ -367,28 +335,26 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("Details/ResearchManager", model);
         }
 
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
         study.SinglePersonResponsibleForRecruiting = model.SinglePersonResponsibleForRecruiting;
-
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
         
-        return RedirectToAction(nameof(ChiefInvestigator), new { studyId });
+        return GetNextAction(studyId, nameof(ChiefInvestigator));
     }
 
     [HttpGet("{studyId:int}/chief-investigator")]
     public async Task<IActionResult> ChiefInvestigator(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
@@ -412,11 +378,11 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("Details/ChiefInvestigator", model);
         }
         
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
@@ -426,7 +392,8 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
         study.ChiefInvestigator = model.ChiefInvestigatorName;
 
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
+        
+        TempData.Keep(GetReturnToSummaryKey(studyId));
         return RedirectToAction(nameof(ChiefInvestigatorContact), new { studyId });
     }
 
@@ -445,22 +412,35 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("Details/ChiefInvestigatorContact", model);
         }
 
         if (model.IsChiefInvestigatorMainContact != true)
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return RedirectToAction(nameof(MainContact), new { studyId });
         }
+        
+        var study = await GetStudyAsync(studyId, cancellationToken);
+        if (study is null)
+        {
+            return NotFound();
+        }
 
-        return RedirectToAction(nameof(SponsorOrganisation), new { studyId });
+        study.FullName = null;
+        study.EmailAddress = null;
+        study.MainContactRole = null;
+        
+        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
+
+        return GetNextAction(studyId, nameof(SponsorOrganisation));
     }
 
     [HttpGet("{studyId:int}/main-contact")]
     public async Task<IActionResult> MainContact(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
@@ -485,11 +465,11 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("Details/MainContact", model);
         }
 
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
@@ -501,24 +481,19 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
 
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
 
-        return RedirectToAction(nameof(SponsorOrganisation), new { studyId });
+        return GetNextAction(studyId, nameof(SponsorOrganisation));
     }
 
     [HttpGet("{studyId:int}/sponsor-organisation")]
     public async Task<IActionResult> SponsorOrganisation(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
-        var model = new StudyRequestViewModel
-        {
-            SponsorName = study.Sponsors
-        };
-
+        var model = new StudyRequestViewModel { SponsorName = study.Sponsors };
         return View("Sponsorship/SponsorOrganisation", model);
     }
 
@@ -531,38 +506,32 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("Sponsorship/SponsorOrganisation", model);
         }
 
         var study = await GetStudyAsync(studyId, cancellationToken);
-        
         if (study is null)
         {
             return NotFound();
         }
 
         study.Sponsors = model.SponsorName;
-
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
 
-        return RedirectToAction(nameof(ParticipantDetails), new { studyId });
+        return GetNextAction(studyId, nameof(ParticipantDetails));
     }
 
     [HttpGet("{studyId:int}/participant-details")]
     public async Task<IActionResult> ParticipantDetails(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
-        var model = new StudyRequestViewModel
-        {
-            InclusionCriteria = study.InclusionCriteria
-        };
-
+        var model = new StudyRequestViewModel { InclusionCriteria = study.InclusionCriteria };
         return View("ParticipantDetails/ParticipantDetails", model);
     }
 
@@ -575,49 +544,68 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     {
         if (!await ValidateAsync(validator, model, cancellationToken))
         {
+            TempData.Keep(GetReturnToSummaryKey(studyId));
             return View("ParticipantDetails/ParticipantDetails", model);
         }
 
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
         study.InclusionCriteria = model.InclusionCriteria;
-
         await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
 
-        return RedirectToAction(nameof(Summary), new { studyId });
+        return GetNextAction(studyId, nameof(Summary));
     }
 
     [HttpGet("{studyId:int}/summary")]
     public async Task<IActionResult> Summary(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
-        var model = MapSummary(study);
+        TempData.Remove(GetReturnToSummaryKey(studyId));
 
+        var model = MapSummary(study);
         return View(model);
+    }
+    
+    [HttpGet("{studyId:int}/change/{actionName}")]
+    public IActionResult Change(int studyId, string actionName)
+    {
+        var allowedActions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            nameof(EthicsApproval), nameof(InclusionInRdnPortfolio), nameof(NihrFunding),
+            nameof(FinishRecruiting), nameof(StudyDescription), nameof(ResearchLocations),
+            nameof(ResearchManager), nameof(ChiefInvestigator), nameof(ChiefInvestigatorContact),
+            nameof(SponsorOrganisation), nameof(ParticipantDetails), nameof(MainContact)
+        };
+
+        if (!allowedActions.Contains(actionName))
+        {
+            return BadRequest();
+        }
+
+        TempData[GetReturnToSummaryKey(studyId)] = true;
+
+        return RedirectToAction(actionName, new { studyId });
     }
 
     [HttpPost("{studyId:int}/summary")]
     public async Task<IActionResult> SubmitStudy(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
         }
 
-        await studyDraftRepository.SubmitStudyAsync(studyId, cancellationToken);
+        await studyDraftRepository.SubmitStudyAsync(studyId, cancellationToken);        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
 
         return RedirectToAction(nameof(ApplicationSubmitted), new { studyId });
     }
@@ -626,7 +614,6 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
     public async Task<IActionResult> ApplicationSubmitted(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
-
         if (study is null)
         {
             return NotFound();
@@ -670,12 +657,22 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository) 
         CancellationToken cancellationToken)
     {
         var validationResult = await validator.ValidateAsync(model, cancellationToken);
-
         foreach (var error in validationResult.Errors)
         {
             ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
         }
-
         return validationResult.IsValid;
+    }
+
+    private IActionResult GetNextAction(int studyId, string defaultNextAction)
+    {
+        var key = GetReturnToSummaryKey(studyId);
+        
+        if (TempData.TryGetValue(key, out var isReview) && (bool)isReview)
+        {
+            return RedirectToAction(nameof(Summary), new { studyId });
+        }
+
+        return RedirectToAction(defaultNextAction, new { studyId });
     }
 }

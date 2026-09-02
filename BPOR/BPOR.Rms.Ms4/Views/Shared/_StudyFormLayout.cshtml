@@ -1,6 +1,7 @@
 @{
     Layout = "_StudyLayout";
     ViewData["ShowBackLink"] = true;
+    var submitButtonText = ViewData["SubmitButtonText"] as string ?? "Continue";
 }
 
 @if (IsSectionDefined("SectionTitle"))
@@ -15,7 +16,7 @@
     @RenderBody()
 
     <button class="govuk-button" type="submit">
-        Continue
+        @submitButtonText
     </button>
 
 </form>

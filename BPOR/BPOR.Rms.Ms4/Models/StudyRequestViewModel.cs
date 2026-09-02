@@ -7,8 +7,9 @@ public class StudyRequestViewModel
 {
     public int? StudyId { get; set; }
 
-    [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
     public bool? HasEthicsApproval { get; set; }
+    [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
+    public string HasEthicsApprovalDisplay => HasEthicsApproval == true ? "Yes" : "Not yet, I am awaiting an approval";
     
     public SubmittedType? InclusionInRdnPortfolioStatus { get; set; }
     [Display(Name = "Have you applied for inclusion in the RDN portfolio")]
@@ -33,11 +34,13 @@ public class StudyRequestViewModel
     [Display(Name = "Provide a one-line description of your study")]
     public string? StudyDescription { get; set; }
     
-    [Display(Name = "Will this study have more than one research location?")]
     public bool? HasMultipleResearchLocations { get; set; }
+    [Display(Name = "Will this study have more than one research location?")]
+    public string HasMultipleResearchLocationsDisplay => HasMultipleResearchLocations == true ? "Yes" : "No";
     
-    [Display(Name = "Will this study be managed by more than one person?")]
     public bool? SinglePersonResponsibleForRecruiting { get; set; }
+    [Display(Name = "Will this study be managed by more than one person?")]
+    public string SinglePersonResponsibleForRecruitingDisplay => SinglePersonResponsibleForRecruiting == true ? "Yes" : "No";
     
     [Display(Name = "Who is the chief investigator for your study?")]
     public string? ChiefInvestigatorName { get; set; }
