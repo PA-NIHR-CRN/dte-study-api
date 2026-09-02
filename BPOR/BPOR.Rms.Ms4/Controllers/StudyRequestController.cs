@@ -17,7 +17,7 @@ using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 
 namespace BPOR.Rms.Ms4.Controllers;
 
-[Route("study-request")]
+[Route("studyRequest")]
 public class StudyRequestController(IStudyDraftRepository studyDraftRepository, IAccessTokenService accessTokenService)
     : Controller
 {
@@ -62,7 +62,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/ethics-approval")]
+    [HttpGet("{studyId:int}/ethicsApproval")]
     public async Task<IActionResult> EthicsApproval(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -77,7 +77,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/ethics-approval")]
+    [HttpPost("{studyId:int}/ethicsApproval")]
     public async Task<IActionResult> EthicsApproval(
         int studyId,
         StudyRequestViewModel model,
@@ -104,7 +104,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/inclusion-in-rdn-portfolio")]
+    [HttpGet("{studyId:int}/inclusionInRdnPortfolio")]
     public async Task<IActionResult> InclusionInRdnPortfolio(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -124,7 +124,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/inclusion-in-rdn-portfolio")]
+    [HttpPost("{studyId:int}/inclusionInRdnPortfolio")]
     public async Task<IActionResult> InclusionInRdnPortfolio(
         int studyId,
         StudyRequestViewModel model,
@@ -164,7 +164,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/nihr-funding")]
+    [HttpGet("{studyId:int}/nihrFunding")]
     public async Task<IActionResult> NihrFunding(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -179,7 +179,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/nihr-funding")]
+    [HttpPost("{studyId:int}/nihrFunding")]
     public async Task<IActionResult> NihrFunding(
         int studyId,
         StudyRequestViewModel model,
@@ -211,7 +211,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/finish-recruiting")]
+    [HttpGet("{studyId:int}/finishRecruiting")]
     public async Task<IActionResult> FinishRecruiting(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -232,7 +232,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/finish-recruiting")]
+    [HttpPost("{studyId:int}/finishRecruiting")]
     public async Task<IActionResult> FinishRecruiting(
         int studyId,
         StudyRequestViewModel model,
@@ -263,7 +263,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/more-information-required")]
+    [HttpGet("{studyId:int}/moreInformationRequired")]
     public IActionResult MoreInformationRequired(int studyId, CancellationToken cancellationToken)
     {
         return View("MoreInformationRequired");
@@ -271,7 +271,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/study-description")]
+    [HttpGet("{studyId:int}/studyDescription")]
     public async Task<IActionResult> StudyDescription(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -291,7 +291,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/study-description")]
+    [HttpPost("{studyId:int}/studyDescription")]
     public async Task<IActionResult> StudyDescription(
         int studyId,
         StudyRequestViewModel model,
@@ -320,7 +320,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/research-locations")]
+    [HttpGet("{studyId:int}/researchLocations")]
     public async Task<IActionResult> ResearchLocations(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -335,7 +335,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/research-locations")]
+    [HttpPost("{studyId:int}/researchLocations")]
     public async Task<IActionResult> ResearchLocations(
         int studyId,
         StudyRequestViewModel model,
@@ -362,7 +362,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/research-manager")]
+    [HttpGet("{studyId:int}/researchManager")]
     public async Task<IActionResult> ResearchManager(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -378,7 +378,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/research-manager")]
+    [HttpPost("{studyId:int}/researchManager")]
     public async Task<IActionResult> ResearchManager(
         int studyId,
         StudyRequestViewModel model,
@@ -405,7 +405,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/chief-investigator")]
+    [HttpGet("{studyId:int}/chiefInvestigator")]
     public async Task<IActionResult> ChiefInvestigator(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -425,7 +425,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/chief-investigator")]
+    [HttpPost("{studyId:int}/chiefInvestigator")]
     public async Task<IActionResult> ChiefInvestigator(
         int studyId,
         StudyRequestViewModel model,
@@ -455,7 +455,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/chief-investigator-contact")]
+    [HttpGet("{studyId:int}/chiefInvestigatorContact")]
     public IActionResult ChiefInvestigatorContact(int studyId, CancellationToken cancellationToken)
     {
         return View("Details/ChiefInvestigatorContact");
@@ -463,7 +463,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/chief-investigator-contact")]
+    [HttpPost("{studyId:int}/chiefInvestigatorContact")]
     public async Task<IActionResult> ChiefInvestigatorContact(
         int studyId,
         StudyRequestViewModel model,
@@ -499,7 +499,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/main-contact")]
+    [HttpGet("{studyId:int}/mainContact")]
     public async Task<IActionResult> MainContact(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -520,7 +520,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/main-contact")]
+    [HttpPost("{studyId:int}/mainContact")]
     public async Task<IActionResult> MainContact(
         int studyId,
         StudyRequestViewModel model,
@@ -550,7 +550,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/sponsor-organisation")]
+    [HttpGet("{studyId:int}/sponsorOrganisation")]
     public async Task<IActionResult> SponsorOrganisation(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -565,7 +565,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/sponsor-organisation")]
+    [HttpPost("{studyId:int}/sponsorOrganisation")]
     public async Task<IActionResult> SponsorOrganisation(
         int studyId,
         StudyRequestViewModel model,
@@ -592,7 +592,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/participant-details")]
+    [HttpGet("{studyId:int}/participantDetails")]
     public async Task<IActionResult> ParticipantDetails(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
@@ -607,7 +607,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/participant-details")]
+    [HttpPost("{studyId:int}/participantDetails")]
     public async Task<IActionResult> ParticipantDetails(
         int studyId,
         StudyRequestViewModel model,
@@ -691,7 +691,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
 
     [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
     [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/application-submitted")]
+    [HttpGet("{studyId:int}/applicationSubmitted")]
     public async Task<IActionResult> ApplicationSubmitted(int studyId, CancellationToken cancellationToken)
     {
         var study = await GetStudyAsync(studyId, cancellationToken);
