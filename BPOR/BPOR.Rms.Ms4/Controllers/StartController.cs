@@ -9,19 +9,19 @@ using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 
 namespace BPOR.Rms.Ms4.Controllers;
 
-[Route("studyRequest")]
+[Route("studyRequest/[action]")]
 [AllowAnonymous]
-public class StartStudyRequestController(IStudyDraftRepository studyDraftRepository)
+public class StudyRequestStartController(IStudyDraftRepository studyDraftRepository)
     : Controller
 {
-    [HttpGet("start")]
+    [HttpGet]
     public IActionResult Start()
     {
         return View();
     }
 
     [AllowAnonymous]
-    [HttpPost("start")]
+    [HttpPost]
     public async Task<IActionResult> Start(
         StudyRequestStartViewModel model,
         [FromServices] IUrlAccessTokenService urlAccessTokenService,

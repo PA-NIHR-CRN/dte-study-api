@@ -16,7 +16,7 @@ public class Graph<TModel, TNodeKey, TContext, TAction>
     
     public void AddEntryPoint(Predicate<TContext> contextPredicate, IGraphNode<TNodeKey> node) => _entryPoints.Add(new EntryPoint(contextPredicate, node));
     
-    public IGraphNode<TNodeKey> AddRedirectNode() => new ContextualNode();
+    public IGraphNode<TNodeKey> AddNonTerminalNode() => new ContextualNode();
 
     private readonly List<IGraphNode<TNodeKey>> _nodes = new();
     private readonly List<Transition> _transitions = new();
@@ -51,7 +51,7 @@ public class Graph<TModel, TNodeKey, TContext, TAction>
         => GetTransition(origin, context, model, action) != null;
 
 
-    public (TContext newContext, TNodeKey newNode) ApplyTransition(TNodeKey origin, TContext context, TModel model, TAction action)
+    public TransitionResult<TContext, TNodeKey>? ApplyTransition(TNodeKey origin, TContext context, TModel model, TAction action)
     {
         IGraphNode<TNodeKey>? currentNode = GetNode(origin);
         if (currentNode == null)
@@ -65,7 +65,7 @@ public class Graph<TModel, TNodeKey, TContext, TAction>
             var transition = GetTransition(currentNode, context, model, action);
             if (transition == null)
             {
-                throw new InvalidOperationException($"Transition {hopCount} had no transition");
+                return null;
             }
 
             TContext newContext = transition.TransformContext == null
@@ -75,7 +75,7 @@ public class Graph<TModel, TNodeKey, TContext, TAction>
 
             if (currentNode.IsTransitionEnd)
             {
-                return (newContext, currentNode.Value!);
+                return new(newContext, currentNode.Value!);
             }
 
             hopCount++;
@@ -109,5 +109,17 @@ public interface IGraphNode<TValue>
 {
     public bool IsTransitionEnd { get; }
     public TValue? Value { get; }
+}
+
+public class TransitionResult<TContext, TNodeKey>
+{
+    public TransitionResult(TContext context, TNodeKey nodeKey)
+    {
+        Context = context;
+        NodeKey = nodeKey;
+    }
+
+    public TContext Context { get; }
+    public TNodeKey NodeKey { get; }
 }
 
