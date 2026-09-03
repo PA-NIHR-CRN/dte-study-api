@@ -13,6 +13,7 @@ public static class AccessTokenDiExtensions
     {
         builder.Services.AddScoped<IAuthorizationHandler, AccessTokenRequirementHandler>();
         builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
+        builder.Services.AddScoped<IUrlAccessTokenService, UrlAccessTokenService>();
         builder.Services.AddOptions<AccessTokenAuthenticationOptions>().BindConfiguration(ConfigSectionPath);
         return builder.AddScheme<AccessTokenAuthenticationOptions, AccessTokenAuthenticationHandler>(
             scheme ?? AccessTokenAuthenticationOptions.AuthenticationScheme, _ => { });

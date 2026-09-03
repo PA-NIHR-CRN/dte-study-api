@@ -1,6 +1,8 @@
-﻿namespace FlowGraphTest.FlowGraph;
+﻿using JetBrains.Annotations;
 
-public record MvcActionKey(string Controller, string Action);
+namespace BPOR.Rms.Ms4.FlowGraph;
+
+public record MvcActionKey([AspMvcController]string Controller, [AspMvcAction]string Action);
 
 // public class RouteBuilder<TModel, TRoute, TTransition>
 //     where TTransition : IEquatable<TTransition>
