@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.TagHelpers;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
+﻿using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Text.Encodings.Web;
 using NIHR.GovUk.AspNetCore.Mvc.Models;
@@ -16,7 +13,7 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
         {
             output.TagName = "button";
             output.AddClass("govuk-button", HtmlEncoder.Default);
-            output.Attributes.Add("data_module", "govuk-button");
+            output.Attributes.Add("data-module", "govuk-button");
             
             switch (ButtonType)
             {

@@ -8,11 +8,16 @@
 @{
     var hideCampaignType = (bool?)ViewData["CampaignTable.HideCampaignType"] ?? false;
 }
-<table class="govuk-table" style="width: 100%;">
 
-    <thead class="govuk-table__head">
+<h3 class="govuk-heading-s">Study invites</h3>
+
+@if (Model.Any())
+{
+    <table class="govuk-table" style="width: 100%;">
+
+        <thead class="govuk-table__head">
         <tr class="govuk-table__row">
-            <th scope="col" class="govuk-table__header ">Date/time sent</th>
+            <th scope="col" class="govuk-table__header ">Date and time sent</th>
             @if (!hideCampaignType)
             {
                 <th scope="col" class="govuk-table__header ">Campaign type</th>
@@ -23,8 +28,8 @@
             <th scope="col" class="govuk-table__header ">Bounced</th>
             <th scope="col" class="govuk-table__header ">Status</th>
         </tr>
-    </thead>
-    <tbody class="govuk-table__body">
+        </thead>
+        <tbody class="govuk-table__body">
         @foreach (var campaign in Model)
         {
             <tr class="govuk-table__row">
@@ -78,5 +83,15 @@
                 </td>
             </tr>
         }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+}
+else
+{
+    var studyId = ViewContext.RouteData.Values["id"];
+    var url = Url.Action("Start", "VolunteerInformationStart", new { studyId = studyId });
+
+    <p>You haven't sent any communications out about this study yet.</p>
+    <p><a href="@url">Create volunteer study information page</a></p>
+}
+

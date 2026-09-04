@@ -1,0 +1,46 @@
+@using BPOR.Domain.Enums
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["Step"] = 3;
+    ViewData["TotalSteps"] = 14;
+}
+
+@section SectionTitle
+{
+    <text>Section 1: Overview</text>
+}
+        
+<h2 class="govuk-heading-l">Does this study have NIHR funding?</h2>
+
+<radio-set for="@Model.NihrFundingStatus">
+
+    <radio value="@NihrFundingStatusType.Yes"
+           conditional-id="conditional-cpms-id">
+        Yes
+    </radio>
+
+    <radio value="@NihrFundingStatusType.No">
+        No
+    </radio>
+
+    <radio value="@NihrFundingStatusType.NoButApplied">
+        No, but I have applied for NIHR funding
+    </radio>
+</radio-set>
+
+<inset-text>
+    
+    <p class="govuk-body">
+        If you are not on the RDN portfolio, you may still be eligible for funding from the NIHR.
+    </p>
+
+    <p class="govuk-body">
+        If you are unsure of this, please contact 
+        <a href="mailto:bepartofresearch-volunteerservice@nihr.ac.uk">
+            bepartofresearch-volunteerservice@nihr.ac.uk
+        </a>
+    </p>
+    
+</inset-text>
