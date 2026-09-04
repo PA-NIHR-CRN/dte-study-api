@@ -20,6 +20,9 @@ public class StudyModel
     [StudyEdit(1)]
     public string EmailAddress { get; set; }
 
+    [Display(Name = "Primary contact role")]
+    public string MainContactRole { get; set; }
+    
     [Required]
     [Display(Name = "Study name")]
     [StudyEdit(2)]
@@ -30,6 +33,9 @@ public class StudyModel
     [StudyEdit(2)]
     [ResearcherEdit(3)] 
     public long? CpmsId { get; set; }
+    
+    [Display(Name = "One line description of study")]
+    public string? Description { get; set; }
 
     [Display(Name = "Is this study recruiting identifiable participants?")]
     [StudyEdit(2)]
@@ -41,6 +47,9 @@ public class StudyModel
     [Display(Name = "Who is the Chief Investigator for the study?")]
     [ResearcherEdit(1)]
     public string? ChiefInvestigator { get; set; }
+    
+    [Display(Name = "Chief Investigator email address")]
+    public string? ChiefInvestigatorEmail { get; set; }
 
     [Display(Name = "Sponsor organisation")]
     [ResearcherEdit(1)]

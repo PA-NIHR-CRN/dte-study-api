@@ -1,6 +1,7 @@
 @using BPOR.Domain.Enums
 @using BPOR.Rms.VolunteerInformation.Data
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
+@inject IVipRepository VipRepository
 
 <div>
     <h3 class="govuk-heading-s">Study details</h3>
@@ -10,11 +11,18 @@
         <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"/>
         <summary-list-item for="Study.CpmsId"/>
         <summary-list-item for="Study.StudyName"/>
-        @* <summary-list-item for="Study.OneLineDescription"/> *@
+        @if (Model.Study.Description is not null)
+        {
+            <summary-list-item for="Study.Description"/>
+        }
         <summary-list-item for="Study.SinglePersonResponsibleForRecruiting" 
                            show-researcher-when="Model.Study.SinglePersonResponsibleForRecruiting.HasValue"/>
         <summary-list-item for="Study.HasMultipleResearchLocations" 
                            show-researcher-when="Model.Study.HasMultipleResearchLocations.HasValue"/>
+        @if (Model.Study.RecruitmentStartDate is not null)
+        {
+            <summary-list-item for="Study.RecruitmentStartDate"/>
+        }
         <summary-list-item for="Study.RecruitmentEndDate"/>
         <summary-list-item for="Study.VolunteerInformationUrl"/>
         <summary-list-item for="Study.PreScreenerUrl" 
@@ -50,7 +58,10 @@
                            show-when="@(Model.Study.PortfolioSubmissionStatus == "Yes")"/>
         <summary-list-item for="Study.HasFundingDisplay"/>
         <summary-list-item for="Study.FundingCode" show-when="@Model.Study.HasFunding == NihrFundingStatusType.Yes"/>
-        <summary-list-item for="Study.UKRecruitmentTarget"/>
+        @if (Model.Study.UKRecruitmentTarget is not null)
+        {
+            <summary-list-item for="Study.UKRecruitmentTarget"/>
+        }
         <summary-list-item for="Study.InformationUrl"/>
 
     </dl>

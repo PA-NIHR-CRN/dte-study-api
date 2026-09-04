@@ -6,8 +6,16 @@
     <dl class="govuk-summary-list">
         
         <summary-list-item for="Study.ChiefInvestigator"/>
+        @if (Model.Study.ChiefInvestigatorEmail is not null)
+        {
+            <summary-list-item for="Study.ChiefInvestigatorEmail"/>
+        }
         <summary-list-item for="Study.FullName"/>
         <summary-list-item for="Study.EmailAddress"/>
+        @if (Model.Study.MainContactRole is not null)
+        {
+            <summary-list-item for="Study.MainContactRole"/>
+        }
 
     </dl>
 </div>
