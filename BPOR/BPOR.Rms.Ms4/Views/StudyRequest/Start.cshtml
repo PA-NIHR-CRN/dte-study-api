@@ -1,0 +1,40 @@
+@model BPOR.Rms.Ms4.Models.StudyRequestStartViewModel
+
+@{
+    Layout = "_StudyLayout";
+    ViewData["Step"] = 0;
+    ViewData["TotalSteps"] = 14;
+    ViewData["HideProgress"] = true;
+}
+
+<h2 class="govuk-heading-l">Apply to include your study in the Be Part of Research registry</h2>
+        
+<p class="govuk-body">
+    This form has four sections. These are:
+</p>
+        
+<ul class="govuk-list govuk-list--bullet">
+    <li>Overview</li>
+    <li>Study details</li>
+    <li>Sponsorship and funding</li>
+    <li>Recruitment details</li>
+</ul>
+        
+<p class="govuk-body">
+    You can't save your progress once you start. Make sure you have all the information you need for the four sections before you begin, as you'll need to complete the application at one go.
+</p>
+        
+<div>
+    <form method="post">
+        <govuk-checkbox asp-for="@Model.TermsAccepted">
+            Click this button to confirm that you have read the
+            <a href="https://bepartofresearch.nihr.ac.uk/site-policies/terms-and-conditions/">
+                terms and conditions
+            </a>
+        </govuk-checkbox>
+
+        <govuk-button type="submit">
+            Start form
+        </govuk-button>
+    </form>
+</div>

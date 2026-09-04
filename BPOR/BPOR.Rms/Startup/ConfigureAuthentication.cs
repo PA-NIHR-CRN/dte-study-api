@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using NIHR.Infrastructure.Settings;
 using Microsoft.AspNetCore.Authorization;
+using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
 using NIHR.Infrastructure.Authentication.IDG;
 using NIHR.Infrastructure.Authentication.IDG.SCIM;
@@ -89,7 +90,8 @@ public static class ConfigureAuthentication
                 options.Events.OnRedirectToIdentityProviderForSignOut = MakeHttps;
 
             })
-            .AddApiKeyAuthentication();
+            .AddApiKeyAuthentication()
+            .AddAccessTokenAuthentication();
 
         return builder;
     }

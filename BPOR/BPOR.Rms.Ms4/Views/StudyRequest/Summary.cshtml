@@ -1,0 +1,149 @@
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["Step"] = 13;
+    ViewData["TotalSteps"] = 14;
+    ViewData["SubmitButtonText"] = "Submit application";
+    var accessToken = Context.Request.Query["accesstoken"].ToString();
+}
+
+@section SectionTitle
+{
+    <text>Section 5: Check your answers</text>
+}
+
+<h2 class="govuk-heading-l">Before submitting your application check the details you’ve provided</h2>
+
+<h3 class="govuk-heading-m">You can change your answers from this page before saving the application.</h3>
+
+<h3 class="govuk-heading-m">Overview</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.HasEthicsApprovalDisplay">
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="EthicsApproval" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
+    </gov-uk-summary-list-item>
+
+    <gov-uk-summary-list-item for="@Model.InclusionInRdnPortfolioStatusDisplay">
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="InclusionInRdnPortfolio" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
+    </gov-uk-summary-list-item>
+
+    @if (Model.CpmsId != null)
+    {
+        <gov-uk-summary-list-item for="@Model.CpmsId">
+            <a class="govuk-link" asp-action="Change" asp-route-actionName="InclusionInRdnPortfolio" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
+        </gov-uk-summary-list-item>
+    }
+
+    @if (Model.NihrFundingStatusDisplay != null)
+    {
+        <gov-uk-summary-list-item for="@Model.NihrFundingStatusDisplay">
+            <a class="govuk-link" asp-action="Change" asp-route-actionName="NihrFunding" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
+        </gov-uk-summary-list-item>
+    }
+
+    <gov-uk-summary-list-item
+        name="When will you finish recruiting to this study?">
+
+        <summary-value>
+            @Model.RecruitmentEndDate?.ToString("dd/MM/yyyy")
+        </summary-value>
+
+        <a class="govuk-link"
+           asp-action="Change"
+           asp-route-actionName="FinishRecruiting"
+           asp-route-studyId="@Model.StudyId"
+           asp-route-accesstoken="@accessToken">
+            Change
+        </a>
+
+    </gov-uk-summary-list-item>
+</dl>
+
+<h3 class="govuk-heading-m">Study details</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.StudyTitle">
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="StudyDescription" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.StudyDescription">
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="StudyDescription" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.HasMultipleResearchLocationsDisplay">
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="ResearchLocations" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.SinglePersonResponsibleForRecruitingDisplay">
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="ResearchManager" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item
+        name="Who is the chief investigator for your study?">
+
+        <summary-value>
+            <p class="govuk-body">
+                <strong>Name:</strong><br />
+                @Model.ChiefInvestigatorName
+            </p>
+
+            <p class="govuk-body">
+                <strong>Email:</strong><br />
+                @Model.ChiefInvestigatorEmail
+            </p>
+        </summary-value>
+
+        <a class="govuk-link"
+           asp-action="Change"
+           asp-route-actionName="ChiefInvestigator"
+           asp-route-studyId="@Model.StudyId" 
+           asp-route-accesstoken="@accessToken">
+            Change
+        </a>
+    </gov-uk-summary-list-item>
+    
+    @if (Model.MainContactName != null)
+    {
+        <gov-uk-summary-list-item
+            name="Who is the main point of contact for the study?">
+
+            <summary-value>
+                <p class="govuk-body">
+                    <strong>Name:</strong><br />
+                    @Model.MainContactName
+                </p>
+
+                <p class="govuk-body">
+                    <strong>Role:</strong><br />
+                    @Model.MainContactRole
+                </p>
+
+                <p class="govuk-body">
+                    <strong>Email:</strong><br />
+                    @Model.MainContactEmail
+                </p>
+            </summary-value>
+
+            <a class="govuk-link"
+               asp-action="Change"
+               asp-route-actionName="MainContact"
+               asp-route-studyId="@Model.StudyId"
+               asp-route-accesstoken="@accessToken">
+                Change
+            </a>
+        </gov-uk-summary-list-item>
+    }
+</dl>
+
+<h3 class="govuk-heading-m">Study sponsorship</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.SponsorName">
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="SponsorOrganisation" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
+    </gov-uk-summary-list-item>
+</dl>
+
+<h3 class="govuk-heading-m">Participant details</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.InclusionCriteria">
+        <a class="govuk-link" asp-action="Change" asp-route-actionName="ParticipantDetails" asp-route-studyId="@Model.StudyId" asp-route-accesstoken="@accessToken">Change</a>
+    </gov-uk-summary-list-item>
+</dl>
