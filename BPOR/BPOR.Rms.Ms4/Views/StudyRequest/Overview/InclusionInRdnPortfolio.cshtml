@@ -1,0 +1,64 @@
+@using BPOR.Domain.Enums
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["Step"] = 2;
+    ViewData["TotalSteps"] = 14;
+}
+
+@section SectionTitle
+{
+    <text>Section 1: Overview</text>
+}
+
+<h2 class="govuk-heading-l">
+    Have you applied for inclusion in the RDN portfolio?
+</h2>
+
+<form-group>
+
+    <radio-set for="@Model.InclusionInRdnPortfolioStatus">
+
+        <radio value="@SubmittedType.Yes"
+               conditional-id="conditional-cpms-id">
+            Yes
+        </radio>
+
+        <radio value="@SubmittedType.No">
+            No
+        </radio>
+
+        <radio value="@SubmittedType.NoButWillApply">
+            No, but I will apply
+        </radio>
+
+        <radio-conditional id="conditional-cpms-id"
+                           value="@SubmittedType.Yes">
+
+            <form-group for="@Model.CpmsId"
+                        label="What is your CPMS ID?"
+                        label-class="govuk-label">
+                <input class="govuk-input govuk-input--width-10"
+                       asp-for="@Model.CpmsId"
+                       type="text" />
+            </form-group>
+
+            <inset-text>
+                You will find your CPMS ID in an email.
+
+                <ul class="govuk-list govuk-list--bullet govuk-!-margin-top-2">
+                    <li>
+                        For commercial studies - you will receive this email automatically after creating your CPMS study record.
+                    </li>
+                    <li>
+                        For non-commercial studies - you will receive this email by the portfolio team during your portfolio application.
+                    </li>
+                </ul>
+            </inset-text>
+
+        </radio-conditional>
+
+    </radio-set>
+
+</form-group>

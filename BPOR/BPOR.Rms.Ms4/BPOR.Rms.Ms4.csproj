@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Properties\launchSettings.json" />
+      <_ContentIncludedByDefault Remove="wwwroot\js\bpor-cookie-banner.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\js\govuk-frontend-5.4.0.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\js\govuk-frontend-5.4.0.min.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\js\moj-frontend.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\js\nihr-ui.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\css\study-request.css" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
+      <ProjectReference Include="..\NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    </ItemGroup>
+
+</Project>

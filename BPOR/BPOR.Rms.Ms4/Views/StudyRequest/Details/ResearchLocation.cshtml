@@ -1,0 +1,19 @@
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["Step"] = 6;
+    ViewData["TotalSteps"] = 14;
+}
+
+@section SectionTitle
+{
+    <text>Section 2: Study details</text>
+}
+        
+<h2 class="govuk-heading-l">Will this study have more than one research location in the UK?</h2>
+
+<radio-set for="@Model.HasMultipleResearchLocations">
+    <radio value="@true">Yes</radio>
+    <radio value="@false">No</radio>
+</radio-set>

@@ -1,0 +1,6 @@
+@model NIHR.GovUk.AspNetCore.Mvc.Models.GovUkRadioConditionalModel
+
+<div id="@Model.Id"
+     class="govuk-radios__conditional govuk-!-margin-top-6 @(Model.IsHidden ? "govuk-radios__conditional--hidden" : "")">
+    @Model.InnerContent
+</div>
