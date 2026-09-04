@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using BPOR.Domain.Entities;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Models.Researcher;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Rms.Models.Study;
@@ -12,7 +13,9 @@ namespace BPOR.Rms.Models;
 public static class Projections
 {
     public static IQueryable<StudyModel> AsStudyListModel(this IQueryable<Domain.Entities.Study> source) =>
-        source.Select(StudyAsStudyListModel());
+        source
+            .Where(s => s.StudyStatusId != StudyStatusType.Draft)
+            .Select(StudyAsStudyListModel());
 
     public static IQueryable<StudyDetailsViewModel> AsStudyDetailsViewModel(
         this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyDetailsViewModel());
@@ -78,7 +81,9 @@ public static class Projections
             Id = s.Id,
             FullName = s.FullName,
             EmailAddress = s.EmailAddress,
+            MainContactRole = s.MainContactRole,
             StudyName = s.StudyName,
+            Description = s.Description,
             CpmsId = s.CpmsId,
             IsRecruitingIdentifiableParticipants = s.IsRecruitingIdentifiableParticipants,
             LatestRecruitmentTotal = s.ManualEnrollments
@@ -120,10 +125,13 @@ public static class Projections
                 Id = s.Id,
                 FullName = s.FullName,
                 EmailAddress = s.EmailAddress,
+                MainContactRole = s.MainContactRole,
                 StudyName = s.StudyName,
+                Description = s.Description,
                 CpmsId = s.CpmsId,
                 IsRecruitingIdentifiableParticipants = s.IsRecruitingIdentifiableParticipants,
                 ChiefInvestigator = s.ChiefInvestigator,
+                ChiefInvestigatorEmail = s.ChiefInvestigatorEmail,
                 StudySponsors = s.Sponsors,
                 HasFunding = s.HasNihrFunding.Value,
                 OutcomeOfSubmission = s.SubmissionOutcome != null ? s.SubmissionOutcome.Code : null,
