@@ -143,18 +143,13 @@ public class StudyRequestController(
         CancellationToken cancellationToken)
     {
         validator.ValidateSpecificProperties(model,
-            i => i.FinishRecruitingDay, 
-            i => i.FinishRecruitingMonth,
-            i => i.FinishRecruitingYear).AddToModelState(ModelState);
+            i => i.FinishRecruiting).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {
             return View("Overview/FinishRecruiting", context, model);
         }
 
-        _study.RecruitmentEndDate = new DateTime(
-            model.FinishRecruitingYear!.Value,
-            model.FinishRecruitingMonth!.Value,
-            model.FinishRecruitingDay!.Value);
+        _study.RecruitmentEndDate = model.FinishRecruiting.ToDateTime();
 
         await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
@@ -294,9 +289,9 @@ public class StudyRequestController(
 
         if (model.IsChiefInvestigatorMainContact == true)
         {
-            _study.FullName = null;
-            _study.EmailAddress = null;
-            _study.MainContactRole = null;
+            _study.FullName = _study.ChiefInvestigator;
+            _study.EmailAddress = _study.ChiefInvestigatorEmail;
+            _study.MainContactRole = "Chief Investigator";
             await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
         }
 
@@ -443,6 +438,7 @@ public class StudyRequestController(
             NihrFundingStatusDisplay = study.NihrFundingStatus?.Code,
             NihrFundingStatus = study.HasNihrFunding,
             RecruitmentEndDate = study.RecruitmentEndDate,
+            FinishRecruiting = DateViewModel.FromDateTime(study.RecruitmentEndDate),
             StudyTitle = study.StudyName,
             StudyDescription = study.Description,
             HasMultipleResearchLocations = study.HasMultipleResearchLocations,

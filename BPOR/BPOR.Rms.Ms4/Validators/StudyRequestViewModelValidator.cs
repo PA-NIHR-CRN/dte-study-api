@@ -6,26 +6,19 @@ using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 
 namespace BPOR.Rms.Ms4.Validators;
 
-
-
-public class StudyRequestViewModelValidator : AbstractValidator<StudyRequestViewModel>
+public class DateViewModelValidator : AbstractValidator<DateViewModel>
 {
-    public StudyRequestViewModelValidator()
+    public DateViewModelValidator()
     {
-        #region Section 1
-        RuleFor(model => model.HasEthicsApproval)
-            .NotNull()
-            .WithMessage("Select an option");
-        
-        RuleFor(x => x.FinishRecruitingDay)
+        RuleFor(x => x.Day)
             .NotEmpty()
             .WithMessage("Enter a day");
 
-        RuleFor(x => x.FinishRecruitingMonth)
+        RuleFor(x => x.Month)
             .NotEmpty()
             .WithMessage("Enter a month");
 
-        RuleFor(x => x.FinishRecruitingYear)
+        RuleFor(x => x.Year)
             .NotEmpty()
             .WithMessage("Enter a year");
 
@@ -38,6 +31,66 @@ public class StudyRequestViewModelValidator : AbstractValidator<StudyRequestView
                     .Must(BeInFuture)
                     .WithMessage("Date of finishing study must be in the future");
             });
+    }
+    
+    private static bool BeAValidDate(DateViewModel model)
+    {
+        if (!model.Year.HasValue || 
+            !model.Month.HasValue || 
+            !model.Day.HasValue)
+        {
+            return false;
+        }
+
+        try
+        {
+            _ = new DateOnly(
+                model.Year.Value, 
+                model.Month.Value, 
+                model.Day.Value
+            );
+            return true;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return false;
+        }
+    }
+
+    private static bool BeInFuture(DateViewModel model)
+    {
+        if (model.Year.HasValue && 
+            model.Month.HasValue && 
+            model.Day.HasValue)
+        {
+            try
+            {
+                var targetDate = new DateOnly(
+                    model.Year.Value, 
+                    model.Month.Value, 
+                    model.Day.Value
+                );
+
+                return targetDate >= DateOnly.FromDateTime(DateTime.Today);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return false;
+            }
+        }
+
+        return false;
+    }
+}
+
+public class StudyRequestViewModelValidator : AbstractValidator<StudyRequestViewModel>
+{
+    public StudyRequestViewModelValidator()
+    {
+        #region Section 1
+        RuleFor(model => model.HasEthicsApproval)
+            .NotNull()
+            .WithMessage("Select an option");
         
         RuleFor(model => model.InclusionInRdnPortfolioStatus)
             .NotNull()
@@ -51,6 +104,9 @@ public class StudyRequestViewModelValidator : AbstractValidator<StudyRequestView
         RuleFor(model => model.NihrFundingStatus)
             .NotNull()
             .WithMessage("Select an option");
+        
+        RuleFor(model => model.FinishRecruiting)
+            .SetValidator(new DateViewModelValidator());
         #endregion
         
         #region Section 2
@@ -117,54 +173,5 @@ public class StudyRequestViewModelValidator : AbstractValidator<StudyRequestView
             .MaximumLength(StudyConfiguration.InclusionCriteriaMaxLength)
             .WithMessage($"You have entered more than {StudyConfiguration.InclusionCriteriaMaxLength} characters");
         #endregion
-    }
-    
-    private static bool BeAValidDate(StudyRequestViewModel model)
-    {
-        if (!model.FinishRecruitingYear.HasValue || 
-            !model.FinishRecruitingMonth.HasValue || 
-            !model.FinishRecruitingDay.HasValue)
-        {
-            return false;
-        }
-
-        try
-        {
-            _ = new DateOnly(
-                model.FinishRecruitingYear.Value, 
-                model.FinishRecruitingMonth.Value, 
-                model.FinishRecruitingDay.Value
-            );
-            return true;
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            return false;
-        }
-    }
-
-    private static bool BeInFuture(StudyRequestViewModel model)
-    {
-        if (model.FinishRecruitingYear.HasValue && 
-            model.FinishRecruitingMonth.HasValue && 
-            model.FinishRecruitingDay.HasValue)
-        {
-            try
-            {
-                var targetDate = new DateOnly(
-                    model.FinishRecruitingYear.Value, 
-                    model.FinishRecruitingMonth.Value, 
-                    model.FinishRecruitingDay.Value
-                );
-
-                return targetDate >= DateOnly.FromDateTime(DateTime.Today);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return false;
-            }
-        }
-
-        return false;
     }
 }

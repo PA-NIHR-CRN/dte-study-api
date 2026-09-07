@@ -24,9 +24,8 @@ public class StudyRequestViewModel
     
     [Display(Name = "When will you finish recruiting to this study?")]
     public DateTime? RecruitmentEndDate { get; set; }
-    public int? FinishRecruitingDay { get; set; }
-    public int? FinishRecruitingMonth { get; set; }
-    public int? FinishRecruitingYear { get; set; }
+
+    public DateViewModel FinishRecruiting { get; set; } = new();
     
     [Display(Name = "What is the title of your study?")]
     public string? StudyTitle { get; set; }
@@ -34,12 +33,12 @@ public class StudyRequestViewModel
     [Display(Name = "Provide a one-line description of your study")]
     public string? StudyDescription { get; set; }
     
-    public bool? HasMultipleResearchLocations { get; set; }
     [Display(Name = "Will this study have more than one research location?")]
+    public bool? HasMultipleResearchLocations { get; set; }
     public string HasMultipleResearchLocationsDisplay => HasMultipleResearchLocations == true ? "Yes" : "No";
     
-    public bool? SinglePersonResponsibleForRecruiting { get; set; }
     [Display(Name = "Will this study be managed by more than one person?")]
+    public bool? SinglePersonResponsibleForRecruiting { get; set; }
     public string SinglePersonResponsibleForRecruitingDisplay => SinglePersonResponsibleForRecruiting == true ? "Yes" : "No";
     
     [Display(Name = "Who is the chief investigator for your study?")]
@@ -57,4 +56,18 @@ public class StudyRequestViewModel
 
     [Display(Name = "Who will be included in this study?")]
     public string? InclusionCriteria { get; set; }
+}
+
+public class DateViewModel
+{
+    public int? Day { get; set; }
+    public int? Month { get; set; }
+    public int? Year { get; set; }
+
+    public DateTime ToDateTime() => new DateTime(Year!.Value, Month!.Value, Day!.Value);
+
+    public static DateViewModel FromDateTime(DateTime? value)
+    {
+        return value == null ? new DateViewModel() : new DateViewModel(){Year =  value.Value.Year, Month = value.Value.Month, Day = value.Value.Day};
+    }
 }
