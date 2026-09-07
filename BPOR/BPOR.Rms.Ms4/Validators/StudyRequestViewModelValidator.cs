@@ -103,7 +103,8 @@ public class StudyRequestViewModelValidator : AbstractValidator<StudyRequestView
         
         RuleFor(model => model.NihrFundingStatus)
             .NotNull()
-            .WithMessage("Select an option");
+            .WithMessage("Select an option")
+            .When(model => model.InclusionInRdnPortfolioStatus != SubmittedType.Yes);
         
         RuleFor(model => model.FinishRecruiting)
             .SetValidator(new DateViewModelValidator());
