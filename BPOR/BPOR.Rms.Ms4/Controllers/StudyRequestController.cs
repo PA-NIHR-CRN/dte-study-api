@@ -37,7 +37,7 @@ public class StudyRequestController(
         {
             context.Result = NotFound();
         }
-        else if (study.StudyStatusId is not StudyStatusType.Draft && User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" }))
+        else if (study.StudyStatusId is not StudyStatusType.Draft && !User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" }))
         {
             context.Result = Forbid();
         }

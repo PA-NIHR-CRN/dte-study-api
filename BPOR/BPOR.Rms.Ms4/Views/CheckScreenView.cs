@@ -21,7 +21,7 @@ public abstract class CheckScreenView : RazorPage<StudyRequestViewModel>
         var studyEditContext = (StudyEditContext)ViewData["StudyEditContext"];
         var actionContext =  new UrlActionContext {Action = node.Action, Controller = node.Controller, Values = studyEditContext with
             {
-                CheckAction = new MvcActionKey("StudyRequest", "Section2Check").ToString()
+                CheckAction = mvcFlowHelper.CurrentActionKey.ToString()
             }};
         string changeUrl = mvcFlowHelper.UrlHelper.Action(actionContext);
         changeUrl = UrlAccessTokenService.AddCurrentAccessToken(changeUrl);
