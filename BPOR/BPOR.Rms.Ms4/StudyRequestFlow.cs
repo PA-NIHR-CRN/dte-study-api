@@ -51,7 +51,7 @@ public class StudyRequestFlow
         AddTransition(ChiefInvestigatorContact, MainContact, TransitionFlags.BackToCheckScreen | TransitionFlags.NextToCheckScreen, 
             model => model.IsChiefInvestigatorMainContact is not true); 
         AddTransition(MainContact, Section2Check, TransitionFlags.NextToCheckScreen);
-        AddTransition(Section2Check, SponsorOrganisation, TransitionFlags.NextToCheckScreen);
+        AddTransition(Section2Check, SponsorOrganisation, TransitionFlags.BackToCheckScreen | TransitionFlags.NextToCheckScreen);
         AddTransition(SponsorOrganisation, Section3Check, TransitionFlags.NextToCheckScreen);
         AddTransition(Section3Check, ParticipantDetails, TransitionFlags.BackToCheckScreen);
         AddTransition(ParticipantDetails, Summary, TransitionFlags.BackToCheckScreen | TransitionFlags.NextToCheckScreen);
