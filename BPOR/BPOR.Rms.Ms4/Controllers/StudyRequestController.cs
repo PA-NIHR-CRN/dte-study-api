@@ -4,12 +4,8 @@ using BPOR.Domain.Enums;
 using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Models;
 using BPOR.Rms.Ms4.Repositories;
-using BPOR.Rms.Ms4.Validators.Details;
-using BPOR.Rms.Ms4.Validators.Overview;
-using BPOR.Rms.Ms4.Validators.ParticipantDetails;
-using BPOR.Rms.Ms4.Validators.Sponsorship;
+using BPOR.Rms.Ms4.Validators;
 using CpmsCore.Web.Authorization;
-using FluentValidation;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -17,13 +13,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
+using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Ms4.Controllers;
 
 [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
 [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
 [Route("[controller]/{studyId:int}/[action]")]
-public class StudyRequestController(IStudyDraftRepository studyDraftRepository, IUrlAccessTokenService urlAccessTokenService)
+public class StudyRequestController(
+    IStudyDraftRepository studyDraftRepository,
+    IUrlAccessTokenService urlAccessTokenService,
+    StudyRequestViewModelValidator validator,
+    IMvcFlowHelper mvcFlowHelper)
     : Controller
 {
     private Study _study = null!; // Initialised in OnActionExecutionAsync
@@ -36,7 +37,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
         {
             context.Result = NotFound();
         }
-        else if (study.StudyStatusId is not StudyStatusType.Draft && User.HasClaim(i => i.Type == ClaimTypes.Role && i.Value == "Admin"))
+        else if (study.StudyStatusId is not StudyStatusType.Draft && User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" }))
         {
             context.Result = Forbid();
         }
@@ -57,10 +58,10 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> EthicsApproval(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] EthicsApprovalValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model, i => i.HasEthicsApproval).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Overview/EthicsApproval", context, model);
         }
@@ -76,31 +77,17 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     {
         return View("Overview/InclusionInRdnPortfolio", context, MapViewModel(_study));
     }
-
-    private IActionResult View([AspMvcView]string viewName, StudyEditContext context, StudyRequestViewModel model)
-    {
-        var backUrl = GetRelatedUrl(context, FlowAction.Back);
-        if (string.IsNullOrWhiteSpace(backUrl))
-        {
-            ViewData.ShowBackLink(false);
-        }
-        else
-        {
-            ViewData.ShowBackLink();
-            ViewData.SetBackLinkOverride(backUrl);
-        }
-        ViewData["StudyEditContext"] = context;
-        return View(viewName, model);
-    }
-
+    
     [HttpPost]
     public async Task<IActionResult> InclusionInRdnPortfolio(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] InclusionInRdnPortfolioValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.InclusionInRdnPortfolioStatus, 
+            i => i.CpmsId).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Overview/InclusionInRdnPortfolio", context, model);
         }
@@ -128,17 +115,18 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> NihrFunding(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] NihrFundingValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.NihrFundingStatus).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Overview/NihrFunding", context, model);
         }
 
         _study.HasNihrFunding = model.NihrFundingStatus;
         await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
-
+        
         return GetNextAction(context);
     }
 
@@ -152,10 +140,13 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> FinishRecruiting(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] FinishRecruitingValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.FinishRecruitingDay, 
+            i => i.FinishRecruitingMonth,
+            i => i.FinishRecruitingYear).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Overview/FinishRecruiting", context, model);
         }
@@ -173,7 +164,7 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     [HttpGet]
     public IActionResult MoreInformationRequired(StudyEditContext context)
     {
-        return View("MoreInformationRequired");
+        return View("MoreInformationRequired", context, MapViewModel(_study));
     }
     
     [HttpGet]
@@ -186,10 +177,12 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> StudyDescription(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] StudyDescriptionValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.StudyTitle, 
+            i => i.StudyDescription).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Details/StudyDescription", model);
         }
@@ -212,10 +205,11 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> ResearchLocations(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] ResearchLocationValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.HasMultipleResearchLocations).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Details/ResearchLocation", model);
         }
@@ -236,10 +230,11 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> ResearchManager(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] ResearchManagerValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.SinglePersonResponsibleForRecruiting).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Details/ResearchManager", model);
         }
@@ -260,10 +255,12 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> ChiefInvestigator(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] ChiefInvestigatorValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.ChiefInvestigatorEmail, 
+            i => i.ChiefInvestigatorName).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Details/ChiefInvestigator", model);
         }
@@ -286,10 +283,11 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> ChiefInvestigatorContact(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] ChiefInvestigatorContactValidator validator,
+        [FromServices] ChiefInvestigatorContactValidator ciContactValidator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        (await ciContactValidator.ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Details/ChiefInvestigatorContact", model);
         }
@@ -302,7 +300,8 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
             await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
         }
 
-        return GetNextAction(context);
+        // The answer to this question is not persisted in the model, so copy it into the model for flow control purposes.
+        return GetNextAction(context, i => i.IsChiefInvestigatorMainContact = model.IsChiefInvestigatorMainContact == true);
     }
     
     [HttpGet]
@@ -315,10 +314,13 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> MainContact(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] MainContactValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.MainContactEmail, 
+            i => i.MainContactName,
+            i => i.MainContactRole).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Details/MainContact", model);
         }
@@ -332,6 +334,20 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     }
     
     [HttpGet]
+    public IActionResult Section2Check(StudyEditContext context)
+    {
+        return View("Details/Section2Check", context, MapViewModel(_study));
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Section2Check(
+        StudyEditContext context,
+        CancellationToken cancellationToken)
+    {
+        return GetNextAction(context);
+    }
+    
+    [HttpGet]
     public IActionResult SponsorOrganisation(StudyEditContext context)
     {
         return View("Sponsorship/SponsorOrganisation", context, MapViewModel(_study));
@@ -341,10 +357,11 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> SponsorOrganisation(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] SponsorOrganisationValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.SponsorName).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("Sponsorship/SponsorOrganisation", model);
         }
@@ -352,6 +369,20 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
         _study.Sponsors = model.SponsorName;
         await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
+        return GetNextAction(context);
+    }
+    
+    [HttpGet]
+    public IActionResult Section3Check(StudyEditContext context)
+    {
+        return View("Sponsorship/Section3Check", context, MapViewModel(_study));
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Section3Check(
+        StudyEditContext context,
+        CancellationToken cancellationToken)
+    {
         return GetNextAction(context);
     }
     
@@ -365,10 +396,11 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     public async Task<IActionResult> ParticipantDetails(
         StudyEditContext context,
         StudyRequestViewModel model,
-        [FromServices] ParticipantDetailsValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.InclusionCriteria).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
             return View("ParticipantDetails/ParticipantDetails", model);
         }
@@ -386,17 +418,17 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
     }
     
     [HttpPost]
-    public async Task<IActionResult> SubmitStudy(StudyEditContext context, CancellationToken cancellationToken)
+    public async Task<IActionResult> Summary(StudyEditContext context, CancellationToken cancellationToken)
     {
+        var model = MapViewModel(_study);
+        (await validator.ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
+        {
+            return View("summary", context, model);
+        }
+        
         await studyDraftRepository.SubmitStudyAsync(context.StudyId, cancellationToken);
-
-        return RedirectToAction(nameof(ApplicationSubmitted), context.StudyId);
-    }
-    
-    [HttpGet]
-    public IActionResult ApplicationSubmitted(int studyId)
-    {
-        return View();
+        return RedirectToAction("ApplicationSubmitted", "StudyRequestStart", context);
     }
 
     private static StudyRequestViewModel MapViewModel(Study study)
@@ -424,41 +456,51 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
             InclusionCriteria = study.InclusionCriteria
         };
     }
-
-    private async Task<bool> ValidateAsync<TModel>(
-        IValidator<TModel> validator,
-        TModel model,
-        CancellationToken cancellationToken)
-    {
-        var validationResult = await validator.ValidateAsync(model, cancellationToken);
-        foreach (var error in validationResult.Errors)
-        {
-            ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-        }
-
-        return validationResult.IsValid;
-    }
     
-    private IActionResult GetNextAction(StudyEditContext context)
+    
+    private IActionResult GetNextAction(StudyEditContext context, Action<StudyRequestViewModel>? modifyModel = null)
     {
-        var result = GetRelatedUrl(context, FlowAction.Next);
+        var result = GetRelatedUrl(context, FlowAction.Next, modifyModel);
         return Redirect(result);
     }
 
-    private string? GetRelatedUrl(StudyEditContext context, FlowAction action)
+    private string? GetRelatedUrl(StudyEditContext context, FlowAction action, Action<StudyRequestViewModel>? modifyModel = null)
     {
-        var currentActionKey = new MvcActionKey(
-            RouteData.Values["controller"]!.ToString()!, RouteData.Values["action"]!.ToString()!);
         var model = MapViewModel(_study);
-        var nextAction = StudyRequestFlow.Graph.ApplyTransition(currentActionKey, context, model, action);
+        modifyModel?.Invoke(model);
+        var nextAction = StudyRequestFlow.Graph.ApplyTransition(mvcFlowHelper.CurrentActionKey, context, model, action);
 
         if (nextAction == null)
         {
             return null;
         }
 
-        string result = StudyRequestFlow.GetUri(Url, nextAction.NodeKey, nextAction.Context);
+        string? result = Url.GetUrl(nextAction);
+        if (result == null)
+        {
+            throw new Exception($"{nextAction.NodeKey} could not be mapped to a URL");
+        }
         result = urlAccessTokenService.AddCurrentAccessToken(result);
         return result;
     }
+    
+    private IActionResult View([AspMvcView]string viewName, StudyEditContext context, StudyRequestViewModel model)
+    {
+        var backUrl = GetRelatedUrl(context, FlowAction.Back);
+        if (string.IsNullOrWhiteSpace(backUrl))
+        {
+            ViewData.ShowBackLink(false);
+        }
+        else
+        {
+            ViewData.ShowBackLink();
+            ViewData.SetBackLinkOverride(backUrl);
+        }
+
+        ViewData["Progress"] = StudyRequestFlow.Graph.CalculateBestCaseProgress(context,
+            StudyRequestFlow.EthicsApproval, StudyRequestFlow.Summary, mvcFlowHelper.CurrentActionKey);
+        ViewData["StudyEditContext"] = context;
+        return View(viewName, model);
+    }
+
 }

@@ -1,11 +1,10 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Study request";
-    
-    var step = ViewData["Step"] as int? ?? 1;
-    var totalSteps = ViewData["TotalSteps"] as int? ?? 1;
-    var percentage = step * 100 / totalSteps;
-    var hideProgress = ViewData["HideProgress"] as bool? ?? false;
+
+    var progress = ViewData["Progress"] as double?;
+    var percentage = 100 * progress;
+    var hideProgress = progress is null || (ViewData["HideProgress"] as bool? ?? false);
 }
 
 @section Progress

@@ -1,0 +1,60 @@
+@using BPOR.Rms.Ms4
+@using BPOR.Rms.Ms4.FlowGraph
+@using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@inject IUrlAccessTokenService UrlAccessTokenService
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["Step"] = 13;
+    ViewData["TotalSteps"] = 14;
+}
+
+@functions {
+
+    void RenderChangeLink(MvcActionKey node)
+    {
+        var studyEditContext = (StudyEditContext)ViewData["StudyEditContext"];
+        string changeUrl = Url.Action(node.Action, node.Controller, studyEditContext with
+        {
+            CheckAction = new MvcActionKey("StudyRequest", "Section2Check").ToString()
+        });
+        changeUrl = UrlAccessTokenService.AddCurrentAccessToken(changeUrl);
+        <a class="govuk-link" href="@changeUrl">Change</a>
+    }
+
+}
+
+@section SectionTitle
+{
+    <text>Section 2: Study details</text>
+}
+
+<h2 class="govuk-heading-l">Provide details of the main contact for this study.</h2>
+
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+  
+    <div class="govuk-summary-list__row">
+        <dd class="govuk-summary-list__value">
+            <p class="govuk-body">
+                <strong>Name:</strong><br />
+                @Model.MainContactName
+            </p>
+
+            <p class="govuk-body">
+                <strong>Role:</strong><br />
+                @Model.MainContactRole
+            </p>
+
+            <p class="govuk-body">
+                <strong>Email:</strong><br />
+                @Model.MainContactEmail
+            </p>
+        </dd>
+
+        <dd class="govuk-summary-list__actions">
+            @{ RenderChangeLink(StudyRequestFlow.MainContact); }
+        </dd>
+    </div>
+</dl>

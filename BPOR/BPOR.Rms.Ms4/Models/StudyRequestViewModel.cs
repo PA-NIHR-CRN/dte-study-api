@@ -11,12 +11,12 @@ public class StudyRequestViewModel
     [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
     public string HasEthicsApprovalDisplay => HasEthicsApproval == true ? "Yes" : "Not yet, I am awaiting an approval";
     
-    public SubmittedType? InclusionInRdnPortfolioStatus { get; set; }
     [Display(Name = "Have you applied for inclusion in the RDN portfolio")]
+    public SubmittedType? InclusionInRdnPortfolioStatus { get; set; }
     public string? InclusionInRdnPortfolioStatusDisplay { get; set; }
     
-    public NihrFundingStatusType? NihrFundingStatus { get; set; }
     [Display(Name = "Does this study have NIHR funding?")]
+    public NihrFundingStatusType? NihrFundingStatus { get; set; }
     public string? NihrFundingStatusDisplay { get; set; }
     
     [Display(Name = "What is your CPMS ID?")]

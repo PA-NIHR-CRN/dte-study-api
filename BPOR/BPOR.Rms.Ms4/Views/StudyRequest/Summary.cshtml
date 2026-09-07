@@ -7,17 +7,18 @@
 
 @{
     Layout = "_StudyFormLayout";
-    ViewData["Step"] = 13;
-    ViewData["TotalSteps"] = 14;
     ViewData["SubmitButtonText"] = "Submit application";
 }
 
 @functions {
 
-    void RenderChangeLink(IGraphNode<MvcActionKey> node)
+    void RenderChangeLink(MvcActionKey node)
     {    
         var studyEditContext = (StudyEditContext)ViewData["StudyEditContext"];
-        string changeUrl = Url.Action(node.Value.Action, node.Value.Controller, studyEditContext with {IndividualEdit = true});
+        string changeUrl = Url.Action(node.Action, node.Controller, studyEditContext with
+        {
+            CheckAction = new MvcActionKey("StudyRequest", "Summary").ToString()
+        });
         changeUrl = UrlAccessTokenService.AddCurrentAccessToken(changeUrl);
         <a class="govuk-link" href="@changeUrl">Change</a>
     }
@@ -39,7 +40,10 @@
         @{ RenderChangeLink(StudyRequestFlow.EthicsApproval); }
     </gov-uk-summary-list-item>
 
-    <gov-uk-summary-list-item for="@Model.InclusionInRdnPortfolioStatusDisplay">
+    <gov-uk-summary-list-item for="@Model.InclusionInRdnPortfolioStatus">
+        <summary-value>
+            @Model.InclusionInRdnPortfolioStatusDisplay
+        </summary-value>
         @{ RenderChangeLink(StudyRequestFlow.InclusionInRdnPortfolio); }
     </gov-uk-summary-list-item>
 
@@ -50,9 +54,12 @@
         </gov-uk-summary-list-item>
     }
 
-    @if (Model.NihrFundingStatusDisplay != null)
+    @if (Model.NihrFundingStatus != null)
     {
-        <gov-uk-summary-list-item for="@Model.NihrFundingStatusDisplay">
+        <gov-uk-summary-list-item for="@Model.NihrFundingStatus">
+            <summary-value>
+                @Model.NihrFundingStatusDisplay
+            </summary-value>
             @{ RenderChangeLink(StudyRequestFlow.NihrFunding); }
         </gov-uk-summary-list-item>
     }
@@ -78,11 +85,17 @@
         @{ RenderChangeLink(StudyRequestFlow.StudyDescription); }
     </gov-uk-summary-list-item>
     
-    <gov-uk-summary-list-item for="@Model.HasMultipleResearchLocationsDisplay">
+    <gov-uk-summary-list-item for="@Model.HasMultipleResearchLocations">
+        <summary-value>
+            @Model.HasMultipleResearchLocationsDisplay
+        </summary-value>
         @{ RenderChangeLink(StudyRequestFlow.ResearchLocations); }
     </gov-uk-summary-list-item>
     
-    <gov-uk-summary-list-item for="@Model.SinglePersonResponsibleForRecruitingDisplay">
+    <gov-uk-summary-list-item for="@Model.SinglePersonResponsibleForRecruiting">
+        <summary-value>
+            @Model.SinglePersonResponsibleForRecruitingDisplay
+        </summary-value>
         @{ RenderChangeLink(StudyRequestFlow.ResearchManager); }
     </gov-uk-summary-list-item>
     
@@ -104,31 +117,29 @@
         @{ RenderChangeLink(StudyRequestFlow.ChiefInvestigator); }
     </gov-uk-summary-list-item>
     
-    @if (Model.MainContactName != null)
-    {
-        <gov-uk-summary-list-item
-            name="Who is the main point of contact for the study?">
+    <gov-uk-summary-list-item
+        name="Who is the main point of contact for the study?">
 
-            <summary-value>
-                <p class="govuk-body">
-                    <strong>Name:</strong><br />
-                    @Model.MainContactName
-                </p>
+        <summary-value>
+            <p class="govuk-body">
+                <strong>Name:</strong><br />
+                @Model.MainContactName
+            </p>
 
-                <p class="govuk-body">
-                    <strong>Role:</strong><br />
-                    @Model.MainContactRole
-                </p>
+            <p class="govuk-body">
+                <strong>Role:</strong><br />
+                @Model.MainContactRole
+            </p>
 
-                <p class="govuk-body">
-                    <strong>Email:</strong><br />
-                    @Model.MainContactEmail
-                </p>
-            </summary-value>
+            <p class="govuk-body">
+                <strong>Email:</strong><br />
+                @Model.MainContactEmail
+            </p>
+        </summary-value>
 
-            @{ RenderChangeLink(StudyRequestFlow.MainContact); }
-        </gov-uk-summary-list-item>
-    }
+        @{ RenderChangeLink(StudyRequestFlow.MainContact); }
+    </gov-uk-summary-list-item>
+    
 </dl>
 
 <h3 class="govuk-heading-m">Study sponsorship</h3>

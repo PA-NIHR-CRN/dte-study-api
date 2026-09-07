@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using BPOR.Domain.Entities;
+using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Models;
 using BPOR.Rms.Ms4.Repositories;
 using FluentValidation;
@@ -36,7 +37,7 @@ public class StudyRequestStartController(IStudyDraftRepository studyDraftReposit
         var study = new Study();
         var studyId = await studyDraftRepository.CreateDraftStudyAsync(study, cancellationToken);
         
-        var uri = Url.GetUri(StudyRequestFlow.EthicsApproval.Value, new StudyEditContext
+        var uri = Url.GetUrl(StudyRequestFlow.EthicsApproval, new StudyEditContext
         {
             StudyId = studyId,
             FlowType = StudyEditFlowType.ResearcherCreate
@@ -50,6 +51,12 @@ public class StudyRequestStartController(IStudyDraftRepository studyDraftReposit
         uri = urlAccessTokenService.AddAccessToken(uri!, token);
 
         return Redirect(uri);
+    }
+    
+    [HttpGet]
+    public IActionResult ApplicationSubmitted(int studyId)
+    {
+        return View();
     }
     
     private async Task<bool> ValidateAsync<TModel>(
