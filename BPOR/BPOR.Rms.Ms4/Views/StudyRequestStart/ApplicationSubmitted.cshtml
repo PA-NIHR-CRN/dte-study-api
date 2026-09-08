@@ -1,7 +1,10 @@
+@using BPOR.Rms.Ms4.Settings
+@using Microsoft.Extensions.Options
+
+@inject IOptions<StudyCreationSettings> Settings
+
 @{
     Layout = "_StudyLayout";
-    ViewData["Step"] = 14;
-    ViewData["TotalSteps"] = 14;
 }
 
 <div class="govuk-panel govuk-panel--confirmation">
@@ -18,6 +21,6 @@
 Not sure where this should redirect to after submission
 *@
 
-<a href="https://bepartofresearch.nihr.ac.uk/" role="button" class="govuk-button" data-module="govuk-button">
+<a href="@Settings.Value.ResearcherCreationFinishRedirect" role="button" class="govuk-button" data-module="govuk-button">
     Return to Be Part of Research
 </a>
