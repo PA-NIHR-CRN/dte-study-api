@@ -1,14 +1,13 @@
+@using BPOR.Rms.Ms4.Views.StudyRequest
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
     Layout = "_StudyFormLayout";
-    ViewData["Step"] = 4;
-    ViewData["TotalSteps"] = 14;
 }
 
 @section SectionTitle
 {
-    <text>Section 1: Overview</text>
+    <text>@StudyRequestEditResources.Section1Caption</text>
 }
 
 <date-input day-for="@Model.FinishRecruiting.Day"

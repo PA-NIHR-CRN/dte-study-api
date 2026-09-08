@@ -6,83 +6,6 @@ using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 
 namespace BPOR.Rms.Ms4.Validators;
 
-public class DateViewModelValidator : AbstractValidator<DateViewModel>
-{
-    public DateViewModelValidator()
-    {
-        RuleFor(x => x.Day)
-            .NotEmpty()
-            .WithMessage("Enter a day");
-
-        RuleFor(x => x.Month)
-            .NotEmpty()
-            .WithMessage("Enter a month");
-
-        RuleFor(x => x.Year)
-            .NotEmpty()
-            .WithMessage("Enter a year");
-
-        RuleFor(x => x)
-            .Must(BeAValidDate)
-            .WithMessage("Enter a real date")
-            .DependentRules(() =>
-            {
-                RuleFor(x => x)
-                    .Must(BeInFuture)
-                    .WithMessage("Date of finishing study must be in the future");
-            });
-    }
-    
-    private static bool BeAValidDate(DateViewModel model)
-    {
-        if (!model.Year.HasValue || 
-            !model.Month.HasValue || 
-            !model.Day.HasValue)
-        {
-            return false;
-        }
-
-        try
-        {
-            _ = new DateOnly(
-                model.Year.Value, 
-                model.Month.Value, 
-                model.Day.Value
-            );
-            return true;
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            return false;
-        }
-    }
-
-    private static bool BeInFuture(DateViewModel model)
-    {
-        if (model.Year.HasValue && 
-            model.Month.HasValue && 
-            model.Day.HasValue)
-        {
-            try
-            {
-                var targetDate = new DateOnly(
-                    model.Year.Value, 
-                    model.Month.Value, 
-                    model.Day.Value
-                );
-
-                return targetDate >= DateOnly.FromDateTime(DateTime.Today);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return false;
-            }
-        }
-
-        return false;
-    }
-}
-
 public class StudyRequestViewModelValidator : AbstractValidator<StudyRequestViewModel>
 {
     public StudyRequestViewModelValidator()
@@ -107,7 +30,9 @@ public class StudyRequestViewModelValidator : AbstractValidator<StudyRequestView
             .When(model => model.InclusionInRdnPortfolioStatus != SubmittedType.Yes);
         
         RuleFor(model => model.FinishRecruiting)
-            .SetValidator(new DateViewModelValidator());
+            .IsComplete()
+            .IsValidDate().WithMessage("Enter a real date")
+            .IsInFuture().WithMessage("Date of finishing study must be in the future");
         #endregion
         
         #region Section 2

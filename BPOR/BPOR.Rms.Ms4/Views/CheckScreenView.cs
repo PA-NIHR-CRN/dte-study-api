@@ -18,10 +18,11 @@ public abstract class CheckScreenView : RazorPage<StudyRequestViewModel>
     
     protected string GetChangeUrl(MvcActionKey node)
     {
-        var studyEditContext = (StudyEditContext)ViewData["StudyEditContext"];
+        // TODO: Move this into a subflow helper.
+        var studyEditContext = (StudyRequestEditContext)ViewData["StudyEditContext"];
         var actionContext =  new UrlActionContext {Action = node.Action, Controller = node.Controller, Values = studyEditContext with
             {
-                CheckAction = mvcFlowHelper.CurrentActionKey.ToString()
+                SubflowRtnAct = mvcFlowHelper.CurrentActionKey.ToString()
             }};
         string changeUrl = mvcFlowHelper.UrlHelper.Action(actionContext);
         changeUrl = UrlAccessTokenService.AddCurrentAccessToken(changeUrl);

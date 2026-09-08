@@ -1,19 +1,13 @@
-@using NIHR.GovUk.AspNetCore.Mvc
+@using BPOR.Rms.Ms4.Views.StudyRequest
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
     Layout = "_StudyFormLayout";
-    ViewData["Step"] = 1;
-    ViewData["TotalSteps"] = 14;
-    
-    
-    
-    //ViewData.SetBackLinkOverride();
 }
 
 @section SectionTitle
 {
-    <text>Section 1: Overview</text>
+    <text>@StudyRequestEditResources.Section1Caption</text>
 }
         
 <h2 class="govuk-heading-l">Do you have ethics approval to use Be Part of Research?</h2>

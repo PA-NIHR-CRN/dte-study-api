@@ -3,32 +3,23 @@
 @using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
-@inject IUrlAccessTokenService UrlAccessTokenService
+@inherits BPOR.Rms.Ms4.Views.CheckScreenView
 
 @{
     Layout = "_StudyFormLayout";
-    ViewData["Step"] = 13;
-    ViewData["TotalSteps"] = 14;
 }
 
 @functions {
 
     void RenderChangeLink(MvcActionKey node)
-    {
-        var studyEditContext = (StudyEditContext)ViewData["StudyEditContext"];
-        string changeUrl = Url.Action(node.Action, node.Controller, studyEditContext with
-        {
-            CheckAction = new MvcActionKey("StudyRequest", "Section2Check").ToString()
-        });
-        changeUrl = UrlAccessTokenService.AddCurrentAccessToken(changeUrl);
-        <a class="govuk-link" href="@changeUrl">Change</a>
+    {    
+        <a class="govuk-link" href="@GetChangeUrl(node)">Change</a>
     }
-
 }
 
 @section SectionTitle
 {
-    <text>Section 2: Study details</text>
+    <text>@StudyRequestEditResources.Section2Caption</text>
 }
 
 <h2 class="govuk-heading-l">Provide details of the main contact for this study.</h2>
@@ -54,7 +45,7 @@
         </dd>
 
         <dd class="govuk-summary-list__actions">
-            @{ RenderChangeLink(StudyRequestFlow.MainContact); }
+            @{ RenderChangeLink(StudyRequestEditFlow.MainContact); }
         </dd>
     </div>
 </dl>

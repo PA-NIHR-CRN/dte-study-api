@@ -3,7 +3,7 @@
 @using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
-@inject IUrlAccessTokenService UrlAccessTokenService
+@inherits BPOR.Rms.Ms4.Views.CheckScreenView
 
 @{
     Layout = "_StudyFormLayout";
@@ -11,23 +11,15 @@
 }
 
 @functions {
-
     void RenderChangeLink(MvcActionKey node)
     {    
-        var studyEditContext = (StudyEditContext)ViewData["StudyEditContext"];
-        string changeUrl = Url.Action(node.Action, node.Controller, studyEditContext with
-        {
-            CheckAction = new MvcActionKey("StudyRequest", "Summary").ToString()
-        });
-        changeUrl = UrlAccessTokenService.AddCurrentAccessToken(changeUrl);
-        <a class="govuk-link" href="@changeUrl">Change</a>
+        <a class="govuk-link" href="@GetChangeUrl(node)">Change</a>
     }
-
 }
 
 @section SectionTitle
 {
-    <text>Section 5: Check your answers</text>
+    <text>@StudyRequestEditResources.Section5Caption</text>
 }
 
 <h2 class="govuk-heading-l">Before submitting your application check the details you’ve provided</h2>
@@ -37,20 +29,20 @@
 <h3 class="govuk-heading-m">Overview</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.HasEthicsApprovalDisplay">
-        @{ RenderChangeLink(StudyRequestFlow.EthicsApproval); }
+        @{ RenderChangeLink(StudyRequestEditFlow.EthicsApproval); }
     </gov-uk-summary-list-item>
 
     <gov-uk-summary-list-item for="@Model.InclusionInRdnPortfolioStatus">
         <summary-value>
             @Model.InclusionInRdnPortfolioStatusDisplay
         </summary-value>
-        @{ RenderChangeLink(StudyRequestFlow.InclusionInRdnPortfolio); }
+        @{ RenderChangeLink(StudyRequestEditFlow.InclusionInRdnPortfolio); }
     </gov-uk-summary-list-item>
 
     @if (Model.CpmsId != null)
     {
         <gov-uk-summary-list-item for="@Model.CpmsId">
-            @{ RenderChangeLink(StudyRequestFlow.InclusionInRdnPortfolio); }
+            @{ RenderChangeLink(StudyRequestEditFlow.InclusionInRdnPortfolio); }
         </gov-uk-summary-list-item>
     }
 
@@ -60,7 +52,7 @@
             <summary-value>
                 @Model.NihrFundingStatusDisplay
             </summary-value>
-            @{ RenderChangeLink(StudyRequestFlow.NihrFunding); }
+            @{ RenderChangeLink(StudyRequestEditFlow.NihrFunding); }
         </gov-uk-summary-list-item>
     }
 
@@ -71,32 +63,32 @@
             @Model.RecruitmentEndDate?.ToString("dd/MM/yyyy")
         </summary-value>
         
-        @{ RenderChangeLink(StudyRequestFlow.FinishRecruiting); }
+        @{ RenderChangeLink(StudyRequestEditFlow.FinishRecruiting); }
     </gov-uk-summary-list-item>
 </dl>
 
 <h3 class="govuk-heading-m">Study details</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.StudyTitle">
-        @{ RenderChangeLink(StudyRequestFlow.StudyDescription); }
+        @{ RenderChangeLink(StudyRequestEditFlow.StudyDescription); }
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item for="@Model.StudyDescription">
-        @{ RenderChangeLink(StudyRequestFlow.StudyDescription); }
+        @{ RenderChangeLink(StudyRequestEditFlow.StudyDescription); }
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item for="@Model.HasMultipleResearchLocations">
         <summary-value>
             @Model.HasMultipleResearchLocationsDisplay
         </summary-value>
-        @{ RenderChangeLink(StudyRequestFlow.ResearchLocations); }
+        @{ RenderChangeLink(StudyRequestEditFlow.ResearchLocations); }
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item for="@Model.SinglePersonResponsibleForRecruiting">
         <summary-value>
             @Model.SinglePersonResponsibleForRecruitingDisplay
         </summary-value>
-        @{ RenderChangeLink(StudyRequestFlow.ResearchManager); }
+        @{ RenderChangeLink(StudyRequestEditFlow.ResearchManager); }
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item
@@ -114,7 +106,7 @@
             </p>
         </summary-value>
 
-        @{ RenderChangeLink(StudyRequestFlow.ChiefInvestigator); }
+        @{ RenderChangeLink(StudyRequestEditFlow.ChiefInvestigator); }
     </gov-uk-summary-list-item>
     
     <gov-uk-summary-list-item
@@ -137,7 +129,7 @@
             </p>
         </summary-value>
 
-        @{ RenderChangeLink(StudyRequestFlow.MainContact); }
+        @{ RenderChangeLink(StudyRequestEditFlow.MainContact); }
     </gov-uk-summary-list-item>
     
 </dl>
@@ -145,13 +137,13 @@
 <h3 class="govuk-heading-m">Study sponsorship</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.SponsorName">
-        @{ RenderChangeLink(StudyRequestFlow.SponsorOrganisation); }
+        @{ RenderChangeLink(StudyRequestEditFlow.SponsorOrganisation); }
     </gov-uk-summary-list-item>
 </dl>
 
 <h3 class="govuk-heading-m">Participant details</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
     <gov-uk-summary-list-item for="@Model.InclusionCriteria">
-        @{ RenderChangeLink(StudyRequestFlow.ParticipantDetails); }
+        @{ RenderChangeLink(StudyRequestEditFlow.ParticipantDetails); }
     </gov-uk-summary-list-item>
 </dl>

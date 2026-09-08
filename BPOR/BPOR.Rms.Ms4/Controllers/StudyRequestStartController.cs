@@ -37,15 +37,15 @@ public class StudyRequestStartController(IStudyDraftRepository studyDraftReposit
         var study = new Study();
         var studyId = await studyDraftRepository.CreateDraftStudyAsync(study, cancellationToken);
         
-        var uri = Url.GetUrl(StudyRequestFlow.EthicsApproval, new StudyEditContext
+        var uri = Url.GetUrl(StudyRequestEditFlow.EthicsApproval, new StudyRequestEditContext
         {
             StudyId = studyId,
-            FlowType = StudyEditFlowType.ResearcherCreate
+            FlowType = StudyRequestEditFlowType.ResearcherCreate
         });
 
-        var token = new AccessToken("ResearcherCreateStudy")
+        var token = new AccessToken(AccessTokenRoleNames.ResearcherCreateStudy)
             .WithRoute(
-                "studyId",
+                nameof(StudyRequestEditContext.StudyId),
                 studyId.ToString(CultureInfo.InvariantCulture));
         
         uri = urlAccessTokenService.AddAccessToken(uri!, token);

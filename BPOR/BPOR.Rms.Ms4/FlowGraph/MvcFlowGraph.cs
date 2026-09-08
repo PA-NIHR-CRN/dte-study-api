@@ -1,5 +1,6 @@
 ﻿using BPOR.Rms.Ms4.Graph;
 using BPOR.Rms.Ms4.Graph.Algorithms;
+using NetTopologySuite.Planargraph;
 
 namespace BPOR.Rms.Ms4.FlowGraph;
 
@@ -18,8 +19,8 @@ public class MvcFlowGraph<TModel, TContext, TAction>
         var dijkstra = _graph.Dijkstra();
 
         // Calculate minimum paths from both the start node and the current node
-        var costsFromStart = dijkstra.Execute(start);
-        var costsFromCurrent = dijkstra.Execute(current);
+        var costsFromStart = dijkstra.Execute(start, edgeFilter: i => i.ContextFilter?.Invoke(context) ?? true);
+        var costsFromCurrent = dijkstra.Execute(current, edgeFilter: i => i.ContextFilter?.Invoke(context) ?? true);
 
         if (costsFromStart.TryGetValue(current, out double costStartToCurrent) &&
             costsFromCurrent.TryGetValue(end, out double costCurrentToEnd))
@@ -31,21 +32,21 @@ public class MvcFlowGraph<TModel, TContext, TAction>
     }
 
     private record Transition(
-        Predicate<TContext>? ContextPredicate,
-        Predicate<TAction> TransitionPredicate,
-        Predicate<TModel>? ModelPredicate,
+        Predicate<TContext>? ContextFilter,
+        TAction Action,
+        Predicate<TModel>? ModelFilter,
         Func<TContext, TContext>? ContextTransform,
-        Func<TContext, TransitionResult<TContext, MvcActionKey>, TransitionResult<TContext, MvcActionKey>>? destinationOverride);
+        Func<TContext, TransitionResult<TContext, MvcActionKey>, TransitionResult<TContext, MvcActionKey>>? ResultTransform);
 
     public void AddTransition(MvcActionKey origin,
         MvcActionKey destination,
-        Predicate<TAction> actionPredicate,
+        TAction action,
         Predicate<TContext>? contextPredicate = null,
         Predicate<TModel>? modelPredicate = null,
         Func<TContext, TContext>? contextTransform = null,
         Func<TContext, TransitionResult<TContext, MvcActionKey>, TransitionResult<TContext, MvcActionKey>>? destinationTransform = null)
         => _graph.AddEdge(origin, destination,
-            new Transition(contextPredicate, actionPredicate, modelPredicate, contextTransform, destinationTransform));
+            new Transition(contextPredicate, action, modelPredicate, contextTransform, destinationTransform));
 
     public TransitionResult<TContext, MvcActionKey>? ApplyTransition(MvcActionKey origin, TContext context,
         TModel model, TAction action)
@@ -67,8 +68,8 @@ public class MvcFlowGraph<TModel, TContext, TAction>
                     ? context
                     : contextTransform(context);
                 var result = new TransitionResult<TContext, MvcActionKey>(newContext, relatedNodes[0].RelatedNode.Key);
-                var destinationOverride = relatedNodes[0].Value.destinationOverride;
-                result = destinationOverride != null ? destinationOverride(context, result) : result;
+                var resultTransform = relatedNodes[0].Value.ResultTransform;
+                result = resultTransform != null ? resultTransform(context, result) : result;
                 return result;
             default:
                 throw new InvalidOperationException($"Multiple {action} transitions found for the current state");
@@ -76,7 +77,7 @@ public class MvcFlowGraph<TModel, TContext, TAction>
     }
 
     private bool IsValidTransition(Transition transition, TContext context, TModel model, TAction action)
-        => (transition.ContextPredicate?.Invoke(context) ?? true) &&
-           transition.TransitionPredicate(action) &&
-           (transition.ModelPredicate?.Invoke(model) ?? true);
+        => Equals(action, transition.Action) &&
+           (transition.ContextFilter?.Invoke(context) ?? true) &&
+           (transition.ModelFilter?.Invoke(model) ?? true);
 }
