@@ -1,4 +1,7 @@
+@using BPOR.Rms.Ms4.Settings
+@using Microsoft.Extensions.Options
 @model BPOR.Rms.Ms4.Models.StudyRequestStartViewModel
+@inject IOptions<StudyCreationSettings> Settings
 
 @{
     Layout = "_StudyLayout";
@@ -28,7 +31,7 @@
     <form method="post">
         <govuk-checkbox asp-for="@Model.TermsAccepted">
             Click this button to confirm that you have read the
-            <a href="https://bepartofresearch.nihr.ac.uk/site-policies/terms-and-conditions/">
+            <a href="@Settings.Value.ResearcherCreationTermsUrl" target="_blank">
                 terms and conditions
             </a>
         </govuk-checkbox>

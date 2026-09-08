@@ -2,5 +2,7 @@
 
 public class StudyCreationSettings
 {
-    public string ResearcherCreationFinishRedirect { get; set; } = "https://bepartofresearch.nihr.ac.uk/";
+    public string ResearcherCreationFinishRedirectUrl { get; set; } = "https://bepartofresearch.nihr.ac.uk/";
+
+    public string ResearcherCreationTermsUrl { get; set; } = "https://bepartofresearch.nihr.ac.uk/site-policies/terms-and-conditions/";
 }
