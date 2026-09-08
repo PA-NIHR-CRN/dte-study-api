@@ -49,14 +49,14 @@ public class StudyRequestController(
     }
 
     [HttpGet]
-    public IActionResult EthicsApproval(StudyEditContext context)
+    public IActionResult EthicsApproval(StudyRequestEditContext context)
     {
         return View("Overview/EthicsApproval", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> EthicsApproval(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -73,14 +73,14 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult InclusionInRdnPortfolio(StudyEditContext context)
+    public IActionResult InclusionInRdnPortfolio(StudyRequestEditContext context)
     {
         return View("Overview/InclusionInRdnPortfolio", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> InclusionInRdnPortfolio(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -106,14 +106,14 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult NihrFunding(StudyEditContext context)
+    public IActionResult NihrFunding(StudyRequestEditContext context)
     {
         return View("Overview/NihrFunding", context, MapViewModel(_study));
     }
 
     [HttpPost]
     public async Task<IActionResult> NihrFunding(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -131,14 +131,14 @@ public class StudyRequestController(
     }
 
     [HttpGet]
-    public IActionResult FinishRecruiting(StudyEditContext context)
+    public IActionResult FinishRecruiting(StudyRequestEditContext context)
     {
         return View("Overview/FinishRecruiting", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> FinishRecruiting(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -157,20 +157,20 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult MoreInformationRequired(StudyEditContext context)
+    public IActionResult MoreInformationRequired(StudyRequestEditContext context)
     {
         return View("MoreInformationRequired", context, MapViewModel(_study));
     }
     
     [HttpGet]
-    public IActionResult StudyDescription(StudyEditContext context)
+    public IActionResult StudyDescription(StudyRequestEditContext context)
     {
         return View("Details/StudyDescription", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> StudyDescription(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -191,14 +191,14 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult ResearchLocations(StudyEditContext context)
+    public IActionResult ResearchLocations(StudyRequestEditContext context)
     {
         return View("Details/ResearchLocation", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> ResearchLocations(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -216,14 +216,14 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult ResearchManager(StudyEditContext context)
+    public IActionResult ResearchManager(StudyRequestEditContext context)
     {
         return View("Details/ResearchManager", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> ResearchManager(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -241,14 +241,14 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult ChiefInvestigator(StudyEditContext context)
+    public IActionResult ChiefInvestigator(StudyRequestEditContext context)
     {
         return View("Details/ChiefInvestigator", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> ChiefInvestigator(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -269,14 +269,14 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult ChiefInvestigatorContact(StudyEditContext context)
+    public IActionResult ChiefInvestigatorContact(StudyRequestEditContext context)
     {
         return View("Details/ChiefInvestigatorContact", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> ChiefInvestigatorContact(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         [FromServices] ChiefInvestigatorContactValidator ciContactValidator,
         CancellationToken cancellationToken)
@@ -300,14 +300,14 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult MainContact(StudyEditContext context)
+    public IActionResult MainContact(StudyRequestEditContext context)
     {
         return View("Details/MainContact", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> MainContact(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -329,28 +329,28 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult Section2Check(StudyEditContext context)
+    public IActionResult Section2Check(StudyRequestEditContext context)
     {
         return View("Details/Section2Check", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> Section2Check(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         CancellationToken cancellationToken)
     {
         return GetNextAction(context);
     }
     
     [HttpGet]
-    public IActionResult SponsorOrganisation(StudyEditContext context)
+    public IActionResult SponsorOrganisation(StudyRequestEditContext context)
     {
         return View("Sponsorship/SponsorOrganisation", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> SponsorOrganisation(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -368,28 +368,28 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult Section3Check(StudyEditContext context)
+    public IActionResult Section3Check(StudyRequestEditContext context)
     {
         return View("Sponsorship/Section3Check", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> Section3Check(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         CancellationToken cancellationToken)
     {
         return GetNextAction(context);
     }
     
     [HttpGet]
-    public IActionResult ParticipantDetails(StudyEditContext context)
+    public IActionResult ParticipantDetails(StudyRequestEditContext context)
     {
         return View("ParticipantDetails/ParticipantDetails", context, MapViewModel(_study));
     }
     
     [HttpPost]
     public async Task<IActionResult> ParticipantDetails(
-        StudyEditContext context,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
         CancellationToken cancellationToken)
     {
@@ -407,13 +407,13 @@ public class StudyRequestController(
     }
 
     [HttpGet]
-    public IActionResult Summary(StudyEditContext context)
+    public IActionResult Summary(StudyRequestEditContext context)
     {
         return View("summary", context, MapViewModel(_study));
     }
     
     [HttpPost]
-    public async Task<IActionResult> Summary(StudyEditContext context, CancellationToken cancellationToken)
+    public async Task<IActionResult> Summary(StudyRequestEditContext context, CancellationToken cancellationToken)
     {
         var model = MapViewModel(_study);
         (await validator.ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
@@ -454,17 +454,17 @@ public class StudyRequestController(
     }
     
     
-    private IActionResult GetNextAction(StudyEditContext context, Action<StudyRequestViewModel>? modifyModel = null)
+    private IActionResult GetNextAction(StudyRequestEditContext context, Action<StudyRequestViewModel>? modifyModel = null)
     {
-        var result = GetRelatedUrl(context, FlowAction.Next, modifyModel);
+        var result = GetRelatedUrl(context, MvcFlowAction.Next, modifyModel);
         return Redirect(result);
     }
 
-    private string? GetRelatedUrl(StudyEditContext context, FlowAction action, Action<StudyRequestViewModel>? modifyModel = null)
+    private string? GetRelatedUrl(StudyRequestEditContext context, MvcFlowAction action, Action<StudyRequestViewModel>? modifyModel = null)
     {
         var model = MapViewModel(_study);
         modifyModel?.Invoke(model);
-        var nextAction = StudyRequestFlow.Graph.ApplyTransition(mvcFlowHelper.CurrentActionKey, context, model, action);
+        var nextAction = StudyRequestEditFlow.Graph.ApplyTransition(mvcFlowHelper.CurrentActionKey, context, model, action);
 
         if (nextAction == null)
         {
@@ -480,9 +480,9 @@ public class StudyRequestController(
         return result;
     }
     
-    private IActionResult View([AspMvcView]string viewName, StudyEditContext context, StudyRequestViewModel model)
+    private IActionResult View([AspMvcView]string viewName, StudyRequestEditContext context, StudyRequestViewModel model)
     {
-        var backUrl = GetRelatedUrl(context, FlowAction.Back);
+        var backUrl = GetRelatedUrl(context, MvcFlowAction.Back);
         if (string.IsNullOrWhiteSpace(backUrl))
         {
             ViewData.ShowBackLink(false);
@@ -493,8 +493,8 @@ public class StudyRequestController(
             ViewData.SetBackLinkOverride(backUrl);
         }
 
-        ViewData["Progress"] = StudyRequestFlow.Graph.CalculateBestCaseProgress(context,
-            StudyRequestFlow.EthicsApproval, StudyRequestFlow.Summary, mvcFlowHelper.CurrentActionKey);
+        ViewData["Progress"] = StudyRequestEditFlow.Graph.CalculateBestCaseProgress(context,
+            StudyRequestEditFlow.EthicsApproval, StudyRequestEditFlow.Summary, mvcFlowHelper.CurrentActionKey);
         ViewData["StudyEditContext"] = context;
         return View(viewName, model);
     }
