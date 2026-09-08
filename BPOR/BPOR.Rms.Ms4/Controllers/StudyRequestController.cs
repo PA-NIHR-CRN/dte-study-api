@@ -179,7 +179,7 @@ public class StudyRequestController(
             i => i.StudyDescription).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {
-            return View("Details/StudyDescription", model);
+            return View("Details/StudyDescription", context, model);
         }
         
         _study.StudyName = model.StudyTitle;
@@ -206,7 +206,7 @@ public class StudyRequestController(
             i => i.HasMultipleResearchLocations).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {
-            return View("Details/ResearchLocation", model);
+            return View("Details/ResearchLocation", context, model);
         }
         
         _study.HasMultipleResearchLocations = model.HasMultipleResearchLocations;
@@ -231,7 +231,7 @@ public class StudyRequestController(
             i => i.SinglePersonResponsibleForRecruiting).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {
-            return View("Details/ResearchManager", model);
+            return View("Details/ResearchManager", context, model);
         }
 
         _study.SinglePersonResponsibleForRecruiting = model.SinglePersonResponsibleForRecruiting;
@@ -257,7 +257,7 @@ public class StudyRequestController(
             i => i.ChiefInvestigatorName).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {
-            return View("Details/ChiefInvestigator", model);
+            return View("Details/ChiefInvestigator", context, model);
         }
 
         _study.ChiefInvestigatorEmail = model.ChiefInvestigatorEmail;
@@ -284,7 +284,7 @@ public class StudyRequestController(
         (await ciContactValidator.ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {
-            return View("Details/ChiefInvestigatorContact", model);
+            return View("Details/ChiefInvestigatorContact", context, model);
         }
 
         if (model.IsChiefInvestigatorMainContact == true)
@@ -317,7 +317,7 @@ public class StudyRequestController(
             i => i.MainContactRole).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {
-            return View("Details/MainContact", model);
+            return View("Details/MainContact", context, model);
         }
         
         _study.FullName = model.MainContactName;
@@ -358,7 +358,7 @@ public class StudyRequestController(
             i => i.SponsorName).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {
-            return View("Sponsorship/SponsorOrganisation", model);
+            return View("Sponsorship/SponsorOrganisation", context, model);
         }
 
         _study.Sponsors = model.SponsorName;
@@ -397,7 +397,7 @@ public class StudyRequestController(
             i => i.InclusionCriteria).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {
-            return View("ParticipantDetails/ParticipantDetails", model);
+            return View("ParticipantDetails/ParticipantDetails", context, model);
         }
 
         _study.InclusionCriteria = model.InclusionCriteria;
