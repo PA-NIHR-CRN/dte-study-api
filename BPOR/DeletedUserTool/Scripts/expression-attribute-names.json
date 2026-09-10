@@ -1,0 +1,12 @@
+﻿{
+  "#A": "Address",
+  "#DOB": "DateOfBirth",
+  "#E": "Email",
+  "#FN": "Firstname",
+  "#LN": "Lastname",
+  "#NI": "NhsId",
+  "#NN": "NhsNumber",
+  "#HCI": "HealthConditionInterests",
+  "#MN": "MobileNumber",
+  "#LLN": "LandlineNumber"
+}

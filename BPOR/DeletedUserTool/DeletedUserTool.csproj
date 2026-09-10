@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="4.0.105.1" />
+      <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.103.6" />
+      <PackageReference Include="AWSSDK.SecurityToken" Version="4.0.100.13" />
+      <PackageReference Include="AWSSDK.SSO" Version="4.0.100.14" />
+      <PackageReference Include="AWSSDK.SSOOIDC" Version="4.0.100.13" />
+      <PackageReference Include="Bogus" Version="35.6.5" />
+      <PackageReference Include="Dapper" Version="2.1.79" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+      <PackageReference Include="MySqlConnector" Version="2.3.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Hosting">
+        <HintPath>..\..\..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.31\Microsoft.Extensions.Hosting.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.Extensions.Options">
+        <HintPath>..\BPOR.Rms\bin\Debug\net8.0\Microsoft.Extensions.Options.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Scripts\GetDeletedUsersFromRms.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appSettings.user.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\expression-attribute-values.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\expression-attribute-names.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
+    </ItemGroup>
+
+</Project>
