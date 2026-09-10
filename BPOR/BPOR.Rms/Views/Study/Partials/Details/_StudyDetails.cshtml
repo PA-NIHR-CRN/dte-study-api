@@ -8,7 +8,7 @@
     <dl class="govuk-summary-list">
         <summary-list-item for="Study.Id"/>
         <summary-list-item for="Study.HasFundingDisplay"/>
-        <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"/>
+        <summary-list-item for="Study.FundingCode" show-when="@Model.Study.HasFunding == NihrFundingStatusType.Yes"/>
         <summary-list-item for="Study.CpmsId"/>
         <summary-list-item for="Study.StudyName"/>
         @if (Model.Study.Description is not null)
@@ -19,15 +19,7 @@
                            show-researcher-when="Model.Study.SinglePersonResponsibleForRecruiting.HasValue"/>
         <summary-list-item for="Study.HasMultipleResearchLocations" 
                            show-researcher-when="Model.Study.HasMultipleResearchLocations.HasValue"/>
-        @if (Model.Study.RecruitmentStartDate is not null)
-        {
-            <summary-list-item for="Study.RecruitmentStartDate"/>
-        }
         <summary-list-item for="Study.RecruitmentEndDate"/>
-        <summary-list-item for="Study.VolunteerInformationUrl"/>
-        <summary-list-item for="Study.PreScreenerUrl" 
-                           show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.PreScreenerUrl)"/>
-        
         <role role-include="Admin">
             <div class="govuk-summary-list__row">
                 <dt class="govuk-summary-list__key">
@@ -50,19 +42,18 @@
                 </dd>
             </div>
         </role>
-        
-        <summary-list-item for="Study.ChiefInvestigator"/>
-        <summary-list-item for="Study.StudySponsors"/>
-        <summary-list-item for="Study.PortfolioSubmissionStatus"/>
-        <summary-list-item for="Study.OutcomeOfSubmission"
-                           show-when="@(Model.Study.PortfolioSubmissionStatus == "Yes")"/>
-        <summary-list-item for="Study.HasFundingDisplay"/>
-        <summary-list-item for="Study.FundingCode" show-when="@Model.Study.HasFunding == NihrFundingStatusType.Yes"/>
+        <summary-list-item for="Study.PreScreenerUrl" 
+                           show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.PreScreenerUrl)"/>
+        <summary-list-item for="Study.InformationUrl"/>
+        <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"/>
+        @if (Model.Study.RecruitmentStartDate is not null)
+        {
+            <summary-list-item for="Study.RecruitmentStartDate"/>
+        }
         @if (Model.Study.UKRecruitmentTarget is not null)
         {
             <summary-list-item for="Study.UKRecruitmentTarget"/>
         }
-        <summary-list-item for="Study.InformationUrl"/>
 
     </dl>
 </div>

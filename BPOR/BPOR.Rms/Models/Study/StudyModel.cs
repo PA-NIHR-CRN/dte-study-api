@@ -34,7 +34,7 @@ public class StudyModel
     [ResearcherEdit(3)] 
     public long? CpmsId { get; set; }
     
-    [Display(Name = "One line description of study")]
+    [Display(Name = "One-line description of study")]
     public string? Description { get; set; }
 
     [Display(Name = "Is this study recruiting identifiable participants?")]
