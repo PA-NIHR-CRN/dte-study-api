@@ -1,0 +1,52 @@
+@model NIHR.GovUk.AspNetCore.Mvc.Models.GovUkTextAreaModel
+
+@{
+    var hintId = $"{Model.Id}-hint";
+    var infoId = $"{Model.Id}-info";
+
+    var hasError = !string.IsNullOrWhiteSpace(Model.ErrorMessage);
+}
+
+<div class="govuk-form-group @(hasError ? "govuk-form-group--error" : "")">
+
+    <div class="govuk-character-count"
+         data-module="govuk-character-count"
+         data-maxlength="@Model.MaxLength">
+
+        <label class="govuk-label govuk-label--l"
+               for="@Model.Id">
+            @Model.Label
+        </label>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Hint))
+        {
+            <div id="@hintId"
+                 class="govuk-hint">
+                @Model.Hint
+            </div>
+        }
+
+        @if (hasError)
+        {
+            <p class="govuk-error-message">
+                <span class="govuk-visually-hidden">
+                    Error:
+                </span>
+                @Model.ErrorMessage
+            </p>
+        }
+
+        <textarea class="govuk-textarea govuk-js-character-count"
+                  id="@Model.Id"
+                  name="@Model.Name"
+                  rows="@Model.Rows"
+                  aria-describedby="@($"{infoId} {hintId}")">@Model.Value</textarea>
+
+        <div id="@infoId"
+             class="govuk-hint govuk-character-count__message">
+            You can enter up to @Model.MaxLength characters
+        </div>
+
+    </div>
+
+</div>

@@ -394,3 +394,9 @@ button.govuk-link:hover{
 button.govuk-link:focus{
     text-decoration: none;
 }
+
+.govuk-radios__conditional {
+    border-left: none;
+    padding-left: 0;
+    margin-left: 0;
+}

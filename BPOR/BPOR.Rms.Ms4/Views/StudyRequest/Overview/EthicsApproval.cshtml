@@ -1,0 +1,21 @@
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["Step"] = 1;
+    ViewData["TotalSteps"] = 14;
+}
+
+@section SectionTitle
+{
+    <text>Section 1: Overview</text>
+}
+        
+<h2 class="govuk-heading-l">Do you have ethics approval to use Be Part of Research?</h2>
+
+<radio-set for="@Model.HasEthicsApproval">
+    <radio value="@true">Yes</radio>
+    <radio value="@false">Not yet, I am awaiting an approval</radio>
+</radio-set>
+
+<inset-text>You can start an application without ethics approval. However, you need to submit ethics approval before we contact volunteers to recruit to your study.</inset-text>

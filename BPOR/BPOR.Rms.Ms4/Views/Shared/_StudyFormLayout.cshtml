@@ -1,0 +1,23 @@
+@{
+    Layout = "_StudyLayout";
+    ViewData["ShowBackLink"] = true;
+    var submitButtonText = ViewData["SubmitButtonText"] as string ?? "Continue";
+    var accessToken = Context.Request.Query["accesstoken"].ToString();
+}
+
+@if (IsSectionDefined("SectionTitle"))
+{
+    <h1 class="govuk-heading-s section-heading">
+        @await RenderSectionAsync("SectionTitle")
+    </h1>
+}
+
+<form method="post" asp-route-accesstoken="@accessToken">
+    
+    @RenderBody()
+
+    <button class="govuk-button" type="submit">
+        @submitButtonText
+    </button>
+
+</form>

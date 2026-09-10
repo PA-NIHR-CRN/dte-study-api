@@ -30,6 +30,7 @@
       <ProjectReference Include="..\NIHR.NotificationService\NIHR.NotificationService.csproj" />
       <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
       <ProjectReference Include="..\NIHR.Rts.Client\NIHR.Rts.Client.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Ms4\BPOR.Rms.Ms4.csproj" />
     </ItemGroup>
 
     <ItemGroup>
