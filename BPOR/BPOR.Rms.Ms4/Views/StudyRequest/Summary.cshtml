@@ -1,0 +1,149 @@
+@using BPOR.Rms.Ms4
+@using BPOR.Rms.Ms4.FlowGraph
+@using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@inherits BPOR.Rms.Ms4.Views.CheckScreenView
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["SubmitButtonText"] = "Submit application";
+}
+
+@functions {
+    void RenderChangeLink(MvcActionKey node)
+    {    
+        <a class="govuk-link" href="@GetChangeUrl(node)">Change</a>
+    }
+}
+
+@section SectionTitle
+{
+    <text>@StudyRequestEditResources.Section5Caption</text>
+}
+
+<h2 class="govuk-heading-l">Before submitting your application check the details you’ve provided</h2>
+
+<h3 class="govuk-heading-m">You can change your answers from this page before saving the application.</h3>
+
+<h3 class="govuk-heading-m">Overview</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.HasEthicsApprovalDisplay">
+        @{ RenderChangeLink(StudyRequestEditFlow.EthicsApproval); }
+    </gov-uk-summary-list-item>
+
+    <gov-uk-summary-list-item for="@Model.InclusionInRdnPortfolioStatus">
+        <summary-value>
+            @Model.InclusionInRdnPortfolioStatusDisplay
+        </summary-value>
+        @{ RenderChangeLink(StudyRequestEditFlow.InclusionInRdnPortfolio); }
+    </gov-uk-summary-list-item>
+
+    @if (Model.CpmsId != null)
+    {
+        <gov-uk-summary-list-item for="@Model.CpmsId">
+            @{ RenderChangeLink(StudyRequestEditFlow.InclusionInRdnPortfolio); }
+        </gov-uk-summary-list-item>
+    }
+
+    @if (Model.NihrFundingStatus != null)
+    {
+        <gov-uk-summary-list-item for="@Model.NihrFundingStatus">
+            <summary-value>
+                @Model.NihrFundingStatusDisplay
+            </summary-value>
+            @{ RenderChangeLink(StudyRequestEditFlow.NihrFunding); }
+        </gov-uk-summary-list-item>
+    }
+
+    <gov-uk-summary-list-item
+        name="When will you finish recruiting to this study?">
+
+        <summary-value>
+            @Model.RecruitmentEndDate?.ToString("dd/MM/yyyy")
+        </summary-value>
+        
+        @{ RenderChangeLink(StudyRequestEditFlow.FinishRecruiting); }
+    </gov-uk-summary-list-item>
+</dl>
+
+<h3 class="govuk-heading-m">Study details</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.StudyTitle">
+        @{ RenderChangeLink(StudyRequestEditFlow.StudyDescription); }
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.StudyDescription">
+        @{ RenderChangeLink(StudyRequestEditFlow.StudyDescription); }
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.HasMultipleResearchLocations">
+        <summary-value>
+            @Model.HasMultipleResearchLocationsDisplay
+        </summary-value>
+        @{ RenderChangeLink(StudyRequestEditFlow.ResearchLocations); }
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item for="@Model.SinglePersonResponsibleForRecruiting">
+        <summary-value>
+            @Model.SinglePersonResponsibleForRecruitingDisplay
+        </summary-value>
+        @{ RenderChangeLink(StudyRequestEditFlow.ResearchManager); }
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item
+        name="Who is the chief investigator for your study?">
+
+        <summary-value>
+            <p class="govuk-body">
+                <strong>Name:</strong><br />
+                @Model.ChiefInvestigatorName
+            </p>
+
+            <p class="govuk-body">
+                <strong>Email:</strong><br />
+                @Model.ChiefInvestigatorEmail
+            </p>
+        </summary-value>
+
+        @{ RenderChangeLink(StudyRequestEditFlow.ChiefInvestigator); }
+    </gov-uk-summary-list-item>
+    
+    <gov-uk-summary-list-item
+        name="Who is the main point of contact for the study?">
+
+        <summary-value>
+            <p class="govuk-body">
+                <strong>Name:</strong><br />
+                @Model.MainContactName
+            </p>
+
+            <p class="govuk-body">
+                <strong>Role:</strong><br />
+                @Model.MainContactRole
+            </p>
+
+            <p class="govuk-body">
+                <strong>Email:</strong><br />
+                @Model.MainContactEmail
+            </p>
+        </summary-value>
+
+        @{ RenderChangeLink(StudyRequestEditFlow.MainContact); }
+    </gov-uk-summary-list-item>
+    
+</dl>
+
+<h3 class="govuk-heading-m">Study sponsorship</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.SponsorName">
+        @{ RenderChangeLink(StudyRequestEditFlow.SponsorOrganisation); }
+    </gov-uk-summary-list-item>
+</dl>
+
+<h3 class="govuk-heading-m">Participant details</h3>
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.InclusionCriteria">
+        @{ RenderChangeLink(StudyRequestEditFlow.ParticipantDetails); }
+    </gov-uk-summary-list-item>
+</dl>

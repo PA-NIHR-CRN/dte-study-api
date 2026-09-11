@@ -1,5 +1,6 @@
 ﻿using BPOR.Domain.Entities.RefData;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Enums;
 using NIHR.GovUk.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Models.Researcher
@@ -23,7 +24,7 @@ namespace BPOR.Rms.Models.Researcher
         public List<Submitted>? PortfolioSubmissionStatusOptions { get; set; }
 
         [Display(Name = "Has the study been submitted for inclusion on the NIHR CRN portfolio?", Order = 4)]
-        public int? PortfolioSubmissionStatus { get; set; }
+        public SubmittedType? PortfolioSubmissionStatus { get; set; }
 
         public List<SubmissionOutcome>? OutcomeOfSubmissionOptions { get; set; }
 
@@ -34,7 +35,7 @@ namespace BPOR.Rms.Models.Researcher
         public long? CPMSId { get; set; }
 
         [Display(Name = "Does the study have NIHR funding?", Order = 7)]
-        public bool? HasFunding { get; set; }
+        public NihrFundingStatusType? HasFunding { get; set; }
 
         [Display(Name = "NIHR funding stream or grant code", Order = 8)]
         public string? FundingCode { get; set; }

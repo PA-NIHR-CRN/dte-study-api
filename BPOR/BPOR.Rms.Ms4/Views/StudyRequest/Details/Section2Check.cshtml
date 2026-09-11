@@ -1,0 +1,51 @@
+@using BPOR.Rms.Ms4
+@using BPOR.Rms.Ms4.FlowGraph
+@using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@inherits BPOR.Rms.Ms4.Views.CheckScreenView
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+@functions {
+
+    void RenderChangeLink(MvcActionKey node)
+    {    
+        <a class="govuk-link" href="@GetChangeUrl(node)">Change</a>
+    }
+}
+
+@section SectionTitle
+{
+    <text>@StudyRequestEditResources.Section2Caption</text>
+}
+
+<h2 class="govuk-heading-l">Provide details of the main contact for this study.</h2>
+
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+  
+    <div class="govuk-summary-list__row">
+        <dd class="govuk-summary-list__value">
+            <p class="govuk-body">
+                <strong>Name:</strong><br />
+                @Model.MainContactName
+            </p>
+
+            <p class="govuk-body">
+                <strong>Role:</strong><br />
+                @Model.MainContactRole
+            </p>
+
+            <p class="govuk-body">
+                <strong>Email:</strong><br />
+                @Model.MainContactEmail
+            </p>
+        </dd>
+
+        <dd class="govuk-summary-list__actions">
+            @{ RenderChangeLink(StudyRequestEditFlow.MainContact); }
+        </dd>
+    </div>
+</dl>

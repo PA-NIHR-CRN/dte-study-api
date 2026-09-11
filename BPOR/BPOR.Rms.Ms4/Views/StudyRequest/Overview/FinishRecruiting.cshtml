@@ -1,0 +1,20 @@
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+@section SectionTitle
+{
+    <text>@StudyRequestEditResources.Section1Caption</text>
+}
+
+<h2 class="govuk-heading-l">When will you finish recruiting to this study?</h2>
+<form-group for="FinishRecruiting"
+            label=""
+            description="If you don't know the exact date, provide an estimated one."
+            label-class="govuk-label">
+    
+    <partial name="_DateInput" for="FinishRecruiting"/>
+    
+</form-group>

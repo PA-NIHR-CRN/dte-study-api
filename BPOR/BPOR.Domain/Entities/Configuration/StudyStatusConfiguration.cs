@@ -15,6 +15,12 @@ public class StudyStatusConfiguration : IEntityTypeConfiguration<StudyStatus>
         builder.HasData(
             new StudyStatus
             {
+                Id = StudyStatusType.Draft,
+                Code = "Draft Application",
+                Description = "Draft Application"
+            },
+            new StudyStatus
+            {
                 Id = StudyStatusType.NewApplication,
                 Code = "New Application",
                 Description = "New Application"

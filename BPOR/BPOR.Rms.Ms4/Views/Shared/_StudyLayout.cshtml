@@ -1,0 +1,30 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Study request";
+
+    var progress = ViewData["Progress"] as double?;
+    var percentage = 100 * progress;
+    var hideProgress = progress is null || (ViewData["HideProgress"] as bool? ?? false);
+}
+
+@section Progress
+{
+    @if (!hideProgress)
+    {
+        <div class="progress-bar-background">
+            <div class="progress-bar-progress" style="width:@(percentage)%;"></div>
+        </div>
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="/css/study-request.css" />
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+        @RenderBody()   
+        
+    </div>
+</div>

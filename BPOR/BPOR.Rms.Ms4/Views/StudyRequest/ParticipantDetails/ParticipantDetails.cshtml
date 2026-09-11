@@ -1,0 +1,19 @@
+@using BPOR.Domain.Entities.Configuration
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+@section SectionTitle
+{
+    <text>@StudyRequestEditResources.Section4Caption</text>
+}
+
+<h2 class="govuk-heading-l">Who will be included in this study?</h2>
+
+<govuk-text-area
+    asp-for="@Model.InclusionCriteria"
+    label=""
+    hint="Write the most essential inclusion criteria."
+    max-length="@StudyConfiguration.InclusionCriteriaMaxLength" />

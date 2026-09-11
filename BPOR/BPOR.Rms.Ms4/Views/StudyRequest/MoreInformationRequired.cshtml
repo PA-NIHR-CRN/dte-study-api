@@ -1,0 +1,46 @@
+@{
+    Layout = "_StudyLayout";
+    ViewData["HideProgress"] = true;
+}
+
+<div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+    <div class="govuk-notification-banner__header">
+        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+            Important
+        </h2>
+    </div>
+    <div class="govuk-notification-banner__content">
+        <p class="govuk-notification-banner__heading">
+            More information needed
+        </p>
+    </div>
+</div>
+
+<p class="govuk-body">
+    At this stage, you are not eligible to use the Be Part of Research registry.
+</p>
+
+<p class="govuk-body">
+    Based on your answers, this is because you do not have:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+    <li>A CPMS ID</li>
+    <li>NIHR funding</li>
+</ul>
+
+<p class="govuk-body">
+    We encourage you to submit another application once you have these details.
+</p>
+
+<p class="govuk-body">
+    If you need more information or would like to get in touch with our team,
+    email
+    <a href="mailto:bepartofresearch-volunteerservice@nihr.ac.uk">
+        bepartofresearch-volunteerservice@nihr.ac.uk
+    </a>
+</p>
+
+<a asp-action="start" role="button" class="govuk-button" data-module="govuk-button">
+    Return to step by step guide
+</a>

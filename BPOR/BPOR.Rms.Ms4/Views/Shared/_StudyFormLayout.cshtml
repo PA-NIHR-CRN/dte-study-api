@@ -1,0 +1,25 @@
+@using AngleSharp.Io
+@using BPOR.Rms.Ms4
+@using BPOR.Rms.Ms4.FlowGraph
+@using Microsoft.AspNetCore.WebUtilities
+@{
+    Layout = "_StudyLayout";
+    var submitButtonText = ViewData["SubmitButtonText"] as string ?? "Continue";
+}
+
+@if (IsSectionDefined("SectionTitle"))
+{
+    <h1 class="govuk-heading-s section-heading">
+        @await RenderSectionAsync("SectionTitle")
+    </h1>
+}
+
+<form method="post">
+    
+    @RenderBody()
+
+    <button class="govuk-button" type="submit">
+        @submitButtonText
+    </button>
+
+</form>

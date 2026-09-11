@@ -26,6 +26,7 @@ COPY "BPOR/NIHR.Geometry" "NIHR.Geometry"
 COPY "BPOR/BPOR.Rms.VolunteerInformation" "BPOR.Rms.VolunteerInformation"
 COPY "BPOR/BPOR.Rms.Abstractions" "BPOR.Rms.Abstractions"
 COPY "BPOR/NIHR.Rts.Client" "NIHR.Rts.Client"
+COPY "BPOR/BPOR.Rms.Ms4" "BPOR.Rms.Ms4"
 
 WORKDIR "/src/BPOR.Rms"
 RUN dotnet build "BPOR.Rms.csproj" -c $BUILD_CONFIGURATION -o /app/build
