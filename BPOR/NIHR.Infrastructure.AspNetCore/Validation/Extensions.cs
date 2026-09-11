@@ -83,7 +83,7 @@ public static class Extensions
 
             if (value.Length > maxUrlLength)
             {
-                context.AddFailure($"The link must be less that {maxUrlLength + 1} characters");
+                context.AddFailure($"The link must be less than {maxUrlLength + 1} characters");
             }
 
             if (!System.Uri.TryCreate(value, uriKind, out var uri))

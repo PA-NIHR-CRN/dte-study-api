@@ -438,7 +438,7 @@ public class StudyRequestController(
             NihrFundingStatusDisplay = study.NihrFundingStatus?.Code,
             NihrFundingStatus = study.HasNihrFunding,
             RecruitmentEndDate = study.RecruitmentEndDate,
-            FinishRecruiting = DateViewModel.FromDateTime(study.RecruitmentEndDate),
+            FinishRecruiting = GovUkDate.FromDateTime(study.RecruitmentEndDate),
             StudyTitle = study.StudyName,
             StudyDescription = study.Description,
             HasMultipleResearchLocations = study.HasMultipleResearchLocations,

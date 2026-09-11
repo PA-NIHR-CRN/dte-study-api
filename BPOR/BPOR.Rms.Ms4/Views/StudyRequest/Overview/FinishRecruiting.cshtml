@@ -1,4 +1,3 @@
-@using BPOR.Rms.Ms4.Views.StudyRequest
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
@@ -10,8 +9,12 @@
     <text>@StudyRequestEditResources.Section1Caption</text>
 }
 
-<date-input day-for="@Model.FinishRecruiting.Day"
-            month-for="@Model.FinishRecruiting.Month"
-            year-for="@Model.FinishRecruiting.Year"
-            legend="When will you finish recruiting to this study?"
-            hint="If you don't know the exact date, provide an estimated one." />
+<h2 class="govuk-heading-l">When will you finish recruiting to this study?</h2>
+<form-group for="FinishRecruiting"
+            label=""
+            description="If you don't know the exact date, provide an estimated one."
+            label-class="govuk-label">
+    
+    <partial name="_DateInput" for="FinishRecruiting"/>
+    
+</form-group>

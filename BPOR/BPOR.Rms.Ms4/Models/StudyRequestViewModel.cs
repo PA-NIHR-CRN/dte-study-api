@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Enums;
+using NIHR.GovUk.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Ms4.Models;
 
@@ -25,7 +26,7 @@ public class StudyRequestViewModel
     [Display(Name = "When will you finish recruiting to this study?")]
     public DateTime? RecruitmentEndDate { get; set; }
 
-    public DateViewModel FinishRecruiting { get; set; } = new();
+    public GovUkDate FinishRecruiting { get; set; } = new();
     
     [Display(Name = "What is the title of your study?")]
     public string? StudyTitle { get; set; }
@@ -56,20 +57,4 @@ public class StudyRequestViewModel
 
     [Display(Name = "Who will be included in this study?")]
     public string? InclusionCriteria { get; set; }
-}
-
-public class DateViewModel
-{
-    public int? Day { get; set; }
-    public int? Month { get; set; }
-    public int? Year { get; set; }
-    
-    public bool IsComplete => Day.HasValue && Month.HasValue && Year.HasValue;
-
-    public DateTime ToDateTime() => new(Year!.Value, Month!.Value, Day!.Value);
-
-    public static DateViewModel FromDateTime(DateTime? value)
-    {
-        return value == null ? new DateViewModel() : new DateViewModel(){Year =  value.Value.Year, Month = value.Value.Month, Day = value.Value.Day};
-    }
 }
