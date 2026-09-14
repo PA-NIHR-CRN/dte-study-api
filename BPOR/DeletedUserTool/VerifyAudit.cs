@@ -10,7 +10,7 @@ public class VerifyAudit(RmsDatabase rmsDatabase)
             var participantCount = rmsDatabase.CountParticipantsByEmail(emailAddressAudit.Email);
             if (participantCount > 0)
             {
-                
+                report.WriteLine($"Email {emailAddressAudit.Email} still has {participantCount} participant records");
             }
         }
     }

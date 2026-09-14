@@ -22,12 +22,13 @@ builder.Services.AddSingleton<BporDynamoDb>();
 var host = builder.Build();
 
 var rmsDatabase = host.Services.GetRequiredService<RmsDatabase>();
-var deletedParticipants = rmsDatabase.GetDeletedParticipants().Take(10);
+var deletedParticipants = rmsDatabase.GetDeletedParticipants().Take(1);
 
 var bporCognito = host.Services.GetRequiredService<BporCognito>();
 var bporDynamoDb = host.Services.GetRequiredService<BporDynamoDb>();
 
-List<DynamoParticipant> dynamoParticipantsByEmail = await bporDynamoDb.GetParticipantsByEmail(deletedParticipants.Select(i => i.Key.Email).Distinct());
+List<DynamoParticipant> dynamoParticipantsByEmail = await bporDynamoDb.GetParticipantsByEmail(
+    deletedParticipants.Select(i => i.Key.Email).Distinct());
 
 HashSet<string> dynamoDbPksToDelete = new();
 HashSet<string> dynamoDbPksToAnonymise = new();
@@ -151,12 +152,12 @@ var columns = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAl
 
 foreach (var pk in dynamoDbPksToAnonymise)
 {
-    dynamoDbScript.WriteLine($"aws dynamodb update-item --table-name {dynamoDbSettings.Value.TableName} --key {pk} --expression-attribute-names file://expression-attribute-names.json --expression-attribute-values file://expression-attribute-values.json --update-expression \"SET {string.Join(", ", columns.Keys.Select(i => $"{i} = {i.Replace('#', ':')}"))} \"");
+    dynamoDbScript.WriteLine($"aws dynamodb update-item --profile {dynamoDbSettings.Value.Profile} --table-name {dynamoDbSettings.Value.TableName} --key {pk} --expression-attribute-names file://expression-attribute-names.json --expression-attribute-values file://expression-attribute-values.json --update-expression \"SET {string.Join(", ", columns.Keys.Select(i => $"{i} = {i.Replace('#', ':')}"))} \"");
 }
 
 var cognitoSettings = host.Services.GetRequiredService<IOptions<CognitoSettings>>();
 using var cognitoScript = File.CreateText(Path.Combine(outputFolder, "cognito-clean.ps1"));
 foreach (var cognitoUserNameToRemove in cognitoUsernamesToRemove)
 {
-    cognitoScript.WriteLine($"admin-delete-user --user-pool-id {cognitoSettings.Value.UserPoolId} --username {cognitoUserNameToRemove}");
+    cognitoScript.WriteLine($"admin-delete-user --profile {cognitoSettings.Value.Profile} --user-pool-id {cognitoSettings.Value.UserPoolId} --username {cognitoUserNameToRemove}");
 }
