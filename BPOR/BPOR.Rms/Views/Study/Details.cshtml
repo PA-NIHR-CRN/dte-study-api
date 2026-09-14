@@ -16,20 +16,43 @@
 
 <div style="display:flex;gap: 40px; flex-direction: column; width: 100%">
     <partial name="Partials/Details/_StudyStatistics" />
-    
-    <accordion>
+
+    <govuk-tabs title="Contents">
+
         @if (UserProvider.IsAdmin())
         {
-            <accordion-section caption="Researcher emails">
+            <govuk-tab id="emails" title="Emails" selected="true">
+
                 <partial name="Partials/Details/_ResearcherEmailsTable" model="Model.ResearcherEmails"/>
-            </accordion-section>
+
+            </govuk-tab>
         }
-        <accordion-section caption="Campaigns sent">
+
+        <govuk-tab id="study-invites" title="Study invites">
+            
             <partial name="Partials/_CampaignTable" model="Model.Campaigns"/>
-        </accordion-section>
-    </accordion>
-    
-    <partial name="Partials/Details/_VolunteerTable" />
-    
-    <partial name="Partials/Details/_StudyDetails" />
+            
+            <partial name="Partials/Details/_VolunteerTable" />
+
+        </govuk-tab>
+        
+        <govuk-tab id="study-details" title="Study details">
+            
+            <partial name="Partials/Details/_StudyDetails"/>
+            
+        </govuk-tab>
+        
+        <govuk-tab id="study-team-details" title="Study team details">
+            
+            <partial name="Partials/Details/_StudyTeamDetails"/>
+            
+        </govuk-tab>
+        
+        <govuk-tab id="funding-details" title="Funding details">
+            
+            <partial name="Partials/Details/_Funding"/>
+
+        </govuk-tab>
+
+    </govuk-tabs>
 </div>
