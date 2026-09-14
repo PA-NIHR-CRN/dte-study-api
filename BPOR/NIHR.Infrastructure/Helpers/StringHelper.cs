@@ -1,6 +1,7 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 
-namespace BPOR.Rms.Ms4.Validators;
+namespace NIHR.Infrastructure;
 
 public static class StringHelper
 {
@@ -21,5 +22,23 @@ public static class StringHelper
             }
         }
         return result.ToString();
+    }
+    
+    public static int CountWords(this string value)
+    {
+        int result = 0;
+        bool inWord = false;
+        
+        foreach (char c in value)
+        {
+            bool isWhitespace = char.IsWhiteSpace(c);
+            if (!isWhitespace && !inWord)
+            {
+                result++;
+            }
+            inWord = !isWhitespace;
+        }
+
+        return result;
     }
 }

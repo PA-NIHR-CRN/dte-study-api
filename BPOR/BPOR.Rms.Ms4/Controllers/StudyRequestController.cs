@@ -312,8 +312,8 @@ public class StudyRequestController(
         CancellationToken cancellationToken)
     {
         validator.ValidateSpecificProperties(model,
-            i => i.MainContactEmail, 
-            i => i.MainContactName,
+                i => i.MainContactEmail, 
+                i => i.MainContactName,
             i => i.MainContactRole).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {

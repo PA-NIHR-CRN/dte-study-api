@@ -1,10 +1,8 @@
-﻿using BPOR.Rms.Ms4.Models;
-using FluentValidation;
-using NIHR.GovUk.AspNetCore.Mvc;
+﻿using FluentValidation;
 
-namespace BPOR.Rms.Ms4.Validators;
+namespace NIHR.GovUk.AspNetCore.Mvc.Validation;
 
-public static class ValidationExtensions
+public static class Extensions
 {
     public static IRuleBuilderOptions<T, GovUkDate> IsInFuture<T>(this IRuleBuilder<T, GovUkDate> ruleBuilder)
         => ruleBuilder.SetValidator(new DateViewModelInFutureValidator<T>());

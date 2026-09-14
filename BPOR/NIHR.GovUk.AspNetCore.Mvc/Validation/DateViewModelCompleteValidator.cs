@@ -1,8 +1,7 @@
-﻿using BPOR.Rms.Ms4.Models;
-using FluentValidation;
-using NIHR.GovUk.AspNetCore.Mvc;
+﻿using FluentValidation;
+using NIHR.Infrastructure;
 
-namespace BPOR.Rms.Ms4.Validators;
+namespace NIHR.GovUk.AspNetCore.Mvc.Validation;
 
 public class DateViewModelCompleteValidator : AbstractValidator<GovUkDate>
 {
