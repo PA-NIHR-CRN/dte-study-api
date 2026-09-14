@@ -1,0 +1,28 @@
+@using BPOR.Rms.Ms4
+@using BPOR.Rms.Ms4.FlowGraph
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+@inherits BPOR.Rms.Ms4.Views.CheckScreenView
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+@functions {
+    void RenderChangeLink(MvcActionKey node)
+    {    
+        <a class="govuk-link" href="@GetChangeUrl(node)">Change</a>
+    }
+}
+
+@section SectionTitle
+{
+    <text>@StudyRequestEditResources.Section3Caption</text>
+}
+
+<h2 class="govuk-heading-l">Select the sponsor organisation</h2>
+
+<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+    <gov-uk-summary-list-item for="@Model.SponsorName" show-name="false">
+        @{ RenderChangeLink(StudyRequestEditFlow.SponsorOrganisation); }
+    </gov-uk-summary-list-item>
+</dl>

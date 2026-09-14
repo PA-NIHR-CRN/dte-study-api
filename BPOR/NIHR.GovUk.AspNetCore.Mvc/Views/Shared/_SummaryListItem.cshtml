@@ -1,7 +1,22 @@
+@model NIHR.GovUk.AspNetCore.Mvc.Models.GovUkSummaryListItemModel
+
+@{
+    var hasError = !string.IsNullOrWhiteSpace(Model.ErrorMessage);
+}
+@if (hasError)
+{
+    @* <p class="govuk-error-message"> *@
+    @*     <span class="govuk-visually-hidden">Error:</span> *@
+    @*     @Model.ErrorMessage *@
+    @* </p> *@
+}
 <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key">
-        @Model.Name
-    </dt>
+    @if (Model.ShowName)
+    {
+        <dt class="govuk-summary-list__key">
+            @Model.Name
+        </dt>
+    }
 
     <dd class="govuk-summary-list__value">
         @if (Model.ValueContent is not null)

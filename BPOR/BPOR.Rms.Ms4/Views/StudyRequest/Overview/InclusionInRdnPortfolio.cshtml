@@ -1,15 +1,14 @@
 @using BPOR.Domain.Enums
+@using BPOR.Rms.Ms4.Views.StudyRequest
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
     Layout = "_StudyFormLayout";
-    ViewData["Step"] = 2;
-    ViewData["TotalSteps"] = 14;
 }
 
 @section SectionTitle
 {
-    <text>Section 1: Overview</text>
+    <text>@StudyRequestEditResources.Section1Caption</text>
 }
 
 <h2 class="govuk-heading-l">
@@ -52,7 +51,7 @@
                         For commercial studies - you will receive this email automatically after creating your CPMS study record.
                     </li>
                     <li>
-                        For non-commercial studies - you will receive this email by the portfolio team during your portfolio application.
+                        For non-commercial studies - you will receive this email from the portfolio team during your portfolio application.
                     </li>
                 </ul>
             </inset-text>

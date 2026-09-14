@@ -2,17 +2,14 @@
 
 @{
     Layout = "_StudyFormLayout";
-    ViewData["Step"] = 4;
-    ViewData["TotalSteps"] = 14;
 }
 
 @section SectionTitle
 {
-    <text>Section 1: Overview</text>
+    <text>@StudyRequestEditResources.Section1Caption</text>
 }
 
-<date-input day-for="@Model.FinishRecruitingDay"
-            month-for="@Model.FinishRecruitingMonth"
-            year-for="@Model.FinishRecruitingYear"
-            legend="When will you finish recruiting to this study?"
-            hint="If you don't know the exact date, provide an estimated one." />
+<form-group for="FinishRecruiting" label-as-heading="true" label-class="govuk-heading-l"
+            description="If you don't know the exact date, provide an estimated one.">
+    <partial name="_DateInput" for="FinishRecruiting"/>
+</form-group>

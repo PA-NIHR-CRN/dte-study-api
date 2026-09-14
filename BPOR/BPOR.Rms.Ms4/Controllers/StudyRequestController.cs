@@ -1,723 +1,444 @@
-using System.Globalization;
+using System.Security.Claims;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Enums;
+using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Models;
 using BPOR.Rms.Ms4.Repositories;
-using BPOR.Rms.Ms4.Validators.Details;
-using BPOR.Rms.Ms4.Validators.Overview;
-using BPOR.Rms.Ms4.Validators.ParticipantDetails;
-using BPOR.Rms.Ms4.Validators.Sponsorship;
+using BPOR.Rms.Ms4.Validators;
 using CpmsCore.Web.Authorization;
-using FluentValidation;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Mvc.Filters;
+using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
+using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Ms4.Controllers;
 
-[Route("studyRequest")]
-public class StudyRequestController(IStudyDraftRepository studyDraftRepository, IAccessTokenService accessTokenService)
+[Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
+[AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
+[Route("[controller]/{studyId:int}/[action]")]
+public class StudyRequestController(
+    IStudyDraftRepository studyDraftRepository,
+    IUrlAccessTokenService urlAccessTokenService,
+    StudyRequestViewModelValidator validator,
+    IMvcFlowHelper mvcFlowHelper)
     : Controller
 {
-    private static string GetReturnToSummaryKey(int studyId) => $"ReturnToSummary_{studyId}";
-
-    [AllowAnonymous]
-    [HttpGet("start")]
-    public IActionResult Start()
+    private Study _study = null!; // Initialised in OnActionExecutionAsync
+    
+    public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        return View();
-    }
-
-    [AllowAnonymous]
-    [HttpPost("start")]
-    public async Task<IActionResult> Start(
-        StudyRequestStartViewModel model,
-        [FromServices] IValidator<StudyRequestStartViewModel> validator,
-        CancellationToken cancellationToken)
-    {
-        if (!await ValidateAsync(validator, model, cancellationToken))
-        {
-            return View(model);
-        }
-
-        var study = new Study();
-        var studyId = await studyDraftRepository.CreateDraftStudyAsync(study, cancellationToken);
-
-        var accessToken = accessTokenService.EncryptAccessToken(
-            new AccessToken("ResearcherCreateStudy")
-                .WithRoute(
-                    "studyId",
-                    studyId.ToString(CultureInfo.InvariantCulture)));
-
-        return RedirectToAction(
-            nameof(EthicsApproval),
-            new
-            {
-                studyId,
-                accesstoken = accessToken
-            });
-    }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/ethicsApproval")]
-    public async Task<IActionResult> EthicsApproval(int studyId, CancellationToken cancellationToken)
-    {
-        var study = await GetStudyAsync(studyId, cancellationToken);
+        var studyId = Convert.ToInt32(context.RouteData.Values["studyId"]);
+        var study = await studyDraftRepository.GetStudyAsync(studyId, context.HttpContext.RequestAborted);
         if (study is null)
         {
-            return NotFound();
+            context.Result = NotFound();
         }
-
-        var model = new StudyRequestViewModel { HasEthicsApproval = study.HasEthicsApproval };
-        return View("Overview/EthicsApproval", model);
+        else if (study.StudyStatusId is not StudyStatusType.Draft && !User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" }))
+        {
+            context.Result = Forbid();
+        }
+        else
+        {
+            _study = study;
+            await base.OnActionExecutionAsync(context, next);
+        }
     }
 
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/ethicsApproval")]
+    [HttpGet]
+    public IActionResult EthicsApproval(StudyRequestEditContext context)
+    {
+        return View("Overview/EthicsApproval", context, MapViewModel(_study));
+    }
+    
+    [HttpPost]
     public async Task<IActionResult> EthicsApproval(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] EthicsApprovalValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model, i => i.HasEthicsApproval).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Overview/EthicsApproval", model);
+            return View("Overview/EthicsApproval", context, model);
         }
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
+        _study.HasEthicsApproval = model.HasEthicsApproval;
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        study.HasEthicsApproval = model.HasEthicsApproval;
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        return GetNextAction(studyId, nameof(InclusionInRdnPortfolio));
+        return GetNextAction(context);
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/inclusionInRdnPortfolio")]
-    public async Task<IActionResult> InclusionInRdnPortfolio(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult InclusionInRdnPortfolio(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        var model = new StudyRequestViewModel
-        {
-            InclusionInRdnPortfolioStatus = study.Submitted?.Id,
-            CpmsId = study.CpmsId
-        };
-
-        return View("Overview/InclusionInRdnPortfolio", model);
+        return View("Overview/InclusionInRdnPortfolio", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/inclusionInRdnPortfolio")]
+    
+    [HttpPost]
     public async Task<IActionResult> InclusionInRdnPortfolio(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] InclusionInRdnPortfolioValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.InclusionInRdnPortfolioStatus, 
+            i => i.CpmsId).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Overview/InclusionInRdnPortfolio", model);
+            return View("Overview/InclusionInRdnPortfolio", context, model);
         }
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        study.SubmittedId = model.InclusionInRdnPortfolioStatus;
-        study.CpmsId = model.InclusionInRdnPortfolioStatus == SubmittedType.Yes ? model.CpmsId : null;
+        _study.SubmittedId = model.InclusionInRdnPortfolioStatus;
+        _study.CpmsId = model.InclusionInRdnPortfolioStatus == SubmittedType.Yes ? model.CpmsId : null;
 
         if (model.InclusionInRdnPortfolioStatus == SubmittedType.Yes)
         {
-            study.NihrFundingStatus = null;
+            _study.NihrFundingStatus = null;
         }
 
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        if (model.InclusionInRdnPortfolioStatus != SubmittedType.Yes)
-        {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return RedirectToJourneyAction(nameof(NihrFunding), studyId);
-        }
-
-        return GetNextAction(studyId, nameof(FinishRecruiting));
+        return GetNextAction(context);
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/nihrFunding")]
-    public async Task<IActionResult> NihrFunding(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult NihrFunding(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        var model = new StudyRequestViewModel { NihrFundingStatus = study.NihrFundingStatus?.Id };
-        return View("Overview/NihrFunding", model);
+        return View("Overview/NihrFunding", context, MapViewModel(_study));
     }
 
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/nihrFunding")]
+    [HttpPost]
     public async Task<IActionResult> NihrFunding(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] NihrFundingValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.NihrFundingStatus).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Overview/NihrFunding", model);
+            return View("Overview/NihrFunding", context, model);
         }
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        study.HasNihrFunding = model.NihrFundingStatus;
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        if (model.NihrFundingStatus == NihrFundingStatusType.No)
-        {
-            return RedirectToJourneyAction(nameof(MoreInformationRequired), studyId);
-        }
-
-        return GetNextAction(studyId, nameof(FinishRecruiting));
+        _study.HasNihrFunding = model.NihrFundingStatus;
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
+        
+        return GetNextAction(context);
     }
 
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/finishRecruiting")]
-    public async Task<IActionResult> FinishRecruiting(int studyId, CancellationToken cancellationToken)
+    [HttpGet]
+    public IActionResult FinishRecruiting(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        var model = new StudyRequestViewModel
-        {
-            FinishRecruitingDay = study.RecruitmentEndDate?.Day,
-            FinishRecruitingMonth = study.RecruitmentEndDate?.Month,
-            FinishRecruitingYear = study.RecruitmentEndDate?.Year,
-        };
-
-        return View("Overview/FinishRecruiting", model);
+        return View("Overview/FinishRecruiting", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/finishRecruiting")]
+    
+    [HttpPost]
     public async Task<IActionResult> FinishRecruiting(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] FinishRecruitingValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.FinishRecruiting).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Overview/FinishRecruiting", model);
+            return View("Overview/FinishRecruiting", context, model);
         }
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
+        _study.RecruitmentEndDate = model.FinishRecruiting.ToDateTime();
 
-        study.RecruitmentEndDate = new DateTime(
-            model.FinishRecruitingYear!.Value,
-            model.FinishRecruitingMonth!.Value,
-            model.FinishRecruitingDay!.Value);
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        return GetNextAction(studyId, nameof(StudyDescription));
+        return GetNextAction(context);
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/moreInformationRequired")]
-    public IActionResult MoreInformationRequired(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult MoreInformationRequired(StudyRequestEditContext context)
     {
-        return View("MoreInformationRequired");
+        return View("MoreInformationRequired", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/studyDescription")]
-    public async Task<IActionResult> StudyDescription(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult StudyDescription(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        var model = new StudyRequestViewModel
-        {
-            StudyTitle = study.StudyName,
-            StudyDescription = study.Description
-        };
-
-        return View("Details/StudyDescription", model);
+        return View("Details/StudyDescription", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/studyDescription")]
+    
+    [HttpPost]
     public async Task<IActionResult> StudyDescription(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] StudyDescriptionValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.StudyTitle, 
+            i => i.StudyDescription).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Details/StudyDescription", model);
+            return View("Details/StudyDescription", context, model);
         }
+        
+        _study.StudyName = model.StudyTitle;
+        _study.Description = model.StudyDescription;
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        study.StudyName = model.StudyTitle;
-        study.Description = model.StudyDescription;
-
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        return GetNextAction(studyId, nameof(ResearchLocations));
+        return GetNextAction(context);
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/researchLocations")]
-    public async Task<IActionResult> ResearchLocations(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult ResearchLocations(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        var model = new StudyRequestViewModel { HasMultipleResearchLocations = study.HasMultipleResearchLocations };
-        return View("Details/ResearchLocation", model);
+        return View("Details/ResearchLocation", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/researchLocations")]
+    
+    [HttpPost]
     public async Task<IActionResult> ResearchLocations(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] ResearchLocationValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.HasMultipleResearchLocations).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Details/ResearchLocation", model);
+            return View("Details/ResearchLocation", context, model);
         }
+        
+        _study.HasMultipleResearchLocations = model.HasMultipleResearchLocations;
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        study.HasMultipleResearchLocations = model.HasMultipleResearchLocations;
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        return GetNextAction(studyId, nameof(ResearchManager));
+        return GetNextAction(context);
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/researchManager")]
-    public async Task<IActionResult> ResearchManager(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult ResearchManager(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        var model = new StudyRequestViewModel
-            { SinglePersonResponsibleForRecruiting = study.SinglePersonResponsibleForRecruiting };
-        return View("Details/ResearchManager", model);
+        return View("Details/ResearchManager", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/researchManager")]
+    
+    [HttpPost]
     public async Task<IActionResult> ResearchManager(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] ResearchManagerValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.SinglePersonResponsibleForRecruiting).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Details/ResearchManager", model);
+            return View("Details/ResearchManager", context, model);
         }
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
+        _study.SinglePersonResponsibleForRecruiting = model.SinglePersonResponsibleForRecruiting;
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        study.SinglePersonResponsibleForRecruiting = model.SinglePersonResponsibleForRecruiting;
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        return GetNextAction(studyId, nameof(ChiefInvestigator));
+        return GetNextAction(context);
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/chiefInvestigator")]
-    public async Task<IActionResult> ChiefInvestigator(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult ChiefInvestigator(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        var model = new StudyRequestViewModel
-        {
-            ChiefInvestigatorName = study.ChiefInvestigator,
-            ChiefInvestigatorEmail = study.ChiefInvestigatorEmail
-        };
-
-        return View("Details/ChiefInvestigator", model);
+        return View("Details/ChiefInvestigator", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/chiefInvestigator")]
+    
+    [HttpPost]
     public async Task<IActionResult> ChiefInvestigator(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] ChiefInvestigatorValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.ChiefInvestigatorEmail, 
+            i => i.ChiefInvestigatorName).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Details/ChiefInvestigator", model);
+            return View("Details/ChiefInvestigator", context, model);
         }
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
+        _study.ChiefInvestigatorEmail = model.ChiefInvestigatorEmail;
+        _study.ChiefInvestigator = model.ChiefInvestigatorName;
 
-        study.ChiefInvestigatorEmail = model.ChiefInvestigatorEmail;
-        study.ChiefInvestigator = model.ChiefInvestigatorName;
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        TempData.Keep(GetReturnToSummaryKey(studyId));
-        return RedirectToJourneyAction(nameof(ChiefInvestigatorContact), studyId);
+        return GetNextAction(context);
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/chiefInvestigatorContact")]
-    public IActionResult ChiefInvestigatorContact(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult ChiefInvestigatorContact(StudyRequestEditContext context)
     {
-        return View("Details/ChiefInvestigatorContact");
+        return View("Details/ChiefInvestigatorContact", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/chiefInvestigatorContact")]
+    
+    [HttpPost]
     public async Task<IActionResult> ChiefInvestigatorContact(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] ChiefInvestigatorContactValidator validator,
+        [FromServices] ChiefInvestigatorContactValidator ciContactValidator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        (await ciContactValidator.ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Details/ChiefInvestigatorContact", model);
+            return View("Details/ChiefInvestigatorContact", context, model);
         }
 
-        if (model.IsChiefInvestigatorMainContact != true)
+        if (model.IsChiefInvestigatorMainContact == true)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return RedirectToJourneyAction(nameof(MainContact), studyId);
+            _study.FullName = _study.ChiefInvestigator;
+            _study.EmailAddress = _study.ChiefInvestigatorEmail;
+            _study.MainContactRole = "Chief Investigator";
+            await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
         }
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        study.FullName = null;
-        study.EmailAddress = null;
-        study.MainContactRole = null;
-
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        return GetNextAction(studyId, nameof(SponsorOrganisation));
+        // The answer to this question is not persisted in the model, so copy it into the model for flow control purposes.
+        return GetNextAction(context, i => i.IsChiefInvestigatorMainContact = model.IsChiefInvestigatorMainContact == true);
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/mainContact")]
-    public async Task<IActionResult> MainContact(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult MainContact(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        var model = new StudyRequestViewModel
-        {
-            MainContactName = study.FullName,
-            MainContactEmail = study.EmailAddress,
-            MainContactRole = study.MainContactRole
-        };
-
-        return View("Details/MainContact", model);
+        return View("Details/MainContact", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/mainContact")]
+    
+    [HttpPost]
     public async Task<IActionResult> MainContact(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] MainContactValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+                i => i.MainContactEmail, 
+                i => i.MainContactName,
+            i => i.MainContactRole).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Details/MainContact", model);
+            return View("Details/MainContact", context, model);
         }
+        
+        _study.FullName = model.MainContactName;
+        _study.EmailAddress = model.MainContactEmail;
+        _study.MainContactRole = model.MainContactRole;
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        study.FullName = model.MainContactName;
-        study.EmailAddress = model.MainContactEmail;
-        study.MainContactRole = model.MainContactRole;
-
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        return GetNextAction(studyId, nameof(SponsorOrganisation));
+        return GetNextAction(context);
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/sponsorOrganisation")]
-    public async Task<IActionResult> SponsorOrganisation(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult Section2Check(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        var model = new StudyRequestViewModel { SponsorName = study.Sponsors };
-        return View("Sponsorship/SponsorOrganisation", model);
+        return View("Details/Section2Check", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/sponsorOrganisation")]
+    
+    [HttpPost]
+    public async Task<IActionResult> Section2Check(
+        StudyRequestEditContext context,
+        CancellationToken cancellationToken)
+    {
+        return GetNextAction(context);
+    }
+    
+    [HttpGet]
+    public IActionResult SponsorOrganisation(StudyRequestEditContext context)
+    {
+        return View("Sponsorship/SponsorOrganisation", context, MapViewModel(_study));
+    }
+    
+    [HttpPost]
     public async Task<IActionResult> SponsorOrganisation(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] SponsorOrganisationValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.SponsorName).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("Sponsorship/SponsorOrganisation", model);
+            return View("Sponsorship/SponsorOrganisation", context, model);
         }
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
+        _study.Sponsors = model.SponsorName;
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        study.Sponsors = model.SponsorName;
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        return GetNextAction(studyId, nameof(ParticipantDetails));
+        return GetNextAction(context);
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/participantDetails")]
-    public async Task<IActionResult> ParticipantDetails(int studyId, CancellationToken cancellationToken)
+    
+    [HttpGet]
+    public IActionResult Section3Check(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        var model = new StudyRequestViewModel { InclusionCriteria = study.InclusionCriteria };
-        return View("ParticipantDetails/ParticipantDetails", model);
+        return View("Sponsorship/Section3Check", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/participantDetails")]
+    
+    [HttpPost]
+    public async Task<IActionResult> Section3Check(
+        StudyRequestEditContext context,
+        CancellationToken cancellationToken)
+    {
+        return GetNextAction(context);
+    }
+    
+    [HttpGet]
+    public IActionResult ParticipantDetails(StudyRequestEditContext context)
+    {
+        return View("ParticipantDetails/ParticipantDetails", context, MapViewModel(_study));
+    }
+    
+    [HttpPost]
     public async Task<IActionResult> ParticipantDetails(
-        int studyId,
+        StudyRequestEditContext context,
         StudyRequestViewModel model,
-        [FromServices] ParticipantDetailsValidator validator,
         CancellationToken cancellationToken)
     {
-        if (!await ValidateAsync(validator, model, cancellationToken))
+        validator.ValidateSpecificProperties(model,
+            i => i.InclusionCriteria).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            TempData.Keep(GetReturnToSummaryKey(studyId));
-            return View("ParticipantDetails/ParticipantDetails", model);
+            return View("ParticipantDetails/ParticipantDetails", context, model);
         }
 
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
+        _study.InclusionCriteria = model.InclusionCriteria;
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        study.InclusionCriteria = model.InclusionCriteria;
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        return GetNextAction(studyId, nameof(Summary));
+        return GetNextAction(context);
     }
 
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/summary")]
-    public async Task<IActionResult> Summary(int studyId, CancellationToken cancellationToken)
+    [HttpGet]
+    public IActionResult Summary(StudyRequestEditContext context)
     {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        TempData.Remove(GetReturnToSummaryKey(studyId));
-
-        var model = MapSummary(study);
-        return View(model);
+        return View("summary", context, MapViewModel(_study));
     }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/change/{actionName}")]
-    public IActionResult Change(int studyId, string actionName)
+    
+    [HttpPost]
+    public async Task<IActionResult> Summary(StudyRequestEditContext context, CancellationToken cancellationToken)
     {
-        var allowedActions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        var model = MapViewModel(_study);
+        (await validator.ValidateAsync(model, cancellationToken)).AddToModelState(ModelState);
+        if (!ModelState.IsValid)
         {
-            nameof(EthicsApproval), nameof(InclusionInRdnPortfolio), nameof(NihrFunding),
-            nameof(FinishRecruiting), nameof(StudyDescription), nameof(ResearchLocations),
-            nameof(ResearchManager), nameof(ChiefInvestigator), nameof(ChiefInvestigatorContact),
-            nameof(SponsorOrganisation), nameof(ParticipantDetails), nameof(MainContact)
-        };
-
-        if (!allowedActions.Contains(actionName))
-        {
-            return BadRequest();
+            return View("summary", context, model);
         }
-
-        TempData[GetReturnToSummaryKey(studyId)] = true;
-
-        return RedirectToJourneyAction(actionName, studyId);
+        
+        await studyDraftRepository.SubmitStudyAsync(context.StudyId, cancellationToken);
+        return RedirectToAction("ApplicationSubmitted", "StudyRequestStart", context);
     }
 
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpPost("{studyId:int}/summary")]
-    public async Task<IActionResult> SubmitStudy(int studyId, CancellationToken cancellationToken)
-    {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        await studyDraftRepository.SubmitStudyAsync(studyId, cancellationToken);
-        await studyDraftRepository.SaveStudyAsync(study, cancellationToken);
-
-        return RedirectToJourneyAction(nameof(ApplicationSubmitted), studyId);
-    }
-
-    [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-    [AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
-    [HttpGet("{studyId:int}/applicationSubmitted")]
-    public async Task<IActionResult> ApplicationSubmitted(int studyId, CancellationToken cancellationToken)
-    {
-        var study = await GetStudyAsync(studyId, cancellationToken);
-        if (study is null)
-        {
-            return NotFound();
-        }
-
-        return View();
-    }
-
-    private Task<Study?> GetStudyAsync(int studyId, CancellationToken cancellationToken)
-    {
-        return studyDraftRepository.GetStudyAsync(studyId, cancellationToken);
-    }
-
-    private static StudyRequestViewModel MapSummary(Study study)
+    private static StudyRequestViewModel MapViewModel(Study study)
     {
         return new StudyRequestViewModel
         {
             StudyId = study.Id,
             HasEthicsApproval = study.HasEthicsApproval,
             InclusionInRdnPortfolioStatusDisplay = study.Submitted?.Code,
+            InclusionInRdnPortfolioStatus = study.SubmittedId,
             CpmsId = study.CpmsId,
             NihrFundingStatusDisplay = study.NihrFundingStatus?.Code,
+            NihrFundingStatus = study.HasNihrFunding,
             RecruitmentEndDate = study.RecruitmentEndDate,
+            FinishRecruiting = GovUkDate.FromDateTime(study.RecruitmentEndDate),
             StudyTitle = study.StudyName,
             StudyDescription = study.Description,
             HasMultipleResearchLocations = study.HasMultipleResearchLocations,
@@ -731,47 +452,51 @@ public class StudyRequestController(IStudyDraftRepository studyDraftRepository, 
             InclusionCriteria = study.InclusionCriteria
         };
     }
-
-    private async Task<bool> ValidateAsync<TModel>(
-        IValidator<TModel> validator,
-        TModel model,
-        CancellationToken cancellationToken)
+    
+    
+    private IActionResult GetNextAction(StudyRequestEditContext context, Action<StudyRequestViewModel>? modifyModel = null)
     {
-        var validationResult = await validator.ValidateAsync(model, cancellationToken);
-        foreach (var error in validationResult.Errors)
-        {
-            ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-        }
-
-        return validationResult.IsValid;
+        var result = GetRelatedUrl(context, MvcFlowAction.Next, modifyModel);
+        return Redirect(result);
     }
 
-    private IActionResult GetNextAction(int studyId, string defaultNextAction)
+    private string? GetRelatedUrl(StudyRequestEditContext context, MvcFlowAction action, Action<StudyRequestViewModel>? modifyModel = null)
     {
-        var key = GetReturnToSummaryKey(studyId);
+        var model = MapViewModel(_study);
+        modifyModel?.Invoke(model);
+        var nextAction = StudyRequestEditFlow.Graph.ApplyTransition(mvcFlowHelper.CurrentActionKey, context, model, action);
 
-        if (TempData.TryGetValue(key, out var isReview) && (bool)isReview)
+        if (nextAction == null)
         {
-            return RedirectToJourneyAction(nameof(Summary), studyId);
+            return null;
         }
 
-        return RedirectToJourneyAction(defaultNextAction, studyId);
+        string? result = Url.GetUrl(nextAction);
+        if (result == null)
+        {
+            throw new Exception($"{nextAction.NodeKey} could not be mapped to a URL");
+        }
+        result = urlAccessTokenService.AddCurrentAccessToken(result);
+        return result;
     }
     
-    private IActionResult RedirectToJourneyAction(string actionName, int studyId, object? additionalRouteValues = null)
+    private IActionResult View([AspMvcView]string viewName, StudyRequestEditContext context, StudyRequestViewModel model)
     {
-        var accessToken = Request.Query["accesstoken"].ToString();
-
-        var routeValues = new RouteValueDictionary(additionalRouteValues)
+        var backUrl = GetRelatedUrl(context, MvcFlowAction.Back);
+        if (string.IsNullOrWhiteSpace(backUrl))
         {
-            ["studyId"] = studyId
-        };
-
-        if (!string.IsNullOrWhiteSpace(accessToken))
+            ViewData.ShowBackLink(false);
+        }
+        else
         {
-            routeValues["accesstoken"] = accessToken;
+            ViewData.ShowBackLink();
+            ViewData.SetBackLinkOverride(backUrl);
         }
 
-        return RedirectToAction(actionName, routeValues);
+        ViewData["Progress"] = StudyRequestEditFlow.Graph.CalculateBestCaseProgress(context,
+            StudyRequestEditFlow.EthicsApproval, StudyRequestEditFlow.Summary, mvcFlowHelper.CurrentActionKey);
+        ViewData["StudyEditContext"] = context;
+        return View(viewName, model);
     }
+
 }
