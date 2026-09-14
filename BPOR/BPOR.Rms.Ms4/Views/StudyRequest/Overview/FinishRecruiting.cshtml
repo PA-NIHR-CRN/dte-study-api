@@ -9,12 +9,7 @@
     <text>@StudyRequestEditResources.Section1Caption</text>
 }
 
-<h2 class="govuk-heading-l">When will you finish recruiting to this study?</h2>
-<form-group for="FinishRecruiting"
-            label=""
-            description="If you don't know the exact date, provide an estimated one."
-            label-class="govuk-label">
-    
+<form-group for="FinishRecruiting" label-as-heading="true" label-class="govuk-heading-l"
+            description="If you don't know the exact date, provide an estimated one.">
     <partial name="_DateInput" for="FinishRecruiting"/>
-    
 </form-group>

@@ -11,11 +11,7 @@ public class CharacterCountTagHelper(IHtmlHelper htmlHelper)
 {
     [HtmlAttributeName("asp-for")]
     public ModelExpression AspFor { get; set; } = null!;
-
-    public string? Label { get; set; }
-
-    public string? Hint { get; set; }
-
+    
     public int MaxLength { get; set; }
 
     public int Rows { get; set; } = 5;
@@ -41,8 +37,6 @@ public class CharacterCountTagHelper(IHtmlHelper htmlHelper)
         var model = new GovUkTextAreaModel(
             Name: name,
             Id: id,
-            Label: Label,
-            Hint: Hint,
             Value: AspFor.Model?.ToString(),
             MaxLength: MaxLength,
             Rows: Rows,

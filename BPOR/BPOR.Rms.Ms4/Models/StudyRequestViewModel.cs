@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Enums;
 using NIHR.GovUk.AspNetCore.Mvc;
@@ -26,6 +27,7 @@ public class StudyRequestViewModel
     [Display(Name = "When will you finish recruiting to this study?")]
     public DateTime? RecruitmentEndDate { get; set; }
 
+    [Display(Name = "When will you finish recruiting to this study?")]
     public GovUkDate FinishRecruiting { get; set; } = new();
     
     [Display(Name = "What is the title of your study?")]
@@ -55,6 +57,6 @@ public class StudyRequestViewModel
     [Display(Name = "Select the Sponsor Organisation")]
     public string? SponsorName { get; set; }
 
-    [Display(Name = "Who will be included in this study?")]
+    [Display(Name = "Who will be included in this study?", Description = "Write the most essential inclusion criteria.")]
     public string? InclusionCriteria { get; set; }
 }

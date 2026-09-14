@@ -3,8 +3,6 @@ namespace NIHR.GovUk.AspNetCore.Mvc.Models;
 public record GovUkTextAreaModel(
     string Name,
     string Id,
-    string? Label,
-    string? Hint,
     string? Value,
     int MaxLength,
     int Rows,
