@@ -312,8 +312,8 @@ public class StudyRequestController(
         CancellationToken cancellationToken)
     {
         validator.ValidateSpecificProperties(model,
-            i => i.MainContactEmail, 
-            i => i.MainContactName,
+                i => i.MainContactEmail, 
+                i => i.MainContactName,
             i => i.MainContactRole).AddToModelState(ModelState);
         if (!ModelState.IsValid)
         {
@@ -438,7 +438,7 @@ public class StudyRequestController(
             NihrFundingStatusDisplay = study.NihrFundingStatus?.Code,
             NihrFundingStatus = study.HasNihrFunding,
             RecruitmentEndDate = study.RecruitmentEndDate,
-            FinishRecruiting = DateViewModel.FromDateTime(study.RecruitmentEndDate),
+            FinishRecruiting = GovUkDate.FromDateTime(study.RecruitmentEndDate),
             StudyTitle = study.StudyName,
             StudyDescription = study.Description,
             HasMultipleResearchLocations = study.HasMultipleResearchLocations,

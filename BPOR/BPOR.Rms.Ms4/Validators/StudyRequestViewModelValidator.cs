@@ -2,6 +2,7 @@
 using BPOR.Domain.Enums;
 using BPOR.Rms.Ms4.Models;
 using FluentValidation;
+using NIHR.GovUk.AspNetCore.Mvc.Validation;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
 
 namespace BPOR.Rms.Ms4.Validators;
@@ -32,7 +33,7 @@ public class StudyRequestViewModelValidator : AbstractValidator<StudyRequestView
         RuleFor(model => model.FinishRecruiting)
             .IsComplete()
             .IsValidDate().WithMessage("Enter a real date")
-            .IsInFuture().WithMessage("Date of finishing study must be in the future");
+            .IsInFuture().WithMessage("End of recruitment date must be in the future");
         #endregion
         
         #region Section 2

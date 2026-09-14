@@ -1,12 +1,11 @@
 ﻿using FluentValidation;
 using FluentValidation.Validators;
-using NIHR.Infrastructure.AspNetCore.Validation;
 
-namespace BPOR.Rms.Validators;
+namespace NIHR.Infrastructure.AspNetCore.Validation;
 
 public class MaxWordValidator<T>(int maxWordCount) : PropertyValidator<T, string?>
 {
-    public override string Name => "NotEmptyValidator";
+    public override string Name => "MaxWordValidator";
 
     public override bool IsValid(ValidationContext<T> context, string? value)
     {
