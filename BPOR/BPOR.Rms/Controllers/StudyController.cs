@@ -169,11 +169,13 @@ public class StudyController(
     {
         var study = new Study();
         var studyId = await studyDraftRepository.CreateDraftStudyAsync(study, cancellationToken);
+        
+        var isAdmin = currentUserProvider.User.HasRole(UserRole.Admin);
 
         var uri = Url.GetUrl(StudyRequestEditFlow.EthicsApproval, new StudyRequestEditContext
         {
             StudyId = studyId,
-            FlowType = StudyRequestEditFlowType.ResearcherCreate
+            FlowType = isAdmin ? StudyRequestEditFlowType.AdminCreate : StudyRequestEditFlowType.ResearcherCreate
         });
 
         return Redirect(uri);
