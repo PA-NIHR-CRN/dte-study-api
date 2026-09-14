@@ -117,5 +117,8 @@ public class StudyModel
 
     [Display(Name = "Volunteer study information page")]
     public string? VolunteerInformationUrl { get; set; }
+    
+    [Display(Name = "Who will be included in this study?")]
+    public string? InclusionCriteria { get; set; }
 }
 
