@@ -1,13 +1,9 @@
 ﻿using NIHR.Infrastructure.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using BPOR.Domain.Enums;
 
-namespace BPOR.Domain.Entities.RefData
+namespace BPOR.Domain.Entities.RefData;
+
+public class Submitted : ReferenceData<SubmittedType>
 {
-    public class Submitted : ReferenceData
-    {
-    }
+    protected override int GetIdAsInt() => (int)Id;
 }

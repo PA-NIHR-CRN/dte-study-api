@@ -11,6 +11,7 @@ using NIHR.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using BPOR.Registration.Stream.Handler.Services;
+using BPOR.Rms.Ms4;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
 using BPOR.Rms.VolunteerInformation;
@@ -154,6 +155,8 @@ public static class DependencyInjection
         
         services.AddRtsServices(configuration);
         services.AddNotificationDeliveryHandler<CampaignParticipantNotificationDeliveryHandler>();
+        
+        services.AddStudyRequest();
 
         return services;
     }

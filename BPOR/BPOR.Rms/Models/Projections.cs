@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using BPOR.Domain.Entities;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Models.Researcher;
 using NIHR.GovUk.AspNetCore.Mvc;
 using BPOR.Rms.Models.Study;
@@ -12,7 +13,9 @@ namespace BPOR.Rms.Models;
 public static class Projections
 {
     public static IQueryable<StudyModel> AsStudyListModel(this IQueryable<Domain.Entities.Study> source) =>
-        source.Select(StudyAsStudyListModel());
+        source
+            .Where(s => s.StudyStatusId != StudyStatusType.Draft)
+            .Select(StudyAsStudyListModel());
 
     public static IQueryable<StudyDetailsViewModel> AsStudyDetailsViewModel(
         this IQueryable<Domain.Entities.Study> source) => source.Select(StudyAsStudyDetailsViewModel());

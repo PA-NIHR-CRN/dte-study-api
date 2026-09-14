@@ -1,0 +1,29 @@
+.govuk-heading-l,
+.govuk-heading-m {
+    color: black;
+}
+
+.govuk-inset-text {
+    border-left: 4px solid #193E72;
+}
+
+.section-heading {
+    color: #5A5555;
+}
+
+.govuk-notification-banner {
+    background-color: #335382;
+    border-color: #335382;
+}
+
+.progress-bar-background {
+    background-color: rgb(218, 238, 226);
+    width: 100%;
+    height: 20px;
+    overflow: hidden;
+}
+
+.progress-bar-progress {
+    background-color: rgb(70, 168, 108);
+    height: 100%;
+}

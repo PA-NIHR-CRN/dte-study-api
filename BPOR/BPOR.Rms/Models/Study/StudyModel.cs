@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Utilities;
 using NIHR.Infrastructure.AspNetCore;
 
@@ -53,7 +54,7 @@ public class StudyModel
     [ResearcherEdit(3)]
     public string? OutcomeOfSubmission { get; set; }
 
-    public bool? HasFunding { get; set; }
+    public NihrFundingStatusType? HasFunding { get; set; }
 
     [Display(Name = "NIHR funding stream or grant code")]
     [ResearcherEdit(5)]
@@ -77,7 +78,7 @@ public class StudyModel
 
     [Display(Name = "Does the study have NIHR funding?")]
     [ResearcherEdit(4)]
-    public string? HasFundingDisplay => HasFunding == null ? null : (HasFunding == true ? "Yes" : "No");
+    public string? HasFundingDisplay => HasFunding == null ? null : (HasFunding == NihrFundingStatusType.Yes ? "Yes" : "No");
 
     [Display(Name = "Email campaign information URL")]
     [StudyEdit(3)]

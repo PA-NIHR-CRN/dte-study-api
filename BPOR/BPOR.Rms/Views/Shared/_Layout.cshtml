@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="~/css/nihr-component-ui.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/bpor.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/moj-frontend.min.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", false)
 
     @* <link rel="stylesheet" href="~/{APP ASSEMBLY}.styles.css" /> *@
 
@@ -35,6 +36,11 @@
     <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 
     <partial name="_Header" />
+
+    @if (IsSectionDefined("Progress"))
+    {
+        @await RenderSectionAsync("Progress")
+    }
 
     <div class="govuk-width-container">
         <back-link />

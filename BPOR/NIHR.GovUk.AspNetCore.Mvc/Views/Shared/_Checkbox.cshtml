@@ -1,0 +1,49 @@
+@using NIHR.GovUk.AspNetCore.Mvc.Extensions
+@model NIHR.GovUk.AspNetCore.Mvc.Models.GovUkCheckboxModel
+
+@{
+    var hasError = !string.IsNullOrWhiteSpace(Model.ErrorMessage);
+    var errorId = $"{Model.Id}-error";
+    var formGroupClass = hasError
+        ? "govuk-form-group govuk-form-group--error"
+        : "govuk-form-group";
+}
+
+<div class="@formGroupClass">
+    @if (hasError)
+    {
+        <p id="@errorId" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Model.ErrorMessage
+        </p>
+    }
+
+    <div class="govuk-checkboxes"
+         data-module="govuk-checkboxes">
+        <div class="govuk-checkboxes__item">
+            <input class="govuk-checkboxes__input"
+                   id="@Model.Id"
+                   name="@Model.Name"
+                   type="checkbox"
+                   value="true"
+                   checked="@Model.Checked"
+                   aria-describedby="@(hasError ? errorId : null)" />
+
+            <label class="govuk-label govuk-checkboxes__label"
+                   for="@Model.Id">
+                @if (Model.LabelHtml is not null && !string.IsNullOrWhiteSpace(Model.LabelHtml.GetString()))
+                {
+                    @Model.LabelHtml
+                }
+                else
+                {
+                    @Model.Label
+                }
+            </label>
+        </div>
+    </div>
+
+    <input type="hidden"
+           name="@Model.Name"
+           value="false" />
+</div>

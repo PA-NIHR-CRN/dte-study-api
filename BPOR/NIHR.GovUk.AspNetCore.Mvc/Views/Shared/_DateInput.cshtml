@@ -1,0 +1,51 @@
+@model GovUkDate
+
+<div class="govuk-date-input">
+    <div class="govuk-date-input__item">
+        <div class="govuk-form-group">
+            <label class="govuk-label govuk-date-input__label"
+                   asp-for="Day">
+                Day
+            </label>
+
+            <input class="govuk-input govuk-date-input__input govuk-input--width-3"
+                   asp-for="Day"
+                   type="text"
+                   maxlength="2"
+                   inputmode="numeric"
+                   autocomplete="off"/>
+        </div>
+    </div>
+
+    <div class="govuk-date-input__item">
+        <div class="govuk-form-group">
+            <label class="govuk-label govuk-date-input__label"
+                   asp-for="Month">
+                Month
+            </label>
+
+            <input class="govuk-input govuk-date-input__input govuk-input--width-3"
+                   asp-for="Month"
+                   type="text"
+                   maxlength="2"
+                   inputmode="numeric"
+                   autocomplete="off"/>
+        </div>
+    </div>
+
+    <div class="govuk-date-input__item">
+        <div class="govuk-form-group">
+            <label class="govuk-label govuk-date-input__label"
+                   asp-for="Year">
+                Year
+            </label>
+
+            <input class="govuk-input govuk-date-input__input govuk-input--width-5"
+                   asp-for="Year"
+                   type="text"
+                   maxlength="4"
+                   inputmode="numeric"
+                   autocomplete="off"/>
+        </div>
+    </div>
+</div>
