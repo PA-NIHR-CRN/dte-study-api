@@ -40,9 +40,19 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
 
         var viewModel = For.ModelExplorer.Container.Model as StudyDetailsViewModel;
 
+        var isAdmin = currentUserProvider.IsAdmin();
+        var isResearcher = currentUserProvider.IsResearcher();
+        
         var visible = Show;
-        visible &= !currentUserProvider.IsAdmin() || ShowAdmin;
-        visible &= !currentUserProvider.IsResearcher() || ShowResearcher;
+        
+        if (isAdmin)
+        {
+            visible &= ShowAdmin;
+        }
+        else if (isResearcher)
+        {
+            visible &= ShowResearcher;
+        }
 
         if (visible)
         {
