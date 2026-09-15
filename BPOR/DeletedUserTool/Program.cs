@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Enums;
 using DeletedUserTool;
@@ -30,15 +31,26 @@ var bporDynamoDb = host.Services.GetRequiredService<BporDynamoDb>();
 List<DynamoParticipant> dynamoParticipantsByEmail = await bporDynamoDb.GetParticipantsByEmail(
     deletedParticipants.Select(i => i.Key.Email).Distinct());
 
-HashSet<string> dynamoDbPksToDelete = new();
-HashSet<string> dynamoDbPksToAnonymise = new();
-HashSet<string> cognitoUsernamesToRemove = new();
+var cognitoSettings = host.Services.GetRequiredService<IOptions<CognitoSettings>>();
+var dynamoDbSettings = host.Services.GetRequiredService<IOptions<DynamoDbSettings>>();
+
+string outputFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"output-{DateTime.UtcNow:yyyy-MM-ddTHH.mm.ss}");
+string scriptsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "scripts");
+Directory.CreateDirectory(outputFolder);
+
+using var cognitoScript = File.CreateText(Path.Combine(outputFolder, "cognito-clean.ps1"));
+using var dynamoDbScript = File.CreateText(Path.Combine(outputFolder, "dynamo-db-clean.ps1"));
+using var rmsDbScript = File.CreateText(Path.Combine(outputFolder, "rms-db-clean.sql"));
 
 List<EmailAddressAudit> audits = new();
+HashSet<string> handledDynamoDbPks = new();
 
 foreach (var deletedEmail in deletedParticipants.GroupBy(i => i.Key.Email))
 {
     string emailAddress = deletedEmail.Key;
+    cognitoScript.WriteLine($"######## EMAIL: {emailAddress}");
+    dynamoDbScript.WriteLine($"######## EMAIL: {emailAddress}");
+    
     Console.WriteLine($"Found deleted RMS participant {emailAddress}");
     EmailAddressAudit emailAddressAudit = new() { Email = emailAddress };
     audits.Add(emailAddressAudit);
@@ -47,15 +59,22 @@ foreach (var deletedEmail in deletedParticipants.GroupBy(i => i.Key.Email))
     emailAddressAudit.CognitoUserIdsMatchingEmail = cognitoUsersMatchingEmail.Select(i => i.Username).ToArray();
     foreach (var cognitoUser in cognitoUsersMatchingEmail)
     {
-        cognitoUsernamesToRemove.Add(cognitoUser.Username);
-        Console.WriteLine(
-            $"    with Cognito User {cognitoUser.Username}");
+        WriteCongnitoDelete(cognitoUser.Username);
+        Console.WriteLine($"    with Cognito User {cognitoUser.Username}");
     }
 
     var dynamoParticipantsMatchingEmail = dynamoParticipantsByEmail.Where(i => i.Email == emailAddress);
     emailAddressAudit.DynamoDbRecordsMatchingEmail.AddRange( dynamoParticipantsMatchingEmail.Select(i => new DynamoDbAudit(i)));
     foreach (var dynamoParticipant in dynamoParticipantsMatchingEmail)
     {
+        if (dynamoParticipant.Pk.StartsWith("PARTICIPANT#"))
+        {
+            WriteDynamoDbDelete(dynamoParticipant);
+        }
+        else if (dynamoParticipant.Pk.StartsWith("DELETED#"))
+        {
+            WriteDynamoDbAnonymise(dynamoParticipant);
+        }
         Console.WriteLine(
             $"  with DynamoDB record by email {FormatRecord(dynamoParticipant)}");
     }
@@ -97,50 +116,33 @@ foreach (var deletedEmail in deletedParticipants.GroupBy(i => i.Key.Email))
                 $"    with Participant Identifier {participantIdentifierValue.IdentifierTypeId} {participantIdentifierValue.IdentifierValue}");
 
             var pk = $"{pkPrefix}#{participantIdentifierValue.IdentifierValue}";
-
-            switch (participantIdentifierValue.IdentifierTypeId)
+            var sk = $"{pkPrefix}#";
+            DynamoParticipant? dynamoRecord = await bporDynamoDb.GetParticipantByKey(pk, sk);
+            if (dynamoRecord != null)
             {
-                case IdentifierTypes.ParticipantId:
-                case IdentifierTypes.NhsId:
-                    dynamoDbPksToDelete.Add(pk);
-                    break;
-                case IdentifierTypes.Deleted:
-                    dynamoDbPksToAnonymise.Add(pk);
-                    break;
+                switch (participantIdentifierValue.IdentifierTypeId)
+                {
+                    case IdentifierTypes.ParticipantId:
+                    case IdentifierTypes.NhsId:
+                        WriteDynamoDbDelete(dynamoRecord);
+                        break;
+                    case IdentifierTypes.Deleted:
+                        WriteDynamoDbAnonymise(dynamoRecord);
+                        break;
+                }
             }
 
-            var dynamoParticipantsByPk = await bporDynamoDb.GetParticipantsByPk(pk);
-            foreach (var dynamoParticipant in dynamoParticipantsByPk)
-            {
-                rmsParticipantIdentifierAudit.DynamoDbRecords.Add(new(dynamoParticipant));
-                Console.WriteLine(
-                    $"      with DynamoDB record by PK {FormatRecord(dynamoParticipant)}");
-            }
+            rmsParticipantIdentifierAudit.DynamoDbRecords.Add(new(dynamoRecord));
+            Console.WriteLine(
+                $"      with DynamoDB record by PK {FormatRecord(dynamoRecord)}");
         }
-
     }
 }
 
 static string FormatRecord(DynamoParticipant dynamoParticipant) =>
     $"PK:{dynamoParticipant.Pk} SK:{dynamoParticipant.Sk} Email:{dynamoParticipant.Email} NhsNo:{dynamoParticipant.NhsNumber} NhsId:{dynamoParticipant.NhsId}";
 
-string outputFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"output-{DateTime.UtcNow:yyyy-MM-ddTHH.mm.ss}");
-string scriptsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "scripts");
-
-Directory.CreateDirectory(outputFolder);
 File.WriteAllText(Path.Combine(outputFolder, "audit.json"), JsonSerializer.Serialize(audits));
-
-using var dynamoDbScript = File.CreateText(Path.Combine(outputFolder, "dynamo-db-clean.ps1"));
-var dynamoDbSettings = host.Services.GetRequiredService<IOptions<DynamoDbSettings>>();
-
-dynamoDbScript.WriteLine("# Deletions");
-foreach (var pk in dynamoDbPksToDelete)
-{
-    dynamoDbScript.WriteLine($"aws dynamodb delete-item --table-name {dynamoDbSettings.Value.TableName} --key {pk}");
-}
-
-dynamoDbScript.WriteLine();
-dynamoDbScript.WriteLine("# Anonymisations");
 
 string[] scriptsToCopy = ["expression-attribute-names.json", "expression-attribute-values.json"];
 foreach (var scriptToCopy in scriptsToCopy)
@@ -148,16 +150,39 @@ foreach (var scriptToCopy in scriptsToCopy)
     File.Copy(Path.Combine(scriptsFolder, scriptToCopy), Path.Combine(outputFolder, scriptToCopy));
 }
 
-var columns = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("scripts/expression-attribute-names.json"));
-
-foreach (var pk in dynamoDbPksToAnonymise)
+void WriteCongnitoDelete(string cognitoUserNameToRemove)
 {
-    dynamoDbScript.WriteLine($"aws dynamodb update-item --profile {dynamoDbSettings.Value.Profile} --table-name {dynamoDbSettings.Value.TableName} --key {pk} --expression-attribute-names file://expression-attribute-names.json --expression-attribute-values file://expression-attribute-values.json --update-expression \"SET {string.Join(", ", columns.Keys.Select(i => $"{i} = {i.Replace('#', ':')}"))} \"");
+    cognitoScript.WriteLine($"aws cognito-idp admin-delete-user --profile {cognitoSettings.Value.Profile} --user-pool-id {cognitoSettings.Value.UserPoolId} --username {cognitoUserNameToRemove}");
 }
 
-var cognitoSettings = host.Services.GetRequiredService<IOptions<CognitoSettings>>();
-using var cognitoScript = File.CreateText(Path.Combine(outputFolder, "cognito-clean.ps1"));
-foreach (var cognitoUserNameToRemove in cognitoUsernamesToRemove)
+void WriteDynamoDbAnonymise(DynamoParticipant dynamoParticipant)
 {
-    cognitoScript.WriteLine($"admin-delete-user --profile {cognitoSettings.Value.Profile} --user-pool-id {cognitoSettings.Value.UserPoolId} --username {cognitoUserNameToRemove}");
+    if (handledDynamoDbPks.Add(dynamoParticipant.Pk))
+    {
+        dynamoDbScript.WriteLine($"aws dynamodb update-item --profile {dynamoDbSettings.Value.Profile} --region {dynamoDbSettings.Value.RegionEndpoint} --table-name {dynamoDbSettings.Value.TableName} --key '{{\"PK\":{{\"S\":\"{dynamoParticipant.Pk}\"}}, \"SK\":{{\"S\": \"{dynamoParticipant.Sk}\"}}}}'}}' --expression-attribute-names file://expression-attribute-names.json --update-expression \"DELETE #NI, #NN, #E, #FN, #LN, #HCI, #MN, #LLN\"");
+        using (var valueStream = File.Create(Path.Combine(outputFolder, $"{dynamoParticipant.Pk}.values.json")))
+        {
+            using StreamWriter writer = new(valueStream, Encoding.ASCII);
+            writer.Write(JsonSerializer.Serialize(new
+            {
+                AddressPlaceHolder = new
+                {
+                    Postcode = dynamoParticipant.Address.Postcode.Split(' ')[0],
+                    Town = dynamoParticipant.Address.Town
+                }
+            }).Replace("AddressPlaceHolder", ":a"));
+        }
+
+        dynamoDbScript.WriteLine($"aws dynamodb update-item --profile {dynamoDbSettings.Value.Profile} --region {dynamoDbSettings.Value.RegionEndpoint} --table-name {dynamoDbSettings.Value.TableName} --key '{{\"PK\":{{\"S\":\"{dynamoParticipant.Pk}\"}}, \"SK\":{{\"S\": \"{dynamoParticipant.Sk}\"}}}}'}}' --expression-attribute-names file://expression-attribute-names.json --expression-attribute-values file://{dynamoParticipant.Pk}.values.json --update-expression \"UPDATE #A = :a\"");
+        dynamoDbScript.WriteLine();
+    }
+}
+
+void WriteDynamoDbDelete(DynamoParticipant dynamoParticipant)
+{
+    if (handledDynamoDbPks.Add(dynamoParticipant.Pk))
+    {
+        dynamoDbScript.WriteLine(
+            $"aws dynamodb delete-item --profile {dynamoDbSettings.Value.Profile} --region {dynamoDbSettings.Value.RegionEndpoint} --table-name {dynamoDbSettings.Value.TableName} --key '{{\"PK\":{{\"S\":\"{dynamoParticipant.Pk}\"}}, \"SK\":{{\"S\": \"{dynamoParticipant.Sk}\"}}}}'}}'");
+    }
 }

@@ -40,4 +40,20 @@ public class BporDynamoDb(IOptions<DynamoDbSettings> options)
         var query = context.ScanAsync<DynamoParticipant>([scanCondition], operationConfig);
         return await query.GetRemainingAsync();
     }
+    
+    public async Task<DynamoParticipant?> GetParticipantByKey(string pk, string sk)
+    {
+        using var context = CreateContext();
+        DynamoDBOperationConfig operationConfig = new DynamoDBOperationConfig
+        {
+            OverrideTableName = options.Value.TableName
+        };
+
+        var query = context.ScanAsync<DynamoParticipant>(
+            [
+                new ScanCondition("PK", ScanOperator.Equal, pk),
+                new ScanCondition("SK", ScanOperator.Equal, sk)
+            ], operationConfig);
+        return (await query.GetRemainingAsync()).FirstOrDefault();
+    }
 }
