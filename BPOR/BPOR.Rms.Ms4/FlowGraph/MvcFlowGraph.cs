@@ -5,7 +5,7 @@ using NetTopologySuite.Planargraph;
 namespace BPOR.Rms.Ms4.FlowGraph;
 
 public class MvcFlowGraph<TModel, TContext, TAction>
-    where TContext : notnull
+    where TContext : MvcFlowContextBase
 {
     private readonly DirectedGraph<MvcActionKey, Transition> _graph = new();
 
@@ -36,7 +36,7 @@ public class MvcFlowGraph<TModel, TContext, TAction>
         TAction Action,
         Predicate<TModel>? ModelFilter,
         Func<TContext, TContext>? ContextTransform,
-        Func<TContext, TransitionResult<TContext, MvcActionKey>, TransitionResult<TContext, MvcActionKey>>? ResultTransform);
+        bool IsSubflowReturn);
 
     public void AddTransition(MvcActionKey origin,
         MvcActionKey destination,
@@ -44,9 +44,9 @@ public class MvcFlowGraph<TModel, TContext, TAction>
         Predicate<TContext>? contextPredicate = null,
         Predicate<TModel>? modelPredicate = null,
         Func<TContext, TContext>? contextTransform = null,
-        Func<TContext, TransitionResult<TContext, MvcActionKey>, TransitionResult<TContext, MvcActionKey>>? destinationTransform = null)
+        bool isSubflowReturn = false)
         => _graph.AddEdge(origin, destination,
-            new Transition(contextPredicate, action, modelPredicate, contextTransform, destinationTransform));
+            new Transition(contextPredicate, action, modelPredicate, contextTransform, isSubflowReturn));
 
     public TransitionResult<TContext, MvcActionKey>? ApplyTransition(MvcActionKey origin, TContext context,
         TModel model, TAction action)
@@ -67,9 +67,8 @@ public class MvcFlowGraph<TModel, TContext, TAction>
                 TContext newContext = contextTransform == null
                     ? context
                     : contextTransform(context);
-                var result = new TransitionResult<TContext, MvcActionKey>(newContext, relatedNodes[0].RelatedNode.Key);
-                var resultTransform = relatedNodes[0].Value.ResultTransform;
-                result = resultTransform != null ? resultTransform(context, result) : result;
+                var result = new TransitionResult<TContext, MvcActionKey>
+                    (newContext, relatedNodes[0].RelatedNode.Key, relatedNodes[0].Value.IsSubflowReturn);
                 return result;
             default:
                 throw new InvalidOperationException($"Multiple {action} transitions found for the current state");

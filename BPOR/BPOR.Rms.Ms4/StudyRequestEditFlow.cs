@@ -67,27 +67,12 @@ public static class StudyRequestEditFlow
         Graph.AddTransition(
             from, to, MvcFlowAction.Next,
             modelPredicate: modelPredicate,
-            destinationTransform: flags.HasFlag(SubflowOptions.SubflowExit) ? HandleSubflow : null);
+            isSubflowReturn: flags.HasFlag(SubflowOptions.SubflowExit));
 
         Graph.AddTransition(
             to, from, MvcFlowAction.Back,
             modelPredicate: modelPredicate,
-            destinationTransform: flags.HasFlag(SubflowOptions.SubflowEntry) ? HandleSubflow : null);
-    }
-
-    private static TransitionResult<StudyRequestEditContext, MvcActionKey> HandleSubflow(
-        StudyRequestEditContext context, TransitionResult<StudyRequestEditContext, MvcActionKey> transitionResult)
-    {
-        // TODO: Implement subflows generically using a stack serialised to the URL query.
-        // Each stack frame needs to consist of the context and mvc action of the calling action - this needs to be
-        // really compact, so positional serialisation, enums as numeric values, short-forms for action names etc.
-        if (!string.IsNullOrWhiteSpace(context.SubflowRtnAct))
-        {
-            transitionResult.NodeKey = MvcActionKey.Parse(context.SubflowRtnAct);
-            transitionResult.Context.SubflowRtnAct = null;
-        }
-
-        return transitionResult;
+            isSubflowReturn: flags.HasFlag(SubflowOptions.SubflowEntry));
     }
 
     [Flags]

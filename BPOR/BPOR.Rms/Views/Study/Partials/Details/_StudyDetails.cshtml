@@ -1,26 +1,39 @@
 @using BPOR.Domain.Enums
+@using BPOR.Rms.Ms4
+@using BPOR.Rms.Ms4.FlowGraph
 @using BPOR.Rms.VolunteerInformation.Data
+@using Microsoft.AspNetCore.Http.Extensions
+@using Microsoft.AspNetCore.Mvc.Routing
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 @inject IVipRepository VipRepository
+@inject IMvcFlowHelper MvcFlowHelper
+
+@{
+    string? GetChangeUrl(MvcActionKey node)
+    {    
+        var actionContext =  new UrlActionContext {Action = node.Action, Controller = node.Controller, Values = new StudyRequestEditContext()
+        {
+            StudyId = Model.Study.Id,
+            FlowType = StudyRequestEditFlowType.Edit,
+            ReturnUrl = Context.Request.GetEncodedPathAndQuery() + "#study-details"
+        }};
+        return Url.Action(actionContext);
+    }
+}
 
 <div>
     <h3 class="govuk-heading-s">Study details</h3>
     <dl class="govuk-summary-list">
         <summary-list-item for="Study.Id"/>
-        <summary-list-item for="Study.HasFundingDisplay"/>
+        <summary-list-item for="Study.HasFundingDisplay" change-url="@GetChangeUrl(StudyRequestEditFlow.NihrFunding)"/>
         <summary-list-item for="Study.FundingCode" show-when="@Model.Study.HasFunding == NihrFundingStatusType.Yes"/>
-        <summary-list-item for="Study.CpmsId"/>
-        <summary-list-item for="Study.StudyName"/>
-        @if (Model.Study.Description is not null)
-        {
-            <summary-list-item for="Study.Description"/>
-        }
-        <summary-list-item for="Study.SinglePersonResponsibleForRecruiting" 
-                           show-researcher-when="Model.Study.SinglePersonResponsibleForRecruiting.HasValue"/>
-        <summary-list-item for="Study.HasMultipleResearchLocations" 
-                           show-researcher-when="Model.Study.HasMultipleResearchLocations.HasValue"/>
-        <summary-list-item for="Study.InclusionCriteria"/>
-        <summary-list-item for="Study.RecruitmentEndDate"/>
+        <summary-list-item for="Study.CpmsId" change-url="@GetChangeUrl(StudyRequestEditFlow.InclusionInRdnPortfolio)"/>
+        <summary-list-item for="Study.StudyName" change-url="@GetChangeUrl(StudyRequestEditFlow.StudyDescription)"/>
+        <summary-list-item for="Study.Description" change-url="@GetChangeUrl(StudyRequestEditFlow.StudyDescription)" hide-when-null/>
+        <summary-list-item for="Study.SinglePersonResponsibleForRecruiting" change-url="@GetChangeUrl(StudyRequestEditFlow.ResearchManager)" hide-from-researcher-when-null />
+        <summary-list-item for="Study.HasMultipleResearchLocations" change-url="@GetChangeUrl(StudyRequestEditFlow.ResearchLocations)" hide-from-researcher-when-null/>
+        <summary-list-item for="Study.InclusionCriteria" change-url="@GetChangeUrl(StudyRequestEditFlow.ParticipantDetails)"/>
+        <summary-list-item for="Study.RecruitmentEndDate" change-url="@GetChangeUrl(StudyRequestEditFlow.FinishRecruiting)"/>
         <role role-include="Admin">
             <div class="govuk-summary-list__row">
                 <dt class="govuk-summary-list__key">
@@ -43,18 +56,10 @@
                 </dd>
             </div>
         </role>
-        <summary-list-item for="Study.PreScreenerUrl" 
-                           show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.PreScreenerUrl)"/>
-        <summary-list-item for="Study.InformationUrl"/>
+        <summary-list-item for="Study.PreScreenerUrl" hide-from-researcher-when-null/>
+        <summary-list-item for="Study.InformationUrl" />
         <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"/>
-        @if (Model.Study.RecruitmentStartDate is not null)
-        {
-            <summary-list-item for="Study.RecruitmentStartDate"/>
-        }
-        @if (Model.Study.UKRecruitmentTarget is not null)
-        {
-            <summary-list-item for="Study.UKRecruitmentTarget"/>
-        }
-
+        <summary-list-item for="Study.RecruitmentStartDate" hide-when-null/>
+        <summary-list-item for="Study.UKRecruitmentTarget" hide-when-null/>
     </dl>
 </div>

@@ -1,6 +1,7 @@
 ﻿using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Razor.Internal;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -22,7 +23,7 @@ public abstract class CheckScreenView : RazorPage<StudyRequestViewModel>
         var studyEditContext = (StudyRequestEditContext)ViewData["StudyEditContext"];
         var actionContext =  new UrlActionContext {Action = node.Action, Controller = node.Controller, Values = studyEditContext with
             {
-                SubflowRtnAct = mvcFlowHelper.CurrentActionKey.ToString()
+                ReturnUrl = Context.Request.GetEncodedPathAndQuery()
             }};
         string changeUrl = mvcFlowHelper.UrlHelper.Action(actionContext);
         changeUrl = UrlAccessTokenService.AddCurrentAccessToken(changeUrl);

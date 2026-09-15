@@ -471,6 +471,11 @@ public class StudyRequestController(
             return null;
         }
 
+        if (nextAction.ReturnFromSubflow && !string.IsNullOrEmpty(nextAction.Context.ReturnUrl))
+        {
+            return nextAction.Context.ReturnUrl;
+        }
+
         string? result = Url.GetUrl(nextAction);
         if (result == null)
         {
