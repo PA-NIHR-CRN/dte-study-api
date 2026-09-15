@@ -12,13 +12,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NIHR.GovUk.AspNetCore.Mvc;
+using NIHR.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Ms4.Controllers;
 
 [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-[AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
+[AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin, PolicyNames.IsResearcher)]
 [Route("[controller]/{studyId:int}/[action]")]
 public class StudyRequestController(
     IStudyDraftRepository studyDraftRepository,
@@ -31,6 +32,7 @@ public class StudyRequestController(
     
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        var currentUserId = User.GetUserId();
         var studyId = Convert.ToInt32(context.RouteData.Values["studyId"]);
         var study = await studyDraftRepository.GetStudyAsync(studyId, context.HttpContext.RequestAborted);
         if (study is null)
@@ -43,8 +45,19 @@ public class StudyRequestController(
         }
         else
         {
-            _study = study;
-            await base.OnActionExecutionAsync(context, next);
+            var isAdmin = User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" });
+            var isResearcher = User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Researcher" });
+            var isCreator = study.CreatedById == currentUserId;
+        
+            if (!isAdmin && !(isResearcher && isCreator))
+            {
+                context.Result = Forbid();
+            }
+            else
+            {
+                _study = study;
+                await base.OnActionExecutionAsync(context, next);
+            }
         }
     }
 

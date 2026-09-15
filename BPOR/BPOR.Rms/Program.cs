@@ -24,6 +24,10 @@ builder.AddIdgAuthentication(authOptions =>
         {
             policy.Requirements.Add(new RolesAuthorizationRequirement(["Admin"]));
         });
+        authOptions.AddPolicy(PolicyNames.IsResearcher, policy =>
+        {
+            policy.Requirements.Add(new RolesAuthorizationRequirement(["Researcher"]));
+        });
     }
 );
 
