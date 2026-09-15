@@ -7,14 +7,11 @@
     <h3 class="govuk-heading-s">Study details</h3>
     <dl class="govuk-summary-list">
         <summary-list-item for="Study.Id"/>
-        @if (Model.Study.HasFundingDisplay is not null)
-        {
-            <summary-list-item for="Study.HasFundingDisplay"
-                               show-researcher-when="false"/>
-            <summary-list-item for="Study.FundingCode" 
-                               show-researcher-when="false"
-                               show-when="@Model.Study.HasFunding == NihrFundingStatusType.Yes"/>
-        }
+        <summary-list-item for="Study.HasFundingDisplay"
+                           show-researcher-when="false"/>
+        <summary-list-item for="Study.FundingCode" 
+                           show-researcher-when="false"
+                           show-when="@Model.Study.HasFunding == NihrFundingStatusType.Yes"/>
         <summary-list-item for="Study.CpmsId"/>
         <summary-list-item for="Study.StudyName"/>
         @if (Model.Study.Description is not null)
