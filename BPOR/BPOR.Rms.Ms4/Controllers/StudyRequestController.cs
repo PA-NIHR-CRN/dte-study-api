@@ -48,16 +48,19 @@ public class StudyRequestController(
             var isAdmin = User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" });
             var isResearcher = User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Researcher" });
             var isCreator = study.CreatedById == currentUserId;
+            _study = study;
+
+            if (isAdmin)
+            {
+                await base.OnActionExecutionAsync(context, next);
+            }
         
-            if (!isAdmin && !(isResearcher && isCreator))
+            if (isResearcher && (!isCreator || study.StudyStatusId is not StudyStatusType.Draft))
             {
                 context.Result = Forbid();
             }
-            else
-            {
-                _study = study;
-                await base.OnActionExecutionAsync(context, next);
-            }
+            
+            await base.OnActionExecutionAsync(context, next);
         }
     }
 
