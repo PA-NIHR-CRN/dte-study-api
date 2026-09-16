@@ -2,7 +2,7 @@
 
 public class StudyCreationSettings
 {
-    public string ResearcherCreationReturnToStepByStepGuideUrl { get; set; } = "https://bepartofresearch.nihr.ac.uk/StudyRegistration/";
+    public string ResearcherCreationReturnToStepByStepGuideUrl { get; set; } = "https://bepartofresearch.nihr.ac.uk/StudyRegistration";
 
     public string ResearcherCreationFinishRedirectUrl { get; set; } = "https://bepartofresearch.nihr.ac.uk/";
 
