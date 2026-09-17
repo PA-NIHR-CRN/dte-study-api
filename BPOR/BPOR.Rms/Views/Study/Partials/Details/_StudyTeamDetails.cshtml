@@ -1,20 +1,35 @@
-﻿@using BPOR.Rms.VolunteerInformation.Data
+﻿@using BPOR.Rms.Ms4
+@using BPOR.Rms.Ms4.FlowGraph
+@using BPOR.Rms.VolunteerInformation.Data
+@using Microsoft.AspNetCore.Http.Extensions
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
+@inject IMvcFlowHelper<StudyRequestEditContext> MvcFlowHelper
+
+@{
+    string? GetChangeUrl(MvcActionKey node)
+    {    
+        return MvcFlowHelper.GetSubflowUrl(node, new StudyRequestEditContext()
+        {
+            StudyId = Model.Study.Id,
+            FlowType = StudyRequestEditFlowType.Edit
+        }, Context.Request.GetEncodedPathAndQuery() + "#study-team-details");
+    }
+}
 
 <div>
     <h3 class="govuk-heading-s">Study team details</h3>
     <dl class="govuk-summary-list">
         
-        <summary-list-item for="Study.ChiefInvestigator"/>
+        <summary-list-item for="Study.ChiefInvestigator" change-url="@GetChangeUrl(StudyRequestEditFlow.ChiefInvestigator)"/>
         @if (Model.Study.ChiefInvestigatorEmail is not null)
         {
-            <summary-list-item for="Study.ChiefInvestigatorEmail"/>
+            <summary-list-item for="Study.ChiefInvestigatorEmail" change-url="@GetChangeUrl(StudyRequestEditFlow.ChiefInvestigator)"/>
         }
-        <summary-list-item for="Study.FullName"/>
-        <summary-list-item for="Study.EmailAddress"/>
+        <summary-list-item for="Study.FullName" change-url="@GetChangeUrl(StudyRequestEditFlow.MainContact)"/>
+        <summary-list-item for="Study.EmailAddress" change-url="@GetChangeUrl(StudyRequestEditFlow.MainContact)"/>
         @if (Model.Study.MainContactRole is not null)
         {
-            <summary-list-item for="Study.MainContactRole"/>
+            <summary-list-item for="Study.MainContactRole" change-url="@GetChangeUrl(StudyRequestEditFlow.MainContact)"/>
         }
 
     </dl>

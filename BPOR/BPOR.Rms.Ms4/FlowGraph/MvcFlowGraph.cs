@@ -1,10 +1,9 @@
 ﻿using BPOR.Rms.Ms4.Graph;
 using BPOR.Rms.Ms4.Graph.Algorithms;
-using NetTopologySuite.Planargraph;
 
 namespace BPOR.Rms.Ms4.FlowGraph;
 
-public class MvcFlowGraph<TModel, TContext, TAction>
+public class MvcFlowGraph<TModel, TContext> : IMvcFlowGraph<TModel, TContext>
     where TContext : MvcFlowContextBase
 {
     private readonly DirectedGraph<MvcActionKey, Transition> _graph = new();
@@ -33,14 +32,14 @@ public class MvcFlowGraph<TModel, TContext, TAction>
 
     private record Transition(
         Predicate<TContext>? ContextFilter,
-        TAction Action,
+        MvcFlowAction Action,
         Predicate<TModel>? ModelFilter,
         Func<TContext, TContext>? ContextTransform,
         bool IsSubflowReturn);
 
     public void AddTransition(MvcActionKey origin,
         MvcActionKey destination,
-        TAction action,
+        MvcFlowAction action,
         Predicate<TContext>? contextPredicate = null,
         Predicate<TModel>? modelPredicate = null,
         Func<TContext, TContext>? contextTransform = null,
@@ -49,7 +48,7 @@ public class MvcFlowGraph<TModel, TContext, TAction>
             new Transition(contextPredicate, action, modelPredicate, contextTransform, isSubflowReturn));
 
     public TransitionResult<TContext, MvcActionKey>? ApplyTransition(MvcActionKey origin, TContext context,
-        TModel model, TAction action)
+        TModel model, MvcFlowAction action)
     {
         var currentNode = _graph.GetNode(origin);
         if (currentNode == null)
@@ -75,8 +74,24 @@ public class MvcFlowGraph<TModel, TContext, TAction>
         }
     }
 
-    private bool IsValidTransition(Transition transition, TContext context, TModel model, TAction action)
+    private bool IsValidTransition(Transition transition, TContext context, TModel model, MvcFlowAction action)
         => Equals(action, transition.Action) &&
            (transition.ContextFilter?.Invoke(context) ?? true) &&
            (transition.ModelFilter?.Invoke(model) ?? true);
+}
+
+public interface IMvcFlowGraph<TModel, TContext> : IMvcFlowGraph<TContext>
+{
+    TransitionResult<TContext, MvcActionKey>? ApplyTransition(MvcActionKey origin, TContext context,
+        TModel model, MvcFlowAction action);
+}
+
+public interface IMvcFlowGraph<TContext>
+{
+    /// <summary>
+    /// Calculates the best case progress for a given context between a start node and end node via the current node.
+    /// </summary>
+    /// <returns> The best case progress between 0 and 1, or null if there is no valid path. </returns>
+    double? CalculateBestCaseProgress(TContext context, MvcActionKey start, MvcActionKey end,
+        MvcActionKey current);
 }

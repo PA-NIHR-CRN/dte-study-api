@@ -4,7 +4,7 @@ using BPOR.Rms.Ms4.Models;
 
 namespace BPOR.Rms.Ms4;
 
-public static class StudyRequestEditFlow
+public class StudyRequestEditFlow : MvcFlowGraph<StudyRequestViewModel, StudyRequestEditContext>
 {
     public static MvcActionKey EthicsApproval { get; } = new("StudyRequest", "EthicsApproval");
     public static MvcActionKey InclusionInRdnPortfolio { get; } = new("StudyRequest", "InclusionInRdnPortfolio");
@@ -22,13 +22,9 @@ public static class StudyRequestEditFlow
     public static MvcActionKey ResearchManager { get; } = new("StudyRequest", "ResearchManager");
     public static MvcActionKey ResearchLocations { get; } = new("StudyRequest", "ResearchLocations");
     public static MvcActionKey StudyDescription { get; } = new("StudyRequest", "StudyDescription");
-
-    public static MvcFlowGraph<StudyRequestViewModel, StudyRequestEditContext, MvcFlowAction> Graph { get; }
-
-    static StudyRequestEditFlow()
+    
+    public StudyRequestEditFlow()
     {
-        Graph = new MvcFlowGraph<StudyRequestViewModel, StudyRequestEditContext, MvcFlowAction>();
-
         AddTransition(EthicsApproval, InclusionInRdnPortfolio,
             SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit);
         AddTransition(InclusionInRdnPortfolio, FinishRecruiting,
@@ -58,18 +54,18 @@ public static class StudyRequestEditFlow
         AddTransition(ParticipantDetails, Summary, SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit);
     }
 
-    private static void AddTransition(
+    private void AddTransition(
         MvcActionKey from,
         MvcActionKey to,
         SubflowOptions flags = SubflowOptions.None,
         Predicate<StudyRequestViewModel>? modelPredicate = null)
     {
-        Graph.AddTransition(
+        AddTransition(
             from, to, MvcFlowAction.Next,
             modelPredicate: modelPredicate,
             isSubflowReturn: flags.HasFlag(SubflowOptions.SubflowExit));
 
-        Graph.AddTransition(
+        AddTransition(
             to, from, MvcFlowAction.Back,
             modelPredicate: modelPredicate,
             isSubflowReturn: flags.HasFlag(SubflowOptions.SubflowEntry));
