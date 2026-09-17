@@ -1,0 +1,13 @@
+@model BPOR.Rms.Ms4.Models.StudyEditViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+@section SectionTitle
+{
+}
+
+<form-group for="RecruitmentStartDate" label-as-heading="true" label-class="govuk-heading-l">
+    <partial name="_DateInput" for="RecruitmentStartDate"/>
+</form-group>

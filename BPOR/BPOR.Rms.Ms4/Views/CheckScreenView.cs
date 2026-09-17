@@ -1,6 +1,7 @@
 ﻿using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Razor.Internal;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -14,17 +15,12 @@ public abstract class CheckScreenView : RazorPage<StudyRequestViewModel>
     public IUrlAccessTokenService UrlAccessTokenService { get; set; }
     
     [RazorInject]
-    public IMvcFlowHelper mvcFlowHelper {get; set; }
+    public IMvcFlowHelper<StudyRequestViewModel, StudyRequestEditContext> mvcFlowHelper {get; set; }
     
     protected string GetChangeUrl(MvcActionKey node)
     {
-        // TODO: Move this into a subflow helper.
         var studyEditContext = (StudyRequestEditContext)ViewData["StudyEditContext"];
-        var actionContext =  new UrlActionContext {Action = node.Action, Controller = node.Controller, Values = studyEditContext with
-            {
-                SubflowRtnAct = mvcFlowHelper.CurrentActionKey.ToString()
-            }};
-        string changeUrl = mvcFlowHelper.UrlHelper.Action(actionContext);
+        string changeUrl = mvcFlowHelper.GetSubflowUrl(node, studyEditContext);
         changeUrl = UrlAccessTokenService.AddCurrentAccessToken(changeUrl);
         return changeUrl;
     }

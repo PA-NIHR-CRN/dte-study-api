@@ -1,24 +1,41 @@
+@using BPOR.Domain.Enums
+@using BPOR.Rms.Ms4
+@using BPOR.Rms.Ms4.FlowGraph
 @using BPOR.Rms.VolunteerInformation.Data
+@using Microsoft.AspNetCore.Http.Extensions
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 @inject IVipRepository VipRepository
+@inject IMvcFlowHelper<StudyRequestEditContext> MvcFlowHelper
+
+@{
+    string? GetChangeUrl(MvcActionKey node)
+    {    
+        return MvcFlowHelper.GetSubflowUrl(node, new StudyRequestEditContext()
+        {
+            StudyId = Model.Study.Id,
+            FlowType = StudyRequestEditFlowType.Edit
+        }, Context.Request.GetEncodedPathAndQuery() + "#study-details");
+    }
+    
+    string? GetStudyEditUrl(string action)
+    {    
+        return Url.Action(action, "StudyEdit", new {studyId = Model.Study.Id});
+    }
+}
 
 <div>
     <h3 class="govuk-heading-s">Study details</h3>
     <dl class="govuk-summary-list">
         <summary-list-item for="Study.Id"/>
-        <summary-list-item for="Study.CpmsId"/>
-        <summary-list-item for="Study.StudyName"/>
-        @if (Model.Study.Description is not null)
-        {
-            <summary-list-item for="Study.Description"/>
-        }
-        <summary-list-item for="Study.SinglePersonResponsibleForRecruiting" 
-                           show-researcher-when="Model.Study.SinglePersonResponsibleForRecruiting.HasValue"/>
-        <summary-list-item for="Study.HasMultipleResearchLocations" 
-                           show-researcher-when="Model.Study.HasMultipleResearchLocations.HasValue"/>
-        <summary-list-item for="Study.InclusionCriteria"/>
-        <summary-list-item for="Study.RecruitmentEndDate"/>
-        <role role-include="Admin">
+        <summary-list-item for="Study.CpmsId" change-url="@GetChangeUrl(StudyRequestEditFlow.InclusionInRdnPortfolio)"/>
+        <summary-list-item for="Study.StudyName" change-url="@GetChangeUrl(StudyRequestEditFlow.StudyDescription)"/>
+        <summary-list-item for="Study.Description" change-url="@GetChangeUrl(StudyRequestEditFlow.StudyDescription)" hide-when-null/>
+        <summary-list-item for="Study.HasEthicsApproval" change-url="@GetChangeUrl(StudyRequestEditFlow.EthicsApproval)"/>
+        <summary-list-item for="Study.SinglePersonResponsibleForRecruiting" change-url="@GetChangeUrl(StudyRequestEditFlow.ResearchManager)" hide-from-researcher-when-null />
+        <summary-list-item for="Study.HasMultipleResearchLocations" change-url="@GetChangeUrl(StudyRequestEditFlow.ResearchLocations)" hide-from-researcher-when-null/>
+        <summary-list-item for="Study.InclusionCriteria" change-url="@GetChangeUrl(StudyRequestEditFlow.ParticipantDetails)"/>
+        <summary-list-item for="Study.RecruitmentEndDate" change-url="@GetChangeUrl(StudyRequestEditFlow.FinishRecruiting)"/>
+        <role >
             <div class="govuk-summary-list__row">
                 <dt class="govuk-summary-list__key">
                     Volunteer study information page
@@ -40,18 +57,11 @@
                 </dd>
             </div>
         </role>
-        <summary-list-item for="Study.PreScreenerUrl" 
-                           show-researcher-when="!string.IsNullOrWhiteSpace(Model.Study.PreScreenerUrl)"/>
-        <summary-list-item for="Study.InformationUrl"/>
-        <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"/>
-        @if (Model.Study.RecruitmentStartDate is not null)
-        {
-            <summary-list-item for="Study.RecruitmentStartDate"/>
-        }
-        @if (Model.Study.UKRecruitmentTarget is not null)
-        {
-            <summary-list-item for="Study.UKRecruitmentTarget"/>
-        }
-
+        <summary-list-item for="Study.PreScreenerUrl" hide-from-researcher-when-null/>
+        <summary-list-item for="Study.InformationUrl" />
+        <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"
+                           change-url="@GetStudyEditUrl("IsRecruitingIdentifiableParticipants")"/>
+        <summary-list-item for="Study.RecruitmentStartDate" change-url="@GetStudyEditUrl("RecruitmentStartDate")"/>
+        <summary-list-item for="Study.UKRecruitmentTarget" change-url="@GetStudyEditUrl("RecruitmentTarget")"/>
     </dl>
 </div>

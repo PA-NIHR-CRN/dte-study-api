@@ -26,7 +26,7 @@ public static class Extensions
         return validator.Validate(instance, options => options.IncludeProperties(properties));
     }
     
-    public static bool ValidateSpecificProperties<T>(this IValidator<T> validator, T instance,
+    public static bool ValidateAndHasErrors<T>(this IValidator<T> validator, T instance,
         ModelStateDictionary modelState, params Expression<Func<T, object?>>[] properties) =>
         validator.Validate(instance, options => options.IncludeProperties(properties))
             .AddToModelState(modelState);

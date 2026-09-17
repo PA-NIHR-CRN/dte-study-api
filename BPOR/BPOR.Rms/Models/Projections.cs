@@ -145,7 +145,8 @@ public static class Projections
                 HasMultipleResearchLocations = s.HasMultipleResearchLocations,
                 SinglePersonResponsibleForRecruiting = s.SinglePersonResponsibleForRecruiting,
                 PreScreenerUrl = s.PreScreenerUrl,
-                InclusionCriteria = s.InclusionCriteria
+                InclusionCriteria = s.InclusionCriteria,
+                HasEthicsApproval = s.HasEthicsApproval
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 

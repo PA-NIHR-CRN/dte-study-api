@@ -1,0 +1,12 @@
+@model BPOR.Rms.Ms4.Models.StudyEditViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+<form-group for="IsRecruitingIdentifiableParticipants" label-as-heading="true" label-class="govuk-heading-l">
+    <radio-set for="@Model.IsRecruitingIdentifiableParticipants">
+        <radio value="@true">Yes</radio>
+        <radio value="@false">No</radio>
+    </radio-set>
+</form-group>

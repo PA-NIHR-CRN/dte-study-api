@@ -24,7 +24,7 @@ public class StudyRequestController(
     IStudyDraftRepository studyDraftRepository,
     IUrlAccessTokenService urlAccessTokenService,
     StudyRequestViewModelValidator validator,
-    IMvcFlowHelper mvcFlowHelper)
+    IMvcFlowHelper<StudyRequestViewModel, StudyRequestEditContext> mvcFlowHelper)
     : Controller
 {
     private Study _study = null!; // Initialised in OnActionExecutionAsync
@@ -436,19 +436,8 @@ public class StudyRequestController(
     {
         var model = MapViewModel(_study);
         modifyModel?.Invoke(model);
-        var nextAction = StudyRequestEditFlow.Graph.ApplyTransition(mvcFlowHelper.CurrentActionKey, context, model, action);
-
-        if (nextAction == null)
-        {
-            return null;
-        }
-
-        string? result = Url.GetUrl(nextAction);
-        if (result == null)
-        {
-            throw new Exception($"{nextAction.NodeKey} could not be mapped to a URL");
-        }
-        result = urlAccessTokenService.AddCurrentAccessToken(result);
+        var result = mvcFlowHelper.GetRelatedUrl(model, context, action);
+        result = result == null ? null : urlAccessTokenService.AddCurrentAccessToken(result);
         return result;
     }
     
@@ -465,10 +454,18 @@ public class StudyRequestController(
             ViewData.SetBackLinkOverride(backUrl);
         }
 
-        ViewData["Progress"] = StudyRequestEditFlow.Graph.CalculateBestCaseProgress(context,
-            StudyRequestEditFlow.EthicsApproval, StudyRequestEditFlow.Summary, mvcFlowHelper.CurrentActionKey);
+        if (context.FlowType is StudyRequestEditFlowType.AdminCreate or StudyRequestEditFlowType.ResearcherCreate)
+        {
+            ViewData["Progress"] = mvcFlowHelper.CalculateBestCaseProgress(context,
+                StudyRequestEditFlow.EthicsApproval, StudyRequestEditFlow.Summary);
+        }
+        else
+        {
+            ViewData["HideSectionTitle"] = true;
+            ViewData["HideProgress"] = true;
+        }
+
         ViewData["StudyEditContext"] = context;
         return View(viewName, model);
     }
-
 }

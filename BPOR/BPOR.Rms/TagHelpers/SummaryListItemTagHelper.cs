@@ -3,9 +3,6 @@ using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using System.Reflection;
-using BPOR.Rms.Models.Study;
-using BPOR.Rms.Controllers;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using System.Text.Encodings.Web;
 using NIHR.Infrastructure.AspNetCore;
@@ -15,43 +12,29 @@ namespace BPOR.Rms.TagHelpers;
 public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProvider, LinkGenerator linkGenerator) : TagHelper
 {
     public ModelExpression For { get; set; }
+    
+    [HtmlAttributeName("change-url")]
+    public string? ChangeUrl { get; set; }
 
     [HtmlAttributeName("show-when")]
     public bool Show { get; set; } = true;
     
-    [HtmlAttributeName("show-admin-when")]
-    public bool ShowAdmin { get; set; } = true;
+    [HtmlAttributeName("hide-when-null")]
+    public bool HideWhenNull { get; set; } = false;
     
-    [HtmlAttributeName("show-researcher-when")]
-    public bool ShowResearcher { get; set; } = true;
+    [HtmlAttributeName("hide-from-researcher-when-null")]
+    public bool HideFromResearcherWhenNull { get; set; } = false;
     
     [HtmlAttributeName("edit-when")]
     public bool Editable { get; set; } = true;
-
-    [HtmlAttributeNotBound]
-    [ViewContext]
-    public ViewContext ViewContext { get; set; } = null!;
-
+    
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        var studyRelativeName = For.Name.Split('.').Last();
-        var studyEdit = For.Metadata.ContainerType?.GetProperty(studyRelativeName)?.GetCustomAttribute<StudyEditAttribute>();
-        var researcherEdit = For.Metadata.ContainerType?.GetProperty(studyRelativeName)?.GetCustomAttribute<ResearcherEditAttribute>();
-
-        var viewModel = For.ModelExplorer.Container.Model as StudyDetailsViewModel;
-
-        var isAdmin = currentUserProvider.IsAdmin();
-        var isResearcher = currentUserProvider.IsResearcher();
-        
         var visible = Show;
-        
-        if (isAdmin)
+        visible &= !HideWhenNull || For.Model != null;
+        if (!currentUserProvider.IsAdmin())
         {
-            visible &= ShowAdmin;
-        }
-        else if (isResearcher)
-        {
-            visible &= ShowResearcher;
+            visible &= !HideFromResearcherWhenNull || For.Model != null;
         }
 
         if (visible)
@@ -74,29 +57,17 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
 
             output.Content.AppendHtml(title);
             output.Content.AppendHtml(value);
-
-            var field = studyEdit?.FieldId;
-            var controller = nameof(StudyController);
             
-            if (researcherEdit is not null)
-            {
-                field = researcherEdit.FieldId;
-                controller = nameof(ResearcherController);
-            }
-            
-            if (field is not null &&
-                viewModel is not null &&
+            if (!string.IsNullOrEmpty(ChangeUrl) &&
                 Editable && 
                 currentUserProvider.IsAdmin())
             {
-                var url = linkGenerator.GetUriByAction(ViewContext.HttpContext, "Edit", controller.Replace("Controller", ""), new { id = viewModel.Study.Id, field });
-
                 var changeLink = new TagBuilder("dd");
                 changeLink.AddCssClass("govuk-summary-list__actions");
 
                 var changeLinkAnchor = new TagBuilder("a");
                 changeLinkAnchor.AddCssClass("govuk-link");
-                changeLinkAnchor.Attributes.Add("href", url);
+                changeLinkAnchor.Attributes.Add("href", ChangeUrl);
 
                 var changeLinkSpan = new TagBuilder("span");
                 changeLinkSpan.AddCssClass("govuk-visually-hidden");
