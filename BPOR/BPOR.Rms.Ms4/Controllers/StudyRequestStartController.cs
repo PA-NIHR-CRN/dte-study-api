@@ -56,7 +56,8 @@ public class StudyRequestStartController(IStudyDraftRepository studyDraftReposit
     [HttpGet]
     public IActionResult ApplicationSubmitted(int studyId)
     {
-        return View();
+        ApplicationSubmittedViewModel viewModel = new() {StudyId = studyId};
+        return View(viewModel);
     }
     
     private async Task<bool> ValidateAsync<TModel>(

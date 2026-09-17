@@ -12,16 +12,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NIHR.GovUk.AspNetCore.Mvc;
+using NIHR.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Ms4.Controllers;
 
 [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-[AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
 [Route("[controller]/{studyId:int}/[action]")]
 public class StudyRequestController(
     IStudyDraftRepository studyDraftRepository,
+    IAccessTokenService accessTokenService,
     IUrlAccessTokenService urlAccessTokenService,
     StudyRequestViewModelValidator validator,
     IMvcFlowHelper mvcFlowHelper)
@@ -31,20 +32,40 @@ public class StudyRequestController(
     
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        var isAdmin = User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" });
+        var isResearcher = User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Researcher" });
+        var hasAccessToken = accessTokenService.HasValidAccessToken(
+            HttpContext, AccessTokenRoleNames.ResearcherCreateStudy);
+
+        // If the user doesn't have the access to this route, then deny immediately to avoid a user with 
+        // only an access token from discovering valid study IDs.
+        if (!isAdmin && !isResearcher && !hasAccessToken)
+        {
+            context.Result = Forbid();
+            return;
+        }
+        
+        var currentUserId = User.GetUserId();
         var studyId = Convert.ToInt32(context.RouteData.Values["studyId"]);
         var study = await studyDraftRepository.GetStudyAsync(studyId, context.HttpContext.RequestAborted);
+        
         if (study is null)
         {
             context.Result = NotFound();
+            return;
         }
-        else if (study.StudyStatusId is not StudyStatusType.Draft && !User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" }))
+
+        _study = study;
+
+        if (isAdmin ||
+            (isResearcher && study.CreatedById == currentUserId && study.StudyStatusId == StudyStatusType.Draft) ||
+            (hasAccessToken && study.StudyStatusId == StudyStatusType.Draft))
         {
-            context.Result = Forbid();
+            await base.OnActionExecutionAsync(context, next); 
         }
         else
         {
-            _study = study;
-            await base.OnActionExecutionAsync(context, next);
+            context.Result = Forbid();
         }
     }
 

@@ -1,7 +1,4 @@
-@using BPOR.Rms.Ms4.Settings
-@using Microsoft.Extensions.Options
-
-@inject IOptions<StudyCreationSettings> Settings
+@model BPOR.Rms.Ms4.Models.ApplicationSubmittedViewModel
 
 @{
     Layout = "_StudyLayout";
@@ -21,6 +18,7 @@
 Not sure where this should redirect to after submission
 *@
 
-<a href="@Settings.Value.ResearcherCreationFinishRedirectUrl" role="button" class="govuk-button" data-module="govuk-button">
-    Return to Be Part of Research
-</a>
+<div class="govuk-button-group">
+    @Html.ActionLink("View study", "Details", "Study", new { id = Model.StudyId }, new { @class = "govuk-button", data_module = "govuk-button" })
+    @Html.ActionLink("All studies", "Index", "Study", null, new { @class = "govuk-button govuk-button--secondary", data_module = "govuk-button" })
+</div>

@@ -2,6 +2,9 @@ using BPOR.Domain.Entities;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
+using BPOR.Rms.Ms4;
+using BPOR.Rms.Ms4.FlowGraph;
+using BPOR.Rms.Ms4.Repositories;
 using BPOR.Rms.Startup;
 using BPOR.Rms.Validators;
 using BPOR.Rms.VolunteerInformation.Data;
@@ -19,7 +22,8 @@ public class StudyController(
     ParticipantDbContext context,
     IPaginationService paginationService,
     ICurrentUserProvider<User> currentUserProvider,
-    ILogger<StudyController> logger
+    ILogger<StudyController> logger,
+    IStudyDraftRepository studyDraftRepository
 ) : Controller
 {
     [HttpGet]
@@ -161,10 +165,20 @@ public class StudyController(
     }
 
     // GET: Study/Create
-    public IActionResult Create()
+    public async Task<IActionResult> Create(CancellationToken cancellationToken = default)
     {
-        var model = new StudyFormViewModel(){AllowEditIsRecruitingIdentifiableParticipants = true};
-        return View(model);
+        var study = new Study();
+        var studyId = await studyDraftRepository.CreateDraftStudyAsync(study, cancellationToken);
+        
+        var isAdmin = currentUserProvider.User.HasRole(UserRole.Admin);
+
+        var uri = Url.GetUrl(StudyRequestEditFlow.EthicsApproval, new StudyRequestEditContext
+        {
+            StudyId = studyId,
+            FlowType = isAdmin ? StudyRequestEditFlowType.AdminCreate : StudyRequestEditFlowType.ResearcherCreate
+        });
+
+        return Redirect(uri);
     }
 
     // POST: Study/Create
