@@ -16,9 +16,7 @@ public class StudyRequestEditFlow : MvcFlowGraph<StudyRequestViewModel, StudyReq
     public static MvcActionKey ChiefInvestigator { get; } = new("StudyRequest", "ChiefInvestigator");
     public static MvcActionKey ChiefInvestigatorContact { get; } = new("StudyRequest", "ChiefInvestigatorContact");
     public static MvcActionKey MainContact { get; } = new("StudyRequest", "MainContact");
-    public static MvcActionKey Section2Check { get; } = new("StudyRequest", "Section2Check");
     public static MvcActionKey SponsorOrganisation { get; } = new("StudyRequest", "SponsorOrganisation");
-    public static MvcActionKey Section3Check { get; } = new("StudyRequest", "Section3Check");
     public static MvcActionKey ResearchManager { get; } = new("StudyRequest", "ResearchManager");
     public static MvcActionKey ResearchLocations { get; } = new("StudyRequest", "ResearchLocations");
     public static MvcActionKey StudyDescription { get; } = new("StudyRequest", "StudyDescription");
@@ -43,14 +41,12 @@ public class StudyRequestEditFlow : MvcFlowGraph<StudyRequestViewModel, StudyReq
         AddTransition(ResearchManager, ChiefInvestigator, SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit);
         AddTransition(ChiefInvestigator, ChiefInvestigatorContact,
             SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit);
-        AddTransition(ChiefInvestigatorContact, Section2Check, SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit,
+        AddTransition(ChiefInvestigatorContact, SponsorOrganisation, SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit,
             model => model.IsChiefInvestigatorMainContact is true);
         AddTransition(ChiefInvestigatorContact, MainContact, SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit,
             model => model.IsChiefInvestigatorMainContact is not true);
-        AddTransition(MainContact, Section2Check, SubflowOptions.SubflowExit);
-        AddTransition(Section2Check, SponsorOrganisation, SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit);
-        AddTransition(SponsorOrganisation, Section3Check, SubflowOptions.SubflowExit);
-        AddTransition(Section3Check, ParticipantDetails, SubflowOptions.SubflowEntry);
+        AddTransition(MainContact, SponsorOrganisation, SubflowOptions.SubflowExit);
+        AddTransition(SponsorOrganisation, ParticipantDetails, SubflowOptions.SubflowExit);
         AddTransition(ParticipantDetails, Summary, SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit);
     }
 

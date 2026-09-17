@@ -329,20 +329,6 @@ public class StudyRequestController(
     }
     
     [HttpGet]
-    public IActionResult Section2Check(StudyRequestEditContext context)
-    {
-        return View("Details/Section2Check", context, MapViewModel(_study));
-    }
-    
-    [HttpPost]
-    public async Task<IActionResult> Section2Check(
-        StudyRequestEditContext context,
-        CancellationToken cancellationToken)
-    {
-        return GetNextAction(context);
-    }
-    
-    [HttpGet]
     public IActionResult SponsorOrganisation(StudyRequestEditContext context)
     {
         return View("Sponsorship/SponsorOrganisation", context, MapViewModel(_study));
@@ -364,20 +350,6 @@ public class StudyRequestController(
         _study.Sponsors = model.SponsorName;
         await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
 
-        return GetNextAction(context);
-    }
-    
-    [HttpGet]
-    public IActionResult Section3Check(StudyRequestEditContext context)
-    {
-        return View("Sponsorship/Section3Check", context, MapViewModel(_study));
-    }
-    
-    [HttpPost]
-    public async Task<IActionResult> Section3Check(
-        StudyRequestEditContext context,
-        CancellationToken cancellationToken)
-    {
         return GetNextAction(context);
     }
     

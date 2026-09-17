@@ -1,3 +1,8 @@
+@using BPOR.Rms.Ms4.Settings
+@using Microsoft.Extensions.Options
+
+@inject IOptions<StudyCreationSettings> Settings
+
 @{
     Layout = "_StudyLayout";
     ViewData["HideProgress"] = true;
@@ -41,6 +46,6 @@
     </a>
 </p>
 
-<a asp-action="start" role="button" class="govuk-button" data-module="govuk-button">
+<a href="@Settings.Value.ResearcherCreationReturnToStepByStepGuideUrl" role="button" class="govuk-button" data-module="govuk-button">
     Return to step by step guide
 </a>
