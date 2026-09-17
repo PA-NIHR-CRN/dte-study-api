@@ -22,4 +22,7 @@ public class StudyEditViewModel
 
     [Display(Name = "Website link?")]
     public string? InformationUrl { get; set; }
+
+    [Display(Name = "NIHR funding stream or grant code")]
+    public string? FundingCode { get; set; }
 }

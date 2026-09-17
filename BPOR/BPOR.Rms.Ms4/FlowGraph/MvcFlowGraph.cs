@@ -57,21 +57,18 @@ public class MvcFlowGraph<TModel, TContext> : IMvcFlowGraph<TModel, TContext>
         }
 
         var relatedNodes = currentNode.GetRelatedNodes(i => IsValidTransition(i, context, model, action)).ToArray();
-        switch (relatedNodes.Length)
+        if (relatedNodes.Length == 0)
         {
-            case 0:
-                return null;
-            case 1:
-                var contextTransform = relatedNodes[0].Value.ContextTransform;
-                TContext newContext = contextTransform == null
-                    ? context
-                    : contextTransform(context);
-                var result = new TransitionResult<TContext, MvcActionKey>
-                    (newContext, relatedNodes[0].RelatedNode.Key, relatedNodes[0].Value.IsSubflowReturn);
-                return result;
-            default:
-                throw new InvalidOperationException($"Multiple {action} transitions found for the current state");
+            return null;
         }
+
+        var contextTransform = relatedNodes[0].Value.ContextTransform;
+        TContext newContext = contextTransform == null
+            ? context
+            : contextTransform(context);
+        var result = new TransitionResult<TContext, MvcActionKey>
+            (newContext, relatedNodes[0].RelatedNode.Key, relatedNodes[0].Value.IsSubflowReturn);
+        return result;
     }
 
     private bool IsValidTransition(Transition transition, TContext context, TModel model, MvcFlowAction action)

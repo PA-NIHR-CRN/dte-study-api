@@ -32,7 +32,10 @@ public class SummaryListItemTagHelper(ICurrentUserProvider<User> currentUserProv
     {
         var visible = Show;
         visible &= !HideWhenNull || For.Model != null;
-        visible &= !currentUserProvider.IsResearcher() || !HideFromResearcherWhenNull || For.Model != null;
+        if (!currentUserProvider.IsAdmin())
+        {
+            visible &= !HideFromResearcherWhenNull || For.Model != null;
+        }
 
         if (visible)
         {

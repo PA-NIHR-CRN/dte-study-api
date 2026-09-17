@@ -3,7 +3,6 @@
 @using BPOR.Rms.Ms4.FlowGraph
 @using BPOR.Rms.VolunteerInformation.Data
 @using Microsoft.AspNetCore.Http.Extensions
-@using Microsoft.AspNetCore.Mvc.Routing
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
 @inject IVipRepository VipRepository
 @inject IMvcFlowHelper<StudyRequestEditContext> MvcFlowHelper
@@ -28,8 +27,6 @@
     <h3 class="govuk-heading-s">Study details</h3>
     <dl class="govuk-summary-list">
         <summary-list-item for="Study.Id"/>
-        <summary-list-item for="Study.HasFundingDisplay" change-url="@GetChangeUrl(StudyRequestEditFlow.NihrFunding)"/>
-        <summary-list-item for="Study.FundingCode" show-when="@Model.Study.HasFunding == NihrFundingStatusType.Yes"/>
         <summary-list-item for="Study.CpmsId" change-url="@GetChangeUrl(StudyRequestEditFlow.InclusionInRdnPortfolio)"/>
         <summary-list-item for="Study.StudyName" change-url="@GetChangeUrl(StudyRequestEditFlow.StudyDescription)"/>
         <summary-list-item for="Study.Description" change-url="@GetChangeUrl(StudyRequestEditFlow.StudyDescription)" hide-when-null/>
@@ -38,7 +35,7 @@
         <summary-list-item for="Study.HasMultipleResearchLocations" change-url="@GetChangeUrl(StudyRequestEditFlow.ResearchLocations)" hide-from-researcher-when-null/>
         <summary-list-item for="Study.InclusionCriteria" change-url="@GetChangeUrl(StudyRequestEditFlow.ParticipantDetails)"/>
         <summary-list-item for="Study.RecruitmentEndDate" change-url="@GetChangeUrl(StudyRequestEditFlow.FinishRecruiting)"/>
-        <role role-include="Admin">
+        <role >
             <div class="govuk-summary-list__row">
                 <dt class="govuk-summary-list__key">
                     Volunteer study information page

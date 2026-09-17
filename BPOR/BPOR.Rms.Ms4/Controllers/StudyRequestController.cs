@@ -454,8 +454,17 @@ public class StudyRequestController(
             ViewData.SetBackLinkOverride(backUrl);
         }
 
-        ViewData["Progress"] = mvcFlowHelper.CalculateBestCaseProgress(context,
-            StudyRequestEditFlow.EthicsApproval, StudyRequestEditFlow.Summary);
+        if (context.FlowType is StudyRequestEditFlowType.AdminCreate or StudyRequestEditFlowType.ResearcherCreate)
+        {
+            ViewData["Progress"] = mvcFlowHelper.CalculateBestCaseProgress(context,
+                StudyRequestEditFlow.EthicsApproval, StudyRequestEditFlow.Summary);
+        }
+        else
+        {
+            ViewData["HideSectionTitle"] = true;
+            ViewData["HideProgress"] = true;
+        }
+
         ViewData["StudyEditContext"] = context;
         return View(viewName, model);
     }

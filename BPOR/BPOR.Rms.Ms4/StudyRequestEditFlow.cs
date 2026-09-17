@@ -21,6 +21,9 @@ public class StudyRequestEditFlow : MvcFlowGraph<StudyRequestViewModel, StudyReq
     public static MvcActionKey ResearchLocations { get; } = new("StudyRequest", "ResearchLocations");
     public static MvcActionKey StudyDescription { get; } = new("StudyRequest", "StudyDescription");
     
+    // TODO: Find a better way to handle a return-subflow-only edge.
+    private static MvcActionKey NullPage { get; } = new("", "");
+
     public StudyRequestEditFlow()
     {
         AddTransition(EthicsApproval, InclusionInRdnPortfolio,
@@ -30,7 +33,11 @@ public class StudyRequestEditFlow : MvcFlowGraph<StudyRequestViewModel, StudyReq
             i => i.InclusionInRdnPortfolioStatus is SubmittedType.Yes);
         AddTransition(InclusionInRdnPortfolio, NihrFunding, SubflowOptions.None,
             i => i.InclusionInRdnPortfolioStatus is not SubmittedType.Yes);
-        AddTransition(NihrFunding, FinishRecruiting, SubflowOptions.SubflowEntry,
+        AddTransition(
+            NihrFunding, NullPage, MvcFlowAction.Next,
+            contextPredicate: context => context.FlowType == StudyRequestEditFlowType.Edit,
+            isSubflowReturn: true);
+        AddTransition(NihrFunding, FinishRecruiting, SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit,
             i => i.InclusionInRdnPortfolioStatus is not SubmittedType.Yes &&
                  i.NihrFundingStatus is not NihrFundingStatusType.No);
         AddTransition(NihrFunding, MoreInformationRequired, SubflowOptions.None,

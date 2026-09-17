@@ -153,6 +153,28 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
         await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
         return StudyDetailsTab();
     }
+    
+    [HttpGet]
+    public IActionResult FundingCode()
+    {
+        return View(GetViewModel());
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> FundingCode(
+        StudyEditViewModel model,
+        StudyEditViewModelValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (validator.ValidateAndHasErrors(model, ModelState, i => i.FundingCode))
+        {
+            return View(model);
+        }
+
+        _study.FundingCode = model.FundingCode;
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
+        return StudyFundingTab();
+    }
 
     private IActionResult StudyDetailsTab() => RedirectToStudyDetailsPage("study-details");
     private IActionResult StudyFundingTab() => RedirectToStudyDetailsPage("funding-details");
@@ -171,7 +193,8 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
             RecruitmentTarget = _study.RecruitmentTarget,
             IsRecruitingIdentifiableParticipants = _study.IsRecruitingIdentifiableParticipants,
             SubmissionOutcome = _study.SubmissionOutcomeId,
-            InformationUrl = _study.InformationUrl
+            InformationUrl = _study.InformationUrl,
+            FundingCode = _study.FundingCode,
         };
     }
 }
