@@ -99,6 +99,7 @@ public class StudyController(
             : isAdmin || (study.HasCampaigns && isResearcher);
 
         var vsiStatus = await repository.GetVipStatus(id.Value, cancellationToken);
+        ViewData["VsiStatus"] = vsiStatus;
         
         study.ActionLinks = new();
 
