@@ -1,13 +1,16 @@
-﻿@using BPOR.Domain.Enums
+﻿@using BPOR.Domain.Entities
+@using BPOR.Domain.Enums
+@using BPOR.Rms.Startup
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
+@inject ICurrentUserProvider<User> UserProvider;
 
 <div>
     <h3 class="govuk-heading-s">Funding details</h3>
     <dl class="govuk-summary-list">
         <summary-list-item for="Study.HasFundingDisplay"
-                           show-researcher-when="false"/>
+                           edit-when="UserProvider.IsAdmin()"/>
         <summary-list-item for="Study.FundingCode"
-                           show-researcher-when="false"
+                           edit-when="UserProvider.IsAdmin()"
                            show-when="@Model.Study.HasFunding == NihrFundingStatusType.Yes"/>
         <summary-list-item for="Study.StudySponsors"/>
         <summary-list-item for="Study.PortfolioSubmissionStatus"/>
