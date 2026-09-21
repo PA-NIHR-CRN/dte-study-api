@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Security.Claims;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Models;
@@ -56,7 +57,14 @@ public class StudyRequestStartController(IStudyDraftRepository studyDraftReposit
     [HttpGet]
     public IActionResult ApplicationSubmitted(int studyId)
     {
-        ApplicationSubmittedViewModel viewModel = new() {StudyId = studyId};
+        var isAdmin = User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" });
+        var isResearcher = User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Researcher" });
+        ApplicationSubmittedViewModel viewModel = new()
+        {
+            StudyId = studyId,
+            IsAdmin = isAdmin,
+            IsResearcher = isResearcher
+        };
         return View(viewModel);
     }
     
