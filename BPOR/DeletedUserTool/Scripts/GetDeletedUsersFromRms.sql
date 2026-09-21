@@ -34,9 +34,7 @@
           AND pi.IdentifierTypeId = 3
     )
 )
-SELECT p.Id, p.Email, pi.Id as IdentifierId, pi.IdentifierTypeId, pi.Value as IdentifierValue
-FROM one_participant_per_email p 
-    JOIN ParticipantIdentifiers pi on p.Id = pi.ParticipantId
-JOIN dte.SysRefIdentifierType SRIT on pi.IdentifierTypeId = SRIT.Id
+SELECT p.Email
+FROM one_participant_per_email p
 WHERE row_num = 1
 ORDER BY Email, Id;

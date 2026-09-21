@@ -43,17 +43,7 @@ public class BporDynamoDb(IOptions<DynamoDbSettings> options)
     
     public async Task<DynamoParticipant?> GetParticipantByKey(string pk, string sk)
     {
-        using var context = CreateContext();
-        DynamoDBOperationConfig operationConfig = new DynamoDBOperationConfig
-        {
-            OverrideTableName = options.Value.TableName
-        };
-
-        var query = context.ScanAsync<DynamoParticipant>(
-            [
-                new ScanCondition("PK", ScanOperator.Equal, pk),
-                new ScanCondition("SK", ScanOperator.Equal, sk)
-            ], operationConfig);
-        return (await query.GetRemainingAsync()).FirstOrDefault();
+        var participantsByPk = await GetParticipantsByPk(pk);
+        return participantsByPk.FirstOrDefault(i => i.Sk == sk);
     }
 }
