@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace DeletedUserTool.Writers;
 
-public class DynamoDbScriptWriter : ScriptWriter
+public class DynamoDbScriptWriter : PowershellScriptWriter
 {
     private readonly IOptions<DynamoDbSettings> _dynamoDbSettings;
     private readonly string _outputFolderPath;
@@ -18,17 +18,12 @@ public class DynamoDbScriptWriter : ScriptWriter
         _outputFolderPath = outputFolderPath;
     }
 
-    protected override void WriteComment(string comment)
-    {
-        TextWriter.WriteLine("# " + comment);
-    }
-
     public void WriteDynamoDbAnonymise(DynamoParticipant dynamoParticipant)
     {
         if (_handledDynamoDbPks.Add(dynamoParticipant.Pk))
         {
             TextWriter.WriteLine(
-                $"aws dynamodb update-item --profile {_dynamoDbSettings.Value.Profile} --region {_dynamoDbSettings.Value.RegionEndpoint} --table-name {_dynamoDbSettings.Value.TableName} --key '{GetKeyJson(dynamoParticipant)}' --expression-attribute-names file://expression-attribute-names.json --update-expression \"DELETE #NI, #NN, #E, #FN, #LN, #HCI, #MN, #LLN\"");
+                $"aws dynamodb update-item --profile {_dynamoDbSettings.Value.Profile} --region {_dynamoDbSettings.Value.RegionEndpoint} --table-name {_dynamoDbSettings.Value.TableName} --key '{GetKeyJson(dynamoParticipant)}' --expression-attribute-names file://expression-attribute-names.json --update-expression \"DELETE #NI, #NN, #E, #FN, #LN, #HCI, #MN, #LLN, #EB, #SRB\"");
             using (var valueStream =
                    File.Create(Path.Combine(_outputFolderPath, $"{dynamoParticipant.Pk}.values.json")))
             {

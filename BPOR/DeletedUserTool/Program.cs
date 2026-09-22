@@ -1,5 +1,4 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Enums;
 using DeletedUserTool;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.user.json");
@@ -24,7 +22,7 @@ builder.Services.AddSingleton<BporDynamoDb>();
 var host = builder.Build();
 
 var rmsDatabase = host.Services.GetRequiredService<RmsDatabase>();
-var emailAddressesToBeRemoved = rmsDatabase.GetDeletedParticipantEmails().Distinct().Take(10).ToArray();
+var emailAddressesToBeRemoved = rmsDatabase.GetDeletedParticipantEmails().Distinct().ToArray();
 
 var bporCognito = host.Services.GetRequiredService<BporCognito>();
 var bporDynamoDb = host.Services.GetRequiredService<BporDynamoDb>();
@@ -33,28 +31,27 @@ List<DynamoParticipant> dynamoParticipantsByEmail = await bporDynamoDb.GetPartic
     emailAddressesToBeRemoved);
 
 string outputFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"output-{DateTime.UtcNow:yyyy-MM-ddTHH.mm.ss}");
-
-var cognitoSettings = host.Services.GetRequiredService<IOptions<CognitoSettings>>();
-
 string scriptsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "scripts");
 Directory.CreateDirectory(outputFolder);
-var dynamoDbScriptWriter = new DynamoDbScriptWriter(
-    host.Services.GetRequiredService<IOptions<DynamoDbSettings>>(),
-    outputFolder);
-var rmsDbScriptWriter = new RmsDbScriptWriter(outputFolder);
 
-
-
-using var cognitoScript = File.CreateText(Path.Combine(outputFolder, "cognito-clean.ps1"));
+using var cognitoScriptWriter = new CognitoScriptWriter(host.Services.GetRequiredService<IOptions<CognitoSettings>>(), outputFolder);
+using var dynamoDbScriptWriter = new DynamoDbScriptWriter(host.Services.GetRequiredService<IOptions<DynamoDbSettings>>(), outputFolder);
+using var rmsDbScriptWriter = new RmsDbScriptWriter(outputFolder);
 
 List<EmailAddressAudit> audits = new();
 
 foreach (var emailAddress in emailAddressesToBeRemoved)
 {
-    dynamoDbScriptWriter.BeginSection($"Email: {emailAddress}");
-    rmsDbScriptWriter.BeginSection($"Email: {emailAddress}");
- 
-    Console.WriteLine($"Found deleted RMS participant {emailAddress}");
+    string anonEmail = AnonEmail(emailAddress);
+    dynamoDbScriptWriter.BeginSection($"Email: {anonEmail}");
+    rmsDbScriptWriter.BeginSection($"Email: {anonEmail}");
+    cognitoScriptWriter.BeginSection($"Email: {anonEmail}");
+    
+    // dynamoDbScriptWriter.BeginSection($"Email: {emailAddress}");
+    // rmsDbScriptWriter.BeginSection($"Email: {emailAddress}");
+    // cognitoScriptWriter.BeginSection($"Email: {emailAddress}");
+
+    Console.WriteLine($"Found deleted RMS participant {anonEmail}");
     EmailAddressAudit emailAddressAudit = new() { Email = emailAddress };
     audits.Add(emailAddressAudit);
 
@@ -62,12 +59,12 @@ foreach (var emailAddress in emailAddressesToBeRemoved)
     emailAddressAudit.CognitoUserIdsMatchingEmail = cognitoUsersMatchingEmail.Select(i => i.Username).ToArray();
     foreach (var cognitoUser in cognitoUsersMatchingEmail)
     {
-        WriteCongnitoDelete(cognitoUser.Username);
+        cognitoScriptWriter.WriteDeleteUser(cognitoUser.Username);
         Console.WriteLine($"    with Cognito User {cognitoUser.Username}");
     }
 
-    var dynamoParticipantsMatchingEmail = dynamoParticipantsByEmail.Where(i => i.Email == emailAddress);
-    emailAddressAudit.DynamoDbRecordsMatchingEmail.AddRange( dynamoParticipantsMatchingEmail.Select(i => new DynamoDbAudit(i)));
+    var dynamoParticipantsMatchingEmail = dynamoParticipantsByEmail.Where(i => i.Email == emailAddress).ToArray();
+    emailAddressAudit.DynamoDbRecordsMatchingEmail.AddRange(dynamoParticipantsMatchingEmail.Select(i => new DynamoDbAudit(i)));
     foreach (var dynamoParticipant in dynamoParticipantsMatchingEmail)
     {
         if (dynamoParticipant.Pk.StartsWith("PARTICIPANT#"))
@@ -156,6 +153,7 @@ foreach (var emailAddress in emailAddressesToBeRemoved)
         rmsDbScriptWriter.EndSection();
     }
     
+    cognitoScriptWriter.EndSection();
     dynamoDbScriptWriter.EndSection();
     rmsDbScriptWriter.EndSection();
 }
@@ -170,13 +168,6 @@ foreach (var scriptToCopy in scriptsToCopy)
 {
     File.Copy(Path.Combine(scriptsFolder, scriptToCopy), Path.Combine(outputFolder, scriptToCopy));
 }
-
-void WriteCongnitoDelete(string cognitoUserNameToRemove)
-{
-    cognitoScript.WriteLine($"aws cognito-idp admin-delete-user --profile {cognitoSettings.Value.Profile} --user-pool-id {cognitoSettings.Value.UserPoolId} --username {cognitoUserNameToRemove}");
-}
-
-
 
 bool TryGetPkPrefix(IdentifierTypes identifierTypes, out string s)
 {
@@ -197,4 +188,17 @@ bool TryGetPkPrefix(IdentifierTypes identifierTypes, out string s)
     }
 
     return true;
+}
+
+string AnonEmail(string emailAddress1)
+{
+    var parts = emailAddress1.Split('@', 2);
+    if (parts.Length == 2)
+    {
+        return $"{parts[0].Substring(0, 2)}***@{parts[1].Substring(0, 2)}***.***";
+    }
+    else
+    {
+        return $"{emailAddress1.Substring(0, 3)}@***.***";
+    }
 }

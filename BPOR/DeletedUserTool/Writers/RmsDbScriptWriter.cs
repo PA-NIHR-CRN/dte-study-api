@@ -26,9 +26,9 @@ public class RmsDbScriptWriter : ScriptWriter
     {
         TextWriter.WriteLine($"-- Anonymise Participant: {participantId}");
         TextWriter.WriteLine($"UPDATE dte.Participants SET Email = '', FirstName = '', LastName = '', " +
-                             $"GenderId = null, GenderIsSameAsSexRegisteredAtBirth = null, MobileNumber = null, " +
+                             $"GenderId = null, MobileNumber = null, " +
                              $"LandlineNumber = null, DailyLifeImpactId = null, EthnicBackground = null, " +
-                             $"HasLongTermCondition = null, IsDeleted = 1 WHERE Id = {participantId}");
+                             $"NHSNumber = null, IsDeleted = 1 WHERE Id = {participantId}");
         TextWriter.WriteLine($"UPDATE dte.ParticipantAddress SET AddressLine1 = '', AddressLine2 = '', " + 
                              $"AddressLine3 = '', AddressLine4 = '', Postcode = TRIM(SUBSTRING(Postcode, 1, 4)) WHERE Id = {participantId}");
         TextWriter.WriteLine($"DELETE FROM dte.ParticipantHealthCondition WHERE ParticipantId = {participantId}");

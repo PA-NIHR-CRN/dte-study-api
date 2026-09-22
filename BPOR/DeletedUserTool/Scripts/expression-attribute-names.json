@@ -7,5 +7,7 @@
   "#NN": "NhsNumber",
   "#HCI": "HealthConditionInterests",
   "#MN": "MobileNumber",
-  "#LLN": "LandlineNumber"
+  "#LLN": "LandlineNumber",
+  "#EB": "EthnicBackground",
+  "#SRB": "SexRegisteredAtBirth"
 }
