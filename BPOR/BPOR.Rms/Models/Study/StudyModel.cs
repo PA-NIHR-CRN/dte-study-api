@@ -123,5 +123,6 @@ public class StudyModel
     public bool? HasEthicsApproval { get; set; }
     [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
     public string HasEthicsApprovalDisplay => HasEthicsApproval == true ? "Yes" : "Not yet, I am awaiting an approval";
+    public StudyStatusType? StudyStatusId { get; set; }
 }
 

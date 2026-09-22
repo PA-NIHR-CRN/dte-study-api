@@ -1,0 +1,26 @@
+﻿@using BPOR.Domain.Entities
+@using BPOR.Domain.Enums
+@using BPOR.Rms.Startup
+@model BPOR.Rms.Models.Study.StudyStatusViewModel
+@inject ICurrentUserProvider<User> CurrentUserProvider
+
+@if (CurrentUserProvider.IsAdmin() && Model.StudyStatusId != null)
+{
+    var statusText = Model.StudyStatusId switch
+    {
+        StudyStatusType.Draft => "Draft",
+        StudyStatusType.NewApplication => "New Application",
+        StudyStatusType.InProgress => "In Progress",
+        StudyStatusType.Active => "Active",
+        StudyStatusType.ConcludedSuccessfully => "Concluded Successfully",
+        StudyStatusType.Rejected => "Rejected",
+        StudyStatusType.Withdrawn => "Withdrawn",
+        _ => null
+    };
+    <div class="govuk-button-group govuk-!-margin-bottom-5 govuk-!-margin-left-2">
+        <govuk-tag colour="Grey" class="govuk-!-margin-right-2">@statusText</govuk-tag>
+        <a class="govuk-link" asp-action="" asp-route-studyId="@Model.StudyId">
+            Change
+        </a>
+    </div>
+}
