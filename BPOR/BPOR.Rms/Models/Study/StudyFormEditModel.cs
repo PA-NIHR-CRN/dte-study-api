@@ -18,6 +18,7 @@ public class StudyFormEditModel : FormWithSteps
     public string? StudyName { get; set; }
 
     [Display(Name = "CPMS ID", Order = 5)]
+    [Range(10000, 99999, ErrorMessage = "Enter a CPMS ID in the correct format, like 12345")]
     public long? CpmsId { get; set; }
 
     [Display(Name = "Is this study recruiting identifiable participants?", Order = 4)]
