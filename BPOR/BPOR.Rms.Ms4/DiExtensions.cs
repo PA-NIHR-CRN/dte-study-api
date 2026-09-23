@@ -1,4 +1,5 @@
 using BPOR.Rms.Ms4.FlowGraph;
+using BPOR.Rms.Ms4.Models;
 using BPOR.Rms.Ms4.Repositories;
 using BPOR.Rms.Ms4.Settings;
 using BPOR.Rms.Ms4.Validators;
@@ -16,7 +17,9 @@ public static class DiExtensions
         
         services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
         services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-        services.AddScoped<IMvcFlowHelper, MvcFlowHelper>();
+        services.AddScoped(typeof(IMvcFlowHelper<>), typeof(MvcFlowHelper<>));
+        services.AddScoped(typeof(IMvcFlowHelper<,>), typeof(MvcFlowHelper<,>));
+        services.AddMvcFlow<StudyRequestEditFlow, StudyRequestViewModel, StudyRequestEditContext>();
         services.AddScoped<IStudyDraftRepository, StudyDraftRepository>();
         services.AddValidatorsFromAssemblyContaining<StudyRequestStartViewModelValidator>();    
     }

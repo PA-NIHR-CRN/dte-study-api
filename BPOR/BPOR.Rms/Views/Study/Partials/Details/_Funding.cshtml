@@ -1,19 +1,33 @@
-﻿@using BPOR.Domain.Entities
 @using BPOR.Domain.Enums
-@using BPOR.Rms.Startup
+@using BPOR.Rms.Ms4
+@using BPOR.Rms.Ms4.FlowGraph
+@using Microsoft.AspNetCore.Http.Extensions
 @model BPOR.Rms.Models.Study.StudyDetailsViewModel
-@inject ICurrentUserProvider<User> UserProvider;
+@inject IMvcFlowHelper<StudyRequestEditContext> MvcFlowHelper
+
+@{
+    string? GetChangeUrl(MvcActionKey node)
+    {    
+        return MvcFlowHelper.GetSubflowUrl(node, new StudyRequestEditContext()
+        {
+            StudyId = Model.Study.Id,
+            FlowType = StudyRequestEditFlowType.Edit
+        }, Context.Request.GetEncodedPathAndQuery() + "#funding-details");
+    }
+    
+    string? GetStudyEditUrl(string action)
+    {    
+        return Url.Action(action, "StudyEdit", new {studyId = Model.Study.Id});
+    }
+}
 
 <div>
     <h3 class="govuk-heading-s">Funding details</h3>
     <dl class="govuk-summary-list">
-        <summary-list-item for="Study.HasFundingDisplay"
-                           edit-when="UserProvider.IsAdmin()"/>
-        <summary-list-item for="Study.FundingCode"
-                           edit-when="UserProvider.IsAdmin()"
-                           show-when="@Model.Study.HasFunding == NihrFundingStatusType.Yes"/>
-        <summary-list-item for="Study.StudySponsors"/>
-        <summary-list-item for="Study.PortfolioSubmissionStatus"/>
-        <summary-list-item for="Study.OutcomeOfSubmission" show-when="@(Model.Study.PortfolioSubmissionStatus == "Yes")"/>
+        <summary-list-item role-include="Admin" for="Study.HasFundingDisplay"  change-url="@GetChangeUrl(StudyRequestEditFlow.NihrFunding)"/>
+        <summary-list-item role-include="Admin" for="Study.FundingCode" show-when="@Model.Study.HasFunding == NihrFundingStatusType.Yes" change-url="@GetStudyEditUrl("FundingCode")"/>
+        <summary-list-item for="Study.StudySponsors" change-url="@GetChangeUrl(StudyRequestEditFlow.SponsorOrganisation)"/>
+        <summary-list-item for="Study.PortfolioSubmissionStatus" change-url="@GetChangeUrl(StudyRequestEditFlow.InclusionInRdnPortfolio)"/>
+        <summary-list-item for="Study.OutcomeOfSubmission" show-when="@(Model.Study.PortfolioSubmissionStatus == "Yes")" change-url="@GetStudyEditUrl("SubmissionOutcome")"/>
     </dl>
 </div>

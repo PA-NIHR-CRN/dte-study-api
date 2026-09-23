@@ -4,7 +4,7 @@ using BPOR.Rms.Ms4.Models;
 
 namespace BPOR.Rms.Ms4;
 
-public static class StudyRequestEditFlow
+public class StudyRequestEditFlow : MvcFlowGraph<StudyRequestViewModel, StudyRequestEditContext>
 {
     public static MvcActionKey EthicsApproval { get; } = new("StudyRequest", "EthicsApproval");
     public static MvcActionKey InclusionInRdnPortfolio { get; } = new("StudyRequest", "InclusionInRdnPortfolio");
@@ -20,13 +20,12 @@ public static class StudyRequestEditFlow
     public static MvcActionKey ResearchManager { get; } = new("StudyRequest", "ResearchManager");
     public static MvcActionKey ResearchLocations { get; } = new("StudyRequest", "ResearchLocations");
     public static MvcActionKey StudyDescription { get; } = new("StudyRequest", "StudyDescription");
+    
+    // TODO: Find a better way to handle a return-subflow-only edge.
+    private static MvcActionKey NullPage { get; } = new("", "");
 
-    public static MvcFlowGraph<StudyRequestViewModel, StudyRequestEditContext, MvcFlowAction> Graph { get; }
-
-    static StudyRequestEditFlow()
+    public StudyRequestEditFlow()
     {
-        Graph = new MvcFlowGraph<StudyRequestViewModel, StudyRequestEditContext, MvcFlowAction>();
-
         AddTransition(EthicsApproval, InclusionInRdnPortfolio,
             SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit);
         AddTransition(InclusionInRdnPortfolio, FinishRecruiting,
@@ -34,7 +33,11 @@ public static class StudyRequestEditFlow
             i => i.InclusionInRdnPortfolioStatus is SubmittedType.Yes);
         AddTransition(InclusionInRdnPortfolio, NihrFunding, SubflowOptions.None,
             i => i.InclusionInRdnPortfolioStatus is not SubmittedType.Yes);
-        AddTransition(NihrFunding, FinishRecruiting, SubflowOptions.SubflowEntry,
+        AddTransition(
+            NihrFunding, NullPage, MvcFlowAction.Next,
+            contextPredicate: context => context.FlowType == StudyRequestEditFlowType.Edit,
+            isSubflowReturn: true);
+        AddTransition(NihrFunding, FinishRecruiting, SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit,
             i => i.InclusionInRdnPortfolioStatus is not SubmittedType.Yes &&
                  i.NihrFundingStatus is not NihrFundingStatusType.No);
         AddTransition(NihrFunding, MoreInformationRequired, SubflowOptions.None,
@@ -54,36 +57,21 @@ public static class StudyRequestEditFlow
         AddTransition(ParticipantDetails, Summary, SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit);
     }
 
-    private static void AddTransition(
+    private void AddTransition(
         MvcActionKey from,
         MvcActionKey to,
         SubflowOptions flags = SubflowOptions.None,
         Predicate<StudyRequestViewModel>? modelPredicate = null)
     {
-        Graph.AddTransition(
+        AddTransition(
             from, to, MvcFlowAction.Next,
             modelPredicate: modelPredicate,
-            destinationTransform: flags.HasFlag(SubflowOptions.SubflowExit) ? HandleSubflow : null);
+            isSubflowReturn: flags.HasFlag(SubflowOptions.SubflowExit));
 
-        Graph.AddTransition(
+        AddTransition(
             to, from, MvcFlowAction.Back,
             modelPredicate: modelPredicate,
-            destinationTransform: flags.HasFlag(SubflowOptions.SubflowEntry) ? HandleSubflow : null);
-    }
-
-    private static TransitionResult<StudyRequestEditContext, MvcActionKey> HandleSubflow(
-        StudyRequestEditContext context, TransitionResult<StudyRequestEditContext, MvcActionKey> transitionResult)
-    {
-        // TODO: Implement subflows generically using a stack serialised to the URL query.
-        // Each stack frame needs to consist of the context and mvc action of the calling action - this needs to be
-        // really compact, so positional serialisation, enums as numeric values, short-forms for action names etc.
-        if (!string.IsNullOrWhiteSpace(context.SubflowRtnAct))
-        {
-            transitionResult.NodeKey = MvcActionKey.Parse(context.SubflowRtnAct);
-            transitionResult.Context.SubflowRtnAct = null;
-        }
-
-        return transitionResult;
+            isSubflowReturn: flags.HasFlag(SubflowOptions.SubflowEntry));
     }
 
     [Flags]

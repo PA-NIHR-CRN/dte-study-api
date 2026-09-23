@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
@@ -32,15 +33,19 @@ public class UrlAccessTokenService (IAccessTokenService accessTokenService, IHtt
     
     public string AddCurrentAccessToken(string uri)
     {
-        if (httpContextAccessor.HttpContext.Request.Query.TryGetValue(options.Value.QueryParameterName,
-                out var accessToken))
+        // TODO: There has to be a better way to modify the query of an URI!!
+        if (!QueryHelpers.ParseQuery(uri).ContainsKey(options.Value.QueryParameterName))
         {
-            var queryParams = new Dictionary<string, string?>
+            if (httpContextAccessor.HttpContext.Request.Query.TryGetValue(options.Value.QueryParameterName,
+                    out var accessToken))
             {
-                { options.Value.QueryParameterName, accessToken.ToString() }
-            };
+                var queryParams = new Dictionary<string, string?>
+                {
+                    { options.Value.QueryParameterName, accessToken.ToString() }
+                };
 
-            uri = QueryHelpers.AddQueryString(uri, queryParams);
+                uri = QueryHelpers.AddQueryString(uri, queryParams);
+            }
         }
 
         return uri;

@@ -12,39 +12,60 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NIHR.GovUk.AspNetCore.Mvc;
+using NIHR.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Ms4.Controllers;
 
 [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-[AuthorizeAnyPolicy(PolicyNames.IsResearcherCreatingStudy, PolicyNames.IsAdmin)]
 [Route("[controller]/{studyId:int}/[action]")]
 public class StudyRequestController(
     IStudyDraftRepository studyDraftRepository,
+    IAccessTokenService accessTokenService,
     IUrlAccessTokenService urlAccessTokenService,
     StudyRequestViewModelValidator validator,
-    IMvcFlowHelper mvcFlowHelper)
+    IMvcFlowHelper<StudyRequestViewModel, StudyRequestEditContext> mvcFlowHelper)
     : Controller
 {
     private Study _study = null!; // Initialised in OnActionExecutionAsync
     
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        var isAdmin = User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" });
+        var isResearcher = User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Researcher" });
+        var hasAccessToken = accessTokenService.HasValidAccessToken(
+            HttpContext, AccessTokenRoleNames.ResearcherCreateStudy);
+
+        // If the user doesn't have the access to this route, then deny immediately to avoid a user with 
+        // only an access token from discovering valid study IDs.
+        if (!isAdmin && !isResearcher && !hasAccessToken)
+        {
+            context.Result = Forbid();
+            return;
+        }
+        
+        var currentUserId = User.GetUserId();
         var studyId = Convert.ToInt32(context.RouteData.Values["studyId"]);
         var study = await studyDraftRepository.GetStudyAsync(studyId, context.HttpContext.RequestAborted);
+        
         if (study is null)
         {
             context.Result = NotFound();
+            return;
         }
-        else if (study.StudyStatusId is not StudyStatusType.Draft && !User.HasClaim(i => i is { Type: ClaimTypes.Role, Value: "Admin" }))
+
+        _study = study;
+
+        if (isAdmin ||
+            (isResearcher && study.CreatedById == currentUserId && study.StudyStatusId == StudyStatusType.Draft) ||
+            (hasAccessToken && study.StudyStatusId == StudyStatusType.Draft))
         {
-            context.Result = Forbid();
+            await base.OnActionExecutionAsync(context, next); 
         }
         else
         {
-            _study = study;
-            await base.OnActionExecutionAsync(context, next);
+            context.Result = Forbid();
         }
     }
 
@@ -436,19 +457,8 @@ public class StudyRequestController(
     {
         var model = MapViewModel(_study);
         modifyModel?.Invoke(model);
-        var nextAction = StudyRequestEditFlow.Graph.ApplyTransition(mvcFlowHelper.CurrentActionKey, context, model, action);
-
-        if (nextAction == null)
-        {
-            return null;
-        }
-
-        string? result = Url.GetUrl(nextAction);
-        if (result == null)
-        {
-            throw new Exception($"{nextAction.NodeKey} could not be mapped to a URL");
-        }
-        result = urlAccessTokenService.AddCurrentAccessToken(result);
+        var result = mvcFlowHelper.GetRelatedUrl(model, context, action);
+        result = result == null ? null : urlAccessTokenService.AddCurrentAccessToken(result);
         return result;
     }
     
@@ -465,10 +475,18 @@ public class StudyRequestController(
             ViewData.SetBackLinkOverride(backUrl);
         }
 
-        ViewData["Progress"] = StudyRequestEditFlow.Graph.CalculateBestCaseProgress(context,
-            StudyRequestEditFlow.EthicsApproval, StudyRequestEditFlow.Summary, mvcFlowHelper.CurrentActionKey);
+        if (context.FlowType is StudyRequestEditFlowType.AdminCreate or StudyRequestEditFlowType.ResearcherCreate)
+        {
+            ViewData["Progress"] = mvcFlowHelper.CalculateBestCaseProgress(context,
+                StudyRequestEditFlow.EthicsApproval, StudyRequestEditFlow.Summary);
+        }
+        else
+        {
+            ViewData["HideSectionTitle"] = true;
+            ViewData["HideProgress"] = true;
+        }
+
         ViewData["StudyEditContext"] = context;
         return View(viewName, model);
     }
-
 }

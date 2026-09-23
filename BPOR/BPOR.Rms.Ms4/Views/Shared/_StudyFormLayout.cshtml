@@ -5,13 +5,21 @@
 @{
     Layout = "_StudyLayout";
     var submitButtonText = ViewData["SubmitButtonText"] as string ?? "Continue";
+    var hideSectionTitle = ViewData["HideSectionTitle"] as bool? ?? false;
 }
 
 @if (IsSectionDefined("SectionTitle"))
 {
-    <h1 class="govuk-heading-s section-heading">
-        @await RenderSectionAsync("SectionTitle")
-    </h1>
+    if (hideSectionTitle)
+    {
+        IgnoreSection("SectionTitle");
+    }
+    else
+    {
+        <h1 class="govuk-heading-s section-heading">
+            @await RenderSectionAsync("SectionTitle")
+        </h1>
+    }
 }
 
 <form method="post">
