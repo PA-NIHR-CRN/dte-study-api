@@ -78,6 +78,7 @@ public class StudyController(
         }
 
         var study = await context.Studies
+            .Include(s => s.StudyStatus)
             .Where(s => s.Id == id)
             .AsStudyDetailsViewModel()
             .FirstOrDefaultAsync(cancellationToken);
