@@ -55,7 +55,6 @@ jobs:
           name: stream-handler-artifact
           path: ./BPOR/BPOR.Registration.Stream.Handler/src/BPOR.Registration.Stream.Handler/bin/Release/net8.0/publish/
           overwrite: true
-          include-hidden-files: true
   
   QA_deploy:
     runs-on: ubuntu-latest
