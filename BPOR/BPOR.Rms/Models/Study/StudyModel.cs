@@ -98,6 +98,7 @@ public class StudyModel
     [StudyEdit(4)]
     public bool? HasMultipleResearchLocations { get; set; }
     
+
     [ValueDisplayFormatter(typeof(YesNoFormatter))]
     [Display(Name = "Will one person be responsible for recruiting or screening for this study using Be Part of Research?")]
     [StudyEdit(5)]
@@ -106,12 +107,16 @@ public class StudyModel
     [Display(Name = "Pre-screener link")]
     [StudyEdit(6)]
     public string? PreScreenerUrl { get; set; }
+    
 
     public bool IsEligibilityCriteriaComplete =>
         HasMultipleResearchLocations.HasValue && SinglePersonResponsibleForRecruiting.HasValue;
 
     public bool IsEligibleForPrescreener =>
         IsEligibilityCriteriaComplete && !(HasMultipleResearchLocations!.Value && SinglePersonResponsibleForRecruiting!.Value);
+
+    [Display(Name = "Volunteer study information page")]
+    public string? VolunteerInformationUrl { get; set; }
     
     [Display(Name = "Who will be included in this study?")]
     public string? InclusionCriteria { get; set; }
