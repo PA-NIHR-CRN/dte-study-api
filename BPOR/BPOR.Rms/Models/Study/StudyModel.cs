@@ -120,8 +120,9 @@ public class StudyModel
     
     [Display(Name = "Who will be included in this study?")]
     public string? InclusionCriteria { get; set; }
+
+    [ValueDisplayFormatter(typeof(YesNoFormatter))]
+    [Display(Name = "Does the study have ethics approval to use Be Part of Research?")]
     public bool? HasEthicsApproval { get; set; }
-    [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
-    public string HasEthicsApprovalDisplay => HasEthicsApproval == true ? "Yes" : "Not yet, I am awaiting an approval";
 }
 
