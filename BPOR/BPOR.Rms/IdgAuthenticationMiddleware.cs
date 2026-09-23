@@ -101,7 +101,8 @@ public class IdgAuthenticationMiddleware
             var identity = context.User.Identity as ClaimsIdentity;
             if (identity != null && user != null)
             {
-
+                identity.AddClaim(new Claim("UserId", user.Id.ToString()));
+                
                 // Add role claims to the user identity for use during authorization
                 // throughout the application.
                 foreach (var userRole in user.UserRoles)
