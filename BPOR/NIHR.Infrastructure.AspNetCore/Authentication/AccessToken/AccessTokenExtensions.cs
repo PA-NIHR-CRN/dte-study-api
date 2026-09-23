@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace NIHR.Infrastructure.AspNetCore.Authentication.AccessToken; 
 
-public static class AccessTokenDiExtensions
+public static class AccessTokenExtensions
 {
     private const string ConfigSectionPath = "AccessTokenAuthentication";
 
@@ -27,5 +30,29 @@ public static class AccessTokenDiExtensions
             policy.AuthenticationSchemes.Add(AccessTokenAuthenticationOptions.AuthenticationScheme);
             policy.Requirements.Add(new AccessTokenRequirement(accessTokenRoleName));
         });
+    }
+    
+    public static bool HasValidAccessToken(this IAccessTokenService accessTokenService, HttpContext httpContext, string role)
+    {
+        return httpContext.User.Claims
+            .Where(i => 
+                i.Subject?.AuthenticationType == AccessTokenAuthenticationOptions.AuthenticationScheme &&
+                i.Type == AccessTokenAuthenticationOptions.ClaimType)
+            .Select(claim => accessTokenService.DeserializeClaim(claim.Value))
+            .Any(token => string.Equals(token.Role, role) && IsAuthorizedRoute(token, httpContext.Request.RouteValues));
+    }
+    
+    private static bool IsAuthorizedRoute(AccessToken token, RouteValueDictionary route)
+    {
+        foreach (var requiredRoute in token.RouteValues)
+        {
+            if (!route.TryGetValue(requiredRoute.Key, out var actualRouteValue) ||
+                !string.Equals(actualRouteValue, requiredRoute.Value))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
