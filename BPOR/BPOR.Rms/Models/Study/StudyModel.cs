@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using BPOR.Rms.Utilities;
 using NIHR.Infrastructure.AspNetCore;
@@ -124,5 +125,8 @@ public class StudyModel
     [ValueDisplayFormatter(typeof(YesNoFormatter))]
     [Display(Name = "Does the study have ethics approval to use Be Part of Research?")]
     public bool? HasEthicsApproval { get; set; }
+    [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
+    public string HasEthicsApprovalDisplay => HasEthicsApproval == true ? "Yes" : "Not yet, I am awaiting an approval";
+    public StudyStatus? StudyStatus { get; set; }
 }
 
