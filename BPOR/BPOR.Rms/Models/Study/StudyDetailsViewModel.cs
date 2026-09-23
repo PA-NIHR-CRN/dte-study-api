@@ -41,7 +41,7 @@ public class StudyDetailsViewModel
         {
             return new StudyStatusViewModel
             {
-                StudyStatusId = Study.StudyStatusId,
+                StudyStatus = Study.StudyStatus,
                 StudyId = Study.Id
             };
         }

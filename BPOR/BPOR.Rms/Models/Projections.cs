@@ -92,7 +92,8 @@ public static class Projections
                 .FirstOrDefault(),
             TotalRecruited = s.ManualEnrollments
                 .Where(m => m.StudyId == s.Id)
-                .Sum(e => e.TotalEnrollments)
+                .Sum(e => e.TotalEnrollments),
+            StudyStatus = s.StudyStatus.Code
         };
     }
 
@@ -147,7 +148,7 @@ public static class Projections
                 PreScreenerUrl = s.PreScreenerUrl,
                 InclusionCriteria = s.InclusionCriteria,
                 HasEthicsApproval = s.HasEthicsApproval,
-                StudyStatusId = s.StudyStatusId
+                StudyStatus = s.StudyStatus.Code
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 
