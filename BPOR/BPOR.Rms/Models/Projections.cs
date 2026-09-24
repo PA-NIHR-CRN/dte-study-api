@@ -93,7 +93,7 @@ public static class Projections
             TotalRecruited = s.ManualEnrollments
                 .Where(m => m.StudyId == s.Id)
                 .Sum(e => e.TotalEnrollments),
-            StudyStatus = s.StudyStatus.Code
+            StudyStatusDisplay = s.StudyStatus.Code
         };
     }
 
@@ -148,7 +148,16 @@ public static class Projections
                 PreScreenerUrl = s.PreScreenerUrl,
                 InclusionCriteria = s.InclusionCriteria,
                 HasEthicsApproval = s.HasEthicsApproval,
-                StudyStatus = s.StudyStatus.Code
+                StatusReasons = s.StudyStatusHistories
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Take(1)
+                    .SelectMany(x => x.StudyStatusReasonHistories)
+                    .Select(x =>
+                        x.WithdrawnReason != null
+                            ? x.WithdrawnReason.Description
+                            : x.RejectedReason.Description)
+                    .ToList(),
+                StudyStatusDisplay = s.StudyStatus.Code
             },
             EnrollmentDetails = GetEnrollmentDetails(s.ManualEnrollments),
 

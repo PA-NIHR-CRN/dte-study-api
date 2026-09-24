@@ -123,14 +123,20 @@ public class StudyModel
     public bool? HasEthicsApproval { get; set; }
     [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
     public string HasEthicsApprovalDisplay => HasEthicsApproval == true ? "Yes" : "Not yet, I am awaiting an approval";
-    public string? StudyStatus { get; set; }
+    public List<string> StatusReasons { get; set; } = [];
+    public string? StudyStatusDisplay { get; set; }
     
     public StudyStatusViewModel StudyStatusViewModel =>
         new()
         {
-            StudyStatus = StudyStatus,
+            StudyStatusDisplay = StudyStatusDisplay,
             StudyId = Id,
             CanChangeStatus = false
         };
+    
+    public string StudyStatusDisplayWithReasons =>
+        !StatusReasons.Any()
+            ? StudyStatusDisplay ?? string.Empty
+            : $"{StudyStatusDisplay}: {string.Join(", ", StatusReasons)}";
 }
 

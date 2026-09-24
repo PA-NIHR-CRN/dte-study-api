@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Enums;
 using BPOR.Rms.Models.PreScreenerEligibility;
 using BPOR.Rms.Models.Volunteer;
-using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Models.Study;
 
@@ -23,29 +22,19 @@ public class StudyDetailsViewModel
     public IEnumerable<ResearcherEmail> ResearcherEmails { get; set; }
     public List<ActionLink> ActionLinks { get; set; } = [];
 
-    public PreScreenerEligibilityViewModel PreScreenerViewModel
-    {
-        get
+    public PreScreenerEligibilityViewModel PreScreenerViewModel =>
+        new()
         {
-            return new PreScreenerEligibilityViewModel
-            {
-                IsEligibilityCriteriaComplete = Study.IsEligibilityCriteriaComplete,
-                IsEligibleForPrescreener = Study.IsEligibleForPrescreener
-            };
-        }
-    }
-    
-    public StudyStatusViewModel StudyStatusViewModel
-    {
-        get
+            IsEligibilityCriteriaComplete = Study.IsEligibilityCriteriaComplete,
+            IsEligibleForPrescreener = Study.IsEligibleForPrescreener
+        };
+
+    public StudyStatusViewModel StudyStatusViewModel =>
+        new()
         {
-            return new StudyStatusViewModel
-            {
-                StudyStatus = Study.StudyStatus,
-                StudyId = Study.Id
-            };
-        }
-    }
+            StudyStatusDisplay = Study.StudyStatusDisplayWithReasons,
+            StudyId = Study.Id
+        };
 }
 
 public class Campaign
@@ -55,9 +44,9 @@ public class Campaign
     public DateTime CreatedAt { get; set; }
     public int? TargetGroupSize { get; set; }
     public IEnumerable<CampaignParticipant> CampaignParticipants { get; set; }
-    public int TotalCampaignNotificationsSent => CampaignParticipants.Where(e => e.DeliveryStatusId == 3).Count();
-    public int TotalContactAttemptsFailed => CampaignParticipants.Where(e => e.DeliveryStatusId == 5).Count();
-    public int TotalCampaignRegisteredInterest => CampaignParticipants.Where(p => p.RegisteredInterestAt != null).Count();
+    public int TotalCampaignNotificationsSent => CampaignParticipants.Count(e => e.DeliveryStatusId == 3);
+    public int TotalContactAttemptsFailed => CampaignParticipants.Count(e => e.DeliveryStatusId == 5);
+    public int TotalCampaignRegisteredInterest => CampaignParticipants.Count(p => p.RegisteredInterestAt != null);
     public ContactMethodId TypeId { get; set; }
 
 }

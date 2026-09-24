@@ -1,0 +1,169 @@
+@using BPOR.Domain.Enums
+@model BPOR.Rms.Models.Study.StudyStatusViewModel
+
+@{
+    ViewData["Title"] = "Update study status";
+    
+    ViewData.AddBreadcrumbs(new Dictionary<string, string>
+    {
+        ["All studies"] = "/Study/Index",
+        ["Study page"] = $"/Study/Details/{Model.StudyId}",
+        ["Update study status"] = $"/Study/{Model.StudyId}/Staus/Change",
+    });
+
+    const string rejectedConditional = "conditional-rejected";
+    const string withdrawnConditional = "conditional-withdrawn";
+
+    const string rejectedMiscConditional = "conditional-rejected-misc";
+    const string withdrawnOtherConditional = "conditional-withdrawn-other";
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+        <h1 class="govuk-heading-l">
+            Update study status
+        </h1>
+
+        <h3 class="govuk-heading-m">
+            The current status is '@Model.StudyStatusDisplay'.
+            Select a new status from the list below.
+        </h3>
+
+        <form asp-action="ChangeStatus"
+              asp-route-studyId="@Model.StudyId"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger">
+            </div>
+
+            <input type="hidden" asp-for="StudyId" />
+
+            <fieldset class="govuk-fieldset">
+
+                <radio-set for="@Model.StudyStatusId">
+
+                    @foreach (var status in Model.AvailableStatuses)
+                    {
+                        var conditionalId = status.Id switch
+                        {
+                            StudyStatusType.Rejected => rejectedConditional,
+                            StudyStatusType.Withdrawn => withdrawnConditional,
+                            _ => null
+                        };
+
+                        <radio value="@status.Id"
+                               conditional-id="@conditionalId">
+                            @status.Description
+                        </radio>
+                    }
+
+                    <radio-conditional id="@rejectedConditional"
+                                       value="@StudyStatusType.Rejected">
+
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                            Select one or more reasons
+                        </legend>
+
+                        @for (var i = 0; i < Model.RejectedReasons.Count; i++)
+                        {
+                            var reason = Model.RejectedReasons[i];
+
+                            <input type="hidden"
+                                   asp-for="RejectedReasons[i].Id" />
+
+                            <govuk-checkbox
+                                asp-for="RejectedReasons[i].IsSelected"
+                                conditional-id="@(reason.Id == (int)RejectedReasonType.Misc
+                                    ? rejectedMiscConditional
+                                    : null)">
+                                @reason.Description
+                            </govuk-checkbox>
+
+                            @if (reason.Id == (int)RejectedReasonType.Misc)
+                            {
+                                <checkbox-conditional
+                                    id="@rejectedMiscConditional"
+                                    is-hidden="@(!reason.IsSelected)">
+
+                                    <form-group
+                                        for="@Model.RejectedMiscReason"
+                                        label="Please provide details"
+                                        label-class="govuk-fieldset__legend--s">
+
+                                        <textarea asp-for="RejectedMiscReason"
+                                                  class="govuk-textarea">
+                                        </textarea>
+
+                                    </form-group>
+
+                                </checkbox-conditional>
+                            }
+                        }
+
+                    </radio-conditional>
+
+                    <radio-conditional id="@withdrawnConditional"
+                                       value="@StudyStatusType.Withdrawn">
+
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                            Select one or more reasons
+                        </legend>
+
+                        @for (var i = 0; i < Model.WithdrawnReasons.Count; i++)
+                        {
+                            var reason = Model.WithdrawnReasons[i];
+
+                            <input type="hidden"
+                                   asp-for="WithdrawnReasons[i].Id" />
+
+                            <govuk-checkbox
+                                asp-for="WithdrawnReasons[i].IsSelected"
+                                conditional-id="@(reason.Id == (int)WithdrawnReasonType.Other
+                                    ? withdrawnOtherConditional
+                                    : null)">
+                                @reason.Description
+                            </govuk-checkbox>
+
+                            @if (reason.Id == (int)WithdrawnReasonType.Other)
+                            {
+                                <checkbox-conditional
+                                    id="@withdrawnOtherConditional"
+                                    is-hidden="@(!reason.IsSelected)">
+
+                                    <form-group
+                                        for="@Model.WithdrawnOtherReason"
+                                        label="Please provide details"
+                                        label-class="govuk-fieldset__legend--s">
+
+                                        <textarea asp-for="WithdrawnOtherReason"
+                                                  class="govuk-textarea">
+                                        </textarea>
+
+                                    </form-group>
+
+                                </checkbox-conditional>
+                            }
+                        }
+
+                    </radio-conditional>
+
+                </radio-set>
+
+            </fieldset>
+
+            <div class="govuk-button-group">
+                <button type="submit"
+                        class="govuk-button"
+                        data-module="govuk-button">
+                    Save and continue
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
