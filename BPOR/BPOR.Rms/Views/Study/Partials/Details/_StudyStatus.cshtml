@@ -1,15 +1,19 @@
 ﻿@using BPOR.Domain.Entities
-@using BPOR.Domain.Enums
 @using BPOR.Rms.Startup
 @model BPOR.Rms.Models.Study.StudyStatusViewModel
 @inject ICurrentUserProvider<User> CurrentUserProvider
 
 @if (CurrentUserProvider.IsAdmin() && !String.IsNullOrEmpty(Model.StudyStatusCode))
 {
-    <div class="govuk-button-group govuk-!-margin-bottom-5 govuk-!-margin-left-2">
+    <div class="govuk-button-group govuk-!-margin-left-2">
         <govuk-tag colour="Grey" class="govuk-!-margin-right-2">@Model.StudyStatusCode</govuk-tag>
-        <a class="govuk-link" asp-action="" asp-route-studyId="@Model.StudyId">
-            Change
-        </a>
+        
+        @if (Model.CanChangeStatus)
+        {
+            <a class="govuk-link" asp-action="ChangeStatus" asp-route-studyId="@Model.StudyId">
+                Change
+            </a>
+        }
+        
     </div>
 }
