@@ -7,6 +7,7 @@
     var formGroupClass = hasError
         ? "govuk-form-group govuk-form-group--error"
         : "govuk-form-group";
+    var hasConditional = !string.IsNullOrWhiteSpace(Model.ConditionalId);
 }
 
 <div class="@formGroupClass">
@@ -27,6 +28,7 @@
                    type="checkbox"
                    value="true"
                    checked="@Model.Checked"
+                   data-aria-controls="@(hasConditional ? Model.ConditionalId : null)"
                    aria-describedby="@(hasError ? errorId : null)" />
 
             <label class="govuk-label govuk-checkboxes__label"
