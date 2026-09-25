@@ -128,7 +128,7 @@ public class StudyModel
     [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
     public string HasEthicsApprovalDisplay => HasEthicsApproval == true ? "Yes" : "Not yet, I am awaiting an approval";
     public StudyStatus? StudyStatus { get; set; }
-    public List<string> StatusReasons { get; set; } = [];
+    public List<string?> StatusReasons { get; set; } = [];
     
     public StudyStatusViewModel StudyStatusViewModel => new()
         {

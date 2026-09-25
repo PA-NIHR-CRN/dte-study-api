@@ -626,15 +626,15 @@ public class StudyController(
         {
             case StudyStatusType.Withdrawn:
             {
-                foreach (var reason in selectedWithdrawnReasons)
+                foreach (var reasonId in selectedWithdrawnReasons.Select(x => x.Id))
                 {
                     context.StudyStatusReasonHistory.Add(
                         new StudyStatusReasonHistory
                         {
                             StudyStatusHistory = statusHistory,
-                            WithdrawnReasonId = (WithdrawnReasonType)reason.Id,
+                            WithdrawnReasonId = (WithdrawnReasonType)reasonId,
                             AdditionalReasonText =
-                                reason.Id == (int)WithdrawnReasonType.Other
+                                reasonId == (int)WithdrawnReasonType.Other
                                     ? viewModel.WithdrawnOtherReason?.Trim()
                                     : null
                         });
@@ -644,15 +644,15 @@ public class StudyController(
             }
             case StudyStatusType.Rejected:
             {
-                foreach (var reason in selectedRejectedReasons)
+                foreach (var reasonId in selectedRejectedReasons.Select(x => x.Id))
                 {
                     context.StudyStatusReasonHistory.Add(
                         new StudyStatusReasonHistory
                         {
                             StudyStatusHistory = statusHistory,
-                            RejectedReasonId = (RejectedReasonType)reason.Id,
+                            RejectedReasonId = (RejectedReasonType)reasonId,
                             AdditionalReasonText =
-                                reason.Id == (int)RejectedReasonType.Misc
+                                reasonId == (int)RejectedReasonType.Misc
                                     ? viewModel.RejectedMiscReason?.Trim()
                                     : null
                         });

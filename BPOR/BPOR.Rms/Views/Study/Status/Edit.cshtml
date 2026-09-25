@@ -46,7 +46,7 @@
 
                 <radio-set for="@Model.StudyStatusId">
 
-                    @foreach (var status in Model.AvailableStatuses)
+                    @foreach (var status in Model.AvailableStatuses!)
                     {
                         var conditionalId = status.Id switch
                         {
@@ -68,15 +68,15 @@
                             Select one or more reasons
                         </legend>
 
-                        @for (var i = 0; i < Model.RejectedReasons.Count; i++)
+                        @for (var i = 0; i < Model.RejectedReasons!.Count; i++)
                         {
                             var reason = Model.RejectedReasons[i];
 
                             <input type="hidden"
-                                   asp-for="RejectedReasons[i].Id" />
+                                   asp-for="RejectedReasons![i].Id" />
 
                             <govuk-checkbox
-                                asp-for="RejectedReasons[i].IsSelected"
+                                asp-for="RejectedReasons![i].IsSelected"
                                 conditional-id="@(reason.Id == (int)RejectedReasonType.Misc
                                     ? rejectedMiscConditional
                                     : null)">
@@ -95,7 +95,8 @@
                                         label-class="govuk-fieldset__legend--s">
 
                                         <textarea asp-for="RejectedMiscReason"
-                                                  class="govuk-textarea">
+                                                class="govuk-textarea"
+                                                label="Please provide details">
                                         </textarea>
 
                                     </form-group>
@@ -113,15 +114,15 @@
                             Select one or more reasons
                         </legend>
 
-                        @for (var i = 0; i < Model.WithdrawnReasons.Count; i++)
+                        @for (var i = 0; i < Model.WithdrawnReasons!.Count; i++)
                         {
                             var reason = Model.WithdrawnReasons[i];
 
                             <input type="hidden"
-                                   asp-for="WithdrawnReasons[i].Id" />
+                                   asp-for="WithdrawnReasons![i].Id" />
 
                             <govuk-checkbox
-                                asp-for="WithdrawnReasons[i].IsSelected"
+                                asp-for="WithdrawnReasons![i].IsSelected"
                                 conditional-id="@(reason.Id == (int)WithdrawnReasonType.Other
                                     ? withdrawnOtherConditional
                                     : null)">
@@ -140,7 +141,8 @@
                                         label-class="govuk-fieldset__legend--s">
 
                                         <textarea asp-for="WithdrawnOtherReason"
-                                                  class="govuk-textarea">
+                                                class="govuk-textarea"
+                                                label="Please provide details">
                                         </textarea>
 
                                     </form-group>
