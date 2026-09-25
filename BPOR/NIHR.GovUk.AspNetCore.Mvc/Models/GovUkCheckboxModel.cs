@@ -6,6 +6,6 @@ public record GovUkCheckboxModel(
     string Name,
     string Id,
     string? Label,
-    IHtmlContent? LabelHtml,
+    IHtmlContent LabelHtml,
     bool Checked,
     string? ErrorMessage);
