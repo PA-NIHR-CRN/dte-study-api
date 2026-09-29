@@ -99,6 +99,11 @@ public class StudyController(
         var updateRecruitmentAction = isIdentifiable ? "UpdateRecruited" : "UpdateAnonymousRecruited";
         var updateRecruitmentButtonText = isIdentifiable ? "Add enrolments" : "Update recruitment total";
 
+        if (isResearcher && study.Study.EmailAddress.Trim() != currentUserProvider.User.ContactEmail.Trim())
+        {
+            return Forbid();
+        }
+
         var canUpdateRecruitmentTotal = isIdentifiable
             ? study.HasCampaigns
             : isAdmin || (study.HasCampaigns && isResearcher);
