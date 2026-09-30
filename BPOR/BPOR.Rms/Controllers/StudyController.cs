@@ -28,7 +28,10 @@ public class StudyController(
 ) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false,
+    public async Task<IActionResult> Index(
+        string? searchTerm,
+        [FromQuery] int[]? statusIds,
+        bool hasBeenReset = false,
         CancellationToken token = default)
     {
         if (hasBeenReset)
@@ -37,13 +40,13 @@ public class StudyController(
             return RedirectToAction(nameof(Index));
         }
 
-        bool userHasResearcherRole = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
+        var userHasResearcherRole = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
 
         var studiesQuery = context.Studies.AsQueryable();
 
         if (userHasResearcherRole)
         {
-            string userEmail = currentUserProvider?.User?.ContactEmail ?? string.Empty;
+            var userEmail = currentUserProvider?.User?.ContactEmail ?? string.Empty;
             studiesQuery = studiesQuery.Where(s => s.EmailAddress == userEmail);
         }
 
@@ -56,6 +59,27 @@ public class StudyController(
                                                    // TODO investigate full text search
                                                    || s.StudyName.Contains(searchTerm));
         }
+        
+        var selectedStatusIds = statusIds?.ToHashSet() ?? [];
+
+        if (selectedStatusIds.Count > 0)
+        {
+            studiesQuery = studiesQuery
+                .Where(s => s.StudyStatusId != null
+                            && selectedStatusIds.Contains((int)s.StudyStatusId));
+        }
+        
+        var studyStatues = await context.SysRefStudyStatus
+            .Where(s => s.Id != StudyStatusType.Draft)
+            .OrderBy(x => x.Id)
+            .Select(x => new StudyStatusFilterOptionViewModel
+            {
+                StatusType =  x.Id,
+                Value = (int)x.Id,
+                Text = x.Code,
+                IsSelected = selectedStatusIds.Contains((int)x.Id)
+            })
+            .ToListAsync(token);
 
         var deferredStudiesPage = studiesQuery
             .AsStudyListModel()
@@ -65,8 +89,13 @@ public class StudyController(
         var viewModel = new StudiesViewModel
         {
             Studies = await deferredStudiesPage.ValueAsync(token),
-            HasSearched = Request.Query.ContainsKey(nameof(searchTerm)),
+            IsSearched = Request.Query.ContainsKey(nameof(searchTerm)),
+            IsFiltered = Request.Query.ContainsKey(nameof(statusIds)),
             SearchTerm = searchTerm ?? string.Empty,
+            Filters = new StudyFilterViewModel
+            {
+                StatusOptions = studyStatues
+            }
         };
 
         return View(viewModel);

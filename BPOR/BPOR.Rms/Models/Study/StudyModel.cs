@@ -134,7 +134,8 @@ public class StudyModel
         {
             StudyId = Id,
             StudyStatusCode = StudyStatus?.Code,
-            CanChangeStatus = false
+            CanChangeStatus = false,
+            StudyStatusId = StudyStatus?.Id,
         };
     
     public string StudyStatusDisplayWithReasons =>

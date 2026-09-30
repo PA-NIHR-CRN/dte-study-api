@@ -404,3 +404,9 @@ button.govuk-link:focus{
 .status-tag {
     max-width: 100%;
 }
+
+.selected-filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
