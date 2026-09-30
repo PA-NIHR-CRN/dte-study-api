@@ -163,7 +163,7 @@ static string FormatRecord(DynamoParticipant dynamoParticipant) =>
 
 File.WriteAllText(Path.Combine(outputFolder, "audit.json"), JsonSerializer.Serialize(audits));
 
-string[] scriptsToCopy = ["expression-attribute-names.json"];
+string[] scriptsToCopy = ["set-expression-attribute-names.json", "remove-expression-attribute-names.json"];
 foreach (var scriptToCopy in scriptsToCopy)
 {
     File.Copy(Path.Combine(scriptsFolder, scriptToCopy), Path.Combine(outputFolder, scriptToCopy));

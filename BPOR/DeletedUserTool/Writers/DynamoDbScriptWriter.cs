@@ -23,7 +23,7 @@ public class DynamoDbScriptWriter : PowershellScriptWriter
         if (_handledDynamoDbPks.Add(dynamoParticipant.Pk))
         {
             TextWriter.WriteLine(
-                $"aws dynamodb update-item --profile {_dynamoDbSettings.Value.Profile} --region {_dynamoDbSettings.Value.RegionEndpoint} --table-name {_dynamoDbSettings.Value.TableName} --key '{GetKeyJson(dynamoParticipant)}' --expression-attribute-names file://expression-attribute-names.json --update-expression \"DELETE #NI, #NN, #E, #FN, #LN, #HCI, #MN, #LLN, #EB, #SRB\"");
+                $"aws dynamodb update-item --profile {_dynamoDbSettings.Value.Profile} --region {_dynamoDbSettings.Value.RegionEndpoint} --table-name {_dynamoDbSettings.Value.TableName} --key '{GetKeyJson(dynamoParticipant)}' --expression-attribute-names file://remove-expression-attribute-names.json --update-expression \"REMOVE #NI, #NN, #E, #FN, #LN, #HCI, #MN, #LLN, #EB, #SRB\"");
             using (var valueStream =
                    File.Create(Path.Combine(_outputFolderPath, $"{dynamoParticipant.Pk}.values.json")))
             {
@@ -32,14 +32,23 @@ public class DynamoDbScriptWriter : PowershellScriptWriter
                 {
                     AddressPlaceHolder = new
                     {
-                        Postcode = dynamoParticipant.Address.Postcode.Split(' ')[0],
-                        Town = dynamoParticipant.Address.Town
+                        M = new
+                        {
+                            Postcode = new
+                            {
+                                S = dynamoParticipant.Address.Postcode.Split(' ')[0]
+                            },
+                            Town = new
+                            {
+                                S = dynamoParticipant.Address.Town
+                            }
+                        }
                     }
                 }).Replace("AddressPlaceHolder", ":a"));
             }
 
             TextWriter.WriteLine(
-                $"aws dynamodb update-item --profile {_dynamoDbSettings.Value.Profile} --region {_dynamoDbSettings.Value.RegionEndpoint} --table-name {_dynamoDbSettings.Value.TableName} --key '{GetKeyJson(dynamoParticipant)}' --expression-attribute-names file://expression-attribute-names.json --expression-attribute-values file://{dynamoParticipant.Pk}.values.json --update-expression \"UPDATE #A = :a\"");
+                $"aws dynamodb update-item --profile {_dynamoDbSettings.Value.Profile} --region {_dynamoDbSettings.Value.RegionEndpoint} --table-name {_dynamoDbSettings.Value.TableName} --key '{GetKeyJson(dynamoParticipant)}' --expression-attribute-names file://set-expression-attribute-names.json --expression-attribute-values file://{dynamoParticipant.Pk}.values.json --update-expression \"SET #A = :a\"");
             TextWriter.WriteLine();
         }
     }

@@ -37,7 +37,10 @@
       <None Update="appSettings.user.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="Scripts\expression-attribute-names.json">
+      <None Update="Scripts\set-expression-attribute-names.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\remove-expression-attribute-names.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
