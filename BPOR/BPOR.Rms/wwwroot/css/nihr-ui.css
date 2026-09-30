@@ -403,9 +403,9 @@ button.govuk-link:focus{
 
 .status-tag {
     max-width: 100%;
-    border-radius: unset !important;
     border-width: 2px;
     border-style: solid;
+    padding: 5px 4px 5px 4px !important;
 }
 
 .status-tag.govuk-tag--grey {
@@ -418,13 +418,10 @@ button.govuk-link:focus{
 
 .status-tag.govuk-tag--green {
     border-color: #26A86C;
-    background: #E7F5EF;
-    color: Black;
 }
 
 .status-tag.govuk-tag--yellow {
     border-color: #FED47A;
-    background: #FFFAF0;
 }
 
 .status-tag.govuk-tag--red {
@@ -433,5 +430,4 @@ button.govuk-link:focus{
 
 .status-tag.govuk-tag--purple {
     border-color: #6667AD;
-    padding: 5px 4px 5px 4px !important;
 }
