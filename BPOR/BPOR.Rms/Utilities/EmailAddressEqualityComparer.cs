@@ -1,6 +1,6 @@
 ﻿namespace BPOR.Rms.Utilities;
 
-public class EmailAddressEqualityComparer 
+public class EmailAddressEqualityComparer : IEqualityComparer<string>
 {
     public bool Equals(string? x, string? y)
     {
@@ -14,5 +14,13 @@ public class EmailAddressEqualityComparer
             x.Trim(), 
             y.Trim(), 
             StringComparison.OrdinalIgnoreCase);
+    }
+
+    public int GetHashCode(string? obj)
+    {
+        if (obj == null)
+            return 0;
+        
+        return obj.Trim().ToUpperInvariant().GetHashCode();
     }
 }
