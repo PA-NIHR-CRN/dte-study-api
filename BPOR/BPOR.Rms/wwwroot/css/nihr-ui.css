@@ -400,3 +400,7 @@ button.govuk-link:focus{
     padding-left: 0;
     margin-left: 0;
 }
+
+.status-tag {
+    max-width: 100%;
+}

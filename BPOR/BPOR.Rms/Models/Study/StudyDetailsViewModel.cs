@@ -42,7 +42,7 @@ public class StudyDetailsViewModel
             return new StudyStatusViewModel
             {
                 StudyId = Study.Id,
-                StudyStatusCode = Study.StudyStatus?.Code
+                StudyStatusCode = Study.StudyStatusDisplayWithReasons
             };
         }
     }
