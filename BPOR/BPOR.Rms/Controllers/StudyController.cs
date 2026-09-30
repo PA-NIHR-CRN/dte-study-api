@@ -46,7 +46,7 @@ public class StudyController(
 
         if (userHasResearcherRole)
         {
-            var userEmail = currentUserProvider?.User?.ContactEmail ?? string.Empty;
+            var userEmail = currentUserProvider.User?.ContactEmail ?? string.Empty;
             studiesQuery = studiesQuery.Where(s => s.EmailAddress == userEmail);
         }
 
