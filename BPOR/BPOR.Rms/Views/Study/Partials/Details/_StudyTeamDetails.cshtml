@@ -19,18 +19,10 @@
 <div>
     <h3 class="govuk-heading-s">Study team details</h3>
     <dl class="govuk-summary-list">
-        
         <summary-list-item for="Study.ChiefInvestigator" change-url="@GetChangeUrl(StudyRequestEditFlow.ChiefInvestigator)"/>
-        @if (Model.Study.ChiefInvestigatorEmail is not null)
-        {
-            <summary-list-item for="Study.ChiefInvestigatorEmail" change-url="@GetChangeUrl(StudyRequestEditFlow.ChiefInvestigator)"/>
-        }
+        <summary-list-item for="Study.ChiefInvestigatorEmail" hide-when-null change-url="@GetChangeUrl(StudyRequestEditFlow.ChiefInvestigator)"/>
         <summary-list-item for="Study.FullName" change-url="@GetChangeUrl(StudyRequestEditFlow.MainContact)"/>
         <summary-list-item for="Study.EmailAddress" change-url="@GetChangeUrl(StudyRequestEditFlow.MainContact)"/>
-        @if (Model.Study.MainContactRole is not null)
-        {
-            <summary-list-item for="Study.MainContactRole" change-url="@GetChangeUrl(StudyRequestEditFlow.MainContact)"/>
-        }
-
+        <summary-list-item for="Study.MainContactRole" hide-when-null change-url="@GetChangeUrl(StudyRequestEditFlow.MainContact)"/>
     </dl>
 </div>

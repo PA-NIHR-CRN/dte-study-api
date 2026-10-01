@@ -29,7 +29,7 @@
         <summary-list-item for="Study.Id"/>
         <summary-list-item for="Study.CpmsId" change-url="@GetChangeUrl(StudyRequestEditFlow.InclusionInRdnPortfolio)"/>
         <summary-list-item for="Study.StudyName" change-url="@GetChangeUrl(StudyRequestEditFlow.StudyDescription)"/>
-        <summary-list-item for="Study.Description" change-url="@GetChangeUrl(StudyRequestEditFlow.StudyDescription)" hide-when-null/>
+        <summary-list-item for="Study.Description" hide-when-null change-url="@GetChangeUrl(StudyRequestEditFlow.StudyDescription)" hide-when-null/>
         <summary-list-item for="Study.HasEthicsApproval" change-url="@GetChangeUrl(StudyRequestEditFlow.EthicsApproval)"/>
         <summary-list-item for="Study.SinglePersonResponsibleForRecruiting" change-url="@GetChangeUrl(StudyRequestEditFlow.ResearchManager)" hide-from-researcher-when-null />
         <summary-list-item for="Study.HasMultipleResearchLocations" change-url="@GetChangeUrl(StudyRequestEditFlow.ResearchLocations)" hide-from-researcher-when-null/>
@@ -61,7 +61,7 @@
         <summary-list-item for="Study.InformationUrl" />
         <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"
                            change-url="@GetStudyEditUrl("IsRecruitingIdentifiableParticipants")"/>
-        <summary-list-item for="Study.RecruitmentStartDate" change-url="@GetStudyEditUrl("RecruitmentStartDate")"/>
-        <summary-list-item for="Study.UKRecruitmentTarget" change-url="@GetStudyEditUrl("RecruitmentTarget")"/>
+        <summary-list-item for="Study.RecruitmentStartDate" hide-when-null change-url="@GetStudyEditUrl("RecruitmentStartDate")"/>
+        <summary-list-item for="Study.UKRecruitmentTarget" hide-when-null change-url="@GetStudyEditUrl("RecruitmentTarget")"/>
     </dl>
 </div>

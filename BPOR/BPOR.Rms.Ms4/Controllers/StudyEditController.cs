@@ -15,7 +15,7 @@ namespace BPOR.Rms.Ms4.Controllers;
 /// Defines additional study edit actions that are not part of the study creation flow
 /// </summary>
 [Route("study/{studyId:int}/edit/[action]")]
-[Authorize(Policy = PolicyNames.IsAdmin)]
+[Authorize(Roles = "Admin")]
 public class StudyEditController(IStudyDraftRepository studyDraftRepository) : Controller
 {
     private Study _study;
