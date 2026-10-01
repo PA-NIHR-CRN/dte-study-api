@@ -408,6 +408,12 @@ button.govuk-link:focus{
     padding: 5px 4px 5px 4px !important;
 }
 
+.selected-filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
 .status-tag.govuk-tag--grey {
     border-color: #ACBCC3;
 }
