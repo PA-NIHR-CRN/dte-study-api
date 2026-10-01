@@ -1,8 +1,8 @@
 @using BPOR.Rms.Helpers
-@model BPOR.Rms.Models.Study.StudyFilterViewModel
+@model BPOR.Rms.Models.Study.StudiesViewModel
 
 @{
-    var selectedStatusOptions = Model.StatusOptions
+    var selectedStatusOptions = Model.Filters.StatusOptions
         .Where(x => x.IsSelected)
         .ToList();
 
@@ -11,6 +11,8 @@
 
 <aside class="app-study-filter" aria-labelledby="study-filter-heading">
     <form method="get">
+        <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+        
         <h2 id="study-filter-heading" class="govuk-heading-m">
             Filter search
         </h2>
@@ -20,17 +22,17 @@
             data-module="govuk-details">
 
             <summary class="govuk-details__summary">
-                    <span class="govuk-details__summary-content">
-                        <span class="govuk-details__summary-text govuk-heading-m govuk-!-margin-bottom-0">
-                            Statuses
-                        </span>
-
-                        <span class="govuk-body-s govuk-!-margin-bottom-0">
-                            @(selectedStatuses == 0
-                                ? "No filters selected"
-                                : $"{selectedStatuses} selected")
-                        </span>
+                <span class="govuk-details__summary-content">
+                    <span class="govuk-details__summary-text govuk-heading-m govuk-!-margin-bottom-0">
+                        Statuses
                     </span>
+
+                    <span class="govuk-body-s govuk-!-margin-bottom-0">
+                        @(selectedStatuses == 0
+                            ? "No filters selected"
+                            : $"{selectedStatuses} selected")
+                    </span>
+                </span>
             </summary>
 
             <fieldset class="govuk-fieldset">
@@ -42,7 +44,7 @@
                     class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-top-2"
                     data-module="govuk-checkboxes">
 
-                    @foreach (var status in Model.StatusOptions)
+                    @foreach (var status in Model.Filters.StatusOptions)
                     {
                         var statusId = $"study-status-{status.Value}";
 
