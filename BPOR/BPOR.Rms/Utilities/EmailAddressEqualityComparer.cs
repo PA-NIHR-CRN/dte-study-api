@@ -16,11 +16,8 @@ public class EmailAddressEqualityComparer : IEqualityComparer<string>
             StringComparison.OrdinalIgnoreCase);
     }
 
-    public int GetHashCode(string? obj)
+    public int GetHashCode(string obj)
     {
-        if (obj == null)
-            return 0;
-        
-        return obj.Trim().ToUpperInvariant().GetHashCode();
+        return StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Trim());
     }
 }
