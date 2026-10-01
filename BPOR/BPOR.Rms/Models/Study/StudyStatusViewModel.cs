@@ -1,13 +1,13 @@
-﻿using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 
 namespace BPOR.Rms.Models.Study;
 
 public class StudyStatusViewModel
 {
+    public StudyStatusType? StudyStatusId { get; set; }
     public long StudyId { get; set; }
     public string? StudyStatusCode { get; set; }
-    public StudyStatusType? StudyStatusId {get; set;}
     public bool CanChangeStatus { get; set; } = true;
     
     public string? WithdrawnOtherReason { get; set; }
