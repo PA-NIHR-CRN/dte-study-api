@@ -6,7 +6,7 @@
 
 @if (CurrentUserProvider.IsAdmin() && !String.IsNullOrEmpty(Model.StudyStatusCode))
 {
-    <div class="govuk-button-group govuk-!-margin-left-2">
+    <div class="govuk-button-group">
         <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(Model.StudyStatusId!.Value)" class="govuk-!-margin-right-2 status-tag">@Model.StudyStatusCode</govuk-tag>
         
         @if (Model.CanChangeStatus)

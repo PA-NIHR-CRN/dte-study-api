@@ -42,7 +42,8 @@ public class StudyDetailsViewModel
             return new StudyStatusViewModel
             {
                 StudyId = Study.Id,
-                StudyStatusCode = Study.StudyStatusDisplayWithReasons
+                StudyStatusCode = Study.StudyStatusDisplayWithReasons,
+                StudyStatusId = Study.StudyStatus?.Id,
             };
         }
     }
