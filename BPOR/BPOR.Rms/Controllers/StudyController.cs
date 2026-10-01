@@ -6,6 +6,7 @@ using BPOR.Rms.Ms4;
 using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Repositories;
 using BPOR.Rms.Startup;
+using BPOR.Rms.Utilities;
 using BPOR.Rms.Validators;
 using BPOR.Rms.VolunteerInformation.Data;
 using FluentValidation.Results;
@@ -98,6 +99,14 @@ public class StudyController(
         var isIdentifiable = study.Study.IsRecruitingIdentifiableParticipants;
         var updateRecruitmentAction = isIdentifiable ? "UpdateRecruited" : "UpdateAnonymousRecruited";
         var updateRecruitmentButtonText = isIdentifiable ? "Add enrolments" : "Update recruitment total";
+
+        var emailComparer = new EmailAddressEqualityComparer();
+
+        if (isResearcher && !isAdmin 
+                         && !emailComparer.Equals(study.Study.EmailAddress, currentUserProvider.User.ContactEmail))
+        {
+            return Forbid();
+        }
 
         var canUpdateRecruitmentTotal = isIdentifiable
             ? study.HasCampaigns
