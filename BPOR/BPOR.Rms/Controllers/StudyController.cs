@@ -6,13 +6,9 @@ using BPOR.Rms.Ms4;
 using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Repositories;
 using BPOR.Rms.Startup;
-using BPOR.Rms.Validators;
 using BPOR.Rms.VolunteerInformation.Data;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NIHR.GovUk.AspNetCore.Mvc;
-using NIHR.Infrastructure.AspNetCore.Validation;
 using NIHR.Infrastructure.Paging;
 using UserRole = BPOR.Domain.Enums.UserRole;
 
@@ -73,6 +69,8 @@ public class StudyController(
 
 
     // GET: Study/Details/5
+    [HttpGet("Study/{id:int}", Order = 0)]
+    [HttpGet("Study/Details/{id:int}", Order = 1)] // Legacy route
     public async Task<IActionResult> Details([FromServices] IVipRepository repository, int? id,
         CancellationToken cancellationToken)
     {
@@ -182,275 +180,13 @@ public class StudyController(
 
         return Redirect(uri);
     }
-
-    // POST: Study/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    // [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(
-        [Bind(@$"
-            {nameof(StudyFormViewModel.Id)}, 
-            {nameof(StudyFormViewModel.FullName)},
-            {nameof(StudyFormViewModel.EmailAddress)},
-            {nameof(StudyFormViewModel.StudyName)},
-            {nameof(StudyFormViewModel.CpmsId)}, 
-            {nameof(StudyFormViewModel.IsRecruitingIdentifiableParticipants)}, 
-            {nameof(StudyFormViewModel.Step)},
-            {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)}")]
-        StudyFormViewModel model, string action)
-    {
-        if (!model.AllowEditIsRecruitingIdentifiableParticipants)
-        {
-            // This should never happen, but we still need to guard against it.
-            logger.LogWarning("[HttpPost]Create called with IsRecruitingIdentifiableParticipants set to false");
-            return BadRequest("Model must allow editing of IsRecruitingIdentifiableParticipants");
-        }
-        
-        if (action == "Next" || action == "Save")
-        {
-            if (model.Step == 1)
-            {
-                ModelState.AddValidationResult(ValidateStep(model, 1));
-                
-                if (ModelState.IsValid)
-                {
-                    model.GotoNextStep();
-                }
-            }
-            else if (model.Step == 2)
-            {
-                // We need to re-validate step 1 since the data has been round-tripped to the browser
-                // since it was first validated.
-                ModelState.AddValidationResult(ValidateStep(model, 1));
-                ModelState.AddValidationResult(ValidateStep(model, 2));
-
-                if (ModelState.IsValid)
-                {
-                    var study = new Study
-                    {
-                        FullName = model.FullName,
-                        EmailAddress = model.EmailAddress,
-                        StudyName = model.StudyName,
-                        CpmsId = model.CpmsId,
-                        IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false
-                    };
-
-                    context.Add(study);
-                    await context.SaveChangesAsync();
-
-                    return RedirectToAction(nameof(AddStudySuccess), new AddStudySuccessViewModel
-                    {
-                        Id = study.Id,
-                        StudyName = study.StudyName,
-                    });
-                }
-            }
-            else
-            {
-                logger.LogWarning("[HttpPost]Create called with step out of range: {Step}", model.Step);
-                return BadRequest($"Step out of range: {model.Step}");
-            }
-        }
-        else if (action == "Back")
-        {
-            // Clear validation when clicking back link
-            // TODO: Needs to be more robust when there are other action names
-            ModelState.Clear();
-            model.Step--;
-
-            if (model.Step < 1)
-            {
-                // Back link is exiting the process.
-                // Return to a known entry point.
-                // TODO: add referer as a query parameter
-                // at the start of the journey so we can start
-                // from any location and the back link
-                // will exit correctly.
-                return RedirectToAction("Index");
-            }
-        }
-        else
-        {
-            logger.LogWarning("[HttpPost]Create called with action out of range: {Action}", action);
-            return BadRequest($"Action out of range: {action}");
-        }
-
-        return View(model);
-    }
     
-
     // success
     public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
     {
         return View(viewModel);
     }
-
-    public async Task<IActionResult> Edit(int id, int field)
-    {
-        var studyModel = await context.Studies
-            .AsStudyFormViewModel()
-            .FirstOrDefaultAsync(s => s.Id == id);
-
-        if (studyModel == null)
-        {
-            logger.LogWarning("[HttpGet]Edit called with non-existent study: {StudyId}", id);
-            return NotFound();
-        }
-
-        studyModel.AllowEditIsRecruitingIdentifiableParticipants = !studyModel.HasCampaigns;
-        studyModel.Step = field;
-        return View(studyModel);
-    }
-
-    static ValidationResult ValidateStep(StudyFormViewModel model, int step )
-    {
-        StudyFormModelValidator validator = new();
-        switch (step)
-        {
-            case 1:
-                return validator.ValidateSpecificProperties(model, i => i.FullName, i => i.EmailAddress);
-            case 2:
-                return validator.ValidateSpecificProperties(model, i => i.StudyName, i => i.IsRecruitingIdentifiableParticipants, i=>i.CpmsId);
-            case 3:
-                return validator.ValidateSpecificProperties(model, i => i.InformationUrl);
-            case 4:
-                return validator.ValidateSpecificProperties(model, i => i.HasMultipleResearchLocations);
-            case 5:
-                return validator.ValidateSpecificProperties(model, i => i.SinglePersonResponsibleForRecruiting);
-            case 6:
-                return validator.ValidateSpecificProperties(model, i => i.PreScreenerUrl);
-            default:
-                throw new ArgumentOutOfRangeException(nameof(model.Step));
-        }
-    }
-
-    // POST: Study/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id,
-        [Bind(@$"
-            {nameof(StudyFormViewModel.FullName)},
-            {nameof(StudyFormViewModel.EmailAddress)},
-            {nameof(StudyFormViewModel.StudyName)},
-            {nameof(StudyFormViewModel.CpmsId)}, 
-            {nameof(StudyFormViewModel.Step)},
-            {nameof(StudyFormViewModel.InformationUrl)},
-            {nameof(StudyFormViewModel.AllowEditIsRecruitingIdentifiableParticipants)},
-            {nameof(StudyFormViewModel.IsRecruitingIdentifiableParticipants)},
-            {nameof(StudyFormViewModel.SinglePersonResponsibleForRecruiting)},
-            {nameof(StudyFormViewModel.HasMultipleResearchLocations)},
-            {nameof(StudyFormViewModel.PreScreenerUrl)}")]
-        StudyFormViewModel model)
-    {
-        model.Id = id;
-
-        if (model.Step is < 1 or > 6)
-        {
-            logger.LogWarning("[HttpPost]Edit called with step out of range: {Step}", model.Step);
-            return BadRequest($"Step out of range: {model.Step}");
-        }
-        
-        ModelState.AddValidationResult(ValidateStep(model, model.Step));
-
-        if (!ModelState.IsValid)
-        {
-            return View(model);
-        }
-
-        try
-        {
-            var studyToUpdate = await context.Studies.FirstOrDefaultAsync(s => s.Id == id);
-
-            if (studyToUpdate == null)
-            {
-                logger.LogWarning("[HttpPost]Edit called with non-existent study: {StudyId}", id);
-                return NotFound();
-            }
-            
-            switch (model.Step)
-            {
-                case 1:
-                    studyToUpdate.FullName = model.FullName;
-                    studyToUpdate.EmailAddress = model.EmailAddress;
-                    break;
-                case 2:
-                    studyToUpdate.StudyName = model.StudyName;
-                    studyToUpdate.CpmsId = model.CpmsId;
-                    
-                    if (model.AllowEditIsRecruitingIdentifiableParticipants)
-                    {
-                        var hasCampaigns = await context.FilterCriterias.AnyAsync(fc => fc.StudyId == studyToUpdate.Id && fc.Campaign.Any());
-                        var isRecruitmentFlagChanging = model.IsRecruitingIdentifiableParticipants != studyToUpdate.IsRecruitingIdentifiableParticipants;
-
-                        if (hasCampaigns && isRecruitmentFlagChanging)
-                        {
-                            ModelState.AddModelError(
-                                nameof(model.IsRecruitingIdentifiableParticipants),
-                                "The recruitment type cannot be updated once a campaign has been sent for a study.");
-                            model.AllowEditIsRecruitingIdentifiableParticipants = false;
-                            
-                            return View(model);
-                        }
-
-                        if (!hasCampaigns)
-                        {
-                            studyToUpdate.IsRecruitingIdentifiableParticipants = (bool)model.IsRecruitingIdentifiableParticipants;
-                        }
-                    }
-
-                    break;
-                case 3:
-                    studyToUpdate.InformationUrl = string.IsNullOrWhiteSpace(model.InformationUrl)
-                        ? null
-                        : model.InformationUrl.Trim();
-                    break;
-                case 4:
-                    studyToUpdate.HasMultipleResearchLocations = model.HasMultipleResearchLocations;
-                    break;
-                case 5:
-                    studyToUpdate.SinglePersonResponsibleForRecruiting = model.SinglePersonResponsibleForRecruiting;
-                    break;
-                case 6:
-                    studyToUpdate.PreScreenerUrl = model.PreScreenerUrl;
-                    break;
-            }
-                  
-            studyToUpdate.UpdatedAt = DateTime.UtcNow;
-
-            await context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!StudyExists(id))
-            {
-                logger.LogWarning("[HttpPost]Edit called with non-existent study following concurrency exception: {StudyId}", id);
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        this.AddNotification(new NotificationBannerModel
-        {
-            IsSuccess = true,
-            Title = "Study details updated",
-            Body = $"{model.StudyName} has been successfully updated"
-        });
-
-        return RedirectToAction(nameof(Details), new { id });
-        
-    }
-
-    private bool StudyExists(int id)
-    {
-        return context.Studies.Any(e => e.Id == id);
-    }
-
+    
     public async Task<IActionResult> SendIntroductoryEmail(int id)
     {
         var studyModel = await context.Studies

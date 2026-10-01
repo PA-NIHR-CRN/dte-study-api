@@ -11,7 +11,8 @@ using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 
 namespace BPOR.Rms.Ms4.Controllers;
 
-[Route("studyRequest/[action]")]
+[Route("study/create/[action]", Order = 0)]
+[Route("studyRequest/[action]", Order = 1)] // Legacy route
 [AllowAnonymous]
 public class StudyRequestStartController(IStudyDraftRepository studyDraftRepository)
     : Controller

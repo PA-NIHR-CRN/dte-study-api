@@ -105,5 +105,6 @@ public static class KeyedServiceExtensions
                     serviceDescriptor.ServiceType == typeof(TService))
                 .Select(serviceDescriptor => (TKey)serviceDescriptor.ServiceKey!)
                 .ToArray();
+
     }
 }

@@ -19,7 +19,7 @@ using NIHR.Infrastructure.AspNetCore.Validation;
 namespace BPOR.Rms.Ms4.Controllers;
 
 [Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
-[Route("[controller]/{studyId:int}/[action]")]
+[Route("study/{studyId:int}/edit/[action]")]
 public class StudyRequestController(
     IStudyDraftRepository studyDraftRepository,
     IAccessTokenService accessTokenService,

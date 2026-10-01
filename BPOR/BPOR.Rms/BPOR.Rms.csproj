@@ -96,6 +96,18 @@
       <_ContentIncludedByDefault Remove="Views\VolunteerStudyInformation\Step8.cshtml" />
       <_ContentIncludedByDefault Remove="Views\VolunteerStudyInformation\Step9.cshtml" />
       <_ContentIncludedByDefault Remove="Views\VolunteerStudyInformation\_VsiEditLayout.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\Partials\_Step1FormFields.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\Partials\_Step2FormFields.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\Partials\_Step3FormFields.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\Partials\_Step4FormFields.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\Partials\_Step5FormFields.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\Partials\_Step6FormFields.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\Partials\_Step7FormFields.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\Partials\_Step8FormFields.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\AddResearcherSuccess.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\AddStudySuccess.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Researcher\SubmitStudy.cshtml" />
     </ItemGroup>
     <ItemGroup>
       <None Include="Views\Shared\Unauthorised.cshtml" />

@@ -250,15 +250,3 @@
 
     <pagination for="Studies" />
 }
-else if (!Model.HasSearched)
-{
-    <div class="no-studies-card">
-        <h1 class="govuk-heading-l">No studies added</h1>
-        <p class="govuk-body">
-            <role include="Researcher">You haven&apos;t added any studies yet, please apply to add a study now</role>
-            <role exclude="Researcher">You haven&apos;t added any studies yet, please add a study now</role>
-        </p>
-        <a role-include="Researcher" asp-action="Create" asp-controller="Study" class="govuk-button">Apply to add a study</a>
-        <a role-exclude="Researcher" asp-action="Create" asp-controller="Study" class="govuk-button">Add study</a>
-    </div>
-}
