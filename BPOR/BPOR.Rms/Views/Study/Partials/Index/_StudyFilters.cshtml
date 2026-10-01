@@ -72,7 +72,7 @@
             <div class="selected-filter-tags govuk-!-margin-bottom-3 govuk-!-margin-top-3">
                 @foreach (var filter in selectedStatusOptions)
                 {
-                    <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(filter.StatusType)">
+                    <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(filter.StatusType)" class="status-tag">
                         @filter.Text
                     </govuk-tag>
                 }
