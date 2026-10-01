@@ -59,7 +59,7 @@ public class StudyController(
 
         var deferredStudiesPage = studiesQuery
             .AsStudyListModel()
-            .OrderByDescending(s => s.Id)
+            .OrderByDescending(s => s.SubmittedAt)
             .DeferredPage(paginationService);
 
         var viewModel = new StudiesViewModel

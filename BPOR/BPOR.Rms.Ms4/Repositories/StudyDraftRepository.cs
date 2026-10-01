@@ -48,6 +48,7 @@ public sealed class StudyDraftRepository(ParticipantDbContext dbContext) : IStud
             .SingleAsync(x => x.Id == id, cancellationToken);
 
         study.StudyStatusId = StudyStatusType.NewApplication;
+        study.SubmittedAt = DateTime.UtcNow;
         
         var studyStausHistory = new StudyStatusHistory
         {
