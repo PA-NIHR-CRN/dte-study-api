@@ -57,8 +57,8 @@
             </dd>
         </div>
 
-        <summary-list-item for="Study.PreScreenerUrl" hide-from-researcher-when-null/>
-        <summary-list-item for="Study.InformationUrl" />
+        <summary-list-item for="Study.PreScreenerUrl" hide-from-researcher-when-null change-url="@GetStudyEditUrl("PreScreenerUrl")"/>
+        <summary-list-item for="Study.InformationUrl" change-url="@GetStudyEditUrl("InformationUrl")"/>
         <summary-list-item for="IsRecruitingIdentifiableParticipantsDisplay" edit-when="!@Model.HasCampaigns"
                            change-url="@GetStudyEditUrl("IsRecruitingIdentifiableParticipants")"/>
         <summary-list-item for="Study.RecruitmentStartDate" hide-when-null change-url="@GetStudyEditUrl("RecruitmentStartDate")"/>

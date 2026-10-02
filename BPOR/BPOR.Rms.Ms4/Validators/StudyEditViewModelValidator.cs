@@ -16,6 +16,10 @@ public class StudyEditViewModelValidator : AbstractValidator<StudyEditViewModel>
        RuleFor(model => model.InformationUrl)
            .Uri();
        
+       RuleFor(model => model.PreScreenerUrl)
+           .NotEmpty()
+           .Uri();
+       
        RuleFor(model => model.IsRecruitingIdentifiableParticipants)
            .NotNull().WithMessage("Select an option");
        
