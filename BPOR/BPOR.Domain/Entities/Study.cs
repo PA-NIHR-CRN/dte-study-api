@@ -30,7 +30,7 @@ public class Study : ISoftDelete, IAudit
     public bool? HasEthicsApproval { get; set; }
     public string? MainContactRole { get; set; }
     public string? InclusionCriteria { get; set; }
-    public DateTime? SubmittedAt { get; set; }
+    public DateTime? NewApplicationAt { get; set; }
 
     public SubmittedType? SubmittedId { get; set; }
     public int? SubmissionOutcomeId { get; set; }

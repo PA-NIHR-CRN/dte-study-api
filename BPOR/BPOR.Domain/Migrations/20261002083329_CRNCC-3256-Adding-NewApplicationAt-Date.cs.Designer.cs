@@ -13,8 +13,8 @@ using NetTopologySuite.Geometries;
 namespace BPOR.Domain.Migrations
 {
     [DbContext(typeof(ParticipantDbContext))]
-    [Migration("20260930121535_CRNCC-3256-Adding-SubmittedAt-Date")]
-    partial class CRNCC3256AddingSubmittedAtDate
+    [Migration("20261002083329_CRNCC-3256-Adding-NewApplicationAt-Date.cs")]
+    partial class CRNCC3256AddingNewApplicationAtDatecs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -10235,6 +10235,9 @@ namespace BPOR.Domain.Migrations
                     b.Property<string>("MainContactRole")
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime?>("NewApplicationAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int?>("ParticipantsRecruited")
                         .HasColumnType("int");
 
@@ -10266,9 +10269,6 @@ namespace BPOR.Domain.Migrations
 
                     b.Property<int?>("SubmissionOutcomeId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("SubmittedAtDate")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<int?>("SubmittedId")
                         .HasColumnType("int");

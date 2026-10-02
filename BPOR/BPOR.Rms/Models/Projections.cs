@@ -94,7 +94,7 @@ public static class Projections
                 .Where(m => m.StudyId == s.Id)
                 .Sum(e => e.TotalEnrollments),
             StudyStatus = s.StudyStatus,
-            SubmittedAt = s.SubmittedAt
+            NewApplicationAt = s.NewApplicationAt
         };
     }
 

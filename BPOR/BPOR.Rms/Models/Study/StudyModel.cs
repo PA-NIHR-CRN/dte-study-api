@@ -129,7 +129,7 @@ public class StudyModel
     public string HasEthicsApprovalDisplay => HasEthicsApproval == true ? "Yes" : "Not yet, I am awaiting an approval";
     public StudyStatus? StudyStatus { get; set; }
     public List<string?> StatusReasons { get; set; } = [];
-    public DateTime? SubmittedAt {get; set; }
+    public DateTime? NewApplicationAt {get; set; }
     
     public StudyStatusViewModel StudyStatusViewModel => new()
         {

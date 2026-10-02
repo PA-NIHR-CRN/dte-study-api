@@ -10232,6 +10232,9 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<string>("MainContactRole")
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime?>("NewApplicationAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int?>("ParticipantsRecruited")
                         .HasColumnType("int");
 
@@ -10263,9 +10266,6 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<int?>("SubmissionOutcomeId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("SubmittedAtDate")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<int?>("SubmittedId")
                         .HasColumnType("int");
