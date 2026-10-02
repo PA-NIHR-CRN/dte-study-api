@@ -1,4 +1,7 @@
-﻿namespace NIHR.Infrastructure.AspNetCore;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+
+namespace NIHR.Infrastructure.AspNetCore;
 
 public class YesNoFormatter : IDisplayStringFormatter
 {

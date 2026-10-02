@@ -6,9 +6,9 @@ namespace BPOR.Rms.Ms4.Models;
 
 public class StudyEditViewModel
 {
-    [Display(Name = "Recruitment start date (UK)?", 
+    [Display(Name = "Recruitment start date (UK)?",
         Description = "If you are unsure, provide an estimate.")]
-    public GovUkDate RecruitmentStartDate { get; set; }
+    public GovUkDate RecruitmentStartDate { get; set; } = new();
 
     [Display(Name = "What is the UK recruitment target for the study?",
         Description = "If any participants have already been recruited, exclude these from the target.")]
@@ -25,4 +25,7 @@ public class StudyEditViewModel
 
     [Display(Name = "NIHR funding stream or grant code")]
     public string? FundingCode { get; set; }
+
+    [Display(Name = "Pre-screener link")]
+    public string? PreScreenerUrl { get; set; }
 }
