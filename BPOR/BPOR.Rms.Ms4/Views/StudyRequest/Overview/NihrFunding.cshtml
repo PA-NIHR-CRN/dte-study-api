@@ -1,5 +1,5 @@
 @using BPOR.Domain.Enums
-@using BPOR.Rms.Ms4.Views.StudyRequest
+@using NIHR.Infrastructure.AspNetCore
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
@@ -10,36 +10,35 @@
 {
     <text>@StudyRequestEditResources.Section1Caption</text>
 }
-        
+
 <h2 class="govuk-heading-l">Does this study have NIHR funding?</h2>
 
 <radio-set for="@Model.NihrFundingStatus">
 
-    <radio value="@NihrFundingStatusType.Yes"
-           conditional-id="conditional-cpms-id">
-        Yes
+    <radio value="@NihrFundingStatusType.Yes">
+        @EnumHelper.GetDisplayName(NihrFundingStatusType.Yes)
     </radio>
 
     <radio value="@NihrFundingStatusType.No">
-        No
+        @EnumHelper.GetDisplayName(NihrFundingStatusType.No)
     </radio>
 
     <radio value="@NihrFundingStatusType.NoButApplied">
-        No, but I have applied for NIHR funding
+        @EnumHelper.GetDisplayName(NihrFundingStatusType.NoButApplied)
     </radio>
 </radio-set>
 
 <inset-text>
-    
+
     <p class="govuk-body">
         If you are not on the RDN portfolio, you may still be eligible for funding from the NIHR.
     </p>
 
     <p class="govuk-body">
-        If you are unsure of this, please contact 
+        If you are unsure of this, please contact
         <a href="mailto:bepartofresearch-volunteerservice@nihr.ac.uk">
             bepartofresearch-volunteerservice@nihr.ac.uk
         </a>
     </p>
-    
+
 </inset-text>

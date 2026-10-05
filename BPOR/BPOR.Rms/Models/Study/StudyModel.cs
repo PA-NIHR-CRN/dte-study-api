@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
-using BPOR.Rms.Utilities;
 using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.Models.Study;
@@ -64,8 +63,6 @@ public class StudyModel
     [ResearcherEdit(3)]
     public string? OutcomeOfSubmission { get; set; }
 
-    public NihrFundingStatusType? HasFunding { get; set; }
-
     [Display(Name = "NIHR funding stream or grant code")]
     [ResearcherEdit(5)]
     public string? FundingCode { get; set; }
@@ -87,14 +84,15 @@ public class StudyModel
     public string? RecruitmentEndDate { get; set; }
 
     [Display(Name = "Does the study have NIHR funding?")]
+    [ValueDisplayFormatter<EnumFormatter<NihrFundingStatusType>>]
     [ResearcherEdit(4)]
-    public string? HasFundingDisplay => HasFunding == null ? null : (HasFunding == NihrFundingStatusType.Yes ? "Yes" : "No");
+    public NihrFundingStatusType? HasFunding { get; set; }
 
     [Display(Name = "Website link")]
     [StudyEdit(3)]
     public string? InformationUrl { get; set; }
     
-    [ValueDisplayFormatter(typeof(YesNoFormatter))]
+    [ValueDisplayFormatter<YesNoFormatter>]
     [Display(Name = "Will this study have more than one research location in the UK?")]
     [StudyEdit(4)]
     public bool? HasMultipleResearchLocations { get; set; }
@@ -122,11 +120,9 @@ public class StudyModel
     [Display(Name = "Who will be included in this study?")]
     public string? InclusionCriteria { get; set; }
 
-    [ValueDisplayFormatter(typeof(YesNoFormatter))]
+    [ValueDisplayFormatter<EnumFormatter<EthicsApproval>>]
     [Display(Name = "Does the study have ethics approval to use Be Part of Research?")]
-    public bool? HasEthicsApproval { get; set; }
-    [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
-    public string HasEthicsApprovalDisplay => HasEthicsApproval == true ? "Yes" : "Not yet, I am awaiting an approval";
+    public EthicsApproval? HasEthicsApproval { get; set; }
     public StudyStatus? StudyStatus { get; set; }
     public List<string?> StatusReasons { get; set; } = [];
     public DateTime? NewApplicationAt {get; set; }

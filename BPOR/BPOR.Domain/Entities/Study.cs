@@ -27,7 +27,7 @@ public class Study : ISoftDelete, IAudit
     public bool? HasMultipleResearchLocations { get; set; }
     public bool? SinglePersonResponsibleForRecruiting { get; set; }
     public string? PreScreenerUrl { get; set; }
-    public bool? HasEthicsApproval { get; set; }
+    public EthicsApproval? HasEthicsApproval { get; set; }
     public string? MainContactRole { get; set; }
     public string? InclusionCriteria { get; set; }
     public DateTime? NewApplicationAt { get; set; }

@@ -31,6 +31,14 @@ public class StudyRequestEditFlow : MvcFlowGraph<StudyRequestViewModel, StudyReq
         AddTransition(InclusionInRdnPortfolio, FinishRecruiting,
             SubflowOptions.SubflowEntry | SubflowOptions.SubflowExit,
             i => i.InclusionInRdnPortfolioStatus is SubmittedType.Yes);
+        AddTransition(
+            InclusionInRdnPortfolio, NullPage, MvcFlowAction.Next,
+            contextPredicate: context => context.FlowType == StudyRequestEditFlowType.Edit,
+            isSubflowReturn: true);
+        AddTransition(
+            NihrFunding, NullPage, MvcFlowAction.Back,
+            contextPredicate: context => context.FlowType == StudyRequestEditFlowType.Edit,
+            isSubflowReturn: true);
         AddTransition(InclusionInRdnPortfolio, NihrFunding, SubflowOptions.None,
             i => i.InclusionInRdnPortfolioStatus is not SubmittedType.Yes);
         AddTransition(
