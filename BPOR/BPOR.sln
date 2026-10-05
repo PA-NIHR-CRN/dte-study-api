@@ -55,8 +55,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Rms.ApiClient", "BPOR.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.NotificationService.GovUkNotify", "NIHR.NotificationService.GovUkNotify\NIHR.NotificationService.GovUkNotify.csproj", "{886BF9DF-7A62-45E0-9549-85407ABFA1F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIHR.Quartz", "NIHR.Quartz\NIHR.Quartz.csproj", "{58263CC8-8A7B-417E-B3C0-C05E99B621B9}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPOR.Rms.Ms4", "BPOR.Rms.Ms4\BPOR.Rms.Ms4.csproj", "{14383DA6-1F56-4450-A923-6A6856BC9DA9}"
 EndProject
 Global
@@ -165,10 +163,6 @@ Global
 		{14383DA6-1F56-4450-A923-6A6856BC9DA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14383DA6-1F56-4450-A923-6A6856BC9DA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14383DA6-1F56-4450-A923-6A6856BC9DA9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{58263CC8-8A7B-417E-B3C0-C05E99B621B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58263CC8-8A7B-417E-B3C0-C05E99B621B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{58263CC8-8A7B-417E-B3C0-C05E99B621B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58263CC8-8A7B-417E-B3C0-C05E99B621B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

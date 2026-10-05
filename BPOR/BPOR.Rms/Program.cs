@@ -2,7 +2,7 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Infrastructure.Services.Development;
 using BPOR.Rms;
 using BPOR.Rms.Ms4;
-using BPOR.Rms.Jobs;
+using BPOR.Rms.Ms4.ScheduledJobs;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -10,7 +10,6 @@ using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 using NIHR.Infrastructure.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
-using NIHR.Quartz;
 using Quartz;
 
 var builder = WebApplication
@@ -35,18 +34,12 @@ builder.AddIdgAuthentication(authOptions =>
     }
 );
 
-builder.Services.AddNihrQuartz(async (services, scheduler) =>
-    {
-        var job = JobBuilder.Create<RemoveStaleDraftStudiesJob>()
-            .Build();
-        var trigger = TriggerBuilder.Create()
-            .WithCronSchedule(services.GetRequiredService<IOptions<DraftStudiesSettings>>().Value.StaleDraftRemovalSchedule, cs => cs
-                .InTimeZone(TimeZoneInfo.Local)
-                .WithMisfireHandlingInstructionFireAndProceed())
-            .Build();
-        await scheduler.ScheduleJob(job, trigger);
-    }
-    );
+builder.Services.AddQuartz();
+builder.Services.AddQuartzHostedService(options =>
+{
+    // when shutting down we want jobs to complete gracefully
+    options.WaitForJobsToComplete = true;
+});
 
 builder.AddAWSSystemsManagerDataProtection("/BPOR/RMS");
 
@@ -65,5 +58,7 @@ var app = builder.Build();
 app.ConfigureSwagger(builder.Environment);
 
 app.UseApplicationMiddleware();
+
+await app.ScheduleDraftStudyCleanup();
 
 app.Run();
