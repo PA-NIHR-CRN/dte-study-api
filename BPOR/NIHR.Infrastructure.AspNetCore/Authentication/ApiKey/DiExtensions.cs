@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -14,7 +15,10 @@ public static class DiExtensions
         builder.Services.AddOptions<ApiKeyAuthenticationOptions>().BindConfiguration("ApiKeyAuthentication");
         builder.Services.AddScoped<IApiKeyClaimProvider, ConfigurationApiKeyClaimsProvider>();
         return builder.AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
-            scheme ?? ApiKeyAuthenticationOptions.DefaultScheme, _ => { });
+            scheme ?? ApiKeyAuthenticationOptions.DefaultScheme, options =>
+            {
+                options.ForwardSignIn = CookieAuthenticationDefaults.AuthenticationScheme;
+            });
     }
 
     public static IServiceCollection AddApiKeyRoleFromOptions<TOptions>(this IServiceCollection services,

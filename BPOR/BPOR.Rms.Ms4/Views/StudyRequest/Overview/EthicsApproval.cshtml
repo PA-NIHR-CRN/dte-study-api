@@ -1,4 +1,6 @@
+@using BPOR.Domain.Enums
 @using BPOR.Rms.Ms4.Views.StudyRequest
+@using NIHR.Infrastructure.AspNetCore
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
 @{
@@ -13,8 +15,12 @@
 <h2 class="govuk-heading-l">Do you have ethics approval to use Be Part of Research?</h2>
 
 <radio-set for="@Model.HasEthicsApproval">
-    <radio value="@true">Yes</radio>
-    <radio value="@false">Not yet, I am awaiting an approval</radio>
+    <radio value="@EthicsApproval.Yes">
+        @EnumHelper.GetDisplayName(EthicsApproval.Yes)
+    </radio>
+    <radio value="@EthicsApproval.NoButApplied">
+        @EnumHelper.GetDisplayName(EthicsApproval.NoButApplied)
+    </radio>
 </radio-set>
 
 <inset-text>You can start an application without ethics approval. However, you need to submit ethics approval before we contact volunteers to recruit to your study.</inset-text>
