@@ -1,0 +1,17 @@
+@using BPOR.Domain.Entities.Configuration
+@model BPOR.Rms.Ms4.Models.StudyRequestViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+@section SectionTitle
+{
+    <text>@StudyRequestEditResources.Section4Caption</text>
+}
+
+<form-group for="InclusionCriteria" label-as-heading="true" label-class="govuk-heading-l">
+    <govuk-text-area
+        asp-for="@Model.InclusionCriteria"
+        max-length="@StudyConfiguration.InclusionCriteriaMaxLength"/>
+</form-group>

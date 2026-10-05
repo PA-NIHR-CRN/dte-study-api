@@ -1,8 +1,13 @@
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Infrastructure.Services.Development;
+using BPOR.Rms;
+using BPOR.Rms.Ms4;
 using BPOR.Rms.Jobs;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
+using NIHR.Infrastructure.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Quartz;
@@ -19,6 +24,14 @@ builder.AddIdgAuthentication(authOptions =>
             .RequireAuthenticatedUser()
             .RequireRole(RoleConfiguration.GetRoles().Select(x => x.Code))
             .Build();
+        authOptions.AddPolicy(PolicyNames.IsAdmin, policy =>
+        {
+            policy.Requirements.Add(new RolesAuthorizationRequirement(["Admin"]));
+        });
+        authOptions.AddPolicy(PolicyNames.IsResearcher, policy =>
+        {
+            policy.Requirements.Add(new RolesAuthorizationRequirement(["Researcher"]));
+        });
     }
 );
 

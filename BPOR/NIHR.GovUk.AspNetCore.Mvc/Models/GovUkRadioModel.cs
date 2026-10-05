@@ -7,4 +7,5 @@ public record GovUkRadioModel (
     string Value,
     bool IsSelected,
     bool Autofocus,
-    TagHelperContent InnerContent) : GovUkModelWithContent(InnerContent);
+    TagHelperContent InnerContent,
+    string? ConditionalId) : GovUkModelWithContent(InnerContent);

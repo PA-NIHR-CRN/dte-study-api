@@ -210,7 +210,9 @@ public class CampaignController(
                         linkGenerator.GetUriByName(HttpContext, nameof(NotifyCallbackController.RegisterInterest),
                             new { reference = encryptionService.Encrypt("0123456789101112") }) ?? string.Empty
                     },
-                    { CampaignPersonalisationKeys.UniqueReference, "0123456789101112" }
+                    { CampaignPersonalisationKeys.UniqueReference, "0123456789101112" },
+                    { CampaignPersonalisationKeys.EnrolmentReferenceNumber, "0123456789101112" } // To replace UniqueReference once it's no longer used in email templates
+
                 });
 
             foreach (var email in emailAddresses)

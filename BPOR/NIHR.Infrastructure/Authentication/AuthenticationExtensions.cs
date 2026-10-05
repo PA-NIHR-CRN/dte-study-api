@@ -8,7 +8,6 @@ namespace NIHR.Infrastructure
         public static string GetId (this ClaimsPrincipal principal)
         {
             return principal?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-            
         }
 
         public static string GetEmail(this ClaimsPrincipal principal)
@@ -23,6 +22,16 @@ namespace NIHR.Infrastructure
             var surname = principal?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Surname)?.Value;
 
             return $"{givenName} {surname}".Trim();
+        }
+        
+        public static int? GetUserId (this ClaimsPrincipal principal)
+        {
+            var userIdClaim = principal?.FindFirst("UserId")?.Value;
+            
+            if (string.IsNullOrEmpty(userIdClaim))
+                return null;
+    
+            return int.TryParse(userIdClaim, out var userId) ? userId : null;
         }
     }
 }

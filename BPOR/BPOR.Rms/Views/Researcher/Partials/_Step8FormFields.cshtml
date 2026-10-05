@@ -1,4 +1,5 @@
-﻿@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+﻿@using BPOR.Domain.Enums
+@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
 
 <h1 class="govuk-heading-xl">
     Check your answers before submitting the study
@@ -51,7 +52,7 @@
     </div>
     @if (Model.PortfolioSubmissionStatus.HasValue)
     {
-        if (Model.PortfolioSubmissionStatus == 1)
+        if (Model.PortfolioSubmissionStatus == SubmittedType.Yes)
         {
             <div class="govuk-summary-list__row">
                 <dt class="govuk-summary-list__key">
@@ -82,7 +83,7 @@
             @Html.DisplayNameFor(model => model.HasFunding)
         </dt>
         <dd class="govuk-summary-list__value">
-            @(Model.HasFunding.HasValue ? (Model.HasFunding.Value ? "Yes" : "No") : "No")
+            @(Model.HasFunding.HasValue ? (Model.HasFunding.Value == NihrFundingStatusType.Yes ? "Yes" : "No") : "No")
         </dd>
         <dd class="govuk-summary-list__actions">
             <button type="submit" name="Step" value="4" class="link-button">Change</button>
@@ -90,7 +91,7 @@
     </div>
     @if (Model.HasFunding.HasValue)
     {
-        if (Model.HasFunding.Value)
+        if (Model.HasFunding.Value == NihrFundingStatusType.Yes)
         {
             <div class="govuk-summary-list__row">
                 <dt class="govuk-summary-list__key">

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
 using Participant = BPOR.Rms.Abstractions.Models.Participant;
 using Study = BPOR.Rms.Abstractions.Models.Study;
@@ -23,9 +24,15 @@ public class VolunteerController : ControllerBase
     public async Task<ActionResult<GetTestTokenResponse>> GetTestTokenAsync(       
         [FromServices] ParticipantDbContext db,
         [FromServices] IVipTokenGenerator vipTokenGenerator, 
+        [FromServices] IHostEnvironment environment,
         long campaignParticipantId,
         CancellationToken cancellationToken)
     {
+        if (environment.IsProduction())
+        {
+            return Forbid();
+        }
+        
         var campaignParticipant = await db.CampaignParticipant
             .Include(i => i.Campaign).ThenInclude(i => i.FilterCriteria)
             .SingleOrDefaultAsync(i => i.Id == campaignParticipantId, cancellationToken);
@@ -154,6 +161,7 @@ public class VolunteerController : ControllerBase
     public async Task<ActionResult<GetInformationResponse>> GetInformation(
         [FromServices] ParticipantDbContext context, 
         [FromServices] IVipTokenGenerator vipTokenGenerator, 
+        [FromServices] IVipRepository repository,
         string token,
         CancellationToken cancellationToken)
     {
@@ -173,11 +181,6 @@ public class VolunteerController : ControllerBase
                     Email = i.Participant.Email,
                     Id = i.ParticipantId,
                     Name = i.Participant.FirstName + " " + i.Participant.LastName
-                },
-                Study = new Study()
-                {
-                    StudyId = (long)i.Campaign.FilterCriteria.StudyId, // TODO: Why would this ever be null?
-                    PrescreenerUrl = i.Campaign.FilterCriteria.Study.PreScreenerUrl
                 }
             })
             .SingleOrDefaultAsync(cancellationToken);
@@ -186,6 +189,27 @@ public class VolunteerController : ControllerBase
         {
             return NotFound();
         }
+        
+        var vsiPage = await repository.GetPage(validatedToken.StudyId, cancellationToken);
+        if (vsiPage == null)
+        {
+            return NotFound();
+        }
+        
+        result.Study = new()
+        {
+            PrescreenerUrl = vsiPage.PreScreenerUrl!,
+            StudyId = validatedToken.StudyId
+        };
+        
+        var studyParticipantEnrollment = await context.StudyParticipantEnrollment
+            .OrderByDescending(spe => spe.Id)
+            .FirstOrDefaultAsync(spe => 
+                spe.StudyId == validatedToken.StudyId
+                && spe.ParticipantId == validatedToken.ParticipantId,
+                cancellationToken);
+
+        result.EnrolmentReferenceNumber = studyParticipantEnrollment?.Reference;
         
         return Ok(result);
     }

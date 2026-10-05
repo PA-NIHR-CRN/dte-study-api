@@ -293,7 +293,9 @@ public class CampaignService(
                     [CampaignPersonalisationKeys.LastName] = volunteer.LastName,
                     [CampaignPersonalisationKeys.UniqueLink] = link,
                     [CampaignPersonalisationKeys.StudyName] = campaign.FilterCriteria.Study?.StudyName ?? string.Empty,
-                    [CampaignPersonalisationKeys.UniqueReference] = reference
+                    [CampaignPersonalisationKeys.UniqueReference] = reference,
+                    [CampaignPersonalisationKeys.EnrolmentReferenceNumber] = reference // To replace UniqueReference once it's no longer used in email templates
+
                 }
             };
 

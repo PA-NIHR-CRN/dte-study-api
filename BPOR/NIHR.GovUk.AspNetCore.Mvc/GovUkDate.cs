@@ -35,7 +35,7 @@ public class GovUkDate
         }
     }
 
-    public static GovUkDate FromDateTime(DateTime? date) => new GovUkDate() { Day = date?.Day, Month = date?.Month, Year = date?.Year };
+    public static GovUkDate FromDateTime(DateTime? date) => new() { Day = date?.Day, Month = date?.Month, Year = date?.Year };
     
     private static string? formatDateForUK(int? year, int? month, int? day)
     {
@@ -49,4 +49,21 @@ public class GovUkDate
 
 
     public string? UKDisplayDate() => formatDateForUK(Year, Month, Day);
+
+    public DateTime? ToDateTime()
+    {
+        if (!HasValue)
+        {
+            return null;
+        }
+
+        try
+        {
+            return new DateTime(Year.GetValueOrDefault(), Month.GetValueOrDefault(), Day.GetValueOrDefault());
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return null;
+        }
+    }
 }

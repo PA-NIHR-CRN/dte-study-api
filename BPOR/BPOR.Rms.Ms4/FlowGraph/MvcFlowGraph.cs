@@ -1,0 +1,94 @@
+﻿using BPOR.Rms.Ms4.Graph;
+using BPOR.Rms.Ms4.Graph.Algorithms;
+
+namespace BPOR.Rms.Ms4.FlowGraph;
+
+public class MvcFlowGraph<TModel, TContext> : IMvcFlowGraph<TModel, TContext>
+    where TContext : MvcFlowContextBase
+{
+    private readonly DirectedGraph<MvcActionKey, Transition> _graph = new();
+
+    /// <summary>
+    /// Calculates the best case progress for a given context between a start node and end node via the current node.
+    /// </summary>
+    /// <returns> The best case progress between 0 and 1, or null if there is no valid path. </returns>
+    public double? CalculateBestCaseProgress(TContext context, MvcActionKey start, MvcActionKey end,
+        MvcActionKey current)
+    {
+        var dijkstra = _graph.Dijkstra();
+
+        // Calculate minimum paths from both the start node and the current node
+        var costsFromStart = dijkstra.Execute(start, edgeFilter: i => i.ContextFilter?.Invoke(context) ?? true);
+        var costsFromCurrent = dijkstra.Execute(current, edgeFilter: i => i.ContextFilter?.Invoke(context) ?? true);
+
+        if (costsFromStart.TryGetValue(current, out double costStartToCurrent) &&
+            costsFromCurrent.TryGetValue(end, out double costCurrentToEnd))
+        {
+            return costStartToCurrent / (costStartToCurrent + costCurrentToEnd);
+        }
+
+        return null;
+    }
+
+    private record Transition(
+        Predicate<TContext>? ContextFilter,
+        MvcFlowAction Action,
+        Predicate<TModel>? ModelFilter,
+        Func<TContext, TContext>? ContextTransform,
+        bool IsSubflowReturn);
+
+    public void AddTransition(MvcActionKey origin,
+        MvcActionKey destination,
+        MvcFlowAction action,
+        Predicate<TContext>? contextPredicate = null,
+        Predicate<TModel>? modelPredicate = null,
+        Func<TContext, TContext>? contextTransform = null,
+        bool isSubflowReturn = false)
+        => _graph.AddEdge(origin, destination,
+            new Transition(contextPredicate, action, modelPredicate, contextTransform, isSubflowReturn));
+
+    public TransitionResult<TContext, MvcActionKey>? ApplyTransition(MvcActionKey origin, TContext context,
+        TModel model, MvcFlowAction action)
+    {
+        var currentNode = _graph.GetNode(origin);
+        if (currentNode == null)
+        {
+            throw new ArgumentException(nameof(origin));
+        }
+
+        var relatedNodes = currentNode.GetRelatedNodes(i => IsValidTransition(i, context, model, action)).ToArray();
+        if (relatedNodes.Length == 0)
+        {
+            return null;
+        }
+
+        var contextTransform = relatedNodes[0].Value.ContextTransform;
+        TContext newContext = contextTransform == null
+            ? context
+            : contextTransform(context);
+        var result = new TransitionResult<TContext, MvcActionKey>
+            (newContext, relatedNodes[0].RelatedNode.Key, relatedNodes[0].Value.IsSubflowReturn);
+        return result;
+    }
+
+    private bool IsValidTransition(Transition transition, TContext context, TModel model, MvcFlowAction action)
+        => Equals(action, transition.Action) &&
+           (transition.ContextFilter?.Invoke(context) ?? true) &&
+           (transition.ModelFilter?.Invoke(model) ?? true);
+}
+
+public interface IMvcFlowGraph<TModel, TContext> : IMvcFlowGraph<TContext>
+{
+    TransitionResult<TContext, MvcActionKey>? ApplyTransition(MvcActionKey origin, TContext context,
+        TModel model, MvcFlowAction action);
+}
+
+public interface IMvcFlowGraph<TContext>
+{
+    /// <summary>
+    /// Calculates the best case progress for a given context between a start node and end node via the current node.
+    /// </summary>
+    /// <returns> The best case progress between 0 and 1, or null if there is no valid path. </returns>
+    double? CalculateBestCaseProgress(TContext context, MvcActionKey start, MvcActionKey end,
+        MvcActionKey current);
+}
