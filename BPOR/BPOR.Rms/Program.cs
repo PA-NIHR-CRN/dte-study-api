@@ -51,7 +51,14 @@ if (builder.Environment.IsDevelopment())
     builder.Services.Decorate<IEmailService, DevelopmentEmailService>();
 }
 
+builder.Services.AddScoped<AnyPolicyAuthorizationFilter>();
+
 builder.WebHost.UseStaticWebAssets();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<AnyPolicyAuthorizationFilter>();
+}).AddRazorRuntimeCompilation();
 
 var app = builder.Build();
 
