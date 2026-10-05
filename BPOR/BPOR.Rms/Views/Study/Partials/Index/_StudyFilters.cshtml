@@ -10,11 +10,9 @@
 @{
     var statuses = await SysRefStudyStatusRepository
         .GetAllAsync(s => s.Id != StudyStatusType.Draft);
-    
-    var selectedStatuses = Model.Filters.SelectedStatuses.Count;
 }
 
-<aside class="app-study-filter" aria-labelledby="study-filter-heading">
+<aside aria-labelledby="study-filter-heading">
     <form method="get">
         
         @if (!string.IsNullOrEmpty(Model.SearchTerm))
@@ -32,15 +30,21 @@
 
             <summary class="govuk-details__summary">
                 <span class="govuk-details__summary-content">
-                    <span class="govuk-details__summary-text govuk-heading-m govuk-!-margin-bottom-0">
+                    <span class="govuk-heading-m govuk-!-margin-bottom-0">
                         Statuses
                     </span>
 
-                    <span class="govuk-body-s govuk-!-margin-bottom-0">
-                        @(selectedStatuses == 0
-                            ? "No filters selected"
-                            : $"{selectedStatuses} selected")
-                    </span>
+                    @if (Model.Filters.SelectedStatuses.Any())
+                    {
+                        <div class="selected-filter-tags govuk-!-margin-top-3">
+                            @foreach (var filter in Model.Filters.SelectedStatuses)
+                            {
+                                <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(filter)" class="status-tag">
+                                    @EnumHelper.GetDisplayName(filter)
+                                </govuk-tag>
+                            }
+                        </div>
+                    }
                 </span>
             </summary>
 
@@ -78,19 +82,7 @@
             </fieldset>
         </details>
 
-        @if (Model.Filters.SelectedStatuses.Any())
-        {
-            <div class="selected-filter-tags govuk-!-margin-bottom-3 govuk-!-margin-top-3">
-                @foreach (var filter in Model.Filters.SelectedStatuses)
-                {
-                    <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(filter)" class="status-tag">
-                        @EnumHelper.GetDisplayName(filter)
-                    </govuk-tag>
-                }
-            </div>
-        }
-
-        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible govuk-!-margin-top-2"/>
 
         <button
             type="submit"

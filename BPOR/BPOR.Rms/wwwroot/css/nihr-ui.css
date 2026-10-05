@@ -401,6 +401,11 @@ button.govuk-link:focus{
     margin-left: 0;
 }
 
+.govuk-details__summary {
+    display: block;
+    padding-bottom: 0.5rem;
+}
+
 .status-tag {
     max-width: 100%;
     border-width: 1px;
