@@ -536,7 +536,6 @@
 
 /* Base styles for all tags */
 .govuk-tag {
-    border-radius: 3px;
     text-align: center;
     font-size: 14px;
     font-style: normal;
@@ -551,14 +550,43 @@
     align-self: stretch;
 }
 
-/* Specific styles for orange tag */
 .govuk-tag--orange {
     background: #FDEBD8;
     color: #494949;
 }
 
-/* Specific styles for green tag */
+.govuk-tag--grey {
+    border-color: #ACBCC3;
+    background-color: #F6F8F8;
+    color: black;
+}
+
+.govuk-tag--blue {
+    border-color: #193E72;
+    background-color: #E5EAEF;
+    color: black;
+}
+
 .govuk-tag--green {
-    background: #388555;
-    color: #FFFFFF;
+    border-color: #26A86C;
+    background-color: #E7F5EF;
+    color: black;
+}
+
+.govuk-tag--yellow {
+    border-color: #FED47A;
+    background-color: #FFFAF0;
+    color: black;
+}
+
+.govuk-tag--red {
+    border-color: #EA5D4E;
+    background-color: #FDEDEB;
+    color: black;
+}
+
+.govuk-tag--purple {
+    border-color: #6667AD;
+    background-color: #EEEEF6;
+    color: black;
 }
