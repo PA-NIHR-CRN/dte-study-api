@@ -75,9 +75,9 @@
 @if (Model.Studies.TotalCount > 0 || Model.IsSearched || Model.IsFiltered)
 {
     <form class="govuk-form-group" method="get" asp-action="Index" asp-controller="Study">
-        @foreach (var filter in Model.Filters.StatusOptions.Where(o => o.IsSelected))
+        @foreach (var filter in Model.Filters.SelectedStatuses)
         {
-            <input type="hidden" name="statusIds" value="@filter.Value" />
+            <input type="hidden" name="statusIds" value="@filter" />
         }
         <label class="govuk-label" for="searchBar">Search full or partial study name, full study ID or full CPMS ID</label>
         <div class="govuk-input__wrapper">
