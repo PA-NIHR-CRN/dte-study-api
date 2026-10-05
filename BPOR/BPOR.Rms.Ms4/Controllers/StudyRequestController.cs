@@ -6,6 +6,7 @@ using BPOR.Rms.Ms4.Models;
 using BPOR.Rms.Ms4.Repositories;
 using BPOR.Rms.Ms4.Validators;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -16,7 +17,7 @@ using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Ms4.Controllers;
 
-[Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, OpenIdConnect")]
+[Authorize(AuthenticationSchemes = $"{AccessTokenAuthenticationOptions.AuthenticationScheme}, {CookieAuthenticationDefaults.AuthenticationScheme}")]
 [Route("[controller]/{studyId:int}/[action]")]
 public class StudyRequestController(
     IStudyDraftRepository studyDraftRepository,
