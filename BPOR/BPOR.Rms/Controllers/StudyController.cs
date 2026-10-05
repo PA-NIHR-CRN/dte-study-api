@@ -41,10 +41,11 @@ public class StudyController(
         }
 
         var userHasResearcherRole = currentUserProvider.IsResearcher();
-
+        var userHasAdminRole = currentUserProvider.IsAdmin();
+        
         var studiesQuery = context.Studies.AsQueryable();
 
-        if (userHasResearcherRole)
+        if (userHasResearcherRole && !userHasAdminRole)
         {
             var userEmail = currentUserProvider.User?.ContactEmail ?? string.Empty;
             studiesQuery = studiesQuery.Where(s => s.EmailAddress == userEmail);
