@@ -28,7 +28,10 @@ public class StudyController(
 ) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false,
+    public async Task<IActionResult> Index(
+        string? searchTerm,
+        [FromQuery] HashSet<StudyStatusType> statusIds,
+        bool hasBeenReset = false,
         CancellationToken token = default)
     {
         if (hasBeenReset)
@@ -37,13 +40,14 @@ public class StudyController(
             return RedirectToAction(nameof(Index));
         }
 
-        bool userHasResearcherRole = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
-
+        var userHasResearcherRole = currentUserProvider.IsResearcher();
+        var userHasAdminRole = currentUserProvider.IsAdmin();
+        
         var studiesQuery = context.Studies.AsQueryable();
 
-        if (userHasResearcherRole)
+        if (userHasResearcherRole && !userHasAdminRole)
         {
-            string userEmail = currentUserProvider?.User?.ContactEmail ?? string.Empty;
+            var userEmail = currentUserProvider.User?.ContactEmail ?? string.Empty;
             studiesQuery = studiesQuery.Where(s => s.EmailAddress == userEmail);
         }
 
@@ -56,6 +60,15 @@ public class StudyController(
                                                    // TODO investigate full text search
                                                    || s.StudyName.Contains(searchTerm));
         }
+        
+        var selectedStatusIds = statusIds.ToHashSet();
+
+        if (selectedStatusIds.Count > 0)
+        {
+            studiesQuery = studiesQuery
+                .Where(s => s.StudyStatusId != null
+                            && selectedStatusIds.Contains(s.StudyStatusId.Value));
+        }
 
         var deferredStudiesPage = studiesQuery
             .AsStudyListModel()
@@ -65,13 +78,17 @@ public class StudyController(
         var viewModel = new StudiesViewModel
         {
             Studies = await deferredStudiesPage.ValueAsync(token),
-            HasSearched = Request.Query.ContainsKey(nameof(searchTerm)),
+            IsSearched = Request.Query.ContainsKey(nameof(searchTerm)),
+            IsFiltered = Request.Query.ContainsKey(nameof(statusIds)),
             SearchTerm = searchTerm ?? string.Empty,
+            Filters = new StudyFilterViewModel
+            {
+                SelectedStatuses =  selectedStatusIds
+            }
         };
 
         return View(viewModel);
     }
-
 
     // GET: Study/Details/5
     public async Task<IActionResult> Details([FromServices] IVipRepository repository, int? id,

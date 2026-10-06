@@ -1,0 +1,94 @@
+@using BPOR.Domain.Entities.RefData
+@using BPOR.Domain.Enums
+@using BPOR.Rms.Database
+@using BPOR.Rms.Helpers
+@using NIHR.Infrastructure.AspNetCore
+@model BPOR.Rms.Models.Study.StudiesViewModel
+
+@inject ISysRefRepository<StudyStatus> SysRefStudyStatusRepository
+
+@{
+    var statuses = await SysRefStudyStatusRepository
+        .GetAllAsync(s => s.Id != StudyStatusType.Draft);
+}
+
+<aside aria-labelledby="study-filter-heading">
+    <form method="get">
+        
+        @if (!string.IsNullOrEmpty(Model.SearchTerm))
+        {
+            <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+        }
+        
+        <h2 id="study-filter-heading" class="govuk-heading-m">
+            Filter search
+        </h2>
+
+        <details
+            class="govuk-details govuk-!-margin-bottom-0"
+            data-module="govuk-details">
+
+            <summary class="govuk-details__summary">
+                <span class="govuk-details__summary-content">
+                    <span class="govuk-heading-m govuk-!-margin-bottom-0">
+                        Statuses
+                    </span>
+
+                    @if (Model.Filters.SelectedStatuses.Any())
+                    {
+                        <div class="selected-filter-tags govuk-!-margin-top-3">
+                            @foreach (var filter in Model.Filters.SelectedStatuses)
+                            {
+                                <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(filter)" class="status-tag">
+                                    @EnumHelper.GetDisplayName(filter)
+                                </govuk-tag>
+                            }
+                        </div>
+                    }
+                </span>
+            </summary>
+
+            <fieldset class="govuk-fieldset">
+                <legend class="govuk-fieldset__legend govuk-visually-hidden">
+                    Filter studies by status
+                </legend>
+
+                <div
+                    class="govuk-checkboxes govuk-checkboxes--small govuk-!-margin-top-2"
+                    data-module="govuk-checkboxes">
+
+                    @foreach (var status in statuses)
+                    {
+                        var statusId = $"study-status-{status.Id}";
+
+                        <div class="govuk-checkboxes__item">
+                            <input
+                                class="govuk-checkboxes__input"
+                                id="@statusId"
+                                name="statusIds"
+                                type="checkbox"
+                                value="@status.Id"
+                                checked="@Model.Filters.SelectedStatuses.Contains(status.Id)"/>
+
+                            <label
+                                class="govuk-label govuk-checkboxes__label"
+                                for="@statusId">
+                                @status.Code
+                            </label>
+                        </div>
+                    }
+                </div>
+
+            </fieldset>
+        </details>
+
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible govuk-!-margin-top-2"/>
+
+        <button
+            type="submit"
+            class="govuk-button"
+            data-module="govuk-button">
+            Apply filters
+        </button>
+    </form>
+</aside>

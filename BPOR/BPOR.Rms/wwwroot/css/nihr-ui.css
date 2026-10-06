@@ -401,33 +401,20 @@ button.govuk-link:focus{
     margin-left: 0;
 }
 
+.govuk-details__summary {
+    display: block;
+    padding-bottom: 0.5rem;
+}
+
 .status-tag {
     max-width: 100%;
-    border-width: 2px;
+    border-width: 1px;
     border-style: solid;
-    padding: 5px 4px 5px 4px !important;
+    padding: 2px 5px !important;
 }
 
-.status-tag.govuk-tag--grey {
-    border-color: #ACBCC3;
-}
-
-.status-tag.govuk-tag--blue {
-    border-color: #193E72;
-}
-
-.status-tag.govuk-tag--green {
-    border-color: #26A86C;
-}
-
-.status-tag.govuk-tag--yellow {
-    border-color: #FED47A;
-}
-
-.status-tag.govuk-tag--red {
-    border-color: #EA5D4E;
-}
-
-.status-tag.govuk-tag--purple {
-    border-color: #6667AD;
+.selected-filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
 }
