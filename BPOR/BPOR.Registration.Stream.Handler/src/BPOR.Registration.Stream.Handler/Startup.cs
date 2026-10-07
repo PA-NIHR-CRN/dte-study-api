@@ -25,7 +25,7 @@ public static class Startup
         // configuration
         var configurationBuilder = new ConfigurationBuilder()
             .AddEnvironmentVariables()
-            .AddNihrConfiguration(services, hostEnvironment);
+            .AddNihrConfiguration(hostEnvironment);
 
         var configuration = configurationBuilder.Build();
 

@@ -16,10 +16,9 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ConfigurationExtensions
     {
-
         //TODO chat with chris about this global exception handling
         public static IServiceCollection ConfigureNihrLogging(this IServiceCollection services,
-    IConfiguration configuration)
+            IConfiguration configuration)
         {
             var loggerOptions = new LambdaLoggerOptions
             {
@@ -64,44 +63,55 @@ namespace Microsoft.Extensions.DependencyInjection
             var executionEnv = Environment.GetEnvironmentVariable("AWS_EXECUTION_ENV");
             return !string.IsNullOrEmpty(executionEnv) && executionEnv.StartsWith("AWS_Lambda_");
         }
-        public static IConfigurationBuilder AddNihrConfiguration(this IConfigurationBuilder configuration,
-IHostEnvironment hostEnvironment)
+
+        public static IConfigurationBuilder AddNihrConfiguration(this IConfigurationBuilder configurationBuilder,
+            IHostEnvironment hostEnvironment)
         {
             if (hostEnvironment.IsDevelopment())
             {
-                configuration.SetBasePath(Directory.GetCurrentDirectory())
+                configurationBuilder.SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
             }
-
-            return configuration;
-        }
-
-        public static IConfigurationBuilder AddNihrConfiguration(this IConfigurationBuilder configurationBuilder, IServiceCollection services,
-IHostEnvironment hostEnvironment)
-        {
-
-            configurationBuilder.AddNihrConfiguration(hostEnvironment);
+            
+            configurationBuilder.AddJsonFile($"appsettings.{hostEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
             var configuration = configurationBuilder.Build();
 
-            var secretsManagerSettings = services.GetSectionAndValidate<AwsSecretsManagerSettings>(configuration).Value;
-            if (secretsManagerSettings.Enabled)
+            var secretsManagerSettings = configuration
+                .GetSection(AwsSecretsManagerSettings.SectionName)
+                .Get<AwsSecretsManagerSettings>();
+            if (secretsManagerSettings?.Enabled == true)
             {
-                configurationBuilder.AddAwsSecretsManager(secretsManagerSettings.SecretName,
-                    () => new AmazonSecretsManagerClient(
-                        RegionEndpoint.GetBySystemName(secretsManagerSettings.Region)));
+                configurationBuilder.AddAwsSecretsManager(secretsManagerSettings.SecretName, () =>
+                {
+                    AmazonSecretsManagerConfig config = new AmazonSecretsManagerConfig();
+                    config.RegionEndpoint = RegionEndpoint.GetBySystemName(secretsManagerSettings.Region);
+                    if (secretsManagerSettings.SsoProfile != null)
+                    {
+                        config.Profile = new Profile(secretsManagerSettings.SsoProfile);
+                    }
+
+                    var amazonSecretsManagerClient = new AmazonSecretsManagerClient(config);
+                    return amazonSecretsManagerClient;
+                });
             }
 
             return configurationBuilder;
+        }
+
+        public static IHostBuilder AddNihrConfiguration(this IHostBuilder builder)
+        {
+            builder.ConfigureAppConfiguration((context, configBuilder) =>
+                configBuilder.AddNihrConfiguration(context.HostingEnvironment));
+            return builder;
         }
 
         public static IHostApplicationBuilder AddNihrConfiguration(this IHostApplicationBuilder builder)
         {
             var hostEnvironment = builder.Environment;
             var configuration = builder.Configuration;
-            var services = builder.Services;
 
-            configuration.AddNihrConfiguration(services, hostEnvironment);
+            configuration.AddNihrConfiguration(hostEnvironment);
 
             return builder;
         }
@@ -114,8 +124,17 @@ IHostEnvironment hostEnvironment)
         }
 
         public static IOptions<T> GetSectionAndValidate<T>(this IHostApplicationBuilder builder
-            ) where T : class, new() => builder.Services.GetSectionAndValidate<T>(builder.Configuration);
+        ) where T : class, new() => builder.Services.GetSectionAndValidate<T>(builder.Configuration);
 
+        public static OptionsBuilder<T> AddOptionsAndValidate<T>(this IServiceCollection services, string sectionName)
+            where T : class
+        {
+            return services.AddOptions<T>()
+                .BindConfiguration(sectionName)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+        }
+        
         public static IOptions<T> GetSectionAndValidate<T>(this IServiceCollection services,
             IConfiguration configuration) where T : class, new()
         {
@@ -146,7 +165,8 @@ IHostEnvironment hostEnvironment)
 
                 if (validationResult.Any())
                 {
-                    throw new OptionsValidationException(string.Empty, typeof(T), validationResult.Select(x => x.ErrorMessage));
+                    throw new OptionsValidationException(string.Empty, typeof(T),
+                        validationResult.Select(x => x.ErrorMessage));
                 }
             }
 
@@ -159,7 +179,8 @@ IHostEnvironment hostEnvironment)
             return Options.Options.Create(settings);
         }
 
-        private static T BindFlatConfigurationKeys<T>(IConfiguration configuration, string sectionName) where T : class, new()
+        private static T BindFlatConfigurationKeys<T>(IConfiguration configuration, string sectionName)
+            where T : class, new()
         {
             var instance = new T();
             var properties = typeof(T).GetProperties();

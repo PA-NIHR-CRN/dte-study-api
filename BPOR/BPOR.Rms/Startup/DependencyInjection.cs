@@ -1,6 +1,7 @@
 using System.Reflection;
 using Amazon;
 using Amazon.SimpleEmail;
+using BPOR.Domain;
 using BPOR.Domain.Entities;
 using BPOR.Infrastructure.Clients;
 using BPOR.Rms.Services;
@@ -95,14 +96,7 @@ public static class DependencyInjection
         var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
         var participantConnectionString = dbSettings.Value.BuildConnectionString();
 
-        services.AddDbContext<ParticipantDbContext>((serviceProvider, options) =>
-            options.UseMySql(participantConnectionString, ServerVersion.AutoDetect(participantConnectionString),
-                builder =>
-                {
-                    builder.UseNetTopologySuite();
-                    builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                })
-                .AddVipSynchronisation(serviceProvider));
+        services.AddRmsDatabase((context, serviceProvider) => context.AddVipSynchronisation(serviceProvider));
 
         var notificationConnectionString =
             dbSettings.Value.BuildConnectionString(dbSettings.Value.NotificationDatabase);
