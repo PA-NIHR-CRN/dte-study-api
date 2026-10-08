@@ -2,7 +2,7 @@
 using FluentValidation.Validators;
 using Rbec.Postcodes;
 
-namespace BPOR.Rms.Validators;
+namespace NIHR.Infrastructure.AspNetCore.Validation;
 
 public class PostcodeValidator<T> : PropertyValidator<T, string?>, INotEmptyValidator
 {

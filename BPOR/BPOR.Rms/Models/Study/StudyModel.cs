@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using BPOR.Rms.Utilities;
+using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Enums;
 using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.Models.Study;
@@ -9,16 +10,19 @@ public class StudyModel
     [Display(Name = "Study ID")] public int Id { get; set; }
 
     [Required]
-    [Display(Name = "Main contact")]
+    [Display(Name = "Primary contact")]
     [StudyEdit(1)]
     public string FullName { get; set; }
 
     [Required]
     [EmailAddress]
-    [Display(Name = "Email address")]
+    [Display(Name = "Primary contact email address")]
     [StudyEdit(1)]
     public string EmailAddress { get; set; }
 
+    [Display(Name = "Primary contact role")]
+    public string MainContactRole { get; set; }
+    
     [Required]
     [Display(Name = "Study name")]
     [StudyEdit(2)]
@@ -29,6 +33,9 @@ public class StudyModel
     [StudyEdit(2)]
     [ResearcherEdit(3)] 
     public long? CpmsId { get; set; }
+    
+    [Display(Name = "One-line description of study")]
+    public string? Description { get; set; }
 
     [Display(Name = "Is this study recruiting identifiable participants?")]
     [StudyEdit(2)]
@@ -40,20 +47,21 @@ public class StudyModel
     [Display(Name = "Who is the Chief Investigator for the study?")]
     [ResearcherEdit(1)]
     public string? ChiefInvestigator { get; set; }
+    
+    [Display(Name = "Chief Investigator email address")]
+    public string? ChiefInvestigatorEmail { get; set; }
 
-    [Display(Name = "Provide the name(s) of the study sponsor(s), funder(s) and CRO (if applicable)")]
+    [Display(Name = "Sponsor organisation")]
     [ResearcherEdit(1)]
     public string? StudySponsors { get; set; }
 
-    [Display(Name = "Has the study been submitted for inclusion on the NIHR CRN portfolio?")]
+    [Display(Name = "Have you applied for inclusion in the RDN portfolio?")]
     [ResearcherEdit(2)]
     public string? PortfolioSubmissionStatus { get; set; }
 
     [Display(Name = "Outcome of submission")]
     [ResearcherEdit(3)]
     public string? OutcomeOfSubmission { get; set; }
-
-    public bool? HasFunding { get; set; }
 
     [Display(Name = "NIHR funding stream or grant code")]
     [ResearcherEdit(5)]
@@ -76,14 +84,15 @@ public class StudyModel
     public string? RecruitmentEndDate { get; set; }
 
     [Display(Name = "Does the study have NIHR funding?")]
+    [ValueDisplayFormatter<EnumFormatter<NihrFundingStatusType>>]
     [ResearcherEdit(4)]
-    public string? HasFundingDisplay => HasFunding == null ? null : (HasFunding == true ? "Yes" : "No");
+    public NihrFundingStatusType? HasFunding { get; set; }
 
-    [Display(Name = "Email campaign information URL")]
+    [Display(Name = "Website link")]
     [StudyEdit(3)]
     public string? InformationUrl { get; set; }
     
-    [ValueDisplayFormatter(typeof(YesNoFormatter))]
+    [ValueDisplayFormatter<YesNoFormatter>]
     [Display(Name = "Will this study have more than one research location in the UK?")]
     [StudyEdit(4)]
     public bool? HasMultipleResearchLocations { get; set; }
@@ -105,7 +114,23 @@ public class StudyModel
     public bool IsEligibleForPrescreener =>
         IsEligibilityCriteriaComplete && !(HasMultipleResearchLocations!.Value && SinglePersonResponsibleForRecruiting!.Value);
 
-    [Display(Name = "Volunteer study information page link")]
+    [Display(Name = "Volunteer study information page")]
     public string? VolunteerInformationUrl { get; set; }
+    
+    [Display(Name = "Who will be included in this study?")]
+    public string? InclusionCriteria { get; set; }
+
+    [ValueDisplayFormatter<EnumFormatter<EthicsApproval>>]
+    [Display(Name = "Does the study have ethics approval to use Be Part of Research?")]
+    public EthicsApproval? HasEthicsApproval { get; set; }
+    public StudyStatus? StudyStatus { get; set; }
+    
+    public StudyStatusViewModel StudyStatusViewModel => new()
+        {
+            StudyId = Id,
+            StudyStatusCode = StudyStatus?.Code,
+            CanChangeStatus = false,
+            StudyStatusId = StudyStatus?.Id,
+        };
 }
 

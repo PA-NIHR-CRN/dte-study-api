@@ -1,4 +1,7 @@
+@using BPOR.Rms.Ms4.Settings
+@using Microsoft.Extensions.Options
 @model BPOR.Rms.Models.Study.StudiesViewModel
+@inject IOptions<StudyCreationSettings> StudyCreationSettings
 
 <style>
     @@media screen and (max-width: 768px) {
@@ -227,6 +230,7 @@
                 </div>
 
                 <div class="study-card-actions">
+                    <partial name="Partials/Details/_StudyStatus" model="item.StudyStatusViewModel" />
                     <div class="study-card-recruited-numbers">
                         <p class="govuk-body govuk-!-margin-0">Recruited:</p>
                         <p class="govuk-heading-m govuk-!-margin-0 govuk-!-padding-0">
@@ -257,7 +261,14 @@ else if (!Model.HasSearched)
             <role include="Researcher">You haven&apos;t added any studies yet, please apply to add a study now</role>
             <role exclude="Researcher">You haven&apos;t added any studies yet, please add a study now</role>
         </p>
-        <a role-include="Researcher" asp-action="TermsAndConditions" asp-controller="Researcher" class="govuk-button">Apply to add a study</a>
+        @if (StudyCreationSettings.Value.EnableMs4ResearcherJourney)
+        {
+            <a role-include="Researcher" asp-action="Create" asp-controller="Study" class="govuk-button">Apply to add a study</a>
+        }
+        else
+        {
+            <a role-include="Researcher" asp-action="TermsAndConditions" asp-controller="Researcher" class="govuk-button">Apply to add a study</a>
+        }
         <a role-exclude="Researcher" asp-action="Create" asp-controller="Study" class="govuk-button">Add study</a>
     </div>
 }

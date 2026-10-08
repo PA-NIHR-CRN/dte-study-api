@@ -1,10 +1,16 @@
-using System.Diagnostics;
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Infrastructure.Services.Development;
+using BPOR.Rms;
+using BPOR.Rms.Ms4;
+using BPOR.Rms.Ms4.ScheduledJobs;
 using BPOR.Rms.Startup;
-using BPOR.Rms.VolunteerInformation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
+using NIHR.Infrastructure.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
+using Quartz;
 
 var builder = WebApplication
     .CreateBuilder(args);
@@ -17,8 +23,23 @@ builder.AddIdgAuthentication(authOptions =>
             .RequireAuthenticatedUser()
             .RequireRole(RoleConfiguration.GetRoles().Select(x => x.Code))
             .Build();
+        authOptions.AddPolicy(PolicyNames.IsAdmin, policy =>
+        {
+            policy.Requirements.Add(new RolesAuthorizationRequirement(["Admin"]));
+        });
+        authOptions.AddPolicy(PolicyNames.IsResearcher, policy =>
+        {
+            policy.Requirements.Add(new RolesAuthorizationRequirement(["Researcher"]));
+        });
     }
 );
+
+builder.Services.AddQuartz();
+builder.Services.AddQuartzHostedService(options =>
+{
+    // when shutting down we want jobs to complete gracefully
+    options.WaitForJobsToComplete = true;
+});
 
 builder.AddAWSSystemsManagerDataProtection("/BPOR/RMS");
 
@@ -30,12 +51,21 @@ if (builder.Environment.IsDevelopment())
     builder.Services.Decorate<IEmailService, DevelopmentEmailService>();
 }
 
+builder.Services.AddScoped<AnyPolicyAuthorizationFilter>();
+
 builder.WebHost.UseStaticWebAssets();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<AnyPolicyAuthorizationFilter>();
+}).AddRazorRuntimeCompilation();
 
 var app = builder.Build();
 
 app.ConfigureSwagger(builder.Environment);
 
 app.UseApplicationMiddleware();
+
+await app.ScheduleDraftStudyCleanup();
 
 app.Run();
