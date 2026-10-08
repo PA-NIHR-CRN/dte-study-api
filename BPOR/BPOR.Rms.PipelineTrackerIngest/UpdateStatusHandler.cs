@@ -26,7 +26,14 @@ public class UpdateStatusHandler(ParseResult result, UpdateStatusParams paramete
 
         foreach (var row in rows)
         {
-            
+            Study[] candidates;
+            candidates = row.CpmsId == null 
+                ? DbContext.Studies.Where(i => i.IsDeleted == false && i.StudyName == row.StudyShortName).ToArray() 
+                : DbContext.Studies.Where(i => i.IsDeleted == false && i.CpmsId == row.CpmsId).ToArray();
+            if (candidates.Length == 1)
+            {
+                
+            }
         }
         
         return Task.FromResult(0);

@@ -9,7 +9,9 @@ using Microsoft.Extensions.Configuration;
 var hostBuilder = new CommandHost("RMS Pipeline Ingest Tool")
     .ConfigureHost(builder =>
     {
-        builder.ConfigureHostConfiguration(config => config.AddCommandLine(args).AddEnvironmentVariables());
+        builder.ConfigureHostConfiguration(config => config
+            .AddCommandLine(args)
+            .AddEnvironmentVariables());
         builder.AddNihrConfiguration();
     })
     .RegisterServices(RegisterServices)

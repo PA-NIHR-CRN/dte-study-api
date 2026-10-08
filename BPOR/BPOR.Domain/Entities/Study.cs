@@ -47,6 +47,8 @@ public class Study : ISoftDelete, IAudit
     public StudyStatus? StudyStatus { get; set; }
     public NihrFundingStatus? NihrFundingStatus { get; set; }
     
+    public int? PipelineVsId { get; set; }
+    
     public ICollection<ManualEnrollment> ManualEnrollments { get; set; } = new List<ManualEnrollment>();
     public ICollection<StudyParticipantEnrollment> StudyParticipantEnrollments { get; set; } = new List<StudyParticipantEnrollment>();
     public ICollection<FilterCriteria> FilterCriterias { get; set; } = new List<FilterCriteria>();

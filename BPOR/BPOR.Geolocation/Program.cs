@@ -2,7 +2,7 @@ using BPOR.Geolocation.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddNihrConfiguration(builder.Services, builder.Environment);
+builder.AddNihrConfiguration();
 builder.Services.RegisterServices(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
