@@ -1,4 +1,5 @@
-﻿@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
+﻿@using BPOR.Domain.Enums
+@model BPOR.Rms.Models.Researcher.ResearcherStudyFormViewModel
 
 <h1 class="govuk-heading-xl">
     NIHR funding
@@ -11,11 +12,11 @@
 
     <div class="govuk-radios" data-module="govuk-radios">
         <div class="govuk-radios__item">
-            @Html.RadioButtonFor(m => m.HasFunding, true, new { @class = "govuk-radios__input", id = "hasFundingYes" })
+            @Html.RadioButtonFor(m => m.HasFunding, NihrFundingStatusType.Yes, new { @class = "govuk-radios__input", id = "hasFundingYes" })
             @Html.Label("Yes", "Yes", new { @class = "govuk-label govuk-radios__label" })
         </div>
         <div class="govuk-radios__item">
-            @Html.RadioButtonFor(m => m.HasFunding, false, new { @class = "govuk-radios__input", id = "hasFundingNo" })
+            @Html.RadioButtonFor(m => m.HasFunding, NihrFundingStatusType.No, new { @class = "govuk-radios__input", id = "hasFundingNo" })
             @Html.Label("No", "No", new { @class = "govuk-label govuk-radios__label" })
         </div>
     </div>
