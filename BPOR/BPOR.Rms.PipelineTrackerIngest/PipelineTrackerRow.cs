@@ -8,7 +8,7 @@ public class PipelineTrackerRow
     public int VsId { get; set; }
     public string StudyShortName { get; set; }
     public int? CpmsId { get; set; }
-    public StudyStatusType? StudyStatus { get; set; }
+    public StudyStatusType StudyStatus { get; set; }
     public string MainContactName { get; set; }
     public string MainContactEmail { get; set; }
     public string ManagingSpeciality { get; set; }
