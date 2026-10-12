@@ -36,7 +36,7 @@
 
                     @if (Model.Filters.SelectedStatuses.Any())
                     {
-                        <div class="selected-filter-tags govuk-!-margin-top-3">
+                        <div class="selected-filter-tags govuk-!-margin-top-2">
                             @foreach (var filter in Model.Filters.SelectedStatuses)
                             {
                                 <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(filter)" class="status-tag">

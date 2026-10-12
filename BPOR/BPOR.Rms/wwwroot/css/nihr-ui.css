@@ -411,10 +411,11 @@ button.govuk-link:focus{
     border-width: 1px;
     border-style: solid;
     padding: 2px 5px !important;
+    margin: 0 !important;
 }
 
 .selected-filter-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 10px;
 }
