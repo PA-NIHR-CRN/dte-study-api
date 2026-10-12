@@ -1,15 +1,18 @@
 ﻿namespace BPOR.Rms.PipelineTrackerIngest.SqlWriter;
 
-public class SqlIdentifier
+public class SqlIdentifier : ISqlValue
 {
-    public SqlIdentifier()
+    public SqlIdentifier(string value)
     {
+        Value = value;
     }
 
     public static implicit operator SqlIdentifier(string value)
     {
-        return new SqlIdentifier { Value = value };
+        return new SqlIdentifier(value);
     }
     
-    public required string Value { get; init; }
+    public string Value { get; }
+    
+    public void Accept(ISqlValueVisitor visitor) => visitor.Visit(this);
 }

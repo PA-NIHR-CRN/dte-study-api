@@ -1,6 +1,6 @@
 ﻿using Albatross.CommandLine.Annotations;
 
-namespace BPOR.Rms.PipelineTrackerIngest;
+namespace BPOR.Rms.PipelineTrackerIngest.CommandParams;
 
 public abstract class PipelineIngestParamsBase 
 {

@@ -1,6 +1,6 @@
 ﻿namespace BPOR.Rms.PipelineTrackerIngest.SqlWriter;
 
-public class SqlVariable
+public class SqlVariable : ISqlValue
 {
     public SqlVariable(string name)
     {
@@ -8,4 +8,6 @@ public class SqlVariable
     }
 
     public string Name { get; init; }
+
+    public void Accept(ISqlValueVisitor visitor) => visitor.Visit(this);
 }

@@ -1,8 +1,9 @@
-﻿using System.Reflection;
+﻿using System.Globalization;
+using System.Reflection;
 
 namespace BPOR.Rms.PipelineTrackerIngest.SqlWriter;
 
-public abstract class SqlWriterBase(TextWriter output) : ISqlWriter
+public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLevelStatementVisitor, ISqlPredicateVisitor, ISqlValueVisitor
 {
     public virtual void WriteComment(string comment)
     {
@@ -16,22 +17,14 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter
         }
     }
     
-    public void WriteLine(string line)
+    public void WriteRawLine(string line)
     {
         output.WriteLine(line);
     }
 
-    public virtual void Write(InsertStatement statement)
+    public void Write(ISqlTopLevelStatement statement)
     {
-        var values = Flatten(statement.InsertedValues);
-        
-        output.Write("INSERT INTO ");
-        Write(statement.Target);
-        output.Write(" (");
-        WriteCommaSeperated(values, i => Write(i.Identifier));
-        output.Write(") VALUES (");
-        WriteCommaSeperated(values, i => Write(i.Value));
-        output.WriteLine(");");
+        statement.Accept(this);
     }
 
     protected virtual void WriteCommaSeperated<T>(IEnumerable<T> values, Action<T> action)
@@ -48,47 +41,33 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter
         }
     }
 
-    protected void Write(TypedValue value)
+    protected void WriteReflectedValue(object value)
     {
-        if (value.Type == typeof(SqlVariable))
+        if (value is not ISqlValue sqlValue)
         {
-            Write((SqlVariable) value.Value);
+            sqlValue = new SqlLiteral(value);
         }
-        else if (value.Value is null)
-        {
-            WriteNullLiteral();
-        }
-        else if (value.Type == typeof(string))
-        {
-            WriteLiteral((string)value.Value);
-        }
-        else if (value.Type == typeof(bool) || value.Type == typeof(bool?))
-        {
-            WriteLiteral((bool)value.Value);
-        }
-        else if (value.Type == typeof(DateTime) || value.Type == typeof(DateTime?))
-        {
-            WriteLiteral((DateTime)value.Value);
-        }
-        else if (value.Type == typeof(int) || value.Type == typeof(int?))
-        {
-            WriteLiteral((int)value.Value);
-        }
+        sqlValue.Accept(this);
     }
 
-    protected abstract void WriteLiteral(DateTime value);
+    protected virtual void WriteLiteral(DateTime value)
+    {
+        WriteLiteral(value.ToString("yyyy-MM-ddTHH:mm:ss"));
+    }
 
-    protected abstract void WriteLiteral(bool value);
+    protected virtual void WriteLiteral(bool value)
+    {
+        WriteLiteral(value ? 1 : 0);
+    }
 
-    protected abstract void WriteLiteral(int value);
+    protected virtual void WriteLiteral(int value)
+    {
+        output.Write(value.ToString(CultureInfo.InvariantCulture));
+    }
 
     protected abstract void WriteLiteral(string value);
 
-    protected abstract void WriteNullLiteral();
-
-    protected abstract void Write(SqlVariable value);
-    
-    protected abstract void Write(SqlIdentifier identifier);
+    protected virtual void WriteNullLiteral() => output.Write("NULL");
 
     private IEnumerable<NamedValue> Flatten(object value)
     {
@@ -98,11 +77,122 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter
             yield return new NamedValue(item.Name, new (item.PropertyType, item.GetValue(value)));
         }
     }
-}
 
-public interface ISqlWriter
-{
-    void WriteComment(string comment);
-    void WriteLine(string line);
-    void Write(InsertStatement statement);
+    public virtual void Visit(UpdateStatement updateStatement)
+    {
+        var flattenedValues = Flatten(updateStatement.UpdatedValues);
+        
+        output.Write("UPDATE ");
+        updateStatement.Table.Accept(this);
+        output.Write(" SET ");
+        WriteCommaSeperated(flattenedValues, i =>
+        {
+            i.Identifier.Accept(this);
+            output.Write(" = ");
+            WriteReflectedValue(i.Value);
+        });
+        output.Write(" WHERE ");
+        updateStatement.WhereClause.Accept(this);
+    }
+
+    public virtual void Visit(InsertStatement insertStatement)
+    {
+        var values = Flatten(insertStatement.InsertedValues);
+        
+        output.Write("INSERT INTO ");
+        Visit(insertStatement.Table);
+        WriteOpenParanthesis();
+        WriteCommaSeperated(values, i => Visit(i.Identifier));
+        WriteCloseParanthesis();
+        output.Write(" VALUES ");
+        WriteOpenParanthesis();
+        WriteCommaSeperated(values, i => WriteReflectedValue(i.Value));
+        WriteCloseParanthesis();
+    }
+
+    public void Visit(LogicalBinOpClause predicate)
+    {
+        WriteOpenParanthesis();
+        predicate.Lhs.Accept(this);
+        WriteLogicalBinOp(predicate.Op);
+        predicate.Rhs.Accept(this);
+        WriteCloseParanthesis();
+    }
+
+    protected virtual void WriteLogicalBinOp(LogicalBinOp predicateOp)
+    {
+        output.Write(predicateOp switch
+        {
+            LogicalBinOp.And => "AND",
+            LogicalBinOp.Or => "OR",
+            _ => throw new NotImplementedException()
+        });
+    }
+
+    private void WriteOpenParanthesis()
+    {
+        output.Write("(");
+    }
+    
+    private void WriteCloseParanthesis()
+    {
+        output.Write("(");
+    }
+
+    public void Visit(ComparisonClause predicate)
+    {
+        predicate.Lhs.Accept(this);
+        WriteComparisonOp(predicate.Op);
+        predicate.Rhs.Accept(this);
+    }
+
+    protected virtual void WriteComparisonOp(ComparisonOperator op)
+    {
+        output.Write(op switch
+        {
+            ComparisonOperator.Equals => "=",
+            ComparisonOperator.NotEquals => "<>",
+            ComparisonOperator.GreaterThan => ">",
+            ComparisonOperator.GreaterThanOrEquals => ">=",
+            ComparisonOperator.LessThan => "<",
+            ComparisonOperator.LessThanOrEquals => "<=",
+            ComparisonOperator.Like => "LIKE",
+            ComparisonOperator.In => "IN",
+            _ => throw new NotImplementedException()
+        });
+    }
+
+    public void Visit(SqlLiteral literal)
+    {
+        if (literal.Value is null)
+        {
+            WriteNullLiteral();
+        }
+        else if (literal.Value is Enum enumValue)
+        {
+            WriteLiteral(Convert.ToInt32(enumValue));
+        }
+        else if (literal.Value is string stringValue)
+        {
+            WriteLiteral(stringValue);
+        }
+        else if (literal.Value is bool boolValue)
+        {
+            WriteLiteral(boolValue);
+        }
+        else if (literal.Value is DateTime dateTimeValue)
+        {
+            WriteLiteral(dateTimeValue);
+        }
+        else if (literal.Value is int intValue)
+        {
+            WriteLiteral(intValue);
+        }
+    }
+
+    public abstract void Visit(SqlIdentifier identifier);
+    public virtual void Visit(SqlVariable variable)
+    {
+        output.Write(variable);
+    }
 }

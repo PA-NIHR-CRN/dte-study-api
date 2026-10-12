@@ -1,9 +1,10 @@
 ﻿using System.CommandLine;
 using BPOR.Domain.Entities;
+using BPOR.Rms.PipelineTrackerIngest.CommandParams;
 using BPOR.Rms.PipelineTrackerIngest.SqlWriter;
 using Microsoft.Extensions.Logging;
 
-namespace BPOR.Rms.PipelineTrackerIngest;
+namespace BPOR.Rms.PipelineTrackerIngest.CommandHandlers;
 
 public class AddMissingStudiesHandler(ParseResult result, UpdateStatusParams parameters, ParticipantDbContext DbContext, ILogger<UpdateStatusHandler> logger)
     : IngestHandlerBase<UpdateStatusParams>(result, parameters, DbContext)
@@ -47,7 +48,7 @@ public class AddMissingStudiesHandler(ParseResult result, UpdateStatusParams par
 
         output.Write(new InsertStatement()
         {
-            Target = "Studies", InsertedValues = new
+            Table = "Studies", InsertedValues = new
             {
                 PipelineVsId = ingestedRow.VsId,
                 FullName = ingestedRow.MainContactName,

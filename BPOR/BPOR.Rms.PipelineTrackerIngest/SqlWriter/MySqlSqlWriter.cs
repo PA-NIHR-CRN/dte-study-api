@@ -4,16 +4,6 @@ namespace BPOR.Rms.PipelineTrackerIngest.SqlWriter;
 
 public class MySqlSqlWriter(TextWriter output) : SqlWriterBase(output)
 {
-    protected override void WriteLiteral(DateTime value)
-    {
-        WriteLiteral(value.ToString("yyyy-MM-ddTHH:mm:ss"));
-    }
-
-    protected override void WriteLiteral(bool value)
-    {
-        WriteLiteral(value ? 1 : 0);
-    }
-
     protected override void WriteLiteral(int value)
     {
         output.Write(value.ToString());
@@ -55,13 +45,8 @@ public class MySqlSqlWriter(TextWriter output) : SqlWriterBase(output)
     {
         output.Write("NULL");
     }
-
-    protected override void Write(SqlVariable value)
-    {
-        Write(value.Name);
-    }
-
-    protected override void Write(SqlIdentifier identifier)
+    
+    public override void Visit(SqlIdentifier identifier)
     {
         output.Write($"`{identifier.Value}`");
     }
