@@ -25,6 +25,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
     public void Write(ISqlTopLevelStatement statement)
     {
         statement.Accept(this);
+        WriteEndStatement();
     }
 
     protected virtual void WriteCommaSeperated<T>(IEnumerable<T> values, Action<T> action)
@@ -41,7 +42,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         }
     }
 
-    protected void WriteReflectedValue(object value)
+    protected void WriteReflectedValue(object? value)
     {
         if (value is not ISqlValue sqlValue)
         {
@@ -63,6 +64,11 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
     protected virtual void WriteLiteral(int value)
     {
         output.Write(value.ToString(CultureInfo.InvariantCulture));
+    }
+
+    protected virtual void WriteEndStatement()
+    {
+        output.WriteLine(";");
     }
 
     protected abstract void WriteLiteral(string value);
@@ -89,7 +95,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         {
             i.Identifier.Accept(this);
             output.Write(" = ");
-            WriteReflectedValue(i.Value);
+            WriteReflectedValue(i.Value.Value);
         });
         output.Write(" WHERE ");
         updateStatement.WhereClause.Accept(this);
@@ -106,7 +112,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         WriteCloseParanthesis();
         output.Write(" VALUES ");
         WriteOpenParanthesis();
-        WriteCommaSeperated(values, i => WriteReflectedValue(i.Value));
+        WriteCommaSeperated(values, i => WriteReflectedValue(i.Value.Value));
         WriteCloseParanthesis();
     }
 
@@ -136,7 +142,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
     
     private void WriteCloseParanthesis()
     {
-        output.Write("(");
+        output.Write(")");
     }
 
     public void Visit(ComparisonClause predicate)
@@ -148,6 +154,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
 
     protected virtual void WriteComparisonOp(ComparisonOperator op)
     {
+        output.Write(" ");
         output.Write(op switch
         {
             ComparisonOperator.Equals => "=",
@@ -160,6 +167,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
             ComparisonOperator.In => "IN",
             _ => throw new NotImplementedException()
         });
+        output.Write(" ");
     }
 
     public void Visit(SqlLiteral literal)
@@ -188,11 +196,15 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         {
             WriteLiteral(intValue);
         }
+        else
+        { 
+            throw new InvalidOperationException($"Unsupported literal type {literal.Value.GetType().Name}");
+        }
     }
 
     public abstract void Visit(SqlIdentifier identifier);
     public virtual void Visit(SqlVariable variable)
     {
-        output.Write(variable);
+        output.Write(variable.Name);
     }
 }

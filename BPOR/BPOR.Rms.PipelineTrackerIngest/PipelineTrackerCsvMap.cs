@@ -15,7 +15,6 @@ public sealed class PipelineTrackerCsvMap : ClassMap<PipelineTrackerRow>
         Map(m => m.MainContactEmail).Name("Main Contact Email");
         Map(m => m.ManagingSpeciality).Name("Managing Specialty");
         Map(m => m.StudyDesign).Name("Study Design");
-        Map(m => m.CommOrNonComm).Name("Comm / \r\nNon-Comm");
         Map(m => m.RecruitmentStartDate).Name("Recruitment Start Date");
         Map(m => m.RecruitmentEndDate).Name("Recruitment End Date");
         Map(m => m.OverallRecruitmentTarget).Name("Overall recruitment target");
