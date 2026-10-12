@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Researcher;
 using BPOR.Rms.Models.Study;
@@ -64,9 +65,9 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                         RecruitmentStartDate = model.RecruitmentStartDate.ToDateOnly()?.ToDateTime(TimeOnly.MinValue),
                         RecruitmentEndDate = model.RecruitmentEndDate.ToDateOnly()?.ToDateTime(TimeOnly.MaxValue),
                         IsRecruitingIdentifiableParticipants = model.RecruitingIdentifiableVolunteers.Value,
-                        SubmissionOutcomeId = model.PortfolioSubmissionStatus == 1 ? model.OutcomeOfSubmission : null,
-                        CpmsId = model.PortfolioSubmissionStatus == 1 ? model.CPMSId : null,
-                        FundingCode = model.HasFunding == true ? model.FundingCode : null,
+                        SubmissionOutcomeId = model.PortfolioSubmissionStatus == SubmittedType.Yes ? model.OutcomeOfSubmission : null,
+                        CpmsId = model.PortfolioSubmissionStatus == SubmittedType.Yes ? model.CPMSId : null,
+                        FundingCode = model.HasFunding == NihrFundingStatusType.Yes ? model.FundingCode : null,
                     };
 
                     context.Add(study);
@@ -83,7 +84,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                     switch (model.Step)
                     {
                         case 2:
-                            if (model.PortfolioSubmissionStatus != 1)
+                            if (model.PortfolioSubmissionStatus != SubmittedType.Yes)
                             {
                                 model.OutcomeOfSubmission = null;
                                 ModelState.Remove(nameof(model.OutcomeOfSubmission));
@@ -96,7 +97,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                             }
                             break;
                         case 4:
-                            if (model.HasFunding != true)
+                            if (model.HasFunding != NihrFundingStatusType.Yes)
                             {
                                 model.FundingCode = null;
                                 model.GotoNextStep(6);
@@ -120,7 +121,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
             ModelState.Clear();
 
             // Skip step if dependency questions are not required
-            if (model.Step == 4 && model.PortfolioSubmissionStatus != 1)
+            if (model.Step == 4 && model.PortfolioSubmissionStatus != SubmittedType.Yes)
             {
                 model.GotoNextStep(2);
             }
@@ -132,7 +133,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                     model.Step = 2;
                 }
             }
-            else if (model.Step == 6 && model.HasFunding != true)
+            else if (model.Step == 6 && model.HasFunding != NihrFundingStatusType.Yes)
             {
                 model.GotoNextStep(4);
             }
@@ -206,12 +207,12 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
         if (model.Step == 3)
         {
-            if (model.OutcomeOfSubmission == null && model.PortfolioSubmissionStatus == 1)
+            if (model.OutcomeOfSubmission == null && model.PortfolioSubmissionStatus == SubmittedType.Yes)
             {
                 ModelState.AddModelError("OutcomeOfSubmission", "Select the outcome of the submission for inclusion on the NIHR CRN portfolio");
             }
 
-            if (model.CPMSId == null && model.PortfolioSubmissionStatus == 1)
+            if (model.CPMSId == null && model.PortfolioSubmissionStatus == SubmittedType.Yes)
             {
                 ModelState.AddModelError("CPMSId", "Enter the CPMS ID for the study");
             }
@@ -227,7 +228,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
 
         if (model.Step == 5)
         {
-            if (String.IsNullOrEmpty(model.FundingCode) && model.HasFunding == true)
+            if (String.IsNullOrEmpty(model.FundingCode) && model.HasFunding == NihrFundingStatusType.Yes)
             {
                 ModelState.AddModelError("FundingCode", "Enter the NIHR funding stream or grant code");
             }
@@ -401,7 +402,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                         studyToUpdate.Sponsors = model.StudySponsors;
                         break;
                     case 2:
-                        if (model.PortfolioSubmissionStatus == 1)
+                        if (model.PortfolioSubmissionStatus == SubmittedType.Yes)
                         {
                             model.Step = 3;
                             model.OutcomeOfSubmission = null;
@@ -413,12 +414,12 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                         studyToUpdate.CpmsId = null;
                         break;
                     case 3:
-                        studyToUpdate.SubmittedId = 1;
+                        studyToUpdate.SubmittedId = SubmittedType.Yes;
                         studyToUpdate.SubmissionOutcomeId = model.OutcomeOfSubmission;
                         studyToUpdate.CpmsId = model.CPMSId;
                         break;
                     case 4:
-                        if (model.HasFunding == true)
+                        if (model.HasFunding == NihrFundingStatusType.Yes)
                         {
                             model.Step = 5;
                             model.FundingCode = string.Empty;
@@ -429,7 +430,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                         studyToUpdate.FundingCode = null;
                         break;
                     case 5:
-                        studyToUpdate.HasNihrFunding = true;
+                        studyToUpdate.HasNihrFunding = NihrFundingStatusType.Yes;
                         studyToUpdate.FundingCode = model.FundingCode;
                         break;
                     case 6:

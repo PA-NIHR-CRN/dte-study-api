@@ -1,0 +1,20 @@
+﻿@using BPOR.Domain.Entities
+@using BPOR.Rms.Helpers
+@using BPOR.Rms.Startup
+@model BPOR.Rms.Models.Study.StudyStatusViewModel
+@inject ICurrentUserProvider<User> CurrentUserProvider
+
+@if (CurrentUserProvider.IsAdmin() && !String.IsNullOrEmpty(Model.StudyStatusCode))
+{
+    <div class="govuk-button-group">
+        <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(Model.StudyStatusId!.Value)" class="govuk-!-margin-right-2 status-tag">@Model.StudyStatusCode</govuk-tag>
+        
+        @if (Model.CanChangeStatus)
+        {
+            <a class="govuk-link" asp-action="ChangeStatus" asp-route-studyId="@Model.StudyId">
+                Change
+            </a>
+        }
+        
+    </div>
+}

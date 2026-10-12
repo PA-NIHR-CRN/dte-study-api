@@ -1,4 +1,5 @@
 @using BPOR.Domain.Enums
+@using BPOR.Rms.Abstractions.Enums
 @using NIHR.Infrastructure
 @using NIHR.Infrastructure.Interfaces
 @using NIHR.Infrastructure.Paging
@@ -7,12 +8,36 @@
 
 @{
     var hideCampaignType = (bool?)ViewData["CampaignTable.HideCampaignType"] ?? false;
+    var vsiStatus = ViewData["VsiStatus"] as VsiStatus?;
+    
+    var vsiLinkText = vsiStatus switch
+    {
+        VsiStatus.Draft => "Resume volunteer study information page",
+        VsiStatus.Active => "Preview volunteer study information page",
+        _ => "Create volunteer study information page"
+    };
+    
+    var studyId = ViewContext.RouteData.Values["id"];
+    var draftUrl = Url.Action("Start", "VolunteerInformationStart", new { studyId = studyId });
+    var activeUrl = Url.Action("PreviewVip", "VolunteerInformationPage", new { studyId = studyId });
+    
+    var url = vsiStatus switch
+    {
+        VsiStatus.Draft => draftUrl,
+        VsiStatus.Active => activeUrl,
+        _ => draftUrl
+    };
 }
-<table class="govuk-table" style="width: 100%;">
 
-    <thead class="govuk-table__head">
+<h3 class="govuk-heading-s">Study invites</h3>
+
+@if (Model.Any())
+{
+    <table class="govuk-table" style="width: 100%;">
+
+        <thead class="govuk-table__head">
         <tr class="govuk-table__row">
-            <th scope="col" class="govuk-table__header ">Date/time sent</th>
+            <th scope="col" class="govuk-table__header ">Date and time sent</th>
             @if (!hideCampaignType)
             {
                 <th scope="col" class="govuk-table__header ">Campaign type</th>
@@ -23,8 +48,8 @@
             <th scope="col" class="govuk-table__header ">Bounced</th>
             <th scope="col" class="govuk-table__header ">Status</th>
         </tr>
-    </thead>
-    <tbody class="govuk-table__body">
+        </thead>
+        <tbody class="govuk-table__body">
         @foreach (var campaign in Model)
         {
             <tr class="govuk-table__row">
@@ -78,5 +103,13 @@
                 </td>
             </tr>
         }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+}
+else
+{
+
+    <p>You haven't sent any communications out about this study yet.</p>
+    <p><a href="@url">@vsiLinkText</a></p>
+}
+

@@ -1,0 +1,11 @@
+@model BPOR.Rms.Ms4.Models.StudyEditViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+}
+
+<form-group for="@Model.FundingCode" label-as-heading="true" label-class="govuk-heading-l">
+    <input class="govuk-input"
+           asp-for="@Model.FundingCode"
+           type="text"/>
+</form-group>

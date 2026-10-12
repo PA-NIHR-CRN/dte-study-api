@@ -5,14 +5,19 @@
 @inject ICurrentUserProvider<User> CurrentUserProvider
 
 <div class="govuk-grid-row">
-    <partial name="Partials/Details/_PreScreenerEligibility" model="Model.PreScreenerViewModel" />
+
+    <div class="govuk-!-margin-left-2">
+        <partial name="Partials/Details/_StudyStatus" model="Model.StudyStatusViewModel" />
+    </div>
     
+    <partial name="Partials/Details/_PreScreenerEligibility" model="Model.PreScreenerViewModel"/>
+
     <div class="govuk-grid-column-one-half">
         <h1 class="govuk-heading-l">
             @Html.DisplayFor(model => model.Study.StudyName)
         </h1>
     </div>
-    
+
 </div>
 
 <partial name="Partials/Details/_StudyDetailsActionMenu" />

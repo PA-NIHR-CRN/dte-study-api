@@ -1,6 +1,19 @@
 @using NIHR.GovUk.AspNetCore.Mvc.Views
 @model NIHR.GovUk.AspNetCore.Mvc.Models.GovUkRadiosModel
 
-<div class="govuk-radios @GovUkStylingHelper.GetRadioLayoutClass(Model.Layout)" data-module="govuk-radios">
-    @Model.InnerContent
+<div class="govuk-form-group @(string.IsNullOrEmpty(Model.ErrorMessage) ? "" : "govuk-form-group--error")">
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <p class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span>
+            @Model.ErrorMessage
+        </p>
+    }
+
+    <div class="govuk-radios @GovUkStylingHelper.GetRadioLayoutClass(Model.Layout)"
+         data-module="govuk-radios">
+        @Model.InnerContent
+    </div>
+
 </div>

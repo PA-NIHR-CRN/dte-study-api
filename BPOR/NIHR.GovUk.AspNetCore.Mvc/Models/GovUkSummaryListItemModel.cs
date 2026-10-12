@@ -2,7 +2,11 @@
 
 namespace NIHR.GovUk.AspNetCore.Mvc.Models;
 
-public record GovUkSummaryListItemModel (
+public record GovUkSummaryListItemModel(
+    bool ShowName,
     string Name,
-    object Value,
-    TagHelperContent InnerContent) : GovUkModelWithContent(InnerContent);
+    object? Value,
+    TagHelperContent? ValueContent,
+    TagHelperContent InnerContent,
+    string? ErrorMessage)
+    : GovUkModelWithContent(InnerContent);

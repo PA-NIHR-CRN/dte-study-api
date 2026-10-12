@@ -9702,6 +9702,51 @@ namespace Dynamo.Stream.Handler.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BPOR.Domain.Entities.RefData.NihrFundingStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SysRefNihrFundingStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "Yes",
+                            Description = "Yes",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "No",
+                            Description = "No",
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "No, but I have applied for NIHR funding",
+                            Description = "No, but I have applied for NIHR funding",
+                            IsDeleted = false
+                        });
+                });
+
             modelBuilder.Entity("BPOR.Domain.Entities.RefData.RejectedReason", b =>
                 {
                     b.Property<int>("Id")
@@ -9886,6 +9931,13 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.ToTable("SysRefStudyStatus");
 
                     b.HasData(
+                        new
+                        {
+                            Id = 0,
+                            Code = "Draft Application",
+                            Description = "Draft Application",
+                            IsDeleted = false
+                        },
                         new
                         {
                             Id = 1,
@@ -10142,6 +10194,10 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<int>("CreatedById")
                         .HasColumnType("int");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
                     b.Property<string>("EmailAddress")
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
@@ -10153,11 +10209,18 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<string>("FundingCode")
                         .HasColumnType("longtext");
 
+                    b.Property<bool?>("HasEthicsApproval")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool?>("HasMultipleResearchLocations")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool?>("HasNihrFunding")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<int?>("HasNihrFunding")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InclusionCriteria")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("InformationUrl")
                         .HasMaxLength(2048)
@@ -10168,6 +10231,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.Property<bool>("IsRecruitingIdentifiableParticipants")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("MainContactRole")
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("ParticipantsRecruited")
                         .HasColumnType("int");
@@ -10214,6 +10280,8 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("HasNihrFunding");
 
                     b.HasIndex("StudyStatusId");
 
@@ -10800,6 +10868,10 @@ namespace Dynamo.Stream.Handler.Migrations
 
             modelBuilder.Entity("BPOR.Domain.Entities.Study", b =>
                 {
+                    b.HasOne("BPOR.Domain.Entities.RefData.NihrFundingStatus", "NihrFundingStatus")
+                        .WithMany()
+                        .HasForeignKey("HasNihrFunding");
+
                     b.HasOne("BPOR.Domain.Entities.RefData.StudyStatus", "StudyStatus")
                         .WithMany()
                         .HasForeignKey("StudyStatusId");
@@ -10811,6 +10883,8 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.HasOne("BPOR.Domain.Entities.RefData.Submitted", "Submitted")
                         .WithMany()
                         .HasForeignKey("SubmittedId");
+
+                    b.Navigation("NihrFundingStatus");
 
                     b.Navigation("StudyStatus");
 

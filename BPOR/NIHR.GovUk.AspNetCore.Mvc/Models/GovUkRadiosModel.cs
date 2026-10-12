@@ -2,5 +2,8 @@
 
 namespace NIHR.GovUk.AspNetCore.Mvc.Models;
 
-public record GovUkRadiosModel (GovUkRadioSize Size, GovUkRadioLayout Layout,
-    TagHelperContent InnerContent) : GovUkModelWithContent(InnerContent);
+public record GovUkRadiosModel (
+    GovUkRadioSize Size,
+    GovUkRadioLayout Layout,
+    TagHelperContent InnerContent,
+    string? ErrorMessage = null) : GovUkModelWithContent(InnerContent);

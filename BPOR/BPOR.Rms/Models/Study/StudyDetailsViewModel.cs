@@ -34,6 +34,19 @@ public class StudyDetailsViewModel
             };
         }
     }
+    
+    public StudyStatusViewModel StudyStatusViewModel
+    {
+        get
+        {
+            return new StudyStatusViewModel
+            {
+                StudyId = Study.Id,
+                StudyStatusCode = Study.StudyStatus?.Code,
+                StudyStatusId = Study.StudyStatus?.Id,
+            };
+        }
+    }
 }
 
 public class Campaign
