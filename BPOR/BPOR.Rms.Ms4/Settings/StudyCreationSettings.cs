@@ -11,4 +11,6 @@ public class StudyCreationSettings
     public string StaleDraftRemovalSchedule { get; set; } = "0 0 2 * * ?"; // Every day at 02:00
     
     public TimeSpan StaleDraftAge { get; set; } =  TimeSpan.FromDays(5);
+    
+    public bool EnableMs4ResearcherJourney { get; set; } = true;
 }
