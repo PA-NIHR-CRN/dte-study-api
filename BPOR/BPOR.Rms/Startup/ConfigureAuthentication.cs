@@ -62,6 +62,8 @@ public static class ConfigureAuthentication
             })
             .AddCookie(options =>
             {
+                options.ForwardChallenge = OpenIdConnectDefaults.AuthenticationScheme;
+
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
 
                 if (configureCookieAuthentication is not null)

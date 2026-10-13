@@ -124,6 +124,8 @@ public class StudyModel
     [Display(Name = "Does the study have ethics approval to use Be Part of Research?")]
     public EthicsApproval? HasEthicsApproval { get; set; }
     public StudyStatus? StudyStatus { get; set; }
+    public List<string?> StatusReasons { get; set; } = [];
+    public DateTime? NewApplicationAt {get; set; }
     
     public StudyStatusViewModel StudyStatusViewModel => new()
         {
@@ -132,5 +134,10 @@ public class StudyModel
             CanChangeStatus = false,
             StudyStatusId = StudyStatus?.Id,
         };
+    
+    public string StudyStatusDisplayWithReasons =>
+        !StatusReasons.Any()
+            ? StudyStatus?.Code ?? string.Empty
+            : $"{StudyStatus?.Code}: {string.Join(", ", StatusReasons)}";
 }
 

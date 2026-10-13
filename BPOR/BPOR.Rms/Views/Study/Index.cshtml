@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = "All studies";
 
-    if (Model.HasSearched)
+    if (Model.IsSearched)
     {
         var studies = Model.Studies.TotalCount == 1 ? "study" : "studies";
 

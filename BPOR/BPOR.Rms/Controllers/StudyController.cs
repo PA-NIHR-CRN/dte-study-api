@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
@@ -6,6 +7,7 @@ using BPOR.Rms.Ms4;
 using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Repositories;
 using BPOR.Rms.Startup;
+using BPOR.Rms.Utilities;
 using BPOR.Rms.Validators;
 using BPOR.Rms.VolunteerInformation.Data;
 using FluentValidation.Results;
@@ -27,7 +29,10 @@ public class StudyController(
 ) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false,
+    public async Task<IActionResult> Index(
+        string? searchTerm,
+        [FromQuery] HashSet<StudyStatusType> statusIds,
+        bool hasBeenReset = false,
         CancellationToken token = default)
     {
         if (hasBeenReset)
@@ -36,13 +41,14 @@ public class StudyController(
             return RedirectToAction(nameof(Index));
         }
 
-        bool userHasResearcherRole = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
-
+        var userHasResearcherRole = currentUserProvider.IsResearcher();
+        var userHasAdminRole = currentUserProvider.IsAdmin();
+        
         var studiesQuery = context.Studies.AsQueryable();
 
-        if (userHasResearcherRole)
+        if (userHasResearcherRole && !userHasAdminRole)
         {
-            string userEmail = currentUserProvider?.User?.ContactEmail ?? string.Empty;
+            var userEmail = currentUserProvider.User?.ContactEmail ?? string.Empty;
             studiesQuery = studiesQuery.Where(s => s.EmailAddress == userEmail);
         }
 
@@ -55,22 +61,35 @@ public class StudyController(
                                                    // TODO investigate full text search
                                                    || s.StudyName.Contains(searchTerm));
         }
+        
+        var selectedStatusIds = statusIds.ToHashSet();
+
+        if (selectedStatusIds.Count > 0)
+        {
+            studiesQuery = studiesQuery
+                .Where(s => s.StudyStatusId != null
+                            && selectedStatusIds.Contains(s.StudyStatusId.Value));
+        }
 
         var deferredStudiesPage = studiesQuery
             .AsStudyListModel()
-            .OrderByDescending(s => s.Id)
+            .OrderByDescending(s => s.NewApplicationAt)
             .DeferredPage(paginationService);
 
         var viewModel = new StudiesViewModel
         {
             Studies = await deferredStudiesPage.ValueAsync(token),
-            HasSearched = Request.Query.ContainsKey(nameof(searchTerm)),
+            IsSearched = Request.Query.ContainsKey(nameof(searchTerm)),
+            IsFiltered = Request.Query.ContainsKey(nameof(statusIds)),
             SearchTerm = searchTerm ?? string.Empty,
+            Filters = new StudyFilterViewModel
+            {
+                SelectedStatuses =  selectedStatusIds
+            }
         };
 
         return View(viewModel);
     }
-
 
     // GET: Study/Details/5
     public async Task<IActionResult> Details([FromServices] IVipRepository repository, int? id,
@@ -98,6 +117,14 @@ public class StudyController(
         var isIdentifiable = study.Study.IsRecruitingIdentifiableParticipants;
         var updateRecruitmentAction = isIdentifiable ? "UpdateRecruited" : "UpdateAnonymousRecruited";
         var updateRecruitmentButtonText = isIdentifiable ? "Add enrolments" : "Update recruitment total";
+
+        var emailComparer = new EmailAddressEqualityComparer();
+
+        if (isResearcher && !isAdmin 
+                         && !emailComparer.Equals(study.Study.EmailAddress, currentUserProvider.User.ContactEmail))
+        {
+            return Forbid();
+        }
 
         var canUpdateRecruitmentTotal = isIdentifiable
             ? study.HasCampaigns
@@ -470,5 +497,225 @@ public class StudyController(
         }
 
         return View(studyModel);
+    }
+    
+    [HttpGet("[controller]/{studyId:int}/status/change")]
+    public async Task<IActionResult> ChangeStatus(int studyId)
+    {
+        var model = await context.Studies
+            .Include(x => x.StudyStatus)
+            .FirstOrDefaultAsync(s => s.Id == studyId);
+
+        if (model == null)
+        {
+            logger.LogWarning("[HttpGet]Edit called with non-existent study: {StudyId}", studyId);
+            return NotFound();
+        }
+
+        var viewModel = new StudyStatusViewModel
+        {
+            StudyId = model.Id,
+            StudyStatusCode = model.StudyStatus?.Code
+        };
+
+        await PopulateReferenceDataAsync(viewModel, model.StudyStatusId!.Value);
+
+        return View("Status/Edit", viewModel);
+    }
+
+    [HttpPost("[controller]/{studyId:int}/status/change")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangeStatus(int studyId, StudyStatusViewModel viewModel)
+    {
+        var study = await context.Studies
+            .Include(x => x.StudyStatus)
+            .FirstOrDefaultAsync(x => x.Id == studyId);
+
+        if (study == null)
+        {
+            logger.LogWarning("[HttpPost] ChangeStatus called with non-existent study: {StudyId}", studyId);
+            return NotFound();
+        }
+
+        if (viewModel.StudyStatusId == null)
+        {
+            ModelState.AddModelError(nameof(viewModel.StudyStatusId), "Select a study status");
+        }
+        else
+        {
+            var statusExists = await context.SysRefStudyStatus
+                .AnyAsync(x =>
+                    x.Id == viewModel.StudyStatusId.Value &&
+                    x.Id != study.StudyStatusId &&
+                    x.Id != StudyStatusType.Draft);
+
+            if (!statusExists)
+            {
+                ModelState.AddModelError(nameof(viewModel.StudyStatusId), "Select a valid study status");
+            }
+        }
+
+        var selectedWithdrawnReasons = viewModel.WithdrawnReasons?
+            .Where(x => x.IsSelected)
+            .ToList() ?? [];
+
+        var selectedRejectedReasons = viewModel.RejectedReasons?
+            .Where(x => x.IsSelected)
+            .ToList() ?? [];
+
+        switch (viewModel.StudyStatusId)
+        {
+            case StudyStatusType.Withdrawn:
+            {
+                if (selectedWithdrawnReasons.Count == 0)
+                {
+                    ModelState.AddModelError(nameof(viewModel.WithdrawnReasons), "Select at least one withdrawn reason");
+                }
+
+                var otherSelected = selectedWithdrawnReasons.Any(x => 
+                    x.Id == (int)WithdrawnReasonType.Other);
+
+                if (otherSelected && string.IsNullOrWhiteSpace(viewModel.WithdrawnOtherReason))
+                {
+                    ModelState.AddModelError(nameof(viewModel.WithdrawnOtherReason), "Enter details for Other");
+                }
+
+                var validWithdrawnReasonIds = context.SysRefWithdrawnReason
+                    .Select(x => (int)x.Id)
+                    .ToHashSet();
+
+                if (selectedWithdrawnReasons.Any(x => !validWithdrawnReasonIds.Contains(x.Id)))
+                {
+                    ModelState.AddModelError(
+                        nameof(viewModel.WithdrawnReasons),
+                        "One or more selected withdrawn reasons are invalid");
+                }
+
+                break;
+            }
+            case StudyStatusType.Rejected:
+            {
+                if (selectedRejectedReasons.Count == 0)
+                {
+                    ModelState.AddModelError(
+                        nameof(viewModel.RejectedReasons),
+                        "Select at least one rejected reason");
+                }
+
+                var miscSelected = selectedRejectedReasons.Any(x => 
+                    x.Id == (int)RejectedReasonType.Misc);
+
+                if (miscSelected && string.IsNullOrWhiteSpace(viewModel.RejectedMiscReason))
+                {
+                    ModelState.AddModelError(
+                        nameof(viewModel.RejectedMiscReason),
+                        "Enter details for Misc");
+                }
+
+                var validRejectedReasonIds = context.SysRefRejectedReason
+                    .Select(x => (int)x.Id)
+                    .ToHashSet();
+
+                if (selectedRejectedReasons.Any(x => !validRejectedReasonIds.Contains(x.Id)))
+                {
+                    ModelState.AddModelError(
+                        nameof(viewModel.RejectedReasons),
+                        "One or more selected rejected reasons are invalid");
+                }
+
+                break;
+            }
+        }
+
+        if (!ModelState.IsValid)
+        {
+            viewModel.StudyStatusCode = study.StudyStatus?.Code;
+
+            await PopulateReferenceDataAsync(viewModel, study.StudyStatusId!.Value);
+
+            return View("Status/Edit", viewModel);
+        }
+
+        var selectedStatus = viewModel.StudyStatusId!.Value;
+
+        study.StudyStatusId = selectedStatus;
+
+        var statusHistory = new StudyStatusHistory
+        {
+            StudyId = study.Id,
+            StudyStatusId = selectedStatus
+        };
+
+        context.StudyStatusHistory.Add(statusHistory);
+
+        switch (selectedStatus)
+        {
+            case StudyStatusType.Withdrawn:
+            {
+                foreach (var reasonId in selectedWithdrawnReasons.Select(x => x.Id))
+                {
+                    context.StudyStatusReasonHistory.Add(
+                        new StudyStatusReasonHistory
+                        {
+                            StudyStatusHistory = statusHistory,
+                            WithdrawnReasonId = (WithdrawnReasonType)reasonId,
+                            AdditionalReasonText =
+                                reasonId == (int)WithdrawnReasonType.Other
+                                    ? viewModel.WithdrawnOtherReason?.Trim()
+                                    : null
+                        });
+                }
+
+                break;
+            }
+            case StudyStatusType.Rejected:
+            {
+                foreach (var reasonId in selectedRejectedReasons.Select(x => x.Id))
+                {
+                    context.StudyStatusReasonHistory.Add(
+                        new StudyStatusReasonHistory
+                        {
+                            StudyStatusHistory = statusHistory,
+                            RejectedReasonId = (RejectedReasonType)reasonId,
+                            AdditionalReasonText =
+                                reasonId == (int)RejectedReasonType.Misc
+                                    ? viewModel.RejectedMiscReason?.Trim()
+                                    : null
+                        });
+                }
+
+                break;
+            }
+        }
+
+        await context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Details), new { id = study.Id });
+    }
+
+    private async Task PopulateReferenceDataAsync(StudyStatusViewModel viewModel, StudyStatusType currentStatus)
+    {
+        viewModel.AvailableStatuses = await context.SysRefStudyStatus
+            .Where(x => x.Id != currentStatus &&
+                        x.Id != StudyStatusType.Draft)
+            .ToListAsync();
+
+        viewModel.WithdrawnReasons = await context.SysRefWithdrawnReason
+            .Select(x => new StudyStatusReasonViewModel
+            {
+                Id = (int)x.Id,
+                Code = x.Code,
+                Description = x.Description
+            })
+            .ToListAsync();
+
+        viewModel.RejectedReasons = await context.SysRefRejectedReason
+            .Select(x => new StudyStatusReasonViewModel
+            {
+                Id = (int)x.Id,
+                Code = x.Code,
+                Description = x.Description
+            })
+            .ToListAsync();
     }
 }

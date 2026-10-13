@@ -1,4 +1,7 @@
+@using BPOR.Rms.Ms4.Settings
+@using Microsoft.Extensions.Options
 @model BPOR.Rms.Models.Study.StudiesViewModel
+@inject IOptions<StudyCreationSettings> StudyCreationSettings
 
 <style>
     @@media screen and (max-width: 768px) {
@@ -157,15 +160,9 @@
 </style>
 
 
-@if (Model.HasSearched)
+@if (Model.IsSearched || Model.IsFiltered)
 {
-    if (Model.Studies.TotalCount == 0)
-    {
-        <div class="govuk-inset-text">
-            No studies match your search
-        </div>
-    }
-    else if (Model.Studies.TotalCount == 1)
+    if (Model.Studies.TotalCount == 1)
     {
         <div class="govuk-inset-text">
             1 study matches your search.
@@ -179,12 +176,10 @@
     }
 }
 
-@if ((TempData["HasBeenReset"] as bool?) == true)
-{
-    <div class="govuk-inset-text">
-        The search results have been reset and all studies are listed.
-    </div>
-}
+<div class="govuk-grid-column-one-quarter" role-exclude="researcher">
+    <partial name="Partials/Index/_StudyFilters" model="Model" />
+</div>
+
 @if (Model.Studies.TotalCount > 0)
 {
     // TODO: Add default empty state to page control.
@@ -250,7 +245,7 @@
 
     <pagination for="Studies" />
 }
-else if (!Model.HasSearched)
+else if (!Model.IsSearched && !Model.IsFiltered)
 {
     <div class="no-studies-card">
         <h1 class="govuk-heading-l">No studies added</h1>
@@ -258,7 +253,22 @@ else if (!Model.HasSearched)
             <role include="Researcher">You haven&apos;t added any studies yet, please apply to add a study now</role>
             <role exclude="Researcher">You haven&apos;t added any studies yet, please add a study now</role>
         </p>
-        <a role-include="Researcher" asp-action="Create" asp-controller="Study" class="govuk-button">Apply to add a study</a>
+        @if (StudyCreationSettings.Value.EnableMs4ResearcherJourney)
+        {
+            <a role-include="Researcher" asp-action="Create" asp-controller="Study" class="govuk-button">Apply to add a study</a>
+        }
+        else
+        {
+            <a role-include="Researcher" asp-action="TermsAndConditions" asp-controller="Researcher" class="govuk-button">Apply to add a study</a>
+        }
         <a role-exclude="Researcher" asp-action="Create" asp-controller="Study" class="govuk-button">Add study</a>
+    </div>
+}
+else
+{
+    <div class="govuk-grid-column-three-quarters">
+        <h2 class="govuk-heading-m">Your search matched no studies</h2>
+        <p class="govuk-body">There are no studies that match your search. Try searching again by adding or removing your search criteria.</p>
+        <hr/>
     </div>
 }

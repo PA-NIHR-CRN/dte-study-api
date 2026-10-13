@@ -1,0 +1,6 @@
+@model NIHR.GovUk.AspNetCore.Mvc.Models.GovUkCheckboxConditionalModel
+
+<div id="@Model.Id"
+     class="govuk-checkboxes__conditional @(Model.IsHidden ? "govuk-checkboxes__conditional--hidden" : null)">
+    @Model.InnerContent
+</div>

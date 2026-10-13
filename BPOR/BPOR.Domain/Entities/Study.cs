@@ -10,6 +10,7 @@ public class Study : ISoftDelete, IAudit
     public string? FullName { get; set; }
     public string? EmailAddress { get; set; }
     public string? StudyName { get; set; }
+    public string? Description { get; set; }
     public long? CpmsId { get; set; }
     public bool IsRecruitingIdentifiableParticipants { get; set; }
     public string? ChiefInvestigator { get; set; }
@@ -26,7 +27,11 @@ public class Study : ISoftDelete, IAudit
     public bool? HasMultipleResearchLocations { get; set; }
     public bool? SinglePersonResponsibleForRecruiting { get; set; }
     public string? PreScreenerUrl { get; set; }
-    
+    public EthicsApproval? HasEthicsApproval { get; set; }
+    public string? MainContactRole { get; set; }
+    public string? InclusionCriteria { get; set; }
+    public DateTime? NewApplicationAt { get; set; }
+
     public SubmittedType? SubmittedId { get; set; }
     public int? SubmissionOutcomeId { get; set; }
     public StudyStatusType? StudyStatusId { get; set; }

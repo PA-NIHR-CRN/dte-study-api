@@ -10232,6 +10232,9 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<string>("MainContactRole")
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime?>("NewApplicationAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int?>("ParticipantsRecruited")
                         .HasColumnType("int");
 
@@ -10980,7 +10983,7 @@ namespace Dynamo.Stream.Handler.Migrations
                         .HasForeignKey("RejectedReasonId");
 
                     b.HasOne("BPOR.Domain.Entities.StudyStatusHistory", "StudyStatusHistory")
-                        .WithMany()
+                        .WithMany("StudyStatusReasonHistories")
                         .HasForeignKey("StudyStatusHistoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -11069,6 +11072,11 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Navigation("StudyResearchers");
 
                     b.Navigation("StudyStatusHistories");
+                });
+
+            modelBuilder.Entity("BPOR.Domain.Entities.StudyStatusHistory", b =>
+                {
+                    b.Navigation("StudyStatusReasonHistories");
                 });
 
             modelBuilder.Entity("BPOR.Domain.Entities.User", b =>
