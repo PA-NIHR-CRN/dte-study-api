@@ -67,13 +67,8 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IConfigurationBuilder AddNihrConfiguration(this IConfigurationBuilder configurationBuilder,
             IHostEnvironment hostEnvironment)
         {
-            if (hostEnvironment.IsDevelopment())
-            {
-                configurationBuilder.SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
-            }
-            
-            configurationBuilder.AddJsonFile($"appsettings.{hostEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+            configurationBuilder.AddJsonFile("appsettings.awssecrets.json", optional: true, reloadOnChange: true);
+            configurationBuilder.AddJsonFile($"appsettings.awssecrets.{hostEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
             var configuration = configurationBuilder.Build();
 
@@ -95,12 +90,21 @@ namespace Microsoft.Extensions.DependencyInjection
                     return amazonSecretsManagerClient;
                 });
             }
+            
+            if (hostEnvironment.IsDevelopment())
+            {
+                configurationBuilder.SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
+            }
 
             return configurationBuilder;
         }
 
-        public static IHostBuilder AddNihrConfiguration(this IHostBuilder builder)
+        public static IHostBuilder AddNihrConfiguration(this IHostBuilder builder, string[] args)
         {
+            builder.ConfigureHostConfiguration(config => config
+                .AddCommandLine(args)
+                .AddEnvironmentVariables());
             builder.ConfigureAppConfiguration((context, configBuilder) =>
                 configBuilder.AddNihrConfiguration(context.HostingEnvironment));
             return builder;
@@ -123,8 +127,15 @@ namespace Microsoft.Extensions.DependencyInjection
             configurationBuilder.Add(configurationSource);
         }
 
-        public static IOptions<T> GetSectionAndValidate<T>(this IHostApplicationBuilder builder
-        ) where T : class, new() => builder.Services.GetSectionAndValidate<T>(builder.Configuration);
+        /// <summary>
+        /// Gets a section directly from the current configuration state. This should be used only when a configuration
+        /// value is absolutely required prior to DI container construction.
+        /// </summary>
+        public static T GetSectionOrDefault<T>(this IConfiguration configuration, string sectionName) 
+            where T : new()
+        {
+            return configuration.GetSection(sectionName).Get<T>() ?? new T();
+        }
 
         public static OptionsBuilder<T> AddOptionsAndValidate<T>(this IServiceCollection services, string sectionName)
             where T : class
