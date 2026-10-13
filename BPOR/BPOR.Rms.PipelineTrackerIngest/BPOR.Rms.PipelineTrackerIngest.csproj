@@ -19,9 +19,6 @@
 
     <ItemGroup>
       <None Remove="TestFiles\BPoR Registry &amp; JDR - Pipelines - BPoR Registry Pipeline.csv" />
-      <Content Include="TestFiles\BPoR Registry &amp; JDR - Pipelines - BPoR Registry Pipeline.csv">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
       <None Remove="appsettings.user.json" />
       <None Remove="appsettings.development.json" />
       <Content Include="appsettings.development.json">
