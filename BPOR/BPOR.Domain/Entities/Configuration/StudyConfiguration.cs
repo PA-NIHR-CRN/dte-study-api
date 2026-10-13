@@ -23,11 +23,11 @@ public class StudyConfiguration : IEntityTypeConfiguration<Study>
         builder.Property(s => s.InformationUrl).Url();
         builder.Property(s => s.PreScreenerUrl).Url();
         
-       // builder.Property(s => s.Description).HasMaxLength(DescriptionMaxLength);
+        builder.Property(s => s.Description).HasMaxLength(DescriptionMaxLength);
         
-        /*builder.HasOne(x => x.NihrFundingStatus)
+        builder.HasOne(x => x.NihrFundingStatus)
             .WithMany()
             .HasForeignKey(x => x.HasNihrFunding)
-            .HasPrincipalKey(x => x.Id);*/
+            .HasPrincipalKey(x => x.Id);
     }
 }

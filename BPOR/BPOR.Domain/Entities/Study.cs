@@ -46,7 +46,8 @@ public class Study : ISoftDelete, IAudit
     public Submitted? Submitted { get; set; }
     public SubmissionOutcome? SubmissionOutcome { get; set; }
     public StudyStatus? StudyStatus { get; set; }
-
+    public NihrFundingStatus? NihrFundingStatus { get; set; }
+    
     /// <summary>
     /// Temporary column to record the VS ID from the pipeline spreadsheet - this can be removed once the spreadsheet
     /// has ben retired.
