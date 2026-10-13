@@ -18,4 +18,5 @@ public class StudyStatusHistory : IAudit
     
     public StudyStatus StudyStatus { get; set; } = null!;
     public Study Study { get; set; } = null!;
+    public ICollection<StudyStatusReasonHistory> StudyStatusReasonHistories { get; } = new List<StudyStatusReasonHistory>();
 }

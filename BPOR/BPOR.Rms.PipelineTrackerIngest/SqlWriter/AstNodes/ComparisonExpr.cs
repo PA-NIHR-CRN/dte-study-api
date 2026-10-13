@@ -1,6 +1,6 @@
 ﻿namespace BPOR.Rms.PipelineTrackerIngest.SqlWriter;
 
-public class ComparisonClause : ISqlPredicate
+public class ComparisonExpr : ISqlPredicate
 {
     public void Accept(ISqlPredicateVisitor visitor) => visitor.Visit(this);
     

@@ -1,6 +1,6 @@
 ﻿namespace BPOR.Rms.PipelineTrackerIngest.SqlWriter;
 
-public class LogicalBinOpClause : ISqlPredicate
+public class LogicBinOpExpr : ISqlPredicate
 {
     public void Accept(ISqlPredicateVisitor visitor) => visitor.Visit(this);
     

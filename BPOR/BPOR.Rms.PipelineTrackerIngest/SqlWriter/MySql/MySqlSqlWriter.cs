@@ -9,7 +9,7 @@ public class MySqlSqlWriter(TextWriter output) : SqlWriterBase(output)
         output.Write($"\"{EscapeStringLiteral(value)}\"");
     }
 
-    private static Dictionary<char, string> _escapes = new()
+    private static readonly Dictionary<char, string> _escapes = new()
     {
         ['\''] = "\\\'",
         ['\"'] = "\\\"",

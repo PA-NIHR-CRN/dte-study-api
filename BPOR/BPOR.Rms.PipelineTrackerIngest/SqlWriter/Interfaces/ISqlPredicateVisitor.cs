@@ -2,6 +2,6 @@
 
 public interface ISqlPredicateVisitor
 {
-    void Visit(LogicalBinOpClause predicate);
-    void Visit(ComparisonClause predicate);
+    void Visit(LogicBinOpExpr predicate);
+    void Visit(ComparisonExpr predicate);
 }

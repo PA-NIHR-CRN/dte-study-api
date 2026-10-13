@@ -17,12 +17,17 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         }
     }
     
+    public virtual void WriteInlineComment(string comment)
+    {
+        output.Write($" /* {comment} */ ");
+    }
+    
     public void WriteRawLine(string line)
     {
         output.WriteLine(line);
     }
 
-    public void Write(ISqlTopLevelStatement statement)
+    public virtual void Write(ISqlTopLevelStatement statement)
     {
         statement.Accept(this);
         WriteEndStatement();
@@ -116,7 +121,15 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         WriteCloseParanthesis();
     }
 
-    public void Visit(LogicalBinOpClause predicate)
+    public virtual void Visit(SetVariableStatement setVariable)
+    {
+        output.Write("SET ");
+        setVariable.Variable.Accept(this);
+        output.Write(" = ");
+        setVariable.Value.Accept(this);
+    }
+
+    public virtual void Visit(LogicBinOpExpr predicate)
     {
         WriteOpenParanthesis();
         predicate.Lhs.Accept(this);
@@ -135,17 +148,17 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         });
     }
 
-    private void WriteOpenParanthesis()
+    protected virtual void WriteOpenParanthesis()
     {
         output.Write("(");
     }
     
-    private void WriteCloseParanthesis()
+    protected virtual void WriteCloseParanthesis()
     {
         output.Write(")");
     }
 
-    public void Visit(ComparisonClause predicate)
+    public void Visit(ComparisonExpr predicate)
     {
         predicate.Lhs.Accept(this);
         WriteComparisonOp(predicate.Op);
@@ -170,7 +183,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         output.Write(" ");
     }
 
-    public void Visit(SqlLiteral literal)
+    public virtual void Visit(SqlLiteral literal)
     {
         if (literal.Value is null)
         {
@@ -179,6 +192,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         else if (literal.Value is Enum enumValue)
         {
             WriteLiteral(Convert.ToInt32(enumValue));
+            WriteInlineComment(enumValue.ToString());
         }
         else if (literal.Value is string stringValue)
         {
@@ -206,5 +220,13 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
     public virtual void Visit(SqlVariable variable)
     {
         output.Write(variable.Name);
+    }
+
+    public virtual void Visit(SqlFunction function)
+    {
+        output.Write(function.Name);
+        WriteOpenParanthesis();
+        // TODO: Add parameters
+        WriteCloseParanthesis();
     }
 }
