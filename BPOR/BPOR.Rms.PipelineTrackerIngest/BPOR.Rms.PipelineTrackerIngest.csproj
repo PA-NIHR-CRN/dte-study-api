@@ -21,9 +21,6 @@
       <None Remove="TestFiles\BPoR Registry &amp; JDR - Pipelines - BPoR Registry Pipeline.csv" />
       <None Remove="appsettings.user.json" />
       <None Remove="appsettings.development.json" />
-      <Content Include="appsettings.development.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
     </ItemGroup>
 
 </Project>
