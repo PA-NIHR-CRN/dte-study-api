@@ -11,7 +11,7 @@
         
         @if (Model.CanChangeStatus)
         {
-            <a class="govuk-link" asp-action="ChangeStatus" asp-route-studyId="@Model.StudyId">
+            <a class="govuk-link" asp-action="Status" asp-controller="StudyEdit" asp-route-studyId="@Model.StudyId">
                 Change
             </a>
         }

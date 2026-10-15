@@ -1,0 +1,67 @@
+@using BPOR.Domain.Enums
+@using NIHR.Infrastructure.AspNetCore
+@model BPOR.Rms.Ms4.Models.StudyEditViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["SubmitButtonText"] = "Save and continue";
+
+    const string miscConditional = "conditional-rejected-misc";
+}
+
+@section SectionTitle
+{
+    <text>Study status</text>
+}
+
+<form-group for="@Model.RejectedReasons"
+            label-as-heading="true"
+            label-class="govuk-heading-l">
+
+    <div class="govuk-checkboxes"
+         data-module="govuk-checkboxes">
+
+        @foreach (var reason in Enum.GetValues<RejectedReasonType>())
+        {
+            var isMisc = reason == RejectedReasonType.Misc;
+            var isSelected = Model.RejectedReasons.Contains(reason);
+
+            <div class="govuk-checkboxes__item">
+
+                <input class="govuk-checkboxes__input"
+                       id="RejectedReasons-@reason"
+                       name="RejectedReasons"
+                       type="checkbox"
+                       value="@reason"
+                       checked="@isSelected"
+                       data-aria-controls="@(isMisc ? miscConditional : null)" />
+
+                <label class="govuk-label govuk-checkboxes__label"
+                       for="RejectedReasons-@reason">
+                    @EnumHelper.GetDisplayName(reason)
+                </label>
+
+            </div>
+
+            @if (isMisc)
+            {
+                <div class="govuk-checkboxes__conditional @(isSelected ? "" : "govuk-checkboxes__conditional--hidden")"
+                     id="@miscConditional">
+
+                    <form-group for="@Model.RejectedMiscReason"
+                                label="Please provide details"
+                                label-class="govuk-!-heading-s">
+
+                        <textarea asp-for="RejectedMiscReason"
+                                  class="govuk-textarea">
+                        </textarea>
+
+                    </form-group>
+
+                </div>
+            }
+        }
+
+    </div>
+
+</form-group>
