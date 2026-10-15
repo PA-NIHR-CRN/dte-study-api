@@ -260,7 +260,8 @@ public class StudyController(
                         EmailAddress = model.EmailAddress,
                         StudyName = model.StudyName,
                         CpmsId = model.CpmsId,
-                        IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false
+                        IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false,
+                        NewApplicationAt = DateTime.UtcNow
                     };
 
                     context.Add(study);
