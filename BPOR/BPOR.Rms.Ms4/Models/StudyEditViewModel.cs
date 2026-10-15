@@ -1,11 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Enums;
 using NIHR.GovUk.AspNetCore.Mvc;
 
 namespace BPOR.Rms.Ms4.Models;
 
 public class StudyEditViewModel
 {
+    public int Id { get; set; }
+    
     [Display(Name = "Recruitment start date (UK)?",
         Description = "If you are unsure, provide an estimate.")]
     public GovUkDate RecruitmentStartDate { get; set; } = new();
@@ -28,4 +30,17 @@ public class StudyEditViewModel
 
     [Display(Name = "Pre-screener link")]
     public string? PreScreenerUrl { get; set; }
+    
+    [Display(Name = "Update study status")]
+    public StudyStatusType? Status { get; set; }
+    
+    public StudyStatusType? CurrentStatus { get; set; }
+    
+    [Display(Name = "Rejection reason")]
+    public List<RejectedReasonType> RejectedReasons { get; set; } = [];
+    public string? RejectedMiscReason { get; set; }
+
+    [Display(Name = "Withdrawal reason")]
+    public List<WithdrawnReasonType> WithdrawnReasons { get; set; } = [];
+    public string? WithdrawnOtherReason { get; set; }
 }

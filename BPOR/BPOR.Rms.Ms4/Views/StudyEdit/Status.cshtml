@@ -1,0 +1,31 @@
+@using BPOR.Domain.Enums
+@using NIHR.Infrastructure.AspNetCore
+@model BPOR.Rms.Ms4.Models.StudyEditViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["SubmitButtonText"] = "Save and continue";
+}
+
+@section SectionTitle
+{
+    <text>Study status</text>
+}
+
+<form-group for="@Model.Status"
+            label-as-heading="true"
+            label-class="govuk-heading-l"
+            description="The current status is ‘@EnumHelper.GetDisplayName(Model.Status)’. Select a new status from the list below."
+            show-validation-message="false">
+    
+    <input type="hidden" asp-for="@Model.CurrentStatus"/>
+
+    <radio-set for="@Model.Status">
+        @foreach (var status in Enum.GetValues<StudyStatusType>()
+                      .Where(x => x != StudyStatusType.Draft))
+        {
+            <radio value="@status">@EnumHelper.GetDisplayName(status)</radio>
+        }
+    </radio-set>
+    
+</form-group>

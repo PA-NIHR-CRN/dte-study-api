@@ -1,4 +1,5 @@
 ﻿using BPOR.Domain.Entities;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Ms4.Models;
 using BPOR.Rms.Ms4.Repositories;
 using BPOR.Rms.Ms4.Validators;
@@ -19,6 +20,7 @@ namespace BPOR.Rms.Ms4.Controllers;
 public class StudyEditController(IStudyDraftRepository studyDraftRepository) : Controller
 {
     private Study _study;
+    private const string _statusUpdateConfirmationHeading = "Study status updated";
 
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
@@ -197,6 +199,167 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
         await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
         return StudyFundingTab();
     }
+    
+    [HttpGet]
+    public IActionResult Status()
+    {
+        ViewData.ShowBackLink();
+        ViewData.SetBackLinkOverride(Url.Action("Details", "Study", new { Id = _study.Id }));
+        
+        return View(GetViewModel());
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Status(
+        StudyEditViewModel model,
+        StudyEditViewModelValidator validator,
+        CancellationToken cancellationToken)
+    {
+        validator.ValidateSpecificProperties(model, i => i.Status)
+            .AddToModelState(ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            ViewData.ShowBackLink();
+            ViewData.SetBackLinkOverride(Url.Action("Details", "Study", new { Id = _study.Id }));
+            
+            return View(model);
+        }
+        
+        if (model.Status == StudyStatusType.Withdrawn)
+        {
+            return RedirectToAction(nameof(WithdrawalReason), new { studyId = _study.Id });
+        }
+
+        if (model.Status == StudyStatusType.Rejected)
+        {
+            return RedirectToAction(nameof(RejectionReason), new { studyId = _study.Id });
+        }
+
+        _study.StudyStatusId = model.Status;
+        AddStatusHistory(model.Status!.Value);
+
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
+        
+        return RedirectToConfirmationPage(_statusUpdateConfirmationHeading);
+    }
+
+    [HttpGet]
+    public IActionResult WithdrawalReason()
+    {
+        ViewData.ShowBackLink();
+        ViewData.SetBackLinkOverride(Url.Action("Status", "StudyEdit", new { StudyId = _study.Id }));
+        
+        return View(GetViewModel());
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> WithdrawalReason(
+        StudyEditViewModel model,
+        StudyEditViewModelValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (validator.ValidateAndHasErrors(
+                model,
+                ModelState,
+                i => i.WithdrawnReasons,
+                i => i.WithdrawnOtherReason))
+        {
+            ViewData.ShowBackLink();
+            ViewData.SetBackLinkOverride(Url.Action("Status", "StudyEdit", new { StudyId = _study.Id }));
+            
+            return View(model);
+        }
+
+        _study.StudyStatusId = StudyStatusType.Withdrawn;
+
+        var statusHistory = new StudyStatusHistory
+        {
+            StudyId = _study.Id,
+            StudyStatusId = StudyStatusType.Withdrawn
+        };
+
+        foreach (var reason in model.WithdrawnReasons)
+        {
+            statusHistory.StudyStatusReasonHistories.Add(
+                new StudyStatusReasonHistory
+                {
+                    WithdrawnReasonId = reason,
+                    AdditionalReasonText = reason == WithdrawnReasonType.Other
+                        ? model.WithdrawnOtherReason?.Trim()
+                        : null
+                });
+        }
+
+        _study.StudyStatusId = StudyStatusType.Withdrawn;
+        _study.StudyStatusHistories.Add(statusHistory);
+
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
+
+        return RedirectToConfirmationPage(_statusUpdateConfirmationHeading);
+    }
+    
+    [HttpGet]
+    public IActionResult RejectionReason()
+    {
+        ViewData.ShowBackLink();
+        ViewData.SetBackLinkOverride(Url.Action("Status", "StudyEdit", new { StudyId = _study.Id }));
+        
+        return View(GetViewModel());
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> RejectionReason(
+        StudyEditViewModel model,
+        StudyEditViewModelValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (validator.ValidateAndHasErrors(
+                model,
+                ModelState,
+                i => i.RejectedReasons,
+                i => i.RejectedMiscReason))
+        {
+            ViewData.ShowBackLink();
+            ViewData.SetBackLinkOverride(Url.Action("Status", "StudyEdit", new { StudyId = _study.Id }));
+            
+            return View(model);
+        }
+
+        var statusHistory = new StudyStatusHistory
+        {
+            StudyId = _study.Id,
+            StudyStatusId = StudyStatusType.Rejected
+        };
+
+        foreach (var reason in model.RejectedReasons)
+        {
+            statusHistory.StudyStatusReasonHistories.Add(
+                new StudyStatusReasonHistory
+                {
+                    RejectedReasonId = reason,
+                    AdditionalReasonText = reason == RejectedReasonType.Misc
+                        ? model.WithdrawnOtherReason?.Trim()
+                        : null
+                });
+        }
+
+        _study.StudyStatusId = StudyStatusType.Rejected;
+        _study.StudyStatusHistories.Add(statusHistory);
+
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
+
+        return RedirectToConfirmationPage(_statusUpdateConfirmationHeading);
+    }
+    
+    [HttpGet]
+    public IActionResult Confirmation(string heading, string? message = null)
+    {
+        ViewData["ConfirmationHeading"] = heading;
+        ViewData["ConfirmationMessage"] = message;
+
+        return View(GetViewModel());
+    }
 
     private IActionResult StudyDetailsTab() => RedirectToStudyDetailsPage("study-details");
     private IActionResult StudyFundingTab() => RedirectToStudyDetailsPage("funding-details");
@@ -206,11 +369,17 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
         var url = Url.Action("Details", "Study", new { Id = _study.Id }) + $"#{anchor}";
         return Redirect(url);
     }
+    
+    private IActionResult RedirectToConfirmationPage(string heading, string? message = null)
+    {
+        return RedirectToAction(nameof(Confirmation), new { studyId = _study.Id, heading,  message });
+    }
 
     private StudyEditViewModel GetViewModel()
     {
         return new StudyEditViewModel
         {
+            Id = _study.Id,
             RecruitmentStartDate = GovUkDate.FromDateTime(_study.RecruitmentStartDate),
             RecruitmentTarget = _study.RecruitmentTarget,
             IsRecruitingIdentifiableParticipants = _study.IsRecruitingIdentifiableParticipants,
@@ -218,6 +387,17 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
             InformationUrl = _study.InformationUrl,
             FundingCode = _study.FundingCode,
             PreScreenerUrl = _study.PreScreenerUrl,
+            Status = _study.StudyStatusId,
+            CurrentStatus =  _study.StudyStatusId
         };
+    }
+    
+    private void AddStatusHistory(StudyStatusType status)
+    {
+        _study.StudyStatusHistories.Add(new StudyStatusHistory
+        {
+            StudyId = _study.Id,
+            StudyStatusId = status
+        });
     }
 }

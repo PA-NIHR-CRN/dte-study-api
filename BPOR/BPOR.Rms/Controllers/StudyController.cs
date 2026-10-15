@@ -111,7 +111,7 @@ public class StudyController(
             logger.LogWarning("[HttpGet]Details called with non-existent study: {StudyId}", id);
             return NotFound();
         }
-        
+
         var isAdmin = currentUserProvider.User.HasRole(UserRole.Admin);
         var isResearcher = currentUserProvider.User.HasRole(UserRole.Researcher);
         var isIdentifiable = study.Study.IsRecruitingIdentifiableParticipants;
@@ -132,7 +132,7 @@ public class StudyController(
 
         var vsiStatus = await repository.GetVipStatus(id.Value, cancellationToken);
         ViewData["VsiStatus"] = vsiStatus;
-        
+
         study.ActionLinks = new();
 
         if (isAdmin)
@@ -198,7 +198,7 @@ public class StudyController(
     {
         var study = new Study();
         var studyId = await studyDraftRepository.CreateDraftStudyAsync(study, cancellationToken);
-        
+
         var isAdmin = currentUserProvider.User.HasRole(UserRole.Admin);
 
         var uri = Url.GetUrl(StudyRequestEditFlow.EthicsApproval, new StudyRequestEditContext
@@ -233,13 +233,13 @@ public class StudyController(
             logger.LogWarning("[HttpPost]Create called with IsRecruitingIdentifiableParticipants set to false");
             return BadRequest("Model must allow editing of IsRecruitingIdentifiableParticipants");
         }
-        
+
         if (action == "Next" || action == "Save")
         {
             if (model.Step == 1)
             {
                 ModelState.AddValidationResult(ValidateStep(model, 1));
-                
+
                 if (ModelState.IsValid)
                 {
                     model.GotoNextStep();
@@ -306,7 +306,7 @@ public class StudyController(
 
         return View(model);
     }
-    
+
 
     // success
     public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
@@ -331,7 +331,7 @@ public class StudyController(
         return View(studyModel);
     }
 
-    static ValidationResult ValidateStep(StudyFormViewModel model, int step )
+    static ValidationResult ValidateStep(StudyFormViewModel model, int step)
     {
         StudyFormModelValidator validator = new();
         switch (step)
@@ -339,7 +339,8 @@ public class StudyController(
             case 1:
                 return validator.ValidateSpecificProperties(model, i => i.FullName, i => i.EmailAddress);
             case 2:
-                return validator.ValidateSpecificProperties(model, i => i.StudyName, i => i.IsRecruitingIdentifiableParticipants, i=>i.CpmsId);
+                return validator.ValidateSpecificProperties(model, i => i.StudyName,
+                    i => i.IsRecruitingIdentifiableParticipants, i => i.CpmsId);
             case 3:
                 return validator.ValidateSpecificProperties(model, i => i.InformationUrl);
             case 4:
@@ -380,7 +381,7 @@ public class StudyController(
             logger.LogWarning("[HttpPost]Edit called with step out of range: {Step}", model.Step);
             return BadRequest($"Step out of range: {model.Step}");
         }
-        
+
         ModelState.AddValidationResult(ValidateStep(model, model.Step));
 
         if (!ModelState.IsValid)
@@ -397,7 +398,7 @@ public class StudyController(
                 logger.LogWarning("[HttpPost]Edit called with non-existent study: {StudyId}", id);
                 return NotFound();
             }
-            
+
             switch (model.Step)
             {
                 case 1:
@@ -407,11 +408,13 @@ public class StudyController(
                 case 2:
                     studyToUpdate.StudyName = model.StudyName;
                     studyToUpdate.CpmsId = model.CpmsId;
-                    
+
                     if (model.AllowEditIsRecruitingIdentifiableParticipants)
                     {
-                        var hasCampaigns = await context.FilterCriterias.AnyAsync(fc => fc.StudyId == studyToUpdate.Id && fc.Campaign.Any());
-                        var isRecruitmentFlagChanging = model.IsRecruitingIdentifiableParticipants != studyToUpdate.IsRecruitingIdentifiableParticipants;
+                        var hasCampaigns = await context.FilterCriterias.AnyAsync(fc =>
+                            fc.StudyId == studyToUpdate.Id && fc.Campaign.Any());
+                        var isRecruitmentFlagChanging = model.IsRecruitingIdentifiableParticipants !=
+                                                        studyToUpdate.IsRecruitingIdentifiableParticipants;
 
                         if (hasCampaigns && isRecruitmentFlagChanging)
                         {
@@ -419,13 +422,14 @@ public class StudyController(
                                 nameof(model.IsRecruitingIdentifiableParticipants),
                                 "The recruitment type cannot be updated once a campaign has been sent for a study.");
                             model.AllowEditIsRecruitingIdentifiableParticipants = false;
-                            
+
                             return View(model);
                         }
 
                         if (!hasCampaigns)
                         {
-                            studyToUpdate.IsRecruitingIdentifiableParticipants = (bool)model.IsRecruitingIdentifiableParticipants;
+                            studyToUpdate.IsRecruitingIdentifiableParticipants =
+                                (bool)model.IsRecruitingIdentifiableParticipants;
                         }
                     }
 
@@ -445,7 +449,7 @@ public class StudyController(
                     studyToUpdate.PreScreenerUrl = model.PreScreenerUrl;
                     break;
             }
-                  
+
             studyToUpdate.UpdatedAt = DateTime.UtcNow;
 
             await context.SaveChangesAsync();
@@ -454,7 +458,8 @@ public class StudyController(
         {
             if (!StudyExists(id))
             {
-                logger.LogWarning("[HttpPost]Edit called with non-existent study following concurrency exception: {StudyId}", id);
+                logger.LogWarning(
+                    "[HttpPost]Edit called with non-existent study following concurrency exception: {StudyId}", id);
                 return NotFound();
             }
             else
@@ -471,7 +476,7 @@ public class StudyController(
         });
 
         return RedirectToAction(nameof(Details), new { id });
-        
+
     }
 
     private bool StudyExists(int id)
@@ -498,225 +503,5 @@ public class StudyController(
         }
 
         return View(studyModel);
-    }
-    
-    [HttpGet("[controller]/{studyId:int}/status/change")]
-    public async Task<IActionResult> ChangeStatus(int studyId)
-    {
-        var model = await context.Studies
-            .Include(x => x.StudyStatus)
-            .FirstOrDefaultAsync(s => s.Id == studyId);
-
-        if (model == null)
-        {
-            logger.LogWarning("[HttpGet]Edit called with non-existent study: {StudyId}", studyId);
-            return NotFound();
-        }
-
-        var viewModel = new StudyStatusViewModel
-        {
-            StudyId = model.Id,
-            StudyStatusCode = model.StudyStatus?.Code
-        };
-
-        await PopulateReferenceDataAsync(viewModel, model.StudyStatusId!.Value);
-
-        return View("Status/Edit", viewModel);
-    }
-
-    [HttpPost("[controller]/{studyId:int}/status/change")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ChangeStatus(int studyId, StudyStatusViewModel viewModel)
-    {
-        var study = await context.Studies
-            .Include(x => x.StudyStatus)
-            .FirstOrDefaultAsync(x => x.Id == studyId);
-
-        if (study == null)
-        {
-            logger.LogWarning("[HttpPost] ChangeStatus called with non-existent study: {StudyId}", studyId);
-            return NotFound();
-        }
-
-        if (viewModel.StudyStatusId == null)
-        {
-            ModelState.AddModelError(nameof(viewModel.StudyStatusId), "Select a study status");
-        }
-        else
-        {
-            var statusExists = await context.SysRefStudyStatus
-                .AnyAsync(x =>
-                    x.Id == viewModel.StudyStatusId.Value &&
-                    x.Id != study.StudyStatusId &&
-                    x.Id != StudyStatusType.Draft);
-
-            if (!statusExists)
-            {
-                ModelState.AddModelError(nameof(viewModel.StudyStatusId), "Select a valid study status");
-            }
-        }
-
-        var selectedWithdrawnReasons = viewModel.WithdrawnReasons?
-            .Where(x => x.IsSelected)
-            .ToList() ?? [];
-
-        var selectedRejectedReasons = viewModel.RejectedReasons?
-            .Where(x => x.IsSelected)
-            .ToList() ?? [];
-
-        switch (viewModel.StudyStatusId)
-        {
-            case StudyStatusType.Withdrawn:
-            {
-                if (selectedWithdrawnReasons.Count == 0)
-                {
-                    ModelState.AddModelError(nameof(viewModel.WithdrawnReasons), "Select at least one withdrawn reason");
-                }
-
-                var otherSelected = selectedWithdrawnReasons.Any(x => 
-                    x.Id == (int)WithdrawnReasonType.Other);
-
-                if (otherSelected && string.IsNullOrWhiteSpace(viewModel.WithdrawnOtherReason))
-                {
-                    ModelState.AddModelError(nameof(viewModel.WithdrawnOtherReason), "Enter details for Other");
-                }
-
-                var validWithdrawnReasonIds = context.SysRefWithdrawnReason
-                    .Select(x => (int)x.Id)
-                    .ToHashSet();
-
-                if (selectedWithdrawnReasons.Any(x => !validWithdrawnReasonIds.Contains(x.Id)))
-                {
-                    ModelState.AddModelError(
-                        nameof(viewModel.WithdrawnReasons),
-                        "One or more selected withdrawn reasons are invalid");
-                }
-
-                break;
-            }
-            case StudyStatusType.Rejected:
-            {
-                if (selectedRejectedReasons.Count == 0)
-                {
-                    ModelState.AddModelError(
-                        nameof(viewModel.RejectedReasons),
-                        "Select at least one rejected reason");
-                }
-
-                var miscSelected = selectedRejectedReasons.Any(x => 
-                    x.Id == (int)RejectedReasonType.Misc);
-
-                if (miscSelected && string.IsNullOrWhiteSpace(viewModel.RejectedMiscReason))
-                {
-                    ModelState.AddModelError(
-                        nameof(viewModel.RejectedMiscReason),
-                        "Enter details for Misc");
-                }
-
-                var validRejectedReasonIds = context.SysRefRejectedReason
-                    .Select(x => (int)x.Id)
-                    .ToHashSet();
-
-                if (selectedRejectedReasons.Any(x => !validRejectedReasonIds.Contains(x.Id)))
-                {
-                    ModelState.AddModelError(
-                        nameof(viewModel.RejectedReasons),
-                        "One or more selected rejected reasons are invalid");
-                }
-
-                break;
-            }
-        }
-
-        if (!ModelState.IsValid)
-        {
-            viewModel.StudyStatusCode = study.StudyStatus?.Code;
-
-            await PopulateReferenceDataAsync(viewModel, study.StudyStatusId!.Value);
-
-            return View("Status/Edit", viewModel);
-        }
-
-        var selectedStatus = viewModel.StudyStatusId!.Value;
-
-        study.StudyStatusId = selectedStatus;
-
-        var statusHistory = new StudyStatusHistory
-        {
-            StudyId = study.Id,
-            StudyStatusId = selectedStatus
-        };
-
-        context.StudyStatusHistory.Add(statusHistory);
-
-        switch (selectedStatus)
-        {
-            case StudyStatusType.Withdrawn:
-            {
-                foreach (var reasonId in selectedWithdrawnReasons.Select(x => x.Id))
-                {
-                    context.StudyStatusReasonHistory.Add(
-                        new StudyStatusReasonHistory
-                        {
-                            StudyStatusHistory = statusHistory,
-                            WithdrawnReasonId = (WithdrawnReasonType)reasonId,
-                            AdditionalReasonText =
-                                reasonId == (int)WithdrawnReasonType.Other
-                                    ? viewModel.WithdrawnOtherReason?.Trim()
-                                    : null
-                        });
-                }
-
-                break;
-            }
-            case StudyStatusType.Rejected:
-            {
-                foreach (var reasonId in selectedRejectedReasons.Select(x => x.Id))
-                {
-                    context.StudyStatusReasonHistory.Add(
-                        new StudyStatusReasonHistory
-                        {
-                            StudyStatusHistory = statusHistory,
-                            RejectedReasonId = (RejectedReasonType)reasonId,
-                            AdditionalReasonText =
-                                reasonId == (int)RejectedReasonType.Misc
-                                    ? viewModel.RejectedMiscReason?.Trim()
-                                    : null
-                        });
-                }
-
-                break;
-            }
-        }
-
-        await context.SaveChangesAsync();
-
-        return RedirectToAction(nameof(Details), new { id = study.Id });
-    }
-
-    private async Task PopulateReferenceDataAsync(StudyStatusViewModel viewModel, StudyStatusType currentStatus)
-    {
-        viewModel.AvailableStatuses = await context.SysRefStudyStatus
-            .Where(x => x.Id != currentStatus &&
-                        x.Id != StudyStatusType.Draft)
-            .ToListAsync();
-
-        viewModel.WithdrawnReasons = await context.SysRefWithdrawnReason
-            .Select(x => new StudyStatusReasonViewModel
-            {
-                Id = (int)x.Id,
-                Code = x.Code,
-                Description = x.Description
-            })
-            .ToListAsync();
-
-        viewModel.RejectedReasons = await context.SysRefRejectedReason
-            .Select(x => new StudyStatusReasonViewModel
-            {
-                Id = (int)x.Id,
-                Code = x.Code,
-                Description = x.Description
-            })
-            .ToListAsync();
     }
 }
