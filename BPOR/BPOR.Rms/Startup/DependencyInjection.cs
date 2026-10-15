@@ -11,11 +11,11 @@ using NIHR.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.DependencyInjection;
 using NIHR.Infrastructure.EntityFrameworkCore;
 using BPOR.Registration.Stream.Handler.Services;
+using BPOR.Rms.Database;
 using BPOR.Rms.Ms4;
 using BPOR.Rms.Utilities;
 using BPOR.Rms.Utilities.Interfaces;
 using BPOR.Rms.VolunteerInformation;
-using BPOR.Rms.VolunteerInformation.Data;
 using Ganss.Xss;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Settings;
@@ -74,6 +74,8 @@ public static class DependencyInjection
         services.GetSectionAndValidate<EmailSettings>(configuration);
         
         services.AddTransient<IEncryptionService, ReferenceEncryptionService>();
+        
+        services.AddScoped(typeof(ISysRefRepository<>), typeof(SysRefRepository<>));
 
         services.AddDistributedMemoryCache();
         services.AddPaging();

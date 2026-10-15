@@ -4,24 +4,14 @@ namespace BPOR.Domain.Enums;
 
 public enum StudyStatusType
 {
-    [Display(Order = 0)]
     Draft = 0,
-    
-    [Display(Name = "New Application", Order = 1)]
+    [Display(Name = "New Application")]
     NewApplication = 1,
-    
-    [Display(Name = "In Progress", Order = 2)]
+    [Display(Name = "In Progress")]
     InProgress = 2,
-    
-    [Display(Order = 3)]
     Active = 3,
-    
-    [Display(Name = "Concluded Successfully", Order = 4)]
+    [Display(Name = "Concluded Successfully")]
     ConcludedSuccessfully = 4,
-    
-    [Display(Order = 5)]
     Rejected = 5,
-    
-    [Display(Order = 6)]
     Withdrawn = 6
 }

@@ -7,7 +7,6 @@ public class StudyStatusViewModel
 {
     public long StudyId { get; set; }
     public string? StudyStatusCode { get; set; }
-    public StudyStatusType? StudyStatusId {get; set;}
     public bool CanChangeStatus { get; set; } = true;
     
     public string? WithdrawnOtherReason { get; set; }

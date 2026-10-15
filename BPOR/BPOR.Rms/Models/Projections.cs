@@ -93,7 +93,8 @@ public static class Projections
             TotalRecruited = s.ManualEnrollments
                 .Where(m => m.StudyId == s.Id)
                 .Sum(e => e.TotalEnrollments),
-            StudyStatus = s.StudyStatus
+            StudyStatus = s.StudyStatus,
+            NewApplicationAt = s.NewApplicationAt
         };
     }
 

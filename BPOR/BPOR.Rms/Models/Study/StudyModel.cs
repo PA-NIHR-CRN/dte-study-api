@@ -125,6 +125,7 @@ public class StudyModel
     public EthicsApproval? HasEthicsApproval { get; set; }
     public StudyStatus? StudyStatus { get; set; }
     public List<string?> StatusReasons { get; set; } = [];
+    public DateTime? NewApplicationAt {get; set; }
     
     public StudyStatusViewModel StudyStatusViewModel => new()
         {
