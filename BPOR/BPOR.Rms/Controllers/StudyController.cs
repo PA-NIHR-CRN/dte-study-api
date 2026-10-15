@@ -31,6 +31,8 @@ public class StudyController(
     public async Task<IActionResult> Index(
         string? searchTerm,
         [FromQuery] HashSet<StudyStatusType> statusIds,
+        bool allStatuses = false,
+        bool allStatusesWasSelected = false,
         bool hasBeenReset = false,
         CancellationToken token = default)
     {
@@ -39,7 +41,27 @@ public class StudyController(
             TempData["HasBeenReset"] = true;
             return RedirectToAction(nameof(Index));
         }
+        
+        var statuses = await context.SysRefStudyStatus
+            .Where(x => x.Id != StudyStatusType.Draft)
+            .ToListAsync(token);
 
+        if (allStatuses && !allStatusesWasSelected)
+        {
+            statusIds = statuses
+                .Select(x => x.Id)
+                .ToHashSet();
+        }
+        else if (!allStatuses && allStatusesWasSelected)
+        {
+            var allIndividualStatusesStillSelected = statuses.All(x => statusIds.Contains(x.Id));
+
+            if (allIndividualStatusesStillSelected)
+            {
+                statusIds.Clear();
+            }
+        }
+        
         var userHasResearcherRole = currentUserProvider.IsResearcher();
         var userHasAdminRole = currentUserProvider.IsAdmin();
         
