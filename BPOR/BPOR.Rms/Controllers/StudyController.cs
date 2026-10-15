@@ -283,7 +283,8 @@ public class StudyController(
                         StudyName = model.StudyName,
                         CpmsId = model.CpmsId,
                         IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false,
-                        NewApplicationAt = DateTime.UtcNow
+                        NewApplicationAt = DateTime.UtcNow,
+                        StudyStatusId = StudyStatusType.NewApplication
                     };
 
                     context.Add(study);
