@@ -68,6 +68,7 @@ public class ResearcherController(ParticipantDbContext context, ICurrentUserProv
                         SubmissionOutcomeId = model.PortfolioSubmissionStatus == SubmittedType.Yes ? model.OutcomeOfSubmission : null,
                         CpmsId = model.PortfolioSubmissionStatus == SubmittedType.Yes ? model.CPMSId : null,
                         FundingCode = model.HasFunding == NihrFundingStatusType.Yes ? model.FundingCode : null,
+                        NewApplicationAt = DateTime.UtcNow
                     };
 
                     context.Add(study);
