@@ -1,7 +1,7 @@
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Enums;
 using NIHR.GovUk.AspNetCore.Mvc;
+using NIHR.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.Ms4.Models;
 
@@ -9,9 +9,9 @@ public class StudyRequestViewModel
 {
     public int? StudyId { get; set; }
 
-    public bool? HasEthicsApproval { get; set; }
     [Display(Name = "Do you have ethics approval to use Be Part of Research?")]
-    public string HasEthicsApprovalDisplay => HasEthicsApproval == true ? "Yes" : "Not yet, I am awaiting an approval";
+    [ValueDisplayFormatter<EnumFormatter<EthicsApproval>>]
+    public EthicsApproval? HasEthicsApproval { get; set; }
     
     [Display(Name = "Have you applied for inclusion in the RDN portfolio")]
     public SubmittedType? InclusionInRdnPortfolioStatus { get; set; }
@@ -19,7 +19,6 @@ public class StudyRequestViewModel
     
     [Display(Name = "Does this study have NIHR funding?")]
     public NihrFundingStatusType? NihrFundingStatus { get; set; }
-    public string? NihrFundingStatusDisplay { get; set; }
     
     [Display(Name = "What is your CPMS ID?")]
     public long? CpmsId { get; set; }

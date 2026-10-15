@@ -155,6 +155,28 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
     }
     
     [HttpGet]
+    public IActionResult PreScreenerUrl()
+    {
+        return View(GetViewModel());
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> PreScreenerUrl(
+        StudyEditViewModel model,
+        StudyEditViewModelValidator validator,
+        CancellationToken cancellationToken)
+    {
+        if (validator.ValidateAndHasErrors(model, ModelState, i => i.PreScreenerUrl))
+        {
+            return View(model);
+        }
+
+        _study.PreScreenerUrl = model.PreScreenerUrl;
+        await studyDraftRepository.SaveStudyAsync(_study, cancellationToken);
+        return StudyDetailsTab();
+    }
+    
+    [HttpGet]
     public IActionResult FundingCode()
     {
         return View(GetViewModel());
@@ -195,6 +217,7 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
             SubmissionOutcome = _study.SubmissionOutcomeId,
             InformationUrl = _study.InformationUrl,
             FundingCode = _study.FundingCode,
+            PreScreenerUrl = _study.PreScreenerUrl,
         };
     }
 }

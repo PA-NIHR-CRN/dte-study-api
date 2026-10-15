@@ -1,4 +1,4 @@
-﻿using BPOR.Domain.Entities.RefData;
+using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 
 namespace BPOR.Rms.Models.Study;

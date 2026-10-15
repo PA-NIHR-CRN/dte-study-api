@@ -9,3 +9,11 @@ public class ValueDisplayFormatterAttribute : Attribute
         Type = type;
     }
 }
+
+public class ValueDisplayFormatterAttribute<T> : ValueDisplayFormatterAttribute
+    where T : IDisplayStringFormatter
+{
+    public ValueDisplayFormatterAttribute() : base(typeof(T))
+    {
+    }
+}

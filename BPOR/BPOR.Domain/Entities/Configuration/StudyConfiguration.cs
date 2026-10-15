@@ -1,3 +1,4 @@
+using BPOR.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
@@ -25,6 +26,10 @@ public class StudyConfiguration : IEntityTypeConfiguration<Study>
         builder.Property(s => s.InclusionCriteria).HasMaxLength(InclusionCriteriaMaxLength);
         builder.Property(s => s.Description).HasMaxLength(DescriptionMaxLength);
 
+        builder.Property(s => s.HasEthicsApproval).HasConversion<bool?>(
+                v => v == EthicsApproval.Yes ? true : v == EthicsApproval.NoButApplied ? false : null,
+                v => v == true ? EthicsApproval.Yes : v == false ? EthicsApproval.NoButApplied : null);
+        
         builder.HasOne(x => x.NihrFundingStatus)
             .WithMany()
             .HasForeignKey(x => x.HasNihrFunding)

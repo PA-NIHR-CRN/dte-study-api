@@ -5,7 +5,6 @@ using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Models;
 using BPOR.Rms.Ms4.Repositories;
 using BPOR.Rms.Ms4.Validators;
-using CpmsCore.Web.Authorization;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -428,7 +427,6 @@ public class StudyRequestController(
             InclusionInRdnPortfolioStatusDisplay = study.Submitted?.Code,
             InclusionInRdnPortfolioStatus = study.SubmittedId,
             CpmsId = study.CpmsId,
-            NihrFundingStatusDisplay = study.NihrFundingStatus?.Code,
             NihrFundingStatus = study.HasNihrFunding,
             RecruitmentEndDate = study.RecruitmentEndDate,
             FinishRecruiting = GovUkDate.FromDateTime(study.RecruitmentEndDate),

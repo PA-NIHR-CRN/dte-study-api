@@ -19,7 +19,9 @@ public static class AccessTokenExtensions
         builder.Services.AddScoped<IUrlAccessTokenService, UrlAccessTokenService>();
         builder.Services.AddOptions<AccessTokenAuthenticationOptions>().BindConfiguration(ConfigSectionPath);
         return builder.AddScheme<AccessTokenAuthenticationOptions, AccessTokenAuthenticationHandler>(
-            scheme ?? AccessTokenAuthenticationOptions.AuthenticationScheme, _ => { });
+            scheme ?? AccessTokenAuthenticationOptions.AuthenticationScheme, options => 
+                {
+                    });
     }
 
     public static void AddAccessTokenPolicy(this AuthorizationOptions options,

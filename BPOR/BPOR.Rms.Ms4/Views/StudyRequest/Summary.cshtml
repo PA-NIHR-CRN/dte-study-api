@@ -1,5 +1,6 @@
 @using BPOR.Rms.Ms4
 @using BPOR.Rms.Ms4.FlowGraph
+@using NIHR.Infrastructure.AspNetCore
 @using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken
 @model BPOR.Rms.Ms4.Models.StudyRequestViewModel
 
@@ -28,7 +29,7 @@
 
 <h3 class="govuk-heading-m">Overview</h3>
 <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-    <gov-uk-summary-list-item for="@Model.HasEthicsApprovalDisplay">
+    <gov-uk-summary-list-item for="@Model.HasEthicsApproval">
         @{ RenderChangeLink(StudyRequestEditFlow.EthicsApproval); }
     </gov-uk-summary-list-item>
 
@@ -50,7 +51,7 @@
     {
         <gov-uk-summary-list-item for="@Model.NihrFundingStatus">
             <summary-value>
-                @Model.NihrFundingStatusDisplay
+                @EnumHelper.GetDisplayName(Model.NihrFundingStatus)
             </summary-value>
             @{ RenderChangeLink(StudyRequestEditFlow.NihrFunding); }
         </gov-uk-summary-list-item>

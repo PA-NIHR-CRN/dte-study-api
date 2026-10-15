@@ -43,6 +43,7 @@ public class StudyDetailsViewModel
             {
                 StudyId = Study.Id,
                 StudyStatusCode = Study.StudyStatusDisplayWithReasons
+                StudyStatusId = Study.StudyStatus?.Id,
             };
         }
     }

@@ -43,4 +43,9 @@ public sealed class AccessTokenAuthenticationHandler(
 
         return AuthenticateResult.Success(ticket);
     }
+
+    protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
+    {
+        await base.HandleChallengeAsync(properties);
+    }
 }

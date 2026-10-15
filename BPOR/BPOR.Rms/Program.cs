@@ -2,12 +2,15 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Infrastructure.Services.Development;
 using BPOR.Rms;
 using BPOR.Rms.Ms4;
+using BPOR.Rms.Ms4.ScheduledJobs;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 using NIHR.Infrastructure.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.Interfaces;
+using Quartz;
 
 var builder = WebApplication
     .CreateBuilder(args);
@@ -30,6 +33,13 @@ builder.AddIdgAuthentication(authOptions =>
         });
     }
 );
+
+builder.Services.AddQuartz();
+builder.Services.AddQuartzHostedService(options =>
+{
+    // when shutting down we want jobs to complete gracefully
+    options.WaitForJobsToComplete = true;
+});
 
 builder.AddAWSSystemsManagerDataProtection("/BPOR/RMS");
 
@@ -55,5 +65,7 @@ var app = builder.Build();
 app.ConfigureSwagger(builder.Environment);
 
 app.UseApplicationMiddleware();
+
+await app.ScheduleDraftStudyCleanup();
 
 app.Run();
