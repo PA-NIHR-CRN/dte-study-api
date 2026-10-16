@@ -102,10 +102,10 @@ public static class ConfigureAuthentication
     {
         var dataprotection = builder.Services.AddDataProtection();
 
-        var developmentSettings = builder.GetSectionAndValidate<DevelopmentSettings>();
+        var developmentSettings = builder.Configuration.GetSectionOrDefault<DevelopmentSettings>("DevelopmentSettings");
 
         if (builder.Environment.IsProduction() ||
-            !(developmentSettings.Value.DisableSsmDataProtection ||
+            !(developmentSettings.DisableSsmDataProtection ||
                 builder.Environment.IsDevelopment()
              ))
         {

@@ -19,7 +19,7 @@ IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Configuration.AddNihrConfiguration(builder.Services, builder.Environment);
+builder.Configuration.AddNihrConfiguration(builder.Environment);
 builder.Services.RegisterServices(builder.Configuration, builder.Environment);
 
 builder.Services.AddScoped<Stage2Backfill>();

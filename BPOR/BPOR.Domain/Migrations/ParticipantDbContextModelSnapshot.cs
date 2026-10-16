@@ -10238,6 +10238,9 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.Property<int?>("ParticipantsRecruited")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PipelineVsId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PreScreenerUrl")
                         .HasMaxLength(2048)
                         .HasColumnType("varchar(2048)");

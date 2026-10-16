@@ -48,6 +48,12 @@ public class Study : ISoftDelete, IAudit
     public StudyStatus? StudyStatus { get; set; }
     public NihrFundingStatus? NihrFundingStatus { get; set; }
     
+    /// <summary>
+    /// Temporary column to record the VS ID from the pipeline spreadsheet - this can be removed once the spreadsheet
+    /// has ben retired.
+    /// </summary>
+    public int? PipelineVsId { get; set; }
+    
     public ICollection<ManualEnrollment> ManualEnrollments { get; set; } = new List<ManualEnrollment>();
     public ICollection<StudyParticipantEnrollment> StudyParticipantEnrollments { get; set; } = new List<StudyParticipantEnrollment>();
     public ICollection<FilterCriteria> FilterCriterias { get; set; } = new List<FilterCriteria>();
