@@ -113,11 +113,14 @@
                 Apply filters
             </button>
 
-            <a class="govuk-link"
-               asp-action="Index"
-               asp-route-searchTerm="@Model.SearchTerm">
-                Clear filters
-            </a>
+            @if (Model.Filters.SelectedStatuses.Any())
+            {
+                <a class="govuk-link"
+                   asp-action="Index"
+                   asp-route-searchTerm="@Model.SearchTerm">
+                    Clear filters
+                </a>
+            }
         </div>
     </form>
 </aside>
