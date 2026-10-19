@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
-using BPOR.Rms.Extensions;
 using NIHR.Infrastructure.AspNetCore;
+using NIHR.Infrastructure.AspNetCore.Extensions;
 
 namespace BPOR.Rms.Models.Study;
 
@@ -129,16 +129,18 @@ public class StudyModel
     public DateTime? NewApplicationAt {get; set; }
     
     public StudyStatusViewModel StudyStatusViewModel => new()
-        {
-            StudyId = Id,
-            StudyStatusCode = StudyStatus?.Code.ToSentenceCase(),
-            CanChangeStatus = false,
-            StudyStatusId = StudyStatus?.Id,
-        };
+    {
+        StudyId = Id,
+        StudyStatusCode = StudyStatusDisplay,
+        CanChangeStatus = false,
+        StudyStatusId = StudyStatus?.Id,
+    };
+
+    public string StudyStatusDisplayWithReasons => StatusReasons.Count == 0
+            ? StudyStatusDisplay
+            : $"{StudyStatusDisplay}: {string.Join(", ", StatusReasons)}";
     
-    public string StudyStatusDisplayWithReasons =>
-        !StatusReasons.Any()
-            ? StudyStatus?.Code.ToSentenceCase() ?? string.Empty
-            : $"{StudyStatus?.Code.ToSentenceCase()}: {string.Join(", ", StatusReasons)}";
+    private string StudyStatusDisplay => StudyStatus?.Code.ToSentenceCase() ?? string.Empty;
+
 }
 

@@ -1,4 +1,4 @@
-namespace BPOR.Rms.Extensions;
+namespace NIHR.Infrastructure.AspNetCore.Extensions;
 
 public static class StringExtensions
 {

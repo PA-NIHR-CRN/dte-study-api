@@ -1,5 +1,6 @@
 @using BPOR.Domain.Enums
 @using NIHR.Infrastructure.AspNetCore
+@using NIHR.Infrastructure.AspNetCore.Extensions
 @model BPOR.Rms.Ms4.Models.StudyEditViewModel
 
 @{
@@ -15,7 +16,7 @@
 <form-group for="@Model.Status"
             label-as-heading="true"
             label-class="govuk-heading-l"
-            description="The current status is ‘@EnumHelper.GetDisplayName(Model.Status)’. Select a new status from the list below."
+            description="The current status is ‘@EnumHelper.GetDisplayName(Model.Status).ToSentenceCase()’. Select a new status from the list below."
             show-validation-message="false">
     
     <input type="hidden" asp-for="@Model.CurrentStatus"/>
@@ -24,7 +25,7 @@
         @foreach (var status in Enum.GetValues<StudyStatusType>()
                       .Where(x => x != StudyStatusType.Draft))
         {
-            <radio value="@status">@EnumHelper.GetDisplayName(status)</radio>
+            <radio value="@status">@EnumHelper.GetDisplayName(status).ToSentenceCase()</radio>
         }
     </radio-set>
     
