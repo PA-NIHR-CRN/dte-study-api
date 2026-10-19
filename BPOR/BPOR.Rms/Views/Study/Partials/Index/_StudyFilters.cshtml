@@ -1,6 +1,7 @@
 @using BPOR.Domain.Entities.RefData
 @using BPOR.Domain.Enums
 @using BPOR.Rms.Database
+@using BPOR.Rms.Extensions
 @using BPOR.Rms.Helpers
 @using NIHR.Infrastructure.AspNetCore
 @model BPOR.Rms.Models.Study.StudiesViewModel
@@ -16,7 +17,7 @@
         studyStatusList.All(status => Model.Filters.SelectedStatuses.Contains(status.Id));
 }
 
-<aside aria-labelledby="study-filter-heading">
+<aside aria-labelledby="study-filter-heading" class="govuk-!-margin-bottom-4">
     <form method="get">
 
         @if (!string.IsNullOrEmpty(Model.SearchTerm))
@@ -44,7 +45,7 @@
                             @foreach (var filter in Model.Filters.SelectedStatuses)
                             {
                                 <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(filter)" class="status-tag">
-                                    @EnumHelper.GetDisplayName(filter)
+                                    @EnumHelper.GetDisplayName(filter).ToSentenceCase()
                                 </govuk-tag>
                             }
                         </div>
@@ -93,7 +94,7 @@
                             <label
                                 class="govuk-label govuk-checkboxes__label"
                                 for="@statusId">
-                                @status.Code
+                                @status.Code.ToSentenceCase()
                             </label>
                         </div>
                     }
@@ -104,11 +105,19 @@
 
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible govuk-!-margin-top-2"/>
 
-        <button
-            type="submit"
-            class="govuk-button"
-            data-module="govuk-button">
-            Apply filters
-        </button>
+        <div class="govuk-button-group">
+            <button
+                type="submit"
+                class="govuk-button"
+                data-module="govuk-button">
+                Apply filters
+            </button>
+
+            <a class="govuk-link"
+               asp-action="Index"
+               asp-route-searchTerm="@Model.SearchTerm">
+                Clear filters
+            </a>
+        </div>
     </form>
 </aside>

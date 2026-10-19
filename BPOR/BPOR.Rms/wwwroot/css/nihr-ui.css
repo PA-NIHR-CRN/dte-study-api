@@ -407,11 +407,32 @@ button.govuk-link:focus{
 }
 
 .status-tag {
+    align-self: flex-start;
     max-width: 100%;
-    border-width: 1px;
-    border-style: solid;
+    border: 1px solid;
     padding: 2px 5px !important;
     margin: 0 !important;
+}
+
+@media screen and (max-width: 768px) {
+    .status-group {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        margin-right: 10px;
+    }
+
+    .status-tag {
+        width: auto;
+        height: fit-content !important;
+        align-self: auto;
+        margin: 0 !important;
+    }
+
+    .status-group .govuk-link {
+        flex-shrink: 0;
+    }
 }
 
 .selected-filter-tags {
