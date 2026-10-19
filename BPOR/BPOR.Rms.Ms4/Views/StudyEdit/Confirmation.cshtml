@@ -1,0 +1,32 @@
+@model BPOR.Rms.Ms4.Models.StudyEditViewModel
+
+@{
+    Layout = "_StudyLayout";
+
+    var heading = ViewData["ConfirmationHeading"] as string ?? "Update complete";
+    var message = ViewData["ConfirmationMessage"] as string;
+}
+
+<div class="govuk-panel govuk-panel--confirmation">
+    <h1 class="govuk-panel__title">
+        @heading
+    </h1>
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <div class="govuk-panel__body">
+            @message
+        </div>
+    }
+</div>
+
+<p class="govuk-body">
+    <a asp-controller="Study"
+        asp-action="Details"
+       asp-route-id="@Model.Id"
+       role="button"
+       class="govuk-button govuk-!-margin-top-4"
+       data-module="govuk-button">
+        Return to study page
+    </a>
+</p>
