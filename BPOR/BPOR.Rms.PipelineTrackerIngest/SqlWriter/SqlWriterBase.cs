@@ -80,18 +80,23 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
 
     protected virtual void WriteNullLiteral() => output.Write("NULL");
 
-    private IEnumerable<NamedValue> Flatten(object value)
+    private NamedValue[] ExtractNamedValues(object value)
     {
-        foreach (var item in value.GetType()
-                     .GetProperties(BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.Public))
+        var propertyInfos = value.GetType()
+            .GetProperties(BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.Public);
+        var result = new NamedValue[propertyInfos.Length];
+        for (var index = 0; index < propertyInfos.Length; index++)
         {
-            yield return new NamedValue(item.Name, new (item.PropertyType, item.GetValue(value)));
+            var item = propertyInfos[index];
+            result[index] = new NamedValue(item.Name, item.GetValue(value));
         }
+
+        return result;
     }
 
     public virtual void Visit(UpdateStatement updateStatement)
     {
-        var flattenedValues = Flatten(updateStatement.UpdatedValues);
+        var flattenedValues = ExtractNamedValues(updateStatement.UpdatedValues);
         
         output.Write("UPDATE ");
         updateStatement.Table.Accept(this);
@@ -100,7 +105,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         {
             i.Identifier.Accept(this);
             output.Write(" = ");
-            WriteReflectedValue(i.Value.Value);
+            WriteReflectedValue(i.Value);
         });
         output.Write(" WHERE ");
         updateStatement.WhereClause.Accept(this);
@@ -108,17 +113,17 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
 
     public virtual void Visit(InsertStatement insertStatement)
     {
-        var values = Flatten(insertStatement.InsertedValues);
+        var values = ExtractNamedValues(insertStatement.InsertedValues);
         
         output.Write("INSERT INTO ");
         Visit(insertStatement.Table);
-        WriteOpenParanthesis();
+        WriteOpenParenthesis();
         WriteCommaSeperated(values, i => Visit(i.Identifier));
-        WriteCloseParanthesis();
+        WriteCloseParenthesis();
         output.Write(" VALUES ");
-        WriteOpenParanthesis();
-        WriteCommaSeperated(values, i => WriteReflectedValue(i.Value.Value));
-        WriteCloseParanthesis();
+        WriteOpenParenthesis();
+        WriteCommaSeperated(values, i => WriteReflectedValue(i.Value));
+        WriteCloseParenthesis();
     }
 
     public virtual void Visit(SetVariableStatement setVariable)
@@ -131,11 +136,11 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
 
     public virtual void Visit(LogicBinOpExpr predicate)
     {
-        WriteOpenParanthesis();
+        WriteOpenParenthesis();
         predicate.Lhs.Accept(this);
         WriteLogicalBinOp(predicate.Op);
         predicate.Rhs.Accept(this);
-        WriteCloseParanthesis();
+        WriteCloseParenthesis();
     }
 
     protected virtual void WriteLogicalBinOp(LogicalBinOp predicateOp)
@@ -148,12 +153,12 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
         });
     }
 
-    protected virtual void WriteOpenParanthesis()
+    protected virtual void WriteOpenParenthesis()
     {
         output.Write("(");
     }
     
-    protected virtual void WriteCloseParanthesis()
+    protected virtual void WriteCloseParenthesis()
     {
         output.Write(")");
     }
@@ -225,8 +230,8 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
     public virtual void Visit(SqlFunction function)
     {
         output.Write(function.Name);
-        WriteOpenParanthesis();
+        WriteOpenParenthesis();
         // TODO: Add parameters
-        WriteCloseParanthesis();
+        WriteCloseParenthesis();
     }
 }

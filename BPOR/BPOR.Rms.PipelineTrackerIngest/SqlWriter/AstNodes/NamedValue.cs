@@ -1,3 +1,3 @@
 ﻿namespace BPOR.Rms.PipelineTrackerIngest.SqlWriter;
 
-public record NamedValue(SqlIdentifier Identifier, TypedValue Value);
+public record NamedValue(SqlIdentifier Identifier, object? Value);
