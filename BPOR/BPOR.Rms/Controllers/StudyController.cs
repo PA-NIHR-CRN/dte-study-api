@@ -29,6 +29,8 @@ public class StudyController(
 ) : Controller
 {
     [HttpGet]
+    [Route("", Order = 0)]
+    [Route("study", Order = 1)]
     public async Task<IActionResult> Index(
         string? searchTerm,
         [FromQuery] HashSet<StudyStatusType> statusIds,
@@ -114,6 +116,9 @@ public class StudyController(
     }
 
     // GET: Study/Details/5
+    [HttpGet]
+    [Route("study/{id:int}", Order = 0)]
+    [Route("study/details/{id:int}", Order = 1)]
     public async Task<IActionResult> Details([FromServices] IVipRepository repository, int? id,
         CancellationToken cancellationToken)
     {
