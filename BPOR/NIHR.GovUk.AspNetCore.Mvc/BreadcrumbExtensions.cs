@@ -2,6 +2,11 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace NIHR.GovUk.AspNetCore.Mvc;
 
+public class BreadcrumbModel
+{
+    public string CurrentPageCaption { get; set; }
+    public BreadcrumbItem[] Ancestors { get; set; }
+}
 public class BreadcrumbItem(string text, string url)
 {
     public string Text { get; set; } = text;
@@ -21,18 +26,14 @@ public static class BreadcrumbExtensions
         breadcrumbs.Add(new BreadcrumbItem(text, url));
     }
 
-    public static void AddBreadcrumbs(this ViewDataDictionary viewData, Dictionary<string, string> items)
+    public static void AddBreadcrumbs(this ViewDataDictionary viewData, string currentPageCaption,
+        params BreadcrumbItem[] ancestors)
     {
-        if (!(viewData["Breadcrumbs"] is List<BreadcrumbItem> breadcrumbs))
+        viewData["Breadcrumbs"] = new BreadcrumbModel
         {
-            breadcrumbs = new List<BreadcrumbItem>();
-            viewData["Breadcrumbs"] = breadcrumbs;
-        }
-
-        foreach (var item in items)
-        {
-            breadcrumbs.Add(new BreadcrumbItem(item.Key, item.Value));
-        }
+            CurrentPageCaption = currentPageCaption,
+            Ancestors = ancestors
+        };
     }
 }
 
