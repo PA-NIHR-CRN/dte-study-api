@@ -546,10 +546,20 @@
     height: 23px;
     width: fit-content;
     max-width: 100%;
-    padding: 5px 8px 4px 8px;
     justify-content: center;
     align-items: center;
-    align-self: stretch;
+    align-self: flex-start;
+    border: 1px solid;
+    padding: 2px 5px !important;
+    margin: 0 !important;
+}
+
+@media screen and (max-width: 768px) {
+    .govuk-tag {
+        height: fit-content !important;
+        align-self: auto;
+        margin: 0 !important;
+    }
 }
 
 .govuk-tag--orange {

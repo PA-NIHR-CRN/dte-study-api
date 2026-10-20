@@ -406,14 +406,6 @@ button.govuk-link:focus{
     padding-bottom: 0.5rem;
 }
 
-.status-tag {
-    align-self: flex-start;
-    max-width: 100%;
-    border: 1px solid;
-    padding: 2px 5px !important;
-    margin: 0 !important;
-}
-
 @media screen and (max-width: 768px) {
     .status-group {
         display: flex !important;
@@ -421,13 +413,6 @@ button.govuk-link:focus{
         flex-wrap: nowrap !important;
         align-items: center !important;
         margin-right: 10px;
-    }
-
-    .status-tag {
-        width: auto;
-        height: fit-content !important;
-        align-self: auto;
-        margin: 0 !important;
     }
 
     .status-group .govuk-link {
