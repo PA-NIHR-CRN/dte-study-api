@@ -264,7 +264,6 @@
 .govuk-skip-link,
 .govuk-link,
 .govuk-back-link {
-    text-decoration: none;
     color: rgb(29, 112, 184);
     cursor: pointer;
 }
