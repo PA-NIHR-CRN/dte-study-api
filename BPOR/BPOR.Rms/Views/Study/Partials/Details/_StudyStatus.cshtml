@@ -4,17 +4,21 @@
 @model BPOR.Rms.Models.Study.StudyStatusViewModel
 @inject ICurrentUserProvider<User> CurrentUserProvider
 
-@if (CurrentUserProvider.IsAdmin() && !String.IsNullOrEmpty(Model.StudyStatusCode))
+@if (CurrentUserProvider.IsAdmin() && !string.IsNullOrEmpty(Model.StudyStatusCode))
 {
-    <div class="govuk-button-group">
-        <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(Model.StudyStatusId!.Value)" class="status-tag">@Model.StudyStatusCode</govuk-tag>
-        
+    <div class="govuk-button-group status-group">
+        <govuk-tag colour="@StudyStatusTagHelper.GetTagColour(Model.StudyStatusId!.Value)">
+            @Model.StudyStatusCode
+        </govuk-tag>
+
         @if (Model.CanChangeStatus)
         {
-            <a class="govuk-link govuk-!-margin-left-2" asp-action="Status" asp-controller="StudyEdit" asp-route-studyId="@Model.StudyId">
+            <a class="govuk-link govuk-!-margin-left-2"
+               asp-action="Status"
+               asp-controller="StudyEdit"
+               asp-route-studyId="@Model.StudyId">
                 Change
             </a>
         }
-        
     </div>
 }
