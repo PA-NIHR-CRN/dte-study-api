@@ -408,10 +408,10 @@ button.govuk-link:focus{
 
 @media screen and (max-width: 768px) {
     .status-group {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
         margin-right: 10px;
     }
 
