@@ -35,7 +35,7 @@
 
             <summary class="govuk-details__summary">
                 <span class="govuk-details__summary-content">
-                    <span class="govuk-heading-m govuk-!-margin-bottom-0">
+                    <span id="study-filter-heading" class="govuk-heading-m govuk-!-margin-bottom-0">
                         Statuses
                     </span>
 
@@ -110,7 +110,7 @@
                 type="submit"
                 class="govuk-button"
                 data-module="govuk-button">
-                Apply filters
+                Apply filter
             </button>
 
             @if (Model.Filters.SelectedStatuses.Any())
@@ -118,7 +118,7 @@
                 <a class="govuk-link"
                    asp-action="Index"
                    asp-route-searchTerm="@Model.SearchTerm">
-                    Clear filters
+                    Clear filter
                 </a>
             }
         </div>
