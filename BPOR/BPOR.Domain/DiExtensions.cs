@@ -16,6 +16,7 @@ public static class DiExtensions
         {
             var dbSettings = serviceProvider.GetRequiredService<IOptions<DbSettings>>();
             var participantConnectionString = dbSettings.Value.BuildConnectionString();
+      
             var dbContextOptionsBuilder = options.UseMySql(participantConnectionString, ServerVersion.AutoDetect(participantConnectionString),
                 builder =>
                 {
