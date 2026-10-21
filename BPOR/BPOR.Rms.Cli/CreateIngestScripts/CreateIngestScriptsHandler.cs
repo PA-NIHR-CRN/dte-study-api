@@ -15,10 +15,9 @@ public class CreateIngestScriptsHandler(
     ParseResult parseResult,
     CreateIngestScriptsParams parameters,
     ParticipantDbContext dbContext,
-    ILogger<CreateIngestScriptsHandler> logger,
-    CreateIngestScriptOptions options) : BaseHandler<CreateIngestScriptsParams>(parseResult, parameters)
+    ILogger<CreateIngestScriptsHandler> logger) : BaseHandler<CreateIngestScriptsParams>(parseResult, parameters)
 {
-    private CreateIngestScriptOptions _options = options;
+    private CreateIngestScriptOptions _options;
 
     public sealed override async Task<int> InvokeAsync(CancellationToken cancellationToken)
     {
@@ -290,7 +289,9 @@ public class CreateIngestScriptsHandler(
                 RecruitmentStartDate = ingestedRow.RecruitmentStartDate,
                 RecruitmentEndDate = ingestedRow.RecruitmentEndDate,
                 RecruitmentTarget = ingestedRow.OverallRecruitmentTarget,
-                NewApplicationAt = ingestedRow.AddedToRegistryPipelineAt
+                NewApplicationAt = ingestedRow.AddedToRegistryPipelineAt,
+                IsRecruitingIdentifiableParticipants = false,
+                IsDeleted = false
             });
 
         var studyIdVar = new SqlVariable("@StudyId");
