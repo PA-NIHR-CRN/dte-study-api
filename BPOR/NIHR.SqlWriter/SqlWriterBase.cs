@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Reflection;
 
 namespace NIHR.SqlWriter;
 
@@ -79,33 +78,17 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
     protected abstract void WriteLiteral(string value);
 
     protected virtual void WriteNullLiteral() => output.Write("NULL");
-
-    private NamedValue[] ExtractNamedValues(object value)
-    {
-        var propertyInfos = value.GetType()
-            .GetProperties(BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.Public);
-        var result = new NamedValue[propertyInfos.Length];
-        for (var index = 0; index < propertyInfos.Length; index++)
-        {
-            var item = propertyInfos[index];
-            result[index] = new NamedValue(item.Name, item.GetValue(value));
-        }
-
-        return result;
-    }
-
+    
     public virtual void Visit(UpdateStatement updateStatement)
     {
-        var flattenedValues = ExtractNamedValues(updateStatement.UpdatedValues);
-        
         output.Write("UPDATE ");
         updateStatement.Table.Accept(this);
         output.Write(" SET ");
-        WriteCommaSeperated(flattenedValues, i =>
+        WriteCommaSeperated(updateStatement.Assignments, i =>
         {
-            i.Identifier.Accept(this);
+            i.ColumnName.Accept(this);
             output.Write(" = ");
-            WriteReflectedValue(i.Value);
+            i.Value.Accept(this);
         });
         output.Write(" WHERE ");
         updateStatement.WhereClause.Accept(this);
@@ -113,17 +96,18 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
 
     public virtual void Visit(InsertStatement insertStatement)
     {
-        var values = ExtractNamedValues(insertStatement.InsertedValues);
-        
         output.Write("INSERT INTO ");
         Visit(insertStatement.Table);
         WriteOpenParenthesis();
-        WriteCommaSeperated(values, i => Visit(i.Identifier));
+        WriteCommaSeperated(insertStatement.Columns, i => i.Accept(this));
         WriteCloseParenthesis();
         output.Write(" VALUES ");
-        WriteOpenParenthesis();
-        WriteCommaSeperated(values, i => WriteReflectedValue(i.Value));
-        WriteCloseParenthesis();
+        WriteCommaSeperated(insertStatement.Values, row =>
+        {
+            WriteOpenParenthesis();
+            WriteCommaSeperated(row, i => i.Accept(this));
+            WriteCloseParenthesis();
+        });
     }
 
     public virtual void Visit(SetVariableStatement setVariable)

@@ -183,7 +183,7 @@ public class CreateIngestScriptsHandler(
                 }
 
                 return history.StudyStatusReasonHistories.First().WithdrawnReasonId !=
-                       ingestedRow.RejectedWithdrawnReasonType.WithdrawnReason;
+                       ingestedRow.RejectedWithdrawnReasonType?.WithdrawnReason;
             } 
             
             if (study.StudyStatusId == StudyStatusType.Rejected)
@@ -194,7 +194,7 @@ public class CreateIngestScriptsHandler(
                 }
 
                 return history.StudyStatusReasonHistories.First().RejectedReasonId !=
-                       ingestedRow.RejectedWithdrawnReasonType.RejectedReason;
+                       ingestedRow.RejectedWithdrawnReasonType?.RejectedReason;
             }
         }
 
@@ -291,7 +291,9 @@ public class CreateIngestScriptsHandler(
                 RecruitmentTarget = ingestedRow.OverallRecruitmentTarget,
                 NewApplicationAt = ingestedRow.AddedToRegistryPipelineAt,
                 IsRecruitingIdentifiableParticipants = false,
-                IsDeleted = false
+                IsDeleted = false,
+                HasNihrFunding = ingestedRow.CpmsId.HasValue ? NihrFundingStatusType.Yes : NihrFundingStatusType.No,
+                SubmittedId = ingestedRow.CpmsId.HasValue ? SubmittedType.Yes : (SubmittedType?)null
             });
 
         var studyIdVar = new SqlVariable("@StudyId");
