@@ -2,8 +2,13 @@
 
 namespace NIHR.SqlWriter;
 
-public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLevelStatementVisitor, ISqlPredicateVisitor, ISqlValueVisitor
+public abstract class SqlWriterBase(TextWriter output)
+    : ISqlWriter, ISqlTopLevelStatementVisitor, ISqlPredicateVisitor, ISqlValueVisitor
 {
+    protected readonly IndentedTextWriter output = new(output);
+
+    protected virtual int MaxInsertBatchSize => 1000;
+
     public virtual void WriteComment(string comment)
     {
         if (comment.Contains('\n'))
@@ -15,12 +20,12 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
             output.WriteLine($"-- {comment}");
         }
     }
-    
+
     public virtual void WriteInlineComment(string comment)
     {
         output.Write($" /* {comment} */ ");
     }
-    
+
     public void WriteRawLine(string line)
     {
         output.WriteLine(line);
@@ -41,20 +46,12 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
             {
                 output.Write(", ");
             }
+
             isFirst = false;
             action(value);
         }
     }
-
-    protected void WriteReflectedValue(object? value)
-    {
-        if (value is not ISqlValue sqlValue)
-        {
-            sqlValue = new SqlLiteral(value);
-        }
-        sqlValue.Accept(this);
-    }
-
+    
     protected virtual void WriteLiteral(DateTime value)
     {
         WriteLiteral(value.ToString("yyyy-MM-ddTHH:mm:ss"));
@@ -78,35 +75,82 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
     protected abstract void WriteLiteral(string value);
 
     protected virtual void WriteNullLiteral() => output.Write("NULL");
-    
+
     public virtual void Visit(UpdateStatement updateStatement)
     {
         output.Write("UPDATE ");
         updateStatement.Table.Accept(this);
-        output.Write(" SET ");
-        WriteCommaSeperated(updateStatement.Assignments, i =>
+        output.Write(" SET");
+        WriteIndentedBlock(() =>
         {
-            i.ColumnName.Accept(this);
-            output.Write(" = ");
-            i.Value.Accept(this);
+            WriteCommaSeperated(updateStatement.Assignments, i =>
+            {
+                i.ColumnName.Accept(this);
+                output.Write(" = ");
+                i.Value.Accept(this);
+            });
         });
-        output.Write(" WHERE ");
-        updateStatement.WhereClause.Accept(this);
+        output.WriteLine("WHERE");
+        WriteIndentedBlock(() =>
+        {
+            updateStatement.WhereClause.Accept(this);
+        });
     }
 
     public virtual void Visit(InsertStatement insertStatement)
     {
+        var batchSize = MaxInsertBatchSize;
+        if (batchSize <= 0)
+        {
+            throw new InvalidOperationException($"{nameof(MaxInsertBatchSize)} must be greater than zero.");
+        }
+
+        var batchCount = Math.Max(1, (insertStatement.Values.Length + (long)batchSize - 1) / batchSize);
+        for (var batchIndex = 0; batchIndex < batchCount; batchIndex++)
+        {
+            if (batchIndex > 0)
+            {
+                WriteEndStatement();
+            }
+
+            var startIndex = batchIndex * batchSize;
+            var count = Math.Min(batchSize, insertStatement.Values.Length - startIndex);
+            WriteInsertBatch(insertStatement, startIndex, count);
+        }
+    }
+
+    private void WriteIndentedBlock(Action writeBlockContent)
+    {
+        output.EnsureNewLine();
+        output.IndentLevel++;
+        writeBlockContent();
+        output.IndentLevel--;
+        output.EnsureNewLine();
+    }
+
+    protected virtual void WriteInsertBatch(InsertStatement insertStatement, int startIndex, int count)
+    {
         output.Write("INSERT INTO ");
         Visit(insertStatement.Table);
-        WriteOpenParenthesis();
-        WriteCommaSeperated(insertStatement.Columns, i => i.Accept(this));
-        WriteCloseParenthesis();
-        output.Write(" VALUES ");
-        WriteCommaSeperated(insertStatement.Values, row =>
+        WriteIndentedBlock(() =>
         {
             WriteOpenParenthesis();
-            WriteCommaSeperated(row, i => i.Accept(this));
+            WriteCommaSeperated(insertStatement.Columns, i => i.Accept(this));
             WriteCloseParenthesis();
+        });
+        output.WriteLine("VALUES");
+        WriteIndentedBlock(() =>
+        {
+            for (var rowIndex = startIndex; rowIndex < startIndex + count; rowIndex++)
+            {
+                WriteOpenParenthesis();
+                WriteCommaSeperated(insertStatement.Values[rowIndex], i => i.Accept(this));
+                WriteCloseParenthesis();
+                if (rowIndex < startIndex + count - 1)
+                {
+                    output.WriteLine(",");
+                }
+            }
         });
     }
 
@@ -121,9 +165,15 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
     public virtual void Visit(LogicBinOpExpr predicate)
     {
         WriteOpenParenthesis();
+        output.WriteLine();
+        output.IndentLevel++;
         predicate.Lhs.Accept(this);
+        output.Write(" ");
         WriteLogicalBinOp(predicate.Op);
+        output.Write(" ");
         predicate.Rhs.Accept(this);
+        output.IndentLevel--;
+        output.WriteLine();
         WriteCloseParenthesis();
     }
 
@@ -141,7 +191,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
     {
         output.Write("(");
     }
-    
+
     protected virtual void WriteCloseParenthesis()
     {
         output.Write(")");
@@ -208,7 +258,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
             WriteLiteral(guidValue);
         }
         else
-        { 
+        {
             throw new InvalidOperationException($"Unsupported literal type {literal.Value.GetType().Name}");
         }
     }
@@ -224,6 +274,7 @@ public abstract class SqlWriterBase(TextWriter output) : ISqlWriter, ISqlTopLeve
     }
 
     public abstract void Visit(SqlIdentifier identifier);
+
     public virtual void Visit(SqlVariable variable)
     {
         output.Write(variable.Name);

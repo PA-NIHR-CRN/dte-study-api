@@ -22,42 +22,40 @@ public class ExportToSqlScriptHandler(
         var writer = new MySqlSqlWriter(output);
         var faker = new Faker();
 
-        foreach (var study in studies)
+        writer.InsertBatch(
+        "Studies",
+        studies.Select(study => new
         {
-            writer.Insert(
-            "Studies",
-                new
-            {
-                study.FullName,
-                EmailAddress = faker.Internet.Email(provider: "test.nihr.ac.uk"),
-                study.StudyName,
-                study.CpmsId,
-                study.IsRecruitingIdentifiableParticipants,
-                IsDeleted = 0,
-                study.CreatedAt,
-                study.UpdatedAt,
-                CreatedById = parameters.UserId,
-                UpdatedById = parameters.UserId,
-                study.AlreadyOpenToRecruitment,
-                study.ChiefInvestigator,
-                study.FundingCode,
-                study.HasNihrFunding,
-                study.ParticipantsRecruited,
-                study.RecruitmentEndDate,
-                study.RecruitmentStartDate,
-                study.RecruitmentTarget,
-                study.Sponsors,
-                study.SubmissionOutcomeId,
-                study.SubmittedId,
-                study.TargetPopulation,
-                study.InformationUrl,
-                study.HasMultipleResearchLocations,
-                study.PreScreenerUrl,
-                study.SinglePersonResponsibleForRecruiting,
-                ChiefInvestigatorEmail = faker.Internet.Email(provider: "test.nihr.ac.uk"),
-                study.StudyStatusId
-                });
-        }
+            study.FullName,
+            EmailAddress = faker.Internet.Email(provider: "test.nihr.ac.uk"),
+            study.StudyName,
+            study.CpmsId,
+            study.IsRecruitingIdentifiableParticipants,
+            IsDeleted = 0,
+            study.CreatedAt,
+            study.UpdatedAt,
+            CreatedById = parameters.UserId,
+            UpdatedById = parameters.UserId,
+            study.AlreadyOpenToRecruitment,
+            study.ChiefInvestigator,
+            study.FundingCode,
+            study.HasNihrFunding,
+            study.ParticipantsRecruited,
+            study.RecruitmentEndDate,
+            study.RecruitmentStartDate,
+            study.RecruitmentTarget,
+            study.Sponsors,
+            study.SubmissionOutcomeId,
+            study.SubmittedId,
+            study.TargetPopulation,
+            study.InformationUrl,
+            study.HasMultipleResearchLocations,
+            study.PreScreenerUrl,
+            study.SinglePersonResponsibleForRecruiting,
+            ChiefInvestigatorEmail = faker.Internet.Email(provider: "test.nihr.ac.uk"),
+            study.StudyStatusId
+            }));
+        
 
         return 1;
     }

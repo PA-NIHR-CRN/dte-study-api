@@ -2,7 +2,7 @@
 
 namespace NIHR.SqlWriter;
 
-public class MySqlSqlWriter(TextWriter output) : SqlWriterBase(output)
+public class MySqlSqlWriter(TextWriter writer) : SqlWriterBase(writer)
 {
     protected override void WriteLiteral(string value)
     {
@@ -33,9 +33,10 @@ public class MySqlSqlWriter(TextWriter output) : SqlWriterBase(output)
                 result.Append(c);
             }
         }
+
         return result.ToString();
     }
-    
+
     public override void Visit(SqlIdentifier identifier)
     {
         output.Write($"`{identifier.Value}`");
