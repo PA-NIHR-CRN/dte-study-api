@@ -9,6 +9,7 @@ namespace NIHR.Infrastructure.Settings
         public bool Enabled { get; set; } = true;
         public string Region { get; set; } = string.Empty;
         public string SecretName { get; set; } = string.Empty;
+        public string SsoProfile { get; set; }
 
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

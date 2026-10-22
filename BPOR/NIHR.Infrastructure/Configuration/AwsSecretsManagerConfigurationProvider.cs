@@ -21,19 +21,10 @@ namespace NIHR.Infrastructure.Configuration
             _secretName = secretName;
         }
 
-        public override async void Load()
-        {
-            await LoadAsync();
-        }
-
-        private async Task LoadAsync()
+        public override void Load()
         {
             // TODO had to make this sync to work with ecs, ask CON if there is a better way
-            var response = Task
-                .Run(async () =>
-                    await _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName }))
-                .GetAwaiter().GetResult();
-
+            var response = Task.Run(() => _client.GetSecretValueAsync(new GetSecretValueRequest { SecretId = _secretName })).Result;
             var secretString = response.SecretString;
             if (string.IsNullOrEmpty(secretString))
             {
@@ -136,7 +127,7 @@ namespace NIHR.Infrastructure.Configuration
 
         public async Task ForceReloadAsync()
         {
-            await LoadAsync();
+            Load();
             OnReload();
         }
     }

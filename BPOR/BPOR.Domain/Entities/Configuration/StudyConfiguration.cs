@@ -22,13 +22,13 @@ public class StudyConfiguration : IEntityTypeConfiguration<Study>
 
         builder.Property(s => s.InformationUrl).Url();
         builder.Property(s => s.PreScreenerUrl).Url();
-        
+
         builder.Property(s => s.InclusionCriteria).HasMaxLength(InclusionCriteriaMaxLength);
         builder.Property(s => s.Description).HasMaxLength(DescriptionMaxLength);
 
         builder.Property(s => s.HasEthicsApproval).HasConversion<bool?>(
-                v => v == EthicsApproval.Yes ? true : v == EthicsApproval.NoButApplied ? false : null,
-                v => v == true ? EthicsApproval.Yes : v == false ? EthicsApproval.NoButApplied : null);
+            v => v == EthicsApproval.Yes ? true : v == EthicsApproval.NoButApplied ? false : null,
+            v => v == true ? EthicsApproval.Yes : v == false ? EthicsApproval.NoButApplied : null);
         
         builder.HasOne(x => x.NihrFundingStatus)
             .WithMany()
