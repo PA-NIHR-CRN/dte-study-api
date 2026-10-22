@@ -16,7 +16,7 @@ public class MySqlSqlWriter(TextWriter writer) : SqlWriterBase(writer)
         ['\n'] = "\\n",
         ['\r'] = "\\r",
         ['\t'] = "\\t",
-        ['\\'] = "\\"
+        ['\\'] = "\\\\"
     };
 
     private string EscapeStringLiteral(string value)

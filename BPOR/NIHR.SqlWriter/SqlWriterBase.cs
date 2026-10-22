@@ -51,7 +51,7 @@ public abstract class SqlWriterBase(TextWriter output)
             action(value);
         }
     }
-    
+
     protected virtual void WriteLiteral(DateTime value)
     {
         WriteLiteral(value.ToString("yyyy-MM-ddTHH:mm:ss"));
@@ -76,6 +76,31 @@ public abstract class SqlWriterBase(TextWriter output)
 
     protected virtual void WriteNullLiteral() => output.Write("NULL");
 
+    public virtual void Visit(SelectStatement selectStatement)
+    {
+        output.WriteLine("SELECT");
+        WriteIndentedBlock(() =>
+        {
+            if (selectStatement.Columns.Length == 0)
+            {
+                output.Write("*");
+            }
+            else
+            {
+                WriteCommaSeperated(selectStatement.Columns, column => column.Accept(this));
+            }
+        });
+
+        output.WriteLine("FROM");
+        WriteIndentedBlock(() => selectStatement.Table.Accept(this));
+
+        if (selectStatement.WhereClause is not null)
+        {
+            output.WriteLine("WHERE");
+            WriteIndentedBlock(() => selectStatement.WhereClause.Accept(this));
+        }
+    }
+
     public virtual void Visit(UpdateStatement updateStatement)
     {
         output.Write("UPDATE ");
@@ -91,10 +116,7 @@ public abstract class SqlWriterBase(TextWriter output)
             });
         });
         output.WriteLine("WHERE");
-        WriteIndentedBlock(() =>
-        {
-            updateStatement.WhereClause.Accept(this);
-        });
+        WriteIndentedBlock(() => { updateStatement.WhereClause.Accept(this); });
     }
 
     public virtual void Visit(InsertStatement insertStatement)
@@ -165,15 +187,11 @@ public abstract class SqlWriterBase(TextWriter output)
     public virtual void Visit(LogicBinOpExpr predicate)
     {
         WriteOpenParenthesis();
-        output.WriteLine();
-        output.IndentLevel++;
         predicate.Lhs.Accept(this);
         output.Write(" ");
         WriteLogicalBinOp(predicate.Op);
         output.Write(" ");
         predicate.Rhs.Accept(this);
-        output.IndentLevel--;
-        output.WriteLine();
         WriteCloseParenthesis();
     }
 
