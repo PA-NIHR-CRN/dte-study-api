@@ -5,7 +5,7 @@ namespace NIHR.SqlWriter;
 public abstract class SqlWriterBase(TextWriter output)
     : ISqlWriter, ISqlTopLevelStatementVisitor, ISqlPredicateVisitor, ISqlValueVisitor
 {
-    protected readonly IndentedTextWriter output = new(output);
+    protected readonly TokenWriter output = new(output);
 
     protected virtual int MaxInsertBatchSize => 1000;
 
@@ -13,22 +13,23 @@ public abstract class SqlWriterBase(TextWriter output)
     {
         if (comment.Contains('\n'))
         {
-            output.WriteLine($"/* {comment} */");
+            output.WriteToken($"/* {comment} */");
         }
         else
         {
-            output.WriteLine($"-- {comment}");
+            output.WriteToken($"-- {comment}");
+            output.EnsureNewLine();
         }
     }
 
     public virtual void WriteInlineComment(string comment)
     {
-        output.Write($" /* {comment} */ ");
+        output.WriteToken($" /* {comment} */ ");
     }
 
     public void WriteRawLine(string line)
     {
-        output.WriteLine(line);
+        output.WriteRawLine(line);
     }
 
     public virtual void Write(ISqlTopLevelStatement statement)
@@ -44,7 +45,7 @@ public abstract class SqlWriterBase(TextWriter output)
         {
             if (!isFirst)
             {
-                output.Write(", ");
+                output.WriteToken(",", suppressWhitespaceBefore: true);
             }
 
             isFirst = false;
@@ -64,26 +65,27 @@ public abstract class SqlWriterBase(TextWriter output)
 
     protected virtual void WriteLiteral(int value)
     {
-        output.Write(value.ToString(CultureInfo.InvariantCulture));
+        output.WriteToken(value.ToString(CultureInfo.InvariantCulture));
     }
 
     protected virtual void WriteEndStatement()
     {
-        output.WriteLine(";");
+        output.WriteToken(";");
+        output.EnsureNewLine();
     }
 
     protected abstract void WriteLiteral(string value);
 
-    protected virtual void WriteNullLiteral() => output.Write("NULL");
+    protected virtual void WriteNullLiteral() => output.WriteToken("NULL");
 
     public virtual void Visit(SelectStatement selectStatement)
     {
-        output.WriteLine("SELECT");
+        output.WriteToken("SELECT");
         WriteIndentedBlock(() =>
         {
             if (selectStatement.Columns.Length == 0)
             {
-                output.Write("*");
+                output.WriteToken("*");
             }
             else
             {
@@ -91,31 +93,31 @@ public abstract class SqlWriterBase(TextWriter output)
             }
         });
 
-        output.WriteLine("FROM");
+        output.WriteToken("FROM");
         WriteIndentedBlock(() => selectStatement.Table.Accept(this));
 
         if (selectStatement.WhereClause is not null)
         {
-            output.WriteLine("WHERE");
+            output.WriteToken("WHERE");
             WriteIndentedBlock(() => selectStatement.WhereClause.Accept(this));
         }
     }
 
     public virtual void Visit(UpdateStatement updateStatement)
     {
-        output.Write("UPDATE ");
+        output.WriteToken("UPDATE");
         updateStatement.Table.Accept(this);
-        output.Write(" SET");
+        output.WriteToken("SET");
         WriteIndentedBlock(() =>
         {
             WriteCommaSeperated(updateStatement.Assignments, i =>
             {
                 i.ColumnName.Accept(this);
-                output.Write(" = ");
+                output.WriteToken("=");
                 i.Value.Accept(this);
             });
         });
-        output.WriteLine("WHERE");
+        output.WriteToken("WHERE");
         WriteIndentedBlock(() => { updateStatement.WhereClause.Accept(this); });
     }
 
@@ -143,16 +145,14 @@ public abstract class SqlWriterBase(TextWriter output)
 
     private void WriteIndentedBlock(Action writeBlockContent)
     {
-        output.EnsureNewLine();
-        output.IndentLevel++;
+        output.StartIndentedBlock();
         writeBlockContent();
-        output.IndentLevel--;
-        output.EnsureNewLine();
+        output.EndIndentedBlock();
     }
 
     protected virtual void WriteInsertBatch(InsertStatement insertStatement, int startIndex, int count)
     {
-        output.Write("INSERT INTO ");
+        output.WriteToken("INSERT INTO");
         Visit(insertStatement.Table);
         WriteIndentedBlock(() =>
         {
@@ -160,7 +160,7 @@ public abstract class SqlWriterBase(TextWriter output)
             WriteCommaSeperated(insertStatement.Columns, i => i.Accept(this));
             WriteCloseParenthesis();
         });
-        output.WriteLine("VALUES");
+        output.WriteToken("VALUES");
         WriteIndentedBlock(() =>
         {
             for (var rowIndex = startIndex; rowIndex < startIndex + count; rowIndex++)
@@ -170,7 +170,8 @@ public abstract class SqlWriterBase(TextWriter output)
                 WriteCloseParenthesis();
                 if (rowIndex < startIndex + count - 1)
                 {
-                    output.WriteLine(",");
+                    output.WriteToken(",");
+                    output.EnsureNewLine();
                 }
             }
         });
@@ -178,9 +179,9 @@ public abstract class SqlWriterBase(TextWriter output)
 
     public virtual void Visit(SetVariableStatement setVariable)
     {
-        output.Write("SET ");
+        output.WriteToken("SET");
         setVariable.Variable.Accept(this);
-        output.Write(" = ");
+        output.WriteToken("=");
         setVariable.Value.Accept(this);
     }
 
@@ -188,16 +189,14 @@ public abstract class SqlWriterBase(TextWriter output)
     {
         WriteOpenParenthesis();
         predicate.Lhs.Accept(this);
-        output.Write(" ");
         WriteLogicalBinOp(predicate.Op);
-        output.Write(" ");
         predicate.Rhs.Accept(this);
         WriteCloseParenthesis();
     }
 
     protected virtual void WriteLogicalBinOp(LogicalBinOp predicateOp)
     {
-        output.Write(predicateOp switch
+        output.WriteToken(predicateOp switch
         {
             LogicalBinOp.And => "AND",
             LogicalBinOp.Or => "OR",
@@ -207,12 +206,12 @@ public abstract class SqlWriterBase(TextWriter output)
 
     protected virtual void WriteOpenParenthesis()
     {
-        output.Write("(");
+        output.WriteToken("(", suppressWhitespaceAfter: true);
     }
 
     protected virtual void WriteCloseParenthesis()
     {
-        output.Write(")");
+        output.WriteToken(")", suppressWhitespaceBefore: true);
     }
 
     public void Visit(ComparisonExpr predicate)
@@ -224,8 +223,7 @@ public abstract class SqlWriterBase(TextWriter output)
 
     protected virtual void WriteComparisonOp(ComparisonOperator op)
     {
-        output.Write(" ");
-        output.Write(op switch
+        output.WriteToken(op switch
         {
             ComparisonOperator.Equals => "=",
             ComparisonOperator.NotEquals => "<>",
@@ -237,7 +235,6 @@ public abstract class SqlWriterBase(TextWriter output)
             ComparisonOperator.In => "IN",
             _ => throw new NotImplementedException()
         });
-        output.Write(" ");
     }
 
     public virtual void Visit(SqlLiteral literal)
@@ -288,19 +285,19 @@ public abstract class SqlWriterBase(TextWriter output)
 
     private void WriteLiteral(long value)
     {
-        output.Write(value.ToString(CultureInfo.InvariantCulture));
+        output.WriteToken(value.ToString(CultureInfo.InvariantCulture));
     }
 
     public abstract void Visit(SqlIdentifier identifier);
 
     public virtual void Visit(SqlVariable variable)
     {
-        output.Write(variable.Name);
+        output.WriteToken(variable.Name);
     }
 
     public virtual void Visit(SqlFunction function)
     {
-        output.Write(function.Name);
+        output.WriteToken(function.Name);
         WriteOpenParenthesis();
         // TODO: Add parameters
         WriteCloseParenthesis();

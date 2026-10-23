@@ -6,7 +6,7 @@ public class MySqlSqlWriter(TextWriter writer) : SqlWriterBase(writer)
 {
     protected override void WriteLiteral(string value)
     {
-        output.Write($"\"{EscapeStringLiteral(value)}\"");
+        output.WriteToken($"\"{EscapeStringLiteral(value)}\"");
     }
 
     private static readonly Dictionary<char, string> _escapes = new()
@@ -39,6 +39,6 @@ public class MySqlSqlWriter(TextWriter writer) : SqlWriterBase(writer)
 
     public override void Visit(SqlIdentifier identifier)
     {
-        output.Write($"`{identifier.Value}`");
+        output.WriteToken($"`{identifier.Value}`");
     }
 }
