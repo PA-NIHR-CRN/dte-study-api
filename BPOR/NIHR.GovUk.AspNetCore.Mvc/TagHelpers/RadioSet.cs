@@ -13,6 +13,10 @@ public class RadioSet(IHtmlHelper htmlHelper) : PartialTagHelperBase(htmlHelper)
     public string? Name { get; set; }
     
     public object? Value { get; set; }
+
+    public string? Legend { get; set; }
+
+    public string? LegendHeadingLevel { get; set; } = "h2";
     
     public GovUkRadioSize Size { get; set; } = GovUkRadioSize.Default;
     
@@ -42,6 +46,8 @@ public class RadioSet(IHtmlHelper htmlHelper) : PartialTagHelperBase(htmlHelper)
                 Size,
                 Layout,
                 innerContent,
+                Legend,
+                LegendHeadingLevel,
                 errorMessage));
         
         output.Content.SetHtmlContent(content);

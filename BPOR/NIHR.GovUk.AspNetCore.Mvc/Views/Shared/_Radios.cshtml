@@ -11,9 +11,39 @@
         </p>
     }
 
-    <div class="govuk-radios @GovUkStylingHelper.GetRadioLayoutClass(Model.Layout)"
-         data-module="govuk-radios">
-        @Model.InnerContent
-    </div>
+    @if (!string.IsNullOrEmpty(Model.Legend))
+    {
+        <fieldset class="govuk-fieldset">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                @switch (Model.LegendHeadingLevel)
+                {
+                    case "h1":
+                        <h1 class="govuk-fieldset__heading">@Model.Legend</h1>
+                        break;
+                    case "h2":
+                        <h2 class="govuk-fieldset__heading">@Model.Legend</h2>
+                        break;
+                    case "h3":
+                        <h3 class="govuk-fieldset__heading">@Model.Legend</h3>
+                        break;
+                    default:
+                        @Model.Legend
+                        break;
+                }
+            </legend>
+
+            <div class="govuk-radios @GovUkStylingHelper.GetRadioLayoutClass(Model.Layout)"
+                 data-module="govuk-radios">
+                @Model.InnerContent
+            </div>
+        </fieldset>
+    }
+    else
+    {
+        <div class="govuk-radios @GovUkStylingHelper.GetRadioLayoutClass(Model.Layout)"
+             data-module="govuk-radios">
+            @Model.InnerContent
+        </div>
+    }
 
 </div>

@@ -33,20 +33,20 @@ public class StudyEditViewModelValidator : AbstractValidator<StudyEditViewModel>
            .NotEqual(model => model.CurrentStatus)
            .WithMessage("Select a different status");
        
-       RuleFor(model => model.RejectedReasons)
-           .NotEmpty().WithMessage("Select an option");
+       RuleFor(model => model.RejectedReason)
+           .NotNull().WithMessage("Select an option");
        
-       RuleFor(model => model.RejectedReasons)
+       RuleFor(model => model.RejectedMiscReason)
            .NotEmpty()
            .WithMessage("Enter a reason")
-           .When(model => model.RejectedReasons.Contains(RejectedReasonType.Misc));
+           .When(model => model.RejectedReason == RejectedReasonType.Misc);
        
-       RuleFor(model => model.WithdrawnReasons)
-           .NotEmpty().WithMessage("Select an option");
+       RuleFor(model => model.WithdrawnReason)
+           .NotNull().WithMessage("Select an option");
        
        RuleFor(model => model.WithdrawnOtherReason)
            .NotEmpty()
            .WithMessage("Enter a reason")
-           .When(model => model.WithdrawnReasons.Contains(WithdrawnReasonType.Other));
+           .When(model => model.WithdrawnReason == WithdrawnReasonType.Other);
     }
 }

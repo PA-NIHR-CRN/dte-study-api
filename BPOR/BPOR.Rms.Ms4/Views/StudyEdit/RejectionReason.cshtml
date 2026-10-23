@@ -14,39 +14,21 @@
     <text>Study status</text>
 }
 
-<form-group for="@Model.RejectedReasons"
-            label-as-heading="true"
-            label-class="govuk-heading-l">
-
-    <div class="govuk-checkboxes"
-         data-module="govuk-checkboxes">
+<radio-set for="@Model.RejectedReason"
+           legend="Rejection reason">
 
         @foreach (var reason in Enum.GetValues<RejectedReasonType>())
         {
             var isMisc = reason == RejectedReasonType.Misc;
-            var isSelected = Model.RejectedReasons.Contains(reason);
 
-            <div class="govuk-checkboxes__item">
-
-                <input class="govuk-checkboxes__input"
-                       id="RejectedReasons-@reason"
-                       name="RejectedReasons"
-                       type="checkbox"
-                       value="@reason"
-                       checked="@isSelected"
-                       data-aria-controls="@(isMisc ? miscConditional : null)" />
-
-                <label class="govuk-label govuk-checkboxes__label"
-                       for="RejectedReasons-@reason">
-                    @EnumHelper.GetDisplayName(reason)
-                </label>
-
-            </div>
+            <radio value="@reason"
+                   conditional-id="@(isMisc ? miscConditional : null)">
+                @EnumHelper.GetDisplayName(reason)
+            </radio>
 
             @if (isMisc)
             {
-                <div class="govuk-checkboxes__conditional @(isSelected ? "" : "govuk-checkboxes__conditional--hidden")"
-                     id="@miscConditional">
+                <radio-conditional id="@miscConditional" value="@reason">
 
                     <form-group for="@Model.RejectedMiscReason"
                                 label="Please provide details"
@@ -58,10 +40,8 @@
 
                     </form-group>
 
-                </div>
+                </radio-conditional>
             }
         }
 
-    </div>
-
-</form-group>
+</radio-set>
