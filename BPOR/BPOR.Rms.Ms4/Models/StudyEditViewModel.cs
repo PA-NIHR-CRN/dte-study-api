@@ -37,10 +37,10 @@ public class StudyEditViewModel
     public StudyStatusType? CurrentStatus { get; set; }
     
     [Display(Name = "Rejection reason")]
-    public List<RejectedReasonType> RejectedReasons { get; set; } = [];
+    public RejectedReasonType? RejectedReason { get; set; }
     public string? RejectedMiscReason { get; set; }
 
     [Display(Name = "Withdrawal reason")]
-    public List<WithdrawnReasonType> WithdrawnReasons { get; set; } = [];
+    public WithdrawnReasonType? WithdrawnReason { get; set; }
     public string? WithdrawnOtherReason { get; set; }
 }

@@ -262,7 +262,7 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
         if (validator.ValidateAndHasErrors(
                 model,
                 ModelState,
-                i => i.WithdrawnReasons,
+                i => i.WithdrawnReason,
                 i => i.WithdrawnOtherReason))
         {
             ViewData.ShowBackLink();
@@ -279,7 +279,7 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
             StudyStatusId = StudyStatusType.Withdrawn
         };
 
-        foreach (var reason in model.WithdrawnReasons)
+        if (model.WithdrawnReason is { } reason)
         {
             statusHistory.StudyStatusReasonHistories.Add(
                 new StudyStatusReasonHistory
@@ -317,7 +317,7 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
         if (validator.ValidateAndHasErrors(
                 model,
                 ModelState,
-                i => i.RejectedReasons,
+                i => i.RejectedReason,
                 i => i.RejectedMiscReason))
         {
             ViewData.ShowBackLink();
@@ -332,14 +332,14 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
             StudyStatusId = StudyStatusType.Rejected
         };
 
-        foreach (var reason in model.RejectedReasons)
+        if (model.RejectedReason is { } reason)
         {
             statusHistory.StudyStatusReasonHistories.Add(
                 new StudyStatusReasonHistory
                 {
                     RejectedReasonId = reason,
                     AdditionalReasonText = reason == RejectedReasonType.Misc
-                        ? model.WithdrawnOtherReason?.Trim()
+                        ? model.RejectedMiscReason?.Trim()
                         : null
                 });
         }
