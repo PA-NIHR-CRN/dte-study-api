@@ -279,17 +279,19 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
             StudyStatusId = StudyStatusType.Withdrawn
         };
 
-        if (model.WithdrawnReason is { } reason)
+        if (!model.WithdrawnReason.HasValue)
         {
-            statusHistory.StudyStatusReasonHistories.Add(
-                new StudyStatusReasonHistory
-                {
-                    WithdrawnReasonId = reason,
-                    AdditionalReasonText = reason == WithdrawnReasonType.Other
-                        ? model.WithdrawnOtherReason?.Trim()
-                        : null
-                });
+            throw new InvalidOperationException("model.WithdrawnReason must have a value");
         }
+
+        statusHistory.StudyStatusReasonHistories.Add(
+            new StudyStatusReasonHistory
+            {
+                WithdrawnReasonId = model.WithdrawnReason.Value,
+                AdditionalReasonText = model.WithdrawnReason.Value == WithdrawnReasonType.Other
+                    ? model.WithdrawnOtherReason?.Trim()
+                    : null
+            });
 
         _study.StudyStatusId = StudyStatusType.Withdrawn;
         _study.StudyStatusHistories.Add(statusHistory);
@@ -332,17 +334,19 @@ public class StudyEditController(IStudyDraftRepository studyDraftRepository) : C
             StudyStatusId = StudyStatusType.Rejected
         };
 
-        if (model.RejectedReason is { } reason)
+        if (!model.RejectedReason.HasValue)
         {
-            statusHistory.StudyStatusReasonHistories.Add(
-                new StudyStatusReasonHistory
-                {
-                    RejectedReasonId = reason,
-                    AdditionalReasonText = reason == RejectedReasonType.Misc
-                        ? model.RejectedMiscReason?.Trim()
-                        : null
-                });
+            throw new InvalidOperationException("model.RejectedReason must have a value");
         }
+
+        statusHistory.StudyStatusReasonHistories.Add(
+            new StudyStatusReasonHistory
+            {
+                RejectedReasonId = model.RejectedReason.Value,
+                AdditionalReasonText = model.RejectedReason.Value == RejectedReasonType.Misc
+                    ? model.RejectedMiscReason?.Trim()
+                    : null
+            });
 
         _study.StudyStatusId = StudyStatusType.Rejected;
         _study.StudyStatusHistories.Add(statusHistory);
