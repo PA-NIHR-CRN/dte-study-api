@@ -1,0 +1,47 @@
+@using BPOR.Domain.Enums
+@using NIHR.Infrastructure.AspNetCore
+@model BPOR.Rms.Ms4.Models.StudyEditViewModel
+
+@{
+    Layout = "_StudyFormLayout";
+    ViewData["SubmitButtonText"] = "Save and continue";
+
+    const string miscConditional = "conditional-rejected-misc";
+}
+
+@section SectionTitle
+{
+    <text>Study status</text>
+}
+
+<radio-set for="@Model.RejectedReason"
+           legend="Rejection reason">
+
+        @foreach (var reason in Enum.GetValues<RejectedReasonType>())
+        {
+            var isMisc = reason == RejectedReasonType.Misc;
+
+            <radio value="@reason"
+                   conditional-id="@(isMisc ? miscConditional : null)">
+                @EnumHelper.GetDisplayName(reason)
+            </radio>
+
+            @if (isMisc)
+            {
+                <radio-conditional id="@miscConditional" value="@reason">
+
+                    <form-group for="@Model.RejectedMiscReason"
+                                label="Please provide details"
+                                label-class="govuk-!-heading-s">
+
+                        <textarea asp-for="RejectedMiscReason"
+                                  class="govuk-textarea">
+                        </textarea>
+
+                    </form-group>
+
+                </radio-conditional>
+            }
+        }
+
+</radio-set>

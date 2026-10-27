@@ -12,6 +12,9 @@ public class CheckboxTagHelper(IHtmlHelper htmlHelper) : PartialTagHelperBase(ht
 
     [HtmlAttributeName("asp-for")]
     public ModelExpression AspFor { get; set; } = null!;
+    
+    [HtmlAttributeName("conditional-id")]
+    public string? ConditionalId { get; set; }
 
     public string? Label { get; set; }
 
@@ -47,7 +50,8 @@ public class CheckboxTagHelper(IHtmlHelper htmlHelper) : PartialTagHelperBase(ht
             Label: Label,
             LabelHtml: childContent,
             Checked: isChecked,
-            ErrorMessage: errorMessage);
+            ErrorMessage: errorMessage,
+            ConditionalId: ConditionalId);
 
         var content = await RenderPartialAsync("_Checkbox", model);
 

@@ -1,4 +1,5 @@
 using BPOR.Domain.Entities;
+using BPOR.Domain.Enums;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.Models;
 using BPOR.Rms.Models.Study;
@@ -6,6 +7,7 @@ using BPOR.Rms.Ms4;
 using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Repositories;
 using BPOR.Rms.Startup;
+using BPOR.Rms.Utilities;
 using BPOR.Rms.Validators;
 using BPOR.Rms.VolunteerInformation.Data;
 using FluentValidation.Results;
@@ -27,7 +29,12 @@ public class StudyController(
 ) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index(string? searchTerm, bool hasBeenReset = false,
+    public async Task<IActionResult> Index(
+        string? searchTerm,
+        [FromQuery] HashSet<StudyStatusType> statusIds,
+        bool allStatuses = false,
+        bool allStatusesWasSelected = false,
+        bool hasBeenReset = false,
         CancellationToken token = default)
     {
         if (hasBeenReset)
@@ -35,14 +42,35 @@ public class StudyController(
             TempData["HasBeenReset"] = true;
             return RedirectToAction(nameof(Index));
         }
+        
+        var statuses = await context.SysRefStudyStatus
+            .Where(x => x.Id != StudyStatusType.Draft)
+            .ToListAsync(token);
 
-        bool userHasResearcherRole = currentUserProvider.User.HasRole(Domain.Enums.UserRole.Researcher);
+        if (allStatuses && !allStatusesWasSelected)
+        {
+            statusIds = statuses
+                .Select(x => x.Id)
+                .ToHashSet();
+        }
+        else if (!allStatuses && allStatusesWasSelected)
+        {
+            var allIndividualStatusesStillSelected = statuses.All(x => statusIds.Contains(x.Id));
 
+            if (allIndividualStatusesStillSelected)
+            {
+                statusIds.Clear();
+            }
+        }
+        
+        var userHasResearcherRole = currentUserProvider.IsResearcher();
+        var userHasAdminRole = currentUserProvider.IsAdmin();
+        
         var studiesQuery = context.Studies.AsQueryable();
 
-        if (userHasResearcherRole)
+        if (userHasResearcherRole && !userHasAdminRole)
         {
-            string userEmail = currentUserProvider?.User?.ContactEmail ?? string.Empty;
+            var userEmail = currentUserProvider.User?.ContactEmail ?? string.Empty;
             studiesQuery = studiesQuery.Where(s => s.EmailAddress == userEmail);
         }
 
@@ -55,22 +83,35 @@ public class StudyController(
                                                    // TODO investigate full text search
                                                    || s.StudyName.Contains(searchTerm));
         }
+        
+        var selectedStatusIds = statusIds.ToHashSet();
+
+        if (selectedStatusIds.Count > 0)
+        {
+            studiesQuery = studiesQuery
+                .Where(s => s.StudyStatusId != null
+                            && selectedStatusIds.Contains(s.StudyStatusId.Value));
+        }
 
         var deferredStudiesPage = studiesQuery
             .AsStudyListModel()
-            .OrderByDescending(s => s.Id)
+            .OrderByDescending(s => s.NewApplicationAt)
             .DeferredPage(paginationService);
 
         var viewModel = new StudiesViewModel
         {
             Studies = await deferredStudiesPage.ValueAsync(token),
-            HasSearched = Request.Query.ContainsKey(nameof(searchTerm)),
+            IsSearched = Request.Query.ContainsKey(nameof(searchTerm)),
+            IsFiltered = Request.Query.ContainsKey(nameof(statusIds)),
             SearchTerm = searchTerm ?? string.Empty,
+            Filters = new StudyFilterViewModel
+            {
+                SelectedStatuses =  selectedStatusIds
+            }
         };
 
         return View(viewModel);
     }
-
 
     // GET: Study/Details/5
     public async Task<IActionResult> Details([FromServices] IVipRepository repository, int? id,
@@ -92,12 +133,20 @@ public class StudyController(
             logger.LogWarning("[HttpGet]Details called with non-existent study: {StudyId}", id);
             return NotFound();
         }
-        
+
         var isAdmin = currentUserProvider.User.HasRole(UserRole.Admin);
         var isResearcher = currentUserProvider.User.HasRole(UserRole.Researcher);
         var isIdentifiable = study.Study.IsRecruitingIdentifiableParticipants;
         var updateRecruitmentAction = isIdentifiable ? "UpdateRecruited" : "UpdateAnonymousRecruited";
         var updateRecruitmentButtonText = isIdentifiable ? "Add enrolments" : "Update recruitment total";
+
+        var emailComparer = new EmailAddressEqualityComparer();
+
+        if (isResearcher && !isAdmin 
+                         && !emailComparer.Equals(study.Study.EmailAddress, currentUserProvider.User.ContactEmail))
+        {
+            return Forbid();
+        }
 
         var canUpdateRecruitmentTotal = isIdentifiable
             ? study.HasCampaigns
@@ -105,7 +154,7 @@ public class StudyController(
 
         var vsiStatus = await repository.GetVipStatus(id.Value, cancellationToken);
         ViewData["VsiStatus"] = vsiStatus;
-        
+
         study.ActionLinks = new();
 
         if (isAdmin)
@@ -171,7 +220,7 @@ public class StudyController(
     {
         var study = new Study();
         var studyId = await studyDraftRepository.CreateDraftStudyAsync(study, cancellationToken);
-        
+
         var isAdmin = currentUserProvider.User.HasRole(UserRole.Admin);
 
         var uri = Url.GetUrl(StudyRequestEditFlow.EthicsApproval, new StudyRequestEditContext
@@ -206,13 +255,13 @@ public class StudyController(
             logger.LogWarning("[HttpPost]Create called with IsRecruitingIdentifiableParticipants set to false");
             return BadRequest("Model must allow editing of IsRecruitingIdentifiableParticipants");
         }
-        
+
         if (action == "Next" || action == "Save")
         {
             if (model.Step == 1)
             {
                 ModelState.AddValidationResult(ValidateStep(model, 1));
-                
+
                 if (ModelState.IsValid)
                 {
                     model.GotoNextStep();
@@ -233,7 +282,9 @@ public class StudyController(
                         EmailAddress = model.EmailAddress,
                         StudyName = model.StudyName,
                         CpmsId = model.CpmsId,
-                        IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false
+                        IsRecruitingIdentifiableParticipants = model.IsRecruitingIdentifiableParticipants ?? false,
+                        NewApplicationAt = DateTime.UtcNow,
+                        StudyStatusId = StudyStatusType.NewApplication
                     };
 
                     context.Add(study);
@@ -278,7 +329,7 @@ public class StudyController(
 
         return View(model);
     }
-    
+
 
     // success
     public IActionResult AddStudySuccess(AddStudySuccessViewModel viewModel)
@@ -303,7 +354,7 @@ public class StudyController(
         return View(studyModel);
     }
 
-    static ValidationResult ValidateStep(StudyFormViewModel model, int step )
+    static ValidationResult ValidateStep(StudyFormViewModel model, int step)
     {
         StudyFormModelValidator validator = new();
         switch (step)
@@ -311,7 +362,8 @@ public class StudyController(
             case 1:
                 return validator.ValidateSpecificProperties(model, i => i.FullName, i => i.EmailAddress);
             case 2:
-                return validator.ValidateSpecificProperties(model, i => i.StudyName, i => i.IsRecruitingIdentifiableParticipants, i=>i.CpmsId);
+                return validator.ValidateSpecificProperties(model, i => i.StudyName,
+                    i => i.IsRecruitingIdentifiableParticipants, i => i.CpmsId);
             case 3:
                 return validator.ValidateSpecificProperties(model, i => i.InformationUrl);
             case 4:
@@ -352,7 +404,7 @@ public class StudyController(
             logger.LogWarning("[HttpPost]Edit called with step out of range: {Step}", model.Step);
             return BadRequest($"Step out of range: {model.Step}");
         }
-        
+
         ModelState.AddValidationResult(ValidateStep(model, model.Step));
 
         if (!ModelState.IsValid)
@@ -369,7 +421,7 @@ public class StudyController(
                 logger.LogWarning("[HttpPost]Edit called with non-existent study: {StudyId}", id);
                 return NotFound();
             }
-            
+
             switch (model.Step)
             {
                 case 1:
@@ -379,11 +431,13 @@ public class StudyController(
                 case 2:
                     studyToUpdate.StudyName = model.StudyName;
                     studyToUpdate.CpmsId = model.CpmsId;
-                    
+
                     if (model.AllowEditIsRecruitingIdentifiableParticipants)
                     {
-                        var hasCampaigns = await context.FilterCriterias.AnyAsync(fc => fc.StudyId == studyToUpdate.Id && fc.Campaign.Any());
-                        var isRecruitmentFlagChanging = model.IsRecruitingIdentifiableParticipants != studyToUpdate.IsRecruitingIdentifiableParticipants;
+                        var hasCampaigns = await context.FilterCriterias.AnyAsync(fc =>
+                            fc.StudyId == studyToUpdate.Id && fc.Campaign.Any());
+                        var isRecruitmentFlagChanging = model.IsRecruitingIdentifiableParticipants !=
+                                                        studyToUpdate.IsRecruitingIdentifiableParticipants;
 
                         if (hasCampaigns && isRecruitmentFlagChanging)
                         {
@@ -391,13 +445,14 @@ public class StudyController(
                                 nameof(model.IsRecruitingIdentifiableParticipants),
                                 "The recruitment type cannot be updated once a campaign has been sent for a study.");
                             model.AllowEditIsRecruitingIdentifiableParticipants = false;
-                            
+
                             return View(model);
                         }
 
                         if (!hasCampaigns)
                         {
-                            studyToUpdate.IsRecruitingIdentifiableParticipants = (bool)model.IsRecruitingIdentifiableParticipants;
+                            studyToUpdate.IsRecruitingIdentifiableParticipants =
+                                (bool)model.IsRecruitingIdentifiableParticipants;
                         }
                     }
 
@@ -417,7 +472,7 @@ public class StudyController(
                     studyToUpdate.PreScreenerUrl = model.PreScreenerUrl;
                     break;
             }
-                  
+
             studyToUpdate.UpdatedAt = DateTime.UtcNow;
 
             await context.SaveChangesAsync();
@@ -426,7 +481,8 @@ public class StudyController(
         {
             if (!StudyExists(id))
             {
-                logger.LogWarning("[HttpPost]Edit called with non-existent study following concurrency exception: {StudyId}", id);
+                logger.LogWarning(
+                    "[HttpPost]Edit called with non-existent study following concurrency exception: {StudyId}", id);
                 return NotFound();
             }
             else
@@ -443,7 +499,7 @@ public class StudyController(
         });
 
         return RedirectToAction(nameof(Details), new { id });
-        
+
     }
 
     private bool StudyExists(int id)
