@@ -11,7 +11,7 @@ namespace NIHR.NotificationService;
 
 public static class DiExtensions
 {
-    private const string? HealthCheckNameNotificationDb = "NotificationDb";
+    private const string HealthCheckNameNotificationDb = "NotificationDb";
 
     public static void AddNotificationService(this IServiceCollection services)
     {
