@@ -1,15 +1,14 @@
 using System.Reflection;
 using Amazon;
 using Amazon.SimpleEmail;
+using BPOR.Domain;
 using BPOR.Domain.Entities;
 using BPOR.Infrastructure.Clients;
 using BPOR.Rms.Services;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
-using Microsoft.EntityFrameworkCore;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.DependencyInjection;
-using NIHR.Infrastructure.EntityFrameworkCore;
 using BPOR.Registration.Stream.Handler.Services;
 using BPOR.Rms.Database;
 using BPOR.Rms.Ms4;
@@ -19,14 +18,12 @@ using BPOR.Rms.VolunteerInformation;
 using Ganss.Xss;
 using NIHR.Infrastructure.Interfaces;
 using NIHR.Infrastructure.Settings;
-using DbSettings = NIHR.Infrastructure.EntityFrameworkCore.DbSettings;
 using NIHR.Infrastructure.Services;
 using Microsoft.Extensions.Http;
 using NIHR.Infrastructure.Authentication.IDG;
 using NIHR.GovUk.AspNetCore.Mvc;
 using NIHR.Infrastructure.DependencyInjection;
 using NIHR.NotificationService;
-using NIHR.NotificationService.Entities;
 using NIHR.NotificationService.GovUkNotify;
 using NIHR.Rts.Client;
 
@@ -91,28 +88,12 @@ public static class DependencyInjection
             RegionEndpoint = RegionEndpoint.GetBySystemName(awsSettings.Region)
         };
         services.AddSingleton<IAmazonSimpleEmailService>(new AmazonSimpleEmailServiceClient(sesConfig));
-
-
+        
         _ = services.GetSectionAndValidate<RmsSettings>(configuration);
-        var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
-        var participantConnectionString = dbSettings.Value.BuildConnectionString();
 
-        services.AddDbContext<ParticipantDbContext>((serviceProvider, options) =>
-            options.UseMySql(participantConnectionString, ServerVersion.AutoDetect(participantConnectionString),
-                builder =>
-                {
-                    builder.UseNetTopologySuite();
-                    builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                })
-                .AddVipSynchronisation(serviceProvider));
-
-        var notificationConnectionString =
-            dbSettings.Value.BuildConnectionString(dbSettings.Value.NotificationDatabase);
-
-        services.AddDbContext<NotificationDbContext>(options =>
-            options.UseMySql(notificationConnectionString, ServerVersion.AutoDetect(notificationConnectionString),
-                builder => { builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery); }));
-
+        services.AddRmsDatabase((dbContextOptionsBuilder, serviceProvider) 
+            => dbContextOptionsBuilder.AddVipSynchronisation(serviceProvider));
+        
         var logger = services.BuildServiceProvider().GetService<ILoggerFactory>()?.CreateLogger("BPOR.Rms");
         
         var clientsSettings = services.GetSectionAndValidate<ClientsSettings>(configuration);
@@ -123,8 +104,9 @@ public static class DependencyInjection
 
         services.AddHttpClientWithRetry<IPostcodeMapper, LocationApiClient>(clientsSettings?.Value?.LocationService, 2,
             logger);
-        services.AddHealthChecks().AddMySql(participantConnectionString).AddCheck<LocationHealthCheck>("Location",
-            Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
+        
+        services.AddHealthChecks()
+            .AddCheck<LocationHealthCheck>("Location", Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded);
 
         services.AddSingleton<IRmsTaskQueue, RmsTaskQueue>(provider =>
         {

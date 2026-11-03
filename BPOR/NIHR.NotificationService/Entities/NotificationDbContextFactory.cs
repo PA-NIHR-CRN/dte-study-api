@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using NIHR.Infrastructure.EntityFrameworkCore;
 using NIHR.NotificationService.Settings;
 
 namespace NIHR.NotificationService.Entities;
@@ -15,8 +16,8 @@ public class NotificationDbContextFactory : IDesignTimeDbContextFactory<Notifica
             .AddJsonFile("appsettings.user.json", optional: true)
             .Build();
 
-        var dbSettings = configuration.GetSection(DbSettings.SectionName).Get<DbSettings>();
-        var connectionString = DbSettings.BuildConnectionString(dbSettings) ??
+        var dbSettings = configuration.GetSection(NotificationDbSettings.SectionName).Get<NotificationDbSettings>();
+        var connectionString = dbSettings.BuildConnectionString() ??
                                Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
         if (connectionString is null)

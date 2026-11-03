@@ -15,6 +15,7 @@ using Dte.Common.Authentication;
 using Dte.Common.Extensions;
 using Microsoft.Extensions.Logging;
 using AWS.Lambda.Powertools.Idempotency;
+using BPOR.Domain;
 
 namespace BPOR.Registration.Stream.Handler;
 
@@ -30,14 +31,8 @@ public static class Startup
         var configuration = configurationBuilder.Build();
 
         services.AddSingleton(configuration);
-
-        // db setup
-        var dbSettings = services.GetSectionAndValidate<DbSettings>(configuration);
-        var connectionString = dbSettings.Value.BuildConnectionString();
         
-        services.AddDbContext<ParticipantDbContext>(options =>
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-                x => x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery).UseNetTopologySuite()));
+        services.AddRmsDatabase();
 
         services.AddScoped<IDynamoDBContext>(x => new DynamoDBContext(new AmazonDynamoDBClient()));
 
