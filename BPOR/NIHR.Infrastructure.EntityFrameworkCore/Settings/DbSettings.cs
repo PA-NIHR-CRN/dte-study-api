@@ -2,47 +2,22 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NIHR.Infrastructure.EntityFrameworkCore
 {
-    public class DbSettings : IValidatableObject
+    public class DbSettings
     {
-        public static string SectionName => "DbSettings";
+        [Required]
         public string Username { get; set; } = null!;
+        [Required]
         public string Password { get; set; } = null!;
+        [Required]
         public string Host { get; set; } = null!;
+        [Range(0, 65535)]
         public uint? Port { get; set; }
+        [Required]
         public string Database { get; set; } = null!;
-        public string NotificationDatabase { get; set; } = null!;
 
         /// <summary>
         /// The default command timeout in seconds; if null then the connection string builer's default value is used.
         /// </summary>
         public uint? DefaultCommandTimeout { get; set; } = null;
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (string.IsNullOrWhiteSpace(Username))
-            {
-                yield return new ValidationResult("Username is required", new[] { nameof(Username) });
-            }
-
-            if (string.IsNullOrWhiteSpace(Password))
-            {
-                yield return new ValidationResult("Password is required", new[] { nameof(Password) });
-            }
-
-            if (string.IsNullOrWhiteSpace(Host))
-            {
-                yield return new ValidationResult("Host is required", new[] { nameof(Host) });
-            }
-
-            if (Port < 0 || Port > 65535)
-            {
-                yield return new ValidationResult("Port is out of range", new[] { nameof(Port) });
-            }
-
-            if (string.IsNullOrWhiteSpace(Database))
-            {
-                yield return new ValidationResult("Database is required", new[] { nameof(Database) });
-            }
-        }
     }
 }
