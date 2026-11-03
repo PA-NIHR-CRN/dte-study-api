@@ -24,6 +24,8 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
         public string? LabelClass { get; set; }
         
         public bool LabelAsHeading { get; set; } = true;
+        
+        public bool ShowValidationMessage { get; set; } = true;
 
         private readonly IHtmlGenerator _generator;
 
@@ -92,7 +94,7 @@ namespace NIHR.GovUk.AspNetCore.Mvc.TagHelpers
                 output.PreContent.AppendHtml(hintBuilder);
             }
 
-            if (!ViewContext.ViewData.ModelState.IsValid)
+            if (ShowValidationMessage && !ViewContext.ViewData.ModelState.IsValid)
             {
                 foreach (var error in ViewContext.Errors().Where(x => modelNames.Contains(x.Key)))
                 {

@@ -264,7 +264,6 @@
 .govuk-skip-link,
 .govuk-link,
 .govuk-back-link {
-    text-decoration: none;
     color: rgb(29, 112, 184);
     cursor: pointer;
 }
@@ -536,7 +535,6 @@
 
 /* Base styles for all tags */
 .govuk-tag {
-    border-radius: 3px;
     text-align: center;
     font-size: 14px;
     font-style: normal;
@@ -545,20 +543,60 @@
     font-feature-settings: 'clig' off, 'liga' off;
     display: flex;
     height: 23px;
-    padding: 5px 8px 4px 8px;
+    width: fit-content;
+    max-width: 100%;
     justify-content: center;
     align-items: center;
-    align-self: stretch;
+    align-self: flex-start;
+    border: 1px solid;
+    padding: 2px 5px;
+    margin: 0;
 }
 
-/* Specific styles for orange tag */
+@media screen and (max-width: 768px) {
+    .govuk-tag {
+        height: fit-content;
+        align-self: auto;
+    }
+}
+
 .govuk-tag--orange {
     background: #FDEBD8;
     color: #494949;
 }
 
-/* Specific styles for green tag */
+.govuk-tag--grey {
+    border-color: #ACBCC3;
+    background-color: #F6F8F8;
+    color: black;
+}
+
+.govuk-tag--blue {
+    border-color: #193E72;
+    background-color: #E5EAEF;
+    color: black;
+}
+
 .govuk-tag--green {
-    background: #388555;
-    color: #FFFFFF;
+    border-color: #26A86C;
+    background-color: #E7F5EF;
+    color: black;
+}
+
+.govuk-tag--yellow {
+    border-color: #FED47A;
+    background-color: #FFFAF0;
+    color: black;
+}
+
+.govuk-tag--red {
+    border-color: #EA5D4E;
+    background-color: #FDEDEB;
+    color: black;
+}
+
+.govuk-tag--purple {
+    border-color: #6667AD;
+    background-color: #EEEEF6;
+    color: black;
 }

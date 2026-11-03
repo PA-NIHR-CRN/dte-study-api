@@ -8,4 +8,5 @@ public record GovUkCheckboxModel(
     string? Label,
     IHtmlContent LabelHtml,
     bool Checked,
-    string? ErrorMessage);
+    string? ErrorMessage,
+    string? ConditionalId);

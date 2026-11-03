@@ -8,5 +8,8 @@ public class StudyStatusHistoryConfiguration : IEntityTypeConfiguration<StudySta
     public void Configure(EntityTypeBuilder<StudyStatusHistory> builder)
     {
         builder.HasKey(s => s.Id);
+        builder.HasMany(s => s.StudyStatusReasonHistories)
+            .WithOne(s => s.StudyStatusHistory)
+            .HasForeignKey(s => s.StudyStatusHistoryId);
     }
 }

@@ -75,6 +75,45 @@ IHostEnvironment hostEnvironment)
 
             return configuration;
         }
+        
+        /// <summary>
+        /// New version of AddNihrConfiguration to remove dependency on the service collection and implement AWS secrets for local development
+        /// </summary>
+        public static IConfigurationBuilder AddNihrConfigurationNew(this IConfigurationBuilder configurationBuilder,
+            IHostEnvironment hostEnvironment)
+        {
+            configurationBuilder.AddJsonFile("appsettings.awssecrets.json", optional: true, reloadOnChange: true);
+            configurationBuilder.AddJsonFile($"appsettings.awssecrets.{hostEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+            var configuration = configurationBuilder.Build();
+
+            var secretsManagerSettings = configuration
+                .GetSection(AwsSecretsManagerSettings.SectionName)
+                .Get<AwsSecretsManagerSettings>();
+            if (secretsManagerSettings?.Enabled == true)
+            {
+                configurationBuilder.AddAwsSecretsManager(secretsManagerSettings.SecretName, () =>
+                {
+                    AmazonSecretsManagerConfig config = new AmazonSecretsManagerConfig();
+                    config.RegionEndpoint = RegionEndpoint.GetBySystemName(secretsManagerSettings.Region);
+                    if (secretsManagerSettings.SsoProfile != null)
+                    {
+                        config.Profile = new Profile(secretsManagerSettings.SsoProfile);
+                    }
+
+                    var amazonSecretsManagerClient = new AmazonSecretsManagerClient(config);
+                    return amazonSecretsManagerClient;
+                });
+            }
+
+            if (hostEnvironment.IsDevelopment())
+            {
+                configurationBuilder.SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true);
+            }
+
+            return configurationBuilder;
+        }
 
         public static IConfigurationBuilder AddNihrConfiguration(this IConfigurationBuilder configurationBuilder, IServiceCollection services,
 IHostEnvironment hostEnvironment)

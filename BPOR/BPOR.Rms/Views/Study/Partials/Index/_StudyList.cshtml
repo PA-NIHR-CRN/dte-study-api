@@ -20,6 +20,7 @@
 
         .study-card-actions {
             width: 100%;
+            margin-top: 10px;
             align-items: center;
             justify-content: center;
         }
@@ -66,7 +67,7 @@
         }
 
         .study-card-actions {
-            width: 154px;
+            width: 180px;
             flex-direction: column;
             justify-content: space-between;
         }
@@ -130,7 +131,7 @@
         align-self: stretch;
         flex: 1 1 0;
         color: #0B0C0C;
-        word-wrap: break-word;
+        word-wrap: anywhere;
         font-feature-settings: 'clig' off, 'liga' off;
         font-style: normal;
     }
@@ -160,15 +161,9 @@
 </style>
 
 
-@if (Model.HasSearched)
+@if (Model.IsSearched || Model.IsFiltered)
 {
-    if (Model.Studies.TotalCount == 0)
-    {
-        <div class="govuk-inset-text">
-            No studies match your search
-        </div>
-    }
-    else if (Model.Studies.TotalCount == 1)
+    if (Model.Studies.TotalCount == 1)
     {
         <div class="govuk-inset-text">
             1 study matches your search.
@@ -182,12 +177,10 @@
     }
 }
 
-@if ((TempData["HasBeenReset"] as bool?) == true)
-{
-    <div class="govuk-inset-text">
-        The search results have been reset and all studies are listed.
-    </div>
-}
+<div class="govuk-grid-column-one-quarter" role-exclude="researcher">
+    <partial name="Partials/Index/_StudyFilters" model="Model" />
+</div>
+
 @if (Model.Studies.TotalCount > 0)
 {
     // TODO: Add default empty state to page control.
@@ -253,7 +246,7 @@
 
     <pagination for="Studies" />
 }
-else if (!Model.HasSearched)
+else if (!Model.IsSearched && !Model.IsFiltered)
 {
     <div class="no-studies-card">
         <h1 class="govuk-heading-l">No studies added</h1>
@@ -270,5 +263,13 @@ else if (!Model.HasSearched)
             <a role-include="Researcher" asp-action="TermsAndConditions" asp-controller="Researcher" class="govuk-button">Apply to add a study</a>
         }
         <a role-exclude="Researcher" asp-action="Create" asp-controller="Study" class="govuk-button">Add study</a>
+    </div>
+}
+else
+{
+    <div class="govuk-grid-column-three-quarters">
+        <h2 class="govuk-heading-m">Your search matched no studies</h2>
+        <p class="govuk-body">There are no studies that match your search. Try searching again by adding or removing your search criteria.</p>
+        <hr/>
     </div>
 }

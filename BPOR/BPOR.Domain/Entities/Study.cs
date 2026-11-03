@@ -30,7 +30,8 @@ public class Study : ISoftDelete, IAudit
     public EthicsApproval? HasEthicsApproval { get; set; }
     public string? MainContactRole { get; set; }
     public string? InclusionCriteria { get; set; }
-    
+    public DateTime? NewApplicationAt { get; set; }
+
     public SubmittedType? SubmittedId { get; set; }
     public int? SubmissionOutcomeId { get; set; }
     public StudyStatusType? StudyStatusId { get; set; }
@@ -46,6 +47,12 @@ public class Study : ISoftDelete, IAudit
     public SubmissionOutcome? SubmissionOutcome { get; set; }
     public StudyStatus? StudyStatus { get; set; }
     public NihrFundingStatus? NihrFundingStatus { get; set; }
+    
+    /// <summary>
+    /// Temporary column to record the VS ID from the pipeline spreadsheet - this can be removed once the spreadsheet
+    /// has ben retired.
+    /// </summary>
+    public int? PipelineVsId { get; set; }
     
     public ICollection<ManualEnrollment> ManualEnrollments { get; set; } = new List<ManualEnrollment>();
     public ICollection<StudyParticipantEnrollment> StudyParticipantEnrollments { get; set; } = new List<StudyParticipantEnrollment>();

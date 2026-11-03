@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
 using NIHR.Infrastructure.AspNetCore;
+using NIHR.Infrastructure.AspNetCore.Extensions;
 
 namespace BPOR.Rms.Models.Study;
 
@@ -124,13 +125,22 @@ public class StudyModel
     [Display(Name = "Does the study have ethics approval to use Be Part of Research?")]
     public EthicsApproval? HasEthicsApproval { get; set; }
     public StudyStatus? StudyStatus { get; set; }
+    public List<string?> StatusReasons { get; set; } = [];
+    public DateTime? NewApplicationAt {get; set; }
     
     public StudyStatusViewModel StudyStatusViewModel => new()
-        {
-            StudyId = Id,
-            StudyStatusCode = StudyStatus?.Code,
-            CanChangeStatus = false,
-            StudyStatusId = StudyStatus?.Id,
-        };
+    {
+        StudyId = Id,
+        StudyStatusCode = StudyStatusDisplay,
+        CanChangeStatus = false,
+        StudyStatusId = StudyStatus?.Id,
+    };
+
+    public string StudyStatusDisplayWithReasons => StatusReasons.Count == 0
+            ? StudyStatusDisplay
+            : $"{StudyStatusDisplay}: {string.Join(", ", StatusReasons)}";
+    
+    private string StudyStatusDisplay => StudyStatus?.Code.ToSentenceCase() ?? string.Empty;
+
 }
 
