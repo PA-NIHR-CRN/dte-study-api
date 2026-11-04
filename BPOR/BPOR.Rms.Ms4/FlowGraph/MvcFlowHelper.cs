@@ -26,9 +26,9 @@ public class MvcFlowHelper<TModel, TContext> : MvcFlowHelper<TContext>, IMvcFlow
             return null;
         }
 
-        if (nextAction.ReturnFromSubflow && !string.IsNullOrEmpty(nextAction.Context.ReturnUrl))
+        if (nextAction.ReturnFromSubflow && nextAction.Context.ReturnUrl != null)
         {
-            return nextAction.Context.ReturnUrl;
+            return nextAction.Context.ReturnUrl.ToString();
         }
 
         string? result = UrlHelper.GetUrl(nextAction);
@@ -80,7 +80,7 @@ public class MvcFlowHelper<TContext> : IMvcFlowHelper<TContext>
     {
         var actionContext =  new UrlActionContext {Action = node.Action, Controller = node.Controller, Values = context with
         {
-            ReturnUrl = returnPathOverride ?? _actionContext.Value.HttpContext.Request.GetEncodedPathAndQuery()
+            ReturnUrl = new Uri(returnPathOverride ?? _actionContext.Value.HttpContext.Request.GetEncodedPathAndQuery())
         }};
         string result = UrlHelper.Action(actionContext);
         if (result == null)

@@ -83,6 +83,7 @@ public static class DependencyInjection
         services.AddTransient<HtmlSanitizer>();
         services.AddContentManagement(configuration);
 
+        services.AddRedirectUriValidation();
 
         var awsSettings = services.GetSectionAndValidate<AwsSecretsManagerSettings>(configuration).Value;
 
