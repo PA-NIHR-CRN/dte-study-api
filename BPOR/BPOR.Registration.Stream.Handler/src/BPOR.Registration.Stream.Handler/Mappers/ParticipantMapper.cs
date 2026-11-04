@@ -6,6 +6,7 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Enums;
 using BPOR.Domain.Extensions;
 using BPOR.Registration.Stream.Handler.Services;
+using BPOR.Rms.Infrastructure.Interfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NIHR.Infrastructure;

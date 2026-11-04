@@ -10,6 +10,7 @@ using BPOR.Infrastructure.Enum;
 using BPOR.Infrastructure.Exceptions;
 using BPOR.Infrastructure.Interfaces;
 using BPOR.Infrastructure.Models.Mfa;
+using BPOR.Rms.Infrastructure.Interfaces;
 using Dte.Common;
 using Dte.Common.Contracts;
 using Dte.Common.Exceptions.Common;
@@ -19,7 +20,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using NIHR.Infrastructure.Interfaces;
 
 namespace BPOR.Infrastructure.Services;
 

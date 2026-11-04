@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
+using BPOR.Rms.Infrastructure.AspNetCore.Authentication.ApiKey;
 using NIHR.NotificationService.Interfaces;
 using NIHR.NotificationService.Models;
 

@@ -1,7 +1,7 @@
 ﻿using System.Threading.RateLimiting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
+using BPOR.Rms.Infrastructure.AspNetCore.Authentication.ApiKey;
 using NIHR.NotificationService.GovUkNotify.Controllers;
 using NIHR.NotificationService.GovUkNotify.Services;
 using NIHR.NotificationService.Interfaces;

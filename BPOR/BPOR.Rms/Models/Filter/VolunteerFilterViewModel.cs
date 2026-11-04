@@ -4,6 +4,7 @@ using BPOR.Domain.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NIHR.Infrastructure.Paging;
 using System.ComponentModel.DataAnnotations;
+using BPOR.Rms.Infrastructure.Paging;
 using NIHR.NotificationService.Enums;
 
 namespace BPOR.Rms.Models.Filter;

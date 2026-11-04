@@ -9,7 +9,7 @@ public class NotificationDbContextFactory : IDesignTimeDbContextFactory<Notifica
 {
     public NotificationDbContext CreateDbContext(string[] args)
     {
-        // TODO: make this more consistent. Base factory in NIHR.Infrastructure.EntityFrameworkCore.
+        // TODO: make this more consistent. Base factory in BPOR.Rms.Infrastructure.EntityFrameworkCore.
         IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.user.json", optional: true)

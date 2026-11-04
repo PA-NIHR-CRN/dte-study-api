@@ -1,6 +1,6 @@
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
-using NIHR.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 

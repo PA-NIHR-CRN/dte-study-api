@@ -2,10 +2,10 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
 using AWS.Lambda.Powertools.Idempotency;
 using BPOR.Registration.Stream.Handler.Handlers;
+using BPOR.Rms.Infrastructure.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NIHR.Infrastructure.Configuration;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]

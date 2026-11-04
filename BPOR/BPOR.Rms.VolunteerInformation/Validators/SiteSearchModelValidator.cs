@@ -1,6 +1,6 @@
 ﻿using BPOR.Rms.VolunteerInformation.Models;
 using FluentValidation;
-using NIHR.Infrastructure.AspNetCore.Validation;
+using BPOR.Rms.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.VolunteerInformation.Validators;
 

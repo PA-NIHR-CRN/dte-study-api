@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Extensions;
+using BPOR.Rms.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;

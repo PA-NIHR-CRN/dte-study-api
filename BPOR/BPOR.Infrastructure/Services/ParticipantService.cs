@@ -9,6 +9,7 @@ using BPOR.Infrastructure.Constants;
 using BPOR.Infrastructure.Enum;
 using BPOR.Infrastructure.Interfaces;
 using BPOR.Infrastructure.Mappers;
+using BPOR.Rms.Infrastructure.Interfaces;
 using Dte.Common;
 using Dte.Common.Contracts;
 using Dte.Common.Exceptions;
@@ -16,7 +17,6 @@ using Dte.Common.Exceptions.Common;
 using Dte.Common.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NIHR.Infrastructure.Interfaces;
 
 namespace BPOR.Infrastructure.Services;
 

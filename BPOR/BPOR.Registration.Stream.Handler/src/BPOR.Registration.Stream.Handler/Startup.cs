@@ -8,13 +8,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NIHR.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
 using NIHR.Infrastructure;
 using BPOR.Infrastructure.Clients;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
 using Microsoft.Extensions.Logging;
 using AWS.Lambda.Powertools.Idempotency;
+using BPOR.Rms.Infrastructure.Configuration.Extensions;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore.MySql;
+using BPOR.Rms.Infrastructure.Interfaces;
 
 namespace BPOR.Registration.Stream.Handler;
 

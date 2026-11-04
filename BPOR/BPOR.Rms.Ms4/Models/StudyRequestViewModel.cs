@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Enums;
 using NIHR.GovUk.AspNetCore.Mvc;
-using NIHR.Infrastructure.AspNetCore;
+using BPOR.Rms.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.Ms4.Models;
 

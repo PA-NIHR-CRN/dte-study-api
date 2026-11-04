@@ -8,8 +8,8 @@
     </PropertyGroup>
     
     <ItemGroup>
-      <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
-      <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Infrastructure.AspNetCore\BPOR.Rms.Infrastructure.AspNetCore.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Infrastructure\BPOR.Rms.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

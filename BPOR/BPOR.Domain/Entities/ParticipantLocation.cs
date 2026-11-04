@@ -1,7 +1,7 @@
 using BPOR.Domain.Entities.Configuration;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
-using NIHR.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Domain.Entities;
 

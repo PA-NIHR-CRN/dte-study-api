@@ -17,7 +17,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
-      <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Infrastructure.AspNetCore\BPOR.Rms.Infrastructure.AspNetCore.csproj" />
     </ItemGroup>
 
     <ItemGroup>

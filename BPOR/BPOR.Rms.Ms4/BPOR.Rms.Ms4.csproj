@@ -23,7 +23,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BPOR.Domain\BPOR.Domain.csproj" />
-      <ProjectReference Include="..\NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.GovUk.AspNetCore.Mvc\BPOR.Rms.GovUk.AspNetCore.Mvc.csproj" />
     </ItemGroup>
 
     <ItemGroup>

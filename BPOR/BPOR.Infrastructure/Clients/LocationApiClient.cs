@@ -1,7 +1,8 @@
+using BPOR.Rms.Infrastructure.Interfaces;
+using BPOR.Rms.Infrastructure.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using NIHR.Infrastructure;
-using NIHR.Infrastructure.Models;
 
 namespace BPOR.Infrastructure.Clients
 {

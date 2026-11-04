@@ -6,6 +6,8 @@ using BPOR.Domain.Entities;
 using BPOR.Registration.Stream.Handler.Handlers;
 using BPOR.Registration.Stream.Handler.Mappers;
 using BPOR.Registration.Stream.Handler.Services;
+using BPOR.Rms.Infrastructure.Interfaces;
+using BPOR.Rms.Infrastructure.Models;
 using BPOR.Tests.Common;
 using BPOR.Tests.Common.Fakers;
 using FluentAssertions;
@@ -13,7 +15,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Testing;
 using NIHR.Infrastructure;
-using NIHR.Infrastructure.Models;
 using NSubstitute;
 using Xunit;
 

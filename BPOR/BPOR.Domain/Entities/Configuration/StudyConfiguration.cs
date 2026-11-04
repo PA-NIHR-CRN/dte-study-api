@@ -1,7 +1,7 @@
 using BPOR.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using NIHR.Infrastructure.EntityFrameworkCore.Extensions;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore.Extensions;
 
 namespace BPOR.Domain.Entities.Configuration;
 

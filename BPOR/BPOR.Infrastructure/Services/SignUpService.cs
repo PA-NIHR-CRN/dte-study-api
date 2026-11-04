@@ -4,6 +4,7 @@ using Amazon.CognitoIdentityProvider.Model;
 using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Constants;
 using BPOR.Infrastructure.Interfaces;
+using BPOR.Rms.Infrastructure.Interfaces;
 using Dte.Common;
 using Dte.Common.Contracts;
 using Dte.Common.Exceptions.Common;
@@ -11,7 +12,6 @@ using Dte.Common.Models;
 using Dte.Common.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NIHR.Infrastructure.Interfaces;
 using SignUpResponse = BPOR.Infrastructure.Responses.V1.Users.SignUpResponse;
 
 namespace BPOR.Infrastructure.Services;

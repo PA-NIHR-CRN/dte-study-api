@@ -1,8 +1,8 @@
 using BPOR.Domain.Settings;
+using BPOR.Rms.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using NIHR.Infrastructure.Configuration;
 
 namespace BPOR.Registration.Api.Controllers.V1;
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using System.Text.Encodings.Web;
-using NIHR.Infrastructure.AspNetCore;
+using BPOR.Rms.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.TagHelpers;
 

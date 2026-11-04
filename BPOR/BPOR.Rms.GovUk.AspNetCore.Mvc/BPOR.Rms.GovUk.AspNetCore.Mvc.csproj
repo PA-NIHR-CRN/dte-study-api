@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>NIHR GOVUK ASP.NET Core MVC</Title>
+    <VersionPrefix>1.0.1</VersionPrefix>
+    <RootNamespace>NIHR.GovUk.AspNetCore.Mvc</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="contentful.aspnetcore" Version="7.6.1" />
+    <PackageReference Include="Markdig" Version="1.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BPOR.Rms.Infrastructure.AspNetCore\BPOR.Rms.Infrastructure.AspNetCore.csproj" />
+    <ProjectReference Include="..\BPOR.Rms.Infrastructure\BPOR.Rms.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewComponents\" />
+    <Folder Include="Views\Shared\Components\" />
+  </ItemGroup>
+
+</Project>

@@ -1,3 +1,4 @@
+using BPOR.Rms.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NIHR.Infrastructure;

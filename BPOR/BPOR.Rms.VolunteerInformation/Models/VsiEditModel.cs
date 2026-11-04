@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using BPOR.Rms.Abstractions.Enums;
 using BPOR.Rms.VolunteerInformation.Controllers;
 using BPOR.Rms.VolunteerInformation.Utility;
-using NIHR.Infrastructure.AspNetCore;
+using BPOR.Rms.Infrastructure.AspNetCore;
 
 namespace BPOR.Rms.VolunteerInformation.Models;
 
