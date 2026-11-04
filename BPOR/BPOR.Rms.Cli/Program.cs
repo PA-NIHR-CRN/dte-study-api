@@ -4,6 +4,7 @@ using System.CommandLine;
 using Albatross.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using BPOR.Domain;
+using BPOR.Rms.Infrastructure.Configuration.Extensions;
 using Microsoft.Extensions.Configuration;
 
 var hostBuilder = new CommandHost("RMS Pipeline Ingest Tool")

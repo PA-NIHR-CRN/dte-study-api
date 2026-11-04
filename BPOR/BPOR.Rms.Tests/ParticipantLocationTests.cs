@@ -2,9 +2,9 @@
 using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Extensions;
+using BPOR.Rms.Infrastructure.Models;
 using FluentAssertions;
 using NetTopologySuite.Geometries;
-using NIHR.Infrastructure.Models;
 
 namespace BPOR.Rms.Tests
 {

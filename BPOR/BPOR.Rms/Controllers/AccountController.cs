@@ -6,9 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NIHR.GovUk.AspNetCore.Mvc;
-using NIHR.Infrastructure.Authentication;
-using NIHR.Infrastructure.Authentication.IDG.SCIM;
 using System.Security.Cryptography;
+using BPOR.Rms.Infrastructure.Authentication.IDG.SCIM;
 
 namespace BPOR.Rms.Controllers
 {

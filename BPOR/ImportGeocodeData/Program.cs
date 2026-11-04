@@ -1,12 +1,13 @@
 ﻿using BPOR.Domain.Entities;
+using BPOR.Rms.Infrastructure.Authentication;
+using BPOR.Rms.Infrastructure.Configuration.Extensions;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore.MySql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NIHR.Infrastructure.EntityFrameworkCore;
-using NIHR.Infrastructure.Configuration;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
 using ImportGeocodeData;
 using NIHR.Infrastructure;
-using NIHR.Infrastructure.Authentication;
 
 internal class Program
 {

@@ -2,7 +2,7 @@ using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.RefData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using NIHR.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Registration.Stream.Handler.Services;
 

@@ -25,9 +25,9 @@
 
     <ItemGroup>
       <ProjectReference Include="..\NIHR.Geometry\NIHR.Geometry.csproj" />
-      <ProjectReference Include="..\NIHR.Infrastructure.EntityFrameworkCore.MySql\NIHR.Infrastructure.EntityFrameworkCore.MySql.csproj" />
-      <ProjectReference Include="..\NIHR.Infrastructure.EntityFrameworkCore\NIHR.Infrastructure.EntityFrameworkCore.csproj" />
-      <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Infrastructure.EntityFrameworkCore.MySql\BPOR.Rms.Infrastructure.EntityFrameworkCore.MySql.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Infrastructure.EntityFrameworkCore\BPOR.Rms.Infrastructure.EntityFrameworkCore.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Infrastructure\BPOR.Rms.Infrastructure.csproj" />
       <ProjectReference Include="..\NIHR.NotificationService\NIHR.NotificationService.csproj" />
     </ItemGroup>
 

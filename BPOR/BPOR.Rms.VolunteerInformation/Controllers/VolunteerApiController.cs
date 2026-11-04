@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
-using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
+using BPOR.Rms.Infrastructure.AspNetCore.Authentication.ApiKey;
 using Participant = BPOR.Rms.Abstractions.Models.Participant;
 using Study = BPOR.Rms.Abstractions.Models.Study;
 

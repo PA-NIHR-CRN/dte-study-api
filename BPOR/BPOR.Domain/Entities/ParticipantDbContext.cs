@@ -2,8 +2,8 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Entities.System;
 using Microsoft.EntityFrameworkCore;
-using NIHR.Infrastructure.EntityFrameworkCore;
-using NIHR.Infrastructure.Exceptions;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.Exceptions;
 
 namespace BPOR.Domain.Entities;
 

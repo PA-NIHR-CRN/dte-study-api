@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using NIHR.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
 using BPOR.Domain.Enums;
 
 namespace BPOR.Domain.Entities;

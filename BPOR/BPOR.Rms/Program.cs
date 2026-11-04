@@ -6,10 +6,11 @@ using BPOR.Rms.Ms4.ScheduledJobs;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
-using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
-using NIHR.Infrastructure.AspNetCore.Authorization;
+using BPOR.Rms.Infrastructure.AspNetCore.Authentication.AccessToken;
+using BPOR.Rms.Infrastructure.AspNetCore.Authorization;
+using BPOR.Rms.Infrastructure.Configuration.Extensions;
+using BPOR.Rms.Infrastructure.Interfaces;
 using Microsoft.Extensions.Options;
-using NIHR.Infrastructure.Interfaces;
 using Quartz;
 
 var builder = WebApplication

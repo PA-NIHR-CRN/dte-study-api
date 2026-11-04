@@ -1,7 +1,7 @@
 ﻿using BPOR.Rms.Models.Study;
 using FluentValidation;
 using FluentValidation.Validators;
-using NIHR.Infrastructure.AspNetCore.Validation;
+using BPOR.Rms.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Validators;
 

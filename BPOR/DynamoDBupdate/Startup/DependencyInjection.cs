@@ -8,6 +8,8 @@ using BPOR.Domain.Interfaces;
 using BPOR.Domain.Repositories;
 using BPOR.Domain.Settings;
 using BPOR.Infrastructure.Clients;
+using BPOR.Rms.Infrastructure.Configuration.Extensions;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore.MySql;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
 using DynamoDBupdate.Backfills;
@@ -17,7 +19,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NIHR.Infrastructure;
-using NIHR.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.Interfaces;
 
 namespace DynamoDBupdate.Startup;
 

@@ -7,7 +7,7 @@ using BPOR.Rms.Ms4.Repositories;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
+using BPOR.Rms.Infrastructure.AspNetCore.Authentication.AccessToken;
 
 namespace BPOR.Rms.Ms4.Controllers;
 

@@ -11,6 +11,10 @@ using BPOR.Infrastructure.Clients;
 using BPOR.Infrastructure.Interfaces;
 using BPOR.Infrastructure.Services;
 using BPOR.Infrastructure.Services.Development;
+using BPOR.Rms.Infrastructure.Configuration.Extensions;
+using BPOR.Rms.Infrastructure.Interfaces;
+using BPOR.Rms.Infrastructure.Services;
+using BPOR.Rms.Infrastructure.Settings;
 using Dte.Common;
 using Dte.Common.Authentication;
 using Dte.Common.Contracts;
@@ -18,10 +22,7 @@ using Dte.Common.Extensions;
 using Dte.Common.Http;
 using Dte.Common.Services;
 using NIHR.Infrastructure;
-using NIHR.Infrastructure.Configuration;
-using NIHR.Infrastructure.Interfaces;
-using NIHR.Infrastructure.Services;
-using NIHR.Infrastructure.Settings;
+using AppSettings = BPOR.Rms.Infrastructure.Settings.AppSettings;
 using ContentfulService = Dte.Common.Services.ContentfulService;
 using ContentfulSettings = Dte.Common.ContentfulSettings;
 
@@ -37,7 +38,7 @@ public static class DependencyInjection
 
         // Settings
         services.GetSectionAndValidate<ContentfulSettings>(configuration);
-        services.GetSectionAndValidate<NIHR.Infrastructure.Settings.AppSettings>(configuration);
+        services.GetSectionAndValidate<AppSettings>(configuration);
         services.GetSectionAndValidate<EmailSettings>(configuration);
 
         // Rate limiting

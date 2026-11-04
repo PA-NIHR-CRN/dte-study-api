@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using BPOR.Domain.Entities.RefData;
 using BPOR.Domain.Enums;
-using NIHR.Infrastructure.AspNetCore;
-using NIHR.Infrastructure.AspNetCore.Extensions;
+using BPOR.Rms.Infrastructure.AspNetCore;
+using BPOR.Rms.Infrastructure.AspNetCore.Extensions;
 
 namespace BPOR.Rms.Models.Study;
 

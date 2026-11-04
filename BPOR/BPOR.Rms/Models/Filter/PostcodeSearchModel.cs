@@ -7,6 +7,7 @@ using NIHR.Infrastructure;
 using Rbec.Postcodes;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using BPOR.Rms.Infrastructure.Interfaces;
 
 namespace BPOR.Rms.Models.Filter
 {

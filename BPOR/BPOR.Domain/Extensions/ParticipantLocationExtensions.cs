@@ -1,8 +1,8 @@
 ﻿using BPOR.Domain.Entities;
 using BPOR.Domain.Entities.Configuration;
+using BPOR.Rms.Infrastructure.Models;
 using NetTopologySuite.Geometries;
 using NIHR.Geometry;
-using NIHR.Infrastructure.Models;
 
 namespace BPOR.Domain.Extensions;
 

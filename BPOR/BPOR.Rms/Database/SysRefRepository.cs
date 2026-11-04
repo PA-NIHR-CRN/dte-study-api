@@ -1,7 +1,7 @@
 using BPOR.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using NIHR.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Rms.Database;
 

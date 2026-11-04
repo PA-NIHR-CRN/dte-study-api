@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure;
-using NIHR.Infrastructure.Settings;
 using System.Security.Claims;
+using BPOR.Rms.Infrastructure.Authentication;
+using BPOR.Rms.Infrastructure.Settings;
 
 public class IdgAuthenticationMiddleware
 {
