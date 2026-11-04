@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 using NIHR.Infrastructure.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.AspNetCore.DependencyInjection;
+using NIHR.Infrastructure.AspNetCore.Services;
 using NIHR.Infrastructure.Interfaces;
 using Quartz;
 
@@ -58,6 +60,7 @@ builder.WebHost.UseStaticWebAssets();
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<AnyPolicyAuthorizationFilter>();
+    options.AddRedirectUrlValidation();
 }).AddRazorRuntimeCompilation();
 
 var app = builder.Build();
