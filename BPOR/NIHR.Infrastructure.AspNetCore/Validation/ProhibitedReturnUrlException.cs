@@ -1,3 +1,3 @@
 ﻿namespace NIHR.Infrastructure.AspNetCore.Validation;
 
-public class ProhibitedRedirectUrlException(string message) : Exception(message);
+public class ProhibitedRedirectUriException(string message) : Exception(message);

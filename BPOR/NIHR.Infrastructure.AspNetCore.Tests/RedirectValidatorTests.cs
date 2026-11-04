@@ -1,22 +1,22 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using NIHR.Infrastructure.AspNetCore.Services;
-using NIHR.Infrastructure.Settings;
+using NIHR.Infrastructure.AspNetCore.Settings;
 
-namespace BPOR.Rms.Tests;
+namespace NIHR.Infrastructure.AspNetCore.Tests;
 
-public class RedirectValidatorTests
+public class RedirectUriValidatorTests
 {
     [Theory]
     [InlineData("/relative/path")]
     [InlineData("../relative/path")]
     [InlineData("relative/path?query=value")]
     [InlineData("#section")]
-    public void Validate_AllowsRelativeUrlsWhenConfigured(string redirectUri)
+    public void Validate_AllowsRelativeUrisWhenConfigured(string redirectUri)
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
-            AllowRelativeUrls = true
+            AllowRelative = true
         });
 
         var result = validator.Validate(redirectUri);
@@ -25,32 +25,32 @@ public class RedirectValidatorTests
     }
 
     [Fact]
-    public void Validate_RejectsRelativeUrlsWhenNotConfigured()
+    public void Validate_RejectsRelativeUrisWhenNotConfigured()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
-            AllowRelativeUrls = false
+            AllowRelative = false
         });
 
         var result = validator.Validate("/relative/path");
 
-        Assert.Equal("Relative URLs are not permitted", result?.ErrorMessage);
+        Assert.Equal("Relative URIs are not permitted", result?.ErrorMessage);
     }
 
     [Fact]
     public void Validate_RejectsMalformedUri()
     {
-        var validator = CreateValidator(new RedirectValidationSettings());
+        var validator = CreateValidator(new RedirectUriValidationSettings());
 
         var result = validator.Validate("http://[invalid");
 
-        Assert.Equal("URL is not well-formed", result?.ErrorMessage);
+        Assert.Equal("URI is not well-formed", result?.ErrorMessage);
     }
 
     [Fact]
-    public void Validate_AllowsAbsoluteUrlMatchingCurrentOrigin()
+    public void Validate_AllowsAbsoluteUriMatchingCurrentOrigin()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = true
         });
@@ -63,7 +63,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_MatchesCurrentOriginCaseInsensitively()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = true
         });
@@ -76,7 +76,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_RejectsCurrentHostWithDifferentScheme()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = true
         });
@@ -89,7 +89,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_RejectsCurrentOriginWhenNotAllowed()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false
         });
@@ -103,7 +103,7 @@ public class RedirectValidatorTests
     public void Validate_AllowsCurrentOriginWithConfiguredNonDefaultPort()
     {
         var validator = CreateValidator(
-            new RedirectValidationSettings { AllowCurrentAuthority = true },
+            new RedirectUriValidationSettings { AllowCurrentAuthority = true },
             requestPort: 8443);
 
         var result = validator.Validate("https://app.example.com:8443/return");
@@ -114,7 +114,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_AllowsOriginMatchingConfiguredAuthority()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -135,7 +135,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_MatchesConfiguredSchemeAndAuthorityCaseInsensitively()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -156,7 +156,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_UsesDefaultHttpsPortWhenOriginPortIsNotSpecified()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -177,7 +177,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_UsesDefaultHttpPortWhenOriginPortIsNotSpecified()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -198,7 +198,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_AllowsConfiguredNonDefaultPort()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -220,7 +220,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_RejectsConfiguredOriginOnDifferentPort()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -242,7 +242,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_AllowsSubdomainWhenConfigured()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -264,7 +264,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_AllowsNestedSubdomainWhenConfigured()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -286,7 +286,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_RejectsSubdomainWhenNotConfigured()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -308,7 +308,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_RejectsHostThatOnlyEndsWithConfiguredAuthorityText()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -330,7 +330,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_RejectsConfiguredAuthorityWithUnlistedScheme()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false,
             AllowOrigins =
@@ -351,7 +351,7 @@ public class RedirectValidatorTests
     [Fact]
     public void Validate_RejectsAbsoluteOriginNotInAllowList()
     {
-        var validator = CreateValidator(new RedirectValidationSettings
+        var validator = CreateValidator(new RedirectUriValidationSettings
         {
             AllowCurrentAuthority = false
         });
@@ -361,8 +361,8 @@ public class RedirectValidatorTests
         Assert.Equal("Origin not permitted", result?.ErrorMessage);
     }
 
-    private static RedirectValidator CreateValidator(
-        RedirectValidationSettings settings,
+    private static RedirectUriValidator CreateValidator(
+        RedirectUriValidationSettings settings,
         string requestScheme = "https",
         string requestHost = "app.example.com",
         int? requestPort = null)
@@ -378,7 +378,7 @@ public class RedirectValidatorTests
             }
         };
 
-        return new RedirectValidator(
+        return new RedirectUriValidator(
             new HttpContextAccessor { HttpContext = httpContext },
             Options.Create(settings));
     }

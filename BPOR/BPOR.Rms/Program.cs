@@ -60,7 +60,7 @@ builder.WebHost.UseStaticWebAssets();
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<AnyPolicyAuthorizationFilter>();
-    options.AddRedirectUrlValidation();
+    options.AddRedirectUriValidation();
 }).AddRazorRuntimeCompilation();
 
 var app = builder.Build();

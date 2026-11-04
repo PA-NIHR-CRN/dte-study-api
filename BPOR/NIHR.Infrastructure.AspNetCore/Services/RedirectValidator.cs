@@ -1,18 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.AspNetCore.Settings;
 using NIHR.Infrastructure.Settings;
 
 namespace NIHR.Infrastructure.AspNetCore.Services;
 
-public class RedirectValidator(IHttpContextAccessor httpContextAccessor, IOptions<RedirectValidationSettings> options)
-    : IRedirectValidator
+public class RedirectUriValidator(IHttpContextAccessor httpContextAccessor, IOptions<RedirectUriValidationSettings> options)
+    : IRedirectUriValidator
 {
     public ValidationResult? Validate(string redirectUri)
     {
         if (!Uri.TryCreate(redirectUri, UriKind.RelativeOrAbsolute, out var uri))
         {
-            return new ValidationResult("URL is not well-formed");
+            return new ValidationResult("URI is not well-formed");
         }
 
         return Validate(uri);
@@ -36,12 +37,12 @@ public class RedirectValidator(IHttpContextAccessor httpContextAccessor, IOption
             return new ValidationResult("Origin not permitted");
         }
 
-        if (options.Value.AllowRelativeUrls)
+        if (options.Value.AllowRelative)
         {
             return ValidationResult.Success;
         }
 
-        return new ValidationResult("Relative URLs are not permitted");
+        return new ValidationResult("Relative URIs are not permitted");
     }
 
     private bool MatchesOriginSpec(Uri uri, OriginSpec authority)

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NIHR.Infrastructure.Settings;
+namespace NIHR.Infrastructure.AspNetCore.Settings;
 
 public class OriginSpec
 {

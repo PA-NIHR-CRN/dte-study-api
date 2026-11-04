@@ -6,12 +6,12 @@ using NIHR.Infrastructure.AspNetCore.Validation;
 
 namespace NIHR.Infrastructure.AspNetCore.Services;
 
-public class RedirectUrlModelBinder : IModelBinder
+public class UriModelBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext context)
     {
         var redirectValidator =
-            context.ActionContext.HttpContext.RequestServices.GetRequiredService<IRedirectValidator>();
+            context.ActionContext.HttpContext.RequestServices.GetRequiredService<IRedirectUriValidator>();
         var value = context.ValueProvider.GetValue(context.ModelName).FirstValue;
         
         if (string.IsNullOrEmpty(value))
@@ -34,7 +34,7 @@ public class RedirectUrlModelBinder : IModelBinder
             }
             else
             {
-                throw new ProhibitedRedirectUrlException(validationResult!.ErrorMessage!);
+                throw new ProhibitedRedirectUriException(validationResult!.ErrorMessage!);
             }
         }
         else

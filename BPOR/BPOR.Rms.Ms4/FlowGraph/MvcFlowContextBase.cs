@@ -1,6 +1,4 @@
-﻿using NIHR.Infrastructure.AspNetCore.Validation;
-
-namespace BPOR.Rms.Ms4.FlowGraph;
+﻿namespace BPOR.Rms.Ms4.FlowGraph;
 
 public record MvcFlowContextBase
 {   
