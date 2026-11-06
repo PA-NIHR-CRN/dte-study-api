@@ -27,7 +27,7 @@
 
             @if (notification.Body is not null || notification.LinkText is not null)
             {
-                <p class="govuk-body">
+                <p class="govuk-body govuk-!-font-size-24">
                     @Html.Raw(notification.Body) <a class="govuk-notification-banner__link" href="@Html.Raw(@notification.LinkUrl)">@notification.LinkText</a>
                 </p>
             }
