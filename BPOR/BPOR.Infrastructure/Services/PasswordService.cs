@@ -6,6 +6,7 @@ using BPOR.Domain.Utils;
 using BPOR.Infrastructure.Constants;
 using BPOR.Infrastructure.Interfaces;
 using BPOR.Infrastructure.Responses.V1.Password;
+using BPOR.Rms.Infrastructure.Interfaces;
 using Dte.Common;
 using Dte.Common.Contracts;
 using Dte.Common.Exceptions.Common;
@@ -15,7 +16,6 @@ using Dte.Common.Responses;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using NIHR.Infrastructure.Interfaces;
 
 namespace BPOR.Infrastructure.Services;
 

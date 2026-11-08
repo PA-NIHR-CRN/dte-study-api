@@ -1,4 +1,4 @@
-﻿using NIHR.Infrastructure.Interfaces;
+﻿using BPOR.Rms.Infrastructure.Interfaces;
 
 namespace BPOR.Rms.Startup
 {

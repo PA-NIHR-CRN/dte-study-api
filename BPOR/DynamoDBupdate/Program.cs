@@ -1,4 +1,5 @@
-﻿using DynamoDBupdate.Backfills;
+﻿using BPOR.Rms.Infrastructure.Configuration.Extensions;
+using DynamoDBupdate.Backfills;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using DynamoDBupdate.Startup;

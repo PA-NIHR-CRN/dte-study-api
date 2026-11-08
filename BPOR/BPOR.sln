@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Registration.Api", "BPOR.Registration.Api\BPOR.Registration.Api.csproj", "{51271F93-49F8-4A0B-8FAD-7911D81A0D70}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms", "BPOR.Rms\BPOR.Rms.csproj", "{A369E709-3D8A-4F5F-8740-231DD890B949}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Registration.Stream.Handler", "BPOR.Registration.Stream.Handler\src\BPOR.Registration.Stream.Handler\BPOR.Registration.Stream.Handler.csproj", "{CEF9BD95-2830-4833-B4A4-4B9401D55D2B}"
@@ -13,13 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Domain", "BPOR.Domain\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Infrastructure", "BPOR.Infrastructure\BPOR.Infrastructure.csproj", "{523924DA-D2CF-43A6-BD96-10D6B1BE60A2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.Infrastructure", "NIHR.Infrastructure\NIHR.Infrastructure.csproj", "{47722999-18CC-4C9D-8F65-B490EE8DB7D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms.Infrastructure", "BPOR.Rms.Infrastructure\BPOR.Rms.Infrastructure.csproj", "{47722999-18CC-4C9D-8F65-B490EE8DB7D0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.Infrastructure.EntityFrameworkCore", "NIHR.Infrastructure.EntityFrameworkCore\NIHR.Infrastructure.EntityFrameworkCore.csproj", "{8825FB07-F7E1-48D5-9582-446A7ED30166}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms.Infrastructure.EntityFrameworkCore", "BPOR.Rms.Infrastructure.EntityFrameworkCore\BPOR.Rms.Infrastructure.EntityFrameworkCore.csproj", "{8825FB07-F7E1-48D5-9582-446A7ED30166}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.Infrastructure.EntityFrameworkCore.MySql", "NIHR.Infrastructure.EntityFrameworkCore.MySql\NIHR.Infrastructure.EntityFrameworkCore.MySql.csproj", "{614FF64A-2087-4A1C-8B23-BF44B7EF084A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms.Infrastructure.EntityFrameworkCore.MySql", "BPOR.Rms.Infrastructure.EntityFrameworkCore.MySql\BPOR.Rms.Infrastructure.EntityFrameworkCore.MySql.csproj", "{614FF64A-2087-4A1C-8B23-BF44B7EF084A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.Infrastructure.AspNetCore", "NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj", "{B112F387-4349-4A82-9A33-B21906EFF4B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms.Infrastructure.AspNetCore", "BPOR.Rms.Infrastructure.AspNetCore\BPOR.Rms.Infrastructure.AspNetCore.csproj", "{B112F387-4349-4A82-9A33-B21906EFF4B7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Geolocation", "BPOR.Geolocation\BPOR.Geolocation.csproj", "{5ED83769-29C7-4504-94C3-C8962CB62500}"
 EndProject
@@ -33,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms.Tests", "BPOR.Rms.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImportGeocodeData", "ImportGeocodeData\ImportGeocodeData.csproj", "{C61E7613-5EFE-4CEA-AE3C-072B3C45A752}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NIHR.GovUk.AspNetCore.Mvc", "NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj", "{310FC69F-836B-4940-9634-EE74BA4F219C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPOR.Rms.GovUk.AspNetCore.Mvc", "BPOR.Rms.GovUk.AspNetCore.Mvc\BPOR.Rms.GovUk.AspNetCore.Mvc.csproj", "{310FC69F-836B-4940-9634-EE74BA4F219C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoDBupdate", "DynamoDBupdate\DynamoDBupdate.csproj", "{8CB36539-35E4-8245-E760-778EC134B17D}"
 EndProject
@@ -67,10 +65,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{51271F93-49F8-4A0B-8FAD-7911D81A0D70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{51271F93-49F8-4A0B-8FAD-7911D81A0D70}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{51271F93-49F8-4A0B-8FAD-7911D81A0D70}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{51271F93-49F8-4A0B-8FAD-7911D81A0D70}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A369E709-3D8A-4F5F-8740-231DD890B949}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A369E709-3D8A-4F5F-8740-231DD890B949}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A369E709-3D8A-4F5F-8740-231DD890B949}.Release|Any CPU.ActiveCfg = Release|Any CPU

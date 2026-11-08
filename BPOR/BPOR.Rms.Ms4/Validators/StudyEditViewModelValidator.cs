@@ -2,7 +2,7 @@
 using BPOR.Rms.Ms4.Models;
 using FluentValidation;
 using NIHR.GovUk.AspNetCore.Mvc.Validation;
-using NIHR.Infrastructure.AspNetCore.Validation;
+using BPOR.Rms.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Ms4.Validators;
 

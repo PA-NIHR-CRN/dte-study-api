@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
+using BPOR.Rms.Infrastructure.AspNetCore.Authentication.ApiKey;
 using NIHR.NotificationService;
 
 namespace BPOR.Rms.VolunteerInformation;

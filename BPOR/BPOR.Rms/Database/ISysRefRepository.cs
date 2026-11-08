@@ -1,4 +1,4 @@
-using NIHR.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
 
 namespace BPOR.Rms.Database;
 

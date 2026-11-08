@@ -1,4 +1,5 @@
 using BPOR.Geolocation.Startup;
+using BPOR.Rms.Infrastructure.Configuration.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

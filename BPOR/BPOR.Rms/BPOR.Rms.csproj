@@ -22,9 +22,9 @@
       <ProjectReference Include="..\BPOR.Registration.Stream.Handler\src\BPOR.Registration.Stream.Handler\BPOR.Registration.Stream.Handler.csproj" />
       <ProjectReference Include="..\BPOR.Rms.VolunteerInformation\BPOR.Rms.VolunteerInformation.csproj" />
       <ProjectReference Include="..\NIHR.Geometry\NIHR.Geometry.csproj" />
-      <ProjectReference Include="..\NIHR.GovUk.AspNetCore.Mvc\NIHR.GovUk.AspNetCore.Mvc.csproj" />
-      <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
-      <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.GovUk.AspNetCore.Mvc\BPOR.Rms.GovUk.AspNetCore.Mvc.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Infrastructure.AspNetCore\BPOR.Rms.Infrastructure.AspNetCore.csproj" />
+      <ProjectReference Include="..\BPOR.Rms.Infrastructure\BPOR.Rms.Infrastructure.csproj" />
       <ProjectReference Include="..\BPOR.Infrastructure\BPOR.Infrastructure.csproj" />
       <ProjectReference Include="..\NIHR.NotificationService.GovUkNotify\NIHR.NotificationService.GovUkNotify.csproj" />
       <ProjectReference Include="..\NIHR.NotificationService\NIHR.NotificationService.csproj" />

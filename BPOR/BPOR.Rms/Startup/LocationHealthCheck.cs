@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿using BPOR.Rms.Infrastructure.Interfaces;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NIHR.Infrastructure;
 
 namespace BPOR.Rms.Startup

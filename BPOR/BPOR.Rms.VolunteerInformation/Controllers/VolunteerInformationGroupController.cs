@@ -6,7 +6,7 @@ using BPOR.Rms.VolunteerInformation.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using NIHR.Infrastructure.AspNetCore.Validation;
+using BPOR.Rms.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.VolunteerInformation.Controllers;
 

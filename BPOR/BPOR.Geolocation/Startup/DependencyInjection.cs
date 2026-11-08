@@ -1,13 +1,15 @@
 using System.Reflection;
 using BPOR.Domain.Entities;
 using BPOR.Infrastructure.Clients;
+using BPOR.Rms.Infrastructure.Configuration.Extensions;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore.MySql;
 using Dte.Common.Authentication;
 using Dte.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using NIHR.Infrastructure;
-using NIHR.Infrastructure.Configuration;
-using NIHR.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.EntityFrameworkCore;
+using BPOR.Rms.Infrastructure.Interfaces;
 
 namespace BPOR.Geolocation.Startup;
 

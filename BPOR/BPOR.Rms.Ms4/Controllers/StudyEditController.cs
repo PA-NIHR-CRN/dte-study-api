@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using NIHR.GovUk.AspNetCore.Mvc;
-using NIHR.Infrastructure.AspNetCore.Validation;
+using BPOR.Rms.Infrastructure.AspNetCore.Validation;
 
 namespace BPOR.Rms.Ms4.Controllers;
 

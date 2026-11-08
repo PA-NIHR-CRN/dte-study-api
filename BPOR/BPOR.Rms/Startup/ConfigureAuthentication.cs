@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using NIHR.Infrastructure.Settings;
 using Microsoft.AspNetCore.Authorization;
-using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
-using NIHR.Infrastructure.AspNetCore.Authentication.ApiKey;
-using NIHR.Infrastructure.Authentication.IDG;
-using NIHR.Infrastructure.Authentication.IDG.SCIM;
+using BPOR.Rms.Infrastructure.AspNetCore.Authentication.AccessToken;
+using BPOR.Rms.Infrastructure.AspNetCore.Authentication.ApiKey;
+using BPOR.Rms.Infrastructure.Authentication.IDG;
+using BPOR.Rms.Infrastructure.Authentication.IDG.SCIM;
+using BPOR.Rms.Infrastructure.Configuration.Extensions;
+using BPOR.Rms.Infrastructure.Settings;
 
 namespace BPOR.Rms.Startup;
 
