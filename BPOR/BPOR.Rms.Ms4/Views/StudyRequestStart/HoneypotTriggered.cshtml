@@ -1,0 +1,19 @@
+@{
+    // This is a mock page that will be displayed to the user in the event that a honeypot is triggered.
+    // It is designed such that, if a false positive occurs (i.e. a genuine researcher triggers the honeypot)
+    // then they will be directed to contact BPOR rather than believing their application was successful.
+    
+    Layout = "_StudyLayout";
+    ViewData["HideProgress"] = true;
+}
+
+<h2 class="govuk-heading-l">Apply to include your study in the Be Part of Research registry</h2>
+        
+<p class="govuk-body">
+    We have registered your interest in applying for inclusion in Be Part Of Research.
+</p>
+
+<p class="govuk-body">
+    Please send an email containing a breif description of your study to
+    <a href="mailto:bepartofresearch@nihr.ac.uk">mailto:bepartofresearch@nihr.ac.uk</a>
+</p>

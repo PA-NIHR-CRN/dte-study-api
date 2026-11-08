@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Security.Claims;
+using AspNetCore.Honeypot;
 using BPOR.Domain.Entities;
 using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Models;
@@ -24,6 +25,7 @@ public class StudyRequestStartController(IStudyDraftRepository studyDraftReposit
 
     [AllowAnonymous]
     [HttpPost]
+    [Honeypot]
     public async Task<IActionResult> Start(
         StudyRequestStartViewModel model,
         [FromServices] IUrlAccessTokenService urlAccessTokenService,
@@ -35,6 +37,12 @@ public class StudyRequestStartController(IStudyDraftRepository studyDraftReposit
             return View(model);
         }
 
+        if (await HttpContext.IsHoneypotTriggeredAsync())
+        {
+            // The honeypot field has a value and/or the form was completed in under a second.
+            return View("HoneypotTriggered");
+        }
+        
         var study = new Study();
         var studyId = await studyDraftRepository.CreateDraftStudyAsync(study, cancellationToken);
         
