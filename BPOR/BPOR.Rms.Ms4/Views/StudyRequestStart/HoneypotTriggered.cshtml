@@ -1,3 +1,7 @@
+@using BPOR.Rms.Ms4.Settings
+@using Microsoft.Extensions.Options
+@inject IOptions<StudyCreationSettings> Settings
+
 @{
     // This is a mock page that will be displayed to the user in the event that a honeypot is triggered.
     // It is designed such that, if a false positive occurs (i.e. a genuine researcher triggers the honeypot)
@@ -14,6 +18,12 @@
 </p>
 
 <p class="govuk-body">
-    Please send an email containing a breif description of your study to
-    <a href="mailto:bepartofresearch@nihr.ac.uk">mailto:bepartofresearch@nihr.ac.uk</a>
+    Please send an email containing a brief description of your study to
+    <a href="mailto:bepartofresearch@nihr.ac.uk">bepartofresearch@nihr.ac.uk</a>
+</p>
+
+<p class="govuk-body">
+    <a href="@Settings.Value.ResearcherCreationFinishRedirectUrl" role="button" class="govuk-button" data-module="govuk-button">
+        Return to Be Part of Research
+    </a>
 </p>

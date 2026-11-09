@@ -25,7 +25,6 @@ public class StudyRequestStartController(IStudyDraftRepository studyDraftReposit
 
     [AllowAnonymous]
     [HttpPost]
-    [Honeypot]
     public async Task<IActionResult> Start(
         StudyRequestStartViewModel model,
         [FromServices] IUrlAccessTokenService urlAccessTokenService,
