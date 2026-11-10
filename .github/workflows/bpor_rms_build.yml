@@ -234,7 +234,7 @@ jobs:
           docker load --input /tmp/bpor-rms.tar
           
           # Extract the image ID from the list of images
-          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
+          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $2}')
           
           echo "Using registry ${{ env.ECR_REGISTRY }}"
           docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
@@ -359,7 +359,7 @@ jobs:
           docker load --input /tmp/bpor-rms.tar
           
           # Extract the image ID from the list of images
-          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
+          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $2}')
           
           echo "Using registry ${{ env.ECR_REGISTRY }}"
           docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
@@ -484,7 +484,7 @@ jobs:
           docker load --input /tmp/bpor-rms.tar
           
           # Extract the image ID from the list of images
-          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
+          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $2}')
           
           echo "Using registry ${{ env.ECR_REGISTRY }}"
           docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
@@ -609,7 +609,7 @@ jobs:
           docker load --input /tmp/bpor-rms.tar
           
           # Extract the image ID from the list of images
-          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
+          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $2}')
           
           echo "Using registry ${{ env.ECR_REGISTRY }}"
           docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
