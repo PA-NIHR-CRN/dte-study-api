@@ -103,7 +103,8 @@ jobs:
         run: |
           echo "Load artifact"
           docker load --input /tmp/bpor-rms.tar
-          
+          echo "docker images..."
+          docker images
           # Extract the image ID from the list of images
           IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
 
