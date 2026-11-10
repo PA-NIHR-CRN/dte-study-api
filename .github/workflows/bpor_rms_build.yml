@@ -106,7 +106,7 @@ jobs:
           echo "docker images..."
           docker images
           # Extract the image ID from the list of images
-          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
+          IMAGE_ID=$(docker images | awk '/bpor-rms/{print $2}')
 
           echo "Using Image ID $IMAGE_ID"
           echo "Using registry ${{ env.ECR_REGISTRY }}"
