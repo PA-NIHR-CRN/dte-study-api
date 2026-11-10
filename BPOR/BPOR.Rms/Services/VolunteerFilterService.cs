@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using NIHR.GovUk.AspNetCore.Mvc;
 using Rbec.Postcodes;
 using System.Threading;
+using MySqlConnector;
 
 namespace BPOR.Rms.Services
 {
@@ -128,7 +129,7 @@ namespace BPOR.Rms.Services
                     result.AddRange(await volunteerQuery.AsCampaignParticipant().ToArrayAsync(cancellationToken));
                     pageMin = pageMax;
                 }
-                catch (TimeoutException)
+                catch (Exception ex) when (ex is TimeoutException or MySqlException { ErrorCode: MySqlErrorCode.CommandTimeoutExpired })
                 {
                     if (pageSize < options.Value.MinPageSize)
                     {
