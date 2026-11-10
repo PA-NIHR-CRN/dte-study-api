@@ -107,6 +107,7 @@ jobs:
           # Extract the image ID from the list of images
           IMAGE_ID=$(docker images | awk '/bpor-rms/{print $3}')
 
+          echo "Using Image ID $IMAGE_ID"
           echo "Using registry ${{ env.ECR_REGISTRY }}"
           echo "docker tag..."
           docker tag $IMAGE_ID $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_SHA_TAG
