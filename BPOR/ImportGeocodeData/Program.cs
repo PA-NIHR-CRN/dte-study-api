@@ -1,9 +1,6 @@
-﻿using BPOR.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using BPOR.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NIHR.Infrastructure.EntityFrameworkCore;
-using NIHR.Infrastructure.Configuration;
 using ImportGeocodeData;
 using NIHR.Infrastructure;
 using NIHR.Infrastructure.Authentication;
@@ -18,15 +15,7 @@ internal class Program
             {
                 services.GetSectionAndValidate<GeocodingSettings>(context.Configuration);
 
-                var dbSettings = services.GetSectionAndValidate<DbSettings>(context.Configuration);
-                var connectionString = dbSettings.Value.BuildConnectionString();
-
-                services.AddDbContext<ParticipantDbContext>(options =>
-                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), builder =>
-                    {
-                        builder.UseNetTopologySuite();
-                        builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                    }));
+                services.AddRmsDatabase();
 
                 services.AddScoped<GeoCoder>();
                 services.AddSingleton<IPostcodeProvider, StaticFilePostcodeMapper>();

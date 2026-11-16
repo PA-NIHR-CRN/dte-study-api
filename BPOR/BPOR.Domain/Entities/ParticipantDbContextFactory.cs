@@ -1,3 +1,4 @@
+using BPOR.Domain.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +17,7 @@ public class ParticipantDbContextFactory() : IDesignTimeDbContextFactory<Partici
             .AddJsonFile("appsettings.user.json", optional: true)
             .Build();
 
-        var dbSettings = configuration.GetSection(DbSettings.SectionName).Get<DbSettings>();
+        var dbSettings = configuration.GetSection(RmsDbSettings.SectionName).Get<RmsDbSettings>();
         var connectionString = dbSettings?.BuildConnectionString() ??
                                Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 

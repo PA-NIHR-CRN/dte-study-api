@@ -9,10 +9,12 @@
     
     <ItemGroup>
       <ProjectReference Include="..\NIHR.Infrastructure.AspNetCore\NIHR.Infrastructure.AspNetCore.csproj" />
+      <ProjectReference Include="..\NIHR.Infrastructure.EntityFrameworkCore.MySql\NIHR.Infrastructure.EntityFrameworkCore.MySql.csproj" />
       <ProjectReference Include="..\NIHR.Infrastructure\NIHR.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="8.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
         <PrivateAssets>all</PrivateAssets>
