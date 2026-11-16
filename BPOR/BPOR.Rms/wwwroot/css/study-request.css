@@ -27,3 +27,7 @@
     background-color: rgb(70, 168, 108);
     height: 100%;
 }
+
+.study-immediate-costing {
+    display: none;
+}

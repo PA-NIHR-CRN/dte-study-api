@@ -1,3 +1,4 @@
+using AspNetCore.Honeypot;
 using BPOR.Rms.Ms4.FlowGraph;
 using BPOR.Rms.Ms4.Models;
 using BPOR.Rms.Ms4.Repositories;
@@ -25,7 +26,11 @@ public static class DiExtensions
         services.AddScoped(typeof(IMvcFlowHelper<,>), typeof(MvcFlowHelper<,>));
         services.AddMvcFlow<StudyRequestEditFlow, StudyRequestViewModel, StudyRequestEditContext>();
         services.AddScoped<IStudyDraftRepository, StudyDraftRepository>();
-        services.AddValidatorsFromAssemblyContaining<StudyRequestStartViewModelValidator>();    
+        services.AddValidatorsFromAssemblyContaining<StudyRequestStartViewModelValidator>();
+        
+        // Add AspNetCore.HoneyPot support
+        services.AddOptions<HoneypotOptions>().BindConfiguration("Honeypot");
+        services.AddHoneypot();
     }
     
     public static async Task ScheduleDraftStudyCleanup(this IHost host)
