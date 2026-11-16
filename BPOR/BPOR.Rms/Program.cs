@@ -2,13 +2,11 @@ using BPOR.Domain.Entities.Configuration;
 using BPOR.Infrastructure.Services.Development;
 using BPOR.Rms;
 using BPOR.Rms.Ms4;
-using BPOR.Rms.Ms4.ScheduledJobs;
 using BPOR.Rms.Startup;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
-using NIHR.Infrastructure.AspNetCore.Authentication.AccessToken;
 using NIHR.Infrastructure.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
+using NIHR.Infrastructure.AspNetCore.TrustedUris;
 using NIHR.Infrastructure.Interfaces;
 using Quartz;
 
@@ -52,12 +50,14 @@ if (builder.Environment.IsDevelopment())
 }
 
 builder.Services.AddScoped<AnyPolicyAuthorizationFilter>();
+builder.Services.AddTrustedUriValidation();
 
 builder.WebHost.UseStaticWebAssets();
 
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<AnyPolicyAuthorizationFilter>();
+    options.AddTrustedUriValidation();
 }).AddRazorRuntimeCompilation();
 
 var app = builder.Build();

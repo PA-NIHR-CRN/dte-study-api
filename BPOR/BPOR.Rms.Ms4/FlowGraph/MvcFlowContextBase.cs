@@ -2,5 +2,5 @@
 
 public record MvcFlowContextBase
 {
-    public string? ReturnUrl { get; set; }
+    public Uri? ReturnUrl { get; set; }
 }
