@@ -9,7 +9,27 @@
     var notification = TempData.Get<NotificationBannerModel>("Notification");
 }
 
-@if (notification != null)
+@if (notification?.DisplayAsPanel == true)
+{
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <div class="govuk-panel govuk-panel--confirmation">
+                <h2 class="govuk-panel__title">@notification.Heading</h2>
+                @if (notification.Body is not null)
+                {
+                    <div class="govuk-panel__body">@notification.Body</div>
+                }
+            </div>
+            @if (notification.LinkText is not null)
+            {
+                <p class="govuk-body">
+                    <a class="govuk-link" href="@notification.LinkUrl">@notification.LinkText</a>
+                </p>
+            }
+        </div>
+    </div>
+}
+else if (notification != null)
 {
     <div class="govuk-notification-banner @(notification.IsSuccess ? "govuk-notification-banner--success" : "govuk-notification-banner--failure")" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
         <div class="govuk-notification-banner__header">
