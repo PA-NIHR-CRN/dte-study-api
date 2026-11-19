@@ -389,6 +389,7 @@ public class VolunteerController(ParticipantDbContext context,
                     this.AddNotification(new NotificationBannerModel
                     {
                         IsSuccess = true,
+                        DisplayAsPanel = true,
                         Title = "Success",
                         Heading = bodyText,
                         Body = totalPreviouslyEnrolled > 0 ? subBodyText : null,
@@ -402,6 +403,7 @@ public class VolunteerController(ParticipantDbContext context,
                     this.AddNotification(new NotificationBannerModel
                     {
                         IsSuccess = true,
+                        DisplayAsPanel = true,
                         Title = "Success",
                         Heading = subBodyText,
                         LinkText = "Return to the study details page",
