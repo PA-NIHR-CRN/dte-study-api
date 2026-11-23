@@ -7,5 +7,5 @@ public sealed class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
     public const string DefaultScheme = "ApiKey";
     public const string HeaderName = "Authorization";
     
-    public List<FixedApiKey> FixedApiKeys { get; set; }
+    public List<FixedApiKey>? FixedApiKeys { get; set; }
 }

@@ -9,7 +9,7 @@ public class ConfigurationApiKeyClaimsProvider(IOptions<ApiKeyAuthenticationOpti
 {
     public bool TryGetClaims(string apiKey, [MaybeNullWhen(false)] out Claim[] claims)
     {
-        var key = options.Value.FixedApiKeys.SingleOrDefault(i => i.ApiKey == apiKey);
+        var key = options.Value.FixedApiKeys?.SingleOrDefault(i => i.ApiKey == apiKey);
         if (key == null)
         {
             claims = null;
