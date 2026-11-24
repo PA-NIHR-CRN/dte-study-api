@@ -22,6 +22,7 @@ function initialiseOptionSearch() {
 
             var foundCount = 0;
             var selectedCount = 0;
+            var visibleOptions = [];
 
             options.forEach(function (option) {
                 var label = option.dataset.searchValue;
@@ -38,11 +39,23 @@ function initialiseOptionSearch() {
                     option.style.display = 'flex';
                     foundCount++;
                 }
+
+                if (option.style.display !== 'none') {
+                    visibleOptions.push(checkbox);
+                }
             });
 
             document.querySelectorAll('.govuk-checkboxes__item.skip-link').forEach(function (item) {
                 item.style.display = searchText ? 'none' : 'flex';
             });
+
+            var fieldset = search.closest('fieldset');
+            var endLink = fieldset.querySelector('.govuk-skip-link.end-of-options');
+            var endFragment = visibleOptions.length ? `#${visibleOptions[visibleOptions.length - 1].id}` : `#${endLink.id}`;
+            fieldset.querySelectorAll('.govuk-skip-link.start-of-options, .govuk-skip-link.options-list').forEach(function (link) {
+                link.href = endFragment;
+            });
+            endLink.href = visibleOptions.length ? `#${visibleOptions[0].id}` : `#${fieldset.querySelector('.govuk-skip-link.start-of-options').id}`;
 
             var foundLabel = foundCount == 1 ? announcementElement.dataset.single : announcementElement.dataset.multiple;
 
