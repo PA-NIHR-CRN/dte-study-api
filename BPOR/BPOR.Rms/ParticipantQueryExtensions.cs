@@ -13,9 +13,9 @@ public static class ParticipantQueryExtensions
     {
         if (selectedVolunteersContacted.HasValue)
         {
-
-            return query.Where(x => x.CampaignParticipant.Any(e => e.Campaign.FilterCriteria.StudyId == studyId) == selectedVolunteersContacted.Value);
-
+            return selectedVolunteersContacted.Value
+                ? query.Where(x => x.CampaignParticipant.Any(e => e.Campaign.FilterCriteria.StudyId == studyId))
+                : query.Where(x => !x.CampaignParticipant.Any(e => e.Campaign.FilterCriteria.StudyId == studyId));
         }
 
         return query;
@@ -57,7 +57,9 @@ public static class ParticipantQueryExtensions
     {
         if (selectedCompletedRegistration.HasValue)
         {
-            return query.Where(x => (x.Stage2CompleteUtc != null) == selectedCompletedRegistration.Value);
+            return selectedCompletedRegistration.Value
+                ? query.Where(x => x.Stage2CompleteUtc != null)
+                : query.Where(x => x.Stage2CompleteUtc == null);
         }
 
         return query;
@@ -65,12 +67,17 @@ public static class ParticipantQueryExtensions
 
     public static IQueryable<Participant> WhereHasAnyAreaOfResearch(this IQueryable<Participant> query, IEnumerable<int> selectedAreasOfInterest, bool includeNoAreasOfInterest)
     {
-        if (selectedAreasOfInterest.Any() || includeNoAreasOfInterest)
+        var areaIds = selectedAreasOfInterest.ToArray();
+        if (areaIds.Length == 0)
         {
-            return query.Where(p => p.HealthConditions.Any(hc => selectedAreasOfInterest.Contains(hc.HealthConditionId)) || includeNoAreasOfInterest && !p.HealthConditions.Any());
+            return includeNoAreasOfInterest
+                ? query.Where(p => !p.HealthConditions.Any())
+                : query;
         }
 
-        return query;
+        return includeNoAreasOfInterest
+            ? query.Where(p => p.HealthConditions.Any(hc => areaIds.Contains(hc.HealthConditionId)) || !p.HealthConditions.Any())
+            : query.Where(p => p.HealthConditions.Any(hc => areaIds.Contains(hc.HealthConditionId)));
     }
 
     public static IQueryable<Participant> WhereHasRegistrationDateInRange(this IQueryable<Participant> query, DateOnly? registrationFromDate, DateOnly? registrationToDate)
@@ -157,27 +164,17 @@ public static class ParticipantQueryExtensions
         {
             int searchRadiusMetres = (int)Conversions.MilesToMetres(postcodeSearch.SearchRadiusMiles.Value);
 
-            int innerSearchRadius = (int)(searchRadiusMetres / Math.Sqrt(2));
-
             var osgbRef = Osgb6.FromLatLong(postcodeSearch.Location.Y, postcodeSearch.Location.X);
-            
+            double radiusSquared = (double)searchRadiusMetres * searchRadiusMetres;
 
-            return query.Where(i => 
-                (i.ParticipantLocation.Easting > osgbRef.Easting - innerSearchRadius &&
-                i.ParticipantLocation.Easting < osgbRef.Easting + innerSearchRadius &&
-                i.ParticipantLocation.Northing < osgbRef.Northing + innerSearchRadius &&
-                i.ParticipantLocation.Northing > osgbRef.Northing - innerSearchRadius)
-            ||
-                (
-                    (i.ParticipantLocation.Easting > osgbRef.Easting - searchRadiusMetres &&
-                    i.ParticipantLocation.Easting < osgbRef.Easting + searchRadiusMetres &&
-                    i.ParticipantLocation.Northing < osgbRef.Northing + searchRadiusMetres &&
-                    i.ParticipantLocation.Northing > osgbRef.Northing - searchRadiusMetres)
-                &&
-                    Math.Sqrt(Math.Pow(i.ParticipantLocation.Easting - osgbRef.Easting, 2)
-                    + Math.Pow(i.ParticipantLocation.Northing - osgbRef.Northing, 2)) < searchRadiusMetres
-                )
-            );
+            return query.Where(i =>
+                i.ParticipantLocation != null &&
+                i.ParticipantLocation.Easting > osgbRef.Easting - searchRadiusMetres &&
+                i.ParticipantLocation.Easting < osgbRef.Easting + searchRadiusMetres &&
+                i.ParticipantLocation.Northing > osgbRef.Northing - searchRadiusMetres &&
+                i.ParticipantLocation.Northing < osgbRef.Northing + searchRadiusMetres &&
+                Math.Pow(i.ParticipantLocation.Easting - osgbRef.Easting, 2)
+                    + Math.Pow(i.ParticipantLocation.Northing - osgbRef.Northing, 2) < radiusSquared);
         }
 
         return query;
