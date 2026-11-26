@@ -162,19 +162,27 @@ public static class ParticipantQueryExtensions
         if (postcodeSearch is not null && postcodeSearch.SearchRadiusMiles is not null && postcodeSearch.SearchRadiusMiles >= 0)
         {
             var searchRadiusMetres = (int)Conversions.MilesToMetres(postcodeSearch.SearchRadiusMiles.Value);
-            
-            var osgbRef = Osgb6.FromLatLong(postcodeSearch.Location.Y, postcodeSearch.Location.X);
-            
-            var radiusSquared = (double)searchRadiusMetres * searchRadiusMetres;
 
-            return query.Where(i =>
-                i.ParticipantLocation != null &&
-                i.ParticipantLocation.Easting > osgbRef.Easting - searchRadiusMetres &&
-                i.ParticipantLocation.Easting < osgbRef.Easting + searchRadiusMetres &&
-                i.ParticipantLocation.Northing > osgbRef.Northing - searchRadiusMetres &&
-                i.ParticipantLocation.Northing < osgbRef.Northing + searchRadiusMetres &&
-                Math.Pow(i.ParticipantLocation.Easting - osgbRef.Easting, 2)
-                + Math.Pow(i.ParticipantLocation.Northing - osgbRef.Northing, 2) < radiusSquared);
+            var innerSearchRadius = (int)(searchRadiusMetres / Math.Sqrt(2));
+
+            var osgbRef = Osgb6.FromLatLong(postcodeSearch.Location.Y, postcodeSearch.Location.X);
+
+            return query.Where(i => 
+                (i.ParticipantLocation.Easting > osgbRef.Easting - innerSearchRadius &&
+                i.ParticipantLocation.Easting < osgbRef.Easting + innerSearchRadius &&
+                i.ParticipantLocation.Northing < osgbRef.Northing + innerSearchRadius &&
+                i.ParticipantLocation.Northing > osgbRef.Northing - innerSearchRadius)
+            ||
+                (
+                    (i.ParticipantLocation.Easting > osgbRef.Easting - searchRadiusMetres &&
+                    i.ParticipantLocation.Easting < osgbRef.Easting + searchRadiusMetres &&
+                    i.ParticipantLocation.Northing < osgbRef.Northing + searchRadiusMetres &&
+                    i.ParticipantLocation.Northing > osgbRef.Northing - searchRadiusMetres)
+                &&
+                    Math.Sqrt(Math.Pow(i.ParticipantLocation.Easting - osgbRef.Easting, 2)
+                    + Math.Pow(i.ParticipantLocation.Northing - osgbRef.Northing, 2)) < searchRadiusMetres
+                )
+            );
         }
 
         return query;
