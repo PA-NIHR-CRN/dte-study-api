@@ -150,15 +150,26 @@ namespace BPOR.Rms.Services
 
         public async Task<int> GetFilteredVolunteerCountAsync(VolunteerFilterViewModel model, CancellationToken token = default)
         {
-            int filteredParticipantCount = 0;
-            int batchSize = options.Value.FilterCountBatchSize;
+            var startTimestamp = timeProvider.GetTimestamp();
+            var filteredParticipantCount = 0;
+            var batchSize = options.Value.FilterCountBatchSize;
 
-            var maxParticipantId = await context.Participants.Select(i => i.Id).MaxAsync();
+            var maxParticipantId = await context.Participants
+                .Select(p => (int?)p.Id)
+                .MaxAsync(token);
 
-            for (int startId = 0; startId <= maxParticipantId; startId += batchSize)
+            for (var startId = 0; startId <= maxParticipantId; startId += batchSize)
             {
-                filteredParticipantCount += await context.Participants.AsNoTracking().Where(p => p.Id >= startId && p.Id < startId + batchSize).FilterVolunteers(timeProvider, model).CountAsync();
+                filteredParticipantCount += await context.Participants
+                    .TagWith("RMS.FilterVolunteerCount")
+                    .Where(p => p.Id >= startId && p.Id < startId + batchSize)
+                    .FilterVolunteers(timeProvider, model)
+                    .CountAsync(token);
             }
+
+            logger.LogInformation(
+                "Volunteer filter count completed for study {StudyId}: {Count} matches in {DurationMs}ms",
+                model.StudyId, filteredParticipantCount, timeProvider.GetElapsedTime(startTimestamp).TotalMilliseconds);
 
             return filteredParticipantCount;
         }

@@ -141,6 +141,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("ParticipantId");
 
+                    b.HasIndex("ParticipantId", "IsDeleted", "CampaignId")
+                        .HasDatabaseName("IX_CampaignParticipant_FilterContacted");
+
                     b.ToTable("CampaignParticipant");
                 });
 
@@ -503,6 +506,12 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("GenderId");
 
+                    b.HasIndex("IsDeleted", "Stage2CompleteUtc")
+                        .HasDatabaseName("IX_Participants_FilterRegistration");
+
+                    b.HasIndex("IsDeleted", "DateOfBirth", "Stage2CompleteUtc")
+                        .HasDatabaseName("IX_Participants_FilterAge");
+
                     b.ToTable("Participants");
                 });
 
@@ -581,6 +590,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("ParticipantId");
 
+                    b.HasIndex("ParticipantId", "IsDeleted", "ContactMethodId")
+                        .HasDatabaseName("IX_ParticipantContactMethod_FilterContactMethod");
+
                     b.ToTable("ParticipantContactMethod");
                 });
 
@@ -612,6 +624,9 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.HasIndex("HealthConditionId");
 
                     b.HasIndex("ParticipantId");
+
+                    b.HasIndex("ParticipantId", "IsDeleted", "HealthConditionId")
+                        .HasDatabaseName("IX_ParticipantHealthCondition_FilterInterests");
 
                     b.ToTable("ParticipantHealthCondition");
                 });
