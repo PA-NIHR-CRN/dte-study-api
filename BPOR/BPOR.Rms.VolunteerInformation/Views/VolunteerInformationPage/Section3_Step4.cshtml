@@ -5,7 +5,10 @@
     VsiEditContext context = ViewBag.Context;
     SetFlowBackAction("Section3_Step3");
     ViewData.SetSectionName(Resources.Section3Name);
-    ViewData.SetSkipLink(Url.Action("Section4", context ));
+    if (context.FlowMode == VipFlowMode.Create)
+    {
+        ViewData.SetSkipLink(Url.Action("Section4", context));
+    }
     Layout = "_VsiEditLayoutForm";
 }
 
