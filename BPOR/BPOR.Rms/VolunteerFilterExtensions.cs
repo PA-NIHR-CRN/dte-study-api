@@ -8,7 +8,9 @@ namespace BPOR.Rms;
 public static class VolunteerFilterExtensions
 {
     // TODO: too tightly coupled to view
-    public static IQueryable<Participant> FilterVolunteers(this IQueryable<Participant> volunteers, TimeProvider timeProvider, VolunteerFilterViewModel model) => volunteers.WhereContacted(model.StudyId, model.SelectedVolunteersContacted)
+    public static IQueryable<Participant> FilterVolunteers(this IQueryable<Participant> volunteers, TimeProvider timeProvider, VolunteerFilterViewModel model) =>
+        volunteers
+        .WhereContacted(model.StudyId, model.SelectedVolunteersContacted)
         .WhereRegisteredInterest(model.StudyId, model.SelectedVolunteersRegisteredInterest)
         .WhereHasPreferredContactMethod(model.ShowPreferredContactFilter ? model.SelectedVolunteersPreferredContact : (int)NotificationContactMethod.Email)
         .WhereRecruited(model.StudyId, model.SelectedVolunteersRecruited)

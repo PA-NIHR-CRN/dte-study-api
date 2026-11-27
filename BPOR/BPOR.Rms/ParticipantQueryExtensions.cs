@@ -13,9 +13,9 @@ public static class ParticipantQueryExtensions
     {
         if (selectedVolunteersContacted.HasValue)
         {
-
-            return query.Where(x => x.CampaignParticipant.Any(e => e.Campaign.FilterCriteria.StudyId == studyId) == selectedVolunteersContacted.Value);
-
+            return selectedVolunteersContacted.Value
+                ? query.Where(x => x.CampaignParticipant.Any(e => e.Campaign.FilterCriteria.StudyId == studyId))
+                : query.Where(x => !x.CampaignParticipant.Any(e => e.Campaign.FilterCriteria.StudyId == studyId));
         }
 
         return query;
@@ -25,7 +25,6 @@ public static class ParticipantQueryExtensions
     {
         if (selectedVolunteersPreferredContact.HasValue)
         {
-
             return query.Where(x => x.ContactMethodId.Any(e => e.ContactMethodId == selectedVolunteersPreferredContact));
         }
         return query;
@@ -57,7 +56,9 @@ public static class ParticipantQueryExtensions
     {
         if (selectedCompletedRegistration.HasValue)
         {
-            return query.Where(x => (x.Stage2CompleteUtc != null) == selectedCompletedRegistration.Value);
+            return selectedCompletedRegistration.Value
+                ? query.Where(x => x.Stage2CompleteUtc != null)
+                : query.Where(x => x.Stage2CompleteUtc == null);
         }
 
         return query;
@@ -65,12 +66,17 @@ public static class ParticipantQueryExtensions
 
     public static IQueryable<Participant> WhereHasAnyAreaOfResearch(this IQueryable<Participant> query, IEnumerable<int> selectedAreasOfInterest, bool includeNoAreasOfInterest)
     {
-        if (selectedAreasOfInterest.Any() || includeNoAreasOfInterest)
+        var areaIds = selectedAreasOfInterest.ToArray();
+        if (areaIds.Length == 0)
         {
-            return query.Where(p => p.HealthConditions.Any(hc => selectedAreasOfInterest.Contains(hc.HealthConditionId)) || includeNoAreasOfInterest && !p.HealthConditions.Any());
+            return includeNoAreasOfInterest
+                ? query.Where(p => p.HealthConditions.Count == 0)
+                : query;
         }
 
-        return query;
+        return includeNoAreasOfInterest
+            ? query.Where(p => p.HealthConditions.Any(hc => areaIds.Contains(hc.HealthConditionId)) || p.HealthConditions.Count == 0)
+            : query.Where(p => p.HealthConditions.Any(hc => areaIds.Contains(hc.HealthConditionId)));
     }
 
     public static IQueryable<Participant> WhereHasRegistrationDateInRange(this IQueryable<Participant> query, DateOnly? registrationFromDate, DateOnly? registrationToDate)
@@ -151,16 +157,15 @@ public static class ParticipantQueryExtensions
         return query;
     }
 
-    public static IQueryable<Participant> WhereWithinRadiusOfLocation(this IQueryable<Participant> query, PostcodeRadiusSearchModel postcodeSearch)
+    private static IQueryable<Participant> WhereWithinRadiusOfLocation(this IQueryable<Participant> query, PostcodeRadiusSearchModel postcodeSearch)
     {
         if (postcodeSearch is not null && postcodeSearch.SearchRadiusMiles is not null && postcodeSearch.SearchRadiusMiles >= 0)
         {
-            int searchRadiusMetres = (int)Conversions.MilesToMetres(postcodeSearch.SearchRadiusMiles.Value);
+            var searchRadiusMetres = (int)Conversions.MilesToMetres(postcodeSearch.SearchRadiusMiles.Value);
 
-            int innerSearchRadius = (int)(searchRadiusMetres / Math.Sqrt(2));
+            var innerSearchRadius = (int)(searchRadiusMetres / Math.Sqrt(2));
 
             var osgbRef = Osgb6.FromLatLong(postcodeSearch.Location.Y, postcodeSearch.Location.X);
-            
 
             return query.Where(i => 
                 (i.ParticipantLocation.Easting > osgbRef.Easting - innerSearchRadius &&
@@ -183,7 +188,7 @@ public static class ParticipantQueryExtensions
         return query;
     }
 
-    public static IQueryable<Participant> WhereHasAnyPostcodeDistrict(this IQueryable<Participant> query, ISet<string> postCodeDistricts)
+    private static IQueryable<Participant> WhereHasAnyPostcodeDistrict(this IQueryable<Participant> query, ISet<string> postCodeDistricts)
     {
         if (postCodeDistricts.Any())
         {

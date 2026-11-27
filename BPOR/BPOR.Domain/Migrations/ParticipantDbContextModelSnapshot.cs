@@ -141,6 +141,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("ParticipantId");
 
+                    b.HasIndex("ParticipantId", "IsDeleted", "CampaignId")
+                        .HasDatabaseName("IX_CampaignParticipant_FilterContacted");
+
                     b.ToTable("CampaignParticipant");
                 });
 
@@ -503,6 +506,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("GenderId");
 
+                    b.HasIndex("IsDeleted", "Id", "Stage2CompleteUtc", "DateOfBirth")
+                        .HasDatabaseName("IX_Participants_FilterChunk");
+
                     b.ToTable("Participants");
                 });
 
@@ -581,6 +587,12 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("ParticipantId");
 
+                    b.HasIndex("ParticipantId", "IsDeleted", "ContactMethodId")
+                        .HasDatabaseName("IX_ParticipantContactMethod_FilterContactMethod");
+
+                    b.HasIndex("ContactMethodId", "IsDeleted", "ParticipantId")
+                        .HasDatabaseName("IX_ParticipantContactMethod_Method_Deleted_Participant");
+
                     b.ToTable("ParticipantContactMethod");
                 });
 
@@ -612,6 +624,9 @@ namespace Dynamo.Stream.Handler.Migrations
                     b.HasIndex("HealthConditionId");
 
                     b.HasIndex("ParticipantId");
+
+                    b.HasIndex("ParticipantId", "IsDeleted", "HealthConditionId")
+                        .HasDatabaseName("IX_ParticipantHealthCondition_FilterInterests");
 
                     b.ToTable("ParticipantHealthCondition");
                 });
@@ -685,6 +700,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("Location")
                         .HasAnnotation("MySql:SpatialIndex", true);
+
+                    b.HasIndex("ParticipantId", "IsDeleted", "Easting", "Northing")
+                        .HasDatabaseName("IX_ParticipantLocation_FilterGeo");
 
                     b.HasIndex("ParticipantId")
                         .IsUnique();
