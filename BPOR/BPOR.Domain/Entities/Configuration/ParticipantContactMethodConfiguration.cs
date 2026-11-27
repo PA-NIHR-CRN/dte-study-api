@@ -10,5 +10,7 @@ public class ParticipantContactMethodConfiguration : IEntityTypeConfiguration<Pa
         builder.HasIndex(p => p.ParticipantId);
         builder.HasIndex(p => new { p.ParticipantId, p.IsDeleted, p.ContactMethodId })
             .HasDatabaseName("IX_ParticipantContactMethod_FilterContactMethod");
+        builder.HasIndex(p => new { p.ContactMethodId, p.IsDeleted, p.ParticipantId })
+            .HasDatabaseName("IX_ParticipantContactMethod_Method_Deleted_Participant");
     }
 }

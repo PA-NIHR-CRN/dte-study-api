@@ -15,6 +15,8 @@ namespace BPOR.Domain.Entities.Configuration
         {
             builder.Property(x => x.Location).HasSpatialReferenceSystem(LocationSrid);
             builder.HasIndex(x => x.Location).IsSpatial();
+            builder.HasIndex(x => new { x.ParticipantId, x.IsDeleted, x.Easting, x.Northing })
+                .HasDatabaseName("IX_ParticipantLocation_FilterGeo");
         }
     }
 }

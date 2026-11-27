@@ -506,11 +506,8 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("GenderId");
 
-                    b.HasIndex("IsDeleted", "Stage2CompleteUtc")
-                        .HasDatabaseName("IX_Participants_FilterRegistration");
-
-                    b.HasIndex("IsDeleted", "DateOfBirth", "Stage2CompleteUtc")
-                        .HasDatabaseName("IX_Participants_FilterAge");
+                    b.HasIndex("IsDeleted", "Id", "Stage2CompleteUtc", "DateOfBirth")
+                        .HasDatabaseName("IX_Participants_FilterChunk");
 
                     b.ToTable("Participants");
                 });
@@ -592,6 +589,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("ParticipantId", "IsDeleted", "ContactMethodId")
                         .HasDatabaseName("IX_ParticipantContactMethod_FilterContactMethod");
+
+                    b.HasIndex("ContactMethodId", "IsDeleted", "ParticipantId")
+                        .HasDatabaseName("IX_ParticipantContactMethod_Method_Deleted_Participant");
 
                     b.ToTable("ParticipantContactMethod");
                 });
@@ -700,6 +700,9 @@ namespace Dynamo.Stream.Handler.Migrations
 
                     b.HasIndex("Location")
                         .HasAnnotation("MySql:SpatialIndex", true);
+
+                    b.HasIndex("ParticipantId", "IsDeleted", "Easting", "Northing")
+                        .HasDatabaseName("IX_ParticipantLocation_FilterGeo");
 
                     b.HasIndex("ParticipantId")
                         .IsUnique();

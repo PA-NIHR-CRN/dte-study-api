@@ -11,14 +11,14 @@ namespace BPOR.Domain.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateIndex(
-                name: "IX_Participants_FilterAge",
+                name: "IX_Participants_FilterChunk",
                 table: "Participants",
-                columns: new[] { "IsDeleted", "DateOfBirth", "Stage2CompleteUtc" });
+                columns: new[] { "IsDeleted", "Id", "Stage2CompleteUtc", "DateOfBirth" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Participants_FilterRegistration",
-                table: "Participants",
-                columns: new[] { "IsDeleted", "Stage2CompleteUtc" });
+                name: "IX_ParticipantLocation_FilterGeo",
+                table: "ParticipantLocation",
+                columns: new[] { "ParticipantId", "IsDeleted", "Easting", "Northing" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ParticipantHealthCondition_FilterInterests",
@@ -31,6 +31,11 @@ namespace BPOR.Domain.Migrations
                 columns: new[] { "ParticipantId", "IsDeleted", "ContactMethodId" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ParticipantContactMethod_Method_Deleted_Participant",
+                table: "ParticipantContactMethod",
+                columns: new[] { "ContactMethodId", "IsDeleted", "ParticipantId" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CampaignParticipant_FilterContacted",
                 table: "CampaignParticipant",
                 columns: new[] { "ParticipantId", "IsDeleted", "CampaignId" });
@@ -40,12 +45,12 @@ namespace BPOR.Domain.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
-                name: "IX_Participants_FilterAge",
+                name: "IX_Participants_FilterChunk",
                 table: "Participants");
 
             migrationBuilder.DropIndex(
-                name: "IX_Participants_FilterRegistration",
-                table: "Participants");
+                name: "IX_ParticipantLocation_FilterGeo",
+                table: "ParticipantLocation");
 
             migrationBuilder.DropIndex(
                 name: "IX_ParticipantHealthCondition_FilterInterests",
@@ -53,6 +58,10 @@ namespace BPOR.Domain.Migrations
 
             migrationBuilder.DropIndex(
                 name: "IX_ParticipantContactMethod_FilterContactMethod",
+                table: "ParticipantContactMethod");
+
+            migrationBuilder.DropIndex(
+                name: "IX_ParticipantContactMethod_Method_Deleted_Participant",
                 table: "ParticipantContactMethod");
 
             migrationBuilder.DropIndex(
